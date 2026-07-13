@@ -20,8 +20,10 @@ FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+# Bind to all interfaces for Docker/Cloud Run
+ENV HOST=0.0.0.0
 # Google Cloud Run injects the PORT environment variable
-ENV PORT=8080
+ENV PORT=3000
 
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist ./dist
