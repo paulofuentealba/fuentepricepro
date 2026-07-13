@@ -1,0 +1,10 @@
+# Fuente Price Pro
+
+> Intelligent ceiling price and smart allocation platform for dividend investors across US and Brazilian markets (stocks, REITs, FIIs and ETFs).
+
+Fuente Price Pro applies the Bazin ceiling-price method with net-yield adjustments, a cash-flow calendar, and a goal-based smart allocation simulator so dividend investors can reverse-engineer their passive-income targets.
+
+## Pages
+
+- [Home](/): Overview, ceiling-price search, and product highlights.
+- [App](/app): Interactive calculator, watchlist, cash-flow calendar, and smart allocation.

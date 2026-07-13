@@ -1,0 +1,467 @@
+import { useCallback, useEffect, useRef, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { db } from "@/integrations/firebase/client";
+import { collection, doc, getDocs, setDoc, deleteDoc, query, where, writeBatch } from "firebase/firestore";
+import { useAuth } from "./auth-provider";
+import type { AssetType, Currency } from "./domain";
+import { assetQueryOptions } from "./queryOptions";
+
+const STORAGE_KEY = "ceilingPricePro.watchlist.v1";
+const ONBOARDED_KEY = "ceilingPricePro.onboarded.v1";
+
+export interface WatchlistItem {
+  id: string;
+  ticker: string;
+  name: string;
+  type: AssetType;
+  currency: Currency;
+  currentPrice: number;
+  /** Projected annual dividend per share (3y avg). */
+  annualDividend: number;
+  targetYield: number;
+  ceilingPrice: number;
+  safetyMargin: number;
+  quantity: number;
+  averagePrice: number | null;
+  /** Months (1-12) the asset historically pays dividends. Empty if unknown. */
+  paymentMonths: number[];
+  /** Optional per-asset monthly income goal (Goal Planner). */
+  targetMonthlyIncome?: number | null;
+  /** Payout ratio to detect dividend traps. */
+  payoutRatio: number | null;
+  /** Custom tax rate (percentage) to deduct from yields. */
+  customTaxRate?: number | null;
+  /** Economic sector for diversification. */
+  sector?: string | null;
+  addedAt: number;
+}
+
+export function makeId(ticker: string, type: AssetType) {
+  return `${type}:${ticker.toUpperCase()}`;
+}
+
+
+
+// ---------- Local storage helpers (guest mode) ----------
+function readLocal(): WatchlistItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    
+    // Auto-heal NaNs that might have been saved as null during JSON.stringify
+    // or loaded from corrupted state.
+    return parsed.map((item: any) => ({
+      ...item,
+      currentPrice: typeof item.currentPrice === "number" && !isNaN(item.currentPrice) ? item.currentPrice : 0,
+      annualDividend: typeof item.annualDividend === "number" && !isNaN(item.annualDividend) ? item.annualDividend : 0,
+      targetYield: typeof item.targetYield === "number" && !isNaN(item.targetYield) ? item.targetYield : 6,
+      ceilingPrice: typeof item.ceilingPrice === "number" && !isNaN(item.ceilingPrice) ? item.ceilingPrice : 0,
+      safetyMargin: typeof item.safetyMargin === "number" && !isNaN(item.safetyMargin) ? item.safetyMargin : 0,
+      quantity: typeof item.quantity === "number" && !isNaN(item.quantity) ? item.quantity : 0,
+      averagePrice: typeof item.averagePrice === "number" && !isNaN(item.averagePrice) ? item.averagePrice : null,
+      targetMonthlyIncome: typeof item.targetMonthlyIncome === "number" && !isNaN(item.targetMonthlyIncome) ? item.targetMonthlyIncome : null,
+      payoutRatio: typeof item.payoutRatio === "number" && !isNaN(item.payoutRatio) ? item.payoutRatio : null,
+      customTaxRate: typeof item.customTaxRate === "number" && !isNaN(item.customTaxRate) ? item.customTaxRate : null,
+    })) as WatchlistItem[];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocal(items: WatchlistItem[]) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+
+function clearLocal() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(STORAGE_KEY);
+}
+
+// ---------- Row mapping ----------
+interface Row {
+  id: string;
+  user_id: string;
+  ticker: string;
+  name: string;
+  type: string;
+  currency: string;
+  current_price: number | string;
+  annual_dividend: number | string;
+  target_yield: number | string;
+  ceiling_price: number | string;
+  safety_margin: number | string;
+  quantity: number | string;
+  average_price: number | string | null;
+  payment_months: number[] | null;
+  target_monthly_income: number | string | null;
+  payout_ratio?: number | string | null;
+  custom_tax_rate?: number | string | null;
+  sector?: string | null;
+  added_at: string;
+}
+
+function rowToItem(r: Row): WatchlistItem {
+  const safeNumber = (val: any, fallback: number = 0) => {
+    const num = Number(val);
+    return isNaN(num) ? fallback : num;
+  };
+  
+  const safeNullableNumber = (val: any) => {
+    if (val == null) return null;
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+  };
+
+  return {
+    id: makeId(r.ticker, r.type as AssetType),
+    ticker: r.ticker,
+    name: r.name,
+    type: r.type as AssetType,
+    currency: r.currency as Currency,
+    currentPrice: safeNumber(r.current_price, 0),
+    annualDividend: safeNumber(r.annual_dividend, 0),
+    targetYield: safeNumber(r.target_yield, 6),
+    ceilingPrice: safeNumber(r.ceiling_price, 0),
+    safetyMargin: safeNumber(r.safety_margin, 0),
+    quantity: safeNumber(r.quantity, 0),
+    averagePrice: safeNullableNumber(r.average_price),
+    paymentMonths: Array.isArray(r.payment_months)
+      ? r.payment_months.filter((m) => Number.isFinite(m) && !isNaN(m))
+      : [],
+    targetMonthlyIncome: safeNullableNumber(r.target_monthly_income),
+    payoutRatio: safeNullableNumber(r.payout_ratio),
+    customTaxRate: safeNullableNumber(r.custom_tax_rate),
+    sector: r.sector ?? null,
+    addedAt: safeNumber(new Date(r.added_at).getTime(), Date.now()),
+  };
+}
+
+function itemToRow(item: WatchlistItem, userId: string): Row {
+  return {
+    id: item.id,
+    user_id: userId,
+    ticker: item.ticker,
+    name: item.name,
+    type: item.type,
+    currency: item.currency,
+    current_price: item.currentPrice,
+    annual_dividend: item.annualDividend,
+    target_yield: item.targetYield,
+    ceiling_price: item.ceilingPrice,
+    safety_margin: item.safetyMargin,
+    quantity: item.quantity,
+    average_price: item.averagePrice,
+    payment_months: item.paymentMonths ?? [],
+    target_monthly_income: item.targetMonthlyIncome ?? null,
+    payout_ratio: item.payoutRatio ?? null,
+    custom_tax_rate: item.customTaxRate ?? null,
+    sector: item.sector ?? null,
+    added_at: new Date(item.addedAt).toISOString(),
+  };
+}
+
+// ---------- Seeding Logic Removed ----------
+export function useWatchlist() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const userId = user?.uid ?? null;
+
+  const queryKey = useMemo(() => ["watchlist", userId], [userId]);
+
+  const { data: items = [], isPending } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      let data: WatchlistItem[] = [];
+      const hasOnboarded = window.localStorage.getItem(ONBOARDED_KEY);
+
+      if (userId) {
+        // Migrate local items on first cloud load
+        const local = readLocal();
+        if (local.length > 0) {
+          try {
+            const batch = writeBatch(db);
+            const rows = local.map((i) => itemToRow(i, userId));
+            rows.forEach((r) => {
+              const ref = doc(db, "watchlist_items", `${r.user_id}_${r.type}_${r.ticker}`);
+              batch.set(ref, r, { merge: true });
+            });
+            await batch.commit();
+            clearLocal();
+            window.localStorage.setItem(ONBOARDED_KEY, "true");
+          } catch (e) {
+            console.error("[watchlist] migration error", e);
+          }
+        }
+
+        // Load from cloud
+        try {
+          const q = query(collection(db, "watchlist_items"), where("user_id", "==", userId));
+          const snap = await getDocs(q);
+          const rows = snap.docs.map((d) => d.data() as Row);
+          rows.sort((a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime());
+          data = rows.map(rowToItem);
+
+          if (data.length === 0 && !hasOnboarded) {
+             window.localStorage.setItem(ONBOARDED_KEY, "true");
+          }
+        } catch (error) {
+          console.error("[watchlist] load failed", error);
+        }
+      } else {
+        // Guest mode
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw && !hasOnboarded) {
+           window.localStorage.setItem(ONBOARDED_KEY, "true");
+        } else {
+           data = readLocal();
+        }
+      }
+      return data;
+    },
+    staleTime: Infinity,
+  });
+
+  // Heal payment months effect
+  const healAttempted = useRef(new Set<string>());
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    let isMounted = true;
+    const stale = items.filter(
+      (i) =>
+        (!Array.isArray(i.paymentMonths) || i.paymentMonths.length === 0) &&
+        !healAttempted.current.has(i.ticker),
+    );
+
+    if (stale.length === 0) return;
+    
+    // Add them synchronously so subsequent rapid renders don't duplicate heal efforts!
+    stale.forEach(item => healAttempted.current.add(item.ticker));
+
+    const heal = async () => {
+      const patches = new Map<string, number[]>();
+      for (const item of stale) {
+        try {
+          const fresh = await queryClient.ensureQueryData(assetQueryOptions(item.ticker));
+          if (fresh?.paymentMonths?.length) {
+            patches.set(item.id, fresh.paymentMonths);
+          }
+        } catch (err) {
+          console.warn("[watchlist] heal failed for", item.ticker);
+        }
+      }
+
+      if (patches.size > 0 && isMounted) {
+        const next = items.map((i) =>
+          patches.has(i.id) ? { ...i, paymentMonths: patches.get(i.id)! } : i,
+        );
+        if (userId) {
+          const rows = next.filter((i) => patches.has(i.id)).map((i) => itemToRow(i, userId));
+          try {
+            const chunkSize = 400;
+            for (let i = 0; i < rows.length; i += chunkSize) {
+              const chunk = rows.slice(i, i + chunkSize);
+              const batch = writeBatch(db);
+              chunk.forEach((r) => {
+                const ref = doc(db, "watchlist_items", `${r.user_id}_${r.type}_${r.ticker}`);
+                batch.set(ref, r, { merge: true });
+              });
+              await batch.commit();
+            }
+          } catch (e) {
+            console.error("[watchlist] heal persist failed", e);
+          }
+        } else {
+          writeLocal(next);
+        }
+        queryClient.setQueryData(queryKey, next);
+      }
+    };
+    void heal();
+    return () => {
+      isMounted = false;
+    };
+  }, [items, userId, queryClient, queryKey]);
+
+  // Sync with cross-tab local storage
+  useEffect(() => {
+    if (userId) return; // Only guest mode needs cross-tab storage sync
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        queryClient.setQueryData(queryKey, readLocal());
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [userId, queryClient, queryKey]);
+
+  const upsertMutation = useMutation({
+    mutationFn: async (item: WatchlistItem) => {
+      if (userId) {
+        const row = itemToRow(item, userId);
+        const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+        await setDoc(ref, row, { merge: true });
+      } else {
+        const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
+        const idx = list.findIndex((i) => i.id === item.id);
+        if (idx >= 0) list[idx] = item;
+        else list.unshift(item);
+        writeLocal(list);
+      }
+      return item;
+    },
+    onMutate: async (newItem) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
+      const list = prev ? [...prev] : [];
+      const idx = list.findIndex((i) => i.id === newItem.id);
+      if (idx >= 0) list[idx] = newItem;
+      else list.unshift(newItem);
+      queryClient.setQueryData(queryKey, list);
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (userId) {
+        const target = items.find((i) => i.id === id);
+        if (target) {
+          const ref = doc(db, "watchlist_items", `${userId}_${target.type}_${target.ticker}`);
+          await deleteDoc(ref);
+        }
+      } else {
+        writeLocal(items.filter((i) => i.id !== id));
+      }
+      return id;
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
+      if (prev) queryClient.setQueryData(queryKey, prev.filter((i) => i.id !== id));
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const upsertManyMutation = useMutation({
+    mutationFn: async (newItems: WatchlistItem[]) => {
+      if (userId) {
+        // Firestore batches can handle up to 500 writes. We chunk by 400 to be safe.
+        const chunkSize = 400;
+        for (let i = 0; i < newItems.length; i += chunkSize) {
+          const chunk = newItems.slice(i, i + chunkSize);
+          const batch = writeBatch(db);
+          chunk.forEach((item) => {
+            const row = itemToRow(item, userId);
+            const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+            batch.set(ref, row, { merge: true });
+          });
+          const commitPromise = batch.commit();
+          const timeoutPromise = new Promise((resolve) => 
+            setTimeout(() => {
+              console.warn("Firestore sync delayed (offline or blocked). Data saved to local cache.");
+              resolve(null);
+            }, 5000)
+          );
+          await Promise.race([commitPromise, timeoutPromise]);
+        }
+      } else {
+        let list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
+        newItems.forEach(item => {
+          const idx = list.findIndex((i) => i.id === item.id);
+          if (idx >= 0) list[idx] = item;
+          else list.unshift(item);
+        });
+        writeLocal(list);
+      }
+      return newItems;
+    },
+    onMutate: async (newItems) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
+      
+      // OPTIMISTIC UPDATE
+      let list = prev ? [...prev] : [];
+      newItems.forEach(item => {
+        const idx = list.findIndex((i) => i.id === item.id);
+        if (idx >= 0) list[idx] = item;
+        else list.unshift(item);
+      });
+      queryClient.setQueryData(queryKey, list);
+
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<WatchlistItem> }) => {
+      const existing = items.find((i) => i.id === id);
+      if (!existing) throw new Error("Item not found");
+      const merged = { ...existing, ...patch };
+
+      if (userId) {
+        const row = itemToRow(merged, userId);
+        const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+        await setDoc(ref, row, { merge: true });
+      } else {
+        const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
+        const idx = list.findIndex((i) => i.id === id);
+        if (idx >= 0) list[idx] = merged;
+        writeLocal(list);
+      }
+      return merged;
+    },
+    onMutate: async ({ id, patch }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
+      if (prev) {
+        queryClient.setQueryData(
+          queryKey,
+          prev.map((i) => (i.id === id ? { ...i, ...patch } : i)),
+        );
+      }
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  const upsert = useCallback(
+    (item: WatchlistItem) => upsertMutation.mutate(item),
+    [upsertMutation],
+  );
+  const upsertAsync = useCallback(
+    (item: WatchlistItem) => upsertMutation.mutateAsync(item),
+    [upsertMutation],
+  );
+  const upsertManyAsync = useCallback(
+    (items: WatchlistItem[]) => upsertManyMutation.mutateAsync(items),
+    [upsertManyMutation],
+  );
+  const remove = useCallback((id: string) => removeMutation.mutate(id), [removeMutation]);
+  const update = useCallback(
+    (id: string, patch: Partial<WatchlistItem>) => updateMutation.mutate({ id, patch }),
+    [updateMutation],
+  );
+
+  return { items, upsert, upsertAsync, upsertManyAsync, remove, update };
+}
+

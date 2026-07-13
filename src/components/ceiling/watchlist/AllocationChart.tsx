@@ -1,0 +1,130 @@
+import { useMemo, useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Sector } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { useI18n } from "@/lib/i18n-provider";
+import type { WatchlistItem } from "@/lib/watchlist";
+import { formatCurrency } from "@/lib/i18n";
+import { useExchangeRate } from "@/lib/useExchangeRate";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { getColorForAsset } from "../shared/chartColors";
+
+interface Props {
+  items: WatchlistItem[];
+}
+
+const renderActiveShape = (props: any) => {
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius + 4}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+    </g>
+  );
+};
+
+export function AllocationChart({ items }: Props) {
+  const { t, locale } = useI18n();
+  const { data: exchangeRate = 5.0 } = useExchangeRate();
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
+
+  const data = useMemo(() => {
+    const totals = new Map<string, { name: string; value: number; type: string }>();
+
+    for (const it of items) {
+      const value = it.currentPrice * it.quantity;
+      if (value <= 0) continue;
+
+      const valueInBrl = it.currency === "USD" ? value * exchangeRate : value;
+      const typeLabel = t.types[it.type] || it.type;
+
+      if (!totals.has(typeLabel)) {
+        totals.set(typeLabel, { name: typeLabel, value: 0, type: it.type });
+      }
+      totals.get(typeLabel)!.value += valueInBrl;
+    }
+
+    return Array.from(totals.values())
+      .sort((a, b) => b.value - a.value);
+  }, [items, exchangeRate, t.types]);
+
+  if (data.length === 0) return null;
+
+  return (
+    <Card className="border-border/60 bg-card/60">
+      <CardContent className="flex items-center p-4">
+        <div className="h-32 w-32 shrink-0">
+          <ChartContainer config={{}} className="h-full w-full">
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={35}
+                outerRadius={55}
+                paddingAngle={2}
+                dataKey="value"
+                stroke="none"
+                activeIndex={activeIndex}
+                activeShape={renderActiveShape}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(-1)}
+              >
+                {data.map((d, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={getColorForAsset(d.type)} 
+                    style={{
+                      filter: activeIndex === index ? `drop-shadow(0px 0px 6px ${getColorForAsset(d.type)})` : 'none',
+                      transition: 'all 0.3s ease'
+                    }}
+                  />
+                ))}
+              </Pie>
+              <ChartTooltip
+                content={<ChartTooltipContent 
+                  formatter={(value: any) => formatCurrency(value, "BRL", locale)} 
+                  hideLabel 
+                />}
+              />
+            </PieChart>
+          </ChartContainer>
+        </div>
+        <div className="ml-4 flex-1 space-y-1.5">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+            {t.watchlist.allocationByType}
+          </div>
+          {data.map((d, i) => (
+            <div 
+              key={d.name} 
+              className="flex items-center justify-between text-sm transition-opacity duration-200"
+              style={{ opacity: activeIndex === -1 || activeIndex === i ? 1 : 0.4 }}
+              onMouseEnter={() => setActiveIndex(i)}
+              onMouseLeave={() => setActiveIndex(-1)}
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ 
+                    backgroundColor: getColorForAsset(d.type),
+                    boxShadow: activeIndex === i ? `0 0 8px ${getColorForAsset(d.type)}` : 'none'
+                  }}
+                />
+                <span className="text-foreground">{d.name}</span>
+              </div>
+              <span className="font-medium tabular-nums">
+                {formatCurrency(d.value, "BRL", locale)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

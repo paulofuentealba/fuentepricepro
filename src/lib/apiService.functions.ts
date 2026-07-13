@@ -1,0 +1,184 @@
+import { createServerFn } from "@tanstack/react-start";
+import type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
+import { UA, fetchWithRetry } from "./api/http.server";
+import { classifyBr, classifyYahoo } from "./api/classify.server";
+import { fetchFromBrapi } from "./api/brapi.server";
+import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
+
+// Re-export public types so existing `@/lib/apiService.functions` imports keep working.
+export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
+
+// -------- Input caps (public, unauthenticated endpoints) --------
+// Keep these tight — anything past normal user input is abuse, not a real query.
+const MAX_QUERY_LEN = 64;
+const MAX_TICKER_LEN = 15;
+// Tickers: letters, digits, dot, hyphen, equals, underscore, caret (e.g. AAPL, PETR4.SA, ^GSPC, BRL=X).
+const TICKER_RE = /^[A-Z0-9.\-=_^]{1,20}$/;
+
+function sanitizeQuery(raw: unknown): string {
+  const s = String(raw ?? "").trim().slice(0, MAX_QUERY_LEN);
+  // Strip control chars; allow letters/digits/space/./-/&/space typical for company names.
+  return s.replace(/[\x00-\x1f\x7f]/g, "");
+}
+
+function sanitizeTicker(raw: unknown): string {
+  return String(raw ?? "").trim().toUpperCase().slice(0, MAX_TICKER_LEN);
+}
+
+// -------- Search --------
+
+export const searchAssetsFn = createServerFn({ method: "GET" })
+  .inputValidator((data: { query: string }) => ({ query: sanitizeQuery(data?.query) }))
+  .handler(async ({ data }): Promise<SearchHit[]> => {
+    const q = data.query;
+    if (!q) return [];
+
+
+    const results: SearchHit[] = [];
+    const seen = new Set<string>();
+
+    const [brRes, yhRes] = await Promise.allSettled([
+      fetchWithRetry(
+        `https://brapi.dev/api/available?search=${encodeURIComponent(q)}`, 
+        {}, 
+        { timeoutMs: 2500, retries: 0 }
+      ).then((r: Response) => (r.ok ? r.json() : null)),
+      fetchWithRetry(
+        `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=6&newsCount=0`,
+        { headers: { "User-Agent": UA } },
+        { timeoutMs: 2500, retries: 0 }
+      ).then((r: Response) => (r.ok ? r.json() : null)),
+    ]);
+
+    if (brRes.status === "fulfilled" && brRes.value?.stocks) {
+      for (const s of brRes.value.stocks.slice(0, 6)) {
+        const t = String(s).toUpperCase();
+        if (seen.has(t)) continue;
+        seen.add(t);
+        results.push({ ticker: t, name: t, type: classifyBr(t), sector: null });
+      }
+    }
+
+    if (yhRes.status === "fulfilled" && yhRes.value?.quotes) {
+      for (const q2 of yhRes.value.quotes) {
+        if (!q2.symbol) continue;
+        const t = String(q2.symbol).toUpperCase();
+        if (seen.has(t)) continue;
+        // Skip non-primary exchange BR shadows (e.g. .BK)
+        if (/\.(BK|F|MX|TA|IL|VI|BR)$/.test(t)) continue;
+        seen.add(t);
+        results.push({
+          ticker: t,
+          name: q2.longname || q2.shortname || t,
+          type: classifyYahoo({
+            symbol: t,
+            quoteType: q2.quoteType,
+            longname: q2.longname,
+            shortname: q2.shortname,
+          }),
+          sector: q2.sector || q2.industry || null,
+        });
+      }
+    }
+
+    return results.slice(0, 8);
+  });
+
+// -------- Fetch --------
+
+export const fetchAssetFn = createServerFn({ method: "GET" })
+  .inputValidator((data: { ticker: string }) => {
+    const ticker = sanitizeTicker(data?.ticker);
+    if (!ticker || !TICKER_RE.test(ticker)) throw new Error("INVALID_TICKER");
+    return { ticker };
+  })
+  .handler(async ({ data }): Promise<ApiAsset> => {
+    const raw = data.ticker;
+    if (!raw) throw new Error("NOT_FOUND");
+
+    const isYahoo = raw.includes(".") || /^[A-Z]{1,5}$/.test(raw);
+    const looksBr = /^[A-Z]{4}\d{1,2}$/.test(raw);
+
+    let asset: ApiAsset | null = null;
+
+    if (looksBr) {
+      asset = await fetchFromBrapi(raw);
+      if (!asset) asset = await fetchFromYahoo(`${raw}.SA`);
+    } else if (isYahoo) {
+      asset = await fetchFromYahoo(raw);
+    } else {
+      asset = await fetchFromYahoo(raw);
+    }
+
+    if (!asset) throw new Error("NOT_FOUND");
+    return asset;
+  });
+
+// -------- Lightweight live quote (price + daily change %) --------
+
+export const fetchQuoteFn = createServerFn({ method: "GET" })
+  .inputValidator((data: { ticker: string }) => {
+    const ticker = sanitizeTicker(data?.ticker);
+    if (!ticker || !TICKER_RE.test(ticker)) throw new Error("INVALID_TICKER");
+    return { ticker };
+  })
+  .handler(async ({ data }): Promise<LiveQuote | null> => {
+    const raw = data.ticker;
+    if (!raw) return null;
+    const looksBr = /^[A-Z]{4}\d{1,2}$/.test(raw);
+    const primary = looksBr && !raw.endsWith(".SA") ? `${raw}.SA` : raw;
+    const q = await fetchYahooQuote(primary);
+    if (q) return { ...q, ticker: raw };
+    return null;
+  });
+
+// -------- Radar --------
+
+const BR_RADAR_TICKERS = ["BBAS3", "TAEE11", "PETR4", "VALE3", "TRPL4", "CMIG4", "EGIE3", "BBSE3", "CXSE3", "DIVO11", "BIVB39", "NDIV11"];
+const US_RADAR_TICKERS = ["O", "KO", "PEP", "JNJ", "PG", "ABBV", "CVX", "XOM", "VZ", "SPYI", "QQQI", "KBWD", "SCHD", "JEPI", "JEPQ", "BTCI", "IBIT"];
+
+let radarCache: { br: any[]; us: any[]; timestamp: number } | null = null;
+const RADAR_CACHE_TTL = 1000 * 60 * 15; // 15 minutes
+
+export const fetchRadarFn = createServerFn({ method: "GET" })
+  .handler(async () => {
+    if (radarCache && Date.now() - radarCache.timestamp < RADAR_CACHE_TTL) {
+      return { br: radarCache.br, us: radarCache.us };
+    }
+
+    const fetchRadarFor = async (tickers: string[]) => {
+      const promises = tickers.map(async (t) => {
+        try {
+          let asset: ApiAsset | null = null;
+          if (t.length >= 5 && !t.includes(".")) {
+            asset = await fetchFromBrapi(t);
+            if (!asset) asset = await fetchFromYahoo(`${t}.SA`);
+          } else {
+            asset = await fetchFromYahoo(t);
+          }
+          if (asset && asset.metrics.dividendCagr5y) {
+            return asset;
+          }
+        } catch (e) {
+          console.warn(`Failed to fetch radar asset ${t}`, e);
+        }
+        return null;
+      });
+
+      const settled = await Promise.allSettled(promises);
+      const results = settled
+        .filter((r): r is PromiseFulfilledResult<ApiAsset> => r.status === "fulfilled" && r.value !== null)
+        .map((r) => r.value);
+        
+      return results;
+    };
+
+    const [br, us] = await Promise.all([
+      fetchRadarFor(BR_RADAR_TICKERS),
+      fetchRadarFor(US_RADAR_TICKERS)
+    ]);
+
+    radarCache = { br, us, timestamp: Date.now() };
+    return { br, us };
+  });
+
