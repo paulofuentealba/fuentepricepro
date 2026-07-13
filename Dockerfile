@@ -28,7 +28,7 @@ ENV PORT=3000
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/test-server.js ./test-server.js
 
 # Run the web service on container startup.
-# TanStack Start outputs a standard Node server to dist/server/server.js
-CMD [ "node", "dist/server/server.js" ]
+CMD [ "node", "test-server.js" ]

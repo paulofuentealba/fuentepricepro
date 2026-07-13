@@ -2,8 +2,11 @@ import server from './dist/server/server.js';
 import http from 'http';
 import { Readable } from 'stream';
 
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || '0.0.0.0';
+
 const webServer = http.createServer(async (req, res) => {
-  const url = 'http://localhost:3000' + req.url;
+  const url = `http://${host}:${port}${req.url}`;
   
   const headers = new Headers();
   for (const [key, value] of Object.entries(req.headers)) {
@@ -60,6 +63,8 @@ const webServer = http.createServer(async (req, res) => {
   }
 });
 
-webServer.listen(3000, () => {
-  console.log('Test server listening on port 3000');
+});
+
+webServer.listen(port, host, () => {
+  console.log(`Test server listening on ${host}:${port}`);
 });
