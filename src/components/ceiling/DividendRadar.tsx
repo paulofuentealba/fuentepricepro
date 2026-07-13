@@ -15,6 +15,7 @@ import { fetchRadarFn } from "@/lib/apiService.functions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { WatchlistFilterBar } from "./watchlist/WatchlistFilterBar";
 
 export function DividendRadar() {
   const { t } = useI18n();
@@ -42,7 +43,7 @@ export function DividendRadar() {
       currentPrice: asset.currentPrice,
       annualDividend: lastDiv,
       safetyMargin: ceiling > 0 && asset.currentPrice > 0 ? ((ceiling - asset.currentPrice) / asset.currentPrice) * 100 : 0,
-      type: asset.type || (market === "BR" ? "STOCK_BR" : "STOCK_US"),
+      type: asset.type || (market === "BR" ? (asset.ticker.endsWith("11") && !asset.ticker.startsWith("TAEE") ? "FII" : "STOCK_BR") : "STOCK_US"),
       currency: market === "BR" ? "BRL" : "USD",
       ceiling: ceiling > 0 ? ceiling : asset.currentPrice,
       dy: dy,
@@ -69,19 +70,17 @@ export function DividendRadar() {
         <TargetYieldSlider value={targetYield} onChange={setTargetYield} />
       </div>
 
-      <div className="flex justify-end mb-4">
-        <Select value={sortOption} onValueChange={(v) => setSortOption(v as any)}>
-          <SelectTrigger className="h-9 w-[200px] bg-background/40">
-            <SelectValue placeholder={t.watchlist.sort.label} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ticker_asc">{t.watchlist.sort.ticker_asc}</SelectItem>
-            <SelectItem value="yield_desc">{t.watchlist.sort.yield_desc}</SelectItem>
-            <SelectItem value="margin_desc">{t.watchlist.sort.margin_desc}</SelectItem>
-            <SelectItem value="income_desc">{t.watchlist.sort.income_desc}</SelectItem>
-            <SelectItem value="yoc_desc">{t.watchlist.sort.yoc_desc}</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+        <WatchlistFilterBar
+          typeFilters={typeFilters}
+          counts={counts}
+          typeFilter={typeFilter}
+          oppFilter={oppFilter}
+          sortOption={sortOption}
+          onSetTypeFilter={setTypeFilter}
+          onSetOppFilter={setOppFilter}
+          onSetSortOption={setSortOption}
+        />
       </div>
 
       <Card className="border-border/60 bg-card/40 backdrop-blur">
@@ -96,6 +95,7 @@ export function DividendRadar() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t.radar.asset}</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>{t.radar.sector}</TableHead>
                 <TableHead className="text-right">{t.radar.currentPrice}</TableHead>
                 <TableHead className="text-right">{t.radar.ceilingPrice}</TableHead>
@@ -108,6 +108,7 @@ export function DividendRadar() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-6 w-16 ml-auto" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-6 w-20 ml-auto" /></TableCell>
@@ -117,13 +118,13 @@ export function DividendRadar() {
                 ))
               ) : isError ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-destructive">
+                  <TableCell colSpan={7} className="text-center py-8 text-destructive">
                     {t.radar.error}
                   </TableCell>
                 </TableRow>
               ) : data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     {t.radar.empty}
                   </TableCell>
                 </TableRow>
@@ -134,6 +135,11 @@ export function DividendRadar() {
                   <TableRow key={asset.ticker} className="hover:bg-muted/50 cursor-pointer transition-colors">
                     <TableCell>
                       <AssetTicker ticker={asset.ticker} name={asset.name} />
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="text-[10px] font-semibold bg-muted text-muted-foreground border-transparent uppercase tracking-wider">
+                        {asset.type === "STOCK_BR" || asset.type === "STOCK_US" ? "Ações" : asset.type}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs font-normal">

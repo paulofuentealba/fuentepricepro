@@ -24,9 +24,9 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Copy the build output from the builder stage
-COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 
 # Run the web service on container startup.
-# TanStack Start / Nitro outputs a standard Node server to .output/server/index.mjs
-CMD [ "node", ".output/server/index.mjs" ]
+# TanStack Start outputs a standard Node server to dist/server/server.js
+CMD [ "node", "dist/server/server.js" ]

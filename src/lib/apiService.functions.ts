@@ -134,7 +134,7 @@ export const fetchQuoteFn = createServerFn({ method: "GET" })
 
 // -------- Radar --------
 
-const BR_RADAR_TICKERS = ["BBAS3", "TAEE11", "PETR4", "VALE3", "TRPL4", "CMIG4", "EGIE3", "BBSE3", "CXSE3", "DIVO11", "BIVB39", "NDIV11"];
+const BR_RADAR_TICKERS = ["BBAS3", "TAEE11", "PETR4", "VALE3", "TRPL4", "CMIG4", "EGIE3", "BBSE3", "CXSE3", "DIVO11", "BIVB39", "NDIV11", "MXRF11", "BTLG11", "HGLG11"];
 const US_RADAR_TICKERS = ["O", "KO", "PEP", "JNJ", "PG", "ABBV", "CVX", "XOM", "VZ", "SPYI", "QQQI", "KBWD", "SCHD", "JEPI", "JEPQ", "BTCI", "IBIT"];
 
 let radarCache: { br: any[]; us: any[]; timestamp: number } | null = null;

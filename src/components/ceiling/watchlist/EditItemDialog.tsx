@@ -134,6 +134,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 <MaskedInput
                   id="wl-edit-avg"
                   formatMode="currency"
+                  currencySymbol={item?.currency === "USD" ? "US$" : "R$"}
                   value={avg ? parseFloat(avg) : null}
                   onChangeValue={(v) => setAvg(v !== undefined ? String(v) : "")}
                 />
@@ -164,6 +165,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 <MaskedInput
                   id="wl-edit-goal"
                   formatMode="currency"
+                  currencySymbol={item?.currency === "USD" ? "US$" : "R$"}
                   value={goal ? parseFloat(goal) : null}
                   onChangeValue={(v) => setGoal(v !== undefined ? String(v) : "")}
                   placeholder="100"

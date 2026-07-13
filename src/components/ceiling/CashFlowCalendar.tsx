@@ -33,7 +33,6 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   }, [items]);
 
   const [currency, setCurrency] = useState<Currency>(availableCurrencies[0] ?? "USD");
-  const [view, setView] = useState<ViewMode>("combo");
   const activeCurrency = availableCurrencies.includes(currency)
     ? currency
     : (availableCurrencies[0] ?? "USD");
@@ -72,8 +71,6 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
       <CardContent className="pt-5">
         <CashFlowHeader
           title={t.watchlist.cashFlowTitle}
-          view={view}
-          onViewChange={setView}
           onExportCsv={handleExportCsv}
           availableCurrencies={availableCurrencies}
           activeCurrency={activeCurrency}
@@ -87,7 +84,6 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
         />
         <CashFlowChart
           data={data}
-          view={view}
           activeCurrency={activeCurrency}
           bestMonth={bestMonth}
           finalCumulative={finalCumulative}
