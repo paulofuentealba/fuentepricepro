@@ -6,6 +6,5 @@ dist
 .gitignore
 .vercel
 .firebase
-.env
 .env.local
 *.log
