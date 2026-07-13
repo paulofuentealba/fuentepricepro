@@ -35,8 +35,8 @@ import { Header } from "@/components/ceiling/Header";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 
 
-const SITE_URL = "https://fuente-price-pro.web.app";
-const OG_IMAGE = "https://firebasestorage.googleapis.com/v0/b/fuente-price-pro.firebasestorage.app/o/og-image.png?alt=media";
+const SITE_URL = "https://fuentepricepro.web.app";
+const OG_IMAGE = "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
 const PAGE_TITLE = "Fuente Price Pro — Dividend Ceiling Price Calculator";
 const PAGE_DESCRIPTION =
   "Calculate the exact ceiling price for stocks, REITs, FIIs and ETFs, track your true net yield, and reverse-engineer your passive income goals.";

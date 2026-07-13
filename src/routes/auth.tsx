@@ -22,7 +22,7 @@ export const Route = createFileRoute("/auth")({
         content: "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://fuente-price-pro.web.app/auth" },
+      { property: "og:url", content: "https://fuentepricepro.web.app/auth" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Sign in — Fuente Price Pro" },
       {
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/auth")({
         content: "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://fuente-price-pro.web.app/auth" }],
+    links: [{ rel: "canonical", href: "https://fuentepricepro.web.app/auth" }],
   }),
   component: AuthPage,
   errorComponent: RouteErrorComponent,

@@ -91,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Fuente Price Pro",
-          url: "https://fuente-price-pro.web.app",
+          url: "https://fuentepricepro.web.app",
           description:
             "Intelligent Ceiling Portfolio Valuation & Passive Income Engineering platform for dividend investors across US and Brazilian markets.",
         }),

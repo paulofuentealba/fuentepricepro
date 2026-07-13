@@ -41,5 +41,5 @@ export function buildResultShareText(
     ceiling,
     currency,
     locale,
-  )} | Projected YoC: ${yocPct ? formatPercent(yocPct, locale, 2) : "—"}. \nCheck your portfolio strategy at https://fuente-price-pro.web.app`;
+  )} | Projected YoC: ${yocPct ? formatPercent(yocPct, locale, 2) : "—"}. \nCheck your portfolio strategy at https://fuentepricepro.web.app`;
 }

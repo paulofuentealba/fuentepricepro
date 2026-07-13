@@ -48,7 +48,7 @@ export const Route = createFileRoute("/app")({
           "Interactive calculator, watchlist, cash-flow calendar, and smart allocation for dividend investors.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://fuente-price-pro.web.app/app" },
+      { property: "og:url", content: "https://fuentepricepro.web.app/app" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Portfolio Dashboard — Fuente Price Pro" },
       {
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/app")({
           "Interactive calculator, watchlist, cash-flow calendar, and smart allocation for dividend investors.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://fuente-price-pro.web.app/app" }],
+    links: [{ rel: "canonical", href: "https://fuentepricepro.web.app/app" }],
   }),
   component: IndexPage,
   errorComponent: RouteErrorComponent,

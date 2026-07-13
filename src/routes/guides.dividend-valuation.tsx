@@ -3,7 +3,7 @@ import { ArrowRight, Calculator, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 
-const SITE_URL = "https://fuente-price-pro.web.app";
+const SITE_URL = "https://fuentepricepro.web.app";
 const PAGE_URL = `${SITE_URL}/guides/dividend-valuation`;
 const PAGE_TITLE = "Dividend Yield Formula & Bazin Ceiling Price Guide";
 const PAGE_DESCRIPTION =
