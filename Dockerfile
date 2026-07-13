@@ -28,7 +28,8 @@ ENV PORT=3000
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/test-server.js ./test-server.js
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/server.production.js ./server.production.js
 
 # Run the web service on container startup.
-CMD [ "node", "test-server.js" ]
+CMD [ "node", "server.production.js" ]
