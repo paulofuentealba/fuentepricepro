@@ -1,0 +1,11 @@
+node_modules
+.output
+dist
+.vinxi
+.git
+.gitignore
+.vercel
+.firebase
+.env
+.env.local
+*.log
