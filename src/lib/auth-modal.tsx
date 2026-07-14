@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
 
@@ -65,10 +65,10 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     }
   }, [user, open]);
 
-  async function handleOAuth(providerName: "google" | "apple") {
+  async function handleOAuth(providerName: "google") {
     setBusy(true);
     try {
-      const provider = providerName === "google" ? new GoogleAuthProvider() : new OAuthProvider('apple.com');
+      const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : `${providerName} sign-in failed`);
@@ -130,30 +130,6 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
               >
                 {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-5 w-5" />}
                 Continue with Google
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOAuth("apple")}
-                disabled={busy}
-                className="w-full h-11 border-border/60 bg-background/40 hover:bg-background"
-              >
-                <AppleIcon className="mr-2 h-5 w-5" />
-                Continue with Apple
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled
-                aria-disabled
-                title="Coming Soon"
-                className="w-full h-11 border-border/60 bg-background/40 opacity-60 cursor-not-allowed"
-              >
-                <MicrosoftIcon className="mr-2 h-5 w-5" />
-                <span>Continue with Microsoft</span>
-                <span className="ml-2 rounded-full border border-border/60 bg-background/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Coming Soon
-                </span>
               </Button>
 
               <Button
@@ -256,22 +232,4 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
-function AppleIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="currentColor">
-      <path d="M17.05 12.04c-.03-2.85 2.33-4.22 2.43-4.29-1.32-1.94-3.39-2.2-4.12-2.23-1.75-.18-3.42 1.03-4.31 1.03-.89 0-2.26-1.01-3.72-.98-1.91.03-3.68 1.11-4.66 2.82-1.99 3.44-.51 8.53 1.42 11.32.94 1.36 2.06 2.89 3.52 2.84 1.42-.06 1.96-.92 3.67-.92 1.71 0 2.2.92 3.7.89 1.53-.03 2.5-1.39 3.44-2.75 1.08-1.58 1.53-3.11 1.56-3.19-.03-.02-2.99-1.15-3.02-4.54zM14.36 3.85c.78-.95 1.31-2.27 1.17-3.58-1.13.05-2.5.75-3.31 1.7-.72.84-1.36 2.19-1.19 3.48 1.26.1 2.55-.64 3.33-1.6z"/>
-    </svg>
-  );
-}
-
-function MicrosoftIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path fill="#F25022" d="M1 1h10v10H1z" />
-      <path fill="#7FBA00" d="M13 1h10v10H13z" />
-      <path fill="#00A4EF" d="M1 13h10v10H1z" />
-      <path fill="#FFB900" d="M13 13h10v10H13z" />
-    </svg>
-  );
-}
 
