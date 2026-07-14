@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { PieChart as PieChartIcon, Sparkles, TrendingUp, Wallet2, X } from "lucide-react";
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -40,15 +40,15 @@ export function SmartAllocation() {
   const { items } = useWatchlist();
   const [capital, setCapital] = useState("");
   const [showOnlyImpacted, setShowOnlyImpacted] = useState(true);
-  const [currency, setCurrency] = useLocalStorage<Currency>("smartAllocationCurrency", "BRL");
+  const { settings, updateSettings } = useUserSettings();
+  const currency = settings.smartAllocationCurrency;
+  const setCurrency = (c: Currency) => updateSettings({ smartAllocationCurrency: c });
   const [strategies, setStrategies] = useState<StrategyKey[]>(["yield"]);
   const [excludedTickers, setExcludedTickers] = useState<string[]>([]);
   const [generated, setGenerated] = useState(false);
   const { data: exchangeRate = 5.0 } = useExchangeRate();
-  const [targets, setTargets] = useLocalStorage<Record<AssetType, number>>(
-    "smart-allocation-targets",
-    { STOCK_BR: 0, STOCK_US: 0, FII: 0, REIT: 0, ETF: 0, FII_INFRA: 0, FIAGRO: 0 }
-  );
+  const targets = settings.smartAllocationTargets;
+  const setTargets = (t: Record<AssetType, number>) => updateSettings({ smartAllocationTargets: t });
   
   const { isPro } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);

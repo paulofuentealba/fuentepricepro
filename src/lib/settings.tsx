@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useUserSettings } from "@/lib/useUserSettings";
 
 interface SettingsContextType {
   targetYield: number;
@@ -9,8 +9,9 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  // Default Target Yield is 6% (Bazin's rule)
-  const [targetYield, setTargetYield] = useLocalStorage<number>("global-target-yield", 6);
+  const { settings, updateSettings } = useUserSettings();
+  const targetYield = settings.targetYield;
+  const setTargetYield = (value: number) => updateSettings({ targetYield: value });
 
   return (
     <SettingsContext.Provider value={{ targetYield, setTargetYield }}>
