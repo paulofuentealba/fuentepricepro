@@ -52,67 +52,62 @@ export function Header({ variant = "app" }: HeaderProps) {
           
           <LanguageSwitcher className="hidden sm:inline-flex" />
 
-          {variant === "landing" ? (
-            user ? (
-              <Button asChild size="sm" className="bg-success text-success-foreground hover:bg-success/90">
-                <Link to="/app">{L.openApp}</Link>
-              </Button>
-            ) : (
-              <>
-                <Button
+          {variant === "landing" && !user && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => openAuthModal()}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {L.login}
+            </Button>
+          )}
+
+          {variant === "landing" && (
+            <Button
+              asChild
+              size="sm"
+              className={user ? "bg-success text-success-foreground hover:bg-success/90" : "hidden bg-success text-success-foreground hover:bg-success/90 sm:inline-flex"}
+            >
+              <Link to="/app">{L.openApp}</Link>
+            </Button>
+          )}
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
                   type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => openAuthModal()}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-success/15 text-sm font-semibold text-success ring-1 ring-success/30 transition-colors hover:bg-success/25"
+                  aria-label="Account menu"
                 >
-                  {L.login}
-                </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  className="hidden bg-success text-success-foreground hover:bg-success/90 sm:inline-flex"
-                >
-                  <Link to="/app">{L.openApp}</Link>
-                </Button>
-              </>
-            )
+                  {initial}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
+                  <UserIcon className="h-3.5 w-3.5" />
+                  <span className="truncate">{user.email}</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <>
-              {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-success/15 text-sm font-semibold text-success ring-1 ring-success/30 transition-colors hover:bg-success/25"
-                      aria-label="Account menu"
-                    >
-                      {initial}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
-                      <UserIcon className="h-3.5 w-3.5" />
-                      <span className="truncate">{user.email}</span>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => openAuthModal()}
-                  className="h-9 bg-success text-success-foreground hover:bg-success/90"
-                >
-                  Sign In
-                </Button>
-              )}
-            </>
+            variant === "app" && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => openAuthModal()}
+                className="h-9 bg-success text-success-foreground hover:bg-success/90"
+              >
+                Sign In
+              </Button>
+            )
           )}
         </div>
       </div>
