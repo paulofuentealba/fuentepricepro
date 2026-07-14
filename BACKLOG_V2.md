@@ -26,5 +26,13 @@ Este backlog contém as sugestões estratégicas levantadas pelo time de Produto
 - **Objetivo Futuro:** A landing page atual é "Clean Fintech", mas no futuro podemos querer explorar um visual voltado para o investidor "hardcore".
 - **Solução:** Executar um redesign conceitual em "Dark Mode + Glassmorphism", com tons de neon e layout semelhante a um Terminal Bloomberg moderno misturado com a estética Web3, atualizando as seções secundárias da página inicial.
 
+## 7. Otimização de Conversão e Onboarding (UX/UI)
+- **Problema Atual:** A Landing Page mistura demonstrações gratuitas com features PRO sem distinção visual clara (botões duplicados e cards confusos), não revela a fonte de dados das cotações (gerando desconfiança) e não avisa o usuário "visitante" de que seus dados estão sendo salvos apenas localmente.
+- **Solução (Ações Rápidas de UX):**
+  - Adicionar selos visuais claros (Cadeado/PRO) ou efeito de desfoque (blur) nos componentes Premium.
+  - Diferenciar o destino dos CTAs: "Start Building" direciona para cadastro, "Upgrade" direciona para checkout ou tabela de preços.
+  - Adicionar um banner transparente de fonte de dados no rodapé: *"Cotações com atraso via API (ex: Yahoo Finance)"*.
+  - Mostrar um *Sticky Banner* para visitantes no App alertando que os dados são locais e incentivando o login para sincronização na nuvem.
+
 ---
 *Documento consolidado gerado após a validação de sucesso do MVP. Pronto para entrar na esteira de Discovery e Delivery da Versão 2.*
