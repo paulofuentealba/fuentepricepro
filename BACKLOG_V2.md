@@ -34,5 +34,21 @@ Este backlog contém as sugestões estratégicas levantadas pelo time de Produto
   - Adicionar um banner transparente de fonte de dados no rodapé: *"Cotações com atraso via API (ex: Yahoo Finance)"*.
   - Mostrar um *Sticky Banner* para visitantes no App alertando que os dados são locais e incentivando o login para sincronização na nuvem.
 
+## 8. Ferramentas de Varejo e Benchmarks BR
+- **Problema Atual:** Falta de ferramentas consagradas no mercado local (como nas plataformas Status Invest e Investidor 10), o que pode afastar o investidor pessoa física que busca centralizar sua gestão.
+- **Solução:**
+  - **Módulo de IRPF:** Automatizar a organização para declaração de bens e cálculo de DARF.
+  - **Dashboard de Dividendos e Calendário:** Além do Preço Teto, exibir de forma visual o histórico e a projeção de dividendos (fluxo de caixa passado e futuro confirmado).
+  - **Calculadoras de Preço Justo:** Implementar as fórmulas clássicas de Décio Bazin e Benjamin Graham.
+  - **Comparador Avançado (Screener):** Ferramenta para comparar indicadores (P/L, PVP, DY) entre ativos lado a lado.
+
+## 9. Conformidade Legal e Privacidade (LGPD & GDPR)
+- **Problema Atual:** O sistema atual carece de mecanismos transparentes de consentimento e gestão de dados, apresentando riscos legais.
+- **Solução:**
+  - **Termos de Uso e Privacidade:** Adicionar checkbox obrigatório no momento do cadastro.
+  - **Banner de Consentimento:** Informar os usuários sobre o uso de Cookies e LocalStorage.
+  - **Direito ao Esquecimento:** Criar um fluxo de "Excluir Conta" que apague os dados do Auth e acione uma Cloud Function para varrer e limpar o Firestore do usuário.
+  - **Portabilidade de Dados:** Botão de exportação da carteira em JSON/CSV.
+
 ---
 *Documento consolidado gerado após a validação de sucesso do MVP. Pronto para entrar na esteira de Discovery e Delivery da Versão 2.*
