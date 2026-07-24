@@ -14,8 +14,34 @@ import { CashFlowSummaryCards } from "./cashflow/CashFlowSummary";
 import { CashFlowChart } from "./cashflow/CashFlowChart";
 import { CashFlowEmptyState } from "./cashflow/CashFlowEmptyState";
 
-const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const MONTHS_PT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const MONTHS_EN = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+const MONTHS_PT = [
+  "Jan",
+  "Fev",
+  "Mar",
+  "Abr",
+  "Mai",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Set",
+  "Out",
+  "Nov",
+  "Dez",
+];
 
 interface Props {
   items: WatchlistItem[];
@@ -45,10 +71,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   const summary = useMemo(() => computeCashFlowSummary(data), [data]);
 
   const finalCumulative = data[data.length - 1]?.cumulativeTotal ?? 0;
-  const sparklinePath = useMemo(
-    () => buildSparklinePath(data.map((d) => d.amount)),
-    [data],
-  );
+  const sparklinePath = useMemo(() => buildSparklinePath(data.map((d) => d.amount)), [data]);
   const cumulativePath = useMemo(
     () => buildSparklinePath(data.map((d) => d.cumulativeTotal)),
     [data],
@@ -67,7 +90,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   }
 
   return (
-    <Card className="border-border/60 bg-card/60">
+    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-2xl">
       <CardContent className="pt-5">
         <CashFlowHeader
           title={t.watchlist.cashFlowTitle}

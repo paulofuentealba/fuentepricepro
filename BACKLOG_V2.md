@@ -1,54 +1,31 @@
 # Fuente Price Pro - Backlog V2 🚀
 
-Este backlog contém as sugestões estratégicas levantadas pelo time de Produto (PM/PMM) durante a revisão final do MVP, visando o roadmap da Versão 2.
+Este backlog contém as sugestões estratégicas levantadas pelo time de Produto (PM/PMM) durante a revisão final do MVP, visando o roadmap da Versão 2. Para facilitar a gestão e priorização, as 10 demandas originais foram consolidadas em 4 grandes Épicos (Pilares Estratégicos).
 
-## 1. Open Finance / Integração com Corretoras (B3/Avenue)
-- **Problema Atual:** Usuários com muitos ativos sofrem atrito ao ter que cadastrar e atualizar preços médios manualmente.
-- **Solução:** Integrar a plataforma via APIs de Open Finance ou parceiros de dados para sincronizar a carteira (ativos e preço médio) automaticamente, garantindo que o "Yield on Cost" esteja sempre exato sem esforço manual.
+## Épico 1: Core de Investimentos e Automação (A Máquina)
+Foco em automatizar a entrada de dados e expandir a capacidade matemática da plataforma.
+- **Integração Open Finance (B3/Avenue) e Notas de Corretagem:** Sincronização automática da carteira e preços médios via APIs externas ou importação de notas de corretagem (PDF).
+- **Eventos Corporativos Automatizados:** Processamento automático de desdobramentos (splits), agrupamentos e bonificações, mantendo o preço médio e histórico da carteira precisos sem intervenção manual do usuário.
+- **Motor Multi-Moedas e Renda Fixa:** Suporte a ativos globais com cálculo de imposto retido na fonte (WHT) e inclusão de títulos de Renda Fixa (Tesouro, CDBs) que pagam cupons no fluxo de caixa.
+- **Métricas Avançadas e Comparadores (Benchmarks BR):** Implementar TWR (Time-Weighted Return), IRR (Taxa Interna de Retorno), fórmulas de Preço Justo de Bazin/Graham, e um Screener comparativo contra índices de mercado (IBOV, CDI, S&P 500).
 
-## 2. Alertas Dinâmicos e Notificações (Push/Email)
-- **Problema Atual:** O usuário precisa acessar ativamente a plataforma para checar se um ativo da sua Watchlist entrou na Margem de Segurança.
-- **Solução:** Implementar um motor de background que envia notificações em tempo real. Exemplo: *"Seu ativo X caiu 3% e agora está abaixo do seu Preço Teto! Excelente margem de segurança."* Isso aumentará exponencialmente o MAU (Monthly Active Users).
+## Épico 2: Inteligência e Engajamento (O Cérebro)
+Foco em retenção (MAU) e entrega de valor interpretativo para o usuário.
+- **Assistente de IA (Insights Pessoais):** Agente LLM para ler a carteira e gerar insights acionáveis (ex: alertas de desbalanceamento setorial).
+- **Alertas Dinâmicos e Notificações (Push/Email):** Motor de background para avisar quando um ativo entra na Margem de Segurança.
+- **Módulo de IRPF:** Automação de cálculo de DARF e relatórios anuais de bens (dor crítica do investidor brasileiro).
 
-## 3. Assistente de IA / Agentes (Insights Pessoais)
-- **Problema Atual:** O usuário tem os dados visuais na tela (Smart Allocation, Radar), mas precisa tomar as decisões interpretando os gráficos sozinho.
-- **Solução:** Implementar um Agente LLM que lê a carteira inteira do usuário, cruza com os dados de mercado e gera insights acionáveis em texto. Exemplo: *"Notei que você está com 40% de exposição no setor Elétrico, mas o setor Financeiro está apresentando oportunidades com Margem de Segurança superior a 15%. Que tal diversificar?"*
+## Épico 3: Monetização e Administração (O Negócio)
+Foco em geração de receita, controle de acesso e métricas macro.
+- **Controle Real de Planos (Free vs PRO):** Implementar lógica de permissões no Firestore e paywalls bloqueando recursos premium. Integração de checkout via Stripe na rota `/pricing`.
+- **Painel Administrativo (`/admin`):** Dashboard restrito para visualizar cadastros, gerenciar *feature flags* e acompanhar métricas de uso sem depender do console do Firebase.
 
-## 4. Painel Administrativo & Feature Management
-- **Problema Atual:** Falta de visibilidade sobre o crescimento da base de usuários e controle centralizado do app para liberar atualizações.
-- **Solução:** Criar uma rota restrita (`/admin`) acessível apenas por administradores para ver a listagem de usuários cadastrados, gerenciar níveis de acesso (roles), ativar/desativar funcionalidades globais (feature flags) e visualizar métricas macro de uso da plataforma sem acessar o console do Firebase.
-
-## 5. Monetização: Controle Real de Planos (Free vs PRO)
-- **Problema Atual:** Atualmente, todas as funcionalidades avançadas estão abertas e liberadas para demonstração no MVP (estado `isPro` fixo no código).
-- **Solução:** Implementar a lógica real de permissões no Firestore, atrelando o `tier` ao documento do usuário. Desenvolver a página oficial `/pricing` com checkout via Stripe e aplicar paywalls funcionais trancando os recursos premium (Efeito Bola de Neve, Estratégias Avançadas de Alocação, etc.) para usuários gratuitos.
-
-## 6. Evolução de UI/UX: Pro Terminal Concept
-- **Objetivo Futuro:** A landing page atual é "Clean Fintech", mas no futuro podemos querer explorar um visual voltado para o investidor "hardcore".
-- **Solução:** Executar um redesign conceitual em "Dark Mode + Glassmorphism", com tons de neon e layout semelhante a um Terminal Bloomberg moderno misturado com a estética Web3, atualizando as seções secundárias da página inicial.
-
-## 7. Otimização de Conversão e Onboarding (UX/UI)
-- **Problema Atual:** A Landing Page mistura demonstrações gratuitas com features PRO sem distinção visual clara (botões duplicados e cards confusos), não revela a fonte de dados das cotações (gerando desconfiança) e não avisa o usuário "visitante" de que seus dados estão sendo salvos apenas localmente.
-- **Solução (Ações Rápidas de UX):**
-  - Adicionar selos visuais claros (Cadeado/PRO) ou efeito de desfoque (blur) nos componentes Premium.
-  - Diferenciar o destino dos CTAs: "Start Building" direciona para cadastro, "Upgrade" direciona para checkout ou tabela de preços.
-  - Adicionar um banner transparente de fonte de dados no rodapé: *"Cotações com atraso via API (ex: Yahoo Finance)"*.
-  - Mostrar um *Sticky Banner* para visitantes no App alertando que os dados são locais e incentivando o login para sincronização na nuvem.
-
-## 8. Ferramentas de Varejo e Benchmarks BR
-- **Problema Atual:** Falta de ferramentas consagradas no mercado local (como nas plataformas Status Invest e Investidor 10), o que pode afastar o investidor pessoa física que busca centralizar sua gestão.
-- **Solução:**
-  - **Módulo de IRPF:** Automatizar a organização para declaração de bens e cálculo de DARF.
-  - **Dashboard de Dividendos e Calendário:** Além do Preço Teto, exibir de forma visual o histórico e a projeção de dividendos (fluxo de caixa passado e futuro confirmado).
-  - **Calculadoras de Preço Justo:** Implementar as fórmulas clássicas de Décio Bazin e Benjamin Graham.
-  - **Comparador Avançado (Screener):** Ferramenta para comparar indicadores (P/L, PVP, DY) entre ativos lado a lado.
-
-## 9. Conformidade Legal e Privacidade (LGPD & GDPR)
-- **Problema Atual:** O sistema atual carece de mecanismos transparentes de consentimento e gestão de dados, apresentando riscos legais.
-- **Solução:**
-  - **Termos de Uso e Privacidade:** Adicionar checkbox obrigatório no momento do cadastro.
-  - **Banner de Consentimento:** Informar os usuários sobre o uso de Cookies e LocalStorage.
-  - **Direito ao Esquecimento:** Criar um fluxo de "Excluir Conta" que apague os dados do Auth e acione uma Cloud Function para varrer e limpar o Firestore do usuário.
-  - **Portabilidade de Dados:** Botão de exportação da carteira em JSON/CSV.
+## Épico 4: Experiência, Design e Privacidade (O Usuário)
+Foco em redução de atrito, imersão visual e segurança jurídica.
+- **Otimização de Conversão e Onboarding (UX/UI):** Distinção clara entre free/pro usando cadeados/blur, CTAs bem direcionados e banners transparentes sobre a fonte de dados (ex: Yahoo Finance).
+- **Onboarding Regulatório e Perfilamento (KYC/Suitability):** Coleta de dados avançados para conhecer o cliente, avaliar tolerância a risco (conservador vs arrojado) e sugerir estratégias de alocação de forma aderente às normas do mercado.
+- **Conformidade Legal (LGPD & GDPR):** Adição de Termos de Uso/Privacidade no cadastro, Banner de Cookies, fluxo de "Direito ao Esquecimento" (Excluir Conta e limpar Firestore) e exportação de dados (Portabilidade).
+- **Evolução UI/UX (Pro Terminal Concept):** Redesign conceitual em "Dark Mode + Glassmorphism" estilo terminal Bloomberg / Web3 para atrair o investidor hardcore.
 
 ---
 *Documento consolidado gerado após a validação de sucesso do MVP. Pronto para entrar na esteira de Discovery e Delivery da Versão 2.*

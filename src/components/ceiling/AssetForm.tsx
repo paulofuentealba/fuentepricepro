@@ -17,6 +17,7 @@ import type { AssetType } from "@/lib/domain";
 import type { SearchHit } from "@/lib/apiService.functions";
 import { searchQueryOptions, assetQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
+import { displayTicker } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 
 const ALL_TYPES: AssetType[] = [
@@ -119,7 +120,13 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     setQuery(hit.ticker);
     setOpen(false);
     const y = globalYield;
-    onSubmit({ ticker: hit.ticker, type: hit.type, targetYield: y, averagePrice: null, customTaxRate: null });
+    onSubmit({
+      ticker: hit.ticker,
+      type: hit.type,
+      targetYield: y,
+      averagePrice: null,
+      customTaxRate: null,
+    });
   }, [initialTicker, query, suggestions, globalYield, onSubmit]);
 
   useEffect(() => {
@@ -166,7 +173,13 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     e.preventDefault();
     if (!selected || !activeType) return;
     const y = globalYield;
-    onSubmit({ ticker: selected.ticker, type: activeType, targetYield: y, averagePrice: null, customTaxRate: null });
+    onSubmit({
+      ticker: selected.ticker,
+      type: activeType,
+      targetYield: y,
+      averagePrice: null,
+      customTaxRate: null,
+    });
   }
 
   return (
@@ -205,11 +218,11 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
                     onClick={() => pick(a)}
                     className={cn(
                       "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
-                      highlightedIndex === idx && "bg-accent text-accent-foreground"
+                      highlightedIndex === idx && "bg-accent text-accent-foreground",
                     )}
                   >
                     <span className="flex flex-col">
-                      <span className="font-medium text-foreground">{a.ticker}</span>
+                      <span className="font-medium text-foreground">{displayTicker(a.ticker)}</span>
                       <span className="line-clamp-1 text-xs text-muted-foreground">{a.name}</span>
                     </span>
                     <Badge variant="secondary" className="shrink-0">
@@ -281,8 +294,6 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
         </div>
       )}
 
-
-
       <div>
         <Button
           type="submit"
@@ -292,12 +303,9 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
           {isSubmitting ? t.form.calculating : t.form.calculate}
         </Button>
         {!selected && query.trim() !== "" && !open && (
-          <p className="mt-2 text-center text-xs text-destructive">
-            {t.form.selectAssetError}
-          </p>
+          <p className="mt-2 text-center text-xs text-destructive">{t.form.selectAssetError}</p>
         )}
       </div>
-
     </form>
   );
 }

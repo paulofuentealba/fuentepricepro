@@ -50,14 +50,13 @@ export function AllocationChart({ items }: Props) {
       totals.get(typeLabel)!.value += valueInBrl;
     }
 
-    return Array.from(totals.values())
-      .sort((a, b) => b.value - a.value);
+    return Array.from(totals.values()).sort((a, b) => b.value - a.value);
   }, [items, exchangeRate, t.types]);
 
   if (data.length === 0) return null;
 
   return (
-    <Card className="border-border/60 bg-card/60">
+    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-lg">
       <CardContent className="flex items-center p-4">
         <div className="h-32 w-32 shrink-0">
           <ChartContainer config={{}} className="h-full w-full">
@@ -77,21 +76,26 @@ export function AllocationChart({ items }: Props) {
                 onMouseLeave={() => setActiveIndex(-1)}
               >
                 {data.map((d, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={getColorForAsset(d.type)} 
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={getColorForAsset(d.type)}
                     style={{
-                      filter: activeIndex === index ? `drop-shadow(0px 0px 6px ${getColorForAsset(d.type)})` : 'none',
-                      transition: 'all 0.3s ease'
+                      filter:
+                        activeIndex === index
+                          ? `drop-shadow(0px 0px 6px ${getColorForAsset(d.type)})`
+                          : "none",
+                      transition: "all 0.3s ease",
                     }}
                   />
                 ))}
               </Pie>
               <ChartTooltip
-                content={<ChartTooltipContent 
-                  formatter={(value: any) => formatCurrency(value, "BRL", locale)} 
-                  hideLabel 
-                />}
+                content={
+                  <ChartTooltipContent
+                    formatter={(value: any) => formatCurrency(value, "BRL", locale)}
+                    hideLabel
+                  />
+                }
               />
             </PieChart>
           </ChartContainer>
@@ -101,8 +105,8 @@ export function AllocationChart({ items }: Props) {
             {t.watchlist.allocationByType}
           </div>
           {data.map((d, i) => (
-            <div 
-              key={d.name} 
+            <div
+              key={d.name}
               className="flex items-center justify-between text-sm transition-opacity duration-200"
               style={{ opacity: activeIndex === -1 || activeIndex === i ? 1 : 0.4 }}
               onMouseEnter={() => setActiveIndex(i)}
@@ -111,9 +115,9 @@ export function AllocationChart({ items }: Props) {
               <div className="flex items-center gap-2">
                 <div
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ 
+                  style={{
                     backgroundColor: getColorForAsset(d.type),
-                    boxShadow: activeIndex === i ? `0 0 8px ${getColorForAsset(d.type)}` : 'none'
+                    boxShadow: activeIndex === i ? `0 0 8px ${getColorForAsset(d.type)}` : "none",
                   }}
                 />
                 <span className="text-foreground">{d.name}</span>

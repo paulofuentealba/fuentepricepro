@@ -8,6 +8,7 @@ export const ASSET_COLORS: Record<AssetType | "OTHER" | "amount", string> = {
   ETF: "hsl(var(--asset-etf))",
   FII_INFRA: "hsl(var(--asset-fii-infra))",
   FIAGRO: "hsl(var(--asset-fiagro))",
+  FIXED_INCOME: "hsl(var(--asset-fixed-income, 160 84% 39%))",
   OTHER: "hsl(var(--asset-other))",
   amount: "var(--color-success, var(--success))",
 };

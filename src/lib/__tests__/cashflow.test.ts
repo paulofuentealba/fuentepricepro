@@ -27,14 +27,29 @@ function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
 
 describe("Cashflow logic", () => {
   it("buildMonthlyBuckets distributes annual dividend across payment months", () => {
-    const items = [mkItem({ ticker: "A", annualDividend: 120, quantity: 1, paymentMonths: [1, 6, 12] })];
-    const buckets = buildMonthlyBuckets(items, "USD", ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]);
-    
+    const items = [
+      mkItem({ ticker: "A", annualDividend: 120, quantity: 1, paymentMonths: [1, 6, 12] }),
+    ];
+    const buckets = buildMonthlyBuckets(items, "USD", [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]);
+
     // 120 total, 3 months -> 40 per month for Jan(0), Jun(5), Dec(11)
     expect(buckets[0].amount).toBe(40);
     expect(buckets[5].amount).toBe(40);
     expect(buckets[11].amount).toBe(40);
-    
+
     // Other months should be 0
     expect(buckets[1].amount).toBe(0);
   });
@@ -53,7 +68,7 @@ describe("Cashflow logic", () => {
       announcedAmount: 0,
       projectedAmount: 0,
     }));
-    
+
     const summary = computeCashFlowSummary(buckets);
     expect(summary.total).toBe(1200);
     expect(summary.avg).toBe(100);

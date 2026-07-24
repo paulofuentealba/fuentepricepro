@@ -1,7 +1,7 @@
 import { useCallback, useMemo, type KeyboardEvent, type MouseEvent } from "react";
 import { ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatPercent } from "@/lib/i18n";
+import { formatPercent, formatCurrency } from "@/lib/i18n";
 import { PriceTag } from "../../shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
@@ -9,14 +9,18 @@ import { cn } from "@/lib/utils";
 import { GoalProgressBar } from "../GoalProgressBar";
 import { MetricBox } from "../../shared/MetricBox";
 import type { AssetDerived } from "./useAssetCardDerived";
+import type { AssetMeta } from "../utils";
 
 interface Props {
   item: WatchlistItem;
   derived: AssetDerived;
+  activeMargin: number;
 }
 
-export function AssetCardFinancials({ item, derived }: Props) {
+export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
   const { t, locale } = useI18n();
+  const isPositive = activeMargin >= 0;
+
   const {
     grossIncome,
     isUs,
@@ -35,29 +39,32 @@ export function AssetCardFinancials({ item, derived }: Props) {
   }, []);
 
   const quantityLabel = useMemo(
-    () =>
-      new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR").format(item.quantity),
+    () => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR").format(item.quantity),
     [item.quantity, locale],
   );
 
   return (
     <>
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <MetricBox
-          label={t.watchlist.qtyShort}
-          value={quantityLabel}
-        />
-        
+        <MetricBox label={t.watchlist.qtyShort} value={quantityLabel} />
+
         <MetricBox
           label={t.result.safetyMargin}
           value={
             <div className="flex items-center gap-1">
-              {formatPercent(item.safetyMargin, locale, 2)}
-              {positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+              {formatPercent(activeMargin, locale, 2)}
+              {isPositive ? (
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              ) : (
+                <ArrowDownRight className="h-3.5 w-3.5" />
+              )}
             </div>
           }
-          subValue={t.watchlist.targetYield.replace("{{yield}}", formatPercent(item.targetYield, locale, 1))}
-          variant={positive ? "success" : "danger"}
+          subValue={t.watchlist.targetYield.replace(
+            "{{yield}}",
+            formatPercent(item.targetYield, locale, 1),
+          )}
+          variant={isPositive ? "success" : "danger"}
         />
       </div>
 
@@ -102,12 +109,26 @@ export function AssetCardFinancials({ item, derived }: Props) {
           subValue={
             hasAvg ? (
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] uppercase text-muted-foreground">{t.watchlist.totalCost}: <PriceTag value={derived.totalCost} currency={item.currency} /></span>
-                <span className={cn("font-medium", returnPositive ? "text-success" : "text-danger")}>
-                  {returnPositive ? "+" : ""}<PriceTag value={totalReturn} currency={item.currency} className={returnPositive ? "text-success" : "text-danger"} /> ({returnPositive ? "+" : ""}{formatPercent(returnPct, locale, 2)})
+                <span className="text-[10px] uppercase text-muted-foreground">
+                  {t.watchlist.totalCost}:{" "}
+                  <PriceTag value={derived.totalCost} currency={item.currency} />
+                </span>
+                <span
+                  className={cn("font-medium", returnPositive ? "text-success" : "text-danger")}
+                >
+                  {returnPositive ? "+" : ""}
+                  <PriceTag
+                    value={totalReturn}
+                    currency={item.currency}
+                    className={returnPositive ? "text-success" : "text-danger"}
+                  />{" "}
+                  ({returnPositive ? "+" : ""}
+                  {formatPercent(returnPct, locale, 2)})
                 </span>
               </div>
-            ) : t.watchlist.addAvgToTrack
+            ) : (
+              t.watchlist.addAvgToTrack
+            )
           }
         />
       </div>

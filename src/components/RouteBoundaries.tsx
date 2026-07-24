@@ -2,13 +2,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { reportGoogleError } from "@/lib/google-error-reporting";
 
-export function RouteErrorComponent({
-  error,
-  reset,
-}: {
-  error: Error;
-  reset: () => void;
-}) {
+export function RouteErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     console.error(error);
@@ -52,9 +46,7 @@ export function RouteNotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-6xl font-bold text-foreground">404</h1>
-        <h2 className="mt-3 text-lg font-semibold text-foreground">
-          Page not found
-        </h2>
+        <h2 className="mt-3 text-lg font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>

@@ -13,8 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Asset } from "@/lib/domain";
-import { avgDividend, ceilingPrice, safetyMargin } from "@/lib/calc";
+import { avgDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
 import { useI18n } from "@/lib/i18n-provider";
+import { formatCurrency, displayTicker } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useAuth } from "@/lib/auth-provider";
 import { useAuthModal } from "@/lib/auth-modal";
@@ -52,14 +53,9 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
             ? String(averagePrice)
             : "",
       );
-      setGoal(
-        existing?.targetMonthlyIncome != null
-          ? String(existing.targetMonthlyIncome)
-          : "",
-      );
+      setGoal(existing?.targetMonthlyIncome != null ? String(existing.targetMonthlyIncome) : "");
     }
   }, [open, existing, averagePrice]);
-
 
   function handleSave() {
     const qty = Number(quantity);
@@ -97,44 +93,43 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
     setOpen(false);
   }
 
-
   if (!user) {
     return (
       <>
-      <Button
-        variant="secondary"
-        size="sm"
-        className="gap-2"
-        onClick={() =>
-          openAuthModal({
-            message: "Sign in to save this asset to your watchlist. We'll add it right after.",
-            onSuccess: () => {
-              if (!isPro && items.length >= 5 && !existing) {
-                setShowPaywall(true);
-              } else {
-                setOpen(true);
-              }
-            },
-          })
-        }
-      >
-        <Bookmark className="h-4 w-4" />
-        {t.watchlist.addBtn}
-      </Button>
-      <PaywallDialog 
-        open={showPaywall} 
-        onOpenChange={setShowPaywall} 
-        title="Watchlist Limit Reached"
-        description="Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!"
-      />
+        <Button
+          variant="secondary"
+          size="sm"
+          className="gap-2"
+          onClick={() =>
+            openAuthModal({
+              message: "Sign in to save this asset to your watchlist. We'll add it right after.",
+              onSuccess: () => {
+                if (!isPro && items.length >= 5 && !existing) {
+                  setShowPaywall(true);
+                } else {
+                  setOpen(true);
+                }
+              },
+            })
+          }
+        >
+          <Bookmark className="h-4 w-4" />
+          {t.watchlist.addBtn}
+        </Button>
+        <PaywallDialog
+          open={showPaywall}
+          onOpenChange={setShowPaywall}
+          title="Watchlist Limit Reached"
+          description="Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!"
+        />
       </>
     );
   }
 
   return (
     <>
-      <Dialog 
-        open={open} 
+      <Dialog
+        open={open}
         onOpenChange={(v) => {
           if (v && !isPro && items.length >= 5 && !existing) {
             setShowPaywall(true);
@@ -149,71 +144,69 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
             {existing ? t.watchlist.updateBtn : t.watchlist.addBtn}
           </Button>
         </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {existing ? t.watchlist.updateTitle : t.watchlist.addTitle} — {asset.ticker}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label htmlFor="wl-qty">{t.watchlist.quantity}</Label>
-            <Input
-              id="wl-qty"
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="any"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="100"
-              autoFocus
-            />
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {existing ? t.watchlist.updateTitle : t.watchlist.addTitle} — {displayTicker(asset.ticker)}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="wl-qty">{t.watchlist.quantity}</Label>
+              <Input
+                id="wl-qty"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="any"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="100"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="wl-avg">{t.form.avgPrice}</Label>
+              <Input
+                id="wl-avg"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="any"
+                value={avg}
+                onChange={(e) => setAvg(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="wl-goal">{t.watchlist.targetMonthlyIncome}</Label>
+              <Input
+                id="wl-goal"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="any"
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                placeholder="100"
+              />
+              <p className="text-xs text-muted-foreground">{t.watchlist.targetMonthlyIncomeHint}</p>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="wl-avg">{t.form.avgPrice}</Label>
-            <Input
-              id="wl-avg"
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="any"
-              value={avg}
-              onChange={(e) => setAvg(e.target.value)}
-              placeholder="0.00"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="wl-goal">{t.watchlist.targetMonthlyIncome}</Label>
-            <Input
-              id="wl-goal"
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="any"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              placeholder="100"
-            />
-            <p className="text-xs text-muted-foreground">
-              {t.watchlist.targetMonthlyIncomeHint}
-            </p>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            {t.watchlist.cancel}
-          </Button>
-          <Button onClick={handleSave}>{t.watchlist.save}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-    <PaywallDialog 
-      open={showPaywall} 
-      onOpenChange={setShowPaywall} 
-      title="Watchlist Limit Reached"
-      description="Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!"
-    />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              {t.watchlist.cancel}
+            </Button>
+            <Button onClick={handleSave}>{t.watchlist.save}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <PaywallDialog
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        title="Watchlist Limit Reached"
+        description="Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!"
+      />
     </>
   );
 }

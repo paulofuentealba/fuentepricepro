@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import type { AssetType, Currency } from "@/lib/domain";
-import { netAfterTax } from "@/lib/calc";
+import { netAfterTax } from "@/lib/calculations";
 
 export type OppFilter = "under" | "over" | null;
 export type SortOption = "ticker_asc" | "yield_desc" | "margin_desc" | "income_desc" | "yoc_desc";
@@ -18,7 +18,10 @@ export interface FilterableAsset {
   customTaxRate?: number | null;
 }
 
-export function useAssetFilterSort<T extends FilterableAsset>(items: T[], defaultSort: SortOption = "ticker_asc") {
+export function useAssetFilterSort<T extends FilterableAsset>(
+  items: T[],
+  defaultSort: SortOption = "ticker_asc",
+) {
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [oppFilter, setOppFilter] = useState<OppFilter>(null);
   const [sortOption, setSortOption] = useState<SortOption>(defaultSort);
@@ -44,7 +47,7 @@ export function useAssetFilterSort<T extends FilterableAsset>(items: T[], defaul
         const key = `${it.currency}:${it.type}`;
         byType.set(key, (byType.get(key) ?? 0) + 1);
       }
-      
+
       const assetKey = it.type && it.currency ? `${it.currency}:${it.type}` : null;
       if (!typeFilter || assetKey === typeFilter) {
         if (it.safetyMargin > 0) under++;
@@ -78,13 +81,45 @@ export function useAssetFilterSort<T extends FilterableAsset>(items: T[], defaul
         case "income_desc": {
           const qtyA = a.quantity ?? 1;
           const qtyB = b.quantity ?? 1;
-          const incA = a.type && a.currency ? netAfterTax(a.annualDividend * qtyA, a.type as AssetType, a.currency as Currency, a.customTaxRate) : a.annualDividend * qtyA;
-          const incB = b.type && b.currency ? netAfterTax(b.annualDividend * qtyB, b.type as AssetType, b.currency as Currency, b.customTaxRate) : b.annualDividend * qtyB;
+          const incA =
+            a.type && a.currency
+              ? netAfterTax(
+                  a.annualDividend * qtyA,
+                  a.type as AssetType,
+                  a.currency as Currency,
+                  a.customTaxRate,
+                )
+              : a.annualDividend * qtyA;
+          const incB =
+            b.type && b.currency
+              ? netAfterTax(
+                  b.annualDividend * qtyB,
+                  b.type as AssetType,
+                  b.currency as Currency,
+                  b.customTaxRate,
+                )
+              : b.annualDividend * qtyB;
           return incB - incA;
         }
         case "yoc_desc": {
-          const yocA = a.averagePrice && a.type && a.currency ? netAfterTax(a.annualDividend, a.type as AssetType, a.currency as Currency, a.customTaxRate) / a.averagePrice : 0;
-          const yocB = b.averagePrice && b.type && b.currency ? netAfterTax(b.annualDividend, b.type as AssetType, b.currency as Currency, b.customTaxRate) / b.averagePrice : 0;
+          const yocA =
+            a.averagePrice && a.type && a.currency
+              ? netAfterTax(
+                  a.annualDividend,
+                  a.type as AssetType,
+                  a.currency as Currency,
+                  a.customTaxRate,
+                ) / a.averagePrice
+              : 0;
+          const yocB =
+            b.averagePrice && b.type && b.currency
+              ? netAfterTax(
+                  b.annualDividend,
+                  b.type as AssetType,
+                  b.currency as Currency,
+                  b.customTaxRate,
+                ) / b.averagePrice
+              : 0;
           return yocB - yocA;
         }
         case "ticker_asc":
@@ -95,11 +130,14 @@ export function useAssetFilterSort<T extends FilterableAsset>(items: T[], defaul
   }, [items, typeFilter, oppFilter, sortOption]);
 
   return {
-    typeFilter, setTypeFilter,
-    oppFilter, setOppFilter,
-    sortOption, setSortOption,
+    typeFilter,
+    setTypeFilter,
+    oppFilter,
+    setOppFilter,
+    sortOption,
+    setSortOption,
     typeFilters,
     counts,
-    filteredAndSorted
+    filteredAndSorted,
   };
 }

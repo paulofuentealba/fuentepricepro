@@ -10,8 +10,7 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
     card.marginTone === "success"
       ? "border-success/30 bg-success/10 text-success"
       : "border-danger/30 bg-danger/10 text-danger";
-  const priceToneCls =
-    card.priceTone === "success" ? "text-success" : "text-danger";
+  const priceToneCls = card.priceTone === "success" ? "text-success" : "text-danger";
   const PriceIcon = card.priceTone === "success" ? ArrowUpRight : ArrowDownRight;
   const displayTicker = cleanTicker(card.ticker);
   const logoLetter = displayTicker.charAt(0);
@@ -23,16 +22,12 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
       {/* Header: ticker + type + logo */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xl font-bold tracking-tight text-foreground">
-            {displayTicker}
-          </div>
+          <div className="text-xl font-bold tracking-tight text-foreground">{displayTicker}</div>
           <span className="mt-1 inline-flex items-center gap-1 rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
             <span>{card.flag}</span>
             {card.type}
           </span>
-          <p className="mt-1.5 truncate text-xs text-muted-foreground">
-            {card.name}
-          </p>
+          <p className="mt-1.5 truncate text-xs text-muted-foreground">{card.name}</p>
         </div>
         <div
           aria-hidden
@@ -51,7 +46,9 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
           <span className="text-xl font-bold tabular-nums text-foreground">
             {card.currentPrice}
           </span>
-          <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${priceToneCls}`}>
+          <span
+            className={`inline-flex items-center gap-0.5 text-xs font-semibold ${priceToneCls}`}
+          >
             <PriceIcon className="h-3.5 w-3.5" />
             {card.priceChange}
           </span>
@@ -63,25 +60,17 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
         <div className="rounded-lg border border-success/25 bg-success/10 p-2.5">
           <div className="flex items-center gap-1 text-success">
             <TrendingUp className="h-3 w-3" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">
-              Ceiling Price
-            </span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">Ceiling Price</span>
           </div>
-          <div className="mt-0.5 text-base font-bold text-foreground">
-            {card.ceiling}
-          </div>
+          <div className="mt-0.5 text-base font-bold text-foreground">{card.ceiling}</div>
         </div>
         <div className={`rounded-lg border p-2.5 ${marginTone}`}>
           <div className="flex items-center gap-1">
             <Shield className="h-3 w-3" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">
-              Margin
-            </span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">Margin</span>
           </div>
           <div className="mt-0.5 flex items-baseline gap-1">
-            <span className="text-base font-bold text-foreground">
-              {card.margin}
-            </span>
+            <span className="text-base font-bold text-foreground">{card.margin}</span>
           </div>
         </div>
       </div>
@@ -96,9 +85,7 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
         >
           {card.status}
         </span>
-        <span className="text-[10px] text-muted-foreground">
-          Fuente Price Pro
-        </span>
+        <span className="text-[10px] text-muted-foreground">Fuente Price Pro</span>
       </div>
     </div>
   );

@@ -10,7 +10,13 @@ import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
@@ -49,7 +55,7 @@ export function SnowballSimulator() {
       if (item.currency !== currency) continue;
       const value = item.currentPrice * item.quantity;
       const dividend = item.annualDividend * item.quantity;
-      
+
       totalValue += value;
       totalAnnualDividend += dividend;
     }
@@ -63,14 +69,14 @@ export function SnowballSimulator() {
     let principal = currentTotal;
     const monthlyYield = blendedYield / 12;
     const data = [];
-    
+
     for (let m = 1; m <= years * 12; m++) {
       if (reinvest) {
         balance += balance * monthlyYield;
       }
       balance += monthlyContribution;
       principal += monthlyContribution;
-      
+
       if (m % 12 === 0) {
         data.push({
           year: t.snowball.year.replace("{{year}}", String(m / 12)),
@@ -81,7 +87,7 @@ export function SnowballSimulator() {
     }
 
     const finalMonthlyPassiveIncome = balance * monthlyYield;
-    const crossoverData = data.find(d => d.Juros > d.Principal);
+    const crossoverData = data.find((d) => d.Juros > d.Principal);
     const crossoverYear = crossoverData ? crossoverData.year : null;
 
     return { finalBalance: balance, finalMonthlyPassiveIncome, data, crossoverYear };
@@ -89,17 +95,14 @@ export function SnowballSimulator() {
 
   return (
     <section className="mt-6">
-
       <Card className="border-border/60 bg-card/60">
         <CardContent className="space-y-6 pt-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground flex-1">
-              {t.snowball.subtitle}
-            </p>
+            <p className="text-sm text-muted-foreground flex-1">{t.snowball.subtitle}</p>
             <div className="shrink-0">
-              <CurrencyToggle 
-                value={currency === "USD" ? "US" : "BR"} 
-                onChange={(v) => setCurrency(v === "US" ? "USD" : "BRL")} 
+              <CurrencyToggle
+                value={currency === "USD" ? "US" : "BR"}
+                onChange={(v) => setCurrency(v === "US" ? "USD" : "BRL")}
               />
             </div>
           </div>
@@ -109,14 +112,16 @@ export function SnowballSimulator() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <Label>{t.snowball.monthlyContribution}</Label>
-                  <span className="text-sm font-semibold">{formatCurrency(monthlyContribution, currency, locale)}</span>
+                  <span className="text-sm font-semibold">
+                    {formatCurrency(monthlyContribution, currency, locale)}
+                  </span>
                 </div>
-                <Slider 
-                  min={0} 
-                  max={10000} 
-                  step={100} 
-                  value={[monthlyContribution]} 
-                  onValueChange={(val) => setMonthlyContribution(val[0])} 
+                <Slider
+                  min={0}
+                  max={10000}
+                  step={100}
+                  value={[monthlyContribution]}
+                  onValueChange={(val) => setMonthlyContribution(val[0])}
                 />
               </div>
 
@@ -125,28 +130,34 @@ export function SnowballSimulator() {
                   <Label>{t.snowball.timeHorizon}</Label>
                   <span className="text-sm font-semibold">{years}</span>
                 </div>
-                <Slider 
-                  min={1} 
-                  max={35} 
-                  step={1} 
-                  value={[years]} 
-                  onValueChange={(val) => setYears(val[0])} 
+                <Slider
+                  min={1}
+                  max={35}
+                  step={1}
+                  value={[years]}
+                  onValueChange={(val) => setYears(val[0])}
                 />
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="reinvest-mode" className="cursor-pointer">{t.snowball.reinvestDrip}</Label>
+                <Label htmlFor="reinvest-mode" className="cursor-pointer">
+                  {t.snowball.reinvestDrip}
+                </Label>
                 <Switch id="reinvest-mode" checked={reinvest} onCheckedChange={setReinvest} />
               </div>
 
               <div className="rounded-md border border-border/60 bg-background/40 p-3 mt-4 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-muted-foreground">{t.snowball.currentBase}</span>
-                  <span className="font-medium text-foreground">{formatCurrency(currentTotal, currency, locale)}</span>
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(currentTotal, currency, locale)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t.snowball.avgYield}</span>
-                  <span className="font-medium text-success">{(blendedYield * 100).toFixed(2)}%</span>
+                  <span className="font-medium text-success">
+                    {(blendedYield * 100).toFixed(2)}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -160,13 +171,19 @@ export function SnowballSimulator() {
                   {formatCurrency(projection.finalMonthlyPassiveIncome, currency, locale)}
                 </div>
                 <p className="mt-4 text-xs text-muted-foreground">
-                  {t.snowball.estimatedAccumulated} <br/><span className="font-semibold text-foreground/80">{formatCurrency(projection.finalBalance, currency, locale)}</span>
+                  {t.snowball.estimatedAccumulated} <br />
+                  <span className="font-semibold text-foreground/80">
+                    {formatCurrency(projection.finalBalance, currency, locale)}
+                  </span>
                 </p>
               </div>
 
               <div className="h-[260px] w-full">
                 <ChartContainer config={chartConfig} className="h-full w-full">
-                  <AreaChart data={projection.data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <AreaChart
+                    data={projection.data}
+                    margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                  >
                     <defs>
                       <ChartGlowDef id="glowArea" blur={6} />
                       <linearGradient id="colorPrincipal" x1="0" y1="0" x2="0" y2="1">
@@ -178,38 +195,74 @@ export function SnowballSimulator() {
                         <stop offset="95%" stopColor="var(--color-Juros)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--muted-foreground)/0.2)" />
-                    <XAxis 
-                      dataKey="year" 
-                      fontSize={11} 
-                      tickLine={false} 
-                      axisLine={false} 
+                    <CartesianGrid
+                      vertical={false}
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--muted-foreground)/0.2)"
+                    />
+                    <XAxis
+                      dataKey="year"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
                       tick={{ fill: "hsl(var(--muted-foreground))" }}
                       dy={10}
                     />
-                    <YAxis 
+                    <YAxis
                       tickLine={false}
                       axisLine={false}
                       fontSize={11}
                       tick={{ fill: "hsl(var(--muted-foreground))" }}
-                      tickFormatter={(v: number) => new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ptBR" ? "pt-BR" : "es-ES", { notation: "compact" }).format(v)}
+                      tickFormatter={(v: number) =>
+                        new Intl.NumberFormat(
+                          locale === "en" ? "en-US" : locale === "ptBR" ? "pt-BR" : "es-ES",
+                          { notation: "compact" },
+                        ).format(v)
+                      }
                     />
-                    <ChartTooltip 
-                      cursor={{ stroke: "hsl(var(--muted-foreground)/0.4)", strokeWidth: 1, strokeDasharray: "4 4" }}
-                      content={<ChartTooltipContent 
-                        valueFormatter={(value: any) => formatCurrency(value, currency, locale)} 
-                      />} 
+                    <ChartTooltip
+                      cursor={{
+                        stroke: "hsl(var(--muted-foreground)/0.4)",
+                        strokeWidth: 1,
+                        strokeDasharray: "4 4",
+                      }}
+                      content={
+                        <ChartTooltipContent
+                          valueFormatter={(value: any) => formatCurrency(value, currency, locale)}
+                        />
+                      }
                     />
                     {projection.crossoverYear && (
-                      <ReferenceLine 
-                        x={projection.crossoverYear} 
-                        stroke="var(--color-Juros)" 
-                        strokeDasharray="3 3" 
-                        label={{ position: 'top', value: t.snowball.crossover, fill: 'var(--color-Juros)', fontSize: 10, fontWeight: 600 }} 
+                      <ReferenceLine
+                        x={projection.crossoverYear}
+                        stroke="var(--color-Juros)"
+                        strokeDasharray="3 3"
+                        label={{
+                          position: "top",
+                          value: t.snowball.crossover,
+                          fill: "var(--color-Juros)",
+                          fontSize: 10,
+                          fontWeight: 600,
+                        }}
                       />
                     )}
-                    <Area type="monotone" dataKey="Principal" stackId="1" stroke="var(--color-Principal)" strokeWidth={2} fill="url(#colorPrincipal)" />
-                    <Area type="monotone" dataKey="Juros" stackId="1" stroke="var(--color-Juros)" strokeWidth={3} fill="url(#colorJuros)" filter="url(#glowArea)" />
+                    <Area
+                      type="monotone"
+                      dataKey="Principal"
+                      stackId="1"
+                      stroke="var(--color-Principal)"
+                      strokeWidth={2}
+                      fill="url(#colorPrincipal)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="Juros"
+                      stackId="1"
+                      stroke="var(--color-Juros)"
+                      strokeWidth={3}
+                      fill="url(#colorJuros)"
+                      filter="url(#glowArea)"
+                    />
                     <ChartLegend content={<ChartLegendContent />} className="pt-4" />
                   </AreaChart>
                 </ChartContainer>

@@ -53,7 +53,9 @@ export function WatchlistFilterBar({
             onClick={() => onSetTypeFilter(typeFilter === f.key ? null : f.key)}
             count={counts.byType.get(f.key) ?? 0}
           >
-            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-muted/50 text-muted-foreground uppercase leading-none">{flagFor(f.currency)}</span>
+            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-muted/50 text-muted-foreground uppercase leading-none">
+              {flagFor(f.currency)}
+            </span>
             {t.types[f.type]}
           </FilterPill>
         ))}

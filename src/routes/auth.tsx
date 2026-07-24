@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Gauge, Loader2 } from "lucide-react";
@@ -6,20 +6,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
 import { auth } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
+import { SuccessIconBox } from "@/components/shared/SuccessIconBox";
+import { useI18n } from "@/lib/i18n-provider";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Fuente Price Pro" },
-      { name: "description", content: "Sign in to save your portfolio and track your dividend cash flow." },
+      {
+        name: "description",
+        content: "Sign in to save your portfolio and track your dividend cash flow.",
+      },
       { property: "og:title", content: "Sign in — Fuente Price Pro" },
       {
         property: "og:description",
-        content: "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
+        content:
+          "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://fuentepricepro.web.app/auth" },
@@ -27,7 +38,8 @@ export const Route = createFileRoute("/auth")({
       { name: "twitter:title", content: "Sign in — Fuente Price Pro" },
       {
         name: "twitter:description",
-        content: "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
+        content:
+          "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
     ],
     links: [{ rel: "canonical", href: "https://fuentepricepro.web.app/auth" }],
@@ -37,11 +49,12 @@ export const Route = createFileRoute("/auth")({
   notFoundComponent: RouteNotFoundComponent,
 });
 
-
 type Mode = "signin" | "signup";
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: '/auth' });
+  const { t } = useI18n();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
@@ -87,11 +100,11 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/15 text-success ring-1 ring-success/30">
-            <Gauge className="h-5 w-5" />
-          </div>
+          <SuccessIconBox icon={Gauge} size="md" rounded="xl" />
           <div className="text-left">
-            <h1 className="text-base font-semibold tracking-tight text-foreground">Fuente Price Pro</h1>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">
+              Fuente Price Pro
+            </h1>
             <div className="text-xs text-muted-foreground">
               Intelligent Ceiling Portfolio Valuation & Passive Income Engineering tool
             </div>
@@ -129,7 +142,7 @@ function AuthPage() {
 
             <form onSubmit={handleEmail} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="auth-email">Email</Label>
+                <Label htmlFor="auth-email">{t.global.email}</Label>
                 <Input
                   id="auth-email"
                   type="email"
@@ -140,7 +153,7 @@ function AuthPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="auth-password">Password</Label>
+                <Label htmlFor="auth-password">{t.global.password}</Label>
                 <Input
                   id="auth-password"
                   type="password"

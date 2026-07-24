@@ -73,7 +73,7 @@ export async function fetchWithRetry(
 ): Promise<Response> {
   const { timeoutMs = DEFAULT_FETCH_TIMEOUT_MS, retries = 2, baseDelayMs = 300 } = opts;
   let attempt = 0;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     try {
       const r = await fetchWithTimeout(input, init, timeoutMs);

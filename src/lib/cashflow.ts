@@ -2,13 +2,7 @@ import type { Currency } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
 
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
-export const MONTHLY_TYPES: WatchlistItem["type"][] = [
-  "FII",
-  "FII_INFRA",
-  "FIAGRO",
-  "ETF",
-  "REIT",
-];
+export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAGRO", "ETF", "REIT"];
 
 export interface MonthContributor {
   ticker: string;
@@ -39,9 +33,7 @@ export interface CashFlowSummary {
 }
 
 function fallbackMonthsForType(type: WatchlistItem["type"]): number[] {
-  return MONTHLY_TYPES.includes(type)
-    ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-    : QUARTERLY_MONTHS;
+  return MONTHLY_TYPES.includes(type) ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : QUARTERLY_MONTHS;
 }
 
 export function buildMonthlyBuckets(
@@ -81,11 +73,11 @@ export function buildMonthlyBuckets(
       b.amount > 0 && sortedContribs.length > 0 ? sortedContribs[0].amount / b.amount : 0;
 
     let paidAmount = 0;
-    let announcedAmount = 0;
+    const announcedAmount = 0;
     let projectedAmount = 0;
-    
+
     const currentMonthIndex = new Date().getMonth();
-    
+
     if (i < currentMonthIndex) {
       paidAmount = b.amount;
     } else if (i > currentMonthIndex) {
@@ -105,10 +97,7 @@ export function buildMonthlyBuckets(
       contributors: sortedContribs,
       isBest: b.amount > 0 && b.amount === maxAmount && positive.length > 1,
       isWorst:
-        b.amount > 0 &&
-        b.amount === minPositive &&
-        positive.length > 1 &&
-        b.amount !== maxAmount,
+        b.amount > 0 && b.amount === minPositive && positive.length > 1 && b.amount !== maxAmount,
       concentratedTicker:
         topShare >= 0.3 && sortedContribs.length > 1 ? sortedContribs[0].ticker : null,
     };
@@ -133,12 +122,12 @@ export function computeCashFlowSummary(data: MonthBucket[]): CashFlowSummary {
   const daysInCurrent = new Date(now.getFullYear(), currentMonthIdx + 1, 0).getDate();
   const dayOfMonth = now.getDate();
   const remainingCurrent = (daysInCurrent - dayOfMonth) / daysInCurrent;
-  
+
   const nextIdx = (currentMonthIdx + 1) % 12;
   const nextYear = nextIdx === 0 ? now.getFullYear() + 1 : now.getFullYear();
   const daysInNext = new Date(nextYear, nextIdx + 1, 0).getDate();
   const nextConsumed = Math.min(dayOfMonth / daysInNext, 1);
-  
+
   const next30 =
     data[currentMonthIdx].amount * remainingCurrent + data[nextIdx].amount * nextConsumed;
   return { total, avg, top, next30 };
@@ -165,9 +154,7 @@ export function exportCashFlowCsv(data: MonthBucket[], currency: Currency): void
     d.amount.toFixed(2),
     d.cumulativeTotal.toFixed(2),
     currency,
-    d.contributors
-      .map((c) => `${c.ticker.replace(/\.SA$/i, "")}:${c.amount.toFixed(2)}`)
-      .join("|"),
+    d.contributors.map((c) => `${c.ticker}:${c.amount.toFixed(2)}`).join("|"),
   ]);
   const csv = [header, ...rows]
     .map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isUsAsset, netAfterTax } from "@/lib/calc";
+import { isUsAsset, netAfterTax } from "@/lib/calculations";
 import { formatCurrency, formatPercent, type Locale } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 
@@ -56,5 +56,5 @@ export function buildAssetShareText(
   locale: Locale,
 ): string {
   const yocValue = yoc ?? item.targetYield;
-  return `Just analyzed ${item.ticker.replace(/\.SA$/i, "")} on Fuente Price Pro! 🚀\nCeiling Price: ${formatCurrency(item.ceilingPrice, item.currency, locale)} | Projected YoC: ${formatPercent(yocValue, locale, 2)}.\nCheck your portfolio strategy at https://fuentepricepro.web.app`;
+  return `Just analyzed ${item.ticker} on Fuente Price Pro! 🚀\nCeiling Price: ${formatCurrency(item.ceilingPrice, item.currency, locale)} | Projected YoC: ${formatPercent(yocValue, locale, 2)}.\nCheck your portfolio strategy at https://fuentepricepro.web.app`;
 }

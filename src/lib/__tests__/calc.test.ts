@@ -6,7 +6,7 @@ import {
   netAfterTax,
   dividendTaxRate,
   isUsAsset,
-} from "../calc";
+} from "../calculations";
 
 describe("Bazin ceiling price math", () => {
   it("averages dividends", () => {

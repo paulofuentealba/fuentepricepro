@@ -1,7 +1,7 @@
 import type { WatchlistItem } from "./watchlist";
 import type { AssetType, Currency } from "./domain";
 
-import { netAfterTax } from "./calc";
+import { netAfterTax } from "./calculations";
 
 export type StrategyKey = "yield" | "margin" | "snowball" | "gapFiller" | "defensive";
 
@@ -87,13 +87,14 @@ export function computeSmartAllocation(
   activeStrategies: StrategyKey[],
   excludedTickers: string[],
   targets: Record<AssetType, number>,
-  exchangeRate: number
+  exchangeRate: number,
 ): SmartAllocationResult | null {
   if (!Number.isFinite(capital) || capital <= 0) return null;
 
   const sameCurrency = items.filter((i) => i.currency === currency);
   const currentPortfolioIncome = sameCurrency.reduce(
-    (sum, it) => sum + netAfterTax(it.annualDividend * it.quantity, it.type, it.currency, it.customTaxRate),
+    (sum, it) =>
+      sum + netAfterTax(it.annualDividend * it.quantity, it.type, it.currency, it.customTaxRate),
     0,
   );
 
@@ -103,10 +104,7 @@ export function computeSmartAllocation(
   }
 
   const candidates = sameCurrency.filter(
-    (i) =>
-      !excludedTickers.includes(i.ticker) &&
-      i.currentPrice > 0 &&
-      i.annualDividend > 0,
+    (i) => !excludedTickers.includes(i.ticker) && i.currentPrice > 0 && i.annualDividend > 0,
   );
 
   if (candidates.length === 0) {
@@ -155,21 +153,24 @@ export function computeSmartAllocation(
   const ranked = candidates
     .map((item, idx) => {
       let score = combined[idx];
-      
+
       // Target Allocation Boost/Penalty
       if (targetTotal > 0) {
         const targetPct = targets[item.type] || 0;
         if (targetPct > 0) {
-          const currentPct = totalPortfolioBRL > 0 ? (currentAllocationBRL[item.type] || 0) / totalPortfolioBRL * 100 : 0;
+          const currentPct =
+            totalPortfolioBRL > 0
+              ? ((currentAllocationBRL[item.type] || 0) / totalPortfolioBRL) * 100
+              : 0;
           if (currentPct < targetPct) {
             const distance = (targetPct - currentPct) / targetPct;
-            const organicBoost = distance * 0.20;
-            score *= (1 + organicBoost);
+            const organicBoost = distance * 0.2;
+            score *= 1 + organicBoost;
           } else {
             score *= 0.9;
           }
         } else {
-           score *= 0.5;
+          score *= 0.5;
         }
       }
 
@@ -205,14 +206,14 @@ export function computeSmartAllocation(
   let spent = 0;
   let remaining = capital;
   let totalAddedIncome = 0;
-  
+
   const recMap = new Map<string, Recommendation>();
 
   for (const { item, score } of ranked) {
     const budget = capital * (score / scoreSum);
     const shares = Math.floor(budget / item.currentPrice);
     const cost = shares * item.currentPrice;
-    
+
     if (shares > 0) {
       const grossCurrent = item.quantity * item.annualDividend;
       const currentIncome = netAfterTax(grossCurrent, item.type, item.currency, item.customTaxRate);
@@ -222,7 +223,7 @@ export function computeSmartAllocation(
         cost,
         addedIncome: 0,
         currentIncome,
-        newIncome: currentIncome
+        newIncome: currentIncome,
       });
       spent += cost;
       remaining -= cost;
@@ -240,11 +241,23 @@ export function computeSmartAllocation(
           spent += cost;
           remaining -= cost;
           madeChanges = true;
-          
+
           let rec = recMap.get(item.ticker);
           if (!rec) {
-            const currentIncome = netAfterTax(item.quantity * item.annualDividend, item.type, item.currency, item.customTaxRate);
-            rec = { item, shares: 0, cost: 0, addedIncome: 0, currentIncome, newIncome: currentIncome };
+            const currentIncome = netAfterTax(
+              item.quantity * item.annualDividend,
+              item.type,
+              item.currency,
+              item.customTaxRate,
+            );
+            rec = {
+              item,
+              shares: 0,
+              cost: 0,
+              addedIncome: 0,
+              currentIncome,
+              newIncome: currentIncome,
+            };
             recMap.set(item.ticker, rec);
           }
           rec.shares += sharesToBuy;
@@ -254,9 +267,14 @@ export function computeSmartAllocation(
     }
   }
 
-  const recs: Recommendation[] = Array.from(recMap.values()).map(rec => {
+  const recs: Recommendation[] = Array.from(recMap.values()).map((rec) => {
     const grossAdded = rec.shares * rec.item.annualDividend;
-    const addedIncome = netAfterTax(grossAdded, rec.item.type, rec.item.currency, rec.item.customTaxRate);
+    const addedIncome = netAfterTax(
+      grossAdded,
+      rec.item.type,
+      rec.item.currency,
+      rec.item.customTaxRate,
+    );
     rec.addedIncome = addedIncome;
     rec.newIncome = rec.currentIncome + addedIncome;
     totalAddedIncome += addedIncome;

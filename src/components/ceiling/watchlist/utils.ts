@@ -17,4 +17,6 @@ export function formatExDate(iso: string, locale: "en" | "ptBR"): string | null 
 export interface AssetMeta {
   exDividendDate: string | null;
   dividendCagr5y: number | null;
+  eps: number | null;
+  pbRatio: number | null;
 }

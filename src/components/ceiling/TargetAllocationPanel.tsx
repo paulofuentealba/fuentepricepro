@@ -14,7 +14,7 @@ const ASSET_TYPES: AssetType[] = [
   "REIT",
   "ETF",
   "FII_INFRA",
-  "FIAGRO"
+  "FIAGRO",
 ];
 
 interface Props {
@@ -46,20 +46,35 @@ export function TargetAllocationPanel({ targets, onChange }: Props) {
       >
         <div className="flex items-center gap-2">
           <PieChart className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground">{t.smartAllocation.targetPanelTitle}</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            {t.smartAllocation.targetPanelTitle}
+          </h3>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn("text-xs font-medium", total === 100 ? "text-success" : total > 100 ? "text-danger" : "text-muted-foreground")}>
+          <span
+            className={cn(
+              "text-xs font-medium",
+              total === 100
+                ? "text-success"
+                : total > 100
+                  ? "text-danger"
+                  : "text-muted-foreground",
+            )}
+          >
             {t.smartAllocation.targetTotal.replace("{{total}}", String(total))}
           </span>
-          {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          {isOpen ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          )}
         </div>
       </button>
 
       {isOpen && (
         <div className="border-t border-border/60 p-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {ASSET_TYPES.map(type => (
+            {ASSET_TYPES.map((type) => (
               <div key={type} className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{t.types[type] || type}</Label>
                 <div className="relative">
@@ -68,13 +83,13 @@ export function TargetAllocationPanel({ targets, onChange }: Props) {
                     min="0"
                     max="100"
                     value={targets[type] === 0 ? "" : targets[type]}
-                    onChange={e => handleChange(type, e.target.value)}
+                    onChange={(e) => handleChange(type, e.target.value)}
                     className="pr-6 h-8 text-sm"
                     placeholder="0"
                   />
                   <span className="absolute right-2 top-1.5 text-xs text-muted-foreground">%</span>
                 </div>
-                <Slider 
+                <Slider
                   min={0}
                   max={100}
                   step={1}
@@ -87,7 +102,12 @@ export function TargetAllocationPanel({ targets, onChange }: Props) {
           </div>
 
           {total !== 100 && (
-            <div className={cn("mt-4 text-xs font-medium", total > 100 ? "text-danger" : "text-muted-foreground")}>
+            <div
+              className={cn(
+                "mt-4 text-xs font-medium",
+                total > 100 ? "text-danger" : "text-muted-foreground",
+              )}
+            >
               {t.smartAllocation.targetTotalIdeal}
             </div>
           )}

@@ -39,7 +39,9 @@ describe("scoreFor", () => {
   const covered = new Set<number>();
   it("yield = annualDividend/price", () => {
     // STOCK_US defaults to 30% tax, so 2 * 0.7 = 1.4. Yield = 1.4 / 20 = 0.07
-    expect(scoreFor(mkItem({ annualDividend: 2, currentPrice: 20 }), "yield", covered)).toBeCloseTo(0.07);
+    expect(scoreFor(mkItem({ annualDividend: 2, currentPrice: 20 }), "yield", covered)).toBeCloseTo(
+      0.07,
+    );
   });
   it("margin clamps negatives to 0", () => {
     expect(scoreFor(mkItem({ safetyMargin: -5 }), "margin", covered)).toBe(0);
@@ -61,7 +63,15 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
   ];
 
   it("allocates all capital proportionally to top scorers (single strategy)", () => {
-    const result = computeSmartAllocation(1000, "USD", items, ["yield"], [], { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0 }, 5);
+    const result = computeSmartAllocation(
+      1000,
+      "USD",
+      items,
+      ["yield"],
+      [],
+      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      5,
+    );
     const recs = result?.recs || [];
     expect(recs.map((r) => r.item.ticker)).toEqual(["A", "B", "C"]);
     const spent = recs.reduce((s, r) => s + r.cost, 0);
@@ -71,13 +81,29 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
   });
 
   it("excluded tickers are ignored", () => {
-    const result = computeSmartAllocation(1000, "USD", items, ["yield"], ["A"], { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0 }, 5);
+    const result = computeSmartAllocation(
+      1000,
+      "USD",
+      items,
+      ["yield"],
+      ["A"],
+      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      5,
+    );
     const recs = result?.recs || [];
     expect(recs.map((r) => r.item.ticker)).not.toContain("A");
   });
 
   it("multi-strategy averages normalized scores", () => {
-    const result = computeSmartAllocation(1000, "USD", items, ["yield", "margin"], [], { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0 }, 5);
+    const result = computeSmartAllocation(
+      1000,
+      "USD",
+      items,
+      ["yield", "margin"],
+      [],
+      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      5,
+    );
     const recs = result?.recs || [];
     // B has high margin (50) so it should not be dominated as heavily
     const byTicker = Object.fromEntries(recs.map((r) => [r.item.ticker, r]));
@@ -86,19 +112,40 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
   });
 
   it("returns empty when no viable candidates", () => {
-    expect(computeSmartAllocation(1000, "USD", [], ["yield"], [], { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0 }, 5)?.recs).toEqual([]);
     expect(
       computeSmartAllocation(
-        1000, "USD",
+        1000,
+        "USD",
+        [],
+        ["yield"],
+        [],
+        { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+        5,
+      )?.recs,
+    ).toEqual([]);
+    expect(
+      computeSmartAllocation(
+        1000,
+        "USD",
         [mkItem({ annualDividend: 0 })],
         ["yield"],
-        [], { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0 }, 5
-      )?.recs || []
+        [],
+        { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+        5,
+      )?.recs || [],
     ).toEqual([]);
   });
 
   it("shares are integer (floor of budget/price)", () => {
-    const result = computeSmartAllocation(1000, "USD", items, ["yield"], [], { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0 }, 5);
+    const result = computeSmartAllocation(
+      1000,
+      "USD",
+      items,
+      ["yield"],
+      [],
+      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      5,
+    );
     const recs = result?.recs || [];
     for (const r of recs) expect(Number.isInteger(r.shares)).toBe(true);
   });

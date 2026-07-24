@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { MaskedInput } from "../shared/MaskedInput";
-import { ceilingPrice, safetyMargin, netAfterTax } from "@/lib/calc";
-import { formatCurrency, formatPercent } from "@/lib/i18n";
+import { ceilingPrice, safetyMargin, netAfterTax } from "@/lib/calculations";
+import { displayTicker, formatCurrency, formatPercent } from "@/lib/i18n";
 import { TrendingUp, Target, Wallet } from "lucide-react";
 import { PriceTag } from "../shared/AssetDataDisplay";
 
@@ -43,7 +43,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
   // Live Calculations for Preview
   const preview = useMemo(() => {
     if (!item) return null;
-    
+
     const parsedQty = parseFloat(qty);
     const parsedAvg = parseFloat(avg);
     const parsedDy = parseFloat(dy);
@@ -55,7 +55,12 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
     const newCeiling = ceilingPrice(item.annualDividend, y);
     const newTotalCost = a != null ? a * q : 0;
     const annualIncome = item.annualDividend * q;
-    const newProjectedIncome = netAfterTax(annualIncome, item.type, item.currency, item.customTaxRate);
+    const newProjectedIncome = netAfterTax(
+      annualIncome,
+      item.type,
+      item.currency,
+      item.customTaxRate,
+    );
     const newYieldOnCost = a != null && a > 0 ? (item.annualDividend / a) * 100 : null;
 
     // Goal Projections
@@ -67,10 +72,15 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
     if (g != null && item.annualDividend > 0) {
       // We calculate based on net dividend to be accurate, but let's use gross for simplicity like in GoalPlanner?
       // Actually, GoalPlanner uses net dividend if applicable.
-      const netAnnualPerShare = netAfterTax(item.annualDividend, item.type, item.currency, item.customTaxRate);
+      const netAnnualPerShare = netAfterTax(
+        item.annualDividend,
+        item.type,
+        item.currency,
+        item.customTaxRate,
+      );
       const targetAnnual = g * 12;
       sharesNeeded = Math.ceil(targetAnnual / netAnnualPerShare);
-      
+
       const currentShares = q;
       const extraShares = Math.max(0, sharesNeeded - currentShares);
       extraCapitalNeeded = extraShares * item.currentPrice;
@@ -84,7 +94,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
       newYieldOnCost,
       sharesNeeded,
       extraCapitalNeeded,
-      goalProgressPct
+      goalProgressPct,
     };
   }, [item, qty, avg, dy, goal]);
 
@@ -101,23 +111,22 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
             {t.watchlist.updateTitle}
             {item ? (
               <span className="text-muted-foreground font-normal">
-                — {item.ticker.replace(/\.SA$/i, "")}
+                — {displayTicker(item.ticker)}
               </span>
             ) : null}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border/40">
           {/* Inputs Section */}
           <div className="p-6 space-y-6">
-            
             {/* My Position */}
             <div className="space-y-4">
               <h3 className="font-semibold flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
                 <Wallet className="h-4 w-4" />
                 {t.watchlist.editPosition}
               </h3>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="wl-edit-qty">{t.watchlist.quantity}</Label>
                 <MaskedInput
@@ -128,7 +137,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                   autoFocus
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="wl-edit-avg">{t.form.avgPrice}</Label>
                 <MaskedInput
@@ -147,7 +156,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 <Target className="h-4 w-4" />
                 {t.watchlist.editGoals}
               </h3>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="wl-edit-dy">{t.form.targetYield} (%)</Label>
                 <MaskedInput
@@ -159,7 +168,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                   placeholder="6"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="wl-edit-goal">{t.watchlist.targetMonthlyIncome}</Label>
                 <MaskedInput
@@ -180,15 +189,15 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
               <TrendingUp className="h-4 w-4" />
               {t.watchlist.editPreview}
             </h3>
-            <p className="text-xs text-muted-foreground mb-6">
-              {t.watchlist.editPreviewDesc}
-            </p>
-            
+            <p className="text-xs text-muted-foreground mb-6">{t.watchlist.editPreviewDesc}</p>
+
             {preview && item && (
               <div className="space-y-4 flex-1">
                 {/* Ceiling Price Preview */}
                 <div className="rounded-lg border border-border/60 bg-card p-4 space-y-1">
-                  <div className="text-xs text-muted-foreground uppercase">{t.radar.ceilingPrice}</div>
+                  <div className="text-xs text-muted-foreground uppercase">
+                    {t.radar.ceilingPrice}
+                  </div>
                   <div className="text-xl font-bold tabular-nums">
                     <PriceTag value={preview.newCeiling} currency={item.currency} />
                   </div>
@@ -197,20 +206,28 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 {/* Total Cost & Projected Income */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-                    <div className="text-[10px] text-muted-foreground uppercase leading-tight">{t.watchlist.totalCost}</div>
+                    <div className="text-[10px] text-muted-foreground uppercase leading-tight">
+                      {t.watchlist.totalCost}
+                    </div>
                     <div className="font-semibold tabular-nums text-sm truncate">
                       {preview.newTotalCost > 0 ? (
-                         <PriceTag value={preview.newTotalCost} currency={item.currency} />
-                      ) : "N/A"}
+                        <PriceTag value={preview.newTotalCost} currency={item.currency} />
+                      ) : (
+                        "N/A"
+                      )}
                     </div>
                   </div>
-                  
+
                   <div className="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-                    <div className="text-[10px] text-muted-foreground uppercase leading-tight">{t.watchlist.projectedIncome}</div>
+                    <div className="text-[10px] text-muted-foreground uppercase leading-tight">
+                      {t.watchlist.projectedIncome}
+                    </div>
                     <div className="font-semibold tabular-nums text-sm truncate text-success">
                       {preview.newProjectedIncome > 0 ? (
-                         <PriceTag value={preview.newProjectedIncome} currency={item.currency} />
-                      ) : "N/A"}
+                        <PriceTag value={preview.newProjectedIncome} currency={item.currency} />
+                      ) : (
+                        "N/A"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -230,20 +247,26 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 {/* Goal Projection */}
                 {preview.sharesNeeded != null && (
                   <div className="rounded-lg border border-border/60 bg-card p-4 space-y-3 mt-4">
-                    <div className="text-xs text-muted-foreground uppercase">{t.result.goalPlannerTitle}</div>
-                    
+                    <div className="text-xs text-muted-foreground uppercase">
+                      {t.result.goalPlannerTitle}
+                    </div>
+
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">{t.result.sharesNeeded.replace('{{qty}}', String(preview.sharesNeeded))}</span>
-                      <span className="font-semibold tabular-nums">{preview.goalProgressPct?.toFixed(1)}%</span>
+                      <span className="text-muted-foreground">
+                        {t.result.sharesNeeded.replace("{{qty}}", String(preview.sharesNeeded))}
+                      </span>
+                      <span className="font-semibold tabular-nums">
+                        {preview.goalProgressPct?.toFixed(1)}%
+                      </span>
                     </div>
 
                     <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                      <div 
-                        className="bg-primary h-1.5 rounded-full transition-all duration-500" 
+                      <div
+                        className="bg-primary h-1.5 rounded-full transition-all duration-500"
                         style={{ width: `${preview.goalProgressPct}%` }}
                       />
                     </div>
-                    
+
                     {preview.extraCapitalNeeded != null && preview.extraCapitalNeeded > 0 && (
                       <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-border/40">
                         <span className="text-muted-foreground">{t.result.capitalRequired}</span>
@@ -276,8 +299,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
               const patch: Partial<WatchlistItem> = {
                 quantity: q,
                 averagePrice: a != null && Number.isFinite(a) ? a : null,
-                targetMonthlyIncome:
-                  g != null && Number.isFinite(g) && g > 0 ? g : null,
+                targetMonthlyIncome: g != null && Number.isFinite(g) && g > 0 ? g : null,
               };
               if (y != null && Number.isFinite(y) && y > 0 && item) {
                 patch.targetYield = y;

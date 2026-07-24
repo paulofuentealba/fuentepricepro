@@ -18,19 +18,13 @@ const BAR_TRACK = "mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-backgroun
 const BAR_ACTIVE = "bg-emerald-500";
 const BAR_REACHED = "bg-gradient-to-r from-amber-300 to-amber-500";
 
-function GoalProgressBarImpl({
-  goal,
-  quantity,
-  annualDividend,
-  currency,
-}: GoalProgressBarProps) {
+function GoalProgressBarImpl({ goal, quantity, annualDividend, currency }: GoalProgressBarProps) {
   const { t, locale } = useI18n();
 
   const progress = useMemo(() => {
     if (!(goal > 0) || !(annualDividend > 0)) return null;
     const sharesNeeded = Math.ceil((goal * 12) / annualDividend);
-    const progressPct =
-      sharesNeeded > 0 ? Math.min(100, (quantity / sharesNeeded) * 100) : 0;
+    const progressPct = sharesNeeded > 0 ? Math.min(100, (quantity / sharesNeeded) * 100) : 0;
     return {
       sharesNeeded,
       progressPct,
@@ -38,10 +32,7 @@ function GoalProgressBarImpl({
     };
   }, [goal, quantity, annualDividend]);
 
-  const fmt = useMemo(
-    () => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR"),
-    [locale],
-  );
+  const fmt = useMemo(() => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR"), [locale]);
 
   if (!progress) return null;
 

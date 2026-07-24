@@ -30,12 +30,10 @@ export function TargetYieldSlider({ value, onChange, label, className }: TargetY
           {label ?? t.form.targetYield}
           {!isPro && <Lock className="h-3 w-3 text-muted-foreground" />}
         </span>
-        <span className="font-bold text-foreground">
-          {value.toFixed(1)}%
-        </span>
+        <span className="font-bold text-foreground">{value.toFixed(1)}%</span>
       </div>
-      
-      <div 
+
+      <div
         className="relative flex items-center h-5"
         onClick={() => {
           if (!isPro) {

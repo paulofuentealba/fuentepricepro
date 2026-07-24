@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n-provider";
+import { SuccessIconBox } from "@/components/shared/SuccessIconBox";
 
 interface Props {
   onNavigateToCalculator?: () => void;
@@ -13,9 +14,7 @@ export function CashFlowEmptyState({ onNavigateToCalculator }: Props) {
   return (
     <Card className="border-dashed border-border/60 bg-card/30">
       <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success ring-1 ring-success/30">
-          <Sparkles className="h-6 w-6" />
-        </div>
+        <SuccessIconBox icon={Sparkles} size="lg" />
         <div>
           <h3 className="text-lg font-semibold text-foreground">
             {isEn

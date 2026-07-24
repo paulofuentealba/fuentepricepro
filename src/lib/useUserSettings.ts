@@ -16,7 +16,16 @@ export interface UserSettings {
 const DEFAULT_SETTINGS: UserSettings = {
   targetYield: 6,
   smartAllocationCurrency: "BRL",
-  smartAllocationTargets: { STOCK_BR: 0, STOCK_US: 0, FII: 0, REIT: 0, ETF: 0, FII_INFRA: 0, FIAGRO: 0 },
+  smartAllocationTargets: {
+    STOCK_BR: 0,
+    STOCK_US: 0,
+    FII: 0,
+    REIT: 0,
+    ETF: 0,
+    FII_INFRA: 0,
+    FIAGRO: 0,
+    FIXED_INCOME: 0,
+  },
 };
 
 // Ler do localStorage para convidados ou migração
@@ -29,17 +38,23 @@ function readLocalSettings(): UserSettings {
       const oldTargetYield = window.localStorage.getItem("global-target-yield");
       const oldCurrency = window.localStorage.getItem("smartAllocationCurrency");
       const oldTargets = window.localStorage.getItem("smart-allocation-targets");
-      
+
       const settings = {
-        targetYield: oldTargetYield ? Number(JSON.parse(oldTargetYield)) : DEFAULT_SETTINGS.targetYield,
-        smartAllocationCurrency: oldCurrency ? JSON.parse(oldCurrency) as Currency : DEFAULT_SETTINGS.smartAllocationCurrency,
-        smartAllocationTargets: oldTargets ? JSON.parse(oldTargets) : DEFAULT_SETTINGS.smartAllocationTargets,
+        targetYield: oldTargetYield
+          ? Number(JSON.parse(oldTargetYield))
+          : DEFAULT_SETTINGS.targetYield,
+        smartAllocationCurrency: oldCurrency
+          ? (JSON.parse(oldCurrency) as Currency)
+          : DEFAULT_SETTINGS.smartAllocationCurrency,
+        smartAllocationTargets: oldTargets
+          ? JSON.parse(oldTargets)
+          : DEFAULT_SETTINGS.smartAllocationTargets,
       };
       // Limpa os antigos
       window.localStorage.removeItem("global-target-yield");
       window.localStorage.removeItem("smartAllocationCurrency");
       window.localStorage.removeItem("smart-allocation-targets");
-      
+
       writeLocalSettings(settings);
       return settings;
     }
@@ -68,7 +83,7 @@ export function useUserSettings() {
         // Load from cloud
         const ref = doc(db, "users", userId);
         const snap = await getDoc(ref);
-        
+
         if (snap.exists()) {
           const data = snap.data();
           // Merge with defaults in case of missing fields
@@ -90,7 +105,7 @@ export function useUserSettings() {
   const updateMutation = useMutation({
     mutationFn: async (patch: Partial<UserSettings>) => {
       const merged = { ...settings, ...patch };
-      
+
       if (userId) {
         const ref = doc(db, "users", userId);
         await setDoc(ref, { settings: merged }, { merge: true });

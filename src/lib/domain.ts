@@ -1,14 +1,7 @@
 // Shared domain types for the asset service.
 // (Previously held mock data; now the real API service in apiService.functions.ts provides data.)
 
-export type AssetType =
-  | "STOCK_US"
-  | "STOCK_BR"
-  | "REIT"
-  | "FII"
-  | "FII_INFRA"
-  | "FIAGRO"
-  | "ETF";
+export type AssetType = "STOCK_US" | "STOCK_BR" | "REIT" | "FII" | "FII_INFRA" | "FIAGRO" | "ETF" | "FIXED_INCOME";
 
 export type Currency = "USD" | "BRL";
 

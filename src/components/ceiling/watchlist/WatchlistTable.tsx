@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,16 +25,16 @@ interface WatchlistTableProps {
 }
 
 export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const { update } = useWatchlist();
-  
+
   const [edits, setEdits] = useState<Record<string, { qty: string; avg: string }>>({});
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
       const initialEdits: Record<string, { qty: string; avg: string }> = {};
-      items.forEach(it => {
+      items.forEach((it) => {
         initialEdits[it.id] = {
           qty: String(it.quantity),
           avg: it.averagePrice ? String(it.averagePrice) : "",
@@ -40,21 +47,21 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
   const handleSave = () => {
     let updatedCount = 0;
     for (const [id, vals] of Object.entries(edits)) {
-      const it = items.find(x => x.id === id);
+      const it = items.find((x) => x.id === id);
       if (!it) continue;
-      
+
       const newQty = parseInt(vals.qty, 10);
       const qty = isNaN(newQty) || newQty < 0 ? 0 : newQty;
-      
+
       const newAvg = parseFloat(vals.avg);
       const avg = isNaN(newAvg) || newAvg <= 0 ? null : newAvg;
-      
+
       if (it.quantity !== qty || it.averagePrice !== avg) {
         update(id, { quantity: qty, averagePrice: avg });
         updatedCount++;
       }
     }
-    
+
     setIsEditing(false);
     if (updatedCount > 0) {
       toast.success(`${updatedCount} ativo(s) atualizados.`);
@@ -66,8 +73,15 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
       <div className="flex justify-end">
         {isEditing ? (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>Cancelar</Button>
-            <Button variant="default" size="sm" className="bg-success text-success-foreground hover:bg-success/90 gap-2" onClick={handleSave}>
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-success text-success-foreground hover:bg-success/90 gap-2"
+              onClick={handleSave}
+            >
               <Save className="h-4 w-4" /> Salvar Alterações
             </Button>
           </div>
@@ -77,23 +91,23 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
           </Button>
         )}
       </div>
-      
+
       <div className="rounded-md border border-border/60 bg-card/40">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ativo</TableHead>
-              <TableHead>Preço Atual</TableHead>
-              <TableHead>Preço Médio</TableHead>
-              <TableHead>Quantidade</TableHead>
-              <TableHead className="text-right">Total</TableHead>
+              <TableHead>{t.global.asset}</TableHead>
+              <TableHead>{t.global.currentPrice}</TableHead>
+              <TableHead>{t.global.averagePrice}</TableHead>
+              <TableHead>{t.global.quantity}</TableHead>
+              <TableHead className="text-right">{t.global.total}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map(it => {
+            {items.map((it) => {
               const quote = quotes[it.ticker];
               const price = quote?.price ?? it.currentPrice;
-              
+
               return (
                 <TableRow key={it.id}>
                   <TableCell>
@@ -104,13 +118,18 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input 
+                      <Input
                         className="h-8 w-24 text-sm"
-                        type="number" 
-                        step="0.01" 
+                        type="number"
+                        step="0.01"
                         min="0"
                         value={edits[it.id]?.avg ?? ""}
-                        onChange={(e) => setEdits(prev => ({...prev, [it.id]: {...prev[it.id], avg: e.target.value}}))}
+                        onChange={(e) =>
+                          setEdits((prev) => ({
+                            ...prev,
+                            [it.id]: { ...prev[it.id], avg: e.target.value },
+                          }))
+                        }
                       />
                     ) : (
                       <PriceTag value={it.averagePrice} currency={it.currency} />
@@ -118,20 +137,28 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
                   </TableCell>
                   <TableCell>
                     {isEditing ? (
-                      <Input 
+                      <Input
                         className="h-8 w-20 text-sm"
-                        type="number" 
-                        step="1" 
+                        type="number"
+                        step="1"
                         min="0"
                         value={edits[it.id]?.qty ?? ""}
-                        onChange={(e) => setEdits(prev => ({...prev, [it.id]: {...prev[it.id], qty: e.target.value}}))}
+                        onChange={(e) =>
+                          setEdits((prev) => ({
+                            ...prev,
+                            [it.id]: { ...prev[it.id], qty: e.target.value },
+                          }))
+                        }
                       />
                     ) : (
                       it.quantity
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <PriceTag value={price !== null ? price * it.quantity : null} currency={it.currency} />
+                    <PriceTag
+                      value={price !== null ? price * it.quantity : null}
+                      currency={it.currency}
+                    />
                   </TableCell>
                 </TableRow>
               );

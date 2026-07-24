@@ -1,5 +1,14 @@
 import { useMemo } from "react";
-import { Bar, ComposedChart, Cell, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  ComposedChart,
+  Cell,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import type { Asset } from "@/lib/domain";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatCurrency, type Locale } from "@/lib/i18n";
@@ -30,12 +39,13 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
   return (
     <div className="rounded-xl border border-border/50 bg-background/30 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-          {title}
-        </span>
+        <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{title}</span>
       </div>
       <div className="h-36 w-full">
-        <ChartContainer config={{ amount: { color: "var(--success)" }, yoy: { color: "var(--warning)" } }} className="h-full w-full">
+        <ChartContainer
+          config={{ amount: { color: "var(--success)" }, yoy: { color: "var(--warning)" } }}
+          className="h-full w-full"
+        >
           <ComposedChart data={chartData} margin={{ top: 12, right: 4, left: 4, bottom: 0 }}>
             <defs>
               <ChartGlowDef />
@@ -46,16 +56,23 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
               tickLine={false}
               tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
             />
-            <YAxis yAxisId="left" hide domain={[0, 'dataMax']} />
-            <YAxis yAxisId="right" hide orientation="right" domain={['dataMin - 10', 'dataMax + 10']} />
+            <YAxis yAxisId="left" hide domain={[0, "dataMax"]} />
+            <YAxis
+              yAxisId="right"
+              hide
+              orientation="right"
+              domain={["dataMin - 10", "dataMax + 10"]}
+            />
             <ChartTooltip
               cursor={{ fill: "rgba(148,163,184,0.12)" }}
-              content={<ChartTooltipContent 
-                formatter={(v: any, name: any) => {
-                  if (name === "yoy") return [`${v.toFixed(1)}%`, t.result.yoyGrowth];
-                  return [formatCurrency(v, currency, locale), t.result.dividends];
-                }} 
-              />}
+              content={
+                <ChartTooltipContent
+                  formatter={(v: any, name: any) => {
+                    if (name === "yoy") return [`${v.toFixed(1)}%`, t.result.yoyGrowth];
+                    return [formatCurrency(v, currency, locale), t.result.dividends];
+                  }}
+                />
+              }
             />
             <Bar yAxisId="left" dataKey="amount" radius={[6, 6, 0, 0]} maxBarSize={44}>
               {chartData.map((d) => (

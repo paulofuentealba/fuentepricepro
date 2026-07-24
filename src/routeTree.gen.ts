@@ -10,14 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PrototypeRouteImport } from './routes/prototype'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
+import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
+import { Route as AppSmartallocationRouteImport } from './routes/app/smartallocation'
+import { Route as AppScreenerRouteImport } from './routes/app/screener'
+import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
+import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
+import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrototypeRoute = PrototypeRouteImport.update({
+  id: '/prototype',
+  path: '/prototype',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -35,53 +54,152 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   id: '/guides/dividend-valuation',
   path: '/guides/dividend-valuation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSnowballeffectsimulatorRoute =
+  AppSnowballeffectsimulatorRouteImport.update({
+    id: '/snowballeffectsimulator',
+    path: '/snowballeffectsimulator',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppSmartallocationRoute = AppSmartallocationRouteImport.update({
+  id: '/smartallocation',
+  path: '/smartallocation',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppScreenerRoute = AppScreenerRouteImport.update({
+  id: '/screener',
+  path: '/screener',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyportfolioRoute = AppMyportfolioRouteImport.update({
+  id: '/myportfolio',
+  path: '/myportfolio',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
+  id: '/globalradar',
+  path: '/globalradar',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCashflowRoute = AppCashflowRouteImport.update({
+  id: '/cashflow',
+  path: '/cashflow',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/prototype': typeof PrototypeRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app/cashflow': typeof AppCashflowRoute
+  '/app/globalradar': typeof AppGlobalradarRoute
+  '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/screener': typeof AppScreenerRoute
+  '/app/smartallocation': typeof AppSmartallocationRoute
+  '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/prototype': typeof PrototypeRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app/cashflow': typeof AppCashflowRoute
+  '/app/globalradar': typeof AppGlobalradarRoute
+  '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/screener': typeof AppScreenerRoute
+  '/app/smartallocation': typeof AppSmartallocationRoute
+  '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/prototype': typeof PrototypeRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app/cashflow': typeof AppCashflowRoute
+  '/app/globalradar': typeof AppGlobalradarRoute
+  '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/screener': typeof AppScreenerRoute
+  '/app/smartallocation': typeof AppSmartallocationRoute
+  '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/app' | '/auth' | '/sitemap.xml' | '/guides/dividend-valuation'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/prototype'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/app/cashflow'
+    | '/app/globalradar'
+    | '/app/myportfolio'
+    | '/app/screener'
+    | '/app/smartallocation'
+    | '/app/snowballeffectsimulator'
+    | '/guides/dividend-valuation'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/auth' | '/sitemap.xml' | '/guides/dividend-valuation'
+  to:
+    | '/'
+    | '/auth'
+    | '/prototype'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/app/cashflow'
+    | '/app/globalradar'
+    | '/app/myportfolio'
+    | '/app/screener'
+    | '/app/smartallocation'
+    | '/app/snowballeffectsimulator'
+    | '/guides/dividend-valuation'
+    | '/app'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/auth'
+    | '/prototype'
+    | '/settings'
     | '/sitemap.xml'
+    | '/app/cashflow'
+    | '/app/globalradar'
+    | '/app/myportfolio'
+    | '/app/screener'
+    | '/app/smartallocation'
+    | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PrototypeRoute: typeof PrototypeRoute
+  SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
 }
@@ -93,6 +211,20 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prototype': {
+      id: '/prototype'
+      path: '/prototype'
+      fullPath: '/prototype'
+      preLoaderRoute: typeof PrototypeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -116,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
       path: '/guides/dividend-valuation'
@@ -123,13 +262,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesDividendValuationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/snowballeffectsimulator': {
+      id: '/app/snowballeffectsimulator'
+      path: '/snowballeffectsimulator'
+      fullPath: '/app/snowballeffectsimulator'
+      preLoaderRoute: typeof AppSnowballeffectsimulatorRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/smartallocation': {
+      id: '/app/smartallocation'
+      path: '/smartallocation'
+      fullPath: '/app/smartallocation'
+      preLoaderRoute: typeof AppSmartallocationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/screener': {
+      id: '/app/screener'
+      path: '/screener'
+      fullPath: '/app/screener'
+      preLoaderRoute: typeof AppScreenerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/myportfolio': {
+      id: '/app/myportfolio'
+      path: '/myportfolio'
+      fullPath: '/app/myportfolio'
+      preLoaderRoute: typeof AppMyportfolioRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/globalradar': {
+      id: '/app/globalradar'
+      path: '/globalradar'
+      fullPath: '/app/globalradar'
+      preLoaderRoute: typeof AppGlobalradarRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/cashflow': {
+      id: '/app/cashflow'
+      path: '/cashflow'
+      fullPath: '/app/cashflow'
+      preLoaderRoute: typeof AppCashflowRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCashflowRoute: typeof AppCashflowRoute
+  AppGlobalradarRoute: typeof AppGlobalradarRoute
+  AppMyportfolioRoute: typeof AppMyportfolioRoute
+  AppScreenerRoute: typeof AppScreenerRoute
+  AppSmartallocationRoute: typeof AppSmartallocationRoute
+  AppSnowballeffectsimulatorRoute: typeof AppSnowballeffectsimulatorRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCashflowRoute: AppCashflowRoute,
+  AppGlobalradarRoute: AppGlobalradarRoute,
+  AppMyportfolioRoute: AppMyportfolioRoute,
+  AppScreenerRoute: AppScreenerRoute,
+  AppSmartallocationRoute: AppSmartallocationRoute,
+  AppSnowballeffectsimulatorRoute: AppSnowballeffectsimulatorRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  PrototypeRoute: PrototypeRoute,
+  SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   GuidesDividendValuationRoute: GuidesDividendValuationRoute,
 }

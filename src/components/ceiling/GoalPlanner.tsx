@@ -44,8 +44,7 @@ function GoalPlannerImpl({ annualDividend, currentPrice, currency }: GoalPlanner
   }, [income, annualDividend, currentPrice]);
 
   const sharesLabel = useMemo(
-    () =>
-      new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR").format(sharesNeeded),
+    () => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR").format(sharesNeeded),
     [sharesNeeded, locale],
   );
 
@@ -66,9 +65,7 @@ function GoalPlannerImpl({ annualDividend, currentPrice, currency }: GoalPlanner
     <div className={CARD_BASE}>
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" />
-        <span className="text-sm font-semibold text-foreground">
-          {t.result.goalPlannerTitle}
-        </span>
+        <span className="text-sm font-semibold text-foreground">{t.result.goalPlannerTitle}</span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">{t.result.goalPlannerSubtitle}</p>
 

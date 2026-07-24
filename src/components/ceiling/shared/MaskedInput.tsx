@@ -3,7 +3,10 @@ import { NumericFormat, type NumericFormatProps } from "react-number-format";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n-provider";
 
-export interface MaskedInputProps extends Omit<NumericFormatProps, "customInput" | "onChange" | "value"> {
+export interface MaskedInputProps extends Omit<
+  NumericFormatProps,
+  "customInput" | "onChange" | "value"
+> {
   value?: number | null;
   onChangeValue?: (value: number | undefined) => void;
   formatMode?: "currency" | "percentage" | "numeric";
@@ -11,17 +14,7 @@ export interface MaskedInputProps extends Omit<NumericFormatProps, "customInput"
 }
 
 export const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  (
-    { 
-      value, 
-      onChangeValue, 
-      formatMode = "numeric", 
-      currencySymbol, 
-      className, 
-      ...props 
-    }, 
-    ref
-  ) => {
+  ({ value, onChangeValue, formatMode = "numeric", currencySymbol, className, ...props }, ref) => {
     const { locale } = useI18n();
 
     // Determine separators based on locale
@@ -60,6 +53,6 @@ export const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
         // We do not use valueIsNumericString because we are passing an actual number
       />
     );
-  }
+  },
 );
 MaskedInput.displayName = "MaskedInput";

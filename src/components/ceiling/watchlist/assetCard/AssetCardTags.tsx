@@ -11,7 +11,9 @@ interface Props {
 
 export function AssetCardTags({ meta }: Props) {
   const { t, locale } = useI18n();
-  const exDateFormatted = meta?.exDividendDate ? formatExDate(meta.exDividendDate, locale as any) : null;
+  const exDateFormatted = meta?.exDividendDate
+    ? formatExDate(meta.exDividendDate, locale as any)
+    : null;
   const cagr = meta?.dividendCagr5y ?? null;
   const cagrNegative = cagr != null && cagr < 0;
 

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { assetQueryOptions } from "@/lib/queryOptions";
-import { avgDividend, ceilingPrice, safetyMargin } from "@/lib/calc";
+import { avgDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
 import { buildWatchlistCsv, downloadCsv, parseWatchlistCsv } from "@/lib/csv";
 import { makeId, type WatchlistItem } from "@/lib/watchlist";
 
@@ -14,7 +14,6 @@ interface Props {
 }
 
 const DEFAULT_TARGET_YIELD = 6;
-
 
 export function WatchlistIO({ items, onImport }: Props) {
   const queryClient = useQueryClient();
@@ -36,7 +35,6 @@ export function WatchlistIO({ items, onImport }: Props) {
       toast.error("Export failed. Please try again.");
     }
   }, [items]);
-
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -63,7 +61,7 @@ export function WatchlistIO({ items, onImport }: Props) {
             const target = existing?.targetYield ?? DEFAULT_TARGET_YIELD;
             const ceiling = ceilingPrice(annual, target);
             const margin = safetyMargin(ceiling, asset.currentPrice);
-            const qty = row.quantity > 0 ? row.quantity : existing?.quantity ?? 0;
+            const qty = row.quantity > 0 ? row.quantity : (existing?.quantity ?? 0);
             if (qty <= 0) {
               failed++;
               continue;
@@ -81,7 +79,7 @@ export function WatchlistIO({ items, onImport }: Props) {
               safetyMargin: margin,
               quantity: qty,
               averagePrice:
-                row.averagePrice != null ? row.averagePrice : existing?.averagePrice ?? null,
+                row.averagePrice != null ? row.averagePrice : (existing?.averagePrice ?? null),
               payoutRatio: existing?.payoutRatio ?? null,
               customTaxRate: existing?.customTaxRate ?? null,
               sector: existing?.sector ?? null,

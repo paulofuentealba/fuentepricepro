@@ -9,13 +9,11 @@ interface SummaryCardProps {
 
 function SummaryCardImpl({ flag, label, value }: SummaryCardProps) {
   return (
-    <Card className="border-border/60 bg-card/60">
+    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-lg">
       <CardContent className="flex items-center gap-3 py-4">
         <div className="text-2xl leading-none">{flag}</div>
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            {label}
-          </div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
           <div className="mt-0.5 truncate text-lg font-bold tabular-nums text-foreground">
             {value}
           </div>

@@ -38,9 +38,9 @@ export function CashFlowHeader({
         </button>
         {availableCurrencies.length > 0 && (
           <div className="block">
-            <CurrencyToggle 
-              value={activeCurrency === "USD" ? "US" : "BR"} 
-              onChange={(v) => onCurrencyChange(v === "US" ? "USD" : "BRL")} 
+            <CurrencyToggle
+              value={activeCurrency === "USD" ? "US" : "BR"}
+              onChange={(v) => onCurrencyChange(v === "US" ? "USD" : "BRL")}
             />
           </div>
         )}

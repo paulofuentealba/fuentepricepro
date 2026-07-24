@@ -49,4 +49,3 @@ function FilterPillImpl({ active, onClick, tone, count, children }: FilterPillPr
 }
 
 export const FilterPill = memo(FilterPillImpl);
-

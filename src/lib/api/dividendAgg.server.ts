@@ -34,9 +34,7 @@ export function dividendCagrPct(history: { year: number; amount: number }[]): nu
 }
 
 /** Extract unique months (1-12) an asset historically paid dividends in the last ~48 months. */
-export function paymentMonthsFromDates(
-  dates: (string | number | null | undefined)[],
-): number[] {
+export function paymentMonthsFromDates(dates: (string | number | null | undefined)[]): number[] {
   const cutoff = Date.now() - 48 * 30 * 24 * 60 * 60 * 1000; // ~48 months
   const set = new Set<number>();
   for (const d of dates) {

@@ -3,7 +3,7 @@
 
 export function reportGoogleError(error: unknown, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
-  
+
   console.error("[Google Error Reporter]", error, context);
 
   // Example integration with Google Analytics (gtag.js):

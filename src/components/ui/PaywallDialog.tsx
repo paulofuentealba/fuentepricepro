@@ -29,10 +29,11 @@ export function PaywallDialog({ open, onOpenChange, title, description }: Props)
             {title || "Unlock Pro Features"}
           </DialogTitle>
           <DialogDescription className="text-center pt-2">
-            {description || "Upgrade to Fuente Price Pro to unlock advanced tools, unlimited assets, and deep portfolio analytics."}
+            {description ||
+              "Upgrade to Fuente Price Pro to unlock advanced tools, unlimited assets, and deep portfolio analytics."}
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="my-6 space-y-3 px-2">
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">

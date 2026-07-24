@@ -27,7 +27,11 @@ export async function getYahooAuth(): Promise<{ crumb: string; cookie: string } 
     const fresh = g.__yahooAuth;
     if (fresh && fresh.expiresAt > Date.now()) return fresh;
     try {
-      const r = await fetchWithTimeout("https://fc.yahoo.com", { headers: { "User-Agent": UA } }, 2000);
+      const r = await fetchWithTimeout(
+        "https://fc.yahoo.com",
+        { headers: { "User-Agent": UA } },
+        2000,
+      );
       const setCookie = r.headers.get("set-cookie") || "";
       const cookie = setCookie
         .split(",")
@@ -35,9 +39,13 @@ export async function getYahooAuth(): Promise<{ crumb: string; cookie: string } 
         .filter(Boolean)
         .join("; ");
       if (!cookie) return null;
-      const cr = await fetchWithTimeout("https://query1.finance.yahoo.com/v1/test/getcrumb", {
-        headers: { "User-Agent": UA, Cookie: cookie },
-      }, 2000);
+      const cr = await fetchWithTimeout(
+        "https://query1.finance.yahoo.com/v1/test/getcrumb",
+        {
+          headers: { "User-Agent": UA, Cookie: cookie },
+        },
+        2000,
+      );
       if (!cr.ok) return null;
       const crumb = (await cr.text()).trim();
       if (!crumb) return null;
@@ -59,7 +67,11 @@ export async function fetchYahooQuoteSummary(ticker: string): Promise<QuoteSumma
   const modules = "summaryDetail,defaultKeyStatistics,financialData,assetProfile,fundProfile";
   const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}&crumb=${encodeURIComponent(auth.crumb)}`;
   try {
-    const r = await fetchWithTimeout(url, { headers: { "User-Agent": UA, Cookie: auth.cookie } }, 2000);
+    const r = await fetchWithTimeout(
+      url,
+      { headers: { "User-Agent": UA, Cookie: auth.cookie } },
+      2000,
+    );
     if (!r.ok) {
       if (r.status === 401) invalidateYahooAuth();
       return null;
@@ -83,7 +95,12 @@ export async function fetchYahooQuoteSummary(ticker: string): Promise<QuoteSumma
       marketCap: num(sd.marketCap),
       exDividendDate: num(sd.exDividendDate),
       payoutRatio: num(sd.payoutRatio),
-      sector: typeof ap.sector === "string" ? ap.sector : typeof fp.categoryName === "string" ? fp.categoryName : null,
+      sector:
+        typeof ap.sector === "string"
+          ? ap.sector
+          : typeof fp.categoryName === "string"
+            ? fp.categoryName
+            : null,
     };
   } catch {
     return null;
@@ -93,68 +110,75 @@ export async function fetchYahooQuoteSummary(ticker: string): Promise<QuoteSumma
 export async function fetchFromYahoo(ticker: string): Promise<ApiAsset | null> {
   const t = ticker.toUpperCase();
   return dedupeInFlight(`yahoo:asset:${t}`, async () => {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(t)}?range=5y&interval=1mo&events=div`;
-  const r = await fetchWithRetry(url, { headers: { "User-Agent": UA } }, { timeoutMs: 2500, retries: 0 });
-  if (!r.ok) return null;
-  const json = await r.json();
-  const res = json?.chart?.result?.[0];
-  if (!res?.meta?.regularMarketPrice) return null;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(t)}?range=5y&interval=1mo&events=div`;
+    const r = await fetchWithRetry(
+      url,
+      { headers: { "User-Agent": UA } },
+      { timeoutMs: 2500, retries: 0 },
+    );
+    if (!r.ok) return null;
+    const json = await r.json();
+    const res = json?.chart?.result?.[0];
+    if (!res?.meta?.regularMarketPrice) return null;
 
-  const divsObj = (res.events?.dividends ?? {}) as Record<string, { amount: number; date: number }>;
-  const yearMap = sumByYear(
-    Object.values(divsObj).map((d) => ({
-      year: new Date(d.date * 1000).getUTCFullYear(),
-      amount: Number(d.amount) || 0,
-    })),
-  );
+    const divsObj = (res.events?.dividends ?? {}) as Record<
+      string,
+      { amount: number; date: number }
+    >;
+    const yearMap = sumByYear(
+      Object.values(divsObj).map((d) => ({
+        year: new Date(d.date * 1000).getUTCFullYear(),
+        amount: Number(d.amount) || 0,
+      })),
+    );
 
-  const type = classifyYahoo({
-    symbol: t,
-    quoteType: res.meta.instrumentType,
-    longname: res.meta.longName,
-    shortname: res.meta.shortName,
-  });
+    const type = classifyYahoo({
+      symbol: t,
+      quoteType: res.meta.instrumentType,
+      longname: res.meta.longName,
+      shortname: res.meta.shortName,
+    });
 
-  // Best-effort fundamentals via authenticated quoteSummary
-  const qs = await fetchYahooQuoteSummary(t);
+    // Best-effort fundamentals via authenticated quoteSummary
+    const qs = await fetchYahooQuoteSummary(t);
 
-  const exIso =
-    qs?.exDividendDate && qs.exDividendDate * 1000 > Date.now()
-      ? new Date(qs.exDividendDate * 1000).toISOString()
-      : null;
+    const exIso =
+      qs?.exDividendDate && qs.exDividendDate * 1000 > Date.now()
+        ? new Date(qs.exDividendDate * 1000).toISOString()
+        : null;
 
-  const dividendHistory = historyFromMap(yearMap, 5);
-  const cagr = dividendCagrPct(dividendHistory);
-  const paymentMonths = paymentMonthsFromDates(Object.values(divsObj).map((d) => d.date));
+    const dividendHistory = historyFromMap(yearMap, 5);
+    const cagr = dividendCagrPct(dividendHistory);
+    const paymentMonths = paymentMonthsFromDates(Object.values(divsObj).map((d) => d.date));
 
-  return {
-    ticker: t,
-    name: res.meta.longName || res.meta.shortName || t,
-    type,
-    currency: (res.meta.currency as Currency) || "USD",
-    currentPrice: Number(res.meta.regularMarketPrice),
-    dividends3y: pickLast3(yearMap),
-    dividendHistory,
-    exDividendDate: exIso,
-    epsCurrent: qs?.trailingEps ?? null,
-    epsNext: qs?.forwardEps ?? null,
-    paymentMonths,
-    sector: qs?.sector ?? null,
-    metrics: {
-      peRatio: qs?.trailingPE ?? qs?.forwardPE ?? null,
-      pbRatio: qs?.priceToBook ?? null,
-      eps: qs?.trailingEps ?? null,
-      roe: qs?.returnOnEquity != null ? qs.returnOnEquity * 100 : null,
-      currentDy: qs?.dividendYield != null ? qs.dividendYield * 100 : null,
-      capRate: null,
-      vacancy: null,
-      expenseRatio: null,
-      aum: qs?.marketCap != null ? qs.marketCap / 1_000_000 : null,
-      trackingError: null,
-      payoutRatio: qs?.payoutRatio != null ? qs.payoutRatio * 100 : null,
-      dividendCagr5y: cagr,
-    },
-  };
+    return {
+      ticker: t,
+      name: res.meta.longName || res.meta.shortName || t,
+      type,
+      currency: (res.meta.currency as Currency) || "USD",
+      currentPrice: Number(res.meta.regularMarketPrice),
+      dividends3y: pickLast3(yearMap),
+      dividendHistory,
+      exDividendDate: exIso,
+      epsCurrent: qs?.trailingEps ?? null,
+      epsNext: qs?.forwardEps ?? null,
+      paymentMonths,
+      sector: qs?.sector ?? null,
+      metrics: {
+        peRatio: qs?.trailingPE ?? qs?.forwardPE ?? null,
+        pbRatio: qs?.priceToBook ?? null,
+        eps: qs?.trailingEps ?? null,
+        roe: qs?.returnOnEquity != null ? qs.returnOnEquity * 100 : null,
+        currentDy: qs?.dividendYield != null ? qs.dividendYield * 100 : null,
+        capRate: null,
+        vacancy: null,
+        expenseRatio: null,
+        aum: qs?.marketCap != null ? qs.marketCap / 1_000_000 : null,
+        trackingError: null,
+        payoutRatio: qs?.payoutRatio != null ? qs.payoutRatio * 100 : null,
+        dividendCagr5y: cagr,
+      },
+    };
   });
 }
 
@@ -162,15 +186,18 @@ export async function fetchYahooQuote(ticker: string): Promise<LiveQuote | null>
   return dedupeInFlight(`yahoo:quote:${ticker}`, async () => {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=5d&interval=1d`;
     try {
-      const r = await fetchWithRetry(url, { headers: { "User-Agent": UA } }, { timeoutMs: 2500, retries: 0 });
+      const r = await fetchWithRetry(
+        url,
+        { headers: { "User-Agent": UA } },
+        { timeoutMs: 2500, retries: 0 },
+      );
       if (!r.ok) return null;
       const json = await r.json();
       const meta = json?.chart?.result?.[0]?.meta;
       if (!meta?.regularMarketPrice) return null;
       const price = Number(meta.regularMarketPrice);
       const prev = Number(meta.chartPreviousClose ?? meta.previousClose);
-      const changePct =
-        Number.isFinite(prev) && prev > 0 ? ((price - prev) / prev) * 100 : null;
+      const changePct = Number.isFinite(prev) && prev > 0 ? ((price - prev) / prev) * 100 : null;
       return { ticker, price, changePct };
     } catch {
       return null;

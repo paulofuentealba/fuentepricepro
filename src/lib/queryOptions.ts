@@ -3,6 +3,8 @@ import {
   fetchAssetFn,
   fetchQuoteFn,
   searchAssetsFn,
+  fetchExchangeRatesFn,
+  fetchMacroRatesFn,
   type LiveQuote,
   type SearchHit,
 } from "./apiService.functions";
@@ -19,8 +21,7 @@ export function assetQueryOptions(ticker: string) {
   const key = ticker.toUpperCase();
   return queryOptions({
     queryKey: ["asset", key] as const,
-    queryFn: ({ signal }): Promise<Asset> =>
-      fetchAssetFn({ data: { ticker: key }, signal }),
+    queryFn: ({ signal }): Promise<Asset> => fetchAssetFn({ data: { ticker: key }, signal }),
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
   });
@@ -46,5 +47,25 @@ export function searchQueryOptions(query: string) {
     staleTime: 5 * 60_000,
     gcTime: 10 * 60_000,
     enabled: normalized.length > 0,
+  });
+}
+
+export function exchangeRateQueryOptions() {
+  return queryOptions({
+    queryKey: ["exchangeRate", "USDBRL"] as const,
+    queryFn: ({ signal }): Promise<{ USDBRL: number }> =>
+      fetchExchangeRatesFn({ signal }),
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+  });
+}
+
+export function macroRatesQueryOptions() {
+  return queryOptions({
+    queryKey: ["macroRates"] as const,
+    queryFn: ({ signal }): Promise<{ cdi: number; ipca: number }> =>
+      fetchMacroRatesFn({ signal }),
+    staleTime: 86_400_000, // 24 hours
+    gcTime: 172_800_000, // 48 hours
   });
 }

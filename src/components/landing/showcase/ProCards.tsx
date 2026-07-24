@@ -1,11 +1,4 @@
-import {
-  ArrowUpRight,
-  CalendarClock,
-  Sparkles,
-  Target,
-  TrendingUp,
-  Wallet,
-} from "lucide-react";
+import { ArrowUpRight, CalendarClock, Sparkles, Target, TrendingUp, Wallet } from "lucide-react";
 import { cleanTicker } from "./cards";
 
 function ProBadge() {

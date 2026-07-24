@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { CalendarClock, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
+import { displayTicker } from "@/lib/i18n";
 import { formatCurrency, type Locale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { CashFlowSummary } from "@/lib/cashflow";
@@ -47,7 +48,7 @@ export function CashFlowSummaryCards({
         label={isEn ? "Top Payer" : "Maior Pagador"}
         value={
           summary.top
-            ? `${summary.top.ticker.replace(/\.SA$/i, "")} · ${formatCurrency(summary.top.amount, activeCurrency, locale)}`
+            ? `${displayTicker(summary.top.ticker)} · ${formatCurrency(summary.top.amount, activeCurrency, locale)}`
             : "—"
         }
         icon={<TrendingUp className="h-3.5 w-3.5 text-success/70" />}
@@ -70,7 +71,7 @@ function SummaryStatCard({
   icon?: ReactNode;
 }) {
   return (
-    <Card className="border-border/60 bg-card/60">
+    <Card className="border border-border/50 bg-background/60 backdrop-blur-md">
       <CardContent className="p-4">
         <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           {icon}

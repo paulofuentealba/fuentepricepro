@@ -1,10 +1,4 @@
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  CalendarClock,
-  Shield,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CalendarClock, Shield, TrendingUp, Calculator } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -19,15 +13,7 @@ import { TargetYieldSlider } from "../../ui/TargetYieldSlider";
 import { MaskedInput } from "../shared/MaskedInput";
 import { Label } from "@/components/ui/label";
 
-function Stat({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-}) {
+function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-border/60 bg-background/40 p-3">
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
@@ -122,11 +108,11 @@ export function ResultStats({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-border/60 bg-background/40 p-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
               {t.result.avgDividendLabel} ({timeframe}Y)
             </div>
-            <div className="inline-flex overflow-hidden rounded-md border border-border/60 bg-background/60">
+            <div className="inline-flex items-center gap-0.5 p-0.5 rounded-md bg-[#1a1a24] border border-white/5">
               {TIMEFRAMES.map((n) => {
                 const enabled = availableTimeframes.includes(n);
                 const active = timeframe === n;
@@ -137,11 +123,11 @@ export function ResultStats({
                     disabled={!enabled}
                     onClick={() => enabled && onTimeframeChange(n)}
                     className={
-                      "px-2 py-0.5 text-[10px] font-semibold tabular-nums transition-colors " +
+                      "px-2.5 py-1 text-[10px] rounded-[4px] font-bold tabular-nums transition-all " +
                       (active
-                        ? "bg-foreground/10 text-foreground"
-                        : "text-muted-foreground hover:text-foreground") +
-                      (!enabled ? " opacity-40 cursor-not-allowed" : "")
+                        ? "bg-indigo-600/80 text-white shadow-sm"
+                        : "text-muted-foreground hover:bg-white/5 hover:text-foreground") +
+                      (!enabled ? " opacity-30 cursor-not-allowed" : "")
                     }
                     aria-pressed={active}
                   >
@@ -172,25 +158,25 @@ export function ResultStats({
         <Stat
           label={t.result.epsNext}
           value={
-            asset.epsNext == null
-              ? "N/A"
-              : formatCurrency(asset.epsNext, asset.currency, locale)
+            asset.epsNext == null ? "N/A" : formatCurrency(asset.epsNext, asset.currency, locale)
           }
         />
       </div>
 
       <div className="rounded-xl border border-border/60 bg-card/60 p-5 space-y-6 mt-2 shadow-sm">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Playground</h3>
+        <div>
+          <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <Calculator className="h-4 w-4 text-success" />
+            {t.form.calculatorTitle ?? "Playground"}
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t.form.calculatorDesc ?? "Ajuste o yield desejado para simular um novo Preço Teto."}
+          </p>
         </div>
-        
+
         <div className="grid gap-8 sm:grid-cols-2">
           <div className="space-y-4">
-            <TargetYieldSlider 
-              value={targetYield} 
-              onChange={onTargetYieldChange} 
-            />
+            <TargetYieldSlider value={targetYield} onChange={onTargetYieldChange} />
             <p className="text-[11px] text-muted-foreground">{t.form.targetYieldHint}</p>
           </div>
 
@@ -204,6 +190,7 @@ export function ResultStats({
             <MaskedInput
               id="avgPrice"
               formatMode="currency"
+              currencySymbol={asset.currency === "USD" ? "US$" : "R$"}
               placeholder="—"
               value={averagePrice}
               onChangeValue={(v) => {
@@ -216,8 +203,8 @@ export function ResultStats({
             <p className="text-[11px] text-muted-foreground">{t.form.avgPriceHint}</p>
           </div>
         </div>
-        
-        <details 
+
+        <details
           className="group space-y-4 rounded-lg border border-border/50 bg-background/30 p-4 [&_summary::-webkit-details-marker]:hidden"
           onClick={(e) => {
             if (!isPro) {
@@ -227,13 +214,35 @@ export function ResultStats({
           }}
         >
           <summary className="flex cursor-pointer items-center justify-between font-medium">
-            <span className="text-xs text-muted-foreground">{t.form.taxExceptions} {!isPro && <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500 uppercase tracking-wider">{t.form.taxExceptionsPro}</span>}</span>
+            <span className="text-xs text-muted-foreground">
+              {t.form.taxExceptions}{" "}
+              {!isPro && (
+                <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500 uppercase tracking-wider">
+                  {t.form.taxExceptionsPro}
+                </span>
+              )}
+            </span>
             <span className="text-muted-foreground transition duration-300 group-open:-rotate-180">
-              <svg fill="none" height="16" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="16"><path d="M6 9l6 6 6-6"></path></svg>
+              <svg
+                fill="none"
+                height="16"
+                shapeRendering="geometricPrecision"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                viewBox="0 0 24 24"
+                width="16"
+              >
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
             </span>
           </summary>
           <div className="pt-2">
-            <p className="mb-4 text-[11px] text-muted-foreground border-l-2 border-primary/50 pl-2" dangerouslySetInnerHTML={{ __html: t.form.taxExceptionsBody }} />
+            <p
+              className="mb-4 text-[11px] text-muted-foreground border-l-2 border-primary/50 pl-2"
+              dangerouslySetInnerHTML={{ __html: t.form.taxExceptionsBody }}
+            />
             <div className="space-y-2">
               <Label
                 htmlFor="taxRate"
@@ -252,7 +261,7 @@ export function ResultStats({
                   onChangeValue={(v) => {
                     const str = v === undefined ? "" : String(v);
                     const tx = str !== "" ? parseFloat(str) : null;
-                    const tax = (isPro && tx !== null && tx >= 0 && tx <= 100) ? tx : null;
+                    const tax = isPro && tx !== null && tx >= 0 && tx <= 100 ? tx : null;
                     onCustomTaxRateChange(tax);
                   }}
                   className="h-10 pr-8 bg-background/50"
@@ -287,16 +296,10 @@ export function ResultStats({
         <div
           className={
             "rounded-xl border p-4 " +
-            (positive
-              ? "border-success/30 bg-success/10"
-              : "border-danger/30 bg-danger/10")
+            (positive ? "border-success/30 bg-success/10" : "border-danger/30 bg-danger/10")
           }
         >
-          <div
-            className={
-              "flex items-center gap-2 " + (positive ? "text-success" : "text-danger")
-            }
-          >
+          <div className={"flex items-center gap-2 " + (positive ? "text-success" : "text-danger")}>
             <Shield className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">
               {t.result.safetyMargin}

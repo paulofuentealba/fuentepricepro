@@ -12,7 +12,10 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
   return (
     <div
-      className={cn("inline-flex items-center gap-1 rounded-full border border-border bg-card p-1", className)}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border border-border bg-card p-1",
+        className,
+      )}
       role="group"
       aria-label={t.languageLabel}
     >

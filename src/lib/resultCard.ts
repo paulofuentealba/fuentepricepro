@@ -1,5 +1,5 @@
 import type { Asset } from "@/lib/domain";
-import { avgDividend } from "@/lib/calc";
+import { avgDividend } from "@/lib/calculations";
 import { formatCurrency, formatPercent, type Locale } from "@/lib/i18n";
 
 export type Timeframe = 1 | 3 | 5;

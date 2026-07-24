@@ -110,32 +110,28 @@ function GuidePage() {
             How to calculate the ceiling price of a dividend stock
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            The <strong>Bazin method</strong> is one of the simplest and most
-            widely used dividend valuation frameworks. It answers a single
-            question: <em>what is the highest price I can pay for this stock
-            and still earn the yield I want?</em> This guide walks through the
-            dividend yield formula, the Bazin ceiling price formula, worked
-            examples, and the edge cases that trip investors up.
+            The <strong>Bazin method</strong> is one of the simplest and most widely used dividend
+            valuation frameworks. It answers a single question:{" "}
+            <em>
+              what is the highest price I can pay for this stock and still earn the yield I want?
+            </em>{" "}
+            This guide walks through the dividend yield formula, the Bazin ceiling price formula,
+            worked examples, and the edge cases that trip investors up.
           </p>
 
           <section className="mt-10">
-            <h2 className="text-2xl font-semibold text-foreground">
-              The dividend yield formula
-            </h2>
+            <h2 className="text-2xl font-semibold text-foreground">The dividend yield formula</h2>
             <p className="mt-3 text-muted-foreground">
-              Dividend yield measures the annual cash return a stock pays
-              relative to its price:
+              Dividend yield measures the annual cash return a stock pays relative to its price:
             </p>
             <div className="mt-4 rounded-lg border border-border/60 bg-card/60 p-4 font-mono text-sm text-foreground">
-              Dividend Yield = (Annual Dividend per Share ÷ Current Share
-              Price) × 100
+              Dividend Yield = (Annual Dividend per Share ÷ Current Share Price) × 100
             </div>
             <p className="mt-3 text-muted-foreground">
-              If a stock trades at $50 and paid $2.50 in dividends over the
-              last 12 months, its dividend yield is 5%. Yield changes every
-              time the price moves — which is why long-term investors track
-              <em> yield on cost</em> (dividend ÷ your purchase price)
-              separately.
+              If a stock trades at $50 and paid $2.50 in dividends over the last 12 months, its
+              dividend yield is 5%. Yield changes every time the price moves — which is why
+              long-term investors track
+              <em> yield on cost</em> (dividend ÷ your purchase price) separately.
             </p>
           </section>
 
@@ -144,75 +140,63 @@ function GuidePage() {
               The Bazin ceiling price formula
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Décio Bazin flipped the yield equation. Instead of asking
-              "what yield does today's price give me?", he asked "what price
-              gives me the yield I require?":
+              Décio Bazin flipped the yield equation. Instead of asking "what yield does today's
+              price give me?", he asked "what price gives me the yield I require?":
             </p>
             <div className="mt-4 rounded-lg border border-success/40 bg-success/10 p-4 font-mono text-sm text-foreground">
-              Ceiling Price = Average Annual Dividend (last 5 years) ÷
-              Target Dividend Yield
+              Ceiling Price = Average Annual Dividend (last 5 years) ÷ Target Dividend Yield
             </div>
             <p className="mt-3 text-muted-foreground">
-              The result is your <strong>maximum fair price</strong>. Any
-              price above it means the stock is too expensive for your yield
-              target; any price below it means there is a margin of safety.
+              The result is your <strong>maximum fair price</strong>. Any price above it means the
+              stock is too expensive for your yield target; any price below it means there is a
+              margin of safety.
             </p>
           </section>
 
           <section className="mt-10">
-            <h2 className="text-2xl font-semibold text-foreground">
-              Worked example
-            </h2>
+            <h2 className="text-2xl font-semibold text-foreground">Worked example</h2>
             <p className="mt-3 text-muted-foreground">
-              A stock has paid the following dividends per share over the
-              last five years: $1.80, $2.00, $2.10, $2.20, and $1.90.
+              A stock has paid the following dividends per share over the last five years: $1.80,
+              $2.00, $2.10, $2.20, and $1.90.
             </p>
             <ol className="mt-4 list-decimal space-y-2 pl-6 text-muted-foreground">
               <li>
-                Average dividend = (1.80 + 2.00 + 2.10 + 2.20 + 1.90) ÷ 5 =
-                <strong> $2.00</strong>
+                Average dividend = (1.80 + 2.00 + 2.10 + 2.20 + 1.90) ÷ 5 =<strong> $2.00</strong>
               </li>
               <li>
-                Target yield = <strong>6%</strong> (your minimum acceptable
-                return)
+                Target yield = <strong>6%</strong> (your minimum acceptable return)
               </li>
               <li>
                 Ceiling price = $2.00 ÷ 0.06 = <strong>$33.33</strong>
               </li>
             </ol>
             <p className="mt-3 text-muted-foreground">
-              If the stock trades at $28, you have a ~19% margin of safety
-              and a projected 7.1% yield on cost. If it trades at $40, you
-              are paying 20% above ceiling and locking in only a 5% yield.
+              If the stock trades at $28, you have a ~19% margin of safety and a projected 7.1%
+              yield on cost. If it trades at $40, you are paying 20% above ceiling and locking in
+              only a 5% yield.
             </p>
           </section>
 
           <section className="mt-10">
-            <h2 className="text-2xl font-semibold text-foreground">
-              Edge cases to watch
-            </h2>
+            <h2 className="text-2xl font-semibold text-foreground">Edge cases to watch</h2>
             <ul className="mt-4 list-disc space-y-2 pl-6 text-muted-foreground">
               <li>
-                <strong>Dividend cuts.</strong> The 5-year average smooths
-                one bad year, but a permanent cut breaks the model. Check
-                the payout ratio and free cash flow before trusting the
-                ceiling price.
+                <strong>Dividend cuts.</strong> The 5-year average smooths one bad year, but a
+                permanent cut breaks the model. Check the payout ratio and free cash flow before
+                trusting the ceiling price.
               </li>
               <li>
-                <strong>Withholding tax.</strong> US-domiciled stocks,
-                REITs, and ETFs withhold 30% of dividends for foreign
-                investors. Apply the tax to the dividend before running the
+                <strong>Withholding tax.</strong> US-domiciled stocks, REITs, and ETFs withhold 30%
+                of dividends for foreign investors. Apply the tax to the dividend before running the
                 formula, or you will overestimate the ceiling.
               </li>
               <li>
-                <strong>Currency.</strong> Compare BRL dividends to a BRL
-                target yield and USD dividends to a USD target yield —
-                never mix.
+                <strong>Currency.</strong> Compare BRL dividends to a BRL target yield and USD
+                dividends to a USD target yield — never mix.
               </li>
               <li>
-                <strong>REITs, FIIs, and ETFs.</strong> These pay monthly.
-                Multiply the trailing 12 monthly distributions to get the
-                annual figure before averaging.
+                <strong>REITs, FIIs, and ETFs.</strong> These pay monthly. Multiply the trailing 12
+                monthly distributions to get the annual figure before averaging.
               </li>
             </ul>
           </section>
@@ -223,13 +207,10 @@ function GuidePage() {
                 <Calculator className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Skip the spreadsheet
-                </h2>
+                <h2 className="text-xl font-semibold text-foreground">Skip the spreadsheet</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Fuente Price Pro runs this calculation automatically for
-                  any US stock, REIT, ETF, or Brazilian FII — including
-                  withholding tax, currency, and payment cadence.
+                  Fuente Price Pro runs this calculation automatically for any US stock, REIT, ETF,
+                  or Brazilian FII — including withholding tax, currency, and payment cadence.
                 </p>
                 <Button
                   asChild

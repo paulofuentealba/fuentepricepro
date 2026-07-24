@@ -12,10 +12,7 @@ import type { AssetMeta } from "./utils";
  * blanks the UI.
  */
 export function useLiveQuotesAndMeta(items: WatchlistItem[]) {
-  const tickers = useMemo(
-    () => Array.from(new Set(items.map((i) => i.ticker))).sort(),
-    [items],
-  );
+  const tickers = useMemo(() => Array.from(new Set(items.map((i) => i.ticker))).sort(), [items]);
 
   const quoteResults = useQueries({
     queries: tickers.map((ticker) => quoteQueryOptions(ticker)),
@@ -41,6 +38,8 @@ export function useLiveQuotesAndMeta(items: WatchlistItem[]) {
         out[ticker] = {
           exDividendDate: asset.exDividendDate ?? null,
           dividendCagr5y: asset.metrics?.dividendCagr5y ?? null,
+          eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
+          pbRatio: asset.metrics?.pbRatio ?? null,
         };
       }
     });

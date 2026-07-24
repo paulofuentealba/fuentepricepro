@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useRef, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/integrations/firebase/client";
-import { collection, doc, getDocs, setDoc, deleteDoc, query, where, writeBatch } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  setDoc,
+  deleteDoc,
+  query,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import { useAuth } from "./auth-provider";
 import type { AssetType, Currency } from "./domain";
 import { assetQueryOptions } from "./queryOptions";
+import { cleanTicker } from "./formatters";
 
 const STORAGE_KEY = "ceilingPricePro.watchlist.v1";
 const ONBOARDED_KEY = "ceilingPricePro.onboarded.v1";
@@ -33,14 +43,18 @@ export interface WatchlistItem {
   customTaxRate?: number | null;
   /** Economic sector for diversification. */
   sector?: string | null;
+  /** History of applied corporate events to prevent double-applying. */
+  appliedEvents?: { eventId: string; date: number; type: string; ratio: number }[];
+  indexer?: string | null;
+  rate?: number | null;
+  maturityDate?: string | null;
+  startDate?: string | null;
   addedAt: number;
 }
 
 export function makeId(ticker: string, type: AssetType) {
   return `${type}:${ticker.toUpperCase()}`;
 }
-
-
 
 // ---------- Local storage helpers (guest mode) ----------
 function readLocal(): WatchlistItem[] {
@@ -50,21 +64,43 @@ function readLocal(): WatchlistItem[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    
+
     // Auto-heal NaNs that might have been saved as null during JSON.stringify
     // or loaded from corrupted state.
     return parsed.map((item: any) => ({
       ...item,
-      currentPrice: typeof item.currentPrice === "number" && !isNaN(item.currentPrice) ? item.currentPrice : 0,
-      annualDividend: typeof item.annualDividend === "number" && !isNaN(item.annualDividend) ? item.annualDividend : 0,
-      targetYield: typeof item.targetYield === "number" && !isNaN(item.targetYield) ? item.targetYield : 6,
-      ceilingPrice: typeof item.ceilingPrice === "number" && !isNaN(item.ceilingPrice) ? item.ceilingPrice : 0,
-      safetyMargin: typeof item.safetyMargin === "number" && !isNaN(item.safetyMargin) ? item.safetyMargin : 0,
+      ticker: cleanTicker(item.ticker),
+      currentPrice:
+        typeof item.currentPrice === "number" && !isNaN(item.currentPrice) ? item.currentPrice : 0,
+      annualDividend:
+        typeof item.annualDividend === "number" && !isNaN(item.annualDividend)
+          ? item.annualDividend
+          : 0,
+      targetYield:
+        typeof item.targetYield === "number" && !isNaN(item.targetYield) ? item.targetYield : 6,
+      ceilingPrice:
+        typeof item.ceilingPrice === "number" && !isNaN(item.ceilingPrice) ? item.ceilingPrice : 0,
+      safetyMargin:
+        typeof item.safetyMargin === "number" && !isNaN(item.safetyMargin) ? item.safetyMargin : 0,
       quantity: typeof item.quantity === "number" && !isNaN(item.quantity) ? item.quantity : 0,
-      averagePrice: typeof item.averagePrice === "number" && !isNaN(item.averagePrice) ? item.averagePrice : null,
-      targetMonthlyIncome: typeof item.targetMonthlyIncome === "number" && !isNaN(item.targetMonthlyIncome) ? item.targetMonthlyIncome : null,
-      payoutRatio: typeof item.payoutRatio === "number" && !isNaN(item.payoutRatio) ? item.payoutRatio : null,
-      customTaxRate: typeof item.customTaxRate === "number" && !isNaN(item.customTaxRate) ? item.customTaxRate : null,
+      averagePrice:
+        typeof item.averagePrice === "number" && !isNaN(item.averagePrice)
+          ? item.averagePrice
+          : null,
+      targetMonthlyIncome:
+        typeof item.targetMonthlyIncome === "number" && !isNaN(item.targetMonthlyIncome)
+          ? item.targetMonthlyIncome
+          : null,
+      payoutRatio:
+        typeof item.payoutRatio === "number" && !isNaN(item.payoutRatio) ? item.payoutRatio : null,
+      customTaxRate:
+        typeof item.customTaxRate === "number" && !isNaN(item.customTaxRate)
+          ? item.customTaxRate
+          : null,
+      indexer: item.indexer ?? null,
+      rate: typeof item.rate === "number" && !isNaN(item.rate) ? item.rate : null,
+      maturityDate: item.maturityDate ?? null,
+      startDate: item.startDate ?? null,
     })) as WatchlistItem[];
   } catch {
     return [];
@@ -101,6 +137,11 @@ interface Row {
   payout_ratio?: number | string | null;
   custom_tax_rate?: number | string | null;
   sector?: string | null;
+  applied_events?: any[] | null;
+  indexer?: string | null;
+  rate?: number | string | null;
+  maturity_date?: string | null;
+  start_date?: string | null;
   added_at: string;
 }
 
@@ -109,7 +150,7 @@ function rowToItem(r: Row): WatchlistItem {
     const num = Number(val);
     return isNaN(num) ? fallback : num;
   };
-  
+
   const safeNullableNumber = (val: any) => {
     if (val == null) return null;
     const num = Number(val);
@@ -118,7 +159,7 @@ function rowToItem(r: Row): WatchlistItem {
 
   return {
     id: makeId(r.ticker, r.type as AssetType),
-    ticker: r.ticker,
+    ticker: cleanTicker(r.ticker),
     name: r.name,
     type: r.type as AssetType,
     currency: r.currency as Currency,
@@ -136,6 +177,11 @@ function rowToItem(r: Row): WatchlistItem {
     payoutRatio: safeNullableNumber(r.payout_ratio),
     customTaxRate: safeNullableNumber(r.custom_tax_rate),
     sector: r.sector ?? null,
+    appliedEvents: Array.isArray(r.applied_events) ? r.applied_events : [],
+    indexer: r.indexer ?? null,
+    rate: safeNullableNumber(r.rate),
+    maturityDate: r.maturity_date ?? null,
+    startDate: r.start_date ?? null,
     addedAt: safeNumber(new Date(r.added_at).getTime(), Date.now()),
   };
 }
@@ -160,6 +206,11 @@ function itemToRow(item: WatchlistItem, userId: string): Row {
     payout_ratio: item.payoutRatio ?? null,
     custom_tax_rate: item.customTaxRate ?? null,
     sector: item.sector ?? null,
+    applied_events: item.appliedEvents ?? [],
+    indexer: item.indexer ?? null,
+    rate: item.rate ?? null,
+    maturity_date: item.maturityDate ?? null,
+    start_date: item.startDate ?? null,
     added_at: new Date(item.addedAt).toISOString(),
   };
 }
@@ -206,7 +257,7 @@ export function useWatchlist() {
           data = rows.map(rowToItem);
 
           if (data.length === 0 && !hasOnboarded) {
-             window.localStorage.setItem(ONBOARDED_KEY, "true");
+            window.localStorage.setItem(ONBOARDED_KEY, "true");
           }
         } catch (error) {
           console.error("[watchlist] load failed", error);
@@ -215,9 +266,9 @@ export function useWatchlist() {
         // Guest mode
         const raw = window.localStorage.getItem(STORAGE_KEY);
         if (!raw && !hasOnboarded) {
-           window.localStorage.setItem(ONBOARDED_KEY, "true");
+          window.localStorage.setItem(ONBOARDED_KEY, "true");
         } else {
-           data = readLocal();
+          data = readLocal();
         }
       }
       return data;
@@ -238,9 +289,9 @@ export function useWatchlist() {
     );
 
     if (stale.length === 0) return;
-    
+
     // Add them synchronously so subsequent rapid renders don't duplicate heal efforts!
-    stale.forEach(item => healAttempted.current.add(item.ticker));
+    stale.forEach((item) => healAttempted.current.add(item.ticker));
 
     const heal = async () => {
       const patches = new Map<string, number[]>();
@@ -346,7 +397,11 @@ export function useWatchlist() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey });
       const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
-      if (prev) queryClient.setQueryData(queryKey, prev.filter((i) => i.id !== id));
+      if (prev)
+        queryClient.setQueryData(
+          queryKey,
+          prev.filter((i) => i.id !== id),
+        );
       return { prev };
     },
     onError: (_, __, context) => {
@@ -369,17 +424,19 @@ export function useWatchlist() {
             batch.set(ref, row, { merge: true });
           });
           const commitPromise = batch.commit();
-          const timeoutPromise = new Promise((resolve) => 
+          const timeoutPromise = new Promise((resolve) =>
             setTimeout(() => {
-              console.warn("Firestore sync delayed (offline or blocked). Data saved to local cache.");
+              console.warn(
+                "Firestore sync delayed (offline or blocked). Data saved to local cache.",
+              );
               resolve(null);
-            }, 5000)
+            }, 5000),
           );
           await Promise.race([commitPromise, timeoutPromise]);
         }
       } else {
-        let list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
-        newItems.forEach(item => {
+        const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
+        newItems.forEach((item) => {
           const idx = list.findIndex((i) => i.id === item.id);
           if (idx >= 0) list[idx] = item;
           else list.unshift(item);
@@ -391,10 +448,10 @@ export function useWatchlist() {
     onMutate: async (newItems) => {
       await queryClient.cancelQueries({ queryKey });
       const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
-      
+
       // OPTIMISTIC UPDATE
-      let list = prev ? [...prev] : [];
-      newItems.forEach(item => {
+      const list = prev ? [...prev] : [];
+      newItems.forEach((item) => {
         const idx = list.findIndex((i) => i.id === item.id);
         if (idx >= 0) list[idx] = item;
         else list.unshift(item);
@@ -464,4 +521,3 @@ export function useWatchlist() {
 
   return { items, upsert, upsertAsync, upsertManyAsync, remove, update };
 }
-
