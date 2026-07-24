@@ -22,6 +22,7 @@ import { Route as AppSmartallocationRouteImport } from './routes/app/smartalloca
 import { Route as AppScreenerRouteImport } from './routes/app/screener'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
+import { Route as AppDocsRouteImport } from './routes/app/docs'
 import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -90,6 +91,11 @@ const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
   path: '/globalradar',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDocsRoute = AppDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCashflowRoute = AppCashflowRouteImport.update({
   id: '/cashflow',
   path: '/cashflow',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
+  '/app/docs': typeof AppDocsRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/screener': typeof AppScreenerRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
+  '/app/docs': typeof AppDocsRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/screener': typeof AppScreenerRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
+  '/app/docs': typeof AppDocsRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/screener': typeof AppScreenerRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
+    | '/app/docs'
     | '/app/globalradar'
     | '/app/myportfolio'
     | '/app/screener'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
+    | '/app/docs'
     | '/app/globalradar'
     | '/app/myportfolio'
     | '/app/screener'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
+    | '/app/docs'
     | '/app/globalradar'
     | '/app/myportfolio'
     | '/app/screener'
@@ -297,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGlobalradarRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/docs': {
+      id: '/app/docs'
+      path: '/docs'
+      fullPath: '/app/docs'
+      preLoaderRoute: typeof AppDocsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/cashflow': {
       id: '/app/cashflow'
       path: '/cashflow'
@@ -309,6 +328,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCashflowRoute: typeof AppCashflowRoute
+  AppDocsRoute: typeof AppDocsRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
   AppScreenerRoute: typeof AppScreenerRoute
@@ -319,6 +339,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCashflowRoute: AppCashflowRoute,
+  AppDocsRoute: AppDocsRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
   AppScreenerRoute: AppScreenerRoute,

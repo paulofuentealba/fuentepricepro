@@ -298,6 +298,9 @@ export const en = {
     addFirstAsset: "Add your first asset",
     allocationByType: "Allocation by Type",
     assets: "assets",
+    contextOvervalued: "{{over}} of {{total}} assets above ceiling — indicates a heated market.",
+    contextUndervalued: "{{under}} of {{total}} assets below ceiling — good entry opportunities.",
+    contextBalanced: "{{under}} of {{total}} assets below ceiling — balanced market.",
   },
 
   tabs: {
@@ -516,6 +519,7 @@ export const en = {
     fairPrice: "Fair Price",
     overvalued: "OVERVALUED",
     selicAnchor: "Selic Anchor",
+    breakdown: "Consensus Breakdown"
   },
   paywall: {
     title: "Unlock Pro Features",
@@ -529,4 +533,24 @@ export const en = {
     button: "See Pricing & Upgrade",
     cancel: "Maybe later"
   },
+  docs: {
+    title: "Valuation Methodology",
+    navLink: "Wiki",
+    consensus: {
+      title: "Fuente Consensus",
+      description: "An intelligent synthesis of the most reliable valuation models. By averaging Bazin, Graham, and Gordon, the consensus mitigates the individual weaknesses of each formula, providing a robust ceiling price for a diverse portfolio."
+    },
+    bazin: {
+      title: "Bazin's Model",
+      description: "Ideal for dividend-focused investors. It establishes a ceiling price by dividing the average dividend by a minimum acceptable yield (the classic 6% rule). Highly effective for mature companies with constant payouts."
+    },
+    graham: {
+      title: "Graham's Formula",
+      description: "Created by Benjamin Graham, it calculates the Intrinsic Value of a stock based on Earnings Per Share (EPS) and Book Value Per Share (BVPS). It is excellent for Value Stocks but is not applied to Real Estate Investment Trusts (REITs/FIIs), because funds must distribute most of their earnings and their book value metrics can distort the formula."
+    },
+    gordon: {
+      title: "Gordon Growth Model",
+      description: "A discounted dividend model that assumes perpetual growth. It is the ideal mathematical model for Real Estate Funds (REITs/FIIs) due to their predictable income distribution and inflation-adjusted growth over time."
+    }
+  }
 };

@@ -302,6 +302,9 @@ export const es = {
     addFirstAsset: "Añade tu primer activo",
     allocationByType: "Asignación por Tipo",
     assets: "activos",
+    contextOvervalued: "{{over}} de {{total}} activos por encima del techo — indica un mercado sobrecalentado.",
+    contextUndervalued: "{{under}} de {{total}} activos por debajo del techo — buenas oportunidades de entrada.",
+    contextBalanced: "{{under}} de {{total}} activos por debajo del techo — mercado equilibrado.",
   },
 
   tabs: {
@@ -524,8 +527,9 @@ export const es = {
     bazin: "Bazin",
     gordon: "Gordon",
     fairPrice: "Precio Justo",
-    overvalued: "CARO",
+    overvalued: "SOBREVALORADO",
     selicAnchor: "Ancla Selic",
+    breakdown: "Consenso Detallado"
   },
   paywall: {
     title: "Desbloquear Características Pro",
@@ -537,6 +541,26 @@ export const es = {
       "Simulador de Bola de Nieve"
     ],
     button: "Ver Planes y Actualizar",
-    cancel: "Quizás más tarde"
+    cancel: "Tal vez más tarde"
   },
+  docs: {
+    title: "Metodología de Valoración",
+    navLink: "Wiki",
+    consensus: {
+      title: "Consenso Fuente",
+      description: "Una síntesis inteligente de los modelos de valoración más fiables. Al promediar Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales de cada fórmula, entregando un precio techo robusto."
+    },
+    bazin: {
+      title: "Modelo de Bazin",
+      description: "Ideal para inversores centrados en ingresos. Establece un precio techo dividiendo el dividendo medio por un rendimiento mínimo aceptable (la regla clásica del 6%). Altamente efectivo para empresas maduras con pagos constantes."
+    },
+    graham: {
+      title: "Fórmula de Graham",
+      description: "Creada por Benjamin Graham, calcula el Valor Intrínseco de una acción en función del Beneficio Por Acción (BPA) y el Valor Contable Por Acción (VCPA). Es excelente para Acciones de Valor, pero no se aplica a Fondos Inmobiliarios (REITs/FIIs), ya que estos deben distribuir la mayor parte de sus beneficios y su valor contable puede distorsionar la fórmula."
+    },
+    gordon: {
+      title: "Modelo de Gordon",
+      description: "Un modelo de descuento de dividendos que asume un crecimiento perpetuo. Es el modelo matemático ideal para Fondos Inmobiliarios (REITs/FIIs) debido a la previsibilidad de sus distribuciones y al ajuste por inflación a lo largo del tiempo."
+    }
+  }
 } satisfies typeof en;

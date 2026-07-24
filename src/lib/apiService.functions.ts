@@ -264,14 +264,6 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
       const splits = json?.chart?.result?.[0]?.events?.splits || {};
       const events = [];
 
-      // MOCK INJECTION for testing
-      events.push({
-        eventId: "mock_split_123",
-        date: Date.now() + 1000000,
-        type: "split",
-        ratio: 4
-      });
-
       for (const key in splits) {
         const sp = splits[key];
         if (sp.date * 1000 > data.sinceTimestamp) {

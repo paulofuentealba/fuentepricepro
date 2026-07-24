@@ -29,7 +29,7 @@ import { useSelic } from "@/lib/useSelic";
 import { MetricBox } from "./shared/MetricBox";
 
 import { Button } from "@/components/ui/button";
-import { PlusCircle, LayoutGrid, List, TrendingUp, TrendingDown, ChevronDown, Shield } from "lucide-react";
+import { PlusCircle, LayoutGrid, List, TrendingUp, TrendingDown, ChevronDown, Shield, Globe } from "lucide-react";
 import { FixedIncomeWizardSheet } from "./watchlist/FixedIncomeWizardSheet";
 import {
   DropdownMenu,
@@ -171,6 +171,17 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     filteredAndSorted,
   } = useAssetFilterSort(valuedItems, "ticker_asc");
 
+  const contextStats = useMemo(() => {
+    let over = 0;
+    let under = 0;
+    const total = valuedItems.length;
+    for (const it of valuedItems) {
+      if (it.currentPrice > (it.ceilingPrice ?? 0)) over++;
+      else under++;
+    }
+    return { over, under, total };
+  }, [valuedItems]);
+
   const handleEdit = useCallback((it: WatchlistItem) => setEditing(it), []);
   const handleOpenDetail = useCallback((it: WatchlistItem) => setDetail(it), []);
   const handleCloseDetail = useCallback(() => setDetail(null), []);
@@ -228,103 +239,129 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
         ) : (
           <>
             <div className="mb-4 grid gap-3 lg:grid-cols-2">
-              <AllocationChart items={valuedItems} />
-
-              <div className="grid gap-3 grid-cols-2">
-                <MetricBox
-                  label={t.watchlist.consolidatedNetWorth}
-                  value={
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl text-emerald-400">🌎</span>
-                      {formatCurrency(totals.consolidatedNetWorth, "BRL", locale)}
-                    </div>
-                  }
-                  subValue={t.watchlist.consolidatedNetWorthSub}
-                  className="bg-background/60 backdrop-blur-md border border-emerald-500/30"
+              <div className="flex flex-col gap-3">
+                <AllocationChart 
+                  items={valuedItems} 
+                  selectedType={typeFilter} 
+                  onSelectType={setTypeFilter} 
                 />
+                <NextPaymentBanner items={valuedItems} meta={meta} />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col rounded-xl border border-emerald-500/30 bg-background/60 backdrop-blur-md p-4 lg:p-6 transition-colors hover:bg-background/80">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                    {t.watchlist.consolidatedNetWorth}
+                  </span>
+                  <div className="flex items-center gap-2 text-4xl lg:text-5xl font-bold tabular-nums">
+                    <Globe className="h-8 w-8 text-emerald-400" />
+                    <span className="bg-gradient-to-r from-white via-emerald-400 to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
+                      {formatCurrency(totals.consolidatedNetWorth, "BRL", locale)}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground/80">
+                    {t.watchlist.consolidatedNetWorthSub}
+                  </div>
+                </div>
+
                 <MetricBox
                   label={t.watchlist.consolidatedIncome}
                   value={
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl text-emerald-400">🌎</span>
+                    <div className="flex items-center gap-2 text-2xl font-bold">
+                      <Globe className="h-5 w-5 text-emerald-400" />
                       {formatCurrency(totals.consolidatedIncome, "BRL", locale)}
                     </div>
                   }
                   subValue={t.watchlist.consolidatedIncomeSub}
-                  className="bg-background/60 backdrop-blur-md border border-emerald-500/30"
-                />
-                <MetricBox
-                  label={t.watchlist.totalUsdIncome}
-                  value={
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">🇺🇸</span>
-                      {formatCurrency(totals.usd, "USD", locale)}
-                    </div>
-                  }
-                  subValue={`${totals.countUsd} ${t.watchlist.assets}`}
-                  className="bg-card/40 backdrop-blur-md"
-                />
-                <MetricBox
-                  label={t.watchlist.totalBrlIncome}
-                  value={
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">🇧🇷</span>
-                      {formatCurrency(totals.brl, "BRL", locale)}
-                    </div>
-                  }
-                  subValue={`${totals.countBrl} ${t.watchlist.assets}`}
-                  className="bg-card/40 backdrop-blur-md"
+                  className="bg-background/60 backdrop-blur-md border border-emerald-500/20 py-4"
                 />
 
-                {topAndWorst.best ? (
+                <div className="grid grid-cols-2 gap-3">
                   <MetricBox
-                    label={t.watchlist.topPerformer}
+                    label={t.watchlist.totalUsdIncome}
                     value={
-                      <span className="text-success">
-                        {displayTicker(topAndWorst.best.item.ticker)} (+
-                        {topAndWorst.best.returnPct.toFixed(2)}%)
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🇺🇸</span>
+                        {formatCurrency(totals.usd, "USD", locale)}
+                      </div>
                     }
-                    subValue={formatCurrency(
-                      topAndWorst.best.price,
-                      topAndWorst.best.item.currency,
-                      locale,
-                    )}
-                    variant="default"
-                    className="bg-card/40 backdrop-blur-md hover:border-success/30"
-                    tooltip={<TrendingUp className="h-3 w-3 text-success/80" />}
+                    subValue={`${totals.countUsd} ${t.watchlist.assets}`}
+                    className="bg-card/40 backdrop-blur-md"
                   />
-                ) : (
-                  <div />
-                )}
+                  <MetricBox
+                    label={t.watchlist.totalBrlIncome}
+                    value={
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🇧🇷</span>
+                        {formatCurrency(totals.brl, "BRL", locale)}
+                      </div>
+                    }
+                    subValue={`${totals.countBrl} ${t.watchlist.assets}`}
+                    className="bg-card/40 backdrop-blur-md"
+                  />
 
-                {topAndWorst.worst ? (
-                  <MetricBox
-                    label={t.watchlist.worstPerformer}
-                    value={
-                      <span className="text-danger">
-                        {displayTicker(topAndWorst.worst.item.ticker)} (
-                        {topAndWorst.worst.returnPct.toFixed(2)}%)
-                      </span>
-                    }
-                    subValue={formatCurrency(
-                      topAndWorst.worst.price,
-                      topAndWorst.worst.item.currency,
-                      locale,
-                    )}
-                    variant="default"
-                    className="bg-card/40 backdrop-blur-md hover:border-danger/30"
-                    tooltip={<TrendingDown className="h-3 w-3 text-danger/80" />}
-                  />
-                ) : (
-                  <div />
-                )}
+                  {topAndWorst.best ? (
+                    <MetricBox
+                      label={t.watchlist.topPerformer}
+                      value={
+                        <span className="text-success truncate">
+                          {displayTicker(topAndWorst.best.item.ticker)} (+
+                          {topAndWorst.best.returnPct.toFixed(2)}%)
+                        </span>
+                      }
+                      subValue={formatCurrency(
+                        topAndWorst.best.price,
+                        topAndWorst.best.item.currency,
+                        locale,
+                      )}
+                      variant="default"
+                      className="bg-card/40 backdrop-blur-md hover:border-success/30 overflow-hidden"
+                      tooltip={<TrendingUp className="h-3 w-3 text-success/80" />}
+                    />
+                  ) : (
+                    <div />
+                  )}
+
+                  {topAndWorst.worst ? (
+                    <MetricBox
+                      label={t.watchlist.worstPerformer}
+                      value={
+                        <span className="text-danger truncate">
+                          {displayTicker(topAndWorst.worst.item.ticker)} (
+                          {topAndWorst.worst.returnPct.toFixed(2)}%)
+                        </span>
+                      }
+                      subValue={formatCurrency(
+                        topAndWorst.worst.price,
+                        topAndWorst.worst.item.currency,
+                        locale,
+                      )}
+                      variant="default"
+                      className="bg-card/40 backdrop-blur-md hover:border-danger/30 overflow-hidden"
+                      tooltip={<TrendingDown className="h-3 w-3 text-danger/80" />}
+                    />
+                  ) : (
+                    <div />
+                  )}
+                </div>
               </div>
             </div>
 
-            <NextPaymentBanner items={valuedItems} meta={meta} />
 
-            <div className="flex items-center justify-between gap-4 mb-4">
+
+            {contextStats.total > 0 && (
+              <div className="mb-4 w-full py-2 px-3 rounded-md bg-muted/20 border border-muted/30">
+                <span className="text-sm text-muted-foreground italic">
+                  {contextStats.over > contextStats.under
+                    ? t.watchlist.contextOvervalued.replace("{{over}}", contextStats.over.toString()).replace("{{total}}", contextStats.total.toString())
+                    : contextStats.under > contextStats.over
+                      ? t.watchlist.contextUndervalued.replace("{{under}}", contextStats.under.toString()).replace("{{total}}", contextStats.total.toString())
+                      : t.watchlist.contextBalanced.replace("{{under}}", contextStats.under.toString()).replace("{{total}}", contextStats.total.toString())}
+                </span>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
               <div className="flex-1 min-w-0">
                 <WatchlistFilterBar
                   typeFilters={typeFilters}

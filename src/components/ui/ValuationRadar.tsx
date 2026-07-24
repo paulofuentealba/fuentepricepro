@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/i18n";
 import type { Currency } from "@/lib/domain";
+import { Info } from "lucide-react";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
 interface ValuationRadarProps {
   currentPrice: number;
@@ -43,10 +45,47 @@ export function ValuationRadar({
   return (
     <div className={cn("flex items-center justify-between w-full", className)}>
       <div className="flex flex-col relative z-10">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-            {t.valuation.consensus}
-          </span>
+        <div className="flex flex-col items-start gap-1.5 mb-2">
+          <div className="flex items-center gap-1">
+          <HoverCard openDelay={200}>
+            <HoverCardTrigger asChild>
+              <button
+                type="button"
+                className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer"
+                aria-label="Consensus Breakdown"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {t.valuation.consensus}
+                <Info className="h-3 w-3" />
+              </button>
+            </HoverCardTrigger>
+            <HoverCardContent side="top" align="start" className="z-[999] w-48 p-3 bg-slate-900 border-slate-700 shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-muted-foreground mb-1">
+                  {t.valuation.breakdown}
+                </span>
+                <div className="flex justify-between items-center text-sm font-mono">
+                  <span className="text-muted-foreground">{t.valuation.bazin}:</span>
+                  <span className={bazin ? "text-foreground font-semibold" : "text-muted-foreground"}>
+                    {bazin ? formatCurrency(bazin, currency, locale) : "--"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-mono">
+                  <span className="text-muted-foreground">{t.valuation.graham}:</span>
+                  <span className={graham ? "text-foreground font-semibold" : "text-muted-foreground"}>
+                    {graham ? formatCurrency(graham, currency, locale) : "--"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-mono">
+                  <span className="text-muted-foreground">{t.valuation.gordon}:</span>
+                  <span className={gordon ? "text-foreground font-semibold" : "text-muted-foreground"}>
+                    {gordon ? formatCurrency(gordon, currency, locale) : "--"}
+                  </span>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+          </div>
           {isSafeBuy ? (
             <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 text-[9px] uppercase font-bold px-1.5 py-0">
               {t.valuation.safeBuy}

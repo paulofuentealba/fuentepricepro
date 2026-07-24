@@ -300,6 +300,9 @@ export const ptBR = {
     addFirstAsset: "Adicione seu primeiro ativo",
     allocationByType: "Alocação por Tipo",
     assets: "ativos",
+    contextOvervalued: "{{over}} de {{total}} ativos acima do teto — indica um mercado aquecido.",
+    contextUndervalued: "{{under}} de {{total}} ativos abaixo do teto — boas oportunidades de entrada.",
+    contextBalanced: "{{under}} de {{total}} ativos abaixo do teto — mercado equilibrado.",
   },
 
   tabs: {
@@ -520,8 +523,9 @@ export const ptBR = {
     bazin: "Bazin",
     gordon: "Gordon",
     fairPrice: "Preço Justo",
-    overvalued: "CARO",
+    overvalued: "SUPERAVALIADO",
     selicAnchor: "Âncora Selic",
+    breakdown: "Consenso Detalhado"
   },
   paywall: {
     title: "Desbloqueie os Recursos Pro",
@@ -533,6 +537,26 @@ export const ptBR = {
       "Simulador de Efeito Bola de Neve"
     ],
     button: "Ver Planos & Assinar",
-    cancel: "Talvez mais tarde"
+    cancel: "Talvez depois"
+  },
+  docs: {
+    title: "Metodologia de Valuation",
+    navLink: "Wiki",
+    consensus: {
+      title: "O Consenso Fuente",
+      description: "Uma síntese inteligente dos modelos de valuation mais confiáveis. Ao extrair a média de Bazin, Graham e Gordon, o consenso mitiga as fraquezas individuais de cada fórmula, entregando um preço teto robusto para uma carteira diversificada."
+    },
+    bazin: {
+      title: "O Modelo de Bazin",
+      description: "Ideal para investidores focados em renda. Estabelece o preço teto dividindo o dividendo médio por um yield mínimo aceitável (a clássica regra dos 6%). Altamente eficaz para empresas maduras com distribuições constantes."
+    },
+    graham: {
+      title: "A Fórmula de Graham",
+      description: "Criada por Benjamin Graham, calcula o Valor Intrínseco de uma ação baseada no Lucro Por Ação (LPA) e Valor Patrimonial Por Ação (VPA). É excelente para Ações de Valor, mas o sistema não a aplica a Fundos Imobiliários (FIIs/REITs), visto que os fundos precisam distribuir a maior parte do lucro e a distorção do patrimônio invalidaria a fórmula."
+    },
+    gordon: {
+      title: "O Modelo de Gordon",
+      description: "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação."
+    }
   },
 } satisfies typeof en;

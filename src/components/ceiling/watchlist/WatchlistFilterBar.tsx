@@ -3,6 +3,7 @@ import type { AssetType, Currency } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
 import { FilterPill } from "./FilterPill";
 import { flagFor } from "./utils";
+import { getColorForAsset } from "../shared/chartColors";
 import type { OppFilter, SortOption } from "@/lib/useAssetFilterSort";
 import {
   Select,
@@ -39,26 +40,19 @@ export function WatchlistFilterBar({
   return (
     <div className="flex items-center gap-2 w-full">
       <div className="flex flex-1 gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <FilterPill
-          active={typeFilter === null}
-          onClick={() => onSetTypeFilter(null)}
-          count={counts.total}
-        >
-          {t.watchlist.filterAll}
-        </FilterPill>
-        {typeFilters.map((f) => (
-          <FilterPill
-            key={f.key}
-            active={typeFilter === f.key}
-            onClick={() => onSetTypeFilter(typeFilter === f.key ? null : f.key)}
-            count={counts.byType.get(f.key) ?? 0}
-          >
-            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-muted/50 text-muted-foreground uppercase leading-none">
-              {flagFor(f.currency)}
-            </span>
-            {t.types[f.type]}
-          </FilterPill>
-        ))}
+        {typeFilter ? (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background/50 text-sm font-medium">
+            <div 
+              className="w-2.5 h-2.5 rounded-full" 
+              style={{ backgroundColor: getColorForAsset(typeFilter) }} 
+            />
+            {counts.byType.get(typeFilter) ?? 0}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background/50 text-sm font-medium text-muted-foreground">
+            {t.watchlist.filterAll} {counts.total}
+          </div>
+        )}
       </div>
 
       <div className="shrink-0 pl-2 ml-auto flex items-center gap-2 hidden lg:flex">

@@ -10,6 +10,8 @@ import { getColorForAsset } from "../shared/chartColors";
 
 interface Props {
   items: WatchlistItem[];
+  selectedType?: string | null;
+  onSelectType?: (type: string | null) => void;
 }
 
 const renderActiveShape = (props: any) => {
@@ -29,7 +31,7 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export function AllocationChart({ items }: Props) {
+export function AllocationChart({ items, selectedType, onSelectType }: Props) {
   const { t, locale } = useI18n();
   const { data: exchangeRate = 5.0 } = useExchangeRate();
   const [activeIndex, setActiveIndex] = useState<number>(-1);
@@ -75,19 +77,25 @@ export function AllocationChart({ items }: Props) {
                 onMouseEnter={(_, index) => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(-1)}
               >
-                {data.map((d, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={getColorForAsset(d.type)}
-                    style={{
-                      filter:
-                        activeIndex === index
-                          ? `drop-shadow(0px 0px 6px ${getColorForAsset(d.type)})`
-                          : "none",
-                      transition: "all 0.3s ease",
-                    }}
-                  />
-                ))}
+                {data.map((d, index) => {
+                  const isSelected = selectedType === d.type;
+                  const opacity = selectedType ? (isSelected ? 1 : 0.4) : 1;
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={getColorForAsset(d.type)}
+                      className="cursor-pointer transition-all duration-300"
+                      onClick={() => onSelectType?.(isSelected ? null : d.type)}
+                      style={{
+                        opacity,
+                        filter:
+                          activeIndex === index || isSelected
+                            ? `drop-shadow(0px 0px 6px ${getColorForAsset(d.type)})`
+                            : "none",
+                      }}
+                    />
+                  );
+                })}
               </Pie>
               <ChartTooltip
                 content={
@@ -104,29 +112,34 @@ export function AllocationChart({ items }: Props) {
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
             {t.watchlist.allocationByType}
           </div>
-          {data.map((d, i) => (
-            <div
-              key={d.name}
-              className="flex items-center justify-between text-sm transition-opacity duration-200"
-              style={{ opacity: activeIndex === -1 || activeIndex === i ? 1 : 0.4 }}
-              onMouseEnter={() => setActiveIndex(i)}
-              onMouseLeave={() => setActiveIndex(-1)}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{
-                    backgroundColor: getColorForAsset(d.type),
-                    boxShadow: activeIndex === i ? `0 0 8px ${getColorForAsset(d.type)}` : "none",
-                  }}
-                />
-                <span className="text-foreground">{d.name}</span>
+          {data.map((d, i) => {
+            const isSelected = selectedType === d.type;
+            const opacity = selectedType ? (isSelected ? 1 : 0.4) : 1;
+            return (
+              <div
+                key={d.name}
+                className="flex items-center justify-between text-sm transition-opacity duration-200 cursor-pointer"
+                style={{ opacity: activeIndex === -1 ? opacity : (activeIndex === i ? 1 : 0.4) }}
+                onClick={() => onSelectType?.(isSelected ? null : d.type)}
+                onMouseEnter={() => setActiveIndex(i)}
+                onMouseLeave={() => setActiveIndex(-1)}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-2.5 w-2.5 rounded-full transition-shadow duration-300"
+                    style={{
+                      backgroundColor: getColorForAsset(d.type),
+                      boxShadow: (activeIndex === i || isSelected) ? `0 0 8px ${getColorForAsset(d.type)}` : "none",
+                    }}
+                  />
+                  <span className="text-foreground">{d.name}</span>
+                </div>
+                <span className="font-medium tabular-nums">
+                  {formatCurrency(d.value, "BRL", locale)}
+                </span>
               </div>
-              <span className="font-medium tabular-nums">
-                {formatCurrency(d.value, "BRL", locale)}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

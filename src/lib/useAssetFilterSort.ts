@@ -30,7 +30,7 @@ export function useAssetFilterSort<T extends FilterableAsset>(
     const seen = new Map<string, { key: string; type: AssetType; currency: Currency }>();
     for (const it of items) {
       if (!it.type || !it.currency) continue;
-      const key = `${it.currency}:${it.type}`;
+      const key = it.type;
       if (!seen.has(key)) {
         seen.set(key, { key, type: it.type as AssetType, currency: it.currency as Currency });
       }
@@ -43,12 +43,12 @@ export function useAssetFilterSort<T extends FilterableAsset>(
     let under = 0;
     let over = 0;
     for (const it of items) {
-      if (it.type && it.currency) {
-        const key = `${it.currency}:${it.type}`;
+      if (it.type) {
+        const key = it.type;
         byType.set(key, (byType.get(key) ?? 0) + 1);
       }
 
-      const assetKey = it.type && it.currency ? `${it.currency}:${it.type}` : null;
+      const assetKey = it.type ? it.type : null;
       if (!typeFilter || assetKey === typeFilter) {
         if (it.safetyMargin > 0) under++;
         else over++;
@@ -61,7 +61,7 @@ export function useAssetFilterSort<T extends FilterableAsset>(
     let result = items;
     if (typeFilter || oppFilter) {
       result = items.filter((it) => {
-        const assetKey = it.type && it.currency ? `${it.currency}:${it.type}` : null;
+        const assetKey = it.type ? it.type : null;
         if (typeFilter && assetKey !== typeFilter) return false;
         if (oppFilter === "under" && it.safetyMargin <= 0) return false;
         if (oppFilter === "over" && it.safetyMargin > 0) return false;
