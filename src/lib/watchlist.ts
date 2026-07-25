@@ -10,7 +10,9 @@ import {
   query,
   where,
   writeBatch,
+  onSnapshot,
 } from "firebase/firestore";
+import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import type { AssetType, Currency } from "./domain";
 import { assetQueryOptions } from "./queryOptions";
@@ -276,6 +278,25 @@ export function useWatchlist() {
     staleTime: Infinity,
   });
 
+  // Realtime Sync (onSnapshot)
+  useEffect(() => {
+    if (!userId) return;
+    const q = query(collection(db, "watchlist_items"), where("user_id", "==", userId));
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const rows = snap.docs.map((d) => d.data() as Row);
+        rows.sort((a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime());
+        queryClient.setQueryData(queryKey, rows.map(rowToItem));
+      },
+      (error) => {
+        console.error("[watchlist] realtime sync failed", error);
+        toast.error("Erro na sincronização de dados: " + error.message);
+      }
+    );
+    return () => unsubscribe();
+  }, [userId, queryClient, queryKey]);
+
   // Heal payment months effect
   const healAttempted = useRef(new Set<string>());
   useEffect(() => {
@@ -353,9 +374,14 @@ export function useWatchlist() {
   const upsertMutation = useMutation({
     mutationFn: async (item: WatchlistItem) => {
       if (userId) {
-        const row = itemToRow(item, userId);
-        const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
-        await setDoc(ref, row, { merge: true });
+        try {
+          const row = itemToRow(item, userId);
+          const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+          await setDoc(ref, row, { merge: true });
+        } catch (error: any) {
+          toast.error(`Erro ao salvar ativo: ${error.message}`);
+          throw error;
+        }
       } else {
         const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
         const idx = list.findIndex((i) => i.id === item.id);
@@ -375,8 +401,11 @@ export function useWatchlist() {
       queryClient.setQueryData(queryKey, list);
       return { prev };
     },
-    onError: (_, __, context) => {
+    onError: (error: any, __, context) => {
       if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSuccess: () => {
+      toast.success("Ativo salvo com sucesso!");
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
@@ -384,10 +413,15 @@ export function useWatchlist() {
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
       if (userId) {
-        const target = items.find((i) => i.id === id);
-        if (target) {
-          const ref = doc(db, "watchlist_items", `${userId}_${target.type}_${target.ticker}`);
-          await deleteDoc(ref);
+        try {
+          const target = items.find((i) => i.id === id);
+          if (target) {
+            const ref = doc(db, "watchlist_items", `${userId}_${target.type}_${target.ticker}`);
+            await deleteDoc(ref);
+          }
+        } catch (error: any) {
+          toast.error(`Erro ao excluir ativo: ${error.message}`);
+          throw error;
         }
       } else {
         writeLocal(items.filter((i) => i.id !== id));
@@ -404,8 +438,11 @@ export function useWatchlist() {
         );
       return { prev };
     },
-    onError: (_, __, context) => {
+    onError: (error: any, __, context) => {
       if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSuccess: () => {
+      toast.success("Ativo removido com sucesso!");
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
@@ -413,26 +450,27 @@ export function useWatchlist() {
   const upsertManyMutation = useMutation({
     mutationFn: async (newItems: WatchlistItem[]) => {
       if (userId) {
-        // Firestore batches can handle up to 500 writes. We chunk by 400 to be safe.
-        const chunkSize = 400;
-        for (let i = 0; i < newItems.length; i += chunkSize) {
-          const chunk = newItems.slice(i, i + chunkSize);
-          const batch = writeBatch(db);
-          chunk.forEach((item) => {
-            const row = itemToRow(item, userId);
-            const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
-            batch.set(ref, row, { merge: true });
-          });
-          const commitPromise = batch.commit();
-          const timeoutPromise = new Promise((resolve) =>
-            setTimeout(() => {
-              console.warn(
-                "Firestore sync delayed (offline or blocked). Data saved to local cache.",
-              );
-              resolve(null);
-            }, 5000),
-          );
-          await Promise.race([commitPromise, timeoutPromise]);
+        try {
+          const chunkSize = 400;
+          for (let i = 0; i < newItems.length; i += chunkSize) {
+            const chunk = newItems.slice(i, i + chunkSize);
+            const batch = writeBatch(db);
+            chunk.forEach((item) => {
+              const row = itemToRow(item, userId);
+              const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+              batch.set(ref, row, { merge: true });
+            });
+            const commitPromise = batch.commit();
+            const timeoutPromise = new Promise((resolve) =>
+              setTimeout(() => {
+                resolve(null);
+              }, 5000),
+            );
+            await Promise.race([commitPromise, timeoutPromise]);
+          }
+        } catch (error: any) {
+          toast.error(`Erro ao salvar múltiplos ativos: ${error.message}`);
+          throw error;
         }
       } else {
         const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
@@ -473,9 +511,14 @@ export function useWatchlist() {
       const merged = { ...existing, ...patch };
 
       if (userId) {
-        const row = itemToRow(merged, userId);
-        const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
-        await setDoc(ref, row, { merge: true });
+        try {
+          const row = itemToRow(merged, userId);
+          const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+          await setDoc(ref, row, { merge: true });
+        } catch (error: any) {
+          toast.error(`Erro ao atualizar ativo: ${error.message}`);
+          throw error;
+        }
       } else {
         const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
         const idx = list.findIndex((i) => i.id === id);
