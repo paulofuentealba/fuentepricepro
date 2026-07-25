@@ -73,7 +73,7 @@ export function NextPaymentBanner({ items, meta }: Props) {
       </div>
 
       <div className="flex flex-col gap-2">
-        {upcomingList.map((upcoming, idx) => {
+        {(upcomingList || []).map((upcoming, idx) => {
           const dateLabel = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
             day: "2-digit",
             month: "short",

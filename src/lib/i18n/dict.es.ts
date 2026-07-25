@@ -185,6 +185,7 @@ export const es = {
     notFound: "No pudimos encontrar ese ticker.",
   },
   watchlist: {
+    loading: "Cargando cartera...",
     addBtn: "Añadir a la Watchlist",
     updateBtn: "Actualizar Posición",
     addTitle: "Añadir a la Watchlist",

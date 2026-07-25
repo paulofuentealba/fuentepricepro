@@ -185,6 +185,7 @@ export const ptBR = {
     notFound: "Não encontramos esse ticker.",
   },
   watchlist: {
+    loading: "Carregando carteira...",
     addBtn: "Adicionar à Watchlist",
     updateBtn: "Atualizar Posição",
     addTitle: "Adicionar à Watchlist",

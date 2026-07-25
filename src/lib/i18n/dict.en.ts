@@ -182,6 +182,7 @@ export const en = {
     notFound: "We couldn't find that ticker.",
   },
   watchlist: {
+    loading: "Loading portfolio...",
     addBtn: "Add to Watchlist",
     updateBtn: "Update Holdings",
     addTitle: "Add to Watchlist",

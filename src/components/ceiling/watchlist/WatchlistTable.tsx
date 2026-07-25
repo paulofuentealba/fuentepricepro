@@ -104,7 +104,8 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((it) => {
+            {(items || []).map((it) => {
+              const r = ((it.currentPrice - (it.averagePrice ?? 0)) / (it.averagePrice ?? 1)) * 100;
               const quote = quotes[it.ticker];
               const price = quote?.price ?? it.currentPrice;
 

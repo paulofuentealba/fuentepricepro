@@ -590,5 +590,5 @@ export function useWatchlist() {
     [updateMutation],
   );
 
-  return { items, upsert, upsertAsync, upsertManyAsync, remove, update };
+  return { items: items || [], isPending, upsert, upsertAsync, upsertManyAsync, remove, update };
 }

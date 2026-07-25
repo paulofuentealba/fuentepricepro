@@ -46,7 +46,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const navigate = useNavigate();
   const [showFIWizard, setShowFIWizard] = useState(false);
   const { t, locale } = useI18n();
-  const { items, remove, update, upsert } = useWatchlist();
+  const { items, remove, update, upsert, isPending } = useWatchlist();
   const [editing, setEditing] = useState<WatchlistItem | null>(null);
   const [detail, setDetail] = useState<WatchlistItem | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -56,7 +56,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
 
   // Treat "6" (the old hardcoded default) as "tracking the global yield".
   const baseItems = useMemo(() => {
-    return items.map((it) => ({
+    return (items || []).map((it) => ({
       ...it,
       targetYield: it.targetYield === 6 ? globalYield : it.targetYield,
     }));
@@ -197,10 +197,19 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     [editing, update, t.watchlist.updated],
   );
 
+  if (isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 text-muted-foreground gap-4 w-full">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+        <p>{t.watchlist.loading}</p>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider>
       <section>
-        {items.length === 0 ? (
+        {!(items && items.length > 0) ? (
           <Card className="border-dashed border-border/50 bg-background/40 backdrop-blur-md">
             <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <p className="text-sm text-muted-foreground">{t.watchlist.empty}</p>
@@ -425,7 +434,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
 
             {viewMode === "grid" ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredAndSorted.map((it) => (
+                {(filteredAndSorted || []).map((it) => (
                   <AssetCard
                     key={it.id}
                     item={it}

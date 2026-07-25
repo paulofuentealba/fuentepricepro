@@ -64,10 +64,10 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
           <ChartContainer config={{}} className="h-full w-full">
             <PieChart>
               <Pie
-                data={data}
+                data={data || []}
                 cx="50%"
                 cy="50%"
-                innerRadius={35}
+                innerRadius={60}
                 outerRadius={55}
                 paddingAngle={2}
                 dataKey="value"
@@ -77,7 +77,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
                 onMouseEnter={(_, index) => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(-1)}
               >
-                {data.map((d, index) => {
+                {(data || []).map((d, index) => {
                   const isSelected = selectedType === d.type;
                   const opacity = selectedType ? (isSelected ? 1 : 0.4) : 1;
                   return (
@@ -112,7 +112,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
             {t.watchlist.allocationByType}
           </div>
-          {data.map((d, i) => {
+          {(data || []).map((d, i) => {
             const isSelected = selectedType === d.type;
             const opacity = selectedType ? (isSelected ? 1 : 0.4) : 1;
             return (
