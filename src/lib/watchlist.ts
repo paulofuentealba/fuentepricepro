@@ -58,6 +58,18 @@ export function makeId(ticker: string, type: AssetType) {
   return `${type}:${ticker.toUpperCase()}`;
 }
 
+async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
+  let timeoutId: any;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error("A operação demorou muito. Verifique sua conexão ou permissões."));
+    }, ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+}
+
 // ---------- Local storage helpers (guest mode) ----------
 function readLocal(): WatchlistItem[] {
   if (typeof window === "undefined") return [];
@@ -379,7 +391,7 @@ export function useWatchlist() {
         try {
           const row = itemToRow(item, userId);
           const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
-          await setDoc(ref, row, { merge: true });
+          await withTimeout(setDoc(ref, row, { merge: true }));
           console.log(`[watchlist] item ${item.ticker} saved successfully.`);
         } catch (error: any) {
           console.error("[watchlist] error saving item:", error);
@@ -423,7 +435,7 @@ export function useWatchlist() {
           const target = items.find((i) => i.id === id);
           if (target) {
             const ref = doc(db, "users", userId, "assets", `${target.type}_${target.ticker}`);
-            await deleteDoc(ref);
+            await withTimeout(deleteDoc(ref));
             console.log(`[watchlist] item ${id} removed successfully.`);
           }
         } catch (error: any) {
@@ -528,7 +540,7 @@ export function useWatchlist() {
         try {
           const row = itemToRow(merged, userId);
           const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
-          await setDoc(ref, row, { merge: true });
+          await withTimeout(setDoc(ref, row, { merge: true }));
           console.log(`[watchlist] item ${id} updated successfully.`);
         } catch (error: any) {
           console.error("[watchlist] error updating item:", error);
