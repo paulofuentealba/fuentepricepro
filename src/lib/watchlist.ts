@@ -252,7 +252,7 @@ export function useWatchlist() {
 
         // Load from cloud
         try {
-          const q = query(collection(db, "watchlist_items"), where("user_id", "==", userId));
+          const q = collection(db, "users", userId, "assets");
           const snap = await getDocs(q);
           const rows = snap.docs.map((d) => d.data() as Row);
           rows.sort((a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime());
@@ -281,7 +281,7 @@ export function useWatchlist() {
   // Realtime Sync (onSnapshot)
   useEffect(() => {
     if (!userId) return;
-    const q = query(collection(db, "watchlist_items"), where("user_id", "==", userId));
+    const q = collection(db, "users", userId, "assets");
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
@@ -339,7 +339,7 @@ export function useWatchlist() {
               const chunk = rows.slice(i, i + chunkSize);
               const batch = writeBatch(db);
               chunk.forEach((r) => {
-                const ref = doc(db, "watchlist_items", `${r.user_id}_${r.type}_${r.ticker}`);
+                const ref = doc(db, "users", userId, "assets", `${r.type}_${r.ticker}`);
                 batch.set(ref, r, { merge: true });
               });
               await batch.commit();
@@ -374,11 +374,15 @@ export function useWatchlist() {
   const upsertMutation = useMutation({
     mutationFn: async (item: WatchlistItem) => {
       if (userId) {
+        if (!userId) throw new Error("Usuário não autenticado");
+        console.log(`[watchlist] upserting item ${item.ticker}...`);
         try {
           const row = itemToRow(item, userId);
-          const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+          const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
           await setDoc(ref, row, { merge: true });
+          console.log(`[watchlist] item ${item.ticker} saved successfully.`);
         } catch (error: any) {
+          console.error("[watchlist] error saving item:", error);
           toast.error(`Erro ao salvar ativo: ${error.message}`);
           throw error;
         }
@@ -413,13 +417,17 @@ export function useWatchlist() {
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
       if (userId) {
+        if (!userId) throw new Error("Usuário não autenticado");
+        console.log(`[watchlist] removing item ${id}...`);
         try {
           const target = items.find((i) => i.id === id);
           if (target) {
-            const ref = doc(db, "watchlist_items", `${userId}_${target.type}_${target.ticker}`);
+            const ref = doc(db, "users", userId, "assets", `${target.type}_${target.ticker}`);
             await deleteDoc(ref);
+            console.log(`[watchlist] item ${id} removed successfully.`);
           }
         } catch (error: any) {
+          console.error("[watchlist] error removing item:", error);
           toast.error(`Erro ao excluir ativo: ${error.message}`);
           throw error;
         }
@@ -450,6 +458,8 @@ export function useWatchlist() {
   const upsertManyMutation = useMutation({
     mutationFn: async (newItems: WatchlistItem[]) => {
       if (userId) {
+        if (!userId) throw new Error("Usuário não autenticado");
+        console.log(`[watchlist] upserting ${newItems.length} items in batch...`);
         try {
           const chunkSize = 400;
           for (let i = 0; i < newItems.length; i += chunkSize) {
@@ -457,7 +467,7 @@ export function useWatchlist() {
             const batch = writeBatch(db);
             chunk.forEach((item) => {
               const row = itemToRow(item, userId);
-              const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+              const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
               batch.set(ref, row, { merge: true });
             });
             const commitPromise = batch.commit();
@@ -467,8 +477,10 @@ export function useWatchlist() {
               }, 5000),
             );
             await Promise.race([commitPromise, timeoutPromise]);
+            console.log(`[watchlist] batch of ${chunk.length} items saved.`);
           }
         } catch (error: any) {
+          console.error("[watchlist] error saving batch:", error);
           toast.error(`Erro ao salvar múltiplos ativos: ${error.message}`);
           throw error;
         }
@@ -511,11 +523,15 @@ export function useWatchlist() {
       const merged = { ...existing, ...patch };
 
       if (userId) {
+        if (!userId) throw new Error("Usuário não autenticado");
+        console.log(`[watchlist] updating item ${id}...`);
         try {
           const row = itemToRow(merged, userId);
-          const ref = doc(db, "watchlist_items", `${row.user_id}_${row.type}_${row.ticker}`);
+          const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
           await setDoc(ref, row, { merge: true });
+          console.log(`[watchlist] item ${id} updated successfully.`);
         } catch (error: any) {
+          console.error("[watchlist] error updating item:", error);
           toast.error(`Erro ao atualizar ativo: ${error.message}`);
           throw error;
         }
