@@ -58,19 +58,20 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
   if (data.length === 0) return null;
 
   return (
-    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-lg">
-      <CardContent className="flex items-center p-4">
-        <div className="h-32 w-32 shrink-0">
+    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-lg h-full">
+      <CardContent className="flex flex-col md:flex-row items-center p-6 gap-6">
+        <div className="w-full md:w-1/2 h-[200px] shrink-0">
           <ChartContainer config={{}} className="h-full w-full">
-            <PieChart>
-              <Pie
-                data={data || []}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={55}
-                paddingAngle={2}
-                dataKey="value"
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data || []}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  dataKey="value"
                 stroke="none"
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape}
@@ -105,10 +106,11 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
                   />
                 }
               />
-            </PieChart>
+              </PieChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </div>
-        <div className="ml-4 flex-1 space-y-1.5">
+        <div className="w-full md:w-1/2 flex flex-col space-y-1.5">
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
             {t.watchlist.allocationByType}
           </div>
