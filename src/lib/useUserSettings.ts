@@ -11,6 +11,8 @@ export interface UserSettings {
   targetYield: number;
   smartAllocationCurrency: Currency;
   smartAllocationTargets: Record<AssetType, number>;
+  monthlyLivingCostGoal?: number;
+  estimatedMonthlyContribution?: number;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -49,6 +51,8 @@ function readLocalSettings(): UserSettings {
         smartAllocationTargets: oldTargets
           ? JSON.parse(oldTargets)
           : DEFAULT_SETTINGS.smartAllocationTargets,
+        monthlyLivingCostGoal: undefined,
+        estimatedMonthlyContribution: undefined,
       };
       // Limpa os antigos
       window.localStorage.removeItem("global-target-yield");

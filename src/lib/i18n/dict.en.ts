@@ -21,7 +21,12 @@ export const en = {
     suffix: " of Fuente Price Pro.",
     login: "Log In",
     signup: "Sign Up",
-    email: "Email"
+    email: "Email",
+    successSignup: "Account created successfully!",
+    successLogin: "Logged in successfully!",
+    error: "An error occurred.",
+    agreeTerms: "You must agree to the Terms and Privacy Policy.",
+    back: "Back"
   },
   global: {
     pageNotFound: "Page not found",
@@ -87,8 +92,9 @@ export const en = {
     calculatorDesc: "Adjust your target yield to simulate a new ceiling price.",
     calculate: "Calculate ceiling price",
     calculating: "Calculating...",
-    searching: "Searching asset...",
-    noResults: "No matches",
+    searching: "Searching for asset...",
+    noResults: "No results found",
+    noAssetsFound: "No assets found",
     taxExceptions: "JCP & Tax Exceptions",
     taxExceptionsPro: "Pro",
     taxExceptionsBody:
@@ -310,6 +316,8 @@ export const en = {
     cashFlow: "Cash Flow",
     smartAllocation: "Smart Allocation",
     radar: "Global Radar",
+    comparator: "Decision Desk",
+    riskRadar: "Risk Radar",
     dividendRadarTitle: "Dividend Radar",
     smartAllocationTitle: "Smart Allocation",
     chart: {
@@ -551,7 +559,81 @@ export const en = {
     },
     gordon: {
       title: "Gordon Growth Model",
-      description: "A discounted dividend model that assumes perpetual growth. It is the ideal mathematical model for Real Estate Funds (REITs/FIIs) due to their predictable income distribution and inflation-adjusted growth over time."
+      description: "A dividend discount model that assumes perpetual growth. It is the ideal mathematical model for Real Estate Investment Trusts (REITs/FIIs) due to the predictability of distribution and constant inflation adjustments."
     }
+  },
+  comparator: {
+    title: "Asset Filter & Comparator",
+    subtitle: "Select up to 3 assets to compare them side-by-side.",
+    searchPlaceholder: "Search asset to compare (e.g., AAPL, SCHD)",
+    selectThree: "Please select at least 3 assets to discover the best safety margin and upside.",
+    limitReached: "3 assets limit reached",
+    emptyTitle: "Empty Decision Desk",
+    emptySubtitle: "Use the search bar above to add your first asset and start comparing.",
+    mixedClassesWarning: "The compared assets do not belong to the same class or category.",
+    noAssetsFound: "No assets found",
+    metric: "Metric",
+    loading: "Loading data...",
+    metrics: {
+      currentPrice: "Current Price",
+      ceiling: "Ceiling Price",
+      margin: "Safety Margin",
+      dividendYield: "Dividend Yield",
+      cagr: "CAGR (5 Years)",
+      bazin: "Bazin",
+      graham: "Graham",
+      gordon: "Gordon",
+    }
+  },
+  
+  riskRadar: {
+    title: "Risk & Concentration Radar",
+    subtitle: "Institutional diagnostic of your portfolio's exposure and vulnerabilities.",
+    emptyTitle: "No assets in portfolio",
+    emptySubtitle: "Add assets to your watchlist to view the risk and concentration matrix.",
+    systemWarnings: "System Alerts",
+    currencyExposure: "Currency Exposure",
+    typeExposure: "Exposure by Asset Class",
+    assetConcentration: "Asset Concentration",
+    assetConcentrationDesc: "Monitoring the individual weight of each asset in the portfolio.",
+    sectorExposure: "Sector Exposure",
+    sectorExposureDesc: "Identification of excessive concentration in specific industries.",
+    asset: "Asset",
+    sector: "Sector",
+    weight: "Weight",
+    status: "Status",
+    safe: "Safe",
+    warning: "Warning",
+    critical: "Critical",
+    concentrationRisk: "Concentration Risk",
+    warnings: {
+      yieldTrapTitle: "Possible Yield Trap",
+      yieldTrapDesc: "Asset has a very high Dividend Yield (>10%), but is trading above the ceiling price (Negative Safety Margin).",
+      payoutAuditTitle: "Sustainability Risk",
+      payoutAuditDesc: "Current Payout exceeds 80%, indicating vulnerability in future profit distribution and risk of dividend cuts.",
+      sectorConcentrationTitle: "Sector Concentration",
+      sectorConcentrationDesc: "Exposure to the {sector} sector has exceeded 25%. Risk of chain volatility if the industry suffers a macroeconomic impact.",
+      assetConcentrationTitle: "Critical Asset Concentration",
+      assetConcentrationDesc: "The portfolio has excessive dependence on the performance of a single asset (>15%). Consider rebalancing.",
+    }
+  },
+  fiMode: {
+    title: "FI Mode (Financial Independence)",
+    configTitle: "Configure FI Goals",
+    monthlyCostGoal: "Monthly Cost of Living",
+    monthlyContribution: "Monthly Contribution",
+    saveGoal: "Save Goals",
+    subtitle: "Track your path to living off dividends.",
+    activate: "Activate FI Mode to see progress",
+    passiveIncome: "Passive Income",
+    covered: "of living expenses covered",
+    achieved: "Financial Independence Achieved! 🎉",
+    moreThan100: ">100 Years (Increase contributions)",
+    monthsRemaining: "{time} to FI",
+    settingsSaved: "FI Settings Saved!",
+    disabled: "FI Mode Disabled"
+  },
+  feedback: {
+    buttonText: "Send Feedback"
   }
 };

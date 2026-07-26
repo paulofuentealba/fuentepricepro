@@ -58,9 +58,10 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
     if (brRes.status === "fulfilled" && brRes.value?.stocks) {
       for (const s of brRes.value.stocks.slice(0, 6)) {
         const t = String(s).toUpperCase();
-        if (seen.has(t)) continue;
-        seen.add(t);
-        results.push({ ticker: t, name: t, type: classifyBr(t), sector: null });
+        const cleaned = cleanTicker(t);
+        if (seen.has(cleaned)) continue;
+        seen.add(cleaned);
+        results.push({ ticker: cleaned, name: t, type: classifyBr(t), sector: null });
       }
     }
 
@@ -68,12 +69,13 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
       for (const q2 of yhRes.value.quotes) {
         if (!q2.symbol) continue;
         const t = String(q2.symbol).toUpperCase();
-        if (seen.has(t)) continue;
+        const cleaned = cleanTicker(t);
+        if (seen.has(cleaned)) continue;
         // Skip non-primary exchange BR shadows (e.g. .BK)
         if (/\.(BK|F|MX|TA|IL|VI|BR)$/.test(t)) continue;
-        seen.add(t);
+        seen.add(cleaned);
         results.push({
-          ticker: cleanTicker(t),
+          ticker: cleaned,
           name: q2.longname || q2.shortname || t,
           type: classifyYahoo({
             symbol: t,

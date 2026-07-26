@@ -22,8 +22,13 @@ export const ptBR = {
     privacy: "Política de Privacidade",
     suffix: " do Fuente Price Pro.",
     login: "Entrar",
-    signup: "Criar Conta",
-    email: "Email"
+    signup: "Cadastrar",
+    email: "E-mail",
+    successSignup: "Conta criada com sucesso!",
+    successLogin: "Login efetuado com sucesso!",
+    error: "Ocorreu um erro.",
+    agreeTerms: "Você deve aceitar os Termos e Política de Privacidade.",
+    back: "Voltar"
   },
   global: {
     pageNotFound: "Página não encontrada",
@@ -91,6 +96,7 @@ export const ptBR = {
     calculating: "Calculando...",
     searching: "Buscando ativo...",
     noResults: "Nenhum resultado",
+    noAssetsFound: "Nenhum ativo encontrado",
     taxExceptions: "JCP & Exceções Fiscais",
     taxExceptionsPro: "Pro",
     taxExceptionsBody:
@@ -276,7 +282,7 @@ export const ptBR = {
     viewCalendar: "Calendário",
     cashFlowTitle: "Fluxo de caixa mensal projetado",
     cashFlowEmpty: "Adicione ativos à sua Watchlist para ver a projeção de fluxo de caixa.",
-    targetMonthlyIncome: "Meta de renda mensal (opcional)",
+    targetMonthlyIncome: "Meta de renda mensal (optional)",
     targetMonthlyIncomeHint: "Defina uma meta mensal para este ativo e acompanhe o progresso.",
     goalProgress: "🎯 Meta: {{amount}}/mês · {{pct}}% atingido",
     goalReached: "Meta Alcançada! 🏆",
@@ -307,12 +313,14 @@ export const ptBR = {
   },
 
   tabs: {
-    calculator: "Calculadora",
-    portfolio: "Meu Portfólio",
-    cashFlow: "Fluxo de Caixa",
-    smartAllocation: "Aporte Inteligente",
-    radar: "Radar Global",
-    dividendRadarTitle: "Radar de Dividendos",
+      calculator: "Calculadora",
+      portfolio: "Minha Carteira",
+      cashFlow: "Fluxo de Caixa",
+      smartAllocation: "Aporte Inteligente",
+      radar: "Radar Global",
+      comparator: "Mesa de Decisão",
+      riskRadar: "Radar de Risco",
+      dividendRadarTitle: "Radar de Dividendos",
     smartAllocationTitle: "Alocação Inteligente",
     chart: {
       projected: "Projetado",
@@ -560,4 +568,78 @@ export const ptBR = {
       description: "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação."
     }
   },
+  comparator: {
+    title: "Filtro e Comparador de Ações",
+    subtitle: "Selecione até 3 ativos para compará-los lado a lado.",
+    searchPlaceholder: "Buscar ativo para comparar (ex: AAPL, ITUB4)",
+    selectThree: "Por favor, selecione ao menos 3 ativos para descobrir a melhor margem de segurança e upside.",
+    limitReached: "Limite de 3 ativos atingido",
+    emptyTitle: "Mesa de Decisão Vazia",
+    emptySubtitle: "Use a barra de pesquisa acima para adicionar o primeiro ativo e iniciar a comparação.",
+    mixedClassesWarning: "Os ativos comparados não pertencem à mesma classe ou categoria.",
+    noAssetsFound: "Nenhum ativo encontrado",
+    metric: "Métrica",
+    loading: "Carregando dados...",
+    metrics: {
+      currentPrice: "Preço Atual",
+      ceiling: "Preço Teto",
+      margin: "Margem de Segurança",
+      dividendYield: "Dividend Yield",
+      cagr: "CAGR (5 Anos)",
+      bazin: "Bazin",
+      graham: "Graham",
+      gordon: "Gordon",
+    }
+  },
+  
+  riskRadar: {
+    title: "Radar de Risco e Concentração",
+    subtitle: "Diagnóstico institucional da exposição e vulnerabilidades da sua carteira.",
+    emptyTitle: "Nenhum ativo na carteira",
+    emptySubtitle: "Adicione ativos à sua watchlist para visualizar a matriz de risco e concentração.",
+    systemWarnings: "Alertas do Sistema",
+    currencyExposure: "Exposição Cambial",
+    typeExposure: "Exposição por Classe de Ativo",
+    assetConcentration: "Concentração por Ativo",
+    assetConcentrationDesc: "Monitoramento do peso individual de cada ativo na carteira.",
+    sectorExposure: "Exposição Setorial",
+    sectorExposureDesc: "Identificação de concentração excessiva em indústrias específicas.",
+    asset: "Ativo",
+    sector: "Setor",
+    weight: "Peso",
+    status: "Status",
+    safe: "Seguro",
+    warning: "Atenção",
+    critical: "Crítico",
+    concentrationRisk: "Risco de Concentração",
+    warnings: {
+      yieldTrapTitle: "Possível Yield Trap",
+      yieldTrapDesc: "Ativo apresenta um Dividend Yield muito alto (>10%), mas é negociado acima do preço teto (Margem de Segurança negativa).",
+      payoutAuditTitle: "Risco de Sustentabilidade",
+      payoutAuditDesc: "O Payout atual ultrapassa 80%, indicando vulnerabilidade na distribuição futura de lucros e risco de corte de dividendos.",
+      sectorConcentrationTitle: "Concentração Setorial",
+      sectorConcentrationDesc: "A exposição ao setor {sector} ultrapassou 25%. Risco de volatilidade em cadeia caso a indústria sofra um impacto macroeconômico.",
+      assetConcentrationTitle: "Concentração Crítica por Ativo",
+      assetConcentrationDesc: "A carteira tem dependência excessiva na performance de um único ativo (>15%). Considere rebalancear.",
+    }
+  },
+  fiMode: {
+    title: "Modo IF (Independência Financeira)",
+    configTitle: "Configurar Metas IF",
+    monthlyCostGoal: "Custo de Vida Mensal",
+    monthlyContribution: "Aporte Mensal",
+    saveGoal: "Salvar Metas",
+    subtitle: "Acompanhe sua jornada para viver de renda.",
+    activate: "Ativar Modo IF para ver progresso",
+    passiveIncome: "Renda Passiva",
+    covered: "do custo de vida coberto",
+    achieved: "Independência Financeira Atingida! 🎉",
+    moreThan100: ">100 Anos (Aumente os aportes)",
+    monthsRemaining: "{time} para IF",
+    settingsSaved: "Configurações IF Salvas!",
+    disabled: "Modo IF Desativado"
+  },
+  feedback: {
+    buttonText: "Enviar Feedback"
+  }
 } satisfies typeof en;

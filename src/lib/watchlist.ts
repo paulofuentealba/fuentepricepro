@@ -20,6 +20,7 @@ import { cleanTicker } from "./formatters";
 
 const STORAGE_KEY = "ceilingPricePro.watchlist.v1";
 const ONBOARDED_KEY = "ceilingPricePro.onboarded.v1";
+const USE_LOCAL_ONLY = true; // HOTFIX: Bloquear Firebase para QA local
 
 export interface WatchlistItem {
   id: string;
@@ -241,9 +242,9 @@ export function useWatchlist() {
     queryKey,
     queryFn: async () => {
       let data: WatchlistItem[] = [];
-      const hasOnboarded = window.localStorage.getItem(ONBOARDED_KEY);
+      const hasOnboarded = window.localStorage.getItem(ONBOARDED_KEY) === "true";
 
-      if (userId) {
+      if (userId && !USE_LOCAL_ONLY) {
         // Migrate local items on first cloud load
         const local = readLocal();
         if (local.length > 0) {
@@ -292,7 +293,7 @@ export function useWatchlist() {
 
   // Realtime Sync (onSnapshot)
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || USE_LOCAL_ONLY) return;
     const q = collection(db, "users", userId, "assets");
     const unsubscribe = onSnapshot(
       q,
@@ -343,7 +344,7 @@ export function useWatchlist() {
         const next = items.map((i) =>
           patches.has(i.id) ? { ...i, paymentMonths: patches.get(i.id)! } : i,
         );
-        if (userId) {
+        if (userId && !USE_LOCAL_ONLY) {
           const rows = next.filter((i) => patches.has(i.id)).map((i) => itemToRow(i, userId));
           try {
             const chunkSize = 400;
@@ -373,7 +374,7 @@ export function useWatchlist() {
 
   // Sync with cross-tab local storage
   useEffect(() => {
-    if (userId) return; // Only guest mode needs cross-tab storage sync
+    if (userId && !USE_LOCAL_ONLY) return; // Only guest mode needs cross-tab storage sync
     const handleStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) {
         queryClient.setQueryData(queryKey, readLocal());
@@ -385,14 +386,12 @@ export function useWatchlist() {
 
   const upsertMutation = useMutation({
     mutationFn: async (item: WatchlistItem) => {
-      if (userId) {
+      if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
-        console.log(`[watchlist] upserting item ${item.ticker}...`);
         try {
           const row = itemToRow(item, userId);
           const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
           await withTimeout(setDoc(ref, row, { merge: true }));
-          console.log(`[watchlist] item ${item.ticker} saved successfully.`);
         } catch (error: any) {
           console.error("[watchlist] error saving item:", error);
           toast.error(`Erro ao salvar ativo: ${error.message}`);
@@ -428,15 +427,13 @@ export function useWatchlist() {
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (userId) {
+      if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
-        console.log(`[watchlist] removing item ${id}...`);
         try {
           const target = items.find((i) => i.id === id);
           if (target) {
             const ref = doc(db, "users", userId, "assets", `${target.type}_${target.ticker}`);
             await withTimeout(deleteDoc(ref));
-            console.log(`[watchlist] item ${id} removed successfully.`);
           }
         } catch (error: any) {
           console.error("[watchlist] error removing item:", error);
@@ -467,11 +464,50 @@ export function useWatchlist() {
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
+  const clearMutation = useMutation({
+    mutationFn: async () => {
+      if (userId && !USE_LOCAL_ONLY) {
+        if (!userId) throw new Error("Usuário não autenticado");
+        try {
+          const chunkSize = 400;
+          for (let i = 0; i < items.length; i += chunkSize) {
+            const chunk = items.slice(i, i + chunkSize);
+            const batch = writeBatch(db);
+            chunk.forEach((item) => {
+              const row = itemToRow(item, userId);
+              const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
+              batch.delete(ref);
+            });
+            await batch.commit();
+          }
+        } catch (error: any) {
+          console.error("[watchlist] error clearing items:", error);
+          toast.error(`Erro ao limpar ativos: ${error.message}`);
+          throw error;
+        }
+      } else {
+        clearLocal();
+      }
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<WatchlistItem[]>(queryKey);
+      queryClient.setQueryData(queryKey, []);
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
+    },
+    onSuccess: () => {
+      toast.success("Watchlist limpa com sucesso!");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
   const upsertManyMutation = useMutation({
     mutationFn: async (newItems: WatchlistItem[]) => {
-      if (userId) {
+      if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
-        console.log(`[watchlist] upserting ${newItems.length} items in batch...`);
         try {
           const chunkSize = 400;
           for (let i = 0; i < newItems.length; i += chunkSize) {
@@ -489,7 +525,6 @@ export function useWatchlist() {
               }, 5000),
             );
             await Promise.race([commitPromise, timeoutPromise]);
-            console.log(`[watchlist] batch of ${chunk.length} items saved.`);
           }
         } catch (error: any) {
           console.error("[watchlist] error saving batch:", error);
@@ -536,12 +571,10 @@ export function useWatchlist() {
 
       if (userId) {
         if (!userId) throw new Error("Usuário não autenticado");
-        console.log(`[watchlist] updating item ${id}...`);
         try {
           const row = itemToRow(merged, userId);
           const ref = doc(db, "users", userId, "assets", `${row.type}_${row.ticker}`);
           await withTimeout(setDoc(ref, row, { merge: true }));
-          console.log(`[watchlist] item ${id} updated successfully.`);
         } catch (error: any) {
           console.error("[watchlist] error updating item:", error);
           toast.error(`Erro ao atualizar ativo: ${error.message}`);

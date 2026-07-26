@@ -91,6 +91,8 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     try {
       const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
       await signInWithPopup(auth, provider);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : `${providerName} sign-in failed`);
@@ -108,13 +110,13 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     try {
       if (emailMode === "signup") {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast.success("Account created successfully!");
+        toast.success(t.authModal.successSignup);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Welcome back");
+        toast.success(t.authModal.successLogin);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      toast.error(err instanceof Error ? err.message : t.authModal.error);
     } finally {
       setBusy(false);
     }
@@ -251,7 +253,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="am-password">Senha</Label>
+                <Label htmlFor="am-password">{t.global.password}</Label>
                 <Input
                   id="am-password"
                   type="password"
@@ -274,7 +276,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                   htmlFor="terms-email"
                   className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
                 >
-                  Eu li e concordo com os{" "}
+                  {t.authModal.agreeTerms}
                   <button
                     type="button"
                     onClick={() => {
@@ -283,9 +285,9 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                     }}
                     className="underline font-medium text-foreground hover:text-success"
                   >
-                    Termos de Uso
-                  </button>{" "}
-                  e{" "}
+                    {t.authModal.terms}
+                  </button>
+                  {t.authModal.and}
                   <button
                     type="button"
                     onClick={() => {
@@ -294,9 +296,9 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                     }}
                     className="underline font-medium text-foreground hover:text-success"
                   >
-                    Política de Privacidade
+                    {t.authModal.privacy}
                   </button>
-                  .
+                  {t.authModal.suffix}
                 </label>
               </div>
 
@@ -306,14 +308,14 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                 className="w-full bg-success text-success-foreground hover:bg-success/90"
               >
                 {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {emailMode === "signup" ? "Criar Conta" : "Entrar"}
+                {emailMode === "signup" ? t.authModal.signup : t.authModal.login}
               </Button>
               <button
                 type="button"
                 onClick={() => setMode("choose")}
                 className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
               >
-                ← Voltar
+                {t.authModal.back}
               </button>
             </form>
           ) : mode === "terms" || mode === "privacy" ? (
@@ -321,7 +323,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
               <div className="max-h-[40vh] overflow-y-auto pr-2 text-sm text-muted-foreground space-y-4">
                 {mode === "terms" ? (
                   <>
-                    <h3 className="font-semibold text-foreground text-base">Termos de Uso</h3>
+                    <h3 className="font-semibold text-foreground text-base">{t.authModal.terms}</h3>
                     <p>
                       Ao utilizar o Fuente Price Pro, você concorda que nossa plataforma fornece
                       dados, projeções de dividendos e análises de mercado{" "}
@@ -340,7 +342,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                 ) : (
                   <>
                     <h3 className="font-semibold text-foreground text-base">
-                      Política de Privacidade
+                      {t.authModal.privacy}
                     </h3>
                     <p>
                       Nós valorizamos muito a sua privacidade (LGPD). Seus dados pessoais, como
@@ -365,7 +367,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
                 variant="outline"
                 className="w-full mt-4"
               >
-                Entendido, voltar
+                {t.authModal.back}
               </Button>
             </div>
           ) : null}

@@ -95,7 +95,7 @@ export function Header({ variant = "app" }: HeaderProps) {
               </div>
             )}
 
-            {user && (
+            {user && variant === "landing" && (
               <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
                 <Link to="/app/docs">
                   <BookOpen className="h-4 w-4" />
@@ -140,28 +140,30 @@ export function Header({ variant = "app" }: HeaderProps) {
             )}
 
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  {userAvatar}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
-                    <UserIcon className="h-3.5 w-3.5" />
-                    <span className="truncate">{user.email}</span>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/settings" className="cursor-pointer flex items-center">
-                      <Settings className="mr-2 h-4 w-4" />
-                      {L.settings}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    {L.signOut}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              variant === "landing" ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    {userAvatar}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
+                      <UserIcon className="h-3.5 w-3.5" />
+                      <span className="truncate">{user.email}</span>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="cursor-pointer flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        {L.settings}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {L.signOut}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null
             ) : (
               variant === "app" && (
                 <Button
@@ -195,7 +197,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                       {L.navFeatures}
                     </a>
                   )}
-                  {user && (
+                  {user && variant === "landing" && (
                     <>
                       <div className="flex items-center gap-3 py-2 border-b border-white/10">
                         {userAvatar}
@@ -244,7 +246,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                       <span className="text-sm font-medium">Language</span>
                       <LanguageSwitcher className="inline-flex" />
                     </div>
-                    {user && (
+                    {user && variant === "landing" && (
                       <Button variant="ghost" onClick={() => signOut()} className="w-full justify-start text-danger hover:text-danger hover:bg-danger/10">
                         <LogOut className="mr-2 h-5 w-5" />
                         {L.signOut}

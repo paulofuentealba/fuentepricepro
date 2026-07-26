@@ -22,8 +22,13 @@ export const es = {
     privacy: "Política de Privacidad",
     suffix: " de Fuente Price Pro.",
     login: "Iniciar Sesión",
-    signup: "Crear Cuenta",
-    email: "Correo Electrónico"
+    signup: "Registrarse",
+    email: "Correo",
+    successSignup: "¡Cuenta creada con éxito!",
+    successLogin: "¡Inicio de sesión exitoso!",
+    error: "Ocurrió un error.",
+    agreeTerms: "Debes aceptar los Términos y la Política de Privacidad.",
+    back: "Volver"
   },
   global: {
     pageNotFound: "Página no encontrada",
@@ -91,6 +96,7 @@ export const es = {
     calculating: "Calculando...",
     searching: "Buscando activo...",
     noResults: "Sin resultados",
+    noAssetsFound: "Ningún activo encontrado",
     taxExceptions: "JCP y Excepciones Fiscales",
     taxExceptionsPro: "Pro",
     taxExceptionsBody:
@@ -310,10 +316,12 @@ export const es = {
 
   tabs: {
     calculator: "Calculadora",
-    portfolio: "Mi Portafolio",
+    portfolio: "Mi Cartera",
     cashFlow: "Flujo de Caja",
-    smartAllocation: "Aporte Inteligente",
+    smartAllocation: "Asignación Inteligente",
     radar: "Radar Global",
+    comparator: "Mesa de Decisión",
+    riskRadar: "Radar de Riesgo",
     dividendRadarTitle: "Radar de Dividendos",
     smartAllocationTitle: "Asignación Inteligente",
     chart: {
@@ -561,7 +569,80 @@ export const es = {
     },
     gordon: {
       title: "Modelo de Gordon",
-      description: "Un modelo de descuento de dividendos que asume un crecimiento perpetuo. Es el modelo matemático ideal para Fondos Inmobiliarios (REITs/FIIs) debido a la previsibilidad de sus distribuciones y al ajuste por inflación a lo largo del tiempo."
+      description: "Un modelo de descuento de dividendos que asume un crecimiento perpetuo. Es el modelo matemático ideal para los Fondos Inmobiliarios (FIIs/REITs) debido a la previsibilidad de la distribución y los constantes ajustes por inflación."
     }
+  },
+  comparator: {
+    title: "Filtro y Comparador de Acciones",
+    subtitle: "Selecciona hasta 3 activos para compararlos lado a lado.",
+    searchPlaceholder: "Buscar activo para comparar (ej: AAPL, ITUB4)",
+    selectThree: "Selecciona al menos 3 activos para descubrir el mejor margen de seguridad y upside.",
+    limitReached: "Límite de 3 activos alcanzado",
+    emptyTitle: "Mesa de Decisión Vacía",
+    emptySubtitle: "Usa la barra de búsqueda de arriba para agregar el primer activo y comenzar a comparar.",
+    mixedClassesWarning: "Los activos comparados no pertenecen a la misma clase o categoría.",
+    noAssetsFound: "Ningún activo encontrado",
+    metric: "Métrica",
+    loading: "Cargando datos...",
+    metrics: {
+      currentPrice: "Precio Actual",
+      ceiling: "Precio Techo",
+      margin: "Margen de Seguridad",
+      dividendYield: "Dividend Yield",
+      cagr: "CAGR (5 Años)",
+      bazin: "Bazin",
+      graham: "Graham",
+      gordon: "Gordon",
+    }
+  },
+  riskRadar: {
+    title: "Radar de Riesgo y Concentración",
+    subtitle: "Diagnóstico institucional de la exposición y vulnerabilidades de su cartera.",
+    emptyTitle: "Sin activos en la cartera",
+    emptySubtitle: "Agregue activos a su lista de seguimiento para ver la matriz de riesgo y concentración.",
+    systemWarnings: "Alertas del Sistema",
+    currencyExposure: "Exposición Cambiaria",
+    typeExposure: "Exposición por Clase de Activo",
+    assetConcentration: "Concentración de Activos",
+    assetConcentrationDesc: "Monitoreo del peso individual de cada activo en la cartera.",
+    sectorExposure: "Exposición Sectorial",
+    sectorExposureDesc: "Identificación de excesiva concentración en industrias específicas.",
+    asset: "Activo",
+    sector: "Sector",
+    weight: "Peso",
+    status: "Estado",
+    safe: "Seguro",
+    warning: "Atención",
+    critical: "Crítico",
+    concentrationRisk: "Riesgo de Concentración",
+    warnings: {
+      yieldTrapTitle: "Posible Trampa de Valor",
+      yieldTrapDesc: "El activo tiene un rendimiento por dividendo muy alto (>10%), pero se negocia por encima de su precio techo (margen de seguridad negativo).",
+      payoutAuditTitle: "Riesgo de Sostenibilidad",
+      payoutAuditDesc: "El Payout supera el 80%, indicando vulnerabilidad en futuras distribuciones de ganancias y riesgo de recortes de dividendos.",
+      sectorConcentrationTitle: "Concentración del Sector",
+      sectorConcentrationDesc: "La exposición al sector {sector} ha superado el 25%. Riesgo de volatilidad en cadena si la industria sufre un impacto macroeconómico.",
+      assetConcentrationTitle: "Concentración Crítica de Activos",
+      assetConcentrationDesc: "La cartera tiene una dependencia excesiva del rendimiento de un solo activo (>15%). Considere reequilibrar.",
+    }
+  },
+  fiMode: {
+    title: "Modo IF (Independencia Financiera)",
+    configTitle: "Configurar Objetivos IF",
+    monthlyCostGoal: "Costo de Vida Mensual",
+    monthlyContribution: "Contribución Mensual",
+    saveGoal: "Guardar Objetivos",
+    subtitle: "Rastree su camino hacia vivir de dividendos.",
+    activate: "Active el Modo IF para ver el progreso",
+    passiveIncome: "Ingreso Pasivo",
+    covered: "de gastos de subsistencia cubiertos",
+    achieved: "¡Independencia Financiera Alcanzada! 🎉",
+    moreThan100: ">100 Años (Aumente contribuciones)",
+    monthsRemaining: "{time} para IF",
+    settingsSaved: "Configuraciones IF Guardadas!",
+    disabled: "Modo IF Desactivado"
+  },
+  feedback: {
+    buttonText: "Enviar Comentarios"
   }
 } satisfies typeof en;

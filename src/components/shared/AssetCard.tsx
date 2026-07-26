@@ -46,6 +46,9 @@ export interface AssetCardProps {
   onEdit?: (item: WatchlistItem) => void;
   onRemove?: (id: string) => void;
   onOpenDetail?: (item: WatchlistItem) => void;
+  onClose?: (ticker: string) => void;
+  hidePlayground?: boolean;
+  hideGoalPlanner?: boolean;
   
   // Specific to Allocation variant
   shares?: number;
@@ -149,15 +152,13 @@ function AllocationVariant({ item, shares = 0, cost = 0, addedIncome = 0, curren
 }
 
 function WatchlistVariant(props: AssetCardProps) {
-  const { item, quote, meta, onEdit, onRemove, onOpenDetail } = props;
+  const { item, quote, meta, onEdit, onRemove, onOpenDetail, onClose } = props;
   const { t, locale } = useI18n();
   const derived = useAssetCardDerived(item as WatchlistItem);
   const cardRef = useRef<HTMLDivElement>(null);
   const { data: selic } = useSelic();
   const [isCorpEventOpen, setIsCorpEventOpen] = useState(false);
   const { pendingEvent } = usePendingEvents(item as WatchlistItem);
-
-  console.log(`[AssetCard] Pending events for ${item?.ticker}:`, pendingEvent);
 
   const handleEdit = useCallback(() => item && onEdit?.(item), [item, onEdit]);
   const handleCorpEvent = useCallback(() => setIsCorpEventOpen(true), []);
@@ -240,6 +241,8 @@ function WatchlistVariant(props: AssetCardProps) {
     type: item.type,
   });
 
+  const hasConsensus = (valuation.consensus && valuation.consensus > 0);
+
   return (
     <Card
       ref={cardRef}
@@ -250,13 +253,26 @@ function WatchlistVariant(props: AssetCardProps) {
       aria-label={`Open details for ${item.ticker}`}
       className={cn(
         "cursor-pointer overflow-hidden border border-border/50 transition-all focus-visible:outline-none focus-visible:ring-1",
-        "bg-background/60 backdrop-blur-md hover:bg-background/80 hover:shadow-2xl hover:border-white/10 group flex flex-col h-full",
-        derived.positive
+        "bg-background/60 backdrop-blur-md hover:bg-background/80 hover:shadow-2xl hover:border-white/10 group flex flex-col h-full relative",
+        !hasConsensus
+          ? "focus-visible:border-slate-500/60 focus-visible:ring-slate-500/40 shadow-[0_0_15px_rgba(100,116,139,0.1)]"
+          : derived.positive
           ? "focus-visible:border-emerald-500/60 focus-visible:ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
           : "focus-visible:border-rose-500/60 focus-visible:ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
       )}
     >
-      <div className="p-5 flex-1 space-y-4">
+      {onClose && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose(item!.ticker);
+          }}
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors z-20"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+      <div className="p-4 flex-1 space-y-3">
         <AssetCardHeader
           item={item}
           quote={quote}
@@ -304,7 +320,14 @@ function WatchlistVariant(props: AssetCardProps) {
 
 function AssetCardImpl(props: AssetCardProps) {
   if (props.variant === 'search' && props.asset && props.targetYield !== undefined) {
-    return <SearchVariant asset={props.asset} targetYield={props.targetYield} averagePrice={props.averagePrice} hideAddToWatchlist={props.hideAddToWatchlist} />;
+    return <SearchVariant 
+             asset={props.asset} 
+             targetYield={props.targetYield} 
+             averagePrice={props.averagePrice} 
+             hideAddToWatchlist={props.hideAddToWatchlist} 
+             hidePlayground={props.hidePlayground}
+             hideGoalPlanner={props.hideGoalPlanner}
+           />;
   }
 
   if (props.variant === "allocation") {
@@ -328,6 +351,8 @@ interface Props {
   targetYield: number;
   averagePrice?: number | null;
   hideAddToWatchlist?: boolean;
+  hidePlayground?: boolean;
+  hideGoalPlanner?: boolean;
 }
 
 function SearchVariant({
@@ -335,6 +360,8 @@ function SearchVariant({
   targetYield: initialTargetYield,
   averagePrice: initialAveragePrice,
   hideAddToWatchlist,
+  hidePlayground,
+  hideGoalPlanner,
 }: Props) {
   const { t, locale } = useI18n();
   const [timeframe, setTimeframe] = useState<Timeframe>(3);
@@ -430,29 +457,31 @@ function SearchVariant({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <ResultStats
-          asset={asset}
-          timeframe={timeframe}
-          availableTimeframes={availableTimeframes}
-          onTimeframeChange={setTimeframe}
-          avg={avg}
-          netAvg={netAvg}
-          isUs={isUs}
-          avgYieldPct={avgYieldPct}
-          yocPct={yocPct}
-          exDateFormatted={exDateFormatted}
-          ceiling={activeCeiling}
-          targetYield={localTargetYield}
-          margin={margin}
-          positive={positive}
-          averagePrice={localAveragePrice ?? null}
-          customTaxRate={localCustomTaxRate}
-          onTargetYieldChange={setLocalTargetYield}
-          onAveragePriceChange={setLocalAveragePrice}
-          onCustomTaxRateChange={setLocalCustomTaxRate}
-          isPro={isPro}
-          onShowPaywall={() => setShowPaywall(true)}
-        />
+        {!hidePlayground && (
+          <ResultStats
+            asset={asset}
+            timeframe={timeframe}
+            availableTimeframes={availableTimeframes}
+            onTimeframeChange={setTimeframe}
+            avg={avg}
+            netAvg={netAvg}
+            isUs={isUs}
+            avgYieldPct={avgYieldPct}
+            yocPct={yocPct}
+            exDateFormatted={exDateFormatted}
+            ceiling={activeCeiling}
+            targetYield={localTargetYield}
+            margin={margin}
+            positive={positive}
+            averagePrice={localAveragePrice ?? null}
+            customTaxRate={localCustomTaxRate}
+            onTargetYieldChange={setLocalTargetYield}
+            onAveragePriceChange={setLocalAveragePrice}
+            onCustomTaxRateChange={setLocalCustomTaxRate}
+            isPro={isPro}
+            onShowPaywall={() => setShowPaywall(true)}
+          />
+        )}
 
         <IndicatorGrid asset={asset} />
 
@@ -474,11 +503,13 @@ function SearchVariant({
           consensus={valuation.consensus}
         />
 
-        <GoalPlanner
-          annualDividend={avg}
-          currentPrice={asset.currentPrice}
-          currency={asset.currency}
-        />
+        {!hideGoalPlanner && (
+          <GoalPlanner
+            annualDividend={avg}
+            currentPrice={asset.currentPrice}
+            currency={asset.currency}
+          />
+        )}
 
         <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
           {!positive && (

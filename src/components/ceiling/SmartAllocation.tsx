@@ -23,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { Currency } from "@/lib/domain";
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
+import { toast } from "sonner";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { cn } from "@/lib/utils";
 import { STRATEGY_ORDER, computeSmartAllocation, type StrategyKey } from "@/lib/allocation";
@@ -53,6 +54,7 @@ export function SmartAllocation() {
   const [strategies, setStrategies] = useState<StrategyKey[]>(["yield"]);
   const [excludedTickers, setExcludedTickers] = useState<string[]>([]);
   const [generated, setGenerated] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { data: exchangeRate = 5.0 } = useExchangeRate();
   const targets = settings.smartAllocationTargets;
   const setTargets = (t: Record<AssetType, number>) =>
@@ -146,8 +148,18 @@ export function SmartAllocation() {
   ]);
 
   const handleGenerate = () => {
-    setExcludedTickers([]);
-    setGenerated(true);
+    const totalTarget = Object.values(targets).reduce((acc, val) => acc + val, 0);
+    if (totalTarget !== 100) {
+      toast.warning("Ajuste suas metas de alocação para 100% antes de gerar a recomendação.");
+      return;
+    }
+
+    setIsGenerating(true);
+    setTimeout(() => {
+      setExcludedTickers([]);
+      setGenerated(true);
+      setIsGenerating(false);
+    }, 600);
   };
 
   const handleExclude = (ticker: string) => {
@@ -268,10 +280,10 @@ export function SmartAllocation() {
 
             <Button
               onClick={handleGenerate}
-              disabled={!capital || Number(capital) <= 0 || !hasCurrency[currency]}
+              disabled={!capital || Number(capital) <= 0 || !hasCurrency[currency] || isGenerating}
               variant={generated ? "secondary" : "default"}
             >
-              {generated ? "Recalculate / Reset" : t.smartAllocation.generate}
+              {isGenerating ? "Calculando..." : generated ? "Recalculate / Reset" : t.smartAllocation.generate}
             </Button>
           </div>
 

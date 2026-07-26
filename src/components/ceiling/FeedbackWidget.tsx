@@ -14,14 +14,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/lib/i18n-provider";
 
 export function FeedbackWidget() {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const pt = locale === "ptBR";
   const labels = {
-    button: pt ? "Enviar Feedback" : "Give Feedback",
+    button: t.feedback?.buttonText ?? "Give Feedback",
     title: pt ? "Ajude-nos a melhorar o Fuente Price Pro" : "Help us improve Fuente Price Pro",
     description: pt
       ? "Sua opinião guia nossos próximos passos. Conte-nos o que você gostaria de ver."

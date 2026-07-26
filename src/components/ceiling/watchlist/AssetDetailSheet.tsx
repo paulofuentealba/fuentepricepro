@@ -105,9 +105,11 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
 interface AssetDetailSheetProps {
   item: WatchlistItem | null;
   onClose: () => void;
+  hidePlayground?: boolean;
+  hideGoalPlanner?: boolean;
 }
 
-export function AssetDetailSheet({ item, onClose }: AssetDetailSheetProps) {
+export function AssetDetailSheet({ item, onClose, hidePlayground, hideGoalPlanner }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
@@ -184,6 +186,8 @@ export function AssetDetailSheet({ item, onClose }: AssetDetailSheetProps) {
                 targetYield={item.targetYield || 6}
                 averagePrice={item.averagePrice}
                 hideAddToWatchlist
+                hidePlayground={hidePlayground}
+                hideGoalPlanner={hideGoalPlanner}
               />
             </ErrorBoundary>
           )}

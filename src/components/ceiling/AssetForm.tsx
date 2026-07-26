@@ -90,7 +90,18 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   }, [query, shouldSearch]);
 
   const searchResult = useQuery(searchQueryOptions(debouncedQuery));
-  const suggestions: SearchHit[] = searchResult.data ?? [];
+  
+  const suggestions: SearchHit[] = useMemo(() => {
+    const raw = searchResult.data ?? [];
+    const seen = new Set<string>();
+    return raw.filter((hit) => {
+      if (seen.has(hit.ticker)) return false;
+      if (!ALL_TYPES.includes(hit.type)) return false;
+      seen.add(hit.ticker);
+      return true;
+    });
+  }, [searchResult.data]);
+
   const searching = shouldSearch && (searchResult.isFetching || debouncedQuery === "");
 
   const assetResult = useQuery({
@@ -167,23 +178,18 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     setManualType(null);
     setEditingType(false);
     setOpen(false);
-  }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!selected || !activeType) return;
-    const y = globalYield;
     onSubmit({
-      ticker: selected.ticker,
-      type: activeType,
-      targetYield: y,
+      ticker: hit.ticker,
+      type: manualType ?? hit.type,
+      targetYield: globalYield,
       averagePrice: null,
       customTaxRate: null,
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="space-y-5">
       <div ref={containerRef} className="relative space-y-2">
         <Label htmlFor="ticker" className="text-xs uppercase tracking-wider text-muted-foreground">
           {t.form.ticker}
@@ -236,7 +242,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
         )}
         {open && shouldSearch && !searching && suggestions.length === 0 && (
           <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
-            {t.form.noResults}
+            {t.form.noAssetsFound}
           </div>
         )}
         {open && searching && (
@@ -295,17 +301,10 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
       )}
 
       <div>
-        <Button
-          type="submit"
-          disabled={!selected || isSubmitting}
-          className="h-11 w-full bg-success text-success-foreground hover:bg-success/90 disabled:opacity-50"
-        >
-          {isSubmitting ? t.form.calculating : t.form.calculate}
-        </Button>
         {!selected && query.trim() !== "" && !open && (
           <p className="mt-2 text-center text-xs text-destructive">{t.form.selectAssetError}</p>
         )}
       </div>
-    </form>
+    </div>
   );
 }

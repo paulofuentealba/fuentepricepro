@@ -351,6 +351,8 @@ function DeleteAccountWizard({
 
       if (isGoogle) {
         const provider = new GoogleAuthProvider();
+        provider.addScope('profile');
+        provider.addScope('email');
         await reauthenticateWithPopup(user, provider);
       } else {
         if (!password) {

@@ -20,9 +20,11 @@ import { Route as GuidesDividendValuationRouteImport } from './routes/guides.div
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
 import { Route as AppSmartallocationRouteImport } from './routes/app/smartallocation'
 import { Route as AppScreenerRouteImport } from './routes/app/screener'
+import { Route as AppRiskradarRouteImport } from './routes/app/riskradar'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
 import { Route as AppDocsRouteImport } from './routes/app/docs'
+import { Route as AppComparatorRouteImport } from './routes/app.comparator'
 import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -81,6 +83,11 @@ const AppScreenerRoute = AppScreenerRouteImport.update({
   path: '/screener',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRiskradarRoute = AppRiskradarRouteImport.update({
+  id: '/riskradar',
+  path: '/riskradar',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyportfolioRoute = AppMyportfolioRouteImport.update({
   id: '/myportfolio',
   path: '/myportfolio',
@@ -94,6 +101,11 @@ const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
 const AppDocsRoute = AppDocsRouteImport.update({
   id: '/docs',
   path: '/docs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppComparatorRoute = AppComparatorRouteImport.update({
+  id: '/comparator',
+  path: '/comparator',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCashflowRoute = AppCashflowRouteImport.update({
@@ -110,9 +122,11 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
+  '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
@@ -126,9 +140,11 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
+  '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
@@ -144,9 +160,11 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
+  '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
@@ -163,9 +181,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
+    | '/app/comparator'
     | '/app/docs'
     | '/app/globalradar'
     | '/app/myportfolio'
+    | '/app/riskradar'
     | '/app/screener'
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
@@ -179,9 +199,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
+    | '/app/comparator'
     | '/app/docs'
     | '/app/globalradar'
     | '/app/myportfolio'
+    | '/app/riskradar'
     | '/app/screener'
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
@@ -196,9 +218,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
+    | '/app/comparator'
     | '/app/docs'
     | '/app/globalradar'
     | '/app/myportfolio'
+    | '/app/riskradar'
     | '/app/screener'
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
@@ -295,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenerRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/riskradar': {
+      id: '/app/riskradar'
+      path: '/riskradar'
+      fullPath: '/app/riskradar'
+      preLoaderRoute: typeof AppRiskradarRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/myportfolio': {
       id: '/app/myportfolio'
       path: '/myportfolio'
@@ -316,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDocsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/comparator': {
+      id: '/app/comparator'
+      path: '/comparator'
+      fullPath: '/app/comparator'
+      preLoaderRoute: typeof AppComparatorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/cashflow': {
       id: '/app/cashflow'
       path: '/cashflow'
@@ -328,9 +366,11 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCashflowRoute: typeof AppCashflowRoute
+  AppComparatorRoute: typeof AppComparatorRoute
   AppDocsRoute: typeof AppDocsRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
+  AppRiskradarRoute: typeof AppRiskradarRoute
   AppScreenerRoute: typeof AppScreenerRoute
   AppSmartallocationRoute: typeof AppSmartallocationRoute
   AppSnowballeffectsimulatorRoute: typeof AppSnowballeffectsimulatorRoute
@@ -339,9 +379,11 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCashflowRoute: AppCashflowRoute,
+  AppComparatorRoute: AppComparatorRoute,
   AppDocsRoute: AppDocsRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
+  AppRiskradarRoute: AppRiskradarRoute,
   AppScreenerRoute: AppScreenerRoute,
   AppSmartallocationRoute: AppSmartallocationRoute,
   AppSnowballeffectsimulatorRoute: AppSnowballeffectsimulatorRoute,

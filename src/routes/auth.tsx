@@ -88,6 +88,8 @@ function AuthPage() {
     setBusy(true);
     try {
       const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
       await signInWithPopup(auth, provider);
       navigate({ to: "/" });
     } catch (err) {

@@ -101,7 +101,7 @@ export function ValuationRadar({
         </div>
         <div
           className={cn(
-            "text-3xl font-mono font-bold tracking-tighter drop-shadow-md",
+            "text-xl font-mono font-bold tracking-tighter drop-shadow-md",
             isSafeBuy ? "text-emerald-400" : "text-rose-400",
           )}
         >
