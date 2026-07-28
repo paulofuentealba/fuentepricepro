@@ -186,16 +186,22 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const handleEdit = useCallback((it: ValuedWatchlistItem) => setEditing(it), []);
   const handleOpenDetail = useCallback((it: ValuedWatchlistItem) => setDetail(it), []);
   const handleCloseDetail = useCallback(() => setDetail(null), []);
-  const handleRemove = useCallback((id: string) => remove(id), [remove]);
+  const handleRemove = useCallback(
+    (id: string) => {
+      remove(id);
+      toast.success(t.toasts.assetRemoved);
+    },
+    [remove, t.toasts.assetRemoved],
+  );
   const handleDialogClose = useCallback(() => setEditing(null), []);
   const handleDialogSave = useCallback(
     (patch: Partial<WatchlistItem>) => {
       if (!editing) return;
       update(editing.id, patch);
-      toast.success(t.watchlist.updated);
+      toast.success(t.toasts.assetUpdated);
       setEditing(null);
     },
-    [editing, update, t.watchlist.updated],
+    [editing, update, t.toasts.assetUpdated],
   );
 
   if (isPending) {

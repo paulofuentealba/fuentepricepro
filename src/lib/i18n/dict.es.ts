@@ -44,6 +44,8 @@ export const es = {
     ceilingPrice: "Precio máximo que debe pagar para alcanzar su yield objetivo.",
   },
   toasts: {
+    assetAdded: "Activo añadido con éxito.",
+    assetUpdated: "Activo actualizado con éxito.",
     assetRemoved: "Activo eliminado exitosamente.",
     settingsSaved: "Configuraciones guardadas.",
   },

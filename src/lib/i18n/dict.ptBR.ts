@@ -44,6 +44,8 @@ export const ptBR = {
     ceilingPrice: "Preço máximo que você deve pagar para atingir seu yield alvo.",
   },
   toasts: {
+    assetAdded: "Ativo adicionado com sucesso.",
+    assetUpdated: "Ativo atualizado com sucesso.",
     assetRemoved: "Ativo removido com sucesso.",
     settingsSaved: "Configurações salvas.",
   },

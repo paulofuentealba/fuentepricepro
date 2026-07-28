@@ -89,7 +89,7 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
       addedAt: existing?.addedAt ?? Date.now(),
     };
     upsert(item);
-    toast.success(existing ? t.watchlist.updated : t.watchlist.added);
+    toast.success(existing ? t.toasts.assetUpdated : t.toasts.assetAdded);
     setOpen(false);
   }
 
