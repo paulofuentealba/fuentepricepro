@@ -610,22 +610,90 @@ export const es = {
   },
   docs: {
     title: "Metodología de Valoración",
+    description: "Nuestra metodología de valoración se enfoca en generar ingresos pasivos seguros y crecientes, usando múltiples modelos y márgenes de seguridad para evaluar oportunidades globales.",
+    searchPlaceholder: "Buscar en Wiki...",
     navLink: "Wiki",
     consensus: {
       title: "Consenso Fuente",
-      description: "Una síntesis inteligente de los modelos de valoración más fiables. Al promediar Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales de cada fórmula, entregando un precio techo robusto."
+      description: "Una síntesis inteligente de los modelos de valoración más confiables. Al promediar Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales, entregando un precio techo robusto para una cartera diversificada."
     },
     bazin: {
       title: "Modelo de Bazin",
-      description: "Ideal para inversores centrados en ingresos. Establece un precio techo dividiendo el dividendo medio por un rendimiento mínimo aceptable (la regla clásica del 6%). Altamente efectivo para empresas maduras con pagos constantes."
+      description: "Ideal para inversores enfocados en ingresos. Establece el precio techo dividiendo el dividendo promedio por un rendimiento mínimo aceptable (la clásica regla del 6%). Altamente efectivo para empresas maduras.",
+      example: "Ejemplo Numérico: Si la empresa paga $5.25, la meta del 6% resulta en un Precio Techo de $87.50 ($5.25 / 0.06)."
     },
     graham: {
       title: "Fórmula de Graham",
-      description: "Creada por Benjamin Graham, calcula el Valor Intrínseco de una acción en función del Beneficio Por Acción (BPA) y el Valor Contable Por Acción (VCPA). Es excelente para Acciones de Valor, pero no se aplica a Fondos Inmobiliarios (REITs/FIIs), ya que estos deben distribuir la mayor parte de sus beneficios y su valor contable puede distorsionar la fórmula."
+      description: "Creada por Benjamin Graham, calcula el Valor Intrínseco de una acción basada en Beneficio por Acción (BPA) y Valor Contable. Excelente para Acciones de Valor.",
+      notApplicableBadge: "No aplicable a REITs",
+      notApplicableReason: "La distorsión del patrimonio y las obligaciones de distribución invalidarían la fórmula.",
+      example: "Ejemplo Numérico: Con BPA de $3.00 y Valor Contable de $10.00, la raíz de (22.5 * 3 * 10) da $25.98."
     },
     gordon: {
       title: "Modelo de Gordon",
-      description: "Un modelo de descuento de dividendos que asume un crecimiento perpetuo. Es el modelo matemático ideal para los Fondos Inmobiliarios (FIIs/REITs) debido a la previsibilidad de la distribución y los constantes ajustes por inflación."
+      description: "Un modelo de descuento de dividendos que asume crecimiento perpetuo. Es ideal para REITs debido a la previsibilidad de distribución y ajustes de inflación.",
+      example: "Ejemplo Ilustrativo (no usar como recomendación): Asumiendo un dividendo de $1.00, crecimiento del 2% y descuento del 6%, el precio justo sería $25.50 [(1.00 * 1.02) / (0.06 - 0.02)]."
+    },
+    metrics: {
+      title: "Métricas Esenciales",
+      safetyMargin: {
+        title: "Margen de Seguridad",
+        description: "La diferencia porcentual entre el precio actual y el precio techo estimado. Cuanto mayor sea, menor el riesgo de pérdida de capital."
+      },
+      yieldOnCost: {
+        title: "Yield on Cost (YoC)",
+        description: "El Dividend Yield efectivo que recibe basado en su precio de compra promedio, no en el precio de mercado actual. Empresas que aumentan dividendos harán crecer su YoC."
+      },
+      payout: {
+        title: "Payout Ratio",
+        description: "El porcentaje de ganancia neta que la empresa distribuye como dividendos. Un payout de 100% o más es insostenible a largo plazo. Los REITs son excepciones."
+      },
+      cagr: {
+        title: "CAGR (Tasa de Crecimiento Anual Compuesto)",
+        description: "La tasa de crecimiento anualizada de los dividendos en los últimos 5 años. Muestra si la empresa puede aumentar los pagos consistentemente."
+      },
+      dyVsYoc: {
+        title: "DY vs. Yield on Cost",
+        description: "El Dividend Yield (DY) fluctúa diariamente. El Yield on Cost (YoC) es fijo relativo a su precio de compra. Seguir ambos ayuda a entender las caídas de precio."
+      }
+    },
+    concepts: {
+      title: "Conceptos Avanzados",
+      snowball: {
+        title: "Efecto Bola de Nieve (Snowball/Crossover)",
+        description: "Ocurre cuando el ingreso pasivo generado es suficiente para comprar nuevas acciones sin aporte externo (Efecto Snowball) y eventualmente supera su costo de vida (Crossover Point)."
+      },
+      taxes: {
+        title: "Tratamiento de Impuestos (BR/US)",
+        description: "En Brasil, los dividendos están exentos, pero JCP tiene 15% retenido. En EE.UU., los extranjeros sufren una retención del 30% sobre los dividendos, que llegan netos a su corredor."
+      }
+    },
+    riskRadar: {
+      title: "Alertas del Risk Radar",
+      sectorConcentration: {
+        title: "Concentración Sectorial",
+        description: "Activada cuando más del 25% de su cartera está en el mismo sector, aumentando el riesgo de volatilidad en cadena."
+      },
+      assetConcentration: {
+        title: "Concentración por Activo",
+        description: "Activada cuando un solo activo compone más del 15% del portafolio. Quiebras o recortes de dividendos causarán un impacto profundo en sus ingresos."
+      },
+      payoutRisk: {
+        title: "Riesgo de Payout (Sostenibilidad)",
+        description: "Las acciones normales que distribuyen más del 80% pueden recortar dividendos pronto. (Ignorado para fondos y REITs)."
+      },
+      yieldTrap: {
+        title: "Yield Trap (Trampa de Dividendos)",
+        description: "Ocorre quando o Dividend Yield é altíssimo (ex: >10%) porque o preço desabou e o mercado prevê corte iminente dos dividendos. A Margen de Seguridad negativa confirma o risco."
+      }
+    },
+    glossary: {
+      title: "Glosario",
+      fii: "Fondo de Inversión Inmobiliario Brasileño.",
+      reit: "Fondo de Inversión Inmobiliario (EE.UU.).",
+      lpa: "Beneficio por Acción (BPA).",
+      vpa: "Valor Contable por Acción.",
+      jcp: "Intereses sobre el Capital Propio (BR)."
     }
   },
   comparator: {

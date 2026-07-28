@@ -33,7 +33,8 @@ const renderActiveShape = (props: any) => {
 
 export function AllocationChart({ items, selectedType, onSelectType }: Props) {
   const { t, locale } = useI18n();
-  const { data: exchangeRate = 5.0 } = useExchangeRate();
+  const { data: exchangeData } = useExchangeRate();
+  const exchangeRate = exchangeData?.rate ?? 5;
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   const data = useMemo(() => {

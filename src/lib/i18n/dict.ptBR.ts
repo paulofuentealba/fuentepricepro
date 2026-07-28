@@ -607,6 +607,8 @@ export const ptBR = {
   },
   docs: {
     title: "Metodologia de Valuation",
+    description: "Nossa metodologia de valuation foca em gerar renda passiva segura e crescente, usando múltiplos modelos e margens de segurança para avaliar oportunidades globais.",
+    searchPlaceholder: "Buscar na Wiki...",
     navLink: "Wiki",
     consensus: {
       title: "O Consenso Fuente",
@@ -614,15 +616,81 @@ export const ptBR = {
     },
     bazin: {
       title: "O Modelo de Bazin",
-      description: "Ideal para investidores focados em renda. Estabelece o preço teto dividindo o dividendo médio por um yield mínimo aceitável (a clássica regra dos 6%). Altamente eficaz para empresas maduras com distribuições constantes."
+      description: "Ideal para investidores focados em renda. Estabelece o preço teto dividindo o dividendo médio por um yield mínimo aceitável (a clássica regra dos 6%). Altamente eficaz para empresas maduras com distribuições constantes.",
+      example: "Exemplo Numérico: Se a empresa paga R$ 5,25 de dividendo médio, a meta de 6% resulta no Preço Teto de R$ 87,50 (R$ 5,25 / 0,06)."
     },
     graham: {
       title: "A Fórmula de Graham",
-      description: "Criada por Benjamin Graham, calcula o Valor Intrínseco de uma ação baseada no Lucro Por Ação (LPA) e Valor Patrimonial Por Ação (VPA). É excelente para Ações de Valor, mas o sistema não a aplica a Fundos Imobiliários (FIIs/REITs), visto que os fundos precisam distribuir a maior parte do lucro e a distorção do patrimônio invalidaria a fórmula."
+      description: "Criada por Benjamin Graham, calcula o Valor Intrínseco de uma ação baseada no Lucro Por Ação (LPA) e Valor Patrimonial Por Ação (VPA). É excelente para Ações de Valor.",
+      notApplicableBadge: "Não se aplica a FIIs/REITs",
+      notApplicableReason: "A distorção do patrimônio e a obrigação de distribuição de lucros invalidariam a fórmula.",
+      example: "Exemplo Numérico: Com LPA de R$ 3,00 e VPA de R$ 10,00, a raiz de (22.5 * 3 * 10) resulta em um Valor Intrínseco de R$ 25,98."
     },
     gordon: {
       title: "O Modelo de Gordon",
-      description: "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação."
+      description: "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação.",
+      example: "Exemplo Ilustrativo (não use como recomendação): Assumindo um dividendo de R$ 1,00, crescimento de 2% e desconto de 6%, o preço justo seria R$ 25,50 [(1,00 * 1,02) / (0,06 - 0,02)]."
+    },
+    metrics: {
+      title: "Métricas Essenciais",
+      safetyMargin: {
+        title: "Margem de Segurança",
+        description: "A diferença percentual entre o preço atual e o preço teto estimado. Quanto maior a margem de segurança, menor o risco de perda de capital e maior o potencial de upside."
+      },
+      yieldOnCost: {
+        title: "Yield on Cost (YoC)",
+        description: "O Dividend Yield efetivo que você recebe baseado no preço médio que você pagou pela ação, não no preço atual de mercado. Empresas que aumentam os dividendos farão seu YoC crescer ao longo dos anos."
+      },
+      payout: {
+        title: "Payout Ratio",
+        description: "A porcentagem do lucro líquido que a empresa distribui aos acionistas como dividendos. Um payout de 100% ou mais é insustentável no longo prazo. FIIs e REITs são exceções, pois são obrigados por lei a distribuir quase todo o lucro."
+      },
+      cagr: {
+        title: "CAGR (Taxa Composta Anual de Crescimento)",
+        description: "A taxa de crescimento anualizada dos dividendos nos últimos 5 anos. Mostra se a empresa consegue aumentar os pagamentos consistentemente acima da inflação."
+      },
+      dyVsYoc: {
+        title: "DY vs. Yield on Cost",
+        description: "O Dividend Yield (DY) flutua diariamente com o preço de mercado da ação. O Yield on Cost (YoC) é fixo em relação ao seu preço médio de compra. Acompanhar ambos ajuda a entender se as quedas de preço refletem corte de dividendos ou apenas pânico no mercado."
+      }
+    },
+    concepts: {
+      title: "Conceitos Avançados",
+      snowball: {
+        title: "Efeito Bola de Neve (Snowball/Crossover)",
+        description: "Ocorre quando a renda passiva gerada pelos seus investimentos é suficiente para comprar novas cotas/ações sem necessidade de aporte externo (Efeito Snowball) e, eventualmente, supera seu custo de vida (Crossover Point)."
+      },
+      taxes: {
+        title: "Tratamento de Impostos (BR/US)",
+        description: "No Brasil, dividendos de Ações e FIIs atualmente são isentos de IR, mas JCP tem 15% retido na fonte. Nos EUA (ações e REITs), estrangeiros sofrem retenção na fonte de 30% sobre os dividendos, que já chegam líquidos à sua conta na corretora internacional."
+      }
+    },
+    riskRadar: {
+      title: "Alertas do Risk Radar",
+      sectorConcentration: {
+        title: "Concentração Setorial",
+        description: "Alerta ativado quando mais de 25% da sua carteira está no mesmo setor, aumentando o risco de volatilidade em cadeia por crises específicas daquela indústria."
+      },
+      assetConcentration: {
+        title: "Concentração por Ativo",
+        description: "Alerta ativado quando um único ativo compõe mais de 15% do portfólio. Falências ou cortes de dividendos causarão impacto profundo na sua renda."
+      },
+      payoutRisk: {
+        title: "Risco de Payout (Sustentabilidade)",
+        description: "Ações normais distribuindo mais de 80% do lucro podem cortar dividendos em breve. (Ignorado para fundos e REITs)."
+      },
+      yieldTrap: {
+        title: "Yield Trap (Armadilha de Dividendos)",
+        description: "Ocorre quando o Dividend Yield é altíssimo (ex: >10%) porque o preço desabou e o mercado prevê corte iminente dos dividendos. A Margem de Segurança negativa confirma o risco."
+      }
+    },
+    glossary: {
+      title: "Glossário",
+      fii: "Fundo de Investimento Imobiliário (BR).",
+      reit: "Real Estate Investment Trust (US).",
+      lpa: "Lucro por Ação (EPS em inglês).",
+      vpa: "Valor Patrimonial por Ação (Book Value).",
+      jcp: "Juros sobre Capital Próprio."
     }
   },
   comparator: {

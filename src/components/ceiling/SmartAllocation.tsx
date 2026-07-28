@@ -55,7 +55,8 @@ export function SmartAllocation() {
   const [excludedTickers, setExcludedTickers] = useState<string[]>([]);
   const [generated, setGenerated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { data: exchangeRate = 5.0 } = useExchangeRate();
+  const { data: exchangeData } = useExchangeRate();
+  const exchangeRate = exchangeData?.rate ?? 5;
   const targets = settings.smartAllocationTargets;
   const setTargets = (t: Record<AssetType, number>) =>
     updateSettings({ smartAllocationTargets: t });

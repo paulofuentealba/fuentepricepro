@@ -223,6 +223,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
               />
               <XAxis
                 dataKey="month"
+                interval={0}
                 tickLine={false}
                 axisLine={false}
                 tick={({ x, y, payload }) => {
@@ -233,7 +234,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       x={x}
                       y={y + 12}
                       fill={isSelected ? "var(--foreground)" : "oklch(0.6 0.02 250)"}
-                      fontSize={11}
+                      className="text-[9px] sm:text-[11px]"
                       fontWeight={isSelected ? 600 : 400}
                       textAnchor="middle"
                     >
@@ -411,11 +412,22 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   strokeDasharray="3 3"
                   stroke="oklch(0.4 0.02 250 / 0.25)"
                 />
-                <XAxis
+                  <XAxis
                   dataKey="month"
+                  interval={0}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: "oklch(0.6 0.02 250)", fontSize: 11 }}
+                  tick={({ x, y, payload }) => (
+                    <text
+                      x={x}
+                      y={y + 12}
+                      fill="oklch(0.6 0.02 250)"
+                      className="text-[9px] sm:text-[11px]"
+                      textAnchor="middle"
+                    >
+                      {payload.value}
+                    </text>
+                  )}
                 />
                 <YAxis
                   tickLine={false}

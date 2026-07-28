@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { useExchangeRate } from "@/lib/useExchangeRate";
+import { useI18n } from "@/lib/i18n-provider";
 
 interface CurrencyToggleProps {
   value: "BR" | "US";
@@ -7,13 +9,31 @@ interface CurrencyToggleProps {
 }
 
 export function CurrencyToggle({ value, onChange, className }: CurrencyToggleProps) {
+  const { data: exchangeData } = useExchangeRate();
+  const { locale } = useI18n();
+
+  let formattedTime = "";
+  if (exchangeData?.date) {
+    try {
+      // The API returns time in BRT (UTC-3), e.g., "2024-05-10 14:32:00"
+      const dateInBrt = exchangeData.date.replace(" ", "T") + "-03:00";
+      const dateObj = new Date(dateInBrt);
+      formattedTime = new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(dateObj);
+    } catch (e) {
+      formattedTime = exchangeData.date.split(" ")[1].slice(0, 5); // fallback
+    }
+  }
+
   return (
-    <div
-      className={cn(
-        "inline-flex items-center rounded-full bg-slate-900/40 p-1 border border-border/40 shadow-inner",
-        className,
-      )}
-    >
+    <div className={cn("flex flex-col items-center", className)}>
+      <div
+        className={cn(
+          "inline-flex items-center rounded-full bg-slate-900/40 p-1 border border-border/40 shadow-inner"
+        )}
+      >
       <button
         type="button"
         onClick={() => onChange("BR")}
@@ -41,6 +61,12 @@ export function CurrencyToggle({ value, onChange, className }: CurrencyTogglePro
         <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">US</span>
         <span className="text-sm font-bold uppercase tracking-wide">USD</span>
       </button>
+    </div>
+      {exchangeData?.rate && (
+        <div className="text-[10px] text-muted-foreground mt-2 text-center opacity-70">
+          USD/BRL {exchangeData.rate.toFixed(2).replace('.', ',')} — cotação de {formattedTime}
+        </div>
+      )}
     </div>
   );
 }

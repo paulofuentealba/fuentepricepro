@@ -64,7 +64,8 @@ function formatDuration(months: number, t: any): string {
 export function FIProgressCard() {
   const { settings, updateSettings } = useUserSettings();
   const { valuedItems: items, isAppLoading } = useValuedPortfolio();
-  const { data: usdRate = 5 } = useExchangeRate();
+  const { data: exchangeData } = useExchangeRate();
+  const usdRate = exchangeData?.rate ?? 5;
   const { locale, t } = useI18n();
   
   const convertToBRL = (value: number, curr: string) => {

@@ -138,7 +138,7 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
         label={
           <span className="flex items-center">
             {t.watchlist.yieldOnCost}
-            <InfoTooltip content={t.tooltips?.yieldOnCost || ""} link="/wiki#yield-on-cost" className="ml-1" />
+            <InfoTooltip content={t.tooltips?.yieldOnCost || ""} link="/app/docs#yield-on-cost" className="ml-1" />
           </span>
         }
         value={yoc != null ? formatPercent(yoc, locale, 2) : "---"}
