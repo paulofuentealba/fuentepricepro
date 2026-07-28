@@ -32,9 +32,10 @@ interface Props {
   onEdit: () => void;
   onCorporateEvent: () => void;
   onRemove: () => void;
+  isSimulation?: boolean;
 }
 
-export function AssetCardHeader({ item, quote, pendingEvent, onShare, onShareInsta, onEdit, onCorporateEvent, onRemove }: Props) {
+export function AssetCardHeader({ item, quote, pendingEvent, onShare, onShareInsta, onEdit, onCorporateEvent, onRemove, isSimulation }: Props) {
   const { t, locale } = useI18n();
   const livePrice = quote?.price ?? item.currentPrice;
   const changePct = quote?.changePct ?? null;
@@ -101,6 +102,14 @@ export function AssetCardHeader({ item, quote, pendingEvent, onShare, onShareIns
               className="text-[10px] text-muted-foreground border-border/50 bg-accent/20"
             >
               {item.sector}
+            </Badge>
+          )}
+          {isSimulation && (
+            <Badge
+              variant="outline"
+              className="text-[10px] text-amber-500/90 border-amber-500/30 bg-amber-500/10"
+            >
+              {t.watchlist.simulationBadge}
             </Badge>
           )}
         </div>

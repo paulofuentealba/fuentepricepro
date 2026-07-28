@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useWatchlist } from "./watchlist";
+import { useValuedPortfolio } from "./useValuedPortfolio";
 import { useAuth } from "./auth-provider";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "./queryOptions";
@@ -41,7 +41,7 @@ export type TypeConcentration = {
 };
 
 export function usePortfolioRisk() {
-  const { items } = useWatchlist();
+  const { valuedItems: items } = useValuedPortfolio();
   const { user } = useAuth();
   const fxQuery = useQuery(exchangeRateQueryOptions());
   const fx = fxQuery.data?.USDBRL || 5.0;
@@ -57,6 +57,7 @@ export function usePortfolioRisk() {
     const warnings: RiskWarning[] = [];
 
     // Calculate total equity and absolute values
+    const payoutTickers: string[] = [];
     for (const item of items) {
       const qty = item.quantity || 0;
       if (qty <= 0) continue;
@@ -107,17 +108,20 @@ export function usePortfolioRisk() {
 
       // 2. Payout Audit
       if (!["FII", "REIT"].includes(item.type)) {
-        if (typeof item.payoutRatio === "number" && item.payoutRatio > 0.8) {
-          warnings.push({
-            id: `payout_${item.id}`,
-            type: "payout_audit",
-            assetId: item.id,
-            ticker: item.ticker,
-            messageKey: "payoutAudit",
-            severity: "yellow",
-          });
+        if (typeof item.payoutRatio === "number" && item.payoutRatio > 80) {
+          payoutTickers.push(item.ticker);
         }
       }
+    }
+
+    if (payoutTickers.length > 0) {
+      warnings.push({
+        id: "payout_grouped",
+        type: "payout_audit",
+        messageKey: "payoutAudit",
+        severity: "yellow",
+        extraData: { tickers: payoutTickers },
+      });
     }
 
     // Calculate weights

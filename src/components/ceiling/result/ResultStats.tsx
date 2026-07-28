@@ -9,6 +9,8 @@ import type { Asset } from "@/lib/domain";
 import { formatCurrency, formatPercent } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { TIMEFRAMES, type Timeframe } from "@/lib/resultCard";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { TargetYieldSlider } from "../../ui/TargetYieldSlider";
 import { MaskedInput } from "../shared/MaskedInput";
 import { Label } from "@/components/ui/label";
@@ -167,10 +169,10 @@ export function ResultStats({
         <div>
           <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
             <Calculator className="h-4 w-4 text-success" />
-            {t.form.calculatorTitle ?? "Playground"}
+            {t.form.calculatorTitle}
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            {t.form.calculatorDesc ?? "Ajuste o yield desejado para simular um novo Preço Teto."}
+            {t.form.calculatorDesc}
           </p>
         </div>
 
@@ -282,11 +284,11 @@ export function ResultStats({
           <div className="flex items-center gap-2 text-success">
             <TrendingUp className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">
-              {t.result.ceilingPrice}
+              {t.result.ceilingPrice} <InfoTooltip content={t.tooltips?.ceilingPrice || "Preço Teto"} link="/wiki#ceiling-price" className="ml-1" />
             </span>
           </div>
           <div className="mt-2 text-3xl font-bold text-foreground">
-            {formatCurrency(ceiling, asset.currency, locale)}
+            <AnimatedNumber value={ceiling} format={(v) => formatCurrency(v, asset.currency, locale)} />
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             @ {formatPercent(targetYield, locale, 2)} {t.form.targetYield.toLowerCase()}

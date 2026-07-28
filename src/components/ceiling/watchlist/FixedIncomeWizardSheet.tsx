@@ -119,7 +119,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent
+      <SheetContent closeLabel={t.common.close}
         side="right"
         className="w-full sm:max-w-md border-l border-border/60 bg-background/80 backdrop-blur-xl text-foreground p-0 flex flex-col shadow-2xl"
       >

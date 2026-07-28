@@ -80,7 +80,7 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
+      <DialogContent closeLabel={t.common.close} 
         className="sm:max-w-md border-border/60" 
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}

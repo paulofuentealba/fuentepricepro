@@ -23,8 +23,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { Currency } from "@/lib/domain";
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { toast } from "sonner";
-import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
+import { type WatchlistItem } from "@/lib/watchlist";
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { cn } from "@/lib/utils";
 import { STRATEGY_ORDER, computeSmartAllocation, type StrategyKey } from "@/lib/allocation";
 import { TargetAllocationPanel } from "./TargetAllocationPanel";
@@ -35,9 +37,6 @@ import { useSubscription } from "@/lib/subscription";
 import { getColorForAsset } from "./shared/chartColors";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { AssetCard } from "@/components/shared/AssetCard";
-import { useLiveQuotesAndMeta } from "./watchlist/useLiveQuotesAndMeta";
-import { getAssetValuation } from "@/lib/calculations";
-import { useSelic } from "@/lib/useSelic";
 
 function flagFor(currency: Currency): string {
   return currency === "USD" ? "🇺🇸" : "🇧🇷";
@@ -45,7 +44,8 @@ function flagFor(currency: Currency): string {
 
 export function SmartAllocation() {
   const { t, locale } = useI18n();
-  const { items } = useWatchlist();
+  const { valuedItems: items } = useValuedPortfolio();
+  const valuedItems = items;
   const [capital, setCapital] = useState("");
   const [showOnlyImpacted, setShowOnlyImpacted] = useState(true);
   const { settings, updateSettings } = useUserSettings();
@@ -62,34 +62,6 @@ export function SmartAllocation() {
 
   const { isPro } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
-  const { quotes, meta } = useLiveQuotesAndMeta(items);
-  const { data: selic } = useSelic();
-
-  const valuedItems = useMemo(() => {
-    return items.map((it) => {
-      const q = quotes[it.ticker];
-      const m = meta[it.ticker];
-      const currentPrice = q?.price ?? it.currentPrice;
-      const valuation = getAssetValuation({
-        targetYield: it.targetYield,
-        currentPrice,
-        avgDividend: it.annualDividend,
-        eps: m?.eps,
-        bvps: m?.pbRatio && currentPrice > 0 ? currentPrice / m.pbRatio : null,
-        dividendCagr: m?.dividendCagr5y,
-        selicPct: selic ?? 10.5,
-        currency: it.currency,
-        type: it.type,
-      });
-
-      return {
-        ...it,
-        currentPrice,
-        ceilingPrice: valuation.activeCeiling,
-        safetyMargin: valuation.margin,
-      };
-    });
-  }, [items, quotes, meta, selic]);
 
   const handleTargetsChange = (newTargets: Record<AssetType, number>) => {
     setTargets(newTargets);
@@ -443,7 +415,7 @@ export function SmartAllocation() {
                             {t.smartAllocation.remaining}
                           </div>
                           <div className="mt-0.5 text-base font-bold tabular-nums text-foreground">
-                            {formatCurrency(result.remaining, result.currency, locale)}
+                            <AnimatedNumber value={result.remaining} format={(v: number) => formatCurrency(v, result.currency, locale)} />
                           </div>
                         </div>
                       </div>
@@ -454,7 +426,7 @@ export function SmartAllocation() {
                             {t.smartAllocation.totalAddedIncome}
                           </div>
                           <div className="mt-0.5 text-base font-bold tabular-nums text-success">
-                            +{formatCurrency(result.totalAddedIncome, result.currency, locale)}
+                            +<AnimatedNumber value={result.totalAddedIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
                           </div>
                         </div>
                       </div>
@@ -470,7 +442,7 @@ export function SmartAllocation() {
                             {t.smartAllocation.currentPortfolioIncome}
                           </div>
                           <div className="text-foreground">
-                            {formatCurrency(result.currentPortfolioIncome, result.currency, locale)}
+                            <AnimatedNumber value={result.currentPortfolioIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
                           </div>
                         </div>
                         <span aria-hidden className="text-success">
@@ -481,11 +453,11 @@ export function SmartAllocation() {
                             {t.smartAllocation.newPortfolioIncome}
                           </div>
                           <div className="text-base font-bold text-success">
-                            {formatCurrency(result.newPortfolioIncome, result.currency, locale)}
+                            <AnimatedNumber value={result.newPortfolioIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
                           </div>
                         </div>
                         <Badge className="bg-success text-success-foreground">
-                          +{formatCurrency(result.totalAddedIncome, result.currency, locale)}
+                          +<AnimatedNumber value={result.totalAddedIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
                         </Badge>
                       </div>
                     </div>

@@ -1,22 +1,29 @@
 import { useEffect, useRef } from "react";
-import { useInView, useSpring, useMotionValue } from "framer-motion";
+import { useInView, useSpring, useTransform, motion, useMotionValue } from "framer-motion";
+
+interface AnimatedNumberProps {
+  value: number;
+  format?: (value: number) => string;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  delay?: number;
+  className?: string;
+}
 
 export function AnimatedNumber({ 
   value, 
+  format,
   prefix = "", 
   suffix = "", 
   decimals = 0, 
-  delay = 0 
-}: { 
-  value: number; 
-  prefix?: string; 
-  suffix?: string; 
-  decimals?: number; 
-  delay?: number; 
-}) {
+  delay = 0,
+  className
+}: AnimatedNumberProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
   const motionValue = useMotionValue(0);
+  
   const springValue = useSpring(motionValue, {
     damping: 60,
     stiffness: 100,
@@ -30,28 +37,19 @@ export function AnimatedNumber({
     }
   }, [inView, value, motionValue, delay]);
 
-  useEffect(() => {
-    return springValue.on("change", (latest) => {
-      if (ref.current) {
-        ref.current.textContent = 
-          prefix + 
-          Intl.NumberFormat("pt-BR", {
-            minimumFractionDigits: decimals,
-            maximumFractionDigits: decimals,
-          }).format(latest) + 
-          suffix;
-      }
-    });
-  }, [springValue, prefix, suffix, decimals]);
+  const display = useTransform(springValue, (latest) => {
+    if (format) {
+      return format(latest);
+    }
+    return prefix + Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(latest) + suffix;
+  });
 
   return (
-    <span ref={ref}>
-      {prefix}
-      {Intl.NumberFormat("pt-BR", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      }).format(0)}
-      {suffix}
-    </span>
+    <motion.span ref={ref} className={className}>
+      {display}
+    </motion.span>
   );
 }

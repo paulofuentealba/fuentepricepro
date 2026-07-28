@@ -26,7 +26,7 @@ import { WatchlistTable } from "./watchlist/WatchlistTable";
 import { DataManagement } from "./watchlist/DataManagement";
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
-import { MetricBox } from "./shared/MetricBox";
+import { MetricBox } from "@/components/shared/MetricBox";
 
 import { Button } from "@/components/ui/button";
 import { PlusCircle, LayoutGrid, List, TrendingUp, TrendingDown, ChevronDown, Shield, Globe } from "lucide-react";
@@ -432,8 +432,15 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               </div>
             </div>
 
-            {viewMode === "grid" ? (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {(filteredAndSorted && filteredAndSorted.length === 0 && valuedItems.length > 0) ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-border/50 bg-background/40 backdrop-blur-md">
+                <p className="text-sm text-muted-foreground mb-4">{t.emptyStates?.noMatch || "Nenhum ativo encontrado."}</p>
+                <Button variant="outline" size="sm" onClick={() => { setTypeFilter("all" as any); setOppFilter("all" as any); }}>
+                  {t.emptyStates?.clearFilters || "Limpar Filtros"}
+                </Button>
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {(filteredAndSorted || []).map((it) => (
                   <AssetCard
                     key={it.id}
@@ -452,8 +459,8 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           </>
         )}
 
-        <EditItemDialog item={editing} onClose={handleDialogClose} onSave={handleDialogSave} />
-        <AssetDetailSheet item={detail} onClose={handleCloseDetail} />
+        <EditItemDialog item={editing as any} onClose={handleDialogClose} onSave={handleDialogSave} />
+        <AssetDetailSheet item={detail as any} onClose={handleCloseDetail} />
         <PaywallDialog
           open={showPaywall}
           onOpenChange={setShowPaywall}

@@ -1,16 +1,20 @@
 import { ArrowUpRight, CalendarClock, Sparkles, Target, TrendingUp, Wallet } from "lucide-react";
 import { cleanTicker } from "./cards";
 
+import { useI18n } from "@/lib/i18n-provider";
+
 function ProBadge() {
+  const { t } = useI18n();
   return (
     <span className="inline-flex items-center gap-1 rounded-md border border-success/40 bg-success/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-success">
       <Sparkles className="h-2.5 w-2.5" />
-      Pro Feature
+      {t.showcase.proFeature}
     </span>
   );
 }
 
 export function ProAllocationCard() {
+  const { t } = useI18n();
   const top3 = ["BBSE3", "VALE", "O"].map(cleanTicker);
   return (
     <div className="flex h-full flex-col rounded-2xl border border-success/50 bg-card/80 p-4 shadow-xl shadow-emerald-500/10 backdrop-blur">
@@ -20,20 +24,20 @@ export function ProAllocationCard() {
         </div>
         <ProBadge />
       </div>
-      <h3 className="mt-3 text-base font-semibold text-foreground">Smart Contribution</h3>
-      <p className="text-xs text-muted-foreground">Optimal Capital Allocation</p>
+      <h3 className="mt-3 text-base font-semibold text-foreground">{t.showcase.smartContribution}</h3>
+      <p className="text-xs text-muted-foreground">{t.showcase.optimalAllocation}</p>
 
       <div className="mt-4 rounded-lg border border-border/60 bg-background/40 p-3">
         <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-          Top 3 Assets for Highest Yield
+          {t.showcase.topAssetsYield}
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {top3.map((t) => (
+          {top3.map((assetId) => (
             <span
-              key={t}
+              key={assetId}
               className="inline-flex items-center rounded-md border border-success/30 bg-success/10 px-2 py-0.5 text-xs font-semibold text-success"
             >
-              {t}
+              {assetId}
             </span>
           ))}
         </div>
@@ -42,7 +46,7 @@ export function ProAllocationCard() {
       <div className="mt-auto flex items-center gap-2 pt-3">
         <ArrowUpRight className="h-3.5 w-3.5 text-success" />
         <span className="text-[11px] font-medium text-success">
-          Targeting highest yield on cost
+          {t.showcase.targetingYield}
         </span>
       </div>
     </div>
@@ -50,6 +54,7 @@ export function ProAllocationCard() {
 }
 
 export function ProForecastCard() {
+  const { t } = useI18n();
   // Tiny inline sparkline (YoY growth)
   const points = [8, 12, 10, 16, 18, 22, 26, 30];
   const max = Math.max(...points);
@@ -71,7 +76,7 @@ export function ProForecastCard() {
         </div>
         <ProBadge />
       </div>
-      <h3 className="mt-3 text-base font-semibold text-foreground">Passive Income Forecast</h3>
+      <h3 className="mt-3 text-base font-semibold text-foreground">{t.showcase.passiveIncomeForecast}</h3>
 
       <div className="mt-3 flex items-baseline gap-2">
         <span className="text-2xl font-bold tabular-nums text-success">$ 500.00</span>
@@ -82,9 +87,9 @@ export function ProForecastCard() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <CalendarClock className="h-3.5 w-3.5 text-success" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">YoY Growth</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">{t.showcase.yoyGrowth}</span>
           </div>
-          <span className="text-xs font-semibold text-success">+12.5% YoY</span>
+          <span className="text-xs font-semibold text-success">+12.5%</span>
         </div>
         <svg viewBox={`0 0 ${w} ${h}`} className="mt-2 h-8 w-full">
           <path
@@ -101,7 +106,7 @@ export function ProForecastCard() {
 
       <div className="mt-auto flex items-center gap-2 pt-3">
         <TrendingUp className="h-3.5 w-3.5 text-success" />
-        <span className="text-[11px] font-medium text-success">Compounding monthly income</span>
+        <span className="text-[11px] font-medium text-success">{t.showcase.compoundingIncome}</span>
       </div>
     </div>
   );

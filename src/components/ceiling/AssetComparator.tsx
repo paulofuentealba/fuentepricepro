@@ -17,6 +17,9 @@ import type { AssetType, Asset } from "@/lib/domain";
 import { AssetCard } from "@/components/shared/AssetCard";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AssetDetailSheet } from "./watchlist/AssetDetailSheet";
+import { useSettings } from "@/lib/settings";
+import { useWatchlist } from "@/lib/watchlist";
+import { getCanonicalAnnualDividend } from "@/lib/calculations";
 
 const ALL_TYPES: AssetType[] = ["STOCK_US", "STOCK_BR", "REIT", "FII", "FII_INFRA", "FIAGRO", "ETF"];
 
@@ -27,6 +30,7 @@ export function AssetComparator() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { data: selic } = useSelic();
   
   const shouldSearch = query.trim().length > 0;
 
@@ -43,15 +47,8 @@ export function AssetComparator() {
   
   const suggestions = useMemo(() => {
     const raw = searchResult.data ?? [];
-    const seen = new Set<string>();
-    return raw.filter((hit) => {
-      if (seen.has(hit.ticker)) return false;
-      if (!ALL_TYPES.includes(hit.type)) return false;
-      // Don't suggest already selected assets
-      if (selectedTickers.includes(hit.ticker)) return false;
-      seen.add(hit.ticker);
-      return true;
-    });
+    const validRaw = raw.filter(item => ALL_TYPES.includes(item.type) && !selectedTickers.includes(item.ticker));
+    return Array.from(new Map(validRaw.map(item => [item.ticker, item])).values());
   }, [searchResult.data, selectedTickers]);
 
   const searching = shouldSearch && (searchResult.isFetching || debouncedQuery === "");
@@ -157,6 +154,9 @@ export function AssetComparator() {
 // Separate component to handle the fetching and comparison logic
 function ComparatorCards({ tickers, onRemove }: { tickers: string[]; onRemove: (ticker: string) => void }) {
   const { t } = useI18n();
+  const { items: portfolioItems } = useWatchlist();
+  const { targetYield: globalYield } = useSettings();
+  const { data: selic } = useSelic();
   const [selectedDetailItem, setSelectedDetailItem] = useState<any>(null);
   
   const queries = useQueries({
@@ -186,35 +186,55 @@ function ComparatorCards({ tickers, onRemove }: { tickers: string[]; onRemove: (
           {t.comparator.mixedClassesWarning}
         </div>
       )}
-      {dataMap.map((data) => (
-        <div key={data.ticker} className="relative group animate-in fade-in zoom-in-95">
-          <AssetCard
-            item={{
-              id: data.ticker,
-              ticker: data.ticker,
-              name: data.name,
-              currency: data.currency,
-              type: data.type,
-              currentPrice: data.currentPrice,
-              targetYield: 6,
-              quantity: 1,
-              averagePrice: data.currentPrice,
-              sector: data.sector || "Outros",
-              createdAt: Date.now(),
-            } as any}
-            meta={{
-              eps: data.metrics?.eps || null,
-              pbRatio: data.metrics?.pbRatio || null,
-              dividendCagr5y: data.metrics?.dividendCagr5y || null,
-              sector: data.sector || "Outros",
-            } as any}
-            variant="watchlist"
-            hideAddToWatchlist
-            onClose={(ticker) => onRemove(ticker)}
-            onOpenDetail={(item) => setSelectedDetailItem(item)}
-          />
-        </div>
-      ))}
+        {dataMap.map((data) => {
+          const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
+          const activeYield = savedItem?.targetYield ?? globalYield;
+          const avgDiv = getCanonicalAnnualDividend(data, 3);
+          const val = getAssetValuation({
+            targetYield: activeYield,
+            currentPrice: data.currentPrice,
+            avgDividend: avgDiv,
+            eps: data.metrics?.eps || null,
+            bvps: data.metrics?.pbRatio && data.currentPrice > 0 ? data.currentPrice / data.metrics.pbRatio : null,
+            dividendCagr: data.metrics?.dividendCagr5y || null,
+            selicPct: selic ?? 10.5,
+            currency: data.currency,
+            type: data.type,
+          });
+          
+          return (
+            <div key={data.ticker} className="relative group animate-in fade-in zoom-in-95">
+              <AssetCard
+                item={{
+                  id: data.ticker,
+                  ticker: data.ticker,
+                  name: data.name,
+                  currency: data.currency,
+                  type: data.type,
+                  currentPrice: data.currentPrice,
+                  targetYield: activeYield,
+                  annualDividend: avgDiv,
+                  quantity: 1,
+                  averagePrice: data.currentPrice,
+                  sector: data.sector || "Outros",
+                  createdAt: Date.now(),
+                  valuation: val,
+                } as any}
+                isSimulation={activeYield !== savedItem?.targetYield}
+                meta={{
+                  eps: data.metrics?.eps || null,
+                  pbRatio: data.metrics?.pbRatio || null,
+                  dividendCagr5y: data.metrics?.dividendCagr5y || null,
+                  sector: data.sector || "Outros",
+                } as any}
+                variant="watchlist"
+                hideAddToWatchlist
+                onClose={(ticker) => onRemove(ticker)}
+                onOpenDetail={(item) => setSelectedDetailItem(item)}
+              />
+            </div>
+          );
+        })}
       <AssetDetailSheet 
         item={selectedDetailItem} 
         onClose={() => setSelectedDetailItem(null)} 

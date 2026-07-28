@@ -21,7 +21,7 @@ export function PaywallDialog({ open, onOpenChange, title, description }: Props)
   const { t } = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent closeLabel={t.common.close} className="sm:max-w-[425px]">
         <DialogHeader>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Lock className="h-6 w-6 text-primary" />

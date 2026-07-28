@@ -62,7 +62,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
       <CardContent className="flex flex-col md:flex-row items-center p-6 gap-6">
         <div className="w-full md:w-1/2 h-[200px] shrink-0">
           <ChartContainer config={{}} className="h-full w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%">
               <PieChart>
                 <Pie
                   data={data || []}

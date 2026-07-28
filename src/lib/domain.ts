@@ -31,7 +31,7 @@ export interface Asset {
   type: AssetType;
   currency: Currency;
   currentPrice: number;
-  dividends3y: [number, number, number];
+  dividends3y: number[];
   /** Annual dividend totals, oldest first (up to 5 years). */
   dividendHistory: DividendYearPoint[];
   /** ISO date string of the next ex-dividend date, if known & future. */

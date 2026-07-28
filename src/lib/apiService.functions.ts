@@ -44,7 +44,7 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
 
     const [brRes, yhRes] = await Promise.allSettled([
       fetchWithRetry(
-        `https://brapi.dev/api/available?search=${encodeURIComponent(q)}`,
+        `https://brapi.dev/api/quote/list?search=${encodeURIComponent(q)}`,
         {},
         { timeoutMs: 2500, retries: 0 },
       ).then((r: Response) => (r.ok ? r.json() : null)),
@@ -57,11 +57,20 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
 
     if (brRes.status === "fulfilled" && brRes.value?.stocks) {
       for (const s of brRes.value.stocks.slice(0, 6)) {
-        const t = String(s).toUpperCase();
-        const cleaned = cleanTicker(t);
-        if (seen.has(cleaned)) continue;
-        seen.add(cleaned);
-        results.push({ ticker: cleaned, name: t, type: classifyBr(t), sector: null });
+        if (typeof s === "string") {
+          // Fallback in case of old API response
+          const t = String(s).toUpperCase();
+          const cleaned = cleanTicker(t);
+          if (seen.has(cleaned)) continue;
+          seen.add(cleaned);
+          results.push({ ticker: cleaned, name: t, type: classifyBr(t), sector: null });
+        } else if (s.stock) {
+          const t = String(s.stock).toUpperCase();
+          const cleaned = cleanTicker(t);
+          if (seen.has(cleaned)) continue;
+          seen.add(cleaned);
+          results.push({ ticker: cleaned, name: s.name || t, type: classifyBr(t, s.type), sector: s.sector || null });
+        }
       }
     }
 
@@ -69,21 +78,23 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
       for (const q2 of yhRes.value.quotes) {
         if (!q2.symbol) continue;
         const t = String(q2.symbol).toUpperCase();
-        const cleaned = cleanTicker(t);
+        // Remove .SA suffix to match Brapi's raw tickers and allow Map deduplication
+        const strippedT = t.replace(/\.SA$/, "");
+        const cleaned = cleanTicker(strippedT);
         if (seen.has(cleaned)) continue;
         // Skip non-primary exchange BR shadows (e.g. .BK)
         if (/\.(BK|F|MX|TA|IL|VI|BR)$/.test(t)) continue;
         seen.add(cleaned);
         results.push({
           ticker: cleaned,
-          name: q2.longname || q2.shortname || t,
+          name: q2.longname || q2.shortname || strippedT,
           type: classifyYahoo({
             symbol: t,
             quoteType: q2.quoteType,
             longname: q2.longname,
             shortname: q2.shortname,
           }),
-          sector: q2.sector || q2.industry || null,
+          sector: null,
         });
       }
     }

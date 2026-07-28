@@ -32,10 +32,11 @@ import { useAuth } from "@/lib/auth-provider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Sidebar() {
   const { t } = useI18n();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
   const location = useLocation();
@@ -143,7 +144,21 @@ export function Sidebar() {
 
         {/* User Profile Block */}
         <div className="mt-auto border-t border-border/30 p-2">
-          {user ? (
+          {loading ? (
+            <div className={cn("flex items-center rounded-xl p-2 w-full", isCollapsed ? "justify-center" : "justify-start gap-3")}>
+              {isCollapsed ? (
+                <Skeleton className="h-8 w-8 rounded-full" />
+              ) : (
+                <>
+                  <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+                  <div className="flex flex-col min-w-0 flex-1 gap-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-12" />
+                  </div>
+                </>
+              )}
+            </div>
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button

@@ -1,5 +1,5 @@
 import type { Asset } from "@/lib/domain";
-import { avgDividend } from "@/lib/calculations";
+import { getCanonicalAnnualDividend } from "@/lib/calculations";
 import { formatCurrency, formatPercent, type Locale } from "@/lib/i18n";
 
 export type Timeframe = 1 | 3 | 5;
@@ -11,13 +11,11 @@ export function computeAvgDividend(asset: Asset, timeframe: Timeframe) {
   const available = TIMEFRAMES.filter((n) => sorted.length >= n);
   if (!available.includes(3)) available.push(3);
   available.sort((a, b) => a - b);
-  let selected: number[];
-  if (sorted.length >= timeframe) {
-    selected = sorted.slice(0, timeframe).map((p) => p.amount);
-  } else {
-    selected = [...asset.dividends3y];
-  }
-  return { avg: avgDividend(selected), availableTimeframes: available };
+  
+  return { 
+    avg: getCanonicalAnnualDividend(asset, timeframe), 
+    availableTimeframes: available 
+  };
 }
 
 export function formatResultDate(iso: string, locale: Locale): string | null {

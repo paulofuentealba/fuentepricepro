@@ -24,6 +24,7 @@ import { useSubscription } from "@/lib/subscription";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface HeaderProps {
   variant?: "app" | "landing";
@@ -31,7 +32,7 @@ interface HeaderProps {
 
 export function Header({ variant = "app" }: HeaderProps) {
   const { locale, setLocale, t } = useI18n();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
 
@@ -197,7 +198,17 @@ export function Header({ variant = "app" }: HeaderProps) {
                       {L.navFeatures}
                     </a>
                   )}
-                  {user && variant === "landing" && (
+                  {loading ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-3 py-2 border-b border-border/30">
+                        <Skeleton className="h-11 w-11 rounded-full" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                      <Skeleton className="h-6 w-24" />
+                      <Skeleton className="h-6 w-32" />
+                      <Skeleton className="h-6 w-28" />
+                    </div>
+                  ) : user ? (
                     <>
                       <div className="flex items-center gap-3 py-2 border-b border-white/10">
                         {userAvatar}
@@ -205,9 +216,11 @@ export function Header({ variant = "app" }: HeaderProps) {
                           <span className="text-sm font-medium truncate">{user.email}</span>
                         </div>
                       </div>
-                      <Link to="/app" className="text-lg font-medium hover:text-emerald-400 transition-colors">
-                        {L.goToTerminal}
-                      </Link>
+                      {variant === "landing" && (
+                        <Link to="/app" className="text-lg font-medium hover:text-emerald-400 transition-colors">
+                          {L.goToTerminal}
+                        </Link>
+                      )}
                       <Link to="/app/docs" className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors">
                         <BookOpen className="h-5 w-5" />
                         {t.docs.navLink}
@@ -217,9 +230,9 @@ export function Header({ variant = "app" }: HeaderProps) {
                         {L.settings}
                       </Link>
                     </>
-                  )}
+                  ) : null}
                   
-                  {!user && (
+                  {!user && !loading && (
                     <div className="flex flex-col gap-3 mt-4">
                       <Button
                         type="button"
@@ -246,7 +259,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                       <span className="text-sm font-medium">Language</span>
                       <LanguageSwitcher className="inline-flex" />
                     </div>
-                    {user && variant === "landing" && (
+                    {user && (
                       <Button variant="ghost" onClick={() => signOut()} className="w-full justify-start text-danger hover:text-danger hover:bg-danger/10">
                         <LogOut className="mr-2 h-5 w-5" />
                         {L.signOut}

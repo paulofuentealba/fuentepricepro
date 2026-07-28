@@ -88,8 +88,7 @@ function GoalPlannerImpl({ annualDividend, currentPrice, currency }: GoalPlanner
                   onChange={handleIncomeInput}
                   className="w-32 tabular-nums"
                 />
-                <Slider
-                  value={[income]}
+                <Slider aria-label="Ajustar aporte mensal"                   value={[income]}
                   min={0}
                   max={5000}
                   step={50}

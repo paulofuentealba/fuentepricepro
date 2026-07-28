@@ -48,7 +48,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { t } = useI18n();
   const S = t.settings;
   const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "privacy">("profile");
@@ -103,6 +103,14 @@ function SettingsPage() {
       setIsSavingProfile(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <Loader2 className="h-10 w-10 text-muted-foreground animate-spin mb-4" />
+      </div>
+    );
+  }
 
   // Se não estiver logado, redireciona suavemente
   if (!user) {
@@ -404,7 +412,7 @@ function DeleteAccountWizard({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md border-border/60 bg-card overflow-hidden">
+      <DialogContent closeLabel={t.common.close} className="sm:max-w-md border-border/60 bg-card overflow-hidden">
         {step === 1 && (
           <>
             <DialogHeader>

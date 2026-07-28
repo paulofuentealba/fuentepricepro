@@ -1,7 +1,9 @@
 import { ArrowUpRight, ArrowDownRight, Shield, TrendingUp } from "lucide-react";
 import { cleanTicker, type MockCard } from "./cards";
+import { useI18n } from "@/lib/i18n-provider";
 
 export function ShowcaseCard({ card }: { card: MockCard }) {
+  const { t } = useI18n();
   const toneRing =
     card.marginTone === "success"
       ? "border-success/25 hover:border-success/40"
@@ -40,7 +42,7 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
       {/* Main price */}
       <div className="mt-4 rounded-lg border border-border/60 bg-background/40 p-3">
         <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-          Price in {card.currency}
+          {t.showcase.priceIn} {card.currency}
         </div>
         <div className="mt-1 flex items-baseline justify-between gap-2">
           <span className="text-xl font-bold tabular-nums text-foreground">
@@ -60,14 +62,14 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
         <div className="rounded-lg border border-success/25 bg-success/10 p-2.5">
           <div className="flex items-center gap-1 text-success">
             <TrendingUp className="h-3 w-3" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">Ceiling Price</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">{t.showcase.ceilingPrice}</span>
           </div>
           <div className="mt-0.5 text-base font-bold text-foreground">{card.ceiling}</div>
         </div>
         <div className={`rounded-lg border p-2.5 ${marginTone}`}>
           <div className="flex items-center gap-1">
             <Shield className="h-3 w-3" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">Margin</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">{t.showcase.margin}</span>
           </div>
           <div className="mt-0.5 flex items-baseline gap-1">
             <span className="text-base font-bold text-foreground">{card.margin}</span>

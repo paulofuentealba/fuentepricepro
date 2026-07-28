@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as PrototypeRouteImport } from './routes/prototype'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -35,11 +34,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrototypeRoute = PrototypeRouteImport.update({
-  id: '/prototype',
-  path: '/prototype',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -118,7 +112,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
-  '/prototype': typeof PrototypeRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
@@ -136,7 +129,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/prototype': typeof PrototypeRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
@@ -156,7 +148,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
-  '/prototype': typeof PrototypeRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/cashflow': typeof AppCashflowRoute
@@ -177,7 +168,6 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
-    | '/prototype'
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
@@ -195,7 +185,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/prototype'
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
@@ -214,7 +203,6 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
-    | '/prototype'
     | '/settings'
     | '/sitemap.xml'
     | '/app/cashflow'
@@ -234,7 +222,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
-  PrototypeRoute: typeof PrototypeRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
@@ -254,13 +241,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/prototype': {
-      id: '/prototype'
-      path: '/prototype'
-      fullPath: '/prototype'
-      preLoaderRoute: typeof PrototypeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -396,7 +376,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
-  PrototypeRoute: PrototypeRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   GuidesDividendValuationRoute: GuidesDividendValuationRoute,

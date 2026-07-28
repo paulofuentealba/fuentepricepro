@@ -38,8 +38,8 @@ export function WatchlistFilterBar({
 }: Props): ReactNode {
   const { t } = useI18n();
   return (
-    <div className="flex items-center gap-2 w-full">
-      <div className="flex flex-1 gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="flex flex-wrap justify-start items-center gap-2 w-full">
+      <div className="flex flex-1 flex-wrap gap-2">
         {typeFilter ? (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background/50 text-sm font-medium">
             <div 

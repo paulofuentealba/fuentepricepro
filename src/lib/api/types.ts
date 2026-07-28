@@ -7,7 +7,7 @@ export interface ApiAsset {
   currency: Currency;
   currentPrice: number;
   /** Total annual dividends per share for previous 3 full calendar years (oldest first). */
-  dividends3y: [number, number, number];
+  dividends3y: number[];
   dividendHistory: DividendYearPoint[];
   exDividendDate: string | null;
   epsCurrent: number | null;

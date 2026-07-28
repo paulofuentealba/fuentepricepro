@@ -4,10 +4,12 @@ export function sumByYear(entries: Array<{ year: number; amount: number }>) {
   return map;
 }
 
-export function pickLast3(map: Map<number, number>): [number, number, number] {
+export function pickLast3(map: Map<number, number>): number[] {
   const now = new Date().getUTCFullYear();
   const years = [now - 3, now - 2, now - 1];
-  return years.map((y) => Number((map.get(y) ?? 0).toFixed(4))) as [number, number, number];
+  return years
+    .filter((y) => map.has(y))
+    .map((y) => Number((map.get(y)!).toFixed(4)));
 }
 
 export function historyFromMap(
@@ -18,7 +20,9 @@ export function historyFromMap(
   const out: { year: number; amount: number }[] = [];
   for (let i = count; i >= 1; i--) {
     const y = now - i;
-    out.push({ year: y, amount: Number((map.get(y) ?? 0).toFixed(4)) });
+    if (map.has(y)) {
+      out.push({ year: y, amount: Number((map.get(y)!).toFixed(4)) });
+    }
   }
   return out;
 }

@@ -40,15 +40,16 @@ export interface AssetCardProps {
   averagePrice?: number | null;
   hideAddToWatchlist?: boolean;
   variant?: "watchlist" | "search" | "allocation";
-  item?: WatchlistItem;
+  item?: WatchlistItem | import("@/lib/useValuedPortfolio").ValuedWatchlistItem;
   quote?: LiveQuote;
   meta?: AssetMeta;
-  onEdit?: (item: WatchlistItem) => void;
+  onEdit?: (item: any) => void;
   onRemove?: (id: string) => void;
-  onOpenDetail?: (item: WatchlistItem) => void;
+  onOpenDetail?: (item: any) => void;
   onClose?: (ticker: string) => void;
   hidePlayground?: boolean;
   hideGoalPlanner?: boolean;
+  isSimulation?: boolean;
   
   // Specific to Allocation variant
   shares?: number;
@@ -225,21 +226,8 @@ function WatchlistVariant(props: AssetCardProps) {
 
   if (!item) return null;
 
-  const eps = meta?.eps ?? null;
-  const bvps = (meta?.pbRatio && meta.pbRatio > 0) ? (item.currentPrice / meta.pbRatio) : null;
-  const dividendCagr = meta?.dividendCagr5y ?? null;
-
-  const valuation = getAssetValuation({
-    targetYield: item.targetYield,
-    currentPrice: item.currentPrice,
-    avgDividend: derived.grossIncome / (item.quantity || 1),
-    eps,
-    bvps,
-    dividendCagr,
-    selicPct: selic ?? 10.5,
-    currency: item.currency,
-    type: item.type,
-  });
+  const valuation = (item as import("@/lib/useValuedPortfolio").ValuedWatchlistItem).valuation;
+  if (!valuation) return null;
 
   const hasConsensus = (valuation.consensus && valuation.consensus > 0);
 
@@ -272,19 +260,20 @@ function WatchlistVariant(props: AssetCardProps) {
           <X className="w-4 h-4" />
         </button>
       )}
-      <div className="p-4 flex-1 space-y-3">
-        <AssetCardHeader
-          item={item}
-          quote={quote}
-          pendingEvent={pendingEvent}
-          onShare={handleShare}
-          onShareInsta={handleShareInsta}
-          onEdit={handleEdit}
-          onCorporateEvent={handleCorpEvent}
-          onRemove={handleRemove}
-        />
-        <AssetCardTags meta={meta} />
-      </div>
+        <div className="p-4 flex-1 space-y-3">
+          <AssetCardHeader
+            item={item}
+            quote={quote}
+            pendingEvent={pendingEvent}
+            onShare={handleShare}
+            onShareInsta={handleShareInsta}
+            onEdit={handleEdit}
+            onCorporateEvent={handleCorpEvent}
+            onRemove={handleRemove}
+            isSimulation={props.isSimulation}
+          />
+          <AssetCardTags meta={meta} />
+        </div>
 
       <div
         className={cn(
@@ -383,7 +372,7 @@ function SearchVariant({
     currentPrice: asset.currentPrice,
     avgDividend: avg,
     eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
-    bvps: asset.metrics?.pbRatio ? asset.currentPrice / asset.metrics.pbRatio : null,
+    bvps: asset.metrics?.pbRatio && asset.currentPrice != null && asset.currentPrice > 0 ? asset.currentPrice / asset.metrics.pbRatio : null,
     dividendCagr: asset.metrics?.dividendCagr5y ?? null,
     selicPct: selic ?? 10.5,
     currency: asset.currency,
@@ -426,16 +415,24 @@ function SearchVariant({
       positive ? "shadow-[0_0_15px_rgba(16,185,129,0.15)]" : "shadow-[0_0_15px_rgba(244,63,94,0.15)]"
     )}>
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold leading-none tracking-tight">{displayTicker}</h2>
-            <Badge variant="secondary">
-              <span className="mr-1">{asset.currency === "USD" ? "🇺🇸" : "🇧🇷"}</span>
-              {t.types[asset.type]}
-            </Badge>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">{displayTicker}</h2>
+              <Badge variant="secondary">
+                <span className="mr-1">{asset.currency === "USD" ? "🇺🇸" : "🇧🇷"}</span>
+                {t.types[asset.type]}
+              </Badge>
+              {(timeframe !== 3 || localTargetYield !== initialTargetYield || localAveragePrice !== initialAveragePrice || localCustomTaxRate != null) && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] text-amber-500/90 border-amber-500/30 bg-amber-500/10"
+                >
+                  {t.watchlist.simulationBadge}
+                </Badge>
+              )}
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">{asset.name}</p>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{asset.name}</p>
-        </div>
         <div className="flex items-start gap-2">
           <div className="text-right">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">

@@ -1,9 +1,27 @@
-import type { AssetType } from "./domain";
+import type { Asset, AssetType } from "./domain";
 import type { WatchlistItem } from "./watchlist";
 
 export function avgDividend(divs: readonly number[]): number {
   if (!divs.length) return 0;
   return divs.reduce((s, v) => s + v, 0) / divs.length;
+}
+
+/**
+ * Calculates the base annual dividend consistently across the application (SSOT).
+ * Computes average across the requested timeframe based ONLY on years with actual data.
+ */
+export function getCanonicalAnnualDividend(asset: Asset, timeframe: number = 3): number {
+  const history = (asset.dividendHistory ?? []).filter((p) => Number.isFinite(p.amount));
+  const sorted = [...history].sort((a, b) => b.year - a.year);
+  let selected: number[];
+  if (sorted.length >= timeframe) {
+    // Has enough historical data (at least 'timeframe' years)
+    selected = sorted.slice(0, timeframe).map((p) => p.amount);
+  } else {
+    // If not enough historical years, fallback to dividends3y which has been curated to only include existing data
+    selected = [...asset.dividends3y];
+  }
+  return avgDividend(selected);
 }
 
 export function ceilingPrice(avgDiv: number, targetYieldPct: number): number {

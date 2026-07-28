@@ -5,7 +5,8 @@ import { AssetCard } from "@/components/shared/AssetCard";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { assetQueryOptions } from "@/lib/queryOptions";
-import type { WatchlistItem } from "@/lib/watchlist";
+import { type WatchlistItem } from "@/lib/watchlist";
+import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
 import { Info, Calendar } from "lucide-react";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
@@ -103,7 +104,7 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
 }
 
 interface AssetDetailSheetProps {
-  item: WatchlistItem | null;
+  item: ValuedWatchlistItem | null;
   onClose: () => void;
   hidePlayground?: boolean;
   hideGoalPlanner?: boolean;
@@ -128,26 +129,15 @@ export function AssetDetailSheet({ item, onClose, hidePlayground, hideGoalPlanne
   const error = query.isError ? t.errors.notFound : null;
 
   const valuation = useMemo(() => {
-    if (!asset || !item) return null;
-    const livePrice = asset.currentPrice ?? item.currentPrice;
-    return getAssetValuation({
-      targetYield: item.targetYield,
-      currentPrice: livePrice,
-      avgDividend: item.annualDividend ?? 0,
-      eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
-      bvps: asset.metrics?.pbRatio ? livePrice / asset.metrics.pbRatio : null,
-      dividendCagr: asset.metrics?.dividendCagr5y ?? null,
-      selicPct: selic ?? 10.5,
-      currency: asset.currency,
-      type: asset.type,
-    });
-  }, [asset, item, selic]);
+    if (!item) return null;
+    return item.valuation || null;
+  }, [item]);
 
   const displayTickerStr = displayTicker(item?.ticker ?? "");
 
   return (
     <Sheet open={item != null} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent
+      <SheetContent closeLabel={t.common.close}
         side="right"
         className="w-full overflow-y-auto border-border/50 bg-slate-950/70 backdrop-blur-xl p-0 sm:max-w-2xl"
       >

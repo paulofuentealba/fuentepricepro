@@ -27,7 +27,7 @@ export function ShowcaseCarousel() {
       {/* Heading with nav arrows */}
       <div className="mx-auto mb-5 flex max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-2xl">
-          A global view of your next opportunity
+          {t.showcase.globalOpportunity}
         </h2>
         <div className="flex shrink-0 items-center gap-2">
           <button

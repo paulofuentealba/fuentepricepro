@@ -93,13 +93,8 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   
   const suggestions: SearchHit[] = useMemo(() => {
     const raw = searchResult.data ?? [];
-    const seen = new Set<string>();
-    return raw.filter((hit) => {
-      if (seen.has(hit.ticker)) return false;
-      if (!ALL_TYPES.includes(hit.type)) return false;
-      seen.add(hit.ticker);
-      return true;
-    });
+    const validRaw = raw.filter(item => ALL_TYPES.includes(item.type));
+    return Array.from(new Map(validRaw.map(item => [item.ticker, item])).values());
   }, [searchResult.data]);
 
   const searching = shouldSearch && (searchResult.isFetching || debouncedQuery === "");

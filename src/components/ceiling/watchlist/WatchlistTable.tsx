@@ -74,7 +74,7 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
         {isEditing ? (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-              Cancelar
+              {t.watchlist.cancel}
             </Button>
             <Button
               variant="default"
@@ -82,18 +82,18 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
               className="bg-success text-success-foreground hover:bg-success/90 gap-2"
               onClick={handleSave}
             >
-              <Save className="h-4 w-4" /> Salvar Alterações
+              <Save className="h-4 w-4" /> {t.watchlist.saveChanges}
             </Button>
           </div>
         ) : (
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsEditing(true)}>
-            <Edit2 className="h-4 w-4" /> Bulk Edit (Rápido)
+            <Edit2 className="h-4 w-4" /> {t.watchlist.bulkEdit}
           </Button>
         )}
       </div>
 
-      <div className="rounded-md border border-border/60 bg-card/40">
-        <Table>
+      <div className="rounded-md border border-border/60 bg-card/40 overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead>{t.global.asset}</TableHead>

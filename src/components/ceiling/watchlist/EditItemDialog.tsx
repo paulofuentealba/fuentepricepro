@@ -11,6 +11,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
+import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { MaskedInput } from "../shared/MaskedInput";
 import { ceilingPrice, safetyMargin, netAfterTax } from "@/lib/calculations";
 import { displayTicker, formatCurrency, formatPercent } from "@/lib/i18n";
@@ -18,7 +19,7 @@ import { TrendingUp, Target, Wallet } from "lucide-react";
 import { PriceTag } from "../shared/AssetDataDisplay";
 
 interface EditItemDialogProps {
-  item: WatchlistItem | null;
+  item: ValuedWatchlistItem | null;
   onClose: () => void;
   onSave: (patch: Partial<WatchlistItem>) => void;
 }
@@ -52,7 +53,9 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
     const a = Number.isFinite(parsedAvg) && parsedAvg > 0 ? parsedAvg : null;
     const y = Number.isFinite(parsedDy) && parsedDy > 0 ? parsedDy : item.targetYield;
 
-    const newCeiling = ceilingPrice(item.annualDividend, y);
+    const newCeiling = y === item.targetYield && item?.valuation
+      ? item.valuation.activeCeiling
+      : ceilingPrice(item.annualDividend, y);
     const newTotalCost = a != null ? a * q : 0;
     const annualIncome = item.annualDividend * q;
     const newProjectedIncome = netAfterTax(
@@ -105,7 +108,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
         if (!o) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden bg-background">
+      <DialogContent closeLabel={t.common.close} className="sm:max-w-[700px] gap-0 p-0 overflow-hidden bg-background">
         <DialogHeader className="p-6 pb-4 border-b border-border/40">
           <DialogTitle className="flex items-center gap-2">
             {t.watchlist.updateTitle}
@@ -300,6 +303,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 quantity: q,
                 averagePrice: a != null && Number.isFinite(a) ? a : null,
                 targetMonthlyIncome: g != null && Number.isFinite(g) && g > 0 ? g : null,
+                annualDividend: item?.annualDividend, // Heal the database with the canonical value passed via props
               };
               if (y != null && Number.isFinite(y) && y > 0 && item) {
                 patch.targetYield = y;

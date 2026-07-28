@@ -4,8 +4,54 @@ import type { en } from "./dict.en";
 
 export const es = {
   appTitle: "Fuente Price Pro",
-  appTagline: "Herramienta Inteligente de Valoración de Cartera e Ingeniería de Ingresos Pasivos",
+  appTagline: "Valoración Inteligente de Portafolio & Ingeniería de Ingresos Pasivos",
   languageLabel: "Idioma",
+  common: {
+    close: "Cerrar",
+    loading: "Cargando...",
+    save: "Guardar",
+    cancel: "Cancelar",
+  },
+  showcase: {
+    title: "Escaparate",
+    subtitle: "Subtítulo",
+    tryNow: "Probar Ahora",
+    proFeature: "Función Pro",
+    smartContribution: "Aporte Inteligente",
+    optimalAllocation: "Asignación Óptima de Capital",
+    topAssetsYield: "Mejores Activos por Yield",
+    targetingYield: "Objetivo 6% Yield",
+    passiveIncomeForecast: "Pronóstico de Ingresos Pasivos",
+    yoyGrowth: "Crecimiento Interanual",
+    compoundingIncome: "Ingreso Compuesto",
+    priceIn: "Precio en",
+    ceilingPrice: "Precio Techo",
+    margin: "Margen de Seguridad",
+    globalOpportunity: "Oportunidad Global",
+  },
+  lockedPanel: {
+    title: "Función Pro",
+    desc: "Desbloquea funciones avanzadas.",
+    button: "Actualizar a Pro",
+    signIn: "Iniciar Sesión",
+  },
+  tooltips: {
+    safetyMargin: "Descuento sobre el precio techo. Mayor es mejor.",
+    cagr: "Tasa de Crecimiento Anual Compuesto de dividendos a 5 años.",
+    payout: "Porcentaje de ganancias pagado como dividendos. Mayor a 100% es riesgoso.",
+    yieldOnCost: "Su yield efectivo basado en su precio promedio de compra.",
+    consensus: "Promedio de los modelos de valoración de Graham, Bazin y Gordon.",
+    ceilingPrice: "Precio máximo que debe pagar para alcanzar su yield objetivo.",
+  },
+  toasts: {
+    assetRemoved: "Activo eliminado exitosamente.",
+    settingsSaved: "Configuraciones guardadas.",
+  },
+  emptyStates: {
+    clearFilters: "Borrar Filtros",
+    goToPortfolio: "Ir al Portafolio",
+    noMatch: "Ningún activo coincide con tu búsqueda.",
+  },
   guestBanner: {
     messagePart1: "¿Te gustó este análisis?",
     messagePart2: "Guarda estos activos en tu Watchlist y accede desde cualquier dispositivo.",
@@ -191,8 +237,18 @@ export const es = {
     notFound: "No pudimos encontrar ese ticker.",
   },
   watchlist: {
-    loading: "Cargando cartera...",
-    addBtn: "Añadir a la Watchlist",
+    loading: "Cargando portafolio...",
+    addBtn: "Añadir a Watchlist",
+    saveChanges: "Guardar Cambios",
+    bulkEdit: "Edición Rápida",
+    simulationBadge: "Escenario / Simulación",
+    fixedIncomePanel: {
+      title: "Renta Fija",
+      indexer: "Indexador",
+      rateYield: "Tasa/Yield",
+      maturityDate: "Vencimiento",
+      accruedBalance: "Saldo Acumulado",
+    },
     updateBtn: "Actualizar Posición",
     addTitle: "Añadir a la Watchlist",
     updateTitle: "Actualizar Posición",
@@ -338,8 +394,8 @@ export const es = {
 
   radar: {
     title: "Radar de Dividendos",
-    description:
-      "Descubre los mayores pagadores de dividendos que cotizan por debajo del Precio Techo.",
+    description: "Descubra las empresas que pagan mayores dividendos y cotizan por debajo del Precio Techo.",
+    globalYieldNote: "Net Yield después de impuestos",
     marketBr: "Brasil (B3)",
     marketUs: "EE.UU. (NYSE/NASDAQ)",
     topOpportunities: "Principales Oportunidades del Mercado",

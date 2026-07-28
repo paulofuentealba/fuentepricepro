@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Trophy, Target, Info } from "lucide-react";
 import { useUserSettings } from "@/lib/useUserSettings";
-import { useWatchlist } from "@/lib/watchlist";
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useExchangeRate } from "@/lib/useExchangeRate";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 
 function calculateMonthsToFI(
   currentCapital: number,
@@ -61,7 +63,7 @@ function formatDuration(months: number, t: any): string {
 
 export function FIProgressCard() {
   const { settings, updateSettings } = useUserSettings();
-  const { items } = useWatchlist();
+  const { valuedItems: items, isAppLoading } = useValuedPortfolio();
   const { data: usdRate = 5 } = useExchangeRate();
   const { locale, t } = useI18n();
   
@@ -74,7 +76,7 @@ export function FIProgressCard() {
   const [tempCost, setTempCost] = useState(settings.monthlyLivingCostGoal?.toString() || "");
   const [tempContribution, setTempContribution] = useState(settings.estimatedMonthlyContribution?.toString() || "1000");
 
-  const currency = settings.smartAllocationCurrency || "BRL";
+  const [currency, setCurrency] = useState<"BRL" | "USD">((settings.smartAllocationCurrency as "BRL" | "USD") || "BRL");
   
   // Conversions assuming user's base currency
   // For simplicity, we sum up current capital and projected monthly income in BRL, 
@@ -141,6 +143,14 @@ export function FIProgressCard() {
     setIsSettingsOpen(false);
   };
 
+  if (isAppLoading) {
+    return (
+      <div className="w-full mb-6">
+        <Skeleton className="h-[120px] w-full rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full mb-6">
       <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-background/50 backdrop-blur-md shadow-sm">
@@ -159,15 +169,20 @@ export function FIProgressCard() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-semibold text-foreground uppercase tracking-widest">{t.fiMode.title}</h3>
+                <h3 className="text-sm font-semibold text-foreground tracking-widest">Independência financeira</h3>
               </div>
-              <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
-                    <Settings className="w-3.5 h-3.5" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+              <div className="flex items-center gap-2">
+                <CurrencyToggle 
+                  value={currency === "USD" ? "US" : "BR"} 
+                  onChange={(v) => setCurrency(v === "US" ? "USD" : "BRL")} 
+                />
+                <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                      <Settings className="w-3.5 h-3.5" />
+                    </Button>
+                  </DialogTrigger>
+                <DialogContent closeLabel={t.common.close} className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>{t.fiMode.configTitle}</DialogTitle>
                   </DialogHeader>
@@ -196,6 +211,7 @@ export function FIProgressCard() {
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
 
             {!isSetup ? (
@@ -223,6 +239,9 @@ export function FIProgressCard() {
                 </div>
                 <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
                   {t.fiMode.passiveIncome}
+                </p>
+                <p className="text-[9px] text-muted-foreground/70 italic mt-1">
+                  Valores consolidados com base na cotação atual.
                 </p>
               </div>
             )}

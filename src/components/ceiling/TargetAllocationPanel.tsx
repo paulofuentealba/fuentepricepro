@@ -89,8 +89,7 @@ export function TargetAllocationPanel({ targets, onChange }: Props) {
                   />
                   <span className="absolute right-2 top-1.5 text-xs text-muted-foreground">%</span>
                 </div>
-                <Slider
-                  min={0}
+                <Slider aria-label="Ajustar alocação alvo"                   min={0}
                   max={100}
                   step={1}
                   value={[targets[type] || 0]}

@@ -7,6 +7,7 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { avgDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
 import { buildWatchlistCsv, downloadCsv, parseWatchlistCsv } from "@/lib/csv";
 import { makeId, type WatchlistItem } from "@/lib/watchlist";
+import { useI18n } from "@/lib/i18n-provider";
 
 interface Props {
   items: WatchlistItem[];
@@ -16,6 +17,7 @@ interface Props {
 const DEFAULT_TARGET_YIELD = 6;
 
 export function WatchlistIO({ items, onImport }: Props) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
@@ -127,10 +129,10 @@ export function WatchlistIO({ items, onImport }: Props) {
         size="sm"
         className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground"
         onClick={handleExport}
-        title="Export CSV"
+        title={t.watchlist.exportData}
       >
         <Download className="h-3.5 w-3.5" />
-        Export
+        {t.watchlist.exportData}
       </Button>
       <Button
         type="button"
@@ -139,14 +141,14 @@ export function WatchlistIO({ items, onImport }: Props) {
         className="h-8 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground"
         onClick={() => fileRef.current?.click()}
         disabled={importing}
-        title="Import CSV"
+        title={t.watchlist.importData}
       >
         {importing ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
         ) : (
           <Upload className="h-3.5 w-3.5" />
         )}
-        Import
+        {t.watchlist.importData}
       </Button>
     </div>
   );

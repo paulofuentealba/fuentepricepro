@@ -88,7 +88,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-border/60 bg-card">
+      <DialogContent closeLabel={t.common.close} className="sm:max-w-md border-border/60 bg-card">
         <DialogHeader>
           <DialogTitle className="text-xl">{t.brokerNote.importTitle}</DialogTitle>
           <DialogDescription className="sr-only">{t.brokerNote.importTitle}</DialogDescription>

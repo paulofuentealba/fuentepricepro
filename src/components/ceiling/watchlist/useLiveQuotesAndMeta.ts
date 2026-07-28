@@ -4,6 +4,7 @@ import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import type { LiveQuote } from "@/lib/apiService.functions";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { AssetMeta } from "./utils";
+import { getCanonicalAnnualDividend } from "@/lib/calculations";
 
 /**
  * Fans out live quote + tactical metadata requests per unique ticker via
@@ -40,11 +41,22 @@ export function useLiveQuotesAndMeta(items: WatchlistItem[]) {
           dividendCagr5y: asset.metrics?.dividendCagr5y ?? null,
           eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
           pbRatio: asset.metrics?.pbRatio ?? null,
+          sector: asset.sector ?? null,
+          canonicalDividend3y: getCanonicalAnnualDividend(asset, 3),
+          currentPrice: asset.currentPrice ?? null,
         };
       }
     });
     return out;
   }, [tickers, assetResults]);
 
-  return { quotes, meta };
+  const dataUpdatedAt = useMemo(() => {
+    let max = 0;
+    for (const q of quoteResults) {
+      if (q.dataUpdatedAt > max) max = q.dataUpdatedAt;
+    }
+    return max;
+  }, [quoteResults]);
+
+  return { quotes, meta, dataUpdatedAt };
 }

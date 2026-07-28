@@ -144,7 +144,7 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
             {existing ? t.watchlist.updateBtn : t.watchlist.addBtn}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent closeLabel={t.common.close} className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {existing ? t.watchlist.updateTitle : t.watchlist.addTitle} — {displayTicker(asset.ticker)}

@@ -65,7 +65,7 @@ export function FeedbackWidget() {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent closeLabel={t.common.close} className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{labels.title}</DialogTitle>
             <DialogDescription>{labels.description}</DialogDescription>

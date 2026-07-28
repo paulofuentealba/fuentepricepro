@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { displayTicker } from "@/lib/i18n";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 
 export function RiskRadar() {
   const { t, locale } = useI18n();
@@ -20,9 +22,10 @@ export function RiskRadar() {
           <ShieldAlert className="w-8 h-8 text-emerald-500" />
         </div>
         <h3 className="text-lg font-bold text-foreground mb-2">{t.riskRadar.emptyTitle}</h3>
-        <p className="text-sm text-muted-foreground max-w-sm">
+        <p className="text-sm text-muted-foreground max-w-sm mb-6">
           {t.riskRadar.emptySubtitle}
         </p>
+        <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white"><Link to="/app">{t.emptyStates?.goToPortfolio || "Ir para a Carteira"}</Link></Button>
       </div>
     );
   }
@@ -66,7 +69,11 @@ export function RiskRadar() {
                   <Icon className={cn("h-5 w-5 mt-0.5", textClass)} />
                   <div>
                     <h4 className={cn("font-medium text-sm", textClass)}>
-                      {w.ticker ? `${displayTicker(w.ticker)} — ` : ""}{title}
+                      {w.ticker 
+                        ? `${displayTicker(w.ticker)} - ` 
+                        : w.extraData?.tickers 
+                          ? `${w.extraData.tickers.map((t: string) => displayTicker(t)).join(", ")} - ` 
+                          : ""}{title}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1">{desc}</p>
                   </div>
@@ -143,7 +150,7 @@ export function RiskRadar() {
           </CardHeader>
           <CardContent>
             <div className="relative overflow-x-auto rounded-lg border border-border/50">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm min-w-[700px]">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium">{t.riskRadar.asset}</th>
@@ -196,7 +203,7 @@ export function RiskRadar() {
           </CardHeader>
           <CardContent>
             <div className="relative overflow-x-auto rounded-lg border border-border/50">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm min-w-[700px]">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium">{t.riskRadar.sector}</th>

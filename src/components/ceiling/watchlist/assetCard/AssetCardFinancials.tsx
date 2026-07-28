@@ -2,12 +2,13 @@ import { useCallback, useMemo, type KeyboardEvent, type MouseEvent } from "react
 import { ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatPercent, formatCurrency } from "@/lib/i18n";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { PriceTag } from "../../shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { cn } from "@/lib/utils";
 import { GoalProgressBar } from "../GoalProgressBar";
-import { MetricBox } from "../../shared/MetricBox";
+import { MetricBox } from "@/components/shared/MetricBox";
 import type { AssetDerived } from "./useAssetCardDerived";
 import type { AssetMeta } from "../utils";
 
@@ -134,7 +135,12 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
       </div>
 
       <MetricBox
-        label={t.watchlist.yieldOnCost}
+        label={
+          <span className="flex items-center">
+            {t.watchlist.yieldOnCost}
+            <InfoTooltip content={t.tooltips?.yieldOnCost || ""} link="/wiki#yield-on-cost" className="ml-1" />
+          </span>
+        }
         value={yoc != null ? formatPercent(yoc, locale, 2) : "---"}
         subValue={yoc == null ? t.watchlist.yocPrompt : undefined}
         variant="success"
