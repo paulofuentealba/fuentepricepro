@@ -4,6 +4,10 @@ import { UploadCloud, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { parseB3BrokerNote } from "@/lib/dataIngestion/b3Parser";
 import { useWatchlist, makeId, WatchlistItem } from "@/lib/watchlist";
+import { useQueryClient } from "@tanstack/react-query";
+import { assetQueryOptions } from "@/lib/queryOptions";
+import { getCanonicalAnnualDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
+import { classifyBr } from "@/lib/classify";
 import { toast } from "sonner";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
@@ -20,6 +24,7 @@ interface BrokerNoteUploaderProps {
 export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderProps) {
   const { t } = useI18n();
   const { upsertManyAsync } = useWatchlist();
+  const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,31 +53,43 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
         throw new Error(t.brokerNote.malformedPdf);
       }
 
-      const itemsToImport: WatchlistItem[] = result.trades.map(trade => {
-        let type: any = "STOCK_BR";
-        if (trade.ticker.endsWith("11")) type = "FII";
-        
-        return {
+      const itemsToImport: WatchlistItem[] = [];
+      
+      for (const trade of result.trades) {
+        let assetData: any = null;
+        try {
+          assetData = await queryClient.ensureQueryData(assetQueryOptions(trade.ticker));
+        } catch (e) {
+          console.warn("Could not fetch asset data for", trade.ticker);
+        }
+
+        const type = assetData?.type || classifyBr(trade.ticker);
+        const annualDiv = assetData ? getCanonicalAnnualDividend(assetData, 3) : 0;
+        const target = 6;
+        const ceil = ceilingPrice(annualDiv, target);
+        const margin = safetyMargin(ceil, trade.price);
+
+        itemsToImport.push({
           id: makeId(trade.ticker, type),
           ticker: trade.ticker,
-          name: trade.ticker,
+          name: assetData?.name || trade.ticker,
           type,
           currency: "BRL",
           currentPrice: trade.price,
-          annualDividend: 0,
-          targetYield: 6,
-          ceilingPrice: 0,
-          safetyMargin: 0,
+          annualDividend: annualDiv,
+          targetYield: target,
+          ceilingPrice: ceil,
+          safetyMargin: margin,
           quantity: trade.quantity,
           averagePrice: trade.price,
-          paymentMonths: [],
+          paymentMonths: Array.isArray(assetData?.paymentMonths) ? assetData.paymentMonths : [],
           payoutRatio: null,
           targetMonthlyIncome: null,
           customTaxRate: null,
-          sector: null,
+          sector: assetData?.sector || null,
           addedAt: Date.now(),
-        } as WatchlistItem;
-      });
+        } as WatchlistItem);
+      }
 
       await upsertManyAsync(itemsToImport);
       toast.success(`${itemsToImport.length} ${t.brokerNote.successImport}`);

@@ -4,6 +4,7 @@ import { Sparkles, TrendingUp, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
 import { getAssetValuation, getCanonicalAnnualDividend } from "@/lib/calculations";
+import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
 import { formatCurrency, formatPercent } from "@/lib/i18n";
 
@@ -63,7 +64,7 @@ export function DividendRadar() {
       ?.map((asset: any) => {
         const canonicalDiv = getCanonicalAnnualDividend(asset, 3);
         const dy = asset.currentPrice > 0 ? (canonicalDiv / asset.currentPrice) * 100 : 0;
-        const assetType = asset.type || (market === "BR" ? (asset.ticker.endsWith("11") && !asset.ticker.startsWith("TAEE") ? "FII" : "STOCK_BR") : "STOCK_US");
+        const assetType = asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US");
         const currency = market === "BR" ? "BRL" : "USD";
 
         const valuation = getAssetValuation({
@@ -88,9 +89,7 @@ export function DividendRadar() {
           type:
             asset.type ||
             (market === "BR"
-              ? asset.ticker.endsWith("11") && !asset.ticker.startsWith("TAEE")
-                ? "FII"
-                : "STOCK_BR"
+              ? classifyBr(asset.ticker)
               : "STOCK_US"),
           currency: market === "BR" ? "BRL" : "USD",
           dy: dy,

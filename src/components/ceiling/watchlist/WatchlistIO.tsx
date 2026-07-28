@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { assetQueryOptions } from "@/lib/queryOptions";
-import { avgDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
+import { getCanonicalAnnualDividend, avgDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
 import { buildWatchlistCsv, downloadCsv, parseWatchlistCsv } from "@/lib/csv";
 import { makeId, type WatchlistItem } from "@/lib/watchlist";
 import { useI18n } from "@/lib/i18n-provider";
@@ -59,7 +59,7 @@ export function WatchlistIO({ items, onImport }: Props) {
             const type = row.type ?? asset.type;
             const id = makeId(asset.ticker, type);
             const existing = existingById.get(id);
-            const annual = avgDividend(asset.dividends3y);
+            const annual = getCanonicalAnnualDividend(asset, 3);
             const target = existing?.targetYield ?? DEFAULT_TARGET_YIELD;
             const ceiling = ceilingPrice(annual, target);
             const margin = safetyMargin(ceiling, asset.currentPrice);
