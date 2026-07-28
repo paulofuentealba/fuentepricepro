@@ -25,6 +25,7 @@ import { WatchlistFilterBar } from "./watchlist/WatchlistFilterBar";
 import { WatchlistTable } from "./watchlist/WatchlistTable";
 import { DataManagement } from "./watchlist/DataManagement";
 import { getAssetValuation } from "@/lib/calculations";
+import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useSelic } from "@/lib/useSelic";
 import { MetricBox } from "@/components/shared/MetricBox";
 
@@ -47,8 +48,8 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const [showFIWizard, setShowFIWizard] = useState(false);
   const { t, locale } = useI18n();
   const { items, remove, update, upsert, isPending } = useWatchlist();
-  const [editing, setEditing] = useState<WatchlistItem | null>(null);
-  const [detail, setDetail] = useState<WatchlistItem | null>(null);
+  const [editing, setEditing] = useState<ValuedWatchlistItem | null>(null);
+  const [detail, setDetail] = useState<ValuedWatchlistItem | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const { isPro } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
@@ -182,8 +183,8 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     return { over, under, total };
   }, [valuedItems]);
 
-  const handleEdit = useCallback((it: WatchlistItem) => setEditing(it), []);
-  const handleOpenDetail = useCallback((it: WatchlistItem) => setDetail(it), []);
+  const handleEdit = useCallback((it: ValuedWatchlistItem) => setEditing(it), []);
+  const handleOpenDetail = useCallback((it: ValuedWatchlistItem) => setDetail(it), []);
   const handleCloseDetail = useCallback(() => setDetail(null), []);
   const handleRemove = useCallback((id: string) => remove(id), [remove]);
   const handleDialogClose = useCallback(() => setEditing(null), []);
@@ -435,7 +436,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
             {(filteredAndSorted && filteredAndSorted.length === 0 && valuedItems.length > 0) ? (
               <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-border/50 bg-background/40 backdrop-blur-md">
                 <p className="text-sm text-muted-foreground mb-4">{t.emptyStates?.noMatch || "Nenhum ativo encontrado."}</p>
-                <Button variant="outline" size="sm" onClick={() => { setTypeFilter("all" as any); setOppFilter("all" as any); }}>
+                <Button variant="outline" size="sm" onClick={() => { setTypeFilter(null); setOppFilter(null); }}>
                   {t.emptyStates?.clearFilters || "Limpar Filtros"}
                 </Button>
               </div>
@@ -459,8 +460,8 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           </>
         )}
 
-        <EditItemDialog item={editing as any} onClose={handleDialogClose} onSave={handleDialogSave} />
-        <AssetDetailSheet item={detail as any} onClose={handleCloseDetail} />
+        <EditItemDialog item={editing} onClose={handleDialogClose} onSave={handleDialogSave} />
+        <AssetDetailSheet item={detail} onClose={handleCloseDetail} />
         <PaywallDialog
           open={showPaywall}
           onOpenChange={setShowPaywall}
