@@ -91,8 +91,17 @@ export function useUserSettings() {
 
         if (snap.exists()) {
           const data = snap.data();
+          let settings = data.settings || {};
+
+          // Migrate smartAllocationCurrency -> displayCurrency in cloud if needed
+          if (settings.smartAllocationCurrency && !settings.displayCurrency) {
+            settings.displayCurrency = settings.smartAllocationCurrency;
+            delete settings.smartAllocationCurrency;
+            await setDoc(ref, { settings }, { merge: true });
+          }
+
           // Merge with defaults in case of missing fields
-          return { ...DEFAULT_SETTINGS, ...data.settings } as UserSettings;
+          return { ...DEFAULT_SETTINGS, ...settings } as UserSettings;
         } else {
           // First time cloud user: migrate local to cloud
           const local = readLocalSettings();
