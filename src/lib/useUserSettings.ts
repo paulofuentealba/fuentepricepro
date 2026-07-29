@@ -9,7 +9,7 @@ const STORAGE_KEY = "ceilingPricePro.settings.v1";
 
 export interface UserSettings {
   targetYield: number;
-  smartAllocationCurrency: Currency;
+  displayCurrency: Currency;
   smartAllocationTargets: Record<AssetType, number>;
   monthlyLivingCostGoal?: number;
   estimatedMonthlyContribution?: number;
@@ -17,7 +17,7 @@ export interface UserSettings {
 
 const DEFAULT_SETTINGS: UserSettings = {
   targetYield: 6,
-  smartAllocationCurrency: "BRL",
+  displayCurrency: "BRL",
   smartAllocationTargets: {
     STOCK_BR: 0,
     STOCK_US: 0,
@@ -38,16 +38,16 @@ function readLocalSettings(): UserSettings {
     if (!raw) {
       // Tenta migrar do antigo formato espalhado
       const oldTargetYield = window.localStorage.getItem("global-target-yield");
-      const oldCurrency = window.localStorage.getItem("smartAllocationCurrency");
+      const oldCurrency = window.localStorage.getItem("smartAllocationCurrency") || window.localStorage.getItem("displayCurrency");
       const oldTargets = window.localStorage.getItem("smart-allocation-targets");
 
       const settings = {
         targetYield: oldTargetYield
           ? Number(JSON.parse(oldTargetYield))
           : DEFAULT_SETTINGS.targetYield,
-        smartAllocationCurrency: oldCurrency
+        displayCurrency: oldCurrency
           ? (JSON.parse(oldCurrency) as Currency)
-          : DEFAULT_SETTINGS.smartAllocationCurrency,
+          : DEFAULT_SETTINGS.displayCurrency,
         smartAllocationTargets: oldTargets
           ? JSON.parse(oldTargets)
           : DEFAULT_SETTINGS.smartAllocationTargets,
@@ -57,6 +57,7 @@ function readLocalSettings(): UserSettings {
       // Limpa os antigos
       window.localStorage.removeItem("global-target-yield");
       window.localStorage.removeItem("smartAllocationCurrency");
+      window.localStorage.removeItem("displayCurrency");
       window.localStorage.removeItem("smart-allocation-targets");
 
       writeLocalSettings(settings);

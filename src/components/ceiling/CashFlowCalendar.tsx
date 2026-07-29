@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import {
@@ -58,10 +59,11 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     return Array.from(set);
   }, [items]);
 
-  const [currency, setCurrency] = useState<Currency>(availableCurrencies[0] ?? "USD");
-  const activeCurrency = availableCurrencies.includes(currency)
-    ? currency
-    : (availableCurrencies[0] ?? "USD");
+  const { settings, updateSettings } = useUserSettings();
+  const currency = settings.displayCurrency;
+
+  // No longer fallback to availableCurrencies[0]. Just use global displayCurrency.
+  const activeCurrency = currency;
 
   const data = useMemo(
     () => buildMonthlyBuckets(items, activeCurrency, months),
@@ -97,7 +99,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
           onExportCsv={handleExportCsv}
           availableCurrencies={availableCurrencies}
           activeCurrency={activeCurrency}
-          onCurrencyChange={setCurrency}
+          onCurrencyChange={(c) => updateSettings({ displayCurrency: c })}
         />
         <CashFlowSummaryCards
           summary={summary}

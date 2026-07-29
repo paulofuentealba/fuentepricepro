@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +43,8 @@ export function SnowballSimulator() {
     },
   } satisfies ChartConfig;
 
-  const [currency, setCurrency] = useState<Currency>("BRL");
+  const { settings, updateSettings } = useUserSettings();
+  const currency = settings.displayCurrency;
   const [monthlyContribution, setMonthlyContribution] = useState<number>(1000);
   const [years, setYears] = useState<number>(10);
   const [reinvest, setReinvest] = useState<boolean>(true);
@@ -102,7 +104,7 @@ export function SnowballSimulator() {
             <div className="shrink-0">
               <CurrencyToggle
                 value={currency === "USD" ? "US" : "BR"}
-                onChange={(v) => setCurrency(v === "US" ? "USD" : "BRL")}
+                onChange={(v) => updateSettings({ displayCurrency: v === "US" ? "USD" : "BRL" })}
               />
             </div>
           </div>

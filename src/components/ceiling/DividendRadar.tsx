@@ -26,6 +26,7 @@ import {
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { TargetYieldSlider } from "@/components/ui/TargetYieldSlider";
 import { useSettings } from "@/lib/settings";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchRadarFn } from "@/lib/apiService.functions";
@@ -42,7 +43,9 @@ import { WatchlistFilterBar } from "./watchlist/WatchlistFilterBar";
 
 export function DividendRadar() {
   const { t } = useI18n();
-  const [market, setMarket] = useState<"BR" | "US">("BR");
+  const { settings, updateSettings } = useUserSettings();
+  const market = settings.displayCurrency === "USD" ? "US" : "BR";
+  const setMarket = (m: "US" | "BR") => updateSettings({ displayCurrency: m === "US" ? "USD" : "BRL" });
   const { targetYield, setTargetYield } = useSettings();
 
   const {

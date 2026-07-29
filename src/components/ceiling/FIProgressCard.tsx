@@ -77,7 +77,7 @@ export function FIProgressCard() {
   const [tempCost, setTempCost] = useState(settings.monthlyLivingCostGoal?.toString() || "");
   const [tempContribution, setTempContribution] = useState(settings.estimatedMonthlyContribution?.toString() || "1000");
 
-  const [currency, setCurrency] = useState<"BRL" | "USD">((settings.smartAllocationCurrency as "BRL" | "USD") || "BRL");
+  const currency = settings.displayCurrency;
   
   // Conversions assuming user's base currency
   // For simplicity, we sum up current capital and projected monthly income in BRL, 
@@ -175,7 +175,7 @@ export function FIProgressCard() {
               <div className="flex items-center gap-2">
                 <CurrencyToggle 
                   value={currency === "USD" ? "US" : "BR"} 
-                  onChange={(v) => setCurrency(v === "US" ? "USD" : "BRL")} 
+                  onChange={(v) => updateSettings({ displayCurrency: v === "US" ? "USD" : "BRL" })} 
                 />
                 <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                   <DialogTrigger asChild>

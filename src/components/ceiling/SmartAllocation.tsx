@@ -49,8 +49,8 @@ export function SmartAllocation() {
   const [capital, setCapital] = useState("");
   const [showOnlyImpacted, setShowOnlyImpacted] = useState(true);
   const { settings, updateSettings } = useUserSettings();
-  const currency = settings.smartAllocationCurrency;
-  const setCurrency = (c: Currency) => updateSettings({ smartAllocationCurrency: c });
+  const currency = settings.displayCurrency;
+  const setCurrency = (c: Currency) => updateSettings({ displayCurrency: c });
   const [strategies, setStrategies] = useState<StrategyKey[]>(["yield"]);
   const [excludedTickers, setExcludedTickers] = useState<string[]>([]);
   const [generated, setGenerated] = useState(false);
