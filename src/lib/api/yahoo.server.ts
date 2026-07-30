@@ -1,4 +1,5 @@
 import type { Currency } from "../domain";
+import type { DividendEvent } from "../domain";
 import type { ApiAsset, LiveQuote, QuoteSummary } from "./types";
 import { UA, dedupeInFlight, fetchWithRetry, fetchWithTimeout, num } from "./http.server";
 import { classifyYahoo } from "./classify.server";
@@ -151,6 +152,16 @@ export async function fetchFromYahoo(ticker: string): Promise<ApiAsset | null> {
     const cagr = dividendCagrPct(dividendHistory);
     const paymentMonths = paymentMonthsFromDates(Object.values(divsObj).map((d) => d.date));
 
+    // Expose raw dividend events in parallel (does NOT affect valuation)
+    // Yahoo doesn't separate ex-date from payment date; date is the ex-date (unix seconds)
+    const dividendEvents: DividendEvent[] = Object.values(divsObj)
+      .filter((d) => Number.isFinite(d.amount) && d.amount > 0)
+      .map((d) => ({
+        exDate: new Date(d.date * 1000).toISOString(),
+        paymentDate: null,
+        amountPerShare: Number(d.amount),
+      }));
+
     return {
       ticker: t,
       name: res.meta.longName || res.meta.shortName || t,
@@ -164,6 +175,7 @@ export async function fetchFromYahoo(ticker: string): Promise<ApiAsset | null> {
       epsNext: qs?.forwardEps ?? null,
       paymentMonths,
       sector: qs?.sector ?? null,
+      dividendEvents,
       metrics: {
         peRatio: qs?.trailingPE ?? qs?.forwardPE ?? null,
         pbRatio: qs?.priceToBook ?? null,

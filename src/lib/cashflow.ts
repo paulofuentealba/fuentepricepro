@@ -1,4 +1,5 @@
 import type { Currency } from "@/lib/domain";
+import type { DividendEvent } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
 
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
@@ -32,6 +33,17 @@ export interface CashFlowSummary {
   next30: number;
 }
 
+/** Map of ticker → raw dividend events, used to compute real paidAmount. */
+export type DividendEventsMap = Record<string, DividendEvent[]>;
+
+export interface InvestedVsReceivedItem {
+  ticker: string;
+  /** averagePrice × quantity */
+  invested: number;
+  /** Sum of all historical dividend events × current quantity (constant quantity assumption). */
+  received: number;
+}
+
 function fallbackMonthsForType(type: WatchlistItem["type"]): number[] {
   return MONTHLY_TYPES.includes(type) ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : QUARTERLY_MONTHS;
 }
@@ -40,6 +52,7 @@ export function buildMonthlyBuckets(
   items: WatchlistItem[],
   currency: Currency,
   months: string[],
+  dividendEventsMap: DividendEventsMap = {},
 ): MonthBucket[] {
   const buckets: { amount: number; contributors: MonthContributor[] }[] = Array.from(
     { length: 12 },
@@ -65,6 +78,9 @@ export function buildMonthlyBuckets(
   const positive = amounts.filter((a) => a > 0);
   const minPositive = positive.length > 0 ? Math.min(...positive) : 0;
 
+  const currentYear = new Date().getFullYear();
+  const currentMonthIndex = new Date().getMonth();
+
   let running = 0;
   return buckets.map((b, i) => {
     running += b.amount;
@@ -76,14 +92,31 @@ export function buildMonthlyBuckets(
     const announcedAmount = 0;
     let projectedAmount = 0;
 
-    const currentMonthIndex = new Date().getMonth();
-
     if (i < currentMonthIndex) {
-      paidAmount = b.amount;
-    } else if (i > currentMonthIndex) {
-      projectedAmount = b.amount;
+      // Use real dividend events for past months: sum events whose paymentDate (or exDate for Yahoo)
+      // falls in month i of the current year, multiplied by each asset's current quantity.
+      let realPaid = 0;
+      for (const contrib of b.contributors) {
+        const events = dividendEventsMap[contrib.ticker] ?? [];
+        const monthPaid = events
+          .filter((ev) => {
+            const dateStr = ev.paymentDate ?? ev.exDate;
+            const d = new Date(dateStr);
+            return d.getUTCMonth() === i && d.getUTCFullYear() === currentYear;
+          })
+          .reduce((sum, ev) => {
+            // Find quantity for this ticker in items
+            const item = items.find((it) => it.ticker === contrib.ticker);
+            return sum + ev.amountPerShare * (item?.quantity ?? 0);
+          }, 0);
+        realPaid += monthPaid;
+      }
+      paidAmount = realPaid;
+      projectedAmount = 0;
     } else {
+      // Current month and future: keep as projected
       projectedAmount = b.amount;
+      paidAmount = 0;
     }
 
     return {
@@ -131,6 +164,32 @@ export function computeCashFlowSummary(data: MonthBucket[]): CashFlowSummary {
   const next30 =
     data[currentMonthIdx].amount * remainingCurrent + data[nextIdx].amount * nextConsumed;
   return { total, avg, top, next30 };
+}
+
+/**
+ * Computes invested vs. received amounts per asset, for the third chart.
+ * Limited to top 10 by invested value.
+ * NOTE: "received" assumes current quantity is held throughout (no transaction history).
+ */
+export function computeInvestedVsReceived(
+  items: WatchlistItem[],
+  currency: Currency,
+  dividendEventsMap: DividendEventsMap,
+): InvestedVsReceivedItem[] {
+  return items
+    .filter((it) => it.currency === currency && it.quantity > 0)
+    .map((it) => {
+      const events = dividendEventsMap[it.ticker] ?? [];
+      const totalReceivedPerShare = events.reduce((s, e) => s + e.amountPerShare, 0);
+      return {
+        ticker: it.ticker,
+        invested: (it.averagePrice ?? 0) * it.quantity,
+        received: totalReceivedPerShare * it.quantity,
+      };
+    })
+    .filter((r) => r.invested > 0 || r.received > 0)
+    .sort((a, b) => b.invested - a.invested)
+    .slice(0, 10);
 }
 
 export function buildSparklinePath(values: number[]): string {

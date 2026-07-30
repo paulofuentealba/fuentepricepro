@@ -1,4 +1,5 @@
 import type { Currency } from "../domain";
+import type { DividendEvent } from "../domain";
 import type { ApiAsset } from "./types";
 import { dedupeInFlight, fetchWithRetry } from "./http.server";
 import { classifyBr } from "./classify.server";
@@ -63,6 +64,16 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
       cash.map((d) => d.paymentDate || d.lastDatePrior || null),
     );
 
+    // Expose raw dividend events in parallel (does NOT affect valuation)
+    const dividendEvents: DividendEvent[] = cash
+      .filter((d) => Number.isFinite(Number(d.rate)) && Number(d.rate) > 0)
+      .map((d) => ({
+        exDate: d.lastDatePrior ?? d.paymentDate ?? "",
+        paymentDate: d.paymentDate ?? null,
+        amountPerShare: Number(d.rate),
+      }))
+      .filter((e) => e.exDate !== "");
+
     return {
       ticker: clean,
       name: res.longName || res.shortName || clean,
@@ -76,6 +87,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
       epsNext: null,
       paymentMonths,
       sector: typeof res.sector === "string" ? res.sector : null,
+      dividendEvents,
       metrics: {
         peRatio: pe,
         pbRatio: pb,

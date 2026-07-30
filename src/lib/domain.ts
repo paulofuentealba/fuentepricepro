@@ -26,6 +26,17 @@ export interface DividendYearPoint {
   amount: number;
 }
 
+/** Raw dividend payment event from the provider API. */
+export interface DividendEvent {
+  /** Ex-dividend (data-com) date in ISO string format.
+   *  For Brapi: lastDatePrior. For Yahoo: event date converted to ISO. */
+  exDate: string;
+  /** Payment date in ISO string. Null for Yahoo (API doesn't separate ex/pay dates). */
+  paymentDate: string | null;
+  /** Dividend amount per share / quota. */
+  amountPerShare: number;
+}
+
 export interface Asset {
   ticker: string;
   name: string;
@@ -43,4 +54,7 @@ export interface Asset {
   paymentMonths: number[];
   metrics: AssetMetrics;
   sector: string | null;
+  /** Raw dividend events (up to 5 years), exposed in parallel to dividendHistory.
+   *  Used by Cash Flow for real paid amounts. Does NOT affect valuation engine. */
+  dividendEvents: DividendEvent[];
 }

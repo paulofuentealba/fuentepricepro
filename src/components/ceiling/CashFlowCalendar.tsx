@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { useQueries } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -8,9 +9,11 @@ import {
   buildMonthlyBuckets,
   buildSparklinePath,
   computeCashFlowSummary,
-  exportCashFlowCsv,
+  computeInvestedVsReceived,
+  type DividendEventsMap,
 } from "@/lib/cashflow";
-import { CashFlowHeader, type ViewMode } from "./cashflow/CashFlowHeader";
+import { assetQueryOptions } from "@/lib/queryOptions";
+import { CashFlowHeader } from "./cashflow/CashFlowHeader";
 import { CashFlowSummaryCards } from "./cashflow/CashFlowSummary";
 import { CashFlowChart } from "./cashflow/CashFlowChart";
 import { CashFlowEmptyState } from "./cashflow/CashFlowEmptyState";
@@ -61,13 +64,33 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   const { settings, updateSettings } = useUserSettings();
   const currency = settings.displayCurrency;
-
-  // No longer fallback to availableCurrencies[0]. Just use global displayCurrency.
   const activeCurrency = currency;
 
+  // Fetch fresh Asset data (with dividendEvents) for each watchlist item in parallel.
+  // TanStack Query caches these (staleTime=5min), so this is cheap after first load.
+  const assetQueries = useQueries({
+    queries: items.map((it) => assetQueryOptions(it.ticker)),
+  });
+
+  const dividendEventsMap = useMemo<DividendEventsMap>(() => {
+    const map: DividendEventsMap = {};
+    assetQueries.forEach((q, i) => {
+      const ticker = items[i]?.ticker;
+      if (ticker && q.data?.dividendEvents) {
+        map[ticker] = q.data.dividendEvents;
+      }
+    });
+    return map;
+  }, [assetQueries, items]);
+
   const data = useMemo(
-    () => buildMonthlyBuckets(items, activeCurrency, months),
-    [items, activeCurrency, months],
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap),
+    [items, activeCurrency, months, dividendEventsMap],
+  );
+
+  const investedVsReceived = useMemo(
+    () => computeInvestedVsReceived(items, activeCurrency, dividendEventsMap),
+    [items, activeCurrency, dividendEventsMap],
   );
 
   const summary = useMemo(() => computeCashFlowSummary(data), [data]);
@@ -77,11 +100,6 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   const cumulativePath = useMemo(
     () => buildSparklinePath(data.map((d) => d.cumulativeTotal)),
     [data],
-  );
-
-  const handleExportCsv = useCallback(
-    () => exportCashFlowCsv(data, activeCurrency),
-    [data, activeCurrency],
   );
 
   const hasData = data.some((d) => d.amount > 0);
@@ -96,7 +114,6 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
       <CardContent className="pt-5">
         <CashFlowHeader
           title={t.watchlist.cashFlowTitle}
-          onExportCsv={handleExportCsv}
           availableCurrencies={availableCurrencies}
           activeCurrency={activeCurrency}
           onCurrencyChange={(c) => updateSettings({ displayCurrency: c })}
@@ -112,6 +129,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
           activeCurrency={activeCurrency}
           bestMonth={bestMonth}
           finalCumulative={finalCumulative}
+          investedVsReceived={investedVsReceived}
         />
       </CardContent>
     </Card>

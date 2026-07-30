@@ -1,4 +1,4 @@
-import type { AssetType, Currency, DividendYearPoint } from "../domain";
+import type { AssetType, Currency, DividendYearPoint, DividendEvent } from "../domain";
 
 export interface ApiAsset {
   ticker: string;
@@ -14,6 +14,8 @@ export interface ApiAsset {
   epsNext: number | null;
   paymentMonths: number[];
   sector: string | null;
+  /** Raw dividend events (up to 5y), parallel to dividendHistory. Does NOT affect valuation. */
+  dividendEvents: DividendEvent[];
   metrics: {
     peRatio: number | null;
     pbRatio: number | null;

@@ -342,7 +342,7 @@ export const es = {
     viewGrid: "Tarjetas",
     viewTable: "Tabla",
     viewCalendar: "Calendario",
-    cashFlowTitle: "Flujo de caja mensual proyectado",
+    cashFlowTitle: "Cash Flow",
     cashFlowEmpty: "Añade activos a tu Watchlist para ver tu proyección de flujo de caja.",
     targetMonthlyIncome: "Ingreso mensual objetivo (opcional)",
     targetMonthlyIncomeHint:
@@ -390,12 +390,19 @@ export const es = {
     chart: {
       projected: "Proyectado",
       confirmed: "Pagado",
+      provisioned: "Provisionado",
       concentratedIn: "Concentrado en",
       more: "más",
       monthly: "Mensual",
       cumulative: "Acumulado",
       bestMonth: "Mejor mes",
       yearEnd: "Fin de año",
+      clickToDrillDown: "Clic para detallar",
+      backToCumulative: "← Acumulado ({month})",
+      investedVsReceived: "Invertido vs. Recibido",
+      invested: "Invertido",
+      received: "Recibido",
+      quantityNote: "El importe recibido asume la cantidad actual constante (sin historial de transacciones).",
     },
   },
 

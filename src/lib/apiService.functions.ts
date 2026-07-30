@@ -134,6 +134,7 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
         epsCurrent: 1.0,
         epsNext: 1.1,
         paymentMonths: [4, 10],
+        dividendEvents: [],
         metrics: {
           peRatio: 15,
           pbRatio: 1.5,
