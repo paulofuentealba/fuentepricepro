@@ -77,4 +77,58 @@ describe("Cashflow logic", () => {
     expect(summary.next30).toBeGreaterThan(90);
     expect(summary.next30).toBeLessThan(110);
   });
+
+  it("isBest reflects the effective displayed value, not the pure projection", () => {
+    // Arrange: two assets paying in different months.
+    // Jan (index 0) has projected = 100, Jun (index 5) also = 100.
+    // But Jan already passed and its real paidAmount is 200 (a bumper payment).
+    // isBest must land on Jan (effectiveAmount=200), not on some future month.
+    const currentMonth = new Date().getMonth();
+    if (currentMonth < 1) {
+      // If we're running in January, Jan isn't a "past" month; skip this variant.
+      return;
+    }
+
+    // Jan: index 0 — must be a past month for this test to be meaningful
+    const pastMonthIdx = 0;
+    const futureMonthIdx = currentMonth + 1 <= 11 ? currentMonth + 1 : 11;
+
+    const items = [
+      mkItem({
+        ticker: "PAST",
+        annualDividend: 100,
+        quantity: 1,
+        paymentMonths: [pastMonthIdx + 1], // 1-indexed
+      }),
+      mkItem({
+        ticker: "FUT",
+        annualDividend: 50,
+        quantity: 1,
+        paymentMonths: [futureMonthIdx + 1], // 1-indexed
+      }),
+    ];
+
+    const currentYear = new Date().getFullYear();
+    // Real event for PAST: 200/share (higher than projection of 100)
+    const dividendEventsMap = {
+      PAST: [
+        {
+          exDate: new Date(Date.UTC(currentYear, pastMonthIdx, 15)).toISOString(),
+          paymentDate: new Date(Date.UTC(currentYear, pastMonthIdx, 20)).toISOString(),
+          amountPerShare: 200,
+        },
+      ],
+    };
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const buckets = buildMonthlyBuckets(items, "USD", months, dividendEventsMap);
+
+    // The past month's effective displayed amount is 200 (real) — must be isBest
+    expect(buckets[pastMonthIdx].isBest).toBe(true);
+    // The future month's projection is 50 — must NOT be isBest
+    expect(buckets[futureMonthIdx].isBest).toBe(false);
+    // amount (pure projection) is still 100 for past month — unchanged
+    expect(buckets[pastMonthIdx].amount).toBe(100);
+  });
 });
+

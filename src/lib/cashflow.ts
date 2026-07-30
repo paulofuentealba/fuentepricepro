@@ -73,28 +73,15 @@ export function buildMonthlyBuckets(
       buckets[m].contributors.push({ ticker: it.ticker, amount: per, type: it.type });
     }
   }
-  const amounts = buckets.map((b) => b.amount);
-  const maxAmount = Math.max(...amounts, 0);
-  const positive = amounts.filter((a) => a > 0);
-  const minPositive = positive.length > 0 ? Math.min(...positive) : 0;
 
   const currentYear = new Date().getFullYear();
   const currentMonthIndex = new Date().getMonth();
 
-  let running = 0;
-  return buckets.map((b, i) => {
-    running += b.amount;
-    const sortedContribs = [...b.contributors].sort((a, b) => b.amount - a.amount);
-    const topShare =
-      b.amount > 0 && sortedContribs.length > 0 ? sortedContribs[0].amount / b.amount : 0;
-
-    let paidAmount = 0;
-    const announcedAmount = 0;
-    let projectedAmount = 0;
-
+  // --- PASS 1: compute the effective displayed value per month ---
+  // Past months use real paidAmount; current/future use projected b.amount.
+  // isBest/isWorst must compare against what is actually VISIBLE on the bar chart.
+  const effectiveAmounts: number[] = buckets.map((b, i) => {
     if (i < currentMonthIndex) {
-      // Use real dividend events for past months: sum events whose paymentDate (or exDate for Yahoo)
-      // falls in month i of the current year, multiplied by each asset's current quantity.
       let realPaid = 0;
       for (const contrib of b.contributors) {
         const events = dividendEventsMap[contrib.ticker] ?? [];
@@ -105,32 +92,49 @@ export function buildMonthlyBuckets(
             return d.getUTCMonth() === i && d.getUTCFullYear() === currentYear;
           })
           .reduce((sum, ev) => {
-            // Find quantity for this ticker in items
             const item = items.find((it) => it.ticker === contrib.ticker);
             return sum + ev.amountPerShare * (item?.quantity ?? 0);
           }, 0);
         realPaid += monthPaid;
       }
-      paidAmount = realPaid;
-      projectedAmount = 0;
-    } else {
-      // Current month and future: keep as projected
-      projectedAmount = b.amount;
-      paidAmount = 0;
+      return realPaid;
     }
+    return b.amount; // current month and future: projected
+  });
+
+  const positiveEffective = effectiveAmounts.filter((a) => a > 0);
+  const maxEffective = Math.max(...effectiveAmounts, 0);
+  const minEffective = positiveEffective.length > 0 ? Math.min(...positiveEffective) : 0;
+
+  // --- PASS 2: build MonthBucket array ---
+  let running = 0;
+  return buckets.map((b, i) => {
+    running += b.amount;
+    const sortedContribs = [...b.contributors].sort((a, b) => b.amount - a.amount);
+    const topShare =
+      b.amount > 0 && sortedContribs.length > 0 ? sortedContribs[0].amount / b.amount : 0;
+
+    const effectiveAmount = effectiveAmounts[i];
+    const paidAmount = i < currentMonthIndex ? effectiveAmount : 0;
+    const announcedAmount = 0;
+    const projectedAmount = i < currentMonthIndex ? 0 : b.amount;
 
     return {
       month: months[i],
       monthIndex: i,
-      amount: b.amount,
+      amount: b.amount, // kept as pure projection — used by summary/sparklines
       paidAmount,
       announcedAmount,
       projectedAmount,
       cumulativeTotal: running,
       contributors: sortedContribs,
-      isBest: b.amount > 0 && b.amount === maxAmount && positive.length > 1,
+      // isBest/isWorst compare against the visually displayed value
+      isBest: effectiveAmount > 0 && effectiveAmount === maxEffective && positiveEffective.length > 1,
       isWorst:
-        b.amount > 0 && b.amount === minPositive && positive.length > 1 && b.amount !== maxAmount,
+        effectiveAmount > 0 &&
+        effectiveAmount === minEffective &&
+        positiveEffective.length > 1 &&
+        effectiveAmount !== maxEffective,
       concentratedTicker:
         topShare >= 0.3 && sortedContribs.length > 1 ? sortedContribs[0].ticker : null,
     };
