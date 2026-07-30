@@ -10,34 +10,28 @@ O frontend da sua aplicação precisa das variáveis públicas do Firebase (`VIT
 2. Navegue até **Cloud Build > Triggers** (Gatilhos).
 3. Selecione o gatilho responsável pelo repositório atual e clique em **Editar**.
 4. Role a página até a seção **Advanced / Substitution variables** (Avançado / Variáveis de substituição).
-5. Adicione as 7 variáveis a seguir. Os nomes **devem** ter esse exato prefixo de _underscore_ (`_`), e os valores devem ser os valores reais correspondentes do seu Firebase (iguais ao seu `.env` local):
-   - `_VITE_FIREBASE_API_KEY` = `(seu valor real)`
-   - `_VITE_FIREBASE_AUTH_DOMAIN` = `(seu valor real)`
-   - `_VITE_FIREBASE_PROJECT_ID` = `(seu valor real)`
-   - `_VITE_FIREBASE_STORAGE_BUCKET` = `(seu valor real)`
-   - `_VITE_FIREBASE_MESSAGING_SENDER_ID` = `(seu valor real)`
-   - `_VITE_FIREBASE_APP_ID` = `(seu valor real)`
-   - `_VITE_FIREBASE_MEASUREMENT_ID` = `(seu valor real)`
-6. Clique em **Salvar**.
+5. Adicione as 7 variáveis a seguir. Os nomes **devem** ter esse exato prefixo de _underscore_ (`_`), e os valores devem ser os valores reais correspondentes do seu Firebase (iguais ao seu `.env` local — NÃO cole os valores reais aqui neste arquivo, só no Console):
+	- `_VITE_FIREBASE_API_KEY` = `(seu valor real, sem aspas)`
+	- `_VITE_FIREBASE_AUTH_DOMAIN` = `(seu valor real, sem aspas)`
+	- `_VITE_FIREBASE_PROJECT_ID` = `(seu valor real, sem aspas)`
+	- `_VITE_FIREBASE_STORAGE_BUCKET` = `(seu valor real, sem aspas)`
+	- `_VITE_FIREBASE_MESSAGING_SENDER_ID` = `(seu valor real, sem aspas)`
+	- `_VITE_FIREBASE_APP_ID` = `(seu valor real, sem aspas)`
+	- `_VITE_FIREBASE_MEASUREMENT_ID` = `(seu valor real, sem aspas)`
+6. Enquanto estiver nessa mesma tela de Substitution variables, confirme também que `_DEPLOY_REGION` está como `us-east1` (a região real do serviço `fuentepricepro`) — esse campo já existe lá, gerado automaticamente pelo Cloud Run, só precisa estar com o valor certo.
+7. Confirme também que **Location**, na seção Configuration do gatilho, está marcado como **"Repository"** (não "Inline") apontando pro `cloudbuild.yaml` — senão o gatilho ignora esse arquivo e nada do que configuramos tem efeito.
+8. Clique em **Salvar**.
 
-*(Nota: Na seção do `cloudbuild.yaml` relativa ao deploy do Cloud Run, eu assumi o nome do serviço como `fuentepricepro` e a região como `us-central1`. Se no GCP seu serviço tiver outro nome ou região, sinta-se livre para ajustar as linhas 31 e 35 do arquivo `cloudbuild.yaml` antes de comitar.)*
+*(Nota: o `cloudbuild.yaml` usa as variáveis que o próprio Cloud Run já provisionou no gatilho — `_SERVICE_NAME`, `_DEPLOY_REGION`, `_AR_HOSTNAME`, `_AR_PROJECT_ID`, `_AR_REPOSITORY` — em vez de nomes fixos, então não precisa editar o arquivo pra ajustar serviço ou região; basta que os valores dessas variáveis estejam corretos aqui no Console.)*
 
 ---
 
-## Passo 2: Cadastrar a RESEND_API_KEY no Secret Manager
+## Passo 2: (Opcional, pulado por enquanto) RESEND_API_KEY no Secret Manager
 
-Ao contrário das chaves do Firebase, a chave da API do Resend é confidencial e só será utilizada em runtime pelo servidor backend (Cloud Run). Por segurança, ela não entra no Docker, sendo extraída diretamente do Secret Manager da Google pelo Cloud Run.
+Envio de e-mail transacional (Resend) ainda não está em uso no projeto — o `cloudbuild.yaml` não depende mais dessa variável. Quando decidir ativar e-mails, siga isto:
 
-1. Navegue até **Security > Secret Manager** (Gerenciador de secrets) no Console.
-2. Clique em **Create Secret** (Criar secret).
-3. **Name (Nome):** Digite exatamente `RESEND_API_KEY`.
-4. **Secret value (Valor do secret):** Cole aqui a sua chave real da API do Resend (`re_...`).
-5. Clique em **Create secret**.
-6. **Importante (Permissão de Acesso):** Para o Cloud Run poder ler esse segredo, sua _Service Account_ padrão do Compute Engine precisa ter permissão.
-   - Dentro da página do novo secret `RESEND_API_KEY`, vá na aba **Permissions** (Permissões).
-   - Clique em **Grant Access** (Conceder acesso).
-   - No campo "New principals" (Novos principais), insira a _Service Account_ utilizada pelo Cloud Run (geralmente tem o formato `1234567890-compute@developer.gserviceaccount.com`).
-   - Em "Select a role" (Selecionar papel), escolha **Secret Manager Secret Accessor** (Acessador de secrets do Secret Manager).
-   - Clique em **Save**.
-
-Após esses 2 passos, você pode aprovar a etapa seguinte, realizar o _commit_ do `cloudbuild.yaml` e o próximo push vai efetuar o build e deploy com total segurança!
+1. Crie uma conta em [resend.com](https://resend.com) e gere uma API key real em "API Keys".
+2. Navegue até **Security > Secret Manager** no Console do Google Cloud.
+3. **Create Secret** → nome exato `RESEND_API_KEY` → cole a chave real (`re_...`) → **Create Secret**.
+4. Na aba **Permissions** do secret criado, **Grant Access** para a service account do Cloud Run (formato `NUMERO-compute@developer.gserviceaccount.com`, visível em Cloud Run > serviço > Security), papel **Secret Manager Secret Accessor**.
+5. Descomentar as duas linhas `--set-secrets` / `RESEND_API_KEY=RESEND_API_KEY:latest` no `cloudbuild.yaml` (estão comentadas, com uma nota explicando isso).

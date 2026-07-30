@@ -1,10 +1,10 @@
 steps:
-  # Build the container image
+  # Build the container image (Artifact Registry, provisionado pelo Cloud Run)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/fuentepricepro:$COMMIT_SHA'
+      - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA'
       - '--build-arg'
       - 'VITE_FIREBASE_API_KEY=$_VITE_FIREBASE_API_KEY'
       - '--build-arg'
@@ -21,9 +21,9 @@ steps:
       - 'VITE_FIREBASE_MEASUREMENT_ID=$_VITE_FIREBASE_MEASUREMENT_ID'
       - '.'
 
-  # Push the container image to Container Registry
+  # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/fuentepricepro:$COMMIT_SHA']
+    args: ['push', '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA']
 
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -31,16 +31,21 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'fuentepricepro' # Substitua pelo nome do seu serviço se for diferente
+      - '$_SERVICE_NAME'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/fuentepricepro:$COMMIT_SHA'
+      - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA'
       - '--region'
-      - 'us-central1' # Substitua pela sua região do Cloud Run, ex: us-east1, us-central1
-      - '--set-secrets'
-      - 'RESEND_API_KEY=RESEND_API_KEY:latest'
+      - '$_DEPLOY_REGION'
+      - '--platform'
+      - '$_PLATFORM'
+      # RESEND_API_KEY removido por enquanto: e-mails transacionais ainda nao
+      # foram ativados no projeto. Quando forem, criar o secret no Secret
+      # Manager e adicionar de volta:
+      # - '--set-secrets'
+      # - 'RESEND_API_KEY=RESEND_API_KEY:latest'
 
 images:
-  - 'gcr.io/$PROJECT_ID/fuentepricepro:$COMMIT_SHA'
+  - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA'
 
 substitutions:
   _VITE_FIREBASE_API_KEY: ''
@@ -50,3 +55,10 @@ substitutions:
   _VITE_FIREBASE_MESSAGING_SENDER_ID: ''
   _VITE_FIREBASE_APP_ID: ''
   _VITE_FIREBASE_MEASUREMENT_ID: ''
+  # As variáveis abaixo (_AR_HOSTNAME, _AR_PROJECT_ID, _AR_REPOSITORY,
+  # _DEPLOY_REGION, _PLATFORM, _SERVICE_NAME) já vêm preenchidas
+  # automaticamente pelo Cloud Run quando o gatilho usa "Repository" como
+  # Location -- não precisam de valor default aqui.
+
+options:
+  substitutionOption: 'ALLOW_LOOSE'
