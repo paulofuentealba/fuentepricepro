@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip as RechartsTooltip,
   Legend,
 } from "recharts";
@@ -98,7 +97,16 @@ export function SmartAllocation() {
     if (!generated) return null;
     const effectiveTargets = isPro
       ? targets
-      : { STOCK_BR: 0, STOCK_US: 0, FII: 0, REIT: 0, ETF: 0, FII_INFRA: 0, FIAGRO: 0, FIXED_INCOME: 0 };
+      : {
+          STOCK_BR: 0,
+          STOCK_US: 0,
+          FII: 0,
+          REIT: 0,
+          ETF: 0,
+          FII_INFRA: 0,
+          FIAGRO: 0,
+          FIXED_INCOME: 0,
+        };
     return computeSmartAllocation(
       Number(capital),
       currency,
@@ -168,7 +176,9 @@ export function SmartAllocation() {
                 onClick={() => setShowPaywall(true)}
               >
                 <div className="flex items-center gap-2 rounded-full bg-background/95 px-4 py-2 text-sm font-semibold text-foreground shadow-lg border border-border/60 backdrop-blur">
-                  <span className="text-amber-500 text-xs tracking-wider uppercase">{t.global.pro}</span>{" "}
+                  <span className="text-amber-500 text-xs tracking-wider uppercase">
+                    {t.global.pro}
+                  </span>{" "}
                   {t.smartAllocation.targetPanelTitle}
                 </div>
               </div>
@@ -256,7 +266,11 @@ export function SmartAllocation() {
               disabled={!capital || Number(capital) <= 0 || !hasCurrency[currency] || isGenerating}
               variant={generated ? "secondary" : "default"}
             >
-              {isGenerating ? "Calculando..." : generated ? "Recalculate / Reset" : t.smartAllocation.generate}
+              {isGenerating
+                ? "Calculando..."
+                : generated
+                  ? "Recalculate / Reset"
+                  : t.smartAllocation.generate}
             </Button>
           </div>
 
@@ -416,7 +430,10 @@ export function SmartAllocation() {
                             {t.smartAllocation.remaining}
                           </div>
                           <div className="mt-0.5 text-base font-bold tabular-nums text-foreground">
-                            <AnimatedNumber value={result.remaining} format={(v: number) => formatCurrency(v, result.currency, locale)} />
+                            <AnimatedNumber
+                              value={result.remaining}
+                              format={(v: number) => formatCurrency(v, result.currency, locale)}
+                            />
                           </div>
                         </div>
                       </div>
@@ -427,7 +444,11 @@ export function SmartAllocation() {
                             {t.smartAllocation.totalAddedIncome}
                           </div>
                           <div className="mt-0.5 text-base font-bold tabular-nums text-success">
-                            +<AnimatedNumber value={result.totalAddedIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
+                            +
+                            <AnimatedNumber
+                              value={result.totalAddedIncome}
+                              format={(v: number) => formatCurrency(v, result.currency, locale)}
+                            />
                           </div>
                         </div>
                       </div>
@@ -443,7 +464,10 @@ export function SmartAllocation() {
                             {t.smartAllocation.currentPortfolioIncome}
                           </div>
                           <div className="text-foreground">
-                            <AnimatedNumber value={result.currentPortfolioIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
+                            <AnimatedNumber
+                              value={result.currentPortfolioIncome}
+                              format={(v: number) => formatCurrency(v, result.currency, locale)}
+                            />
                           </div>
                         </div>
                         <span aria-hidden className="text-success">
@@ -454,11 +478,18 @@ export function SmartAllocation() {
                             {t.smartAllocation.newPortfolioIncome}
                           </div>
                           <div className="text-base font-bold text-success">
-                            <AnimatedNumber value={result.newPortfolioIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
+                            <AnimatedNumber
+                              value={result.newPortfolioIncome}
+                              format={(v: number) => formatCurrency(v, result.currency, locale)}
+                            />
                           </div>
                         </div>
                         <Badge className="bg-success text-success-foreground">
-                          +<AnimatedNumber value={result.totalAddedIncome} format={(v: number) => formatCurrency(v, result.currency, locale)} />
+                          +
+                          <AnimatedNumber
+                            value={result.totalAddedIncome}
+                            format={(v: number) => formatCurrency(v, result.currency, locale)}
+                          />
                         </Badge>
                       </div>
                     </div>

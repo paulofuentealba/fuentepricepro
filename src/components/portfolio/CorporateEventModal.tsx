@@ -1,12 +1,22 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useI18n } from "@/lib/i18n-provider";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
-import { applyCorporateEvent, type CorporateEventType, type PendingCorporateEvent } from "@/lib/corporateEvents";
+import {
+  applyCorporateEvent,
+  type CorporateEventType,
+  type PendingCorporateEvent,
+} from "@/lib/corporateEvents";
 import { toast } from "sonner";
 import { ArrowDown, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -19,7 +29,12 @@ interface CorporateEventModalProps {
   pendingEvent?: PendingCorporateEvent | null;
 }
 
-export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: CorporateEventModalProps) {
+export function CorporateEventModal({
+  item,
+  open,
+  onOpenChange,
+  pendingEvent,
+}: CorporateEventModalProps) {
   const { t } = useI18n();
   const { upsertAsync } = useWatchlist();
   const [eventType, setEventType] = useState<CorporateEventType>("split");
@@ -39,10 +54,14 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
 
   // Calculate preview using the engine
   const newPosition = applyCorporateEvent(
-    { ticker: item.ticker, quantity: item.quantity, averagePrice: item.averagePrice ?? item.currentPrice },
+    {
+      ticker: item.ticker,
+      quantity: item.quantity,
+      averagePrice: item.averagePrice ?? item.currentPrice,
+    },
     { type: eventType, factor },
     true,
-    item.currentPrice
+    item.currentPrice,
   );
 
   const handleSubmit = async (e?: React.MouseEvent) => {
@@ -57,7 +76,7 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
           eventId: pendingEvent.eventId,
           date: pendingEvent.date,
           type: pendingEvent.type,
-          ratio: pendingEvent.ratio
+          ratio: pendingEvent.ratio,
         });
       }
 
@@ -65,7 +84,7 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
         ...item,
         quantity: newPosition.quantity,
         averagePrice: newPosition.averagePrice,
-        appliedEvents: newAppliedEvents
+        appliedEvents: newAppliedEvents,
       };
       await upsertAsync(updatedItem);
       toast.success(`${item.ticker} ${t.corporateEvents.successMessage}`);
@@ -75,24 +94,30 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
     }
   };
 
-  const formatCurrency = (val: number) => 
-    new Intl.NumberFormat(undefined, { style: 'currency', currency: item.currency }).format(val);
+  const formatCurrency = (val: number) =>
+    new Intl.NumberFormat(undefined, { style: "currency", currency: item.currency }).format(val);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent closeLabel={t.common.close} 
-        className="sm:max-w-md border-border/60" 
+      <DialogContent
+        closeLabel={t.common.close}
+        className="sm:max-w-md border-border/60"
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
       >
         <DialogHeader>
-          <DialogTitle>{t.corporateEvents.modalTitle} - {item.ticker}</DialogTitle>
+          <DialogTitle>
+            {t.corporateEvents.modalTitle} - {item.ticker}
+          </DialogTitle>
           <DialogDescription className="sr-only">{t.corporateEvents.modalTitle}</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-6 py-4">
           {pendingEvent && (
-            <Alert variant="default" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
+            <Alert
+              variant="default"
+              className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20"
+            >
               <AlertCircle className="h-4 w-4 stroke-indigo-500" />
               <AlertDescription className="ml-2 font-medium">
                 {t.publicEvents.modalAlert}
@@ -102,8 +127,8 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
 
           <div className="space-y-3">
             <Label>{t.corporateEvents.eventType}</Label>
-            <RadioGroup 
-              value={eventType} 
+            <RadioGroup
+              value={eventType}
               onValueChange={(val) => setEventType(val as CorporateEventType)}
               className="flex gap-4"
             >
@@ -120,7 +145,7 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
 
           <div className="space-y-3">
             <Label>{t.corporateEvents.ratio}</Label>
-            <Input 
+            <Input
               type="number"
               min="1"
               step="0.01"
@@ -131,12 +156,14 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
 
           <div className="rounded-xl border border-border/60 bg-muted/30 p-5 space-y-4">
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{t.corporateEvents.previewOriginal}</span>
+              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                {t.corporateEvents.previewOriginal}
+              </span>
               <span className="text-base font-medium text-foreground">
                 {item.quantity} shares @ {formatCurrency(item.averagePrice ?? item.currentPrice)}
               </span>
             </div>
-            
+
             <div className="flex justify-center -my-2 relative z-10">
               <div className="bg-background rounded-full p-1 border border-border/50">
                 <ArrowDown className="h-4 w-4 text-muted-foreground" />
@@ -144,7 +171,9 @@ export function CorporateEventModal({ item, open, onOpenChange, pendingEvent }: 
             </div>
 
             <div className="flex flex-col gap-1.5 bg-success/10 -mx-5 -mb-5 p-5 rounded-b-xl border-t border-success/20">
-              <span className="text-xs text-success font-semibold uppercase tracking-wider">{t.corporateEvents.previewNew}</span>
+              <span className="text-xs text-success font-semibold uppercase tracking-wider">
+                {t.corporateEvents.previewNew}
+              </span>
               <span className="text-base font-bold text-success">
                 {newPosition.quantity} shares @ {formatCurrency(newPosition.averagePrice)}
               </span>

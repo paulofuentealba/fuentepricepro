@@ -53,9 +53,10 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
     const a = Number.isFinite(parsedAvg) && parsedAvg > 0 ? parsedAvg : null;
     const y = Number.isFinite(parsedDy) && parsedDy > 0 ? parsedDy : item.targetYield;
 
-    const newCeiling = y === item.targetYield && item?.valuation
-      ? item.valuation.activeCeiling
-      : ceilingPrice(item.annualDividend, y);
+    const newCeiling =
+      y === item.targetYield && item?.valuation
+        ? item.valuation.activeCeiling
+        : ceilingPrice(item.annualDividend, y);
     const newTotalCost = a != null ? a * q : 0;
     const annualIncome = item.annualDividend * q;
     const newProjectedIncome = netAfterTax(
@@ -108,7 +109,10 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
         if (!o) onClose();
       }}
     >
-      <DialogContent closeLabel={t.common.close} className="sm:max-w-[700px] gap-0 p-0 overflow-hidden bg-background">
+      <DialogContent
+        closeLabel={t.common.close}
+        className="sm:max-w-[700px] gap-0 p-0 overflow-hidden bg-background"
+      >
         <DialogHeader className="p-6 pb-4 border-b border-border/40">
           <DialogTitle className="flex items-center gap-2">
             {t.watchlist.updateTitle}

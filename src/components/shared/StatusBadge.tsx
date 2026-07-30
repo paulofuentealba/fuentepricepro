@@ -8,13 +8,12 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export function StatusBadge({ 
-  children, 
-  icon: Icon, 
+export function StatusBadge({
+  children,
+  icon: Icon,
   variant = "default",
-  className 
+  className,
 }: StatusBadgeProps) {
-  
   const variants = {
     success: "bg-success/10 text-success ring-success/20",
     warning: "bg-amber-500/10 text-amber-500 ring-amber-500/20",
@@ -23,11 +22,11 @@ export function StatusBadge({
   };
 
   return (
-    <span 
+    <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1",
         variants[variant],
-        className
+        className,
       )}
     >
       {Icon && <Icon className="h-3.5 w-3.5" />}

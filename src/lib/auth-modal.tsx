@@ -91,8 +91,8 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     try {
       const provider = new GoogleAuthProvider();
-      provider.addScope('profile');
-      provider.addScope('email');
+      provider.addScope("profile");
+      provider.addScope("email");
       await signInWithPopup(auth, provider);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : `${providerName} sign-in failed`);

@@ -138,29 +138,35 @@ export function getAssetValuation({
   const bazin = targetYield > 0 ? netAvgDividend / (targetYield / 100) : null;
 
   // 2. Graham Model: Math.sqrt(22.5 * EPS * BVPS)
-  const graham = (eps && bvps && eps > 0 && bvps > 0) ? Math.sqrt(22.5 * eps * bvps) : null;
+  const graham = eps && bvps && eps > 0 && bvps > 0 ? Math.sqrt(22.5 * eps * bvps) : null;
 
   // 3. Gordon Model: NextYearDiv / (DiscountRate - CAGR)
   const k = selicPct / 100;
   const g = dividendCagr ? dividendCagr / 100 : 0; // assuming dividendCagr is in percentage like selicPct
   const nextYearDiv = netAvgDividend * (1 + g);
-  const gordon = (k > g) ? (nextYearDiv / (k - g)) : null;
+  const gordon = k > g ? nextYearDiv / (k - g) : null;
 
   // 4. Consensus & Margin
   const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
-  const consensus = validModels.length > 0 ? validModels.reduce((a, b) => a + b, 0) / validModels.length : null;
-  
-  const activeCeiling = consensus !== null ? consensus : (bazin || 0);
-  const margin = currentPrice > 0 ? ((activeCeiling / currentPrice) - 1) * 100 : 0;
+  const consensus =
+    validModels.length > 0 ? validModels.reduce((a, b) => a + b, 0) / validModels.length : null;
+
+  const activeCeiling = consensus !== null ? consensus : bazin || 0;
+  const margin = currentPrice > 0 ? (activeCeiling / currentPrice - 1) * 100 : 0;
 
   return { bazin, graham, gordon, consensus, activeCeiling, margin, positive: margin >= 0 };
 }
 
 export function calculateFixedIncomeBalance(
   item: WatchlistItem,
-  macroRates?: { cdi: number; ipca: number }
+  macroRates?: { cdi: number; ipca: number },
 ): { accruedBalance: number; profit: number } | null {
-  if (item.type !== "FIXED_INCOME" || !item.startDate || item.averagePrice == null || item.quantity <= 0) {
+  if (
+    item.type !== "FIXED_INCOME" ||
+    !item.startDate ||
+    item.averagePrice == null ||
+    item.quantity <= 0
+  ) {
     return null;
   }
 
@@ -168,11 +174,11 @@ export function calculateFixedIncomeBalance(
   const principal = item.averagePrice * item.quantity;
   const start = new Date(item.startDate).getTime();
   const now = Date.now();
-  
+
   if (start > now) return { accruedBalance: principal, profit: 0 };
 
   const elapsedDays = (now - start) / (1000 * 60 * 60 * 24);
-  
+
   let effectiveRate = 0;
   const itemRate = item.rate || 0;
   const indexer = item.indexer?.toUpperCase();
@@ -180,14 +186,14 @@ export function calculateFixedIncomeBalance(
   if (indexer === "CDI") {
     effectiveRate = (rates.cdi / 100) * (itemRate / 100);
   } else if (indexer === "IPCA") {
-    effectiveRate = (rates.ipca / 100) + (itemRate / 100);
+    effectiveRate = rates.ipca / 100 + itemRate / 100;
   } else {
     // PRE or default
     effectiveRate = itemRate / 100;
   }
 
   const accruedBalance = principal * Math.pow(1 + effectiveRate, elapsedDays / 365);
-  
+
   return {
     accruedBalance,
     profit: accruedBalance - principal,
@@ -200,31 +206,31 @@ export function projectFixedIncomeValueAtMaturity(
   rate: number,
   startDateStr: string,
   maturityDateStr: string,
-  macroRates?: { cdi: number; ipca: number }
+  macroRates?: { cdi: number; ipca: number },
 ): { projectedBalance: number; projectedProfit: number } {
   const rates = macroRates || { cdi: 10.5, ipca: 4.5 };
-  
+
   const start = new Date(startDateStr).getTime();
   const maturity = new Date(maturityDateStr).getTime();
-  
+
   if (maturity <= start) return { projectedBalance: principal, projectedProfit: 0 };
 
   const totalDays = (maturity - start) / (1000 * 60 * 60 * 24);
-  
+
   let effectiveRate = 0;
   const idx = indexer.toUpperCase();
 
   if (idx === "CDI") {
     effectiveRate = (rates.cdi / 100) * (rate / 100);
   } else if (idx === "IPCA") {
-    effectiveRate = (rates.ipca / 100) + (rate / 100);
+    effectiveRate = rates.ipca / 100 + rate / 100;
   } else {
     // PRE
     effectiveRate = rate / 100;
   }
 
   const projectedBalance = principal * Math.pow(1 + effectiveRate, totalDays / 365);
-  
+
   return {
     projectedBalance,
     projectedProfit: projectedBalance - principal,

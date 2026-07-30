@@ -1,1 +1,0 @@
-import { searchAssetsFn } from "./src/lib/apiService.functions"; async function main() { const r1 = await searchAssetsFn({ data: { query: "AAPL" } }); console.log("AAPL:", r1); const r2 = await searchAssetsFn({ data: { query: "TAEE" } }); console.log("TAEE:", r2); } main();

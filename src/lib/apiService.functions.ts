@@ -34,7 +34,7 @@ function sanitizeTicker(raw: unknown): string {
 // -------- Search --------
 
 export const searchAssetsFn = createServerFn({ method: "GET" })
-  .inputValidator((data: { query: string }) => ({ query: sanitizeQuery(data?.query) }))
+  .validator((data: { query: string }) => ({ query: sanitizeQuery(data?.query) }))
   .handler(async ({ data }): Promise<SearchHit[]> => {
     const q = data.query;
     if (!q) return [];
@@ -69,7 +69,12 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
           const cleaned = cleanTicker(t);
           if (seen.has(cleaned)) continue;
           seen.add(cleaned);
-          results.push({ ticker: cleaned, name: s.name || t, type: classifyBr(t, s.type), sector: s.sector || null });
+          results.push({
+            ticker: cleaned,
+            name: s.name || t,
+            type: classifyBr(t, s.type),
+            sector: s.sector || null,
+          });
         }
       }
     }
@@ -105,7 +110,7 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
 // -------- Fetch --------
 
 export const fetchAssetFn = createServerFn({ method: "GET" })
-  .inputValidator((data: { ticker: string }) => {
+  .validator((data: { ticker: string }) => {
     const ticker = sanitizeTicker(data?.ticker);
     if (!ticker || !TICKER_RE.test(ticker)) throw new Error("INVALID_TICKER");
     return { ticker };
@@ -113,6 +118,41 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ApiAsset> => {
     const raw = data.ticker;
     if (!raw) throw new Error("NOT_FOUND");
+
+    if (process.env.NODE_ENV === "development" && raw === "TEST_IPO_RECENTE") {
+      const currentYear = new Date().getUTCFullYear();
+      return {
+        ticker: "TEST_IPO_RECENTE",
+        name: "Synthetic Recent IPO",
+        currentPrice: 15.0,
+        dividends3y: [1.5, 1.2],
+        dividendHistory: [
+          { year: currentYear - 1, amount: 1.5 },
+          { year: currentYear - 2, amount: 1.2 },
+        ],
+        exDividendDate: null,
+        epsCurrent: 1.0,
+        epsNext: 1.1,
+        paymentMonths: [4, 10],
+        metrics: {
+          peRatio: 15,
+          pbRatio: 1.5,
+          eps: 1.0,
+          roe: 10,
+          currentDy: 10,
+          capRate: null,
+          vacancy: null,
+          expenseRatio: null,
+          aum: null,
+          trackingError: null,
+          payoutRatio: 50,
+          dividendCagr5y: null,
+        },
+        type: "STOCK_BR",
+        currency: "BRL",
+        sector: "Utilities",
+      };
+    }
 
     const isYahoo = raw.includes(".") || /^[A-Z]{1,5}$/.test(raw);
     const looksBr = /^[A-Z]{4}\d{1,2}$/.test(raw);
@@ -135,7 +175,7 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
 // -------- Lightweight live quote (price + daily change %) --------
 
 export const fetchQuoteFn = createServerFn({ method: "GET" })
-  .inputValidator((data: { ticker: string }) => {
+  .validator((data: { ticker: string }) => {
     const ticker = sanitizeTicker(data?.ticker);
     if (!ticker || !TICKER_RE.test(ticker)) throw new Error("INVALID_TICKER");
     return { ticker };
@@ -143,6 +183,15 @@ export const fetchQuoteFn = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<LiveQuote | null> => {
     const raw = data.ticker;
     if (!raw) return null;
+
+    if (process.env.NODE_ENV === "development" && raw === "TEST_IPO_RECENTE") {
+      return {
+        ticker: "TEST_IPO_RECENTE",
+        price: 15.0,
+        changePct: 1.5,
+      };
+    }
+
     const looksBr = /^[A-Z]{4}\d{1,2}$/.test(raw);
     const primary = looksBr && !raw.endsWith(".SA") ? `${raw}.SA` : raw;
     const q = await fetchYahooQuote(primary);
@@ -152,10 +201,10 @@ export const fetchQuoteFn = createServerFn({ method: "GET" })
 
 // -------- Exchange Rate Oracle --------
 
-export const fetchExchangeRatesFn = createServerFn({ method: "GET" })
-  .handler(async (): Promise<{ USDBRL: number }> => {
+export const fetchExchangeRatesFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ USDBRL: number }> => {
     // Fallback default in case of failure to prevent UI crashing
-    const fallback = { USDBRL: 5.5 }; 
+    const fallback = { USDBRL: 5.5 };
     try {
       const q = await fetchYahooQuote("BRL=X");
       if (q && q.price > 0) {
@@ -165,7 +214,8 @@ export const fetchExchangeRatesFn = createServerFn({ method: "GET" })
     } catch {
       return fallback;
     }
-  });
+  },
+);
 
 // -------- Radar --------
 
@@ -255,7 +305,7 @@ export const fetchRadarFn = createServerFn({ method: "GET" }).handler(async () =
 // -------- Corporate Events --------
 
 export const checkPendingSplitsFn = createServerFn({ method: "GET" })
-  .inputValidator((data: { ticker: string; sinceTimestamp: number }) => {
+  .validator((data: { ticker: string; sinceTimestamp: number }) => {
     const ticker = sanitizeTicker(data?.ticker);
     if (!ticker) throw new Error("INVALID_TICKER");
     return { ticker, sinceTimestamp: data.sinceTimestamp };
@@ -269,7 +319,7 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
       const res = await fetchWithRetry(
         `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yhTicker)}?events=split`,
         { headers: { "User-Agent": UA } },
-        { timeoutMs: 3000, retries: 1 }
+        { timeoutMs: 3000, retries: 1 },
       );
       if (!res.ok) return [];
 
@@ -286,7 +336,7 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
             eventId: `yh_${sp.date}`,
             date: sp.date * 1000,
             type,
-            ratio: factor
+            ratio: factor,
           });
         }
       }
@@ -299,34 +349,37 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
 
 // -------- Macro Rates Oracle --------
 
-export const fetchMacroRatesFn = createServerFn({ method: "GET" })
-  .handler(async (): Promise<{ cdi: number; ipca: number }> => {
+export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ cdi: number; ipca: number }> => {
     const fallback = { cdi: 10.5, ipca: 4.5 };
-    
+
     try {
       const fetchWithTimeout = (url: string) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), 5000);
-        return fetch(url, { signal: controller.signal })
-          .finally(() => clearTimeout(id));
+        return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
       };
 
       const [cdiRes, ipcaRes] = await Promise.all([
-        fetchWithTimeout("https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json"),
-        fetchWithTimeout("https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/1?formato=json")
+        fetchWithTimeout(
+          "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json",
+        ),
+        fetchWithTimeout(
+          "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/1?formato=json",
+        ),
       ]);
 
       if (cdiRes.ok && ipcaRes.ok) {
         const cdiData = await cdiRes.json();
         const ipcaData = await ipcaRes.json();
-        
+
         let cdi = fallback.cdi;
         let ipca = fallback.ipca;
 
         if (cdiData && cdiData.length > 0) {
           cdi = parseFloat(cdiData[0].valor);
         }
-        
+
         if (ipcaData && ipcaData.length > 0) {
           ipca = parseFloat(ipcaData[0].valor);
         }
@@ -340,4 +393,5 @@ export const fetchMacroRatesFn = createServerFn({ method: "GET" })
       console.warn("[MacroRates] BACEN SGS error:", err);
       return fallback;
     }
-  });
+  },
+);

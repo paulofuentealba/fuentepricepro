@@ -69,7 +69,16 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
       items,
       ["yield"],
       [],
-      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      {
+        STOCK_US: 0,
+        FII: 0,
+        STOCK_BR: 0,
+        REIT: 0,
+        FII_INFRA: 0,
+        FIAGRO: 0,
+        ETF: 0,
+        FIXED_INCOME: 0,
+      },
       5,
     );
     const recs = result?.recs || [];
@@ -87,7 +96,16 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
       items,
       ["yield"],
       ["A"],
-      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      {
+        STOCK_US: 0,
+        FII: 0,
+        STOCK_BR: 0,
+        REIT: 0,
+        FII_INFRA: 0,
+        FIAGRO: 0,
+        ETF: 0,
+        FIXED_INCOME: 0,
+      },
       5,
     );
     const recs = result?.recs || [];
@@ -101,7 +119,16 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
       items,
       ["yield", "margin"],
       [],
-      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      {
+        STOCK_US: 0,
+        FII: 0,
+        STOCK_BR: 0,
+        REIT: 0,
+        FII_INFRA: 0,
+        FIAGRO: 0,
+        ETF: 0,
+        FIXED_INCOME: 0,
+      },
       5,
     );
     const recs = result?.recs || [];
@@ -119,7 +146,16 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
         [],
         ["yield"],
         [],
-        { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+        {
+          STOCK_US: 0,
+          FII: 0,
+          STOCK_BR: 0,
+          REIT: 0,
+          FII_INFRA: 0,
+          FIAGRO: 0,
+          ETF: 0,
+          FIXED_INCOME: 0,
+        },
         5,
       )?.recs,
     ).toEqual([]);
@@ -130,7 +166,16 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
         [mkItem({ annualDividend: 0 })],
         ["yield"],
         [],
-        { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+        {
+          STOCK_US: 0,
+          FII: 0,
+          STOCK_BR: 0,
+          REIT: 0,
+          FII_INFRA: 0,
+          FIAGRO: 0,
+          ETF: 0,
+          FIXED_INCOME: 0,
+        },
         5,
       )?.recs || [],
     ).toEqual([]);
@@ -143,7 +188,16 @@ describe("computeSmartAllocation multi-strategy weighted scoring", () => {
       items,
       ["yield"],
       [],
-      { STOCK_US: 0, FII: 0, STOCK_BR: 0, REIT: 0, FII_INFRA: 0, FIAGRO: 0, ETF: 0, FIXED_INCOME: 0 },
+      {
+        STOCK_US: 0,
+        FII: 0,
+        STOCK_BR: 0,
+        REIT: 0,
+        FII_INFRA: 0,
+        FIAGRO: 0,
+        ETF: 0,
+        FIXED_INCOME: 0,
+      },
       5,
     );
     const recs = result?.recs || [];

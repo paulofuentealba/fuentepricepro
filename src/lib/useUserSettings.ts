@@ -38,7 +38,9 @@ function readLocalSettings(): UserSettings {
     if (!raw) {
       // Tenta migrar do antigo formato espalhado
       const oldTargetYield = window.localStorage.getItem("global-target-yield");
-      const oldCurrency = window.localStorage.getItem("smartAllocationCurrency") || window.localStorage.getItem("displayCurrency");
+      const oldCurrency =
+        window.localStorage.getItem("smartAllocationCurrency") ||
+        window.localStorage.getItem("displayCurrency");
       const oldTargets = window.localStorage.getItem("smart-allocation-targets");
 
       const settings = {

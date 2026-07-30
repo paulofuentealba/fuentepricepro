@@ -45,7 +45,7 @@ export function usePortfolioRisk() {
   const { user } = useAuth();
   const fxQuery = useQuery(exchangeRateQueryOptions());
   const fx = fxQuery.data?.USDBRL || 5.0;
-  
+
   const baseCurrency = "BRL" as string; // Hardcoded default for now since smartAllocationCurrency isn't on User
 
   return useMemo(() => {
@@ -64,7 +64,7 @@ export function usePortfolioRisk() {
 
       let value = qty * item.currentPrice;
       const itemCurrency = ["Stock", "REIT"].includes(item.type) ? "USD" : "BRL";
-      
+
       // Convert to base currency
       if (baseCurrency === "BRL" && itemCurrency === "USD") {
         value *= fx;
@@ -94,7 +94,8 @@ export function usePortfolioRisk() {
 
       // Warnings
       // 1. Yield Trap
-      const dividendYield = item.currentPrice > 0 ? (item.annualDividend / item.currentPrice) * 100 : 0;
+      const dividendYield =
+        item.currentPrice > 0 ? (item.annualDividend / item.currentPrice) * 100 : 0;
       if (dividendYield > 10 && item.safetyMargin < 0) {
         warnings.push({
           id: `yield_trap_${item.id}`,
@@ -126,46 +127,52 @@ export function usePortfolioRisk() {
 
     // Calculate weights
     if (totalEquity > 0) {
-      assets.forEach(a => {
+      assets.forEach((a) => {
         a.weightPct = (a.valueBase / totalEquity) * 100;
       });
-      
+
       // Sort assets by weight
       assets.sort((a, b) => b.weightPct - a.weightPct);
     }
 
-    const sectors: SectorConcentration[] = Object.entries(sectorMap).map(([sector, value]) => ({
-      sector,
-      valueBase: value,
-      weightPct: totalEquity > 0 ? (value / totalEquity) * 100 : 0,
-    })).sort((a, b) => b.weightPct - a.weightPct);
+    const sectors: SectorConcentration[] = Object.entries(sectorMap)
+      .map(([sector, value]) => ({
+        sector,
+        valueBase: value,
+        weightPct: totalEquity > 0 ? (value / totalEquity) * 100 : 0,
+      }))
+      .sort((a, b) => b.weightPct - a.weightPct);
 
-    const currencies: CurrencyConcentration[] = Object.entries(currencyMap).map(([currency, value]) => ({
-      currency,
-      valueBase: value,
-      weightPct: totalEquity > 0 ? (value / totalEquity) * 100 : 0,
-    })).sort((a, b) => b.weightPct - a.weightPct);
+    const currencies: CurrencyConcentration[] = Object.entries(currencyMap)
+      .map(([currency, value]) => ({
+        currency,
+        valueBase: value,
+        weightPct: totalEquity > 0 ? (value / totalEquity) * 100 : 0,
+      }))
+      .sort((a, b) => b.weightPct - a.weightPct);
 
-    const types: TypeConcentration[] = Object.entries(typeMap).map(([type, value]) => ({
-      type,
-      valueBase: value,
-      weightPct: totalEquity > 0 ? (value / totalEquity) * 100 : 0,
-    })).sort((a, b) => b.weightPct - a.weightPct);
+    const types: TypeConcentration[] = Object.entries(typeMap)
+      .map(([type, value]) => ({
+        type,
+        valueBase: value,
+        weightPct: totalEquity > 0 ? (value / totalEquity) * 100 : 0,
+      }))
+      .sort((a, b) => b.weightPct - a.weightPct);
 
     // 3. Concentration Warnings
-    sectors.forEach(s => {
+    sectors.forEach((s) => {
       if (s.weightPct > 25 && s.sector !== "Outros") {
         warnings.push({
           id: `conc_sector_${s.sector}`,
           type: "concentration",
           messageKey: "sectorConcentration",
           severity: "yellow",
-          extraData: { sector: s.sector }
+          extraData: { sector: s.sector },
         });
       }
     });
 
-    assets.forEach(a => {
+    assets.forEach((a) => {
       if (a.weightPct > 15) {
         warnings.push({
           id: `conc_asset_${a.id}`,
@@ -185,7 +192,7 @@ export function usePortfolioRisk() {
       sectors,
       currencies,
       types,
-      warnings
+      warnings,
     };
   }, [items, baseCurrency, fx]);
 }

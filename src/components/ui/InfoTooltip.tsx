@@ -11,7 +11,9 @@ interface InfoTooltipProps {
 
 export function InfoTooltip({ content, link, className }: InfoTooltipProps) {
   const trigger = (
-    <span className={`inline-flex items-center text-muted-foreground/70 hover:text-foreground transition-colors cursor-pointer ${className || ''}`}>
+    <span
+      className={`inline-flex items-center text-muted-foreground/70 hover:text-foreground transition-colors cursor-pointer ${className || ""}`}
+    >
       <HelpCircle className="h-3.5 w-3.5" />
     </span>
   );
@@ -21,11 +23,17 @@ export function InfoTooltip({ content, link, className }: InfoTooltipProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           {link ? (
-            <Link to={link as any} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full">
+            <Link
+              to={link as any}
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+            >
               {trigger}
             </Link>
           ) : (
-            <span className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full" tabIndex={0}>
+            <span
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+              tabIndex={0}
+            >
               {trigger}
             </span>
           )}

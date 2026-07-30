@@ -1,5 +1,11 @@
 import { useState, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { parseB3BrokerNote } from "@/lib/dataIngestion/b3Parser";
@@ -9,12 +15,8 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { getCanonicalAnnualDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { toast } from "sonner";
-import * as pdfjsLib from "pdfjs-dist";
+// pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-
-if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-}
 
 interface BrokerNoteUploaderProps {
   open: boolean;
@@ -31,11 +33,15 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
   const processFile = async (file: File) => {
     setIsProcessing(true);
-    
+
     try {
+      const pdfjsLib = await import("pdfjs-dist");
+      if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+      }
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      
+
       let rawText = "";
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
@@ -45,16 +51,16 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
       }
 
       const result = parseB3BrokerNote(rawText);
-      
+
       if (!result.success || !result.trades) {
-        if (result.error === 'unknown_broker') {
+        if (result.error === "unknown_broker") {
           throw new Error(t.brokerNote.unknownBroker);
         }
         throw new Error(t.brokerNote.malformedPdf);
       }
 
       const itemsToImport: WatchlistItem[] = [];
-      
+
       for (const trade of result.trades) {
         let assetData: any = null;
         try {
@@ -94,7 +100,6 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
       await upsertManyAsync(itemsToImport);
       toast.success(`${itemsToImport.length} ${t.brokerNote.successImport}`);
       onOpenChange(false);
-
     } catch (err: any) {
       toast.error(t.brokerNote.errorImport + ": " + err.message);
     } finally {
@@ -110,10 +115,13 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
           <DialogTitle className="text-xl">{t.brokerNote.importTitle}</DialogTitle>
           <DialogDescription className="sr-only">{t.brokerNote.importTitle}</DialogDescription>
         </DialogHeader>
-        
-        <div 
-          className={`mt-2 flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${isDragging ? 'border-success bg-success/5 scale-[1.02]' : 'border-border/60 bg-background/40 hover:bg-muted/50'}`}
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+
+        <div
+          className={`mt-2 flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${isDragging ? "border-success bg-success/5 scale-[1.02]" : "border-border/60 bg-background/40 hover:bg-muted/50"}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={(e) => {
             e.preventDefault();
@@ -140,16 +148,14 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
               <p className="text-base font-semibold text-foreground text-center mb-1.5 tracking-tight">
                 {t.brokerNote.dragDropText}
               </p>
-              <p className="text-sm text-muted-foreground text-center">
-                {t.brokerNote.orClick}
-              </p>
+              <p className="text-sm text-muted-foreground text-center">{t.brokerNote.orClick}</p>
             </>
           )}
-          <input 
-            type="file" 
-            accept=".pdf" 
-            className="hidden" 
-            ref={fileInputRef} 
+          <input
+            type="file"
+            accept=".pdf"
+            className="hidden"
+            ref={fileInputRef}
             onChange={(e) => {
               if (e.target.files && e.target.files.length > 0) {
                 processFile(e.target.files[0]);

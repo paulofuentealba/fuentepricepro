@@ -11,10 +11,10 @@ export function computeAvgDividend(asset: Asset, timeframe: Timeframe) {
   const available = TIMEFRAMES.filter((n) => sorted.length >= n);
   if (!available.includes(3)) available.push(3);
   available.sort((a, b) => a - b);
-  
-  return { 
-    avg: getCanonicalAnnualDividend(asset, timeframe), 
-    availableTimeframes: available 
+
+  return {
+    avg: getCanonicalAnnualDividend(asset, timeframe),
+    availableTimeframes: available,
   };
 }
 
@@ -39,5 +39,5 @@ export function buildResultShareText(
     ceiling,
     currency,
     locale,
-  )} | Projected YoC: ${yocPct ? formatPercent(yocPct, locale, 2) : "—"}. \nCheck your portfolio strategy at https://fuentepricepro.web.app`;
+  )} | Projected YoC: ${yocPct ? formatPercent(yocPct, locale, 2) : "—"}. \nCheck your portfolio strategy at https://fuentepricepro.com`;
 }

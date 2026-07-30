@@ -21,7 +21,15 @@ import { useSettings } from "@/lib/settings";
 import { useWatchlist } from "@/lib/watchlist";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
 
-const ALL_TYPES: AssetType[] = ["STOCK_US", "STOCK_BR", "REIT", "FII", "FII_INFRA", "FIAGRO", "ETF"];
+const ALL_TYPES: AssetType[] = [
+  "STOCK_US",
+  "STOCK_BR",
+  "REIT",
+  "FII",
+  "FII_INFRA",
+  "FIAGRO",
+  "ETF",
+];
 
 export function AssetComparator() {
   const { t } = useI18n();
@@ -31,7 +39,7 @@ export function AssetComparator() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { data: selic } = useSelic();
-  
+
   const shouldSearch = query.trim().length > 0;
 
   useEffect(() => {
@@ -44,11 +52,13 @@ export function AssetComparator() {
   }, [query, shouldSearch]);
 
   const searchResult = useQuery(searchQueryOptions(debouncedQuery));
-  
+
   const suggestions = useMemo(() => {
     const raw = searchResult.data ?? [];
-    const validRaw = raw.filter(item => ALL_TYPES.includes(item.type) && !selectedTickers.includes(item.ticker));
-    return Array.from(new Map(validRaw.map(item => [item.ticker, item])).values());
+    const validRaw = raw.filter(
+      (item) => ALL_TYPES.includes(item.type) && !selectedTickers.includes(item.ticker),
+    );
+    return Array.from(new Map(validRaw.map((item) => [item.ticker, item])).values());
   }, [searchResult.data, selectedTickers]);
 
   const searching = shouldSearch && (searchResult.isFetching || debouncedQuery === "");
@@ -79,9 +89,7 @@ export function AssetComparator() {
           <Scale className="w-6 h-6 text-emerald-500" />
           {t.comparator.title}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          {t.comparator.subtitle}
-        </p>
+        <p className="text-sm text-muted-foreground">{t.comparator.subtitle}</p>
       </div>
 
       <div ref={containerRef} className="relative w-full max-w-xl mx-auto">
@@ -90,7 +98,11 @@ export function AssetComparator() {
           <Input
             autoComplete="off"
             value={query}
-            placeholder={selectedTickers.length >= 3 ? t.comparator.limitReached : t.comparator.searchPlaceholder}
+            placeholder={
+              selectedTickers.length >= 3
+                ? t.comparator.limitReached
+                : t.comparator.searchPlaceholder
+            }
             onChange={(e) => {
               setQuery(e.target.value.toUpperCase());
               setOpen(true);
@@ -138,9 +150,7 @@ export function AssetComparator() {
             <Scale className="w-8 h-8 text-emerald-500" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">{t.comparator.emptyTitle}</h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            {t.comparator.emptySubtitle}
-          </p>
+          <p className="text-sm text-muted-foreground max-w-sm">{t.comparator.emptySubtitle}</p>
         </div>
       ) : (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -152,19 +162,25 @@ export function AssetComparator() {
 }
 
 // Separate component to handle the fetching and comparison logic
-function ComparatorCards({ tickers, onRemove }: { tickers: string[]; onRemove: (ticker: string) => void }) {
+function ComparatorCards({
+  tickers,
+  onRemove,
+}: {
+  tickers: string[];
+  onRemove: (ticker: string) => void;
+}) {
   const { t } = useI18n();
   const { items: portfolioItems } = useWatchlist();
   const { targetYield: globalYield } = useSettings();
   const { data: selic } = useSelic();
   const [selectedDetailItem, setSelectedDetailItem] = useState<any>(null);
-  
+
   const queries = useQueries({
-    queries: tickers.map((ticker) => assetQueryOptions(ticker))
+    queries: tickers.map((ticker) => assetQueryOptions(ticker)),
   });
 
   const isLoading = queries.some((q: any) => q.isFetching);
-  
+
   if (isLoading) {
     return (
       <div className="col-span-full py-12 text-center text-muted-foreground">
@@ -175,8 +191,8 @@ function ComparatorCards({ tickers, onRemove }: { tickers: string[]; onRemove: (
 
   // Extract data
   const dataMap = queries.map((q: any) => q.data).filter(Boolean) as Asset[];
-  
-  const types = new Set(dataMap.map(d => d.type));
+
+  const types = new Set(dataMap.map((d) => d.type));
   const hasMixedClasses = types.size > 1;
 
   return (
@@ -186,26 +202,30 @@ function ComparatorCards({ tickers, onRemove }: { tickers: string[]; onRemove: (
           {t.comparator.mixedClassesWarning}
         </div>
       )}
-        {dataMap.map((data) => {
-          const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
-          const activeYield = savedItem?.targetYield ?? globalYield;
-          const avgDiv = getCanonicalAnnualDividend(data, 3);
-          const val = getAssetValuation({
-            targetYield: activeYield,
-            currentPrice: data.currentPrice,
-            avgDividend: avgDiv,
-            eps: data.metrics?.eps || null,
-            bvps: data.metrics?.pbRatio && data.currentPrice > 0 ? data.currentPrice / data.metrics.pbRatio : null,
-            dividendCagr: data.metrics?.dividendCagr5y || null,
-            selicPct: selic ?? 10.5,
-            currency: data.currency,
-            type: data.type,
-          });
-          
-          return (
-            <div key={data.ticker} className="relative group animate-in fade-in zoom-in-95">
-              <AssetCard
-                item={{
+      {dataMap.map((data) => {
+        const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
+        const activeYield = savedItem?.targetYield ?? globalYield;
+        const avgDiv = getCanonicalAnnualDividend(data, 3);
+        const val = getAssetValuation({
+          targetYield: activeYield,
+          currentPrice: data.currentPrice,
+          avgDividend: avgDiv,
+          eps: data.metrics?.eps || null,
+          bvps:
+            data.metrics?.pbRatio && data.currentPrice > 0
+              ? data.currentPrice / data.metrics.pbRatio
+              : null,
+          dividendCagr: data.metrics?.dividendCagr5y || null,
+          selicPct: selic ?? 10.5,
+          currency: data.currency,
+          type: data.type,
+        });
+
+        return (
+          <div key={data.ticker} className="relative group animate-in fade-in zoom-in-95">
+            <AssetCard
+              item={
+                {
                   id: data.ticker,
                   ticker: data.ticker,
                   name: data.name,
@@ -219,27 +239,30 @@ function ComparatorCards({ tickers, onRemove }: { tickers: string[]; onRemove: (
                   sector: data.sector || "Outros",
                   createdAt: Date.now(),
                   valuation: val,
-                } as any}
-                isSimulation={activeYield !== savedItem?.targetYield}
-                meta={{
+                } as any
+              }
+              isSimulation={activeYield !== savedItem?.targetYield}
+              meta={
+                {
                   eps: data.metrics?.eps || null,
                   pbRatio: data.metrics?.pbRatio || null,
                   dividendCagr5y: data.metrics?.dividendCagr5y || null,
                   sector: data.sector || "Outros",
-                } as any}
-                variant="watchlist"
-                hideAddToWatchlist
-                onClose={(ticker) => onRemove(ticker)}
-                onOpenDetail={(item) => setSelectedDetailItem(item)}
-              />
-            </div>
-          );
-        })}
-      <AssetDetailSheet 
-        item={selectedDetailItem} 
-        onClose={() => setSelectedDetailItem(null)} 
-        hidePlayground 
-        hideGoalPlanner 
+                } as any
+              }
+              variant="watchlist"
+              hideAddToWatchlist
+              onClose={(ticker) => onRemove(ticker)}
+              onOpenDetail={(item) => setSelectedDetailItem(item)}
+            />
+          </div>
+        );
+      })}
+      <AssetDetailSheet
+        item={selectedDetailItem}
+        onClose={() => setSelectedDetailItem(null)}
+        hidePlayground
+        hideGoalPlanner
       />
     </TooltipProvider>
   );

@@ -33,7 +33,7 @@ export const Route = createFileRoute("/auth")({
           "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://fuentepricepro.web.app/auth" },
+      { property: "og:url", content: "https://fuentepricepro.com/auth" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Sign in — Fuente Price Pro" },
       {
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/auth")({
           "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://fuentepricepro.web.app/auth" }],
+    links: [{ rel: "canonical", href: "https://fuentepricepro.com/auth" }],
   }),
   component: AuthPage,
   errorComponent: RouteErrorComponent,
@@ -53,7 +53,7 @@ type Mode = "signin" | "signup";
 
 function AuthPage() {
   const navigate = useNavigate();
-  const search = useSearch({ from: '/auth' });
+  const search = useSearch({ from: "/auth" });
   const { t } = useI18n();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
@@ -88,8 +88,8 @@ function AuthPage() {
     setBusy(true);
     try {
       const provider = new GoogleAuthProvider();
-      provider.addScope('profile');
-      provider.addScope('email');
+      provider.addScope("profile");
+      provider.addScope("email");
       await signInWithPopup(auth, provider);
       navigate({ to: "/" });
     } catch (err) {

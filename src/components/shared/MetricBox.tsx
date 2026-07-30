@@ -68,7 +68,9 @@ export function MetricBox({
       </div>
 
       {actualSubValue && (
-        <div className="mt-0.5 text-[11px] leading-tight text-muted-foreground/80">{actualSubValue}</div>
+        <div className="mt-0.5 text-[11px] leading-tight text-muted-foreground/80">
+          {actualSubValue}
+        </div>
       )}
     </div>
   );

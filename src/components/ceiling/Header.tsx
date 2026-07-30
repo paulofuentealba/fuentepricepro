@@ -1,4 +1,13 @@
-import { Calculator, Gauge, LogOut, Settings, User, User as UserIcon, Menu, BookOpen } from "lucide-react";
+import {
+  Calculator,
+  Gauge,
+  LogOut,
+  Settings,
+  User,
+  User as UserIcon,
+  Menu,
+  BookOpen,
+} from "lucide-react";
 import { useAuthModal } from "@/lib/auth-modal";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
@@ -11,13 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useI18n } from "@/lib/i18n-provider";
 import { useAuth } from "@/lib/auth-provider";
 import { useSubscription } from "@/lib/subscription";
@@ -53,10 +56,10 @@ export function Header({ variant = "app" }: HeaderProps) {
           className="h-11 w-11 md:h-9 md:w-9 rounded-full object-cover ring-1 ring-border/60 transition-all hover:ring-success/50"
         />
       ) : (
-        <SuccessIconBox 
-          icon={User} 
-          size="md" 
-          rounded="full" 
+        <SuccessIconBox
+          icon={User}
+          size="md"
+          rounded="full"
           className="h-11 w-11 md:h-9 md:w-9 hover:bg-success/25 transition-colors"
         />
       )}
@@ -74,7 +77,9 @@ export function Header({ variant = "app" }: HeaderProps) {
             {variant !== "landing" && <span className="sr-only"> — {t.appTagline}</span>}
           </h1>
           {variant !== "landing" && (
-            <p className="truncate text-xs text-muted-foreground sm:text-sm ml-2 hidden md:block">{t.appTagline}</p>
+            <p className="truncate text-xs text-muted-foreground sm:text-sm ml-2 hidden md:block">
+              {t.appTagline}
+            </p>
           )}
         </div>
 
@@ -85,7 +90,7 @@ export function Header({ variant = "app" }: HeaderProps) {
               USD/BRL R$ {fx.USDBRL.toFixed(2)}
             </div>
           )}
-          
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
             {variant === "landing" && (
@@ -97,7 +102,12 @@ export function Header({ variant = "app" }: HeaderProps) {
             )}
 
             {user && variant === "landing" && (
-              <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
+              >
                 <Link to="/app/docs">
                   <BookOpen className="h-4 w-4" />
                   {t.docs.navLink}
@@ -143,9 +153,7 @@ export function Header({ variant = "app" }: HeaderProps) {
             {user ? (
               variant === "landing" ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    {userAvatar}
-                  </DropdownMenuTrigger>
+                  <DropdownMenuTrigger asChild>{userAvatar}</DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
                       <UserIcon className="h-3.5 w-3.5" />
@@ -191,10 +199,13 @@ export function Header({ variant = "app" }: HeaderProps) {
                 <SheetHeader>
                   <SheetTitle className="text-left">{t.appTitle}</SheetTitle>
                 </SheetHeader>
-                
+
                 <div className="flex flex-col gap-4 flex-1">
                   {variant === "landing" && (
-                    <a href="#features" className="text-lg font-medium hover:text-emerald-400 transition-colors">
+                    <a
+                      href="#features"
+                      className="text-lg font-medium hover:text-emerald-400 transition-colors"
+                    >
                       {L.navFeatures}
                     </a>
                   )}
@@ -217,21 +228,30 @@ export function Header({ variant = "app" }: HeaderProps) {
                         </div>
                       </div>
                       {variant === "landing" && (
-                        <Link to="/app" className="text-lg font-medium hover:text-emerald-400 transition-colors">
+                        <Link
+                          to="/app"
+                          className="text-lg font-medium hover:text-emerald-400 transition-colors"
+                        >
                           {L.goToTerminal}
                         </Link>
                       )}
-                      <Link to="/app/docs" className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors">
+                      <Link
+                        to="/app/docs"
+                        className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors"
+                      >
                         <BookOpen className="h-5 w-5" />
                         {t.docs.navLink}
                       </Link>
-                      <Link to="/settings" className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors">
+                      <Link
+                        to="/settings"
+                        className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors"
+                      >
                         <Settings className="h-5 w-5" />
                         {L.settings}
                       </Link>
                     </>
                   ) : null}
-                  
+
                   {!user && !loading && (
                     <div className="flex flex-col gap-3 mt-4">
                       <Button
@@ -260,7 +280,11 @@ export function Header({ variant = "app" }: HeaderProps) {
                       <LanguageSwitcher className="inline-flex" />
                     </div>
                     {user && (
-                      <Button variant="ghost" onClick={() => signOut()} className="w-full justify-start text-danger hover:text-danger hover:bg-danger/10">
+                      <Button
+                        variant="ghost"
+                        onClick={() => signOut()}
+                        className="w-full justify-start text-danger hover:text-danger hover:bg-danger/10"
+                      >
                         <LogOut className="mr-2 h-5 w-5" />
                         {L.signOut}
                       </Button>
@@ -270,7 +294,6 @@ export function Header({ variant = "app" }: HeaderProps) {
               </SheetContent>
             </Sheet>
           </div>
-
         </div>
       </div>
     </header>

@@ -62,14 +62,18 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
         <div className="rounded-lg border border-success/25 bg-success/10 p-2.5">
           <div className="flex items-center gap-1 text-success">
             <TrendingUp className="h-3 w-3" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">{t.showcase.ceilingPrice}</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">
+              {t.showcase.ceilingPrice}
+            </span>
           </div>
           <div className="mt-0.5 text-base font-bold text-foreground">{card.ceiling}</div>
         </div>
         <div className={`rounded-lg border p-2.5 ${marginTone}`}>
           <div className="flex items-center gap-1">
             <Shield className="h-3 w-3" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">{t.showcase.margin}</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">
+              {t.showcase.margin}
+            </span>
           </div>
           <div className="mt-0.5 flex items-baseline gap-1">
             <span className="text-base font-bold text-foreground">{card.margin}</span>

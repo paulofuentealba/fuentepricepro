@@ -47,7 +47,10 @@ export function useValuedPortfolio() {
         currentPrice: livePrice,
         avgDividend: m?.canonicalDividend3y ?? it.annualDividend,
         eps: m?.eps,
-        bvps: m?.pbRatio && m.currentPrice != null && m.currentPrice > 0 ? m.currentPrice / m.pbRatio : null,
+        bvps:
+          m?.pbRatio && m.currentPrice != null && m.currentPrice > 0
+            ? m.currentPrice / m.pbRatio
+            : null,
         dividendCagr: m?.dividendCagr5y,
         selicPct: selic ?? 10.5,
         currency: it.currency,
@@ -82,7 +85,7 @@ export function useValuedPortfolio() {
         it.currency,
         it.customTaxRate,
       );
-      
+
       let worth = it.currentPrice * it.quantity;
       if (it.type === "FIXED_INCOME" && macroRates) {
         const accrual = calculateFixedIncomeBalance(it, macroRates);
@@ -101,16 +104,26 @@ export function useValuedPortfolio() {
         countBrl++;
       }
     }
-    
-    const rate = fx?.USDBRL ?? 1; // Default to 1 if missing so it doesn't break
-    const consolidatedNetWorth = brlWorth + (usdWorth * rate);
-    const consolidatedIncome = brl + (usd * rate);
 
-    return { usd, brl, usdWorth, brlWorth, countUsd, countBrl, consolidatedNetWorth, consolidatedIncome };
+    const rate = fx?.USDBRL ?? 1; // Default to 1 if missing so it doesn't break
+    const consolidatedNetWorth = brlWorth + usdWorth * rate;
+    const consolidatedIncome = brl + usd * rate;
+
+    return {
+      usd,
+      brl,
+      usdWorth,
+      brlWorth,
+      countUsd,
+      countBrl,
+      consolidatedNetWorth,
+      consolidatedIncome,
+    };
   }, [valuedItems, fx, macroRates]);
 
   return {
     ...rest,
+    items,
     valuedItems,
     totals,
     quotes,
@@ -119,6 +132,6 @@ export function useValuedPortfolio() {
     lastUpdatedAt,
     macroRates,
     fx,
-    selic
+    selic,
   };
 }

@@ -26,9 +26,7 @@ export function PaywallDialog({ open, onOpenChange, title, description }: Props)
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Lock className="h-6 w-6 text-primary" />
           </div>
-          <DialogTitle className="text-center text-xl">
-            {title || t.paywall.title}
-          </DialogTitle>
+          <DialogTitle className="text-center text-xl">{title || t.paywall.title}</DialogTitle>
           <DialogDescription className="text-center pt-2">
             {description || t.paywall.description}
           </DialogDescription>

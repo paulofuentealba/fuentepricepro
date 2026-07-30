@@ -1,21 +1,26 @@
-import { Bell, Share2 } from 'lucide-react';
-import type { Asset } from '@/lib/domain';
-import { ceilingPrice, isUsAsset, netAfterTax, safetyMargin } from '@/lib/calculations';
-import { buildResultShareText, computeAvgDividend, formatResultDate, type Timeframe } from '@/lib/resultCard';
-import { AddToWatchlistDialog } from '../ceiling/AddToWatchlistDialog';
-import { IndicatorGrid } from '../ceiling/IndicatorGrid';
-import { GoalPlanner } from '../ceiling/GoalPlanner';
-import { DividendHistoryChart } from '../ceiling/result/DividendHistoryChart';
-import { ResultStats } from '../ceiling/result/ResultStats';
-import { useSubscription } from '@/lib/subscription';
-import { PaywallDialog } from '../ui/PaywallDialog';
-import { useState, useMemo } from 'react';
+import { Bell, Share2 } from "lucide-react";
+import type { Asset } from "@/lib/domain";
+import { ceilingPrice, isUsAsset, netAfterTax, safetyMargin } from "@/lib/calculations";
+import {
+  buildResultShareText,
+  computeAvgDividend,
+  formatResultDate,
+  type Timeframe,
+} from "@/lib/resultCard";
+import { AddToWatchlistDialog } from "../ceiling/AddToWatchlistDialog";
+import { IndicatorGrid } from "../ceiling/IndicatorGrid";
+import { GoalPlanner } from "../ceiling/GoalPlanner";
+import { DividendHistoryChart } from "../ceiling/result/DividendHistoryChart";
+import { ResultStats } from "../ceiling/result/ResultStats";
+import { useSubscription } from "@/lib/subscription";
+import { PaywallDialog } from "../ui/PaywallDialog";
+import { useState, useMemo } from "react";
 
 import { memo, useCallback, type KeyboardEvent, useRef } from "react";
 import { ValuationRadar } from "@/components/ui/ValuationRadar";
 import { useSelic } from "@/lib/useSelic";
 import { getAssetValuation } from "@/lib/calculations";
-import { toPng } from "html-to-image";
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -24,7 +29,10 @@ import type { LiveQuote } from "@/lib/apiService.functions";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { AssetCardHeader } from "../ceiling/watchlist/assetCard/AssetCardHeader";
 import { AssetCardTags } from "../ceiling/watchlist/assetCard/AssetCardTags";
-import { buildAssetShareText, useAssetCardDerived } from "../ceiling/watchlist/assetCard/useAssetCardDerived";
+import {
+  buildAssetShareText,
+  useAssetCardDerived,
+} from "../ceiling/watchlist/assetCard/useAssetCardDerived";
 import { CorporateEventModal } from "../portfolio/CorporateEventModal";
 import { usePendingEvents } from "@/lib/corporateEvents";
 import { cn } from "@/lib/utils";
@@ -50,7 +58,7 @@ export interface AssetCardProps {
   hidePlayground?: boolean;
   hideGoalPlanner?: boolean;
   isSimulation?: boolean;
-  
+
   // Specific to Allocation variant
   shares?: number;
   cost?: number;
@@ -63,9 +71,16 @@ function flagFor(currency: string): string {
   return currency === "USD" ? "🇺🇸" : "🇧🇷";
 }
 
-function AllocationVariant({ item, shares = 0, cost = 0, addedIncome = 0, currentIncome = 0, onExclude }: AssetCardProps) {
+function AllocationVariant({
+  item,
+  shares = 0,
+  cost = 0,
+  addedIncome = 0,
+  currentIncome = 0,
+  onExclude,
+}: AssetCardProps) {
   const { t, locale } = useI18n();
-  
+
   if (!item) return null;
 
   return (
@@ -82,9 +97,7 @@ function AllocationVariant({ item, shares = 0, cost = 0, addedIncome = 0, curren
       )}
 
       <div className="flex items-center gap-2 pr-6">
-        <span className="text-sm font-semibold text-foreground">
-          {item.ticker}
-        </span>
+        <span className="text-sm font-semibold text-foreground">{item.ticker}</span>
         <Badge variant="secondary" className="text-[10px]">
           <span className="mr-1">{flagFor(item.currency)}</span>
           {t.types[item.type]}
@@ -94,10 +107,7 @@ function AllocationVariant({ item, shares = 0, cost = 0, addedIncome = 0, curren
       <div className="mt-2 text-sm font-semibold text-foreground">
         {t.smartAllocation.buyShares
           .replace("{{qty}}", String(shares))
-          .replace(
-            "{{price}}",
-            formatCurrency(item.currentPrice, item.currency, locale as any),
-          )}
+          .replace("{{price}}", formatCurrency(item.currentPrice, item.currency, locale as any))}
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
@@ -170,7 +180,7 @@ function WatchlistVariant(props: AssetCardProps) {
     }
   }, [item, onRemove, t.watchlist.removed]);
   const handleOpenDetail = useCallback(() => item && onOpenDetail?.(item), [item, onOpenDetail]);
-  
+
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
       if ((e.key === "Enter" || e.key === " ") && item) {
@@ -195,6 +205,7 @@ function WatchlistVariant(props: AssetCardProps) {
   const handleShareInsta = useCallback(async () => {
     if (!cardRef.current || !item) return;
     try {
+      const { toPng } = await import("html-to-image");
       const dataUrl = await toPng(cardRef.current, {
         filter: (node) => {
           if (node.hasAttribute && node.hasAttribute("data-html2canvas-ignore")) return false;
@@ -229,7 +240,7 @@ function WatchlistVariant(props: AssetCardProps) {
   const valuation = (item as import("@/lib/useValuedPortfolio").ValuedWatchlistItem).valuation;
   if (!valuation) return null;
 
-  const hasConsensus = (valuation.consensus && valuation.consensus > 0);
+  const hasConsensus = valuation.consensus && valuation.consensus > 0;
 
   return (
     <Card
@@ -245,8 +256,8 @@ function WatchlistVariant(props: AssetCardProps) {
         !hasConsensus
           ? "focus-visible:border-slate-500/60 focus-visible:ring-slate-500/40 shadow-[0_0_15px_rgba(100,116,139,0.1)]"
           : derived.positive
-          ? "focus-visible:border-emerald-500/60 focus-visible:ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-          : "focus-visible:border-rose-500/60 focus-visible:ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
+            ? "focus-visible:border-emerald-500/60 focus-visible:ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+            : "focus-visible:border-rose-500/60 focus-visible:ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
       )}
     >
       {onClose && (
@@ -260,20 +271,20 @@ function WatchlistVariant(props: AssetCardProps) {
           <X className="w-4 h-4" />
         </button>
       )}
-        <div className="p-4 flex-1 space-y-3">
-          <AssetCardHeader
-            item={item}
-            quote={quote}
-            pendingEvent={pendingEvent}
-            onShare={handleShare}
-            onShareInsta={handleShareInsta}
-            onEdit={handleEdit}
-            onCorporateEvent={handleCorpEvent}
-            onRemove={handleRemove}
-            isSimulation={props.isSimulation}
-          />
-          <AssetCardTags meta={meta} />
-        </div>
+      <div className="p-4 flex-1 space-y-3">
+        <AssetCardHeader
+          item={item}
+          quote={quote}
+          pendingEvent={pendingEvent}
+          onShare={handleShare}
+          onShareInsta={handleShareInsta}
+          onEdit={handleEdit}
+          onCorporateEvent={handleCorpEvent}
+          onRemove={handleRemove}
+          isSimulation={props.isSimulation}
+        />
+        <AssetCardTags meta={meta} />
+      </div>
 
       <div
         className={cn(
@@ -297,10 +308,10 @@ function WatchlistVariant(props: AssetCardProps) {
           className="w-full relative z-10"
         />
       </div>
-      <CorporateEventModal 
-        item={item} 
-        open={isCorpEventOpen} 
-        onOpenChange={setIsCorpEventOpen} 
+      <CorporateEventModal
+        item={item}
+        open={isCorpEventOpen}
+        onOpenChange={setIsCorpEventOpen}
         pendingEvent={pendingEvent}
       />
     </Card>
@@ -308,32 +319,30 @@ function WatchlistVariant(props: AssetCardProps) {
 }
 
 function AssetCardImpl(props: AssetCardProps) {
-  if (props.variant === 'search' && props.asset && props.targetYield !== undefined) {
-    return <SearchVariant 
-             asset={props.asset} 
-             targetYield={props.targetYield} 
-             averagePrice={props.averagePrice} 
-             hideAddToWatchlist={props.hideAddToWatchlist} 
-             hidePlayground={props.hidePlayground}
-             hideGoalPlanner={props.hideGoalPlanner}
-           />;
+  if (props.variant === "search" && props.asset && props.targetYield !== undefined) {
+    return (
+      <SearchVariant
+        asset={props.asset}
+        targetYield={props.targetYield}
+        averagePrice={props.averagePrice}
+        hideAddToWatchlist={props.hideAddToWatchlist}
+        hidePlayground={props.hidePlayground}
+        hideGoalPlanner={props.hideGoalPlanner}
+      />
+    );
   }
 
   if (props.variant === "allocation") {
     return <AllocationVariant {...props} />;
   }
-  
+
   // By default (or variant === "watchlist" / "search"), we render the Watchlist variant
-  // ResultCard can be merged in similarly by adapting the WatchlistVariant 
+  // ResultCard can be merged in similarly by adapting the WatchlistVariant
   // or creating a distinct SearchVariant if props differ significantly.
   return <WatchlistVariant {...props} />;
 }
 
 export const AssetCard = memo(AssetCardImpl);
-
-
-
-
 
 interface Props {
   asset: Asset;
@@ -372,7 +381,10 @@ function SearchVariant({
     currentPrice: asset.currentPrice,
     avgDividend: avg,
     eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
-    bvps: asset.metrics?.pbRatio && asset.currentPrice != null && asset.currentPrice > 0 ? asset.currentPrice / asset.metrics.pbRatio : null,
+    bvps:
+      asset.metrics?.pbRatio && asset.currentPrice != null && asset.currentPrice > 0
+        ? asset.currentPrice / asset.metrics.pbRatio
+        : null,
     dividendCagr: asset.metrics?.dividendCagr5y ?? null,
     selicPct: selic ?? 10.5,
     currency: asset.currency,
@@ -410,29 +422,36 @@ function SearchVariant({
   }, [asset.currency, activeCeiling, displayTicker, locale, t.result.shareCopied, yocPct]);
 
   return (
-    <Card className={cn(
-      "border border-border/50 bg-background/60 backdrop-blur-md",
-      positive ? "shadow-[0_0_15px_rgba(16,185,129,0.15)]" : "shadow-[0_0_15px_rgba(244,63,94,0.15)]"
-    )}>
+    <Card
+      className={cn(
+        "border border-border/50 bg-background/60 backdrop-blur-md",
+        positive
+          ? "shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+          : "shadow-[0_0_15px_rgba(244,63,94,0.15)]",
+      )}
+    >
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-semibold leading-none tracking-tight">{displayTicker}</h2>
-              <Badge variant="secondary">
-                <span className="mr-1">{asset.currency === "USD" ? "🇺🇸" : "🇧🇷"}</span>
-                {t.types[asset.type]}
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg font-semibold leading-none tracking-tight">{displayTicker}</h2>
+            <Badge variant="secondary">
+              <span className="mr-1">{asset.currency === "USD" ? "🇺🇸" : "🇧🇷"}</span>
+              {t.types[asset.type]}
+            </Badge>
+            {(timeframe !== 3 ||
+              localTargetYield !== initialTargetYield ||
+              localAveragePrice !== initialAveragePrice ||
+              localCustomTaxRate != null) && (
+              <Badge
+                variant="outline"
+                className="text-[10px] text-amber-500/90 border-amber-500/30 bg-amber-500/10"
+              >
+                {t.watchlist.simulationBadge}
               </Badge>
-              {(timeframe !== 3 || localTargetYield !== initialTargetYield || localAveragePrice !== initialAveragePrice || localCustomTaxRate != null) && (
-                <Badge
-                  variant="outline"
-                  className="text-[10px] text-amber-500/90 border-amber-500/30 bg-amber-500/10"
-                >
-                  {t.watchlist.simulationBadge}
-                </Badge>
-              )}
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">{asset.name}</p>
+            )}
           </div>
+          <p className="mt-1 text-sm text-muted-foreground">{asset.name}</p>
+        </div>
         <div className="flex items-start gap-2">
           <div className="text-right">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">

@@ -1,14 +1,5 @@
 import { useMemo } from "react";
-import {
-  Bar,
-  ComposedChart,
-  Cell,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, ComposedChart, Cell, Line, XAxis, YAxis } from "recharts";
 import type { Asset } from "@/lib/domain";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatCurrency, type Locale } from "@/lib/i18n";

@@ -1,4 +1,11 @@
-import { ArrowDownRight, ArrowUpRight, CalendarClock, Shield, TrendingUp, Calculator } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CalendarClock,
+  Shield,
+  TrendingUp,
+  Calculator,
+} from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -171,9 +178,7 @@ export function ResultStats({
             <Calculator className="h-4 w-4 text-success" />
             {t.form.calculatorTitle}
           </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t.form.calculatorDesc}
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{t.form.calculatorDesc}</p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2">
@@ -284,11 +289,19 @@ export function ResultStats({
           <div className="flex items-center gap-2 text-success">
             <TrendingUp className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">
-              {t.result.ceilingPrice} <InfoTooltip content={t.tooltips?.ceilingPrice || "Preço Teto"} link="/app/docs#ceiling-price" className="ml-1" />
+              {t.result.ceilingPrice}{" "}
+              <InfoTooltip
+                content={t.tooltips?.ceilingPrice || "Preço Teto"}
+                link="/app/docs#ceiling-price"
+                className="ml-1"
+              />
             </span>
           </div>
           <div className="mt-2 text-3xl font-bold text-foreground">
-            <AnimatedNumber value={ceiling} format={(v) => formatCurrency(v, asset.currency, locale)} />
+            <AnimatedNumber
+              value={ceiling}
+              format={(v) => formatCurrency(v, asset.currency, locale)}
+            />
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             @ {formatPercent(targetYield, locale, 2)} {t.form.targetYield.toLowerCase()}

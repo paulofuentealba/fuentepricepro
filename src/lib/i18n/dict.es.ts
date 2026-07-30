@@ -61,7 +61,8 @@ export const es = {
   },
   authModal: {
     title: "Domina tu portafolio.",
-    description: "Accede a inteligencia artificial y métricas institucionales. Continúa con tu cuenta para sincronizar tus datos en la nube.",
+    description:
+      "Accede a inteligencia artificial y métricas institucionales. Continúa con tu cuenta para sincronizar tus datos en la nube.",
     continueGoogle: "Continuar con Google",
     continueEmail: "Continuar con Email",
     termsPrefix: "Al continuar, confirmo que he leído y acepto los ",
@@ -76,7 +77,7 @@ export const es = {
     successLogin: "¡Inicio de sesión exitoso!",
     error: "Ocurrió un error.",
     agreeTerms: "Debes aceptar los Términos y la Política de Privacidad.",
-    back: "Volver"
+    back: "Volver",
   },
   global: {
     pageNotFound: "Página no encontrada",
@@ -99,7 +100,7 @@ export const es = {
     snowballSimulator: "Simulador Bola de Nieve",
     exclusivePro: "Función Exclusiva PRO",
     email: "Correo Electrónico",
-    password: "Contraseña"
+    password: "Contraseña",
   },
   brokerNote: {
     importTitle: "Importar Nota de Corretaje",
@@ -110,7 +111,7 @@ export const es = {
     successImport: "órdenes importadas con éxito",
     errorImport: "Error al leer el formato del PDF",
     malformedPdf: "PDF malformado o ilegible",
-    unknownBroker: "Corredor no identificado o formato no soportado"
+    unknownBroker: "Corredor no identificado o formato no soportado",
   },
   corporateEvents: {
     menuTitle: "Evento Corporativo (Split/Agrup.)",
@@ -122,11 +123,12 @@ export const es = {
     previewOriginal: "Posición Actual",
     previewNew: "Nueva Posición",
     applyButton: "Aplicar Evento",
-    successMessage: "actualizado con éxito."
+    successMessage: "actualizado con éxito.",
   },
   publicEvents: {
     detectedBadge: "Desdoblamiento Detectado",
-    modalAlert: "Hemos detectado un evento público para este activo. Por favor, confirme los detalles."
+    modalAlert:
+      "Hemos detectado un evento público para este activo. Por favor, confirme los detalles.",
   },
   form: {
     ticker: "Ticker",
@@ -195,7 +197,7 @@ export const es = {
       overvalued: "¡Cuidado! El activo está {{margin}}% Sobrevalorado.",
       nextPayment: "Próximo Pago",
       predictedMonth: "Mes previsto: {{month}}",
-      noPaymentData: "Sin datos previsibles de pago."
+      noPaymentData: "Sin datos previsibles de pago.",
     },
     shareOpportunity: "🚀 Compartir Oportunidad",
     shareAnalysis: "Compartir Análisis",
@@ -268,6 +270,7 @@ export const es = {
     addEquityDesc: "Acciones, FIBRAs",
     addFixedIncome: "Añadir Renta Fija",
     addFixedIncomeDesc: "Bonos, Letras",
+    importBrokerNote: "Importar Nota de Corretaje",
     consolidatedNetWorth: "Patrimonio Consolidado",
     consolidatedNetWorthSub: "Patrimonio Total",
     consolidatedIncome: "Ingreso Pasivo Proyectado",
@@ -293,7 +296,7 @@ export const es = {
       calculate: "Calcular Proyección",
       confirm: "Confirmar y Añadir",
       success: "Activo de renta fija añadido con éxito!",
-      fillAll: "Por favor, rellene todos los campos"
+      fillAll: "Por favor, rellene todos los campos",
     },
     qtyShort: "Cant.",
     projectedIncome: "Ingreso anual proyectado",
@@ -367,8 +370,10 @@ export const es = {
     addFirstAsset: "Añade tu primer activo",
     allocationByType: "Asignación por Tipo",
     assets: "activos",
-    contextOvervalued: "{{over}} de {{total}} activos por encima del techo — indica un mercado sobrecalentado.",
-    contextUndervalued: "{{under}} de {{total}} activos por debajo del techo — buenas oportunidades de entrada.",
+    contextOvervalued:
+      "{{over}} de {{total}} activos por encima del techo — indica un mercado sobrecalentado.",
+    contextUndervalued:
+      "{{under}} de {{total}} activos por debajo del techo — buenas oportunidades de entrada.",
     contextBalanced: "{{under}} de {{total}} activos por debajo del techo — mercado equilibrado.",
   },
 
@@ -396,7 +401,8 @@ export const es = {
 
   radar: {
     title: "Radar de Dividendos",
-    description: "Descubra las empresas que pagan mayores dividendos y cotizan por debajo del Precio Techo.",
+    description:
+      "Descubra las empresas que pagan mayores dividendos y cotizan por debajo del Precio Techo.",
     globalYieldNote: "Net Yield después de impuestos",
     marketBr: "Brasil (B3)",
     marketUs: "EE.UU. (NYSE/NASDAQ)",
@@ -488,7 +494,8 @@ export const es = {
     badge: "✨ Creado para inversores serios en dividendos",
     heroHeadline1: "Valoración Inteligente de Cartera ",
     heroHeadline2: "& Ingeniería de Ingresos Pasivos.",
-    heroSub: "Deja de adivinar. Calcula el precio techo exacto para tus activos, rastrea tu verdadero Net Yield y haz ingeniería inversa de tu independencia financiera.",
+    heroSub:
+      "Deja de adivinar. Calcula el precio techo exacto para tus activos, rastrea tu verdadero Net Yield y haz ingeniería inversa de tu independencia financiera.",
     ctaTerminal: "Acceder al Terminal Pro",
     navFeatures: "Funcionalidades",
     navAccess: "Acceder al Terminal",
@@ -496,17 +503,23 @@ export const es = {
     footerLegal2: "Enlaces externos",
     footerLegal3: "Términos de suscripción",
     panel1Title: "Consenso Fuente: Valoración Inteligente",
-    panel1Sub: "Tu toma de decisiones sin conjeturas. Combinamos Bazin, Graham y Gordon para calcular el Precio Techo Consolidado y el Margen de Seguridad automático de tu activo.",
+    panel1Sub:
+      "Tu toma de decisiones sin conjeturas. Combinamos Bazin, Graham y Gordon para calcular el Precio Techo Consolidado y el Margen de Seguridad automático de tu activo.",
     panel2Title: "Radar Global",
-    panel2Sub: "Filtra automáticamente las acciones globales con mayores dividendos que están actualmente en su zona de compra.",
+    panel2Sub:
+      "Filtra automáticamente las acciones globales con mayores dividendos que están actualmente en su zona de compra.",
     panel3Title: "Flujo de Caja Inteligente",
-    panel3Sub: "Visualiza la proyección de tus rendimientos mensuales con nuestro calendario de dividendos dinámico.",
+    panel3Sub:
+      "Visualiza la proyección de tus rendimientos mensuales con nuestro calendario de dividendos dinámico.",
     panel4Title: "Cartera Global Sin Fronteras",
-    panel4Sub: "Unifica tus activos de Brasil (R$) y EE.UU. (US$). Nuestro Motor Cambiario convierte tu patrimonio e ingresos proyectados en tiempo real.",
+    panel4Sub:
+      "Unifica tus activos de Brasil (R$) y EE.UU. (US$). Nuestro Motor Cambiario convierte tu patrimonio e ingresos proyectados en tiempo real.",
     panel5Title: "Renta Fija con Rendimiento Diario",
-    panel5Sub: "Bonos del Tesoro, CDBs (como CDB BTG Pactual) y LCIs con acumulación de intereses en tiempo real. Sigue la evolución de tu capital seguro.",
+    panel5Sub:
+      "Bonos del Tesoro, CDBs (como CDB BTG Pactual) y LCIs con acumulación de intereses en tiempo real. Sigue la evolución de tu capital seguro.",
     panel6Title: "Simulador Bola de Nieve & Control Total",
-    panel6Sub: "Proyecta tu Independencia Financiera y mantén la propiedad de tus datos. Exporta toda tu cartera en CSV en cualquier momento.",
+    panel6Sub:
+      "Proyecta tu Independencia Financiera y mantén la propiedad de tus datos. Exporta toda tu cartera en CSV en cualquier momento.",
     mockupBuySignal: "Señal de Compra",
     mockupConsensus: "Consenso Fuente",
     mockupExportCsv: "Exportar Cartera (CSV)",
@@ -596,98 +609,133 @@ export const es = {
     fairPrice: "Precio Justo",
     overvalued: "SOBREVALORADO",
     selicAnchor: "Ancla Selic",
-    breakdown: "Consenso Detallado"
+    breakdown: "Consenso Detallado",
   },
   paywall: {
     title: "Desbloquear Características Pro",
-    description: "Actualice a Fuente Price Pro para desbloquear herramientas avanzadas, activos ilimitados y análisis profundo de cartera.",
+    description:
+      "Actualice a Fuente Price Pro para desbloquear herramientas avanzadas, activos ilimitados y análisis profundo de cartera.",
     features: [
       "Activos Ilimitados",
       "Asignación Inteligente Avanzada",
       "Penalidades Sectoriales",
-      "Simulador de Bola de Nieve"
+      "Simulador de Bola de Nieve",
     ],
     button: "Ver Planes y Actualizar",
-    cancel: "Tal vez más tarde"
+    cancel: "Tal vez más tarde",
   },
   docs: {
     title: "Metodología de Valoración",
-    description: "Nuestra metodología de valoración se enfoca en generar ingresos pasivos seguros y crecientes, usando múltiples modelos y márgenes de seguridad para evaluar oportunidades globales.",
+    description:
+      "Nuestra metodología de valoración se enfoca en generar ingresos pasivos seguros y crecientes, usando múltiples modelos y márgenes de seguridad para evaluar oportunidades globales.",
     searchPlaceholder: "Buscar en Wiki...",
     navLink: "Wiki",
     consensus: {
       title: "Consenso Fuente",
-      description: "Una síntesis inteligente de los modelos de valoración más confiables. Al promediar Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales, entregando un precio techo robusto para una cartera diversificada."
+      description:
+        "Una síntesis inteligente de los modelos de valoración más confiables. Al promediar Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales, entregando un precio techo robusto para una cartera diversificada.",
     },
     bazin: {
       title: "Modelo de Bazin",
-      description: "Ideal para inversores enfocados en ingresos. Establece el precio techo dividiendo el dividendo promedio por un rendimiento mínimo aceptable (la clásica regla del 6%). Altamente efectivo para empresas maduras.",
-      example: "Ejemplo Numérico: Si la empresa paga $5.25, la meta del 6% resulta en un Precio Techo de $87.50 ($5.25 / 0.06)."
+      description:
+        "Ideal para inversores enfocados en ingresos. Establece el precio techo dividiendo el dividendo promedio por un rendimiento mínimo aceptable (la clásica regla del 6%). Altamente efectivo para empresas maduras.",
+      example:
+        "Ejemplo Numérico: Si la empresa paga $5.25, la meta del 6% resulta en un Precio Techo de $87.50 ($5.25 / 0.06).",
     },
     graham: {
       title: "Fórmula de Graham",
-      description: "Creada por Benjamin Graham, calcula el Valor Intrínseco de una acción basada en Beneficio por Acción (BPA) y Valor Contable. Excelente para Acciones de Valor.",
+      description:
+        "Creada por Benjamin Graham, calcula el Valor Intrínseco de una acción basada en Beneficio por Acción (BPA) y Valor Contable. Excelente para Acciones de Valor.",
       notApplicableBadge: "No aplicable a REITs",
-      notApplicableReason: "La distorsión del patrimonio y las obligaciones de distribución invalidarían la fórmula.",
-      example: "Ejemplo Numérico: Con BPA de $3.00 y Valor Contable de $10.00, la raíz de (22.5 * 3 * 10) da $25.98."
+      notApplicableReason:
+        "La distorsión del patrimonio y las obligaciones de distribución invalidarían la fórmula.",
+      example:
+        "Ejemplo Numérico: Con BPA de $3.00 y Valor Contable de $10.00, la raíz de (22.5 * 3 * 10) da $25.98.",
     },
     gordon: {
       title: "Modelo de Gordon",
-      description: "Un modelo de descuento de dividendos que asume crecimiento perpetuo. Es ideal para REITs debido a la previsibilidad de distribución y ajustes de inflación.",
-      example: "Ejemplo Ilustrativo (no usar como recomendación): Asumiendo un dividendo de $1.00, crecimiento del 2% y descuento del 6%, el precio justo sería $25.50 [(1.00 * 1.02) / (0.06 - 0.02)]."
+      description:
+        "Un modelo de descuento de dividendos que asume crecimiento perpetuo. Es ideal para REITs debido a la previsibilidad de distribución y ajustes de inflación.",
+      example:
+        "Ejemplo Ilustrativo (no usar como recomendación): Asumiendo un dividendo de $1.00, crecimiento del 2% y descuento del 6%, el precio justo sería $25.50 [(1.00 * 1.02) / (0.06 - 0.02)].",
     },
     metrics: {
       title: "Métricas Esenciales",
       safetyMargin: {
         title: "Margen de Seguridad",
-        description: "La diferencia porcentual entre el precio actual y el precio techo estimado. Cuanto mayor sea, menor el riesgo de pérdida de capital."
+        description:
+          "La diferencia porcentual entre el precio actual y el precio techo estimado. Cuanto mayor sea, menor el riesgo de pérdida de capital.",
       },
       yieldOnCost: {
         title: "Yield on Cost (YoC)",
-        description: "El Dividend Yield efectivo que recibe basado en su precio de compra promedio, no en el precio de mercado actual. Empresas que aumentan dividendos harán crecer su YoC."
+        description:
+          "El Dividend Yield efectivo que recibe basado en su precio de compra promedio, no en el precio de mercado actual. Empresas que aumentan dividendos harán crecer su YoC.",
       },
       payout: {
         title: "Payout Ratio",
-        description: "El porcentaje de ganancia neta que la empresa distribuye como dividendos. Un payout de 100% o más es insostenible a largo plazo. Los REITs son excepciones."
+        description:
+          "El porcentaje de ganancia neta que la empresa distribuye como dividendos. Un payout de 100% o más es insostenible a largo plazo. Los REITs son excepciones.",
       },
       cagr: {
         title: "CAGR (Tasa de Crecimiento Anual Compuesto)",
-        description: "La tasa de crecimiento anualizada de los dividendos en los últimos 5 años. Muestra si la empresa puede aumentar los pagos consistentemente."
+        description:
+          "La tasa de crecimiento anualizada de los dividendos en los últimos 5 años. Muestra si la empresa puede aumentar los pagos consistentemente.",
       },
       dyVsYoc: {
         title: "DY vs. Yield on Cost",
-        description: "El Dividend Yield (DY) fluctúa diariamente. El Yield on Cost (YoC) es fijo relativo a su precio de compra. Seguir ambos ayuda a entender las caídas de precio."
-      }
+        description:
+          "El Dividend Yield (DY) fluctúa diariamente. El Yield on Cost (YoC) es fijo relativo a su precio de compra. Seguir ambos ayuda a entender las caídas de precio.",
+      },
     },
     concepts: {
       title: "Conceptos Avanzados",
       snowball: {
         title: "Efecto Bola de Nieve (Snowball/Crossover)",
-        description: "Ocurre cuando el ingreso pasivo generado es suficiente para comprar nuevas acciones sin aporte externo (Efecto Snowball) y eventualmente supera su costo de vida (Crossover Point)."
+        description:
+          "Ocurre cuando el ingreso pasivo generado es suficiente para comprar nuevas acciones sin aporte externo (Efecto Snowball) y eventualmente supera su costo de vida (Crossover Point).",
       },
       taxes: {
         title: "Tratamiento de Impuestos (BR/US)",
-        description: "En Brasil, los dividendos están exentos, pero JCP tiene 15% retenido. En EE.UU., los extranjeros sufren una retención del 30% sobre los dividendos, que llegan netos a su corredor."
-      }
+        description:
+          "En Brasil, los dividendos están exentos, pero JCP tiene 15% retenido. En EE.UU., los extranjeros sufren una retención del 30% sobre los dividendos, que llegan netos a su corredor.",
+      },
     },
     riskRadar: {
       title: "Alertas del Risk Radar",
       sectorConcentration: {
         title: "Concentración Sectorial",
-        description: "Activada cuando más del 25% de su cartera está en el mismo sector, aumentando el riesgo de volatilidad en cadena."
+        description:
+          "Activada cuando más del 25% de su cartera está en el mismo sector, aumentando el riesgo de volatilidad en cadena.",
       },
       assetConcentration: {
         title: "Concentración por Activo",
-        description: "Activada cuando un solo activo compone más del 15% del portafolio. Quiebras o recortes de dividendos causarán un impacto profundo en sus ingresos."
+        description:
+          "Activada cuando un solo activo compone más del 15% del portafolio. Quiebras o recortes de dividendos causarán un impacto profundo en sus ingresos.",
       },
       payoutRisk: {
         title: "Riesgo de Payout (Sostenibilidad)",
-        description: "Las acciones normales que distribuyen más del 80% pueden recortar dividendos pronto. (Ignorado para fondos y REITs)."
+        description:
+          "Las acciones normales que distribuyen más del 80% pueden recortar dividendos pronto. (Ignorado para fondos y REITs).",
       },
       yieldTrap: {
-        title: "Yield Trap (Trampa de Dividendos)",
-        description: "Ocorre quando o Dividend Yield é altíssimo (ex: >10%) porque o preço desabou e o mercado prevê corte iminente dos dividendos. A Margen de Seguridad negativa confirma o risco."
-      }
+        title: "Trampa de Valor (Yield Trap)",
+        description:
+          "Ocurre cuando el Dividend Yield es extremadamente alto (ej: >10%) porque el precio colapsó y el mercado espera un recorte inminente de dividendos. Un Margen de Seguridad negativo confirma el riesgo.",
+      },
+    },
+    supportedBrokers: {
+      title: "Corredores Soportados (PDF)",
+      description:
+        "Lista de instituciones financieras y corredores autorizados para la importación automática de notas de corretaje de la B3.",
+      sinacorTitle: "Extracción Completa (Estándar SINACOR)",
+      sinacorDesc:
+        "Corredores digitales que adoptan el diseño estandarizado, permitiendo la extracción completa de compras y ventas.",
+      fallbackTitle: "Rechazo Controlado (Bancos Tradicionales)",
+      fallbackDesc:
+        "Los bancos suelen alterar el diseño de sus notas. Son reconocidos para evitar fallas en el sistema, devolviendo una alerta amigable de formato inválido si la nota no cumple con el estándar.",
+      howToAddTitle: "Cómo Agregar un Nuevo Corredor",
+      howToAddDesc:
+        "1. Confirma el CNPJ exacto en el encabezado de una nota real. 2. Regístralo en `detectBroker` en `src/lib/dataIngestion/b3Parser.ts`. 3. Si es SINACOR, enruta a `parseSinacorLayout`. Si es personalizado, solo detecta para activar el rechazo. 4. Agrega una simulación en `pdf-parser.test.ts` y actualiza esta Wiki.",
     },
     glossary: {
       title: "Glosario",
@@ -695,17 +743,19 @@ export const es = {
       reit: "Fondo de Inversión Inmobiliario (EE.UU.).",
       lpa: "Beneficio por Acción (BPA).",
       vpa: "Valor Contable por Acción.",
-      jcp: "Intereses sobre el Capital Propio (BR)."
-    }
+      jcp: "Intereses sobre el Capital Propio (BR).",
+    },
   },
   comparator: {
     title: "Filtro y Comparador de Acciones",
     subtitle: "Selecciona hasta 3 activos para compararlos lado a lado.",
     searchPlaceholder: "Buscar activo para comparar (ej: AAPL, ITUB4)",
-    selectThree: "Selecciona al menos 3 activos para descubrir el mejor margen de seguridad y upside.",
+    selectThree:
+      "Selecciona al menos 3 activos para descubrir el mejor margen de seguridad y upside.",
     limitReached: "Límite de 3 activos alcanzado",
     emptyTitle: "Mesa de Decisión Vacía",
-    emptySubtitle: "Usa la barra de búsqueda de arriba para agregar el primer activo y comenzar a comparar.",
+    emptySubtitle:
+      "Usa la barra de búsqueda de arriba para agregar el primer activo y comenzar a comparar.",
     mixedClassesWarning: "Los activos comparados no pertenecen a la misma clase o categoría.",
     noAssetsFound: "Ningún activo encontrado",
     metric: "Métrica",
@@ -719,13 +769,14 @@ export const es = {
       bazin: "Bazin",
       graham: "Graham",
       gordon: "Gordon",
-    }
+    },
   },
   riskRadar: {
     title: "Radar de Riesgo y Concentración",
     subtitle: "Diagnóstico institucional de la exposición y vulnerabilidades de su cartera.",
     emptyTitle: "Sin activos en la cartera",
-    emptySubtitle: "Agregue activos a su lista de seguimiento para ver la matriz de riesgo y concentración.",
+    emptySubtitle:
+      "Agregue activos a su lista de seguimiento para ver la matriz de riesgo y concentración.",
     systemWarnings: "Alertas del Sistema",
     currencyExposure: "Exposición Cambiaria",
     typeExposure: "Exposición por Clase de Activo",
@@ -743,14 +794,18 @@ export const es = {
     concentrationRisk: "Riesgo de Concentración",
     warnings: {
       yieldTrapTitle: "Posible Trampa de Valor",
-      yieldTrapDesc: "El activo tiene un rendimiento por dividendo muy alto (>10%), pero se negocia por encima de su precio techo (margen de seguridad negativo).",
+      yieldTrapDesc:
+        "El activo tiene un rendimiento por dividendo muy alto (>10%), pero se negocia por encima de su precio techo (margen de seguridad negativo).",
       payoutAuditTitle: "Riesgo de Sostenibilidad",
-      payoutAuditDesc: "El Payout supera el 80%, indicando vulnerabilidad en futuras distribuciones de ganancias y riesgo de recortes de dividendos.",
+      payoutAuditDesc:
+        "El Payout supera el 80%, indicando vulnerabilidad en futuras distribuciones de ganancias y riesgo de recortes de dividendos.",
       sectorConcentrationTitle: "Concentración del Sector",
-      sectorConcentrationDesc: "La exposición al sector {sector} ha superado el 25%. Riesgo de volatilidad en cadena si la industria sufre un impacto macroeconómico.",
+      sectorConcentrationDesc:
+        "La exposición al sector {sector} ha superado el 25%. Riesgo de volatilidad en cadena si la industria sufre un impacto macroeconómico.",
       assetConcentrationTitle: "Concentración Crítica de Activos",
-      assetConcentrationDesc: "La cartera tiene una dependencia excesiva del rendimiento de un solo activo (>15%). Considere reequilibrar.",
-    }
+      assetConcentrationDesc:
+        "La cartera tiene una dependencia excesiva del rendimiento de un solo activo (>15%). Considere reequilibrar.",
+    },
   },
   fiMode: {
     title: "Modo IF (Independencia Financiera)",
@@ -766,9 +821,9 @@ export const es = {
     moreThan100: ">100 Años (Aumente contribuciones)",
     monthsRemaining: "{time} para IF",
     settingsSaved: "Configuraciones IF Guardadas!",
-    disabled: "Modo IF Desactivado"
+    disabled: "Modo IF Desactivado",
   },
   feedback: {
-    buttonText: "Enviar Comentarios"
-  }
+    buttonText: "Enviar Comentarios",
+  },
 } satisfies typeof en;

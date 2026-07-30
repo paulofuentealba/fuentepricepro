@@ -42,9 +42,9 @@ export function WatchlistFilterBar({
       <div className="flex flex-1 flex-wrap gap-2">
         {typeFilter ? (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background/50 text-sm font-medium">
-            <div 
-              className="w-2.5 h-2.5 rounded-full" 
-              style={{ backgroundColor: getColorForAsset(typeFilter) }} 
+            <div
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ backgroundColor: getColorForAsset(typeFilter) }}
             />
             {String(counts?.byType?.get(typeFilter) ?? 0)}
           </div>

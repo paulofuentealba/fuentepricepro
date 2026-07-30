@@ -53,8 +53,7 @@ export function searchQueryOptions(query: string) {
 export function exchangeRateQueryOptions() {
   return queryOptions({
     queryKey: ["exchangeRate", "USDBRL"] as const,
-    queryFn: ({ signal }): Promise<{ USDBRL: number }> =>
-      fetchExchangeRatesFn({ signal }),
+    queryFn: ({ signal }): Promise<{ USDBRL: number }> => fetchExchangeRatesFn({ signal }),
     staleTime: 10 * 60_000,
     gcTime: 30 * 60_000,
   });
@@ -63,8 +62,7 @@ export function exchangeRateQueryOptions() {
 export function macroRatesQueryOptions() {
   return queryOptions({
     queryKey: ["macroRates"] as const,
-    queryFn: ({ signal }): Promise<{ cdi: number; ipca: number }> =>
-      fetchMacroRatesFn({ signal }),
+    queryFn: ({ signal }): Promise<{ cdi: number; ipca: number }> => fetchMacroRatesFn({ signal }),
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
   });

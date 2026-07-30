@@ -25,10 +25,7 @@ export type Card = MockCard | ProCard;
 
 /** Strip the .SA / .S.A. / " S.A." suffixes so tickers display cleanly. */
 export function cleanTicker(t: string): string {
-  return t
-    
-    .replace(/\.S\.A\.$/i, "")
-    .replace(/\s+S\.?A\.?$/i, "");
+  return t.replace(/\.S\.A\.$/i, "").replace(/\s+S\.?A\.?$/i, "");
 }
 
 export const CARDS: Card[] = [

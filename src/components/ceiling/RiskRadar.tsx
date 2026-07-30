@@ -22,10 +22,10 @@ export function RiskRadar() {
           <ShieldAlert className="w-8 h-8 text-emerald-500" />
         </div>
         <h3 className="text-lg font-bold text-foreground mb-2">{t.riskRadar.emptyTitle}</h3>
-        <p className="text-sm text-muted-foreground max-w-sm mb-6">
-          {t.riskRadar.emptySubtitle}
-        </p>
-        <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white"><Link to="/app">{t.emptyStates?.goToPortfolio || "Ir para a Carteira"}</Link></Button>
+        <p className="text-sm text-muted-foreground max-w-sm mb-6">{t.riskRadar.emptySubtitle}</p>
+        <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white">
+          <Link to="/app">{t.emptyStates?.goToPortfolio || "Ir para a Carteira"}</Link>
+        </Button>
       </div>
     );
   }
@@ -40,14 +40,17 @@ export function RiskRadar() {
             {t.riskRadar.systemWarnings}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {risk.warnings.map(w => {
+            {risk.warnings.map((w) => {
               const Icon = w.severity === "red" ? ShieldAlert : AlertCircle;
-              const bgClass = w.severity === "red" ? "bg-red-500/10 border-red-500/20" : "bg-amber-500/10 border-amber-500/20";
+              const bgClass =
+                w.severity === "red"
+                  ? "bg-red-500/10 border-red-500/20"
+                  : "bg-amber-500/10 border-amber-500/20";
               const textClass = w.severity === "red" ? "text-red-500" : "text-amber-500";
-              
+
               let title = "";
               let desc = "";
-              
+
               if (w.type === "yield_trap") {
                 title = t.riskRadar.warnings.yieldTrapTitle;
                 desc = t.riskRadar.warnings.yieldTrapDesc;
@@ -57,7 +60,10 @@ export function RiskRadar() {
               } else if (w.type === "concentration") {
                 if (w.extraData?.sector) {
                   title = t.riskRadar.warnings.sectorConcentrationTitle;
-                  desc = t.riskRadar.warnings.sectorConcentrationDesc.replace("{sector}", w.extraData.sector);
+                  desc = t.riskRadar.warnings.sectorConcentrationDesc.replace(
+                    "{sector}",
+                    w.extraData.sector,
+                  );
                 } else {
                   title = t.riskRadar.warnings.assetConcentrationTitle;
                   desc = t.riskRadar.warnings.assetConcentrationDesc;
@@ -65,15 +71,19 @@ export function RiskRadar() {
               }
 
               return (
-                <div key={w.id} className={cn("p-4 rounded-xl border flex items-start gap-3", bgClass)}>
+                <div
+                  key={w.id}
+                  className={cn("p-4 rounded-xl border flex items-start gap-3", bgClass)}
+                >
                   <Icon className={cn("h-5 w-5 mt-0.5", textClass)} />
                   <div>
                     <h4 className={cn("font-medium text-sm", textClass)}>
-                      {w.ticker 
-                        ? `${displayTicker(w.ticker)} - ` 
-                        : w.extraData?.tickers 
-                          ? `${w.extraData.tickers.map((t: string) => displayTicker(t)).join(", ")} - ` 
-                          : ""}{title}
+                      {w.ticker
+                        ? `${displayTicker(w.ticker)} - `
+                        : w.extraData?.tickers
+                          ? `${w.extraData.tickers.map((t: string) => displayTicker(t)).join(", ")} - `
+                          : ""}
+                      {title}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1">{desc}</p>
                   </div>
@@ -95,15 +105,15 @@ export function RiskRadar() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {risk.currencies.map(c => (
+              {risk.currencies.map((c) => (
                 <div key={c.currency} className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">{c.currency}</span>
                     <span className="text-muted-foreground">{formatPercent(c.weightPct, l)}</span>
                   </div>
                   <div className="h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-emerald-500 rounded-full" 
+                    <div
+                      className="h-full bg-emerald-500 rounded-full"
                       style={{ width: `${Math.min(c.weightPct, 100)}%` }}
                     />
                   </div>
@@ -122,15 +132,17 @@ export function RiskRadar() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {risk.types.map(tItem => (
+              {risk.types.map((tItem) => (
                 <div key={tItem.type} className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">{tItem.type}</span>
-                    <span className="text-muted-foreground">{formatPercent(tItem.weightPct, l)}</span>
+                    <span className="text-muted-foreground">
+                      {formatPercent(tItem.weightPct, l)}
+                    </span>
                   </div>
                   <div className="h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 rounded-full" 
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
                       style={{ width: `${Math.min(tItem.weightPct, 100)}%` }}
                     />
                   </div>
@@ -159,18 +171,18 @@ export function RiskRadar() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                  {risk.assets.map(a => {
+                  {risk.assets.map((a) => {
                     const isCritical = a.weightPct > 15;
                     const isWarning = a.weightPct > 10 && a.weightPct <= 15;
-                    const badgeClass = isCritical 
-                      ? "bg-red-500/10 text-red-500 border-red-500/20" 
-                      : isWarning 
-                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20" 
+                    const badgeClass = isCritical
+                      ? "bg-red-500/10 text-red-500 border-red-500/20"
+                      : isWarning
+                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                         : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-                    const statusText = isCritical 
-                      ? t.riskRadar.critical 
-                      : isWarning 
-                        ? t.riskRadar.warning 
+                    const statusText = isCritical
+                      ? t.riskRadar.critical
+                      : isWarning
+                        ? t.riskRadar.warning
                         : t.riskRadar.safe;
 
                     return (
@@ -212,20 +224,16 @@ export function RiskRadar() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                  {risk.sectors.map(s => {
+                  {risk.sectors.map((s) => {
                     const isWarning = s.weightPct > 25;
-                    const badgeClass = isWarning 
-                      ? "bg-destructive/10 text-destructive border-destructive/20" 
+                    const badgeClass = isWarning
+                      ? "bg-destructive/10 text-destructive border-destructive/20"
                       : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-                    const statusText = isWarning 
-                      ? t.riskRadar.concentrationRisk 
-                      : t.riskRadar.safe;
+                    const statusText = isWarning ? t.riskRadar.concentrationRisk : t.riskRadar.safe;
 
                     return (
                       <tr key={s.sector} className="hover:bg-muted/50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-foreground">
-                          {s.sector}
-                        </td>
+                        <td className="px-4 py-3 font-medium text-foreground">{s.sector}</td>
                         <td className="px-4 py-3 text-right tabular-nums">
                           {formatPercent(s.weightPct, l)}
                         </td>

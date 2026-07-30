@@ -11,19 +11,19 @@ interface AnimatedNumberProps {
   className?: string;
 }
 
-export function AnimatedNumber({ 
-  value, 
+export function AnimatedNumber({
+  value,
   format,
-  prefix = "", 
-  suffix = "", 
-  decimals = 0, 
+  prefix = "",
+  suffix = "",
+  decimals = 0,
   delay = 0,
-  className
+  className,
 }: AnimatedNumberProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
   const motionValue = useMotionValue(0);
-  
+
   const springValue = useSpring(motionValue, {
     damping: 60,
     stiffness: 100,
@@ -41,10 +41,14 @@ export function AnimatedNumber({
     if (format) {
       return format(latest);
     }
-    return prefix + Intl.NumberFormat("pt-BR", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(latest) + suffix;
+    return (
+      prefix +
+      Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      }).format(latest) +
+      suffix
+    );
   });
 
   return (

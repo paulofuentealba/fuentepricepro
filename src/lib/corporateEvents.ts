@@ -1,4 +1,4 @@
-export type CorporateEventType = 'split' | 'grouping';
+export type CorporateEventType = "split" | "grouping";
 
 export interface CorporateEventPayload {
   type: CorporateEventType;
@@ -7,7 +7,7 @@ export interface CorporateEventPayload {
    * For a 1:4 split (4 new shares for 1 old share), factor = 4.
    * For a 10:1 grouping (1 new share for 10 old shares), factor = 0.1.
    */
-  factor: number; 
+  factor: number;
 }
 
 export interface AssetPosition {
@@ -25,7 +25,7 @@ export interface ProcessedPosition extends AssetPosition {
 
 /**
  * Applies a corporate event (split or grouping) to an asset position.
- * 
+ *
  * @param position The user's current holding for the asset.
  * @param event The corporate event details.
  * @param liquidateFractional Whether to liquidate fractional shares resulting from a grouping.
@@ -35,24 +35,24 @@ export function applyCorporateEvent(
   position: AssetPosition,
   event: CorporateEventPayload,
   liquidateFractional: boolean = true,
-  currentMarketPrice?: number 
+  currentMarketPrice?: number,
 ): ProcessedPosition {
   if (position.quantity <= 0) return position;
 
   let newQuantity = position.quantity * event.factor;
-  // To keep Total Invested Capital identical (quantity * avgPrice), 
+  // To keep Total Invested Capital identical (quantity * avgPrice),
   // the new average price must be divided by the factor.
   const newAveragePrice = position.averagePrice / event.factor;
-  
+
   let fractionalCash = 0;
 
   // Handle grouping fractionals (Inplit)
-  if (event.type === 'grouping' && liquidateFractional) {
+  if (event.type === "grouping" && liquidateFractional) {
     // Avoid floating point precision issues with small decimals
     const roundedQuantity = Math.round(newQuantity * 1000000) / 1000000;
     const wholeShares = Math.floor(roundedQuantity);
     const fraction = roundedQuantity - wholeShares;
-    
+
     if (fraction > 0) {
       newQuantity = wholeShares;
       // In B3, fractional shares are usually auctioned at market price.
@@ -66,7 +66,7 @@ export function applyCorporateEvent(
     ticker: position.ticker,
     quantity: newQuantity,
     averagePrice: newAveragePrice,
-    ...(fractionalCash > 0 ? { fractionalCash } : {})
+    ...(fractionalCash > 0 ? { fractionalCash } : {}),
   };
 }
 
@@ -86,19 +86,23 @@ import { type WatchlistItem } from "./watchlist";
 export function usePendingEvents(item: WatchlistItem | null) {
   // If the user manually added applied events, check the most recent one.
   // Otherwise fallback to addedAt, minus a 24h buffer for safety.
-  const lastSync = item?.appliedEvents?.length 
-    ? Math.max(...item.appliedEvents.map(e => e.date))
-    : (item?.addedAt ? item.addedAt - (1000 * 60 * 60 * 24) : Date.now());
+  const lastSync = item?.appliedEvents?.length
+    ? Math.max(...item.appliedEvents.map((e) => e.date))
+    : item?.addedAt
+      ? item.addedAt - 1000 * 60 * 60 * 24
+      : Date.now();
 
   const { data: pendingEvents, isPending } = useQuery({
     queryKey: ["pendingSplits", item?.ticker, lastSync],
     queryFn: async () => {
       if (!item) return [];
       try {
-        const results = await checkPendingSplitsFn({ data: { ticker: item.ticker, sinceTimestamp: lastSync } });
-        
+        const results = await checkPendingSplitsFn({
+          data: { ticker: item.ticker, sinceTimestamp: lastSync },
+        });
+
         // Filter out anything already in appliedEvents
-        const appliedIds = new Set(item.appliedEvents?.map(e => e.eventId) ?? []);
+        const appliedIds = new Set(item.appliedEvents?.map((e) => e.eventId) ?? []);
         return results.filter((ev: any) => !appliedIds.has(ev.eventId)) as PendingCorporateEvent[];
       } catch (err) {
         console.error("Error fetching pending splits for", item.ticker, err);
@@ -111,6 +115,6 @@ export function usePendingEvents(item: WatchlistItem | null) {
 
   return {
     pendingEvent: pendingEvents?.[0] ?? null,
-    isPending
+    isPending,
   };
 }

@@ -359,8 +359,8 @@ function DeleteAccountWizard({
 
       if (isGoogle) {
         const provider = new GoogleAuthProvider();
-        provider.addScope('profile');
-        provider.addScope('email');
+        provider.addScope("profile");
+        provider.addScope("email");
         await reauthenticateWithPopup(user, provider);
       } else {
         if (!password) {
@@ -412,7 +412,10 @@ function DeleteAccountWizard({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent closeLabel={t.common.close} className="sm:max-w-md border-border/60 bg-card overflow-hidden">
+      <DialogContent
+        closeLabel={t.common.close}
+        className="sm:max-w-md border-border/60 bg-card overflow-hidden"
+      >
         {step === 1 && (
           <>
             <DialogHeader>

@@ -24,7 +24,9 @@ export function ProAllocationCard() {
         </div>
         <ProBadge />
       </div>
-      <h3 className="mt-3 text-base font-semibold text-foreground">{t.showcase.smartContribution}</h3>
+      <h3 className="mt-3 text-base font-semibold text-foreground">
+        {t.showcase.smartContribution}
+      </h3>
       <p className="text-xs text-muted-foreground">{t.showcase.optimalAllocation}</p>
 
       <div className="mt-4 rounded-lg border border-border/60 bg-background/40 p-3">
@@ -45,9 +47,7 @@ export function ProAllocationCard() {
 
       <div className="mt-auto flex items-center gap-2 pt-3">
         <ArrowUpRight className="h-3.5 w-3.5 text-success" />
-        <span className="text-[11px] font-medium text-success">
-          {t.showcase.targetingYield}
-        </span>
+        <span className="text-[11px] font-medium text-success">{t.showcase.targetingYield}</span>
       </div>
     </div>
   );
@@ -76,7 +76,9 @@ export function ProForecastCard() {
         </div>
         <ProBadge />
       </div>
-      <h3 className="mt-3 text-base font-semibold text-foreground">{t.showcase.passiveIncomeForecast}</h3>
+      <h3 className="mt-3 text-base font-semibold text-foreground">
+        {t.showcase.passiveIncomeForecast}
+      </h3>
 
       <div className="mt-3 flex items-baseline gap-2">
         <span className="text-2xl font-bold tabular-nums text-success">$ 500.00</span>
@@ -87,7 +89,9 @@ export function ProForecastCard() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <CalendarClock className="h-3.5 w-3.5 text-success" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.showcase.yoyGrowth}</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">
+              {t.showcase.yoyGrowth}
+            </span>
           </div>
           <span className="text-xs font-semibold text-success">+12.5%</span>
         </div>

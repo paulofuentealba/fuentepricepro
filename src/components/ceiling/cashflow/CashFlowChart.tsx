@@ -7,7 +7,6 @@ import {
   CartesianGrid,
   Cell,
   ReferenceLine,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -412,7 +411,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   strokeDasharray="3 3"
                   stroke="oklch(0.4 0.02 250 / 0.25)"
                 />
-                  <XAxis
+                <XAxis
                   dataKey="month"
                   interval={0}
                   tickLine={false}

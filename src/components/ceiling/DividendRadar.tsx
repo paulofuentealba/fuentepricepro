@@ -45,7 +45,8 @@ export function DividendRadar() {
   const { t } = useI18n();
   const { settings, updateSettings } = useUserSettings();
   const market = settings.displayCurrency === "USD" ? "US" : "BR";
-  const setMarket = (m: "US" | "BR") => updateSettings({ displayCurrency: m === "US" ? "USD" : "BRL" });
+  const setMarket = (m: "US" | "BR") =>
+    updateSettings({ displayCurrency: m === "US" ? "USD" : "BRL" });
   const { targetYield, setTargetYield } = useSettings();
 
   const {
@@ -75,7 +76,10 @@ export function DividendRadar() {
           currentPrice: asset.currentPrice,
           avgDividend: canonicalDiv,
           eps: asset.metrics?.eps ?? null,
-          bvps: asset.metrics?.pbRatio && asset.currentPrice > 0 ? asset.currentPrice / asset.metrics.pbRatio : null,
+          bvps:
+            asset.metrics?.pbRatio && asset.currentPrice > 0
+              ? asset.currentPrice / asset.metrics.pbRatio
+              : null,
           dividendCagr: asset.metrics?.dividendCagr5y ?? null,
           selicPct: selic ?? 10.5,
           currency: currency,
@@ -89,11 +93,7 @@ export function DividendRadar() {
           annualDividend: canonicalDiv,
           safetyMargin: valuation.margin,
           ceiling: valuation.activeCeiling,
-          type:
-            asset.type ||
-            (market === "BR"
-              ? classifyBr(asset.ticker)
-              : "STOCK_US"),
+          type: asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US"),
           currency: market === "BR" ? "BRL" : "USD",
           dy: dy,
           sector: asset.sector || "N/A",
@@ -137,138 +137,141 @@ export function DividendRadar() {
       </div>
 
       <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-2xl">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                {t.radar.topOpportunities}
-              </CardTitle>
-              <div className="text-sm text-muted-foreground bg-accent/30 px-3 py-1.5 rounded-md border border-border/40 inline-flex items-center gap-1.5">
-                <Info className="h-4 w-4" />
-                {t.radar.globalYieldNote?.replace("{targetYield}", targetYield.toString())}
-              </div>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              {t.radar.topOpportunities}
+            </CardTitle>
+            <div className="text-sm text-muted-foreground bg-accent/30 px-3 py-1.5 rounded-md border border-border/40 inline-flex items-center gap-1.5">
+              <Info className="h-4 w-4" />
+              {t.radar.globalYieldNote?.replace("{targetYield}", targetYield.toString())}
             </div>
-          </CardHeader>
-          <CardContent>
-            <TooltipProvider delayDuration={200}>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t.radar.asset}</TableHead>
-                    <TableHead>{t.global.type}</TableHead>
-                    <TableHead>{t.radar.sector}</TableHead>
-                    <TableHead className="text-right">{t.radar.currentPrice}</TableHead>
-                    <TableHead className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {t.radar.ceilingPrice}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-[280px]">
-                            {t.radar.globalYieldNote?.replace("{targetYield}", targetYield.toString())}
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableHead>
-                    <TableHead className="text-right">{t.radar.currentDy}</TableHead>
-                    <TableHead className="text-right">{t.radar.exDate}</TableHead>
-                  </TableRow>
-                </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <Skeleton className="h-10 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-16" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-20" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-6 w-16 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-6 w-20 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-6 w-12 ml-auto" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-6 w-20 ml-auto" />
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : isError ? (
+          </div>
+        </CardHeader>
+        <CardContent>
+          <TooltipProvider delayDuration={200}>
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-destructive">
-                    {t.radar.error}
-                  </TableCell>
+                  <TableHead>{t.radar.asset}</TableHead>
+                  <TableHead>{t.global.type}</TableHead>
+                  <TableHead>{t.radar.sector}</TableHead>
+                  <TableHead className="text-right">{t.radar.currentPrice}</TableHead>
+                  <TableHead className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      {t.radar.ceilingPrice}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[280px]">
+                          {t.radar.globalYieldNote?.replace(
+                            "{targetYield}",
+                            targetYield.toString(),
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-right">{t.radar.currentDy}</TableHead>
+                  <TableHead className="text-right">{t.radar.exDate}</TableHead>
                 </TableRow>
-              ) : data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    {t.radar.empty}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredAndSorted.map((asset: any) => {
-                  const margin = asset.safetyMargin;
-                  return (
-                    <TableRow
-                      key={asset.ticker}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    >
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
                       <TableCell>
-                        <AssetTicker ticker={asset.ticker} name={asset.name} />
+                        <Skeleton className="h-10 w-24" />
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] font-semibold bg-muted text-muted-foreground border-transparent uppercase tracking-wider"
-                        >
-                          {asset.type === "STOCK_BR" || asset.type === "STOCK_US"
-                            ? "Ações"
-                            : asset.type}
-                        </Badge>
+                        <Skeleton className="h-6 w-16" />
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs font-normal">
-                          {asset.sector}
-                        </Badge>
+                        <Skeleton className="h-6 w-20" />
                       </TableCell>
                       <TableCell className="text-right">
-                        <PriceTag
-                          value={asset.currentPrice}
-                          currency={market === "BR" ? "BRL" : "USD"}
-                        />
+                        <Skeleton className="h-6 w-16 ml-auto" />
                       </TableCell>
                       <TableCell className="text-right">
-                        <PriceTag
-                          value={asset.ceiling}
-                          currency={market === "BR" ? "BRL" : "USD"}
-                          className="text-success"
-                        />
-                        <SafetyMarginBadge margin={margin} />
+                        <Skeleton className="h-6 w-20 ml-auto" />
                       </TableCell>
                       <TableCell className="text-right">
-                        <YieldIndicator value={asset.dy} />
+                        <Skeleton className="h-6 w-12 ml-auto" />
                       </TableCell>
                       <TableCell className="text-right">
-                        {asset.exDate ? (
-                          <div className="font-medium text-amber-500/90">{asset.exDate}</div>
-                        ) : (
-                          <div className="text-xs text-muted-foreground">-</div>
-                        )}
+                        <Skeleton className="h-6 w-20 ml-auto" />
                       </TableCell>
                     </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
+                  ))
+                ) : isError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-destructive">
+                      {t.radar.error}
+                    </TableCell>
+                  </TableRow>
+                ) : data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      {t.radar.empty}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredAndSorted.map((asset: any) => {
+                    const margin = asset.safetyMargin;
+                    return (
+                      <TableRow
+                        key={asset.ticker}
+                        className="hover:bg-muted/50 cursor-pointer transition-colors"
+                      >
+                        <TableCell>
+                          <AssetTicker ticker={asset.ticker} name={asset.name} />
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-semibold bg-muted text-muted-foreground border-transparent uppercase tracking-wider"
+                          >
+                            {asset.type === "STOCK_BR" || asset.type === "STOCK_US"
+                              ? "Ações"
+                              : asset.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {asset.sector}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <PriceTag
+                            value={asset.currentPrice}
+                            currency={market === "BR" ? "BRL" : "USD"}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <PriceTag
+                            value={asset.ceiling}
+                            currency={market === "BR" ? "BRL" : "USD"}
+                            className="text-success"
+                          />
+                          <SafetyMarginBadge margin={margin} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <YieldIndicator value={asset.dy} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {asset.exDate ? (
+                            <div className="font-medium text-amber-500/90">{asset.exDate}</div>
+                          ) : (
+                            <div className="text-xs text-muted-foreground">-</div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
             </Table>
           </TooltipProvider>
         </CardContent>

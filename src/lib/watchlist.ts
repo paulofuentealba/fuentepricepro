@@ -305,7 +305,7 @@ export function useWatchlist() {
       (error) => {
         console.error("[watchlist] realtime sync failed", error);
         toast.error("Erro na sincronização de dados: " + error.message);
-      }
+      },
     );
     return () => unsubscribe();
   }, [userId, queryClient, queryKey]);

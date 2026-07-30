@@ -35,7 +35,17 @@ interface Props {
   isSimulation?: boolean;
 }
 
-export function AssetCardHeader({ item, quote, pendingEvent, onShare, onShareInsta, onEdit, onCorporateEvent, onRemove, isSimulation }: Props) {
+export function AssetCardHeader({
+  item,
+  quote,
+  pendingEvent,
+  onShare,
+  onShareInsta,
+  onEdit,
+  onCorporateEvent,
+  onRemove,
+  isSimulation,
+}: Props) {
   const { t, locale } = useI18n();
   const livePrice = quote?.price ?? item.currentPrice;
   const changePct = quote?.changePct ?? null;
@@ -202,12 +212,12 @@ export function AssetCardHeader({ item, quote, pendingEvent, onShare, onShareIns
               <Pencil className="h-4 w-4" />
               <span>{t.watchlist.edit}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 onCorporateEvent();
-              }} 
+              }}
               className="gap-2 cursor-pointer"
             >
               <Scissors className="h-4 w-4" />

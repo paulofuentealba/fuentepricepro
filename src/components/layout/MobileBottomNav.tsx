@@ -19,8 +19,18 @@ export function MobileBottomNav() {
     { key: "myportfolio", path: "/app/myportfolio", label: t.tabs.portfolio, icon: FolderOpen },
     { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
     { key: "cashflow", path: "/app/cashflow", label: t.tabs.cashFlow, icon: BarChart3 },
-    { key: "smartallocation", path: "/app/smartallocation", label: t.tabs.smartAllocation, icon: Sparkles },
-    { key: "snowballeffectsimulator", path: "/app/snowballeffectsimulator", label: t.snowball?.title, icon: TrendingUp },
+    {
+      key: "smartallocation",
+      path: "/app/smartallocation",
+      label: t.tabs.smartAllocation,
+      icon: Sparkles,
+    },
+    {
+      key: "snowballeffectsimulator",
+      path: "/app/snowballeffectsimulator",
+      label: t.snowball?.title,
+      icon: TrendingUp,
+    },
   ];
 
   return (
@@ -28,22 +38,20 @@ export function MobileBottomNav() {
       <div className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide px-3 items-center h-full gap-2">
         {tabs.map(({ key, path, label, icon: Icon }) => {
           const isActive = location.pathname.startsWith(path);
-          
+
           return (
             <Link
               key={key}
               to={path}
               className={cn(
                 "flex flex-row items-center gap-2 px-4 py-2 min-h-[44px] rounded-full snap-start whitespace-nowrap transition-colors",
-                isActive 
-                  ? "bg-emerald-500/10 text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.2)]" 
-                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                isActive
+                  ? "bg-emerald-500/10 text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.2)]"
+                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
               )}
             >
               <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-emerald-500")} />
-              <span className="text-sm font-medium tracking-tight">
-                {label}
-              </span>
+              <span className="text-sm font-medium tracking-tight">{label}</span>
             </Link>
           );
         })}

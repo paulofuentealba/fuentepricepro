@@ -15,7 +15,18 @@ export function classifyBr(symbol: string, apiType?: string): AssetType {
     if (t === "bdr") return "STOCK_US";
   }
   const s = symbol.toUpperCase();
-  if (s.endsWith("11") && !s.startsWith("TAEE") && !s.startsWith("KLBN") && !s.startsWith("SANB") && !s.startsWith("TIET") && !s.startsWith("ALUP") && !s.startsWith("SULA") && !s.startsWith("ENGI") && !s.startsWith("BIDI") && !s.startsWith("BPAC")) {
+  if (
+    s.endsWith("11") &&
+    !s.startsWith("TAEE") &&
+    !s.startsWith("KLBN") &&
+    !s.startsWith("SANB") &&
+    !s.startsWith("TIET") &&
+    !s.startsWith("ALUP") &&
+    !s.startsWith("SULA") &&
+    !s.startsWith("ENGI") &&
+    !s.startsWith("BIDI") &&
+    !s.startsWith("BPAC")
+  ) {
     return "FII";
   }
   return "STOCK_BR";

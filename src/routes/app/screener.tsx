@@ -96,9 +96,7 @@ function ScreenerRoute() {
               <h2 className="text-lg font-semibold text-foreground">
                 {error ?? t.result.emptyTitle}
               </h2>
-              <p className="max-w-xs text-sm text-muted-foreground">
-                {t.result.emptyBody}
-              </p>
+              <p className="max-w-xs text-sm text-muted-foreground">{t.result.emptyBody}</p>
             </CardContent>
           </Card>
         )}

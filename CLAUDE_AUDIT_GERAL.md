@@ -1,4 +1,5 @@
 # Varredura Geral — Acesso Direto ao Repositório
+
 ## Fuente Price Pro — achados além do que já vínhamos rastreando por ZIP
 
 ---

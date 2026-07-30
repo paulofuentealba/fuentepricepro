@@ -4,7 +4,7 @@ A investigação sobre as discrepâncias de `eps`, `bvps` e `dividendCagr5y` par
 
 ## Origem dos Dados (Metadados vs. Cotação)
 
-1. **Radar Global (`fetchRadarFn`)**: 
+1. **Radar Global (`fetchRadarFn`)**:
    - Ao varrer os tickers (como `BBAS3`), a função consulta a API da **Brapi** (`fetchFromBrapi`).
    - O objeto retornado contém o `currentPrice` e os metadados (`pbRatio`, `eps`, `dividendCagr5y`) **capturados no exato mesmo momento pela Brapi**.
    - O cálculo do Valor Patrimonial por Ação (`bvps`) é feito como: `Brapi currentPrice / Brapi pbRatio`.
@@ -15,7 +15,7 @@ A investigação sobre as discrepâncias de `eps`, `bvps` e `dividendCagr5y` par
      - `fetchAssetFn` (Metadados): Consulta a **Brapi** para obter `pbRatio`, `eps`, `dividendCagr5y` (idêntico ao Radar).
      - `fetchQuoteFn` (Cotação Live): Consulta o **Yahoo Finance** (`fetchYahooQuote`) para obter a cotação em tempo real (`currentPrice`).
    - O cálculo do Valor Patrimonial por Ação (`bvps`) é feito como: `Yahoo currentPrice / Brapi pbRatio`.
-   - **Resultado (A Divergência)**: Como o preço em tempo real do Yahoo difere do preço da Brapi (que pode estar defasado ou ser de fechamento), o cálculo do `bvps` diverge daquele visto no Radar. Os valores estáticos de `eps` e `dividendCagr5y` em si são idênticos, mas qualquer métrica que cruze *Preço x Metadados* ficará diferente entre as telas.
+   - **Resultado (A Divergência)**: Como o preço em tempo real do Yahoo difere do preço da Brapi (que pode estar defasado ou ser de fechamento), o cálculo do `bvps` diverge daquele visto no Radar. Os valores estáticos de `eps` e `dividendCagr5y` em si são idênticos, mas qualquer métrica que cruze _Preço x Metadados_ ficará diferente entre as telas.
 
 ## Conclusão
 

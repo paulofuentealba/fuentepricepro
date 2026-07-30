@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Sector } from "recharts";
+import { Cell, Pie, PieChart, Tooltip, Sector } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
@@ -63,16 +63,15 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
       <CardContent className="flex flex-col md:flex-row items-center p-6 gap-6">
         <div className="w-full md:w-1/2 h-[200px] shrink-0">
           <ChartContainer config={{}} className="h-full w-full">
-            <ResponsiveContainer width="99%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="value"
+            <PieChart>
+              <Pie
+                data={data || []}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="value"
                 stroke="none"
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape}
@@ -107,8 +106,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
                   />
                 }
               />
-              </PieChart>
-            </ResponsiveContainer>
+            </PieChart>
           </ChartContainer>
         </div>
         <div className="w-full md:w-1/2 flex flex-col space-y-1.5">
@@ -122,7 +120,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
               <div
                 key={d.name}
                 className="flex items-center justify-between text-sm transition-opacity duration-200 cursor-pointer"
-                style={{ opacity: activeIndex === -1 ? opacity : (activeIndex === i ? 1 : 0.4) }}
+                style={{ opacity: activeIndex === -1 ? opacity : activeIndex === i ? 1 : 0.4 }}
                 onClick={() => onSelectType?.(isSelected ? null : d.type)}
                 onMouseEnter={() => setActiveIndex(i)}
                 onMouseLeave={() => setActiveIndex(-1)}
@@ -132,7 +130,10 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
                     className="h-2.5 w-2.5 rounded-full transition-shadow duration-300"
                     style={{
                       backgroundColor: getColorForAsset(d.type),
-                      boxShadow: (activeIndex === i || isSelected) ? `0 0 8px ${getColorForAsset(d.type)}` : "none",
+                      boxShadow:
+                        activeIndex === i || isSelected
+                          ? `0 0 8px ${getColorForAsset(d.type)}`
+                          : "none",
                     }}
                   />
                   <span className="text-foreground">{d.name}</span>

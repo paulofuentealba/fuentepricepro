@@ -85,7 +85,9 @@ export function NextPaymentBanner({ items, meta }: Props) {
               className="flex items-center justify-between bg-background/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-success/10 shadow-sm"
             >
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-foreground text-sm">{displayTicker(upcoming.item.ticker)}</span>
+                <span className="font-semibold text-foreground text-sm">
+                  {displayTicker(upcoming.item.ticker)}
+                </span>
                 <span className="text-muted-foreground text-[10px] uppercase">· {dateLabel}</span>
               </div>
               <span className="font-medium text-success text-sm tabular-nums">

@@ -4,7 +4,12 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { assetQueryOptions } from "@/lib/queryOptions";
-import { getCanonicalAnnualDividend, avgDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
+import {
+  getCanonicalAnnualDividend,
+  avgDividend,
+  ceilingPrice,
+  safetyMargin,
+} from "@/lib/calculations";
 import { buildWatchlistCsv, downloadCsv, parseWatchlistCsv } from "@/lib/csv";
 import { makeId, type WatchlistItem } from "@/lib/watchlist";
 import { useI18n } from "@/lib/i18n-provider";

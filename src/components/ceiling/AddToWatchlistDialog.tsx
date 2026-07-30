@@ -147,7 +147,8 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
         <DialogContent closeLabel={t.common.close} className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {existing ? t.watchlist.updateTitle : t.watchlist.addTitle} — {displayTicker(asset.ticker)}
+              {existing ? t.watchlist.updateTitle : t.watchlist.addTitle} —{" "}
+              {displayTicker(asset.ticker)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">

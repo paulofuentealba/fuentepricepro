@@ -14,21 +14,16 @@ const FORBIDDEN = [
 ];
 
 /** Extensions to scan for text copy. */
-const EXTENSIONS = new Set([
-  ".tsx",
-  ".ts",
-  ".jsx",
-  ".js",
-  ".json",
-  ".md",
-  ".html",
-  ".css",
-]);
+const EXTENSIONS = new Set([".tsx", ".ts", ".jsx", ".js", ".json", ".md", ".html", ".css"]);
 
 /** Directories that should never be scanned. */
 const EXCLUDED_DIRS = new Set(["node_modules", "dist", ".git", ".output", "build"]);
 
-async function walk(dir, matches = [], thisScriptPath = join(".", "scripts", "forbid-legacy-tagline.js")) {
+async function walk(
+  dir,
+  matches = [],
+  thisScriptPath = join(".", "scripts", "forbid-legacy-tagline.js"),
+) {
   const entries = await readdir(dir, { withFileTypes: true });
 
   for (const entry of entries) {

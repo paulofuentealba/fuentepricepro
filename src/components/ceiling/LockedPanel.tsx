@@ -15,9 +15,7 @@ export function LockedPanel() {
           <Lock className="h-5 w-5" />
         </div>
         <h2 className="text-lg font-semibold text-foreground">{t.lockedPanel.title}</h2>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          {t.lockedPanel.desc}
-        </p>
+        <p className="max-w-sm text-sm text-muted-foreground">{t.lockedPanel.desc}</p>
         <Button
           type="button"
           onClick={() => openAuthModal()}

@@ -20,7 +20,15 @@ import { useSelic } from "@/lib/useSelic";
 import { ConsensusPyramid } from "./ConsensusPyramid";
 import { FixedIncomePanel } from "./FixedIncomePanel";
 
-function WowInsights({ item, asset, valuation }: { item: WatchlistItem; asset?: any; valuation: ReturnType<typeof getAssetValuation> }) {
+function WowInsights({
+  item,
+  asset,
+  valuation,
+}: {
+  item: WatchlistItem;
+  asset?: any;
+  valuation: ReturnType<typeof getAssetValuation>;
+}) {
   const { t, locale } = useI18n();
 
   const margin = valuation.margin;
@@ -110,7 +118,12 @@ interface AssetDetailSheetProps {
   hideGoalPlanner?: boolean;
 }
 
-export function AssetDetailSheet({ item, onClose, hidePlayground, hideGoalPlanner }: AssetDetailSheetProps) {
+export function AssetDetailSheet({
+  item,
+  onClose,
+  hidePlayground,
+  hideGoalPlanner,
+}: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
@@ -137,7 +150,8 @@ export function AssetDetailSheet({ item, onClose, hidePlayground, hideGoalPlanne
 
   return (
     <Sheet open={item != null} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent closeLabel={t.common.close}
+      <SheetContent
+        closeLabel={t.common.close}
         side="right"
         className="w-full overflow-y-auto border-border/50 bg-slate-950/70 backdrop-blur-xl p-0 sm:max-w-2xl"
       >
@@ -145,7 +159,13 @@ export function AssetDetailSheet({ item, onClose, hidePlayground, hideGoalPlanne
           <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>
           {item?.currency === "USD" && fx?.USDBRL && (
             <p className="text-sm text-muted-foreground mt-1">
-              ~ {formatCurrency((asset?.currentPrice ?? item.currentPrice) * fx.USDBRL, "BRL", locale)} (converted)
+              ~{" "}
+              {formatCurrency(
+                (asset?.currentPrice ?? item.currentPrice) * fx.USDBRL,
+                "BRL",
+                locale,
+              )}{" "}
+              (converted)
             </p>
           )}
         </SheetHeader>
@@ -161,10 +181,7 @@ export function AssetDetailSheet({ item, onClose, hidePlayground, hideGoalPlanne
               {item.type !== "FIXED_INCOME" && (
                 <WowInsights item={item} asset={asset} valuation={valuation} />
               )}
-              <AssetHoldings 
-                item={item} 
-                activeMargin={valuation.margin} 
-              />
+              <AssetHoldings item={item} activeMargin={valuation.margin} />
               {item.type === "FIXED_INCOME" ? (
                 <FixedIncomePanel item={item} />
               ) : (
