@@ -12,8 +12,6 @@ import {
   collection,
   getDocs,
   writeBatch,
-  query,
-  where,
   doc,
   getDoc,
   setDoc,
@@ -376,20 +374,33 @@ function DeleteAccountWizard({
       setStatusText(S.statusScrubbing);
 
       // 2. Client-Side Scrubbing (Deletar dados do Firestore)
-      const batch = writeBatch(db);
+      // A ordem de operação é CRÍTICA:
+      // Deletar as subcoleções (assets e transactions) PRIMEIRO.
+      // Se apagar o documento pai primeiro e a operação falhar na sequência,
+      // as subcoleções tornam os dados órfãos no banco de dados.
 
-      const portfoliosRef = collection(db, "portfolios");
-      const q = query(portfoliosRef, where("userId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
+      // 2a. Buscar todos os ativos do usuário (users/{uid}/assets)
+      const assetsRef = collection(db, "users", user.uid, "assets");
+      const assetsSnap = await getDocs(assetsRef);
 
-      querySnapshot.forEach((docSnap) => {
-        batch.delete(docSnap.ref);
-      });
+      // 2b. Buscar todas as transações do usuário (users/{uid}/transactions)
+      const txRef = collection(db, "users", user.uid, "transactions");
+      const txSnap = await getDocs(txRef);
 
-      // Deletar o documento de perfil do usuário, se existir
-      batch.delete(doc(db, "users", user.uid));
+      // 2c. Coletar todas as referências (subcoleções primeiro, documento raiz por último)
+      const allRefs = [
+        ...assetsSnap.docs.map((d) => d.ref),
+        ...txSnap.docs.map((d) => d.ref),
+        doc(db, "users", user.uid),
+      ];
 
-      await batch.commit();
+      // Executar a exclusão em lote no Firestore em grupos de até 400 operações
+      for (let i = 0; i < allRefs.length; i += 400) {
+        const chunk = allRefs.slice(i, i + 400);
+        const batch = writeBatch(db);
+        chunk.forEach((ref) => batch.delete(ref));
+        await batch.commit();
+      }
 
       // 3. Deletar Usuário
       setStatusText(S.statusRevoking);
