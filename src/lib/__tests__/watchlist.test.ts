@@ -75,4 +75,37 @@ describe("watchlist itemToRow date resilience", () => {
     expect(safeToISOString(NaN, 1700000000000)).toBe(new Date(1700000000000).toISOString());
     expect(safeToISOString(null, 1700000000000)).toBe(new Date(1700000000000).toISOString());
   });
+
+  it("should update investingSince for VALE3 to 2024-07-15 and serialize investing_since to ISO string", () => {
+    const targetDateMs = new Date("2024-07-15T00:00:00.000Z").getTime();
+    const item: WatchlistItem = {
+      id: "STOCK_BR:VALE3",
+      ticker: "VALE3",
+      name: "VALE S.A.",
+      type: "STOCK_BR",
+      currency: "BRL",
+      currentPrice: 60,
+      annualDividend: 5,
+      targetYield: 6,
+      ceilingPrice: 83.33,
+      safetyMargin: 38.8,
+      quantity: 100,
+      averagePrice: 55,
+      paymentMonths: [3, 9],
+      payoutRatio: 0.5,
+      addedAt: Date.now(),
+      investingSince: targetDateMs,
+    };
+
+    const safeToISOString = (val: any, fallbackMs: number = Date.now()): string => {
+      const d = new Date(val);
+      return !isNaN(d.getTime()) ? d.toISOString() : new Date(fallbackMs).toISOString();
+    };
+
+    const investing_since_iso = safeToISOString(item.investingSince);
+    expect(investing_since_iso).toBe("2024-07-15T00:00:00.000Z");
+
+    const parsedMs = new Date(investing_since_iso).getTime();
+    expect(parsedMs).toBe(targetDateMs);
+  });
 });

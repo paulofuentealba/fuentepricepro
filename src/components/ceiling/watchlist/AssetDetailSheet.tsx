@@ -5,10 +5,12 @@ import { AssetCard } from "@/components/shared/AssetCard";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { assetQueryOptions } from "@/lib/queryOptions";
-import { type WatchlistItem } from "@/lib/watchlist";
+import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar } from "lucide-react";
+import { Info, Calendar as CalendarIcon, Pencil } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,12 +38,6 @@ function WowInsights({
 }) {
   const { t, locale } = useI18n();
 
-  const margin = valuation.margin;
-  const marginStr = Math.abs(margin).toFixed(1);
-  const isBargain = margin > 10;
-  const isFair = margin >= 0 && margin <= 10;
-
-  let insightText = "";
   let badgeColor = "";
   let iconColor = "";
   if (isBargain) {
@@ -102,13 +98,61 @@ function WowInsights({
 }
 
 function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMargin: number }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { update } = useWatchlist();
   const derived = useAssetCardDerived(item);
+
+  const rawDateMs = item.investingSince ?? item.addedAt ?? Date.now();
+  const dateObj = useMemo(() => new Date(rawDateMs), [rawDateMs]);
+
+  const formattedDate = useMemo(() => {
+    try {
+      const monthStr = new Intl.DateTimeFormat(locale, { month: "short" }).format(dateObj);
+      const yearStr = dateObj.getFullYear();
+      const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1);
+      return `${capitalizedMonth}/${yearStr}`;
+    } catch {
+      return new Date(rawDateMs).toLocaleDateString();
+    }
+  }, [dateObj, rawDateMs, locale]);
+
   return (
-    <div className="mb-6 rounded-lg border border-border/60 bg-muted/20 p-4">
-      <h3 className="mb-4 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-        {t.tabs.portfolio}
-      </h3>
+    <div className="mb-6 rounded-lg border border-border/60 bg-muted/20 p-4 space-y-4">
+      <div className="flex items-center justify-between border-b border-border/40 pb-3">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          {t.tabs.portfolio}
+        </h3>
+
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-muted-foreground">{t.form.investingSince}:</span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-border/50 bg-background/60 hover:bg-muted text-foreground transition-colors font-medium cursor-pointer"
+              >
+                <CalendarIcon className="h-3.5 w-3.5 text-primary" />
+                <span>{formattedDate}</span>
+                <Pencil className="h-3 w-3 text-muted-foreground/70" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={dateObj}
+                onSelect={(newDate) => {
+                  if (newDate) {
+                    update(item.id, { investingSince: newDate.getTime() });
+                  }
+                }}
+                disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <AssetCardFinancials item={item} derived={derived} activeMargin={activeMargin} />
       </div>

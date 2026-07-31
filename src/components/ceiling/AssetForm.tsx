@@ -58,7 +58,6 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [confirmHit, setConfirmHit] = useState<SearchHit | null>(null);
-  const [investingSince, setInvestingSince] = useState<Date | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSubmittedRef = useRef(false);
 
@@ -195,49 +194,21 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
           <p className="text-sm text-muted-foreground">{t.form.confirmDesc}</p>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label>{t.form.investingSince}</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal bg-card/50 border-border/50",
-                  !investingSince && "text-muted-foreground",
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {investingSince ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(investingSince) : <span>{t.form.investingSince}</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={investingSince}
-                onSelect={setInvestingSince}
-                disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="ghost" onClick={() => { setConfirmHit(null); setInvestingSince(undefined); }}>
+          <Button type="button" variant="ghost" onClick={() => setConfirmHit(null)}>
             {t.common.cancel}
           </Button>
           <Button
             type="button"
-            disabled={!investingSince || isSubmitting}
+            disabled={isSubmitting}
             onClick={() => {
-              if (!investingSince) return;
               onSubmit({
                 ticker: confirmHit.ticker,
                 type: manualType ?? confirmHit.type,
                 targetYield: globalYield,
                 averagePrice: null,
                 customTaxRate: null,
-                investingSince: investingSince.getTime(),
+                investingSince: Date.now(),
               });
             }}
           >
