@@ -185,12 +185,12 @@ export function AssetDetailSheet({
             <ErrorBoundary label="asset_detail_sheet">
               <Tabs defaultValue={item.type === "FIXED_INCOME" ? "myPosition" : "highlights"} className="w-full">
                 <TabsList className={item.type === "FIXED_INCOME" ? "grid w-full grid-cols-2 mb-4" : "grid w-full grid-cols-2 lg:grid-cols-4 mb-4"}>
-                  <TabsTrigger value="highlights">{t.watchlist.tabs.highlights}</TabsTrigger>
-                  <TabsTrigger value="myPosition">{t.watchlist.tabs.myPosition}</TabsTrigger>
+                  <TabsTrigger value="highlights" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.highlights}</TabsTrigger>
+                  <TabsTrigger value="myPosition" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.myPosition}</TabsTrigger>
                   {item.type !== "FIXED_INCOME" && (
                     <>
-                      <TabsTrigger value="transactions">{t.watchlist.tabs.transactions}</TabsTrigger>
-                      <TabsTrigger value="dividends">{t.watchlist.tabs.dividends}</TabsTrigger>
+                      <TabsTrigger value="transactions" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.transactions}</TabsTrigger>
+                      <TabsTrigger value="dividends" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.dividends}</TabsTrigger>
                     </>
                   )}
                 </TabsList>

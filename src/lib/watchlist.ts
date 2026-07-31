@@ -206,6 +206,27 @@ function rowToItem(r: Row): WatchlistItem {
   };
 }
 
+function safeToISOString(val: any, fallbackMs: number = Date.now()): string {
+  if (val == null) {
+    return new Date(fallbackMs).toISOString();
+  }
+  if (typeof val === "object" && typeof val.toDate === "function") {
+    try {
+      const d = val.toDate();
+      if (!isNaN(d.getTime())) return d.toISOString();
+    } catch {}
+  }
+  if (typeof val === "object" && typeof val.seconds === "number") {
+    const d = new Date(val.seconds * 1000);
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+  const d = new Date(val);
+  if (!isNaN(d.getTime())) {
+    return d.toISOString();
+  }
+  return new Date(fallbackMs).toISOString();
+}
+
 function itemToRow(item: WatchlistItem, userId: string): Row {
   return {
     id: item.id,
@@ -231,8 +252,8 @@ function itemToRow(item: WatchlistItem, userId: string): Row {
     rate: item.rate ?? null,
     maturity_date: item.maturityDate ?? null,
     start_date: item.startDate ?? null,
-    added_at: new Date(item.addedAt).toISOString(),
-    investing_since: new Date(item.investingSince).toISOString(),
+    added_at: safeToISOString(item.addedAt, Date.now()),
+    investing_since: safeToISOString(item.investingSince ?? item.addedAt, Date.now()),
   };
 }
 
