@@ -1242,7 +1242,7 @@ de negócio em aberto — ver seção "Pendências registradas" acima.
 
 ---
 
-### 31 — Cash Flow: investidor com histórico parcial (começou no meio do ano) ⚪ AGUARDANDO DECISÃO DE INÍCIO
+### 31 — Cash Flow: investidor com histórico parcial (começou no meio do ano) ✅ CONCLUÍDO E CONFIRMADO (gating por addedAt aplicado nos 3 pontos certos, mapeamento calendarMonth/.find() verificado, desacoplamento dos cards de resumo confirmado, i18n completo, teste de regressão do dividendo fantasma conferido)
 
 Problema levantado pelo usuário após a 29.1/29.6: o Cash Flow sempre
 mostra Jan-Dez do ano corrente, mesmo que o investidor só tenha começado
@@ -1304,9 +1304,240 @@ Precisão total (compras/vendas parciais ao longo do tempo), equivalente
 ao que Sharesight/Snowball pago oferecem. Já mapeado como sensível no
 `BACKLOG_V2` (módulo de IRPF), não precisa resolver agora.
 
-Próximo passo real: decidir se a Camada 1 entra na fila agora (é a única
-implementável sem dependência nova) ou se fica registrada pra depois do
-29.2-29.5.
+**Discovery de mercado (30/07/2026)** — achado que simplifica o design:
+Sharesight (padrão internacional) rastreia "parcelas" de compra 
+separadas, com métodos de alocação de venda configuráveis (FIFO, etc). 
+No Brasil isso NÃO se aplica — a Receita Federal exige preço médio 
+ponderado sobre um "estoque único", sem escolha de qual lote vender. 
+Venda NÃO muda o preço médio, só reduz quantidade; compra recalcula o 
+médio: `novoPM = ((PM_atual × qtd_atual) + (preço × qtd_nova)) / 
+(qtd_atual + qtd_nova)`. Isso torna o modelo de dado bem mais simples que 
+o padrão internacional — só um livro-razão de eventos, sem rastreamento 
+de lote/estado individual.
+
+Dividido em 3 prompts sequenciais, cada um testável isoladamente:
+
+---
+
+**PROMPT PRONTO — 34 (Camada 3, parte 1/3: schema + persistência)** ✅ CONCLUÍDO E CONFIRMADO (firestore.rules aninhado corretamente, recalculateHoldingFromTransactions com fórmula de fees verificada manualmente, 5 testes cobrindo os 4 cenários pedidos, cashflow.test.ts corrigido pra investingSince)
+
+```
+34 — Camada 3 (1/3): Schema de transações + persistência + cálculo de 
+preço médio
+
+Contexto: hoje averagePrice e quantity em WatchlistItem são digitados 
+manualmente pelo usuário, sem histórico de como chegaram nesses números. 
+Isso causa duas distõrcões já identificadas: (1) o Cash Flow assume 
+quantidade constante desde sempre (Tarefas 29-33), inflando/subestimando 
+proventos passados quando a posição mudou ao longo do tempo; (2) preço 
+médio digitado à mao é sujeito a erro humano.
+
+Regra brasileira (Receita Federal, confirmada via pesquisa): preço médio 
+ponderado sobre estoque único. Venda NÃO muda o preço médio, só reduz 
+quantidade. Compra recalcula: novoPM = ((PM_atual × qtd_atual) + 
+(preço × qtd_nova)) / (qtd_atual + qtd_nova).
+
+TAREFA (só fundação de dado nesta parte — SEM UI ainda, isso é o 
+prompt 35):
+
+1. Novo tipo Transaction (sugestão de local: src/lib/transactions.ts, 
+   arquivo novo, espelhando a estrutura de src/lib/watchlist.ts):
+   
+   interface Transaction {
+     id: string;
+     ticker: string;
+     type: "buy" | "sell";
+     date: number; // timestamp
+     quantity: number;
+     pricePerShare: number;
+     fees?: number | null; // corretagem/taxas, a Receita manda incluir no custo
+   }
+
+2. Função pura recalculateHoldingFromTransactions(transactions: 
+   Transaction[]): { quantity: number; averagePrice: number } — processa 
+   em ordem cronológica (ordenar por date antes de processar, não 
+   assumir que já vem ordenado), aplicando a regra brasileira acima. 
+   Função pura, sem side-effect, fácil de testar isoladamente — escrever 
+   também um teste unitário cobrindo: só compras, compra+venda 
+   (confirmar que venda não muda o PM), venda de tudo (quantity=0), 
+   compra após zerar a posição.
+
+3. Função auxiliar getQuantityAtDate(transactions: Transaction[], date: 
+   number): number — retorna a quantidade que o usuário tinha numa data 
+   específica do passado (soma compras, subtrai vendas, até aquela 
+   data). Vai ser usada no prompt 36 pro Cash Flow, mas a função em si 
+   entra aqui junto do resto da lógica de transação.
+
+4. Persistência, espelhando exatamente o padrão já usado em 
+   src/lib/watchlist.ts (readLocal/writeLocal pro modo local, 
+   rowToItem/itemToRow pro Firestore, hook useTransactions com 
+   upsert/remove/list):
+   - Firestore: nova subcoleção users/{userId}/transactions/{id} (não 
+     aninhar dentro de assets/{assetId} — mantém simples de consultar 
+     "todas as transações do usuário" e "todas de um ticker" via campo 
+     ticker)
+   - localStorage: nova chave, ex: "ceilingPricePro.transactions.v1", 
+     mesmo padrão de guest mode do watchlist.ts
+   - Respeitar USE_LOCAL_ONLY (mesma flag já usada em watchlist.ts)
+   - Adicionar regra no firestore.rules pra 
+     users/{userId}/transactions/{transactionId}, mesmo padrão de posse 
+     por auth.uid já usado pra users/{userId}/assets
+
+NÃO TOCAR:
+- WatchlistItem.quantity e averagePrice NÃO mudam de comportamento 
+  ainda — continuam editáveis manualmente como hoje. A ligação entre 
+  transações e esses campos é escopo do prompt 36, não deste.
+- Nenhuma UI nova — só tipo, funções puras, persistência e o hook. 
+  Ninguém consegue ainda lançar uma transação pela interface depois 
+  desta tarefa, e está correto que seja assim.
+- Não mexer no Cash Flow (cashflow.ts) nesta parte.
+
+CRITÉRIO DE SUCESSO: recalculateHoldingFromTransactions com testes 
+unitários passando pros 4 cenários listados; useTransactions funcionando 
+em modo local (CRUD via console/teste manual, já que não há UI ainda); 
+firestore.rules cobrindo a nova subcoleção; tsc limpo, testes passando.
+```
+
+---
+
+**PROMPT PRONTO — 35 (Camada 3, parte 2/3: UI de lançamento)** ✅ CONCLUÍDO E CONFIRMADO (após 2 rodadas de correção: dict.es.ts recebeu o bloco transactions que faltava, textos hardcoded "quotas"/"/ share" viraram chaves i18n, mensagem de confirmação de exclusão corrigida e comentário de rascunho removido)
+
+```
+35 — Camada 3 (2/3): UI pra lançar e ver histórico de transações
+
+Contexto: a Tarefa 34 já criou o tipo Transaction, a persistência 
+(useTransactions) e a função recalculateHoldingFromTransactions — mas 
+nada disso é acessível pela interface ainda. Esta tarefa constrói a UI.
+
+TAREFA:
+
+1. Local natural: dentro do AssetDetailSheet (o painel que já abre ao 
+   clicar num ativo da Watchlist), adicionar uma nova seção "Histórico 
+   de Transações" (ou aba, se o sheet já tiver abas — confirmar a 
+   estrutura atual do componente antes de decidir).
+2. Lista das transações daquele ticker (useTransactions filtrado por 
+   ticker), ordenada por data decrescente, com editar/excluir por linha.
+3. Botão "+ Lançar transação" abrindo um form pequeno: tipo (Compra/
+   Venda), data (usar o padrão Calendar+Popover já estabelecido na 
+   Tarefa 32 — confirmar se o FixedIncomeWizardSheet ou o form da 32 já 
+   tem esse componente pronto pra reaproveitar), quantidade, preço por 
+   ação/cota, taxas (opcional).
+4. Mostrar, ao lado da lista, o preço médio e quantidade JÁ CALCULADOS 
+   (usando recalculateHoldingFromTransactions em tempo real conforme o 
+   usuário adiciona/edita/remove transações) — só exibir por enquanto, 
+   ainda NÃO sincronizar com o WatchlistItem.averagePrice/quantity de 
+   verdade (isso é o prompt 36).
+5. Validação: não deixar registrar uma venda de quantidade maior do que 
+   a posição disponível naquele momento (calcular via 
+   getQuantityAtDate na data da venda sendo lançada).
+6. i18n nos 3 dicionários pra todos os textos novos.
+
+NÃO TOCAR:
+- Ainda não sincronizar quantity/averagePrice do WatchlistItem com o 
+  resultado das transações — os dois continuam independentes por 
+  enquanto (o usuário vê os dois números, mas só um é "oficial" ainda: 
+  o editado manualmente). Ligar isso de vez é o prompt 36.
+- Não mexer no Cash Flow.
+
+CRITÉRIO DE SUCESSO: consigo abrir o detalhe de um ativo, lançar 
+compras e vendas, ver a lista com editar/excluir, e ver o preço 
+médio/quantidade calculados em tempo real batendo com 
+recalculateHoldingFromTransactions. Validação de venda a descoberto 
+funcionando. tsc limpo, testes passando, confirmado ao vivo no 
+navegador.
+```
+
+---
+
+**PROMPT PRONTO — 36 (Camada 3, parte 3/3: religar no Cash Flow)** ✅ CONCLUÍDO E CONFIRMADO (filtro por ticker verificado, invested intocado corretamente, received usando getQuantityAtDate, update() sincronizando Watchlist, readonly no EditItemDialog, teste de quantidade dinâmica conferido manualmente — Camada 3 completa: 34→35→36)
+
+---
+
+### 37 — Reorganizar AssetDetailSheet em 4 abas (Highlights / My Position / Transaction History / Dividends History) ✅ CONCLUÍDO E CONFIRMADO (4 abas pra ativos normais, 2 pra Renda Fixa, sem duplicação de pirâmide/AssetCard, DividendsHistoryPanel com resumo pessoal + tabela paginada de 10, 2 bugs de i18n achados e corrigidos: t.common.prev/next faltando e string hardcoded na aba Highlights de Renda Fixa)
+
+Problema levantado pelo usuário: a tela lateral que abre ao clicar num ativo da Watchlist ficou grande demais depois da Tarefa 35 (Histórico de Transações empilhado em cima do resto).
+
+**Achado ao explorar o código**: não é só volume de conteúdo — tem DUPLICAÇÃO real. `AssetDetailSheet.tsx` empilha `WowInsights` + `AssetHoldings` + `ConsensusPyramid` + `TransactionsPanel` + o componente `AssetCard` inteiro (variant="search", o mesmo usado nos resultados de busca) — que já tem sua PRÓPRIA pirâmide de valuation e preço atual, repetindo o que `ConsensusPyramid` e o header já mostram.
+
+**Benchmark confirmado (30/07/2026)**: Snowball Analytics usa exatamente esse padrão de abas no detalhe de um ativo — "General" (dados financeiros + gráfico de preço), "Dividends" (analytics pessoal + histórico de pagamento em tabela e gráfico, juntos na mesma aba), "Financials". StatusInvest e Investidor10 seguem a mesma separação mercado/pessoal/proventos. Valida a estrutura abaixo.
+
+```
+37 — Reorganizar AssetDetailSheet em 4 abas
+
+Contexto: src/components/ceiling/watchlist/AssetDetailSheet.tsx hoje empilha 
+verticalmente WowInsights, AssetHoldings, ConsensusPyramid (ou 
+FixedIncomePanel), TransactionsPanel, e o componente AssetCard inteiro 
+(variant="search") — este último duplica pirâmide de valuation e preço 
+atual que já aparecem antes. Não existe componente de Tabs no projeto 
+hoje (confirmar em src/components/ui/ — não há tabs.tsx).
+
+TAREFA:
+
+1. Adicionar o componente Tabs do shadcn/ui (src/components/ui/tabs.tsx) 
+   seguindo o mesmo padrão dos outros componentes ui/ já existentes 
+   (mesma estrutura de Popover/Dialog/ToggleGroup já usados no projeto), 
+   estilizado pro tema escuro atual (não o exemplo padrão claro do 
+   shadcn).
+
+2. Reestruturar AssetDetailSheet.tsx em 4 abas, SEM duplicar conteúdo:
+
+   a) "Highlights": WowInsights (Investor Vision + Next Payment) + as 
+      partes de MERCADO do AssetCard atual (gráfico de dividendos 
+      1Y/3Y/5Y, EPS atual/próximo, preço atual) + ConsensusPyramid — sem 
+      repetir a pirâmide duas vezes. O restante do AssetCard variant 
+      "search" que não for usado aqui (ex: o botão "Add to Watchlist", 
+      que não faz sentido dentro do detalhe de um ativo que já está na 
+      watchlist) deve ser removido dessa composição, não escondido via 
+      CSS.
+
+   b) "My Position": AssetHoldings como já está hoje (Qtd, Margem de 
+      Segurança, Renda Projetada, Valor da Posição, Yield on Cost, Meta). 
+      Para ativos FIXED_INCOME, usar FixedIncomePanel aqui em vez de 
+      AssetHoldings, mantendo o comportamento condicional que já existe.
+
+   c) "Transaction History": TransactionsPanel como já está, sem mudança 
+      de lógica — só muda de lugar. NÃO mostrar essa aba pra ativos 
+      FIXED_INCOME (transações não se aplicam a eles neste momento).
+
+   d) "Dividends History": aba NOVA, com duas partes:
+      
+      - Resumo pessoal (topo): último provento recebido (valor, data, 
+        qual evento) e total recebido nos últimos 12 meses. Calcular a 
+        partir do mesmo dividendEventsMap/transactions já disponíveis 
+        via assetQueryOptions + useTransactions (mesmo padrão já usado 
+        em TransactionsPanel/CashFlowCalendar) — filtrar eventos do 
+        ticker atual, aplicar o mesmo gating por investingSince/addedAt 
+        já estabelecido nas Tarefas 31/36, e usar getQuantityAtDate 
+        quando houver transações (mesma lógica de computeInvestedVsReceived, 
+        não reinventar).
+      
+      - Tabela de mercado paginada (abaixo): todos os dividendEvents do 
+        ticker dos últimos 3 anos (a API já cobre esse período, 
+        confirmar em brapi.server.ts/yahoo.server.ts se precisa ajustar 
+        o range solicitado). Colunas: data (ex-date/data-com), data de 
+        pagamento (quando disponível), valor por ação/cota. Paginação de 
+        6-12 linhas por página (escolher um valor fixo razoável, ex: 10, 
+        e reportar a escolha) — não carregar tudo de uma vez numa lista 
+        longa.
+
+3. Não mostrar a aba "Transaction History" nem a aba "Dividends History" 
+   pra ativos FIXED_INCOME (não fazem sentido pra esse tipo hoje) — nesse 
+   caso, manter só Highlights e My Position, ou ajustar pra 2 abas 
+   quando o tipo for FIXED_INCOME.
+
+NÃO TOCAR:
+- Nenhuma lógica de cálculo muda — isso é reorganização de layout mais a 
+  aba nova de histórico de mercado (que só lê dado que já existe).
+- Não duplicar a pirâmide de valuation nem o preço atual em mais de um 
+  lugar dentro da sheet inteira.
+
+CRITÉRIO DE SUCESSO: a sheet lateral fica visivelmente mais curta em 
+cada aba individual; nenhuma informação duplicada nas 4 abas somadas; 
+aba Dividends History mostra resumo pessoal + tabela paginada de 3 anos; 
+ativo FIXED_INCOME não mostra as abas que não se aplicam a ele; tsc 
+limpo, testes passando, confirmado ao vivo no navegador comparando a 
+altura da sheet antes/depois.
+```
 
 ---
 
@@ -1413,3 +1644,140 @@ e resolvidas corretamente pelo Antigravity antes de começar a codar:
    explícito (0-11) por posição, usando `.find(b => b.calendarMonth ===
    m)` em vez de indexar direto no array — elimina risco de mapeamento
    errado mesmo com janela não alinhada ao calendário.
+
+---
+
+### 33 — Cash Flow: rótulo de ano poluindo o eixo X do modo "Minha Jornada" ✅ CONCLUÍDO E CONFIRMADO (lógica isFirstBucket || isYearChange verificada no código)
+
+Após testar a 31 ao vivo, o usuário achou o eixo X do gráfico mensal
+poluído: toda etiqueta de mês no modo "Minha Jornada" que cruza virada de
+ano vem com `/25` ou `/26` grudado (ex: "Aug/25 Sep/25 Oct/25..."),
+repetindo o ano 11 vezes numa fileira sem espaço. Benchmark de mercado
+(Google Finance, TradingView, Snowball Analytics): o ano só aparece na
+etiqueta quando muda (ou no primeiro mês da janela, pra dar contexto de
+largada) — nunca repetido em toda etiqueta do mesmo ano.
+
+```
+33 — Cash Flow: mostrar o ano só quando muda no eixo X
+
+Contexto: em src/lib/cashflow.ts, na construção dos bucketTemplates 
+(Tarefa 31), a lógica atual é:
+
+  const isCrossYear = startYear !== endYear;
+  let label = monthsLabels[m];
+  if (mode === "journey" && isCrossYear) {
+    label = `${label}/${y.toString().slice(2)}`;
+  }
+
+Isso aplica o sufixo de ano em TODA etiqueta sempre que a janela cruza 
+virada de ano, não só no mês em que o ano realmente muda — resultado: 
+"Aug/25 Sep/25 Oct/25 Nov/25 Dec/25 Jan/26 Feb/26..." em vez de 
+"Aug/25 Sep Oct Nov Dec Jan/26 Feb...".
+
+TAREFA: mudar a condição pra só adicionar o sufixo de ano quando:
+(a) for o primeiro bucket da janela (dá contexto de largada), OU
+(b) o ano desse bucket for diferente do ano do bucket anterior na 
+    sequência (é exatamente onde o ano muda).
+Em todos os outros casos, a etiqueta continua só "Jan", "Fev", etc., 
+sem sufixo. Isso vale só pro modo "journey" — modo "calendar" nunca tem 
+sufixo de ano (comportamento atual, não muda).
+
+NÃO TOCAR: nenhuma outra parte da lógica de buildMonthlyBuckets muda — 
+isso é só o texto do label, não afeta calendarMonth/calendarYear 
+nem nenhum cálculo.
+
+CRITÉRIO DE SUCESSO: no modo "Minha Jornada" cruzando virada de ano, só 
+o primeiro mês da janela e o mês onde o ano muda mostram o sufixo 
+(ex: "Aug/25 Sep Oct Nov Dec Jan/26 Feb Mar Apr May Jun Jul"); modo 
+"Ano Calendário" continua sem nenhum sufixo, igual antes.
+```
+
+---
+
+### 38 — Corrigir USE_LOCAL_ONLY travado em produção (ativos e transações não iam pro Firestore) ⚪ PROMPT PRONTO
+
+Problema levantado pelo usuário: ativo adicionado em produção não ia pro
+banco de dados. Causa raiz confirmada por mim direto no código: tanto
+`src/lib/watchlist.ts` quanto `src/lib/transactions.ts` tinham
+`const USE_LOCAL_ONLY = true; // HOTFIX: Bloquear Firebase para QA local`
+— fixo em `true` sem nenhuma condição de ambiente, inclusive em
+produção. Todo upsert/remove/update ia só pro localStorage do navegador,
+nunca tocava o Firestore, mesmo com o usuário logado.
+
+**Já corrigi direto no código** (não precisa refazer, só validar):
+- As duas flags agora são `const USE_LOCAL_ONLY = import.meta.env.DEV;`
+  — automático pro ambiente (true só no `npm run dev` local, false em
+  qualquer build de produção), nunca mais depende de alguém lembrar de
+  trocar antes de um commit.
+- Adicionei em `transactions.ts` a mesma lógica de migração
+  local→nuvem que já existia em `watchlist.ts` (na primeira carga com
+  usuário logado, migra o que estiver no localStorage pro Firestore via
+  `writeBatch`, depois limpa o local) — o `useTransactions()` não tinha
+  essa migração antes, e o usuário confirmou ter testado lançamento de
+  transação em produção hoje, então há dado real preso no localStorage
+  do navegador dele que precisa migrar.
+
+```
+38 — Validar correção do USE_LOCAL_ONLY + commit/push pra produção
+
+Contexto: watchlist.ts e transactions.ts tinham USE_LOCAL_ONLY fixo em 
+true (nunca escrevia no Firestore, nem em produção). Já corrigido pra 
+import.meta.env.DEV nos dois arquivos, e adicionada migração 
+local→nuvem em transactions.ts (mesma lógica que já existia em 
+watchlist.ts). Esta tarefa é validar em dev, depois preparar e (com 
+minha confirmação) subir pra produção.
+
+TAREFA:
+
+1. Teste em dev (npm run dev), confirmando isolamento continua correto:
+   a. Abrir o app localmente, deslogado (modo convidado). Adicionar um 
+      ativo. Confirmar que ele aparece só no localStorage do navegador 
+      (Application > Local Storage no DevTools, chave 
+      ceilingPricePro.watchlist.v1) — NÃO deve criar nada no Firestore 
+      (conferir no Console do Firebase, coleção users/{seu uid}/assets, 
+      que nada novo apareceu de um teste local).
+   b. Logar com uma conta de teste local. Adicionar outro ativo. 
+      Confirmar EXPLICITAMENTE se ele vai ou não pro Firestore nesse 
+      cenário (import.meta.env.DEV é true tanto logado quanto 
+      deslogado em npm run dev — reportar esse comportamento, já que 
+      pode ser diferente do que o usuário espera: local-only vale pro 
+      dev inteiro, não só modo convidado. Se isso não for o desejado, 
+      não mudar sozinho — só reportar e perguntar antes de ajustar).
+   c. Lançar uma transação de teste (Camada 3) logado em dev, e 
+      confirmar o mesmo comportamento consistente com o item acima.
+
+2. Rodar npm run build (build de produção real) e confirmar que 
+   compila limpo. Não precisa rodar o app buildado localmente pra este 
+   teste — só confirmar que import.meta.env.DEV vira false no build 
+   (pode confirmar isso lendo o bundle gerado em dist/, procurando se a 
+   string "HOTFIX" ou lógica de local-only ficou inlined como false, ou 
+   reportar como validou).
+
+3. SE o teste do passo 1 confirmar que o comportamento está correto 
+   (dev isolado, produção não): seguir com o checklist de commit/push 
+   já usado antes (mesmo padrão da Tarefa 26):
+   a. git status e git branch --show-current — reportar e pausar se 
+      houver qualquer arquivo inesperado.
+   b. git diff --stat — resumo do tamanho do commit.
+   c. git add dos arquivos relevantes (watchlist.ts, transactions.ts, 
+      e qualquer outro arquivo pendente do bug reportado nesta 
+      conversa).
+   d. Um commit único, mensagem clara, ex: "fix: USE_LOCAL_ONLY travado 
+      impedia sincronização com Firestore em produção" com corpo 
+      explicando a causa raiz e a correção (flag amarrada a 
+      import.meta.env.DEV + migração local→nuvem adicionada em 
+      transactions.ts).
+   e. git log -1 --stat — mostrar e PAUSAR aqui, aguardando minha 
+      confirmação explícita antes do push.
+   f. Só depois da minha confirmação: git push (sem --force).
+
+NÃO TOCAR: nenhum comando destrutivo (git reset --hard, git checkout 
+sobre arquivos não commitados, git push --force, git rebase, git commit 
+--amend). Não pular a pausa de confirmação antes do push.
+
+CRITÉRIO DE SUCESSO: teste de dev confirma isolamento correto (ou 
+reporta claramente se o comportamento for diferente do esperado, sem 
+assumir e corrigir sozinho); build de produção limpo; commit único e 
+claro revisado por mim antes do push; push feito só depois da minha 
+confirmação explícita.
+```

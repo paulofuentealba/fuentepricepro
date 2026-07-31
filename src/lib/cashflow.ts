@@ -1,6 +1,7 @@
 import type { Currency } from "@/lib/domain";
 import type { DividendEvent } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
+import { type Transaction, getQuantityAtDate } from "@/lib/transactions";
 
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
 export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAGRO", "ETF", "REIT"];
@@ -57,7 +58,8 @@ export function buildMonthlyBuckets(
   currency: Currency,
   monthsLabels: string[],
   dividendEventsMap: DividendEventsMap = {},
-  mode: "calendar" | "journey" = "calendar"
+  mode: "calendar" | "journey" = "calendar",
+  transactions: Transaction[] = []
 ): MonthBucket[] {
   const currentYear = new Date().getFullYear();
   const currentMonthIndex = new Date().getMonth();
@@ -68,11 +70,11 @@ export function buildMonthlyBuckets(
   let endYear = currentYear;
   let endMonth = 11;
 
-  let earliestAddedAt = Date.now();
+  let earliestInvestingSince = Date.now();
   if (items.length > 0) {
-    earliestAddedAt = Math.min(...items.map((it) => it.addedAt));
+    earliestInvestingSince = Math.min(...items.map((it) => it.investingSince));
   }
-  const earliestDate = new Date(earliestAddedAt);
+  const earliestDate = new Date(earliestInvestingSince);
 
   if (mode === "journey") {
     const oneYearAgo = new Date();
@@ -105,7 +107,12 @@ export function buildMonthlyBuckets(
   while (y < endYear || (y === endYear && m <= endMonth)) {
     const isCrossYear = startYear !== endYear;
     let label = monthsLabels[m];
-    if (mode === "journey" && isCrossYear) {
+    
+    const isFirstBucket = bucketTemplates.length === 0;
+    const previousYear = bucketTemplates.length > 0 ? bucketTemplates[bucketTemplates.length - 1].calendarYear : null;
+    const isYearChange = previousYear !== null && previousYear !== y;
+
+    if (mode === "journey" && isCrossYear && (isFirstBucket || isYearChange)) {
       label = `${label}/${y.toString().slice(2)}`;
     }
     bucketTemplates.push({
@@ -153,18 +160,25 @@ export function buildMonthlyBuckets(
       for (const contrib of b.contributors) {
         const events = dividendEventsMap[contrib.ticker] ?? [];
         const item = items.find((it) => it.ticker === contrib.ticker);
-        const itemAddedAt = item ? item.addedAt : Date.now();
+        const itemInvestingSince = item ? item.investingSince : Date.now();
+
+        const tickerTxs = transactions.filter(t => t.ticker === contrib.ticker);
 
         const monthPaid = events
           .filter((ev) => {
             const dateStr = ev.paymentDate ?? ev.exDate;
             const d = new Date(dateStr);
             // GHOST DIVIDEND FIX: Skip events before the asset was added
-            if (d.getTime() < itemAddedAt) return false;
+            if (d.getTime() < itemInvestingSince) return false;
             
             return d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear;
           })
-          .reduce((sum, ev) => sum + ev.amountPerShare * (item?.quantity ?? 0), 0);
+          .reduce((sum, ev) => {
+            const dateStr = ev.paymentDate ?? ev.exDate;
+            const dateNum = new Date(dateStr).getTime();
+            const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, dateNum) : (item?.quantity ?? 0);
+            return sum + ev.amountPerShare * q;
+          }, 0);
 
         contrib.paidAmount = monthPaid;
         realPaid += monthPaid;
@@ -261,22 +275,30 @@ export function computeInvestedVsReceived(
   items: WatchlistItem[],
   currency: Currency,
   dividendEventsMap: DividendEventsMap,
+  transactions: Transaction[] = []
 ): InvestedVsReceivedItem[] {
   return items
     .filter((it) => it.currency === currency && it.quantity > 0)
     .map((it) => {
       const events = dividendEventsMap[it.ticker] ?? [];
-      const totalReceivedPerShare = events
+      const tickerTxs = transactions.filter(t => t.ticker === it.ticker);
+      
+      const totalReceived = events
         .filter((ev) => {
           const dateStr = ev.paymentDate ?? ev.exDate;
-          return new Date(dateStr).getTime() >= it.addedAt;
+          return new Date(dateStr).getTime() >= it.investingSince;
         })
-        .reduce((s, e) => s + e.amountPerShare, 0);
+        .reduce((s, ev) => {
+          const dateStr = ev.paymentDate ?? ev.exDate;
+          const dateNum = new Date(dateStr).getTime();
+          const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, dateNum) : it.quantity;
+          return s + ev.amountPerShare * q;
+        }, 0);
         
       return {
         ticker: it.ticker,
         invested: (it.averagePrice ?? 0) * it.quantity,
-        received: totalReceivedPerShare * it.quantity,
+        received: totalReceived,
       };
     })
     .filter((r) => r.invested > 0 || r.received > 0)

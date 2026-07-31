@@ -12,6 +12,7 @@ import {
   computeInvestedVsReceived,
   type DividendEventsMap,
 } from "@/lib/cashflow";
+import { useTransactions } from "@/lib/transactions";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import { CashFlowHeader } from "./cashflow/CashFlowHeader";
 import { CashFlowSummaryCards } from "./cashflow/CashFlowSummary";
@@ -95,19 +96,21 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     return map;
   }, [assetQueries, items]);
 
+  const { transactions } = useTransactions();
+
   const calendarData = useMemo(
-    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, "calendar"),
-    [items, activeCurrency, months, dividendEventsMap],
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, "calendar", transactions),
+    [items, activeCurrency, months, dividendEventsMap, transactions],
   );
 
   const chartData = useMemo(
-    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, mode),
-    [items, activeCurrency, months, dividendEventsMap, mode],
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, mode, transactions),
+    [items, activeCurrency, months, dividendEventsMap, mode, transactions],
   );
 
   const investedVsReceived = useMemo(
-    () => computeInvestedVsReceived(items, activeCurrency, dividendEventsMap),
-    [items, activeCurrency, dividendEventsMap],
+    () => computeInvestedVsReceived(items, activeCurrency, dividendEventsMap, transactions),
+    [items, activeCurrency, dividendEventsMap, transactions],
   );
 
   const summary = useMemo(() => computeCashFlowSummary(calendarData), [calendarData]);

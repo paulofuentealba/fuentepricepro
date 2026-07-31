@@ -11,6 +11,10 @@ import { useI18n } from "@/lib/i18n-provider";
 import { Info, Calendar } from "lucide-react";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DividendsHistoryPanel } from "./DividendsHistoryPanel";
+import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
+import { DividendHistoryChart } from "@/components/ceiling/result/DividendHistoryChart";
 
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, displayTicker } from "@/lib/i18n";
@@ -19,6 +23,7 @@ import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { ConsensusPyramid } from "./ConsensusPyramid";
 import { FixedIncomePanel } from "./FixedIncomePanel";
+import { TransactionsPanel } from "./TransactionsPanel";
 
 function WowInsights({
   item,
@@ -178,24 +183,63 @@ export function AssetDetailSheet({
           )}
           {!loading && asset && item && valuation && (
             <ErrorBoundary label="asset_detail_sheet">
-              {item.type !== "FIXED_INCOME" && (
-                <WowInsights item={item} asset={asset} valuation={valuation} />
-              )}
-              <AssetHoldings item={item} activeMargin={valuation.margin} />
-              {item.type === "FIXED_INCOME" ? (
-                <FixedIncomePanel item={item} />
-              ) : (
-                <ConsensusPyramid valuation={valuation} currency={asset.currency} />
-              )}
-              <AssetCard
-                variant="search"
-                asset={asset}
-                targetYield={item.targetYield || 6}
-                averagePrice={item.averagePrice}
-                hideAddToWatchlist
-                hidePlayground={hidePlayground}
-                hideGoalPlanner={hideGoalPlanner}
-              />
+              <Tabs defaultValue={item.type === "FIXED_INCOME" ? "myPosition" : "highlights"} className="w-full">
+                <TabsList className={item.type === "FIXED_INCOME" ? "grid w-full grid-cols-2 mb-4" : "grid w-full grid-cols-2 lg:grid-cols-4 mb-4"}>
+                  <TabsTrigger value="highlights">{t.watchlist.tabs.highlights}</TabsTrigger>
+                  <TabsTrigger value="myPosition">{t.watchlist.tabs.myPosition}</TabsTrigger>
+                  {item.type !== "FIXED_INCOME" && (
+                    <>
+                      <TabsTrigger value="transactions">{t.watchlist.tabs.transactions}</TabsTrigger>
+                      <TabsTrigger value="dividends">{t.watchlist.tabs.dividends}</TabsTrigger>
+                    </>
+                  )}
+                </TabsList>
+
+                <TabsContent value="highlights" className="space-y-6 mt-0">
+                  {item.type !== "FIXED_INCOME" ? (
+                    <>
+                      <WowInsights item={item} asset={asset} valuation={valuation} />
+                      <ConsensusPyramid valuation={valuation} currency={asset.currency} />
+                      <IndicatorGrid asset={asset} />
+                      {(asset.dividendHistory ?? []).filter((p: any) => p.amount > 0).length > 1 && (
+                        <DividendHistoryChart
+                          data={asset.dividendHistory}
+                          currency={asset.currency}
+                          locale={locale}
+                          title={t.result.dividendHistory}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg border-border/50 bg-background/50">
+                      <p className="text-sm text-muted-foreground">{t.watchlist.highlightsNotApplicableFI}</p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="myPosition" className="space-y-6 mt-0">
+                  <AssetHoldings item={item} activeMargin={valuation.margin} />
+                  {item.type === "FIXED_INCOME" && (
+                    <FixedIncomePanel item={item} />
+                  )}
+                </TabsContent>
+
+                {item.type !== "FIXED_INCOME" && (
+                  <>
+                    <TabsContent value="transactions" className="space-y-6 mt-0">
+                      <TransactionsPanel item={item} />
+                    </TabsContent>
+
+                    <TabsContent value="dividends" className="space-y-6 mt-0">
+                      <DividendsHistoryPanel
+                        item={item}
+                        events={asset.dividendEvents ?? []}
+                        currency={asset.currency}
+                      />
+                    </TabsContent>
+                  </>
+                )}
+              </Tabs>
             </ErrorBoundary>
           )}
         </div>

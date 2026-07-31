@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, Search, Sparkles } from "lucide-react";
+import { Pencil, Search, Sparkles, Calendar as CalendarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -36,6 +38,7 @@ export interface AssetFormValue {
   targetYield: number;
   averagePrice: number | null;
   customTaxRate: number | null;
+  investingSince: number;
 }
 
 interface Props {
@@ -45,7 +48,7 @@ interface Props {
 }
 
 export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selected, setSelected] = useState<SearchHit | null>(null);
@@ -54,6 +57,8 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   const { targetYield: globalYield } = useSettings();
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [confirmHit, setConfirmHit] = useState<SearchHit | null>(null);
+  const [investingSince, setInvestingSince] = useState<Date | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSubmittedRef = useRef(false);
 
@@ -123,16 +128,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     if (!hit) return;
     autoSubmittedRef.current = true;
     setSelected(hit);
-    setQuery(hit.ticker);
-    setOpen(false);
-    const y = globalYield;
-    onSubmit({
-      ticker: hit.ticker,
-      type: hit.type,
-      targetYield: y,
-      averagePrice: null,
-      customTaxRate: null,
-    });
+    pick(hit, true);
   }, [initialTicker, query, suggestions, globalYield, onSubmit]);
 
   useEffect(() => {
@@ -167,20 +163,89 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
 
   const activeType: AssetType | null = manualType ?? selected?.type ?? null;
 
-  function pick(hit: SearchHit) {
-    setSelected(hit);
+  function pick(hit: SearchHit, autoSubmit = false) {
+    if (autoSubmit) {
+      onSubmit({
+        ticker: hit.ticker,
+        type: hit.type,
+        targetYield: globalYield,
+        averagePrice: null,
+        customTaxRate: null,
+        investingSince: Date.now(),
+      });
+      return;
+    }
+
+    setConfirmHit(hit);
     setQuery(hit.ticker);
     setManualType(null);
     setEditingType(false);
     setOpen(false);
+  }
 
-    onSubmit({
-      ticker: hit.ticker,
-      type: manualType ?? hit.type,
-      targetYield: globalYield,
-      averagePrice: null,
-      customTaxRate: null,
-    });
+  if (confirmHit) {
+    return (
+      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="space-y-1">
+          <Label className="text-muted-foreground">{t.form.confirmTitle}</Label>
+          <div className="flex items-center gap-3">
+            <span className="text-xl font-bold">{displayTicker(confirmHit.ticker)}</span>
+            <Badge variant="secondary">{t.types[manualType ?? confirmHit.type]}</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">{t.form.confirmDesc}</p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label>{t.form.investingSince}</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal bg-card/50 border-border/50",
+                  !investingSince && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {investingSince ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(investingSince) : <span>{t.form.investingSince}</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={investingSince}
+                onSelect={setInvestingSince}
+                disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="ghost" onClick={() => { setConfirmHit(null); setInvestingSince(undefined); }}>
+            {t.common.cancel}
+          </Button>
+          <Button
+            type="button"
+            disabled={!investingSince || isSubmitting}
+            onClick={() => {
+              if (!investingSince) return;
+              onSubmit({
+                ticker: confirmHit.ticker,
+                type: manualType ?? confirmHit.type,
+                targetYield: globalYield,
+                averagePrice: null,
+                customTaxRate: null,
+                investingSince: investingSince.getTime(),
+              });
+            }}
+          >
+            {isSubmitting ? t.common.loading : t.form.done}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

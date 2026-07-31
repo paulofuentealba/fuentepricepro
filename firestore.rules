@@ -11,6 +11,9 @@ service cloud.firestore {
       match /assets/{assetId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      match /transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }

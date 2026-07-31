@@ -21,6 +21,7 @@ function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
     customTaxRate: null,
     sector: null,
     addedAt: 0,
+    investingSince: 0,
     ...overrides,
   };
 }
@@ -144,7 +145,7 @@ describe("Cashflow logic", () => {
         annualDividend: 120,
         quantity: 1,
         paymentMonths: [1, 2], // Jan, Feb
-        addedAt: new Date(Date.UTC(currentYear, 1, 15)).getTime(), // Added mid-Feb
+        investingSince: new Date(Date.UTC(currentYear, 1, 15)).getTime(), // Added mid-Feb
       }),
     ];
 
@@ -171,5 +172,50 @@ describe("Cashflow logic", () => {
     // Feb (index 1) is after addedAt -> realPaid should be 10
     expect(buckets[1].paidAmount).toBe(10);
   });
-});
 
+  it("buildMonthlyBuckets computes dynamic quantity when transactions are provided", () => {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+
+    const items = [
+      mkItem({
+        ticker: "DYNAMIC",
+        quantity: 100, // current quantity is 100, but historical is different
+        investingSince: Date.UTC(currentYear, 0, 1),
+      }),
+    ];
+
+    const dividendEventsMap = {
+      DYNAMIC: [
+        {
+          exDate: new Date(Date.UTC(currentYear, 0, 15)).toISOString(), // Jan event
+          paymentDate: null,
+          amountPerShare: 2,
+        },
+        {
+          exDate: new Date(Date.UTC(currentYear, 1, 15)).toISOString(), // Feb event
+          paymentDate: null,
+          amountPerShare: 2,
+        },
+      ],
+    };
+
+    const transactions: any[] = [
+      { id: "1", ticker: "DYNAMIC", type: "buy", quantity: 10, pricePerShare: 100, date: Date.UTC(currentYear, 0, 1) }, // Jan 1st: bought 10
+      { id: "2", ticker: "DYNAMIC", type: "buy", quantity: 90, pricePerShare: 100, date: Date.UTC(currentYear, 1, 10) }, // Feb 10th: bought 90 -> total 100
+    ];
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const buckets = buildMonthlyBuckets(items, "USD", months, dividendEventsMap, "calendar", transactions);
+
+    // Jan event should multiply by 10 (quantity at Jan 15) -> 2 * 10 = 20
+    // Feb event should multiply by 100 (quantity at Feb 15) -> 2 * 100 = 200
+
+    if (currentMonth >= 1 || currentYear > new Date().getFullYear()) {
+      expect(buckets[0].paidAmount).toBe(20);
+    }
+    if (currentMonth >= 2 || currentYear > new Date().getFullYear()) {
+      expect(buckets[1].paidAmount).toBe(200);
+    }
+  });
+});

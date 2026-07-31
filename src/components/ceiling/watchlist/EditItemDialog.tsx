@@ -15,8 +15,12 @@ import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { MaskedInput } from "../shared/MaskedInput";
 import { ceilingPrice, safetyMargin, netAfterTax } from "@/lib/calculations";
 import { displayTicker, formatCurrency, formatPercent } from "@/lib/i18n";
-import { TrendingUp, Target, Wallet } from "lucide-react";
+import { TrendingUp, Target, Wallet, Calendar as CalendarIcon } from "lucide-react";
 import { PriceTag } from "../shared/AssetDataDisplay";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useTransactions } from "@/lib/transactions";
 
 interface EditItemDialogProps {
   item: ValuedWatchlistItem | null;
@@ -30,7 +34,15 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
   const [avg, setAvg] = useState("");
   const [goal, setGoal] = useState("");
   const [dy, setDy] = useState("");
+  const [investingSince, setInvestingSince] = useState<Date | undefined>(undefined);
   const open = item !== null;
+  const { transactions } = useTransactions();
+  
+  const tickerTxs = useMemo(() => {
+    if (!item) return [];
+    return transactions.filter(t => t.ticker === item.ticker);
+  }, [transactions, item]);
+  const hasTransactions = tickerTxs.length > 0;
 
   useEffect(() => {
     if (item) {
@@ -38,6 +50,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
       setAvg(item.averagePrice != null ? String(item.averagePrice) : "");
       setGoal(item.targetMonthlyIncome != null ? String(item.targetMonthlyIncome) : "");
       setDy(String(item.targetYield));
+      setInvestingSince(item.investingSince ? new Date(item.investingSince) : undefined);
     }
   }, [item]);
 
@@ -141,7 +154,8 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                   formatMode="numeric"
                   value={qty ? parseFloat(qty) : null}
                   onChangeValue={(v) => setQty(v !== undefined ? String(v) : "")}
-                  autoFocus
+                  autoFocus={!hasTransactions}
+                  disabled={hasTransactions}
                 />
               </div>
 
@@ -153,7 +167,42 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                   currencySymbol={item?.currency === "USD" ? "US$" : "R$"}
                   value={avg ? parseFloat(avg) : null}
                   onChangeValue={(v) => setAvg(v !== undefined ? String(v) : "")}
+                  disabled={hasTransactions}
                 />
+              </div>
+              
+              {hasTransactions && (
+                <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md">
+                  {t.transactions.calculatedFromTransactions.replace("{n}", String(tickerTxs.length))}
+                </p>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="wl-edit-investing-since">{t.form.investingSince}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      id="wl-edit-investing-since"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-background",
+                        !investingSince && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {investingSince ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(investingSince) : <span>{t.form.investingSince}</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-background" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={investingSince}
+                      onSelect={setInvestingSince}
+                      disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -308,6 +357,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                 averagePrice: a != null && Number.isFinite(a) ? a : null,
                 targetMonthlyIncome: g != null && Number.isFinite(g) && g > 0 ? g : null,
                 annualDividend: item?.annualDividend, // Heal the database with the canonical value passed via props
+                investingSince: investingSince?.getTime() ?? item?.addedAt,
               };
               if (y != null && Number.isFinite(y) && y > 0 && item) {
                 patch.targetYield = y;

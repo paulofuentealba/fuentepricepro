@@ -20,7 +20,7 @@ import { cleanTicker } from "./formatters";
 
 const STORAGE_KEY = "ceilingPricePro.watchlist.v1";
 const ONBOARDED_KEY = "ceilingPricePro.onboarded.v1";
-const USE_LOCAL_ONLY = true; // HOTFIX: Bloquear Firebase para QA local
+const USE_LOCAL_ONLY = import.meta.env.DEV; // Local-only só no dev server (npm run dev); build de produção sempre usa Firestore automaticamente, sem depender de lembrar de trocar antes do commit
 
 export interface WatchlistItem {
   id: string;
@@ -53,6 +53,8 @@ export interface WatchlistItem {
   maturityDate?: string | null;
   startDate?: string | null;
   addedAt: number;
+  /** When the user originally started investing in this asset. */
+  investingSince: number;
 }
 
 export function makeId(ticker: string, type: AssetType) {
@@ -116,6 +118,7 @@ function readLocal(): WatchlistItem[] {
       rate: typeof item.rate === "number" && !isNaN(item.rate) ? item.rate : null,
       maturityDate: item.maturityDate ?? null,
       startDate: item.startDate ?? null,
+      investingSince: typeof item.investingSince === "number" && !isNaN(item.investingSince) ? item.investingSince : item.addedAt,
     })) as WatchlistItem[];
   } catch {
     return [];
@@ -158,6 +161,7 @@ interface Row {
   maturity_date?: string | null;
   start_date?: string | null;
   added_at: string;
+  investing_since?: string | null;
 }
 
 function rowToItem(r: Row): WatchlistItem {
@@ -198,6 +202,7 @@ function rowToItem(r: Row): WatchlistItem {
     maturityDate: r.maturity_date ?? null,
     startDate: r.start_date ?? null,
     addedAt: safeNumber(new Date(r.added_at).getTime(), Date.now()),
+    investingSince: r.investing_since ? safeNumber(new Date(r.investing_since).getTime(), safeNumber(new Date(r.added_at).getTime(), Date.now())) : safeNumber(new Date(r.added_at).getTime(), Date.now()),
   };
 }
 
@@ -227,6 +232,7 @@ function itemToRow(item: WatchlistItem, userId: string): Row {
     maturity_date: item.maturityDate ?? null,
     start_date: item.startDate ?? null,
     added_at: new Date(item.addedAt).toISOString(),
+    investing_since: new Date(item.investingSince).toISOString(),
   };
 }
 
