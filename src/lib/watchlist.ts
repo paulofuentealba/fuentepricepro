@@ -279,7 +279,7 @@ export function useWatchlist() {
             const batch = writeBatch(db);
             const rows = local.map((i) => itemToRow(i, userId));
             rows.forEach((r) => {
-              const ref = doc(db, "watchlist_items", `${r.user_id}_${r.type}_${r.ticker}`);
+              const ref = doc(db, "users", userId, "assets", `${r.type}_${r.ticker}`);
               batch.set(ref, r, { merge: true });
             });
             await batch.commit();
