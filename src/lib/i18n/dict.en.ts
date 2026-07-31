@@ -396,6 +396,9 @@ export const en = {
       invested: "Invested",
       received: "Received",
       quantityNote: "Received amount assumes current quantity is held throughout (no transaction history).",
+      calendarYear: "Calendar Year",
+      myJourney: "My Journey",
+      journeyStart: "🌱 Start",
     },
   },
 

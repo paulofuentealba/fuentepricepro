@@ -46,7 +46,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
   const breakdownData =
     selectedMonthData?.contributors.slice(0, 8).map((c) => ({
       ticker: c.ticker,
-      amount: c.amount,
+      amount: c.paidAmount !== undefined ? c.paidAmount : c.amount,
     })) || [];
 
   const handleBarClick = (entry: any, index: number) => {
@@ -341,6 +341,21 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     stroke="var(--warning)"
                     strokeDasharray="3 3"
                     label={{ position: "top", value: "🏆", fill: "var(--warning)", fontSize: 14 }}
+                  />
+                )}
+                {data.find((d) => d.isStartMonth) && (
+                  <ReferenceLine
+                    x={data.find((d) => d.isStartMonth)?.month}
+                    stroke="var(--foreground)"
+                    strokeDasharray="4 4"
+                    strokeOpacity={0.4}
+                    label={{
+                      position: "insideBottomLeft",
+                      value: t.tabs.chart.journeyStart,
+                      fill: "var(--foreground)",
+                      fontSize: 10,
+                      fontWeight: 600,
+                    }}
                   />
                 )}
               </BarChart>

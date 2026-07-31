@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
@@ -66,6 +66,18 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   const currency = settings.displayCurrency;
   const activeCurrency = currency;
 
+  const defaultMode = useMemo(() => {
+    if (items.length === 0) return "calendar";
+    const oldest = Math.min(...items.map((it) => it.addedAt));
+    const oldestDate = new Date(oldest);
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    oneYearAgo.setMonth(oneYearAgo.getMonth() + 1); // 12 rolling months back
+    return oldestDate >= oneYearAgo ? "journey" : "calendar";
+  }, [items]);
+
+  const [mode, setMode] = useState<"calendar" | "journey">(defaultMode);
+
   // Fetch fresh Asset data (with dividendEvents) for each watchlist item in parallel.
   // TanStack Query caches these (staleTime=5min), so this is cheap after first load.
   const assetQueries = useQueries({
@@ -83,9 +95,14 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     return map;
   }, [assetQueries, items]);
 
-  const data = useMemo(
-    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap),
+  const calendarData = useMemo(
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, "calendar"),
     [items, activeCurrency, months, dividendEventsMap],
+  );
+
+  const chartData = useMemo(
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, mode),
+    [items, activeCurrency, months, dividendEventsMap, mode],
   );
 
   const investedVsReceived = useMemo(
@@ -93,17 +110,17 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     [items, activeCurrency, dividendEventsMap],
   );
 
-  const summary = useMemo(() => computeCashFlowSummary(data), [data]);
+  const summary = useMemo(() => computeCashFlowSummary(calendarData), [calendarData]);
 
-  const finalCumulative = data[data.length - 1]?.cumulativeTotal ?? 0;
-  const sparklinePath = useMemo(() => buildSparklinePath(data.map((d) => d.amount)), [data]);
+  const finalCumulative = chartData[chartData.length - 1]?.cumulativeTotal ?? 0;
+  const sparklinePath = useMemo(() => buildSparklinePath(calendarData.map((d) => d.amount)), [calendarData]);
   const cumulativePath = useMemo(
-    () => buildSparklinePath(data.map((d) => d.cumulativeTotal)),
-    [data],
+    () => buildSparklinePath(calendarData.map((d) => d.cumulativeTotal)),
+    [calendarData],
   );
 
-  const hasData = data.some((d) => d.amount > 0);
-  const bestMonth = data.find((d) => d.isBest);
+  const hasData = chartData.some((d) => d.amount > 0);
+  const bestMonth = chartData.find((d) => d.isBest);
 
   if (items.length === 0 || !hasData) {
     return <CashFlowEmptyState onNavigateToCalculator={onNavigateToCalculator} />;
@@ -117,6 +134,8 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
           availableCurrencies={availableCurrencies}
           activeCurrency={activeCurrency}
           onCurrencyChange={(c) => updateSettings({ displayCurrency: c })}
+          mode={mode}
+          onModeChange={setMode}
         />
         <CashFlowSummaryCards
           summary={summary}
@@ -125,7 +144,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
           cumulativePath={cumulativePath}
         />
         <CashFlowChart
-          data={data}
+          data={chartData}
           activeCurrency={activeCurrency}
           bestMonth={bestMonth}
           finalCumulative={finalCumulative}

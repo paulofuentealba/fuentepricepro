@@ -1,0 +1,1415 @@
+# Fuente Price Pro — Log Único de Prompts
+
+## Lista viva, em ordem cronológica. Novos itens são sempre ADICIONADOS ao final — nunca um arquivo novo.
+
+Legenda: ✅ Concluído e confirmado | 🔵 Aplicado, aguardando confirmação | ⚪ Ainda não rodado | ❌ Tentado, não resolveu
+
+Prompts já **concluídos** ficam só com resumo (a íntegra de cada um está no histórico da conversa, não repetida aqui pra manter o arquivo gerenciável). Prompts **pendentes** (🔵 ou ⚪) têm o texto completo abaixo, prontos pra colar no Antigravity.
+
+---
+
+## PARTE 1 — HISTÓRICO (resumo, já concluído)
+
+### Fase 1 — Causa raiz do bug de fidelidade do Fuente Consensus
+
+| #   | Título                                                                                                                                  | Status |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1   | Unificar fonte do dividendo-base (SSOT) — 3 fontes divergentes, sentinela mágico "6", proteção pickLast3 contra deflação de IPO recente | ✅     |
+| 2   | Consolidar componente `MetricBox` duplicado                                                                                             | ✅     |
+| 3   | Remover `seedDevData.ts` órfão                                                                                                          | ✅     |
+| 4   | Badge de simulação com i18n + Radar Global comunicando yield-alvo global                                                                | ✅     |
+| 5   | Corrigir BVPS misturando preço de fontes diferentes (Yahoo live + Brapi ratio)                                                          | ✅     |
+| 6   | Corrigir 5º lugar escondido (diálogo Update Holdings) contaminando o banco com dividendo desatualizado                                  | ✅     |
+
+### Fase 2 — Refatoração estrutural
+
+| #   | Título                                                                                     | Status |
+| --- | ------------------------------------------------------------------------------------------ | ------ |
+| 7   | Componentes de "estado salvo" passam a consumir `valuation` pronto de `useValuedPortfolio` | ✅     |
+| 7.5 | Fechar lacuna do `EditItemDialog` (cast inseguro)                                          | ✅     |
+
+### Fase 3 — Varredura de navegação (P0/P1)
+
+| #    | Título                                                                             | Status |
+| ---- | ---------------------------------------------------------------------------------- | ------ |
+| 8    | P0: gráficos, FI Mode, randomizer                                                  | ✅     |
+| 9    | P1: busca, classificação TAEE11, payout duplicado, autocomplete, `/settings`, i18n | ✅     |
+| 9.5  | Eliminar acoplamento `items`/`valuedItems`                                         | ✅     |
+| 9.6b | Fechar as 77 violações de i18n restantes                                           | ✅     |
+
+### Fase 4 — Sprints de Polimento UX (P2)
+
+| #        | Título                                                  | Status |
+| -------- | ------------------------------------------------------- | ------ |
+| Sprint 1 | Skeleton loaders + acessibilidade WCAG AA               | ✅     |
+| Sprint 2 | Hierarquia visual do dashboard + tooltips               | ✅     |
+| Sprint 3 | Toasts de CRUD + responsividade mobile/tablet           | ✅     |
+| 10a      | Reconstruir i18n perdido no incidente do `git checkout` | ✅     |
+| 10b      | Corrigir regressões estruturais do incidente            | ✅     |
+| Sprint 4 | Câmbio (transparência) + eixos de tempo dos gráficos    | ✅     |
+| Sprint 5 | Reestruturação da Wiki                                  | ✅     |
+| 11       | Fechamento formal das Sprints 3 e 5                     | ✅     |
+
+### Fase 5 — Varredura técnica direta + acesso ao repositório
+
+| #   | Título                                                                                 | Status |
+| --- | -------------------------------------------------------------------------------------- | ------ |
+| —   | Varredura técnica inicial (achou os bugs A/B/C/D)                                      | ✅     |
+| 12  | `.env` no `.gitignore` + Supabase órfão removido                                       | ✅     |
+| 13  | Bugs no fluxo de importação existente (classificação, `annualDividend`, `WatchlistIO`) | ✅     |
+| —   | Unificação do backlog (`BACKLOG_V2.md`)                                                | ✅     |
+
+### Fase 6 — Correções pontuais + debug ao vivo
+
+| #      | Título                                                                                                              | Status                                                                                                                                                                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 14.1   | Remover plugin `vite-tsconfig-paths`                                                                                | ✅                                                                                                                                                                                                                       |
+| 14.2   | Toggle de câmbio global + migração Firestore                                                                        | ✅                                                                                                                                                                                                                       |
+| 14.3   | Grade de ativos vazia (cálculo duplicado em `Watchlist.tsx`)                                                        | ✅ confirmado ao vivo                                                                                                                                                                                                    |
+| 14.3.2 | Desalinhamento da barra de filtros (`sm:flex-row` → `xl:flex-row`)                                                  | ❌ tentado, não resolveu na prática — abandonado, substituído pelo 17.1                                                                                                                                                  |
+| 14.4   | Domínio errado no mockup + 10 arquivos de SEO/OG/sitemap                                                            | ✅ confirmado                                                                                                                                                                                                            |
+| 15     | Investigação do travamento — `ResponsiveContainer` aninhado                                                         | ✅ (real, mas não era a causa raiz)                                                                                                                                                                                      |
+| 16     | Causa raiz real do travamento — `pdfjs-dist` no SSR                                                                 | ✅ confirmado ao vivo                                                                                                                                                                                                    |
+| 17.1   | Mover "Import Broker Note" pro dropdown "+ Add Asset"                                                               | ✅ (com um efeito colateral: import duplicado de `toast` quebrou o build, corrigido diretamente por mim; também expôs o bug sistêmico do Firebase — ver item 24)                                                         |
+| 17.2   | Estender o parser pra 10 corretoras BR (CNPJs verificados por mim após achar 2 errados na 1ª tentativa: BTG e Itaú) | ✅ confirmado — 7 suportadas via SINACOR (Rico, Modal, BTG, Inter, NuInvest, Órama, Genial), 3 bancos tradicionais com fallback gracioso (Itaú, Bradesco, Santander/Toro); testes rodados com output real (8/8 passando) |
+| 21     | Discrepância `unknown_broker` vs `Malformed file` no `pdf-parser.test.ts`                                           | ✅ resolvido de quebra durante a 17.2 — os dois erros agora são conceitos distintos e corretos                                                                                                                           |
+
+---
+
+## PARTE 2 — PENDENTES (texto completo, pronto pra rodar)
+
+---
+
+### 24 — Firebase inicializando sem proteção contra re-execução (causa raiz de "preciso reiniciar toda vez") ✅ CONCLUÍDO E CONFIRMADO AO VIVO
+
+Teste de fogo real feito por mim: dupliquei o import do toast em
+DataManagement.tsx de propósito, confirmei o erro de parse disparando no
+console do navegador, corrigi, e a aplicação voltou sozinha — grade de 23
+ativos renderizada completa, zero erro de Firebase, sem precisar reiniciar
+o processo manualmente.
+
+```
+Contexto: em src/integrations/firebase/client.ts, initializeApp() e
+initializeFirestore() rodam incondicionalmente no escopo do módulo, sem
+nenhuma checagem se já existe uma instância. Quando o Vite faz um "program
+reload" da SSR (o que acontece sempre que há um erro de parse em qualquer
+arquivo, ou certos tipos de HMR), esse módulo é reexecutado dentro do MESMO
+processo Node que já tinha o Firebase inicializado antes, e a segunda
+chamada de initializeFirestore() lança: "initializeFirestore() has already
+been called with different options". Isso trava a SSR inteira (erro 500
+swallowed), exigindo reiniciar o servidor manualmente — e vai continuar
+acontecendo toda vez que qualquer erro de parse disparar um program reload,
+não só desta vez.
+
+TAREFA:
+1. Em client.ts, trocar `export const app = initializeApp(firebaseConfig)`
+   por uma versão que verifica se já existe um app antes de inicializar:
+   usar getApps() (de "firebase/app") — se getApps().length > 0, usar
+   getApp() em vez de chamar initializeApp() de novo
+2. Para o Firestore, envolver initializeFirestore() em try/catch: se
+   lançar erro de "already been called", usar getFirestore(app) (de
+   "firebase/firestore") como fallback em vez de propagar o erro
+3. Confirmar que isso não muda o comportamento em produção (onde o módulo
+   só carrega uma vez por processo normalmente) — é uma proteção que só
+   deveria mudar comportamento no cenário de HMR/reload do dev server
+4. Depois de aplicar, testar especificamente o cenário que causou o bug:
+   provocar um erro de parse de propósito (ex: duplicar um import), ver o
+   Vite fazer o program reload, e confirmar que o Firebase NÃO quebra mais
+   depois disso — sem precisar reiniciar o servidor manualmente
+
+NÃO TOCAR: a configuração do Firebase em si (firebaseConfig) não muda, só
+a forma como app/db são inicializados.
+
+CRITÉRIO DE SUCESSO: provocar um erro de parse de propósito, deixar o Vite
+fazer o program reload, e confirmar que a aplicação volta a funcionar
+sozinha sem reiniciar o processo manualmente. Esse é o teste que realmente
+prova que funcionou — não só tsc limpo.
+```
+
+---
+
+### 17.1 — Mover "Import Broker Note" para dentro do dropdown "+ Add Asset" ✅ CONCLUÍDO
+
+```
+Contexto: o dropdown "+ Add Asset" hoje tem duas opções: "Add Equity"
+(subtítulo "Stocks, REITs, BDRs") e "Add Fixed Income" (subtítulo "Tesouro,
+CDBs, LCI/LCA"). O botão "Import Broker Note" fica solto na barra de ações,
+ao lado do dropdown, disputando espaço horizontal e causando aperto visual.
+A tentativa anterior de resolver isso ajustando o breakpoint flex
+(sm:flex-row → xl:flex-row) NÃO funcionou na prática, mesmo o código
+parecendo correto — abandonar essa abordagem.
+
+TAREFA:
+1. Adicionar uma terceira linha no dropdown "+ Add Asset", mesmo componente/
+   formatação das outras duas (ícone à esquerda, título "Import Broker
+   Note", subtítulo abaixo listando as corretoras suportadas: "XP, Clear"
+   por enquanto — BTG e Rico entram na Tarefa 17.2, ainda não suportadas)
+2. Usar um ícone consistente com o que já era usado no botão solto "Import
+   Broker Note" (provavelmente ícone de upload/documento)
+3. Ao clicar, abrir o mesmo fluxo que já existe (BrokerNoteUploader),
+   idêntico ao que o botão solto fazia
+4. Remover completamente o botão "Import Broker Note" da barra de ações
+   principal — ele não deve mais aparecer solto em lugar nenhum
+5. Depois de remover o botão solto, verificar se a barra de filtros/ações
+   volta a caber numa linha só sem precisar de nenhum ajuste de flex
+   adicional (um botão a menos pode já resolver o aperto sozinho)
+
+NÃO TOCAR: a lógica interna do BrokerNoteUploader não muda nesta tarefa, só
+de onde ele é acionado. Não reaplicar a mudança de flex da 14.3.2.
+
+CRITÉRIO DE SUCESSO: dropdown "+ Add Asset" com as 3 opções, mesmo padrão
+visual; nenhum botão de import solto na barra; fluxo de upload de PDF
+continua funcionando idêntico a antes, só acionado de outro lugar; barra de
+ações sem aperto visual em telas normais de desktop.
+```
+
+---
+
+### 17.3 — Catalogar corretoras suportadas ✅ CONCLUÍDO E CONFIRMADO (verificado CNPJ a CNPJ contra o código-fonte)
+
+```
+17.3 — Catalogar corretoras suportadas
+
+Contexto: hoje o suporte a corretoras está espalhado dentro da lógica do
+b3Parser.ts (detecção por CNPJ + layout SINACOR) sem nenhum documento
+central listando o que é suportado. Depois da Tarefa 17.2, temos 9
+corretoras via layout SINACOR (XP, Clear, Rico, Modal, BTG, Inter,
+NuInvest, Órama, Genial) com CNPJs verificados em fonte oficial, mais 3
+bancos tradicionais com fallback gracioso, sem parsing forçado (Itaú,
+Bradesco, Santander/Toro). Isso não está documentado em lugar nenhum.
+
+O projeto já tem uma Wiki funcional em src/routes/app/docs.tsx (rota
+/app/docs), reestruturada na Sprint 5 — página com índice lateral, busca,
+e seções renderizadas a partir do dicionário i18n (t.docs.*), cada seção
+com um id e uma entrada correspondente no array menuItems. O conteúdo é
+novo, então a documentação de corretoras deve virar uma NOVA SEÇÃO dessa
+Wiki, não um arquivo solto na raiz — e, seguindo a Golden Rule 2 (i18n
+obrigatório, proibido hardcode de texto de interface), o conteúdo precisa
+entrar nos 3 dicionários (dict.ptBR.ts, dict.en.ts, dict.es.ts), não só na
+página.
+
+TAREFA:
+1. Confirmar cada CNPJ diretamente no código-fonte do b3Parser.ts antes de
+   documentar — não presumir a partir da memória desta conversa; se algum
+   CNPJ no código divergir do que está registrado aqui no PROMPTS_LOG.md,
+   reportar a divergência em vez de escolher um dos dois silenciosamente
+2. Adicionar uma nova seção na Wiki (ex: id "supported-brokers", com
+   entrada correspondente em menuItems) listando cada corretora/banco
+   suportado hoje: nome, CNPJ usado na detecção, layout assumido (SINACOR
+   ou fallback), e status (parsing completo vs. fallback gracioso sem
+   parsing forçado) — seguir o mesmo padrão visual das outras seções já
+   existentes na página (Card, título, ícone do lucide-react coerente com
+   o tema, ex: Building ou FileText)
+3. Adicionar as strings correspondentes (título da seção, labels de coluna,
+   descrições) nos 3 arquivos de dicionário (dict.ptBR.ts, dict.en.ts,
+   dict.es.ts), sob a chave t.docs — nada de texto hardcoded na página
+4. Incluir, na mesma seção ou como subseção, um passo a passo de "Como
+   adicionar uma nova corretora" cobrindo: onde adicionar o CNPJ de
+   detecção, como confirmar se o layout é SINACOR-compatível ou precisa de
+   parser dedicado, onde adicionar o teste correspondente em
+   pdf-parser.test.ts, e o critério pra decidir entre parsing completo e
+   fallback gracioso (banco tradicional fora do padrão SINACOR) — esse
+   passo a passo pode ficar em português apenas se fizer mais sentido como
+   nota técnica pra devs (confirmar com o padrão já usado em outras seções
+   técnicas da Wiki antes de decidir)
+5. Adicionar um comentário curto no topo do b3Parser.ts apontando para a
+   seção da Wiki (rota /app/docs#supported-brokers ou id equivalente
+   escolhido no passo 2), pra quem estiver lendo o código direto também
+   encontrar a documentação
+
+NÃO TOCAR: nenhuma lógica de detecção ou parsing muda nesta tarefa — é
+documentação pura, baixo risco.
+
+CRITÉRIO DE SUCESSO: nova seção visível em /app/docs, acessível pelo
+índice lateral e pela busca da página, com corretora por corretora, CNPJ e
+status corretos (confirmados contra o código-fonte, não pela memória da
+conversa), presente nos 3 idiomas sem nenhuma string hardcoded, com o passo
+a passo de como adicionar uma nova corretora, e o b3Parser.ts referenciando
+a seção. Qualquer pessoa ou sessão futura consegue adicionar uma corretora
+nova só com essa documentação, sem precisar ler o parser inteiro primeiro.
+```
+
+---
+
+### 14.5 — Reconstruir a massa de dados de DEV do zero ✅ CONCLUÍDO E CONFIRMADO (ativo sintético TEST_IPO_RECENTE verificado no apiService.functions.ts, IVVB11 corretamente não mascarado)
+
+```
+14.5 — Reconstruir a massa de dados de DEV do zero
+
+Contexto: a massa de dados de teste atual (TEMP_DATA em DataManagement.tsx,
+só 3 ativos: PETR4, MXRF11, AAPL) está desatualizada e não reflete as várias
+correções feitas ao longo dessa auditoria (dividendo canônico, classificação
+correta, BVPS, eventos corporativos, etc.). Além disso, os 23 ativos que
+estão hoje na conta de teste foram cadastrados manualmente ao longo do
+tempo, não vieram de um processo repetível.
+
+TAREFA:
+1. Remover completamente a massa de dados de teste atual (tanto o TEMP_DATA
+   hardcoded em DataManagement.tsx quanto os 23 ativos hoje cadastrados na
+   conta de teste usada para validação — confirmar com o usuário antes de
+   apagar dados da conta, mesmo sendo dados de teste)
+2. Criar uma nova massa de dados de teste que cubra os cenários relevantes
+   pra testar as funcionalidades e correções já existentes: pelo menos um
+   ativo de cada tipo (Ação BR, FII, REIT, ETF, Stock US, Fii-Infra,
+   Fiagro), pelo menos um ativo com IPO recente (< 3 anos de histórico, pra
+   testar a proteção contra deflação de dividendo do pickLast3), pelo menos
+   um ativo com ticker terminado em "11" que NÃO seja FII (pra testar a
+   classificação correta), ativos undervalued e overvalued misturados
+3. Estruturar essa massa de dados de forma que seja fácil adicionar novos
+   casos de teste no futuro conforme novas features forem construídas (ex:
+   quando a Sprint 1 do P3 for implementada, precisará de dado de
+   proventos/transações de teste também — deixar a estrutura pronta pra
+   isso, não necessariamente populada ainda)
+4. Garantir que o botão "Restore Mock Data" continue funcionando com essa
+   nova massa, e que seja fácil atualizá-la no código conforme necessário
+5. Confirmar que a proteção import.meta.env.DEV continua envolvendo todo o
+   mecanismo — a massa de dados não pode existir nem ser acessível fora de
+   DEV
+
+NÃO TOCAR: a lógica de cálculo (getAssetValuation, getCanonicalAnnualDividend,
+etc.) não muda.
+
+CRITÉRIO DE SUCESSO: clicar em "Restore Mock Data" popula uma carteira de
+teste nova e completa cobrindo os casos acima; nada da massa aparece fora
+de DEV; fácil de editar/expandir no código.
+```
+
+---
+
+### 14.6 — Botão "Restore Mock Data" sem tratamento de erro ⚪
+
+```
+14.6 — Botão "Restore Mock Data" sem tratamento de erro
+
+Contexto: em DataManagement.tsx, upsertManyAsync(TEMP_DATA).then(...) não
+tem .catch(). Se falhar, o usuário não recebe nenhum feedback.
+
+TAREFA: adicionar tratamento de erro com toast.error(...) mostrando a
+mensagem real da falha, passando pelo sistema de i18n.
+
+CRITÉRIO DE SUCESSO: se upsertManyAsync falhar, o usuário vê um toast de
+erro claro, não silêncio.
+```
+
+---
+
+### 14.7 — Adicionar proteção CSRF nas server functions ✅ CONCLUÍDO E CONFIRMADO AO VIVO (searchAssetsFn e fetchAssetFn testados no navegador, ambos retornando 200 sem bloqueio)
+
+```
+14.7 — Adicionar proteção CSRF nas server functions
+
+Contexto: o log de inicialização do dev server mostra: "TanStack Start
+server functions are not protected by the CSRF middleware."
+
+TAREFA: em src/start.ts, adicionar:
+
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === 'serverFn',
+  })
+
+  export const startInstance = createStart(() => ({
+    requestMiddleware: [csrfMiddleware],
+  }))
+
+Confirmar que isso não quebra nenhuma chamada de server function existente
+(testar Calculadora, busca de cotação, importação de nota) depois de
+aplicar.
+
+CRITÉRIO DE SUCESSO: o aviso de CSRF não aparece mais no log; todas as
+server functions continuam funcionando normalmente.
+```
+
+---
+
+### 14.8 — Atualizar método depreciado do TanStack Start ⚪
+
+```
+14.8 — Atualizar método depreciado do TanStack Start
+
+Contexto: o log mostra 4 ocorrências de "createServerFn().inputValidator()
+is deprecated. Use createServerFn().validator() instead" em
+src/lib/apiService.functions.ts (linhas 36, 107, 137, 257).
+
+TAREFA: trocar .inputValidator() por .validator() nas 4 ocorrências,
+confirmando que o formato do validator não mudou entre as duas versões.
+
+CRITÉRIO DE SUCESSO: nenhum aviso de depreciação no log; tsc limpo; as 4
+server functions continuam validando input normalmente.
+```
+
+---
+
+### 18 — Atualizar AGENTS.md com as Golden Rules completas e revisadas ⚪
+
+```
+18 — Atualizar AGENTS.md com as Golden Rules completas e revisadas
+
+Contexto: o AGENTS.md do projeto documenta só as Golden Rules 1 e 2
+originais (datadas de 10/07/2026). Não reflete as revisões feitas nas
+Regras 3 e 4, nem inclui as Regras 5 e 6 que foram adicionadas depois.
+
+TAREFA: substituir o conteúdo de Golden Rules no AGENTS.md pelo texto
+abaixo (versão completa e já revisada):
+
+---
+📐 1. Reusabilidade Primeiro (Arquitetura)
+Regra: Antes de criar ou propor qualquer componente novo, o foco absoluto é
+a REUSABILIDADE.
+Ação: Evitar duplicação de lógica ou componentes isolados a todo custo.
+Tudo deve ser arquitetado de forma agnóstica para servir toda a aplicação.
+Antes de escrever um componente novo, buscar no projeto se já existe algo
+equivalente — e se existir mais de uma versão do mesmo componente,
+consolidar em um só antes de adicionar funcionalidade nova.
+
+🌍 2. Global i18n Enforcement (Sem Hardcode)
+Regra: É estritamente PROIBIDO escrever componentes React com texto de
+interface em hardcode.
+Ação: Qualquer texto visível ao utilizador final tem de passar pelo
+sistema de i18n. Uma string solta na interface é falha crítica de
+compilação.
+
+🔒 3. Isolamento e Segurança de Dados (Database & Mocks)
+Regra: É expressamente proibido comitar massa de dados locais/mockados
+para o repositório principal ou sincronizar massa de dados de
+desenvolvimento com o ambiente real do Firebase.
+Ação: O ambiente de testes locais fica estritamente isolado da produção.
+Arquivos de dado de dev sem nenhum import ativo devem ser removidos, não
+deixados no repositório "por via das dúvidas".
+
+🎯 4. Single Source of Truth (SSOT — Dados Financeiros)
+Regra: A fórmula (getAssetValuation) é sagrada e única — nenhuma tela pode
+reimplementar Bazin/Graham/Gordon por conta própria.
+Ação: Toda tela de estado SALVO da carteira deve consumir exclusivamente
+useValuedPortfolio. Telas de SIMULAÇÃO/exploração podem chamar
+getAssetValuation diretamente, mas devem: (a) buscar o dividendo-base pela
+mesma função canônica, nunca uma fonte paralela; (b) rotular visualmente
+qualquer parâmetro alterado pelo usuário como "cenário/simulação".
+
+📱 5. Abordagem "Mobile-First" Sustentável
+Regra: Classes base do Tailwind definem o layout para telemóveis. Desktop é
+sempre uma expansão (md:, lg:).
+Ação: O layout não é "esmagado"; transaciona para scroll horizontal ou
+colunas empilhadas no mobile, preservando elegância no Desktop.
+
+🎨 6. Qualidade Visual Premium (Aesthetics)
+Regra: "WOW effect" imediato. Evitar soluções simples de MVP.
+Ação: Design moderno, micro-interações refinadas, glassmorphism elegante,
+interfaces que transmitam confiança financeira absoluta.
+---
+
+CRITÉRIO DE SUCESSO: AGENTS.md com as 6 regras completas e na versão
+revisada, substituindo o conteúdo antigo.
+```
+
+---
+
+### 19 — Limpar scripts órfãos da raiz ✅ CONCLUÍDO E CONFIRMADO (verificado: 5 arquivos removidos, sem referência em package.json)
+
+```
+19 — Limpar scripts órfãos da raiz
+
+Contexto: clean.cjs, merge.cjs, test-bbas3.ts, test-server.js, test_search.ts
+estão soltos na raiz do projeto, fora de src/ e scripts/. Pelo conteúdo,
+merge.cjs parece ser o script que gerou a estrutura atual do AssetCard.tsx
+a partir de um ResultCard.tsx antigo — já executado, não roda mais.
+
+TAREFA:
+1. Confirmar que cada um desses 5 arquivos não é referenciado em nenhum
+   script do package.json nem importado por nenhum outro arquivo
+2. Se confirmado órfão: remover
+3. Se algum ainda for usado (ex: script de teste manual que você roda às
+   vezes): reportar antes de remover, não presumir
+
+CRITÉRIO DE SUCESSO: raiz do projeto sem scripts órfãos; qualquer um que
+ainda tenha uso real fica documentado no README ou similar.
+```
+
+---
+
+### 20 — Documentar a fragilidade do fallback de classificação ⚪
+
+```
+20 — Documentar a fragilidade do fallback de classificação
+
+Contexto: em classify.ts, o fallback pro sufixo "11" usa uma lista de
+exceções crescendo à mão (!s.startsWith("TAEE"), "KLBN", "SANB", "TIET",
+"ALUP", "SULA", "ENGI", "BIDI", "BPAC"). Funciona porque o apiType da API
+cobre a maioria dos casos primeiro, mas qualquer ação nova terminada em
+"11" que não esteja na lista cai no bug de classificação errada se a API
+não retornar o tipo.
+
+TAREFA: não é pra reescrever a lógica agora — é só documentar isso
+claramente com um comentário no código acima da lista de exceções,
+explicando a limitação e o porquê dela existir, pra quem mexer nesse código
+no futuro entender o risco sem precisar redescobrir.
+
+CRITÉRIO DE SUCESSO: comentário claro no código explicando a limitação
+conhecida do fallback.
+```
+
+---
+
+### 22 — Migrar Nitro de beta para versão estável ⚪
+
+```
+22 — Migrar Nitro de beta para versão estável
+
+Contexto: nitro está fixado em "3.0.260603-beta" no package.json — versão
+beta como dependência de motor de servidor em produção.
+
+TAREFA: verificar se já existe uma versão estável do Nitro compatível com a
+versão atual do TanStack Start do projeto. Se sim, migrar. Se não, deixar
+registrado pra revisitar periodicamente (não é urgente).
+
+CRITÉRIO DE SUCESSO: relatório indicando se a migração foi feita ou se
+ainda não há versão estável disponível — não travar nisso se não houver.
+```
+
+---
+
+### 23 — Refatorar Watchlist.tsx em componentes menores ✅ CONCLUÍDO E CONFIRMADO AO VIVO (2 erros de TypeScript reais encontrados e corrigidos: tipo errado de typeFilters/counts no WatchlistToolbar, chave i18n inexistente no AddAssetDropdown; mais 1 regressão visual corrigida: botão Restore Mock Data sumindo do estado vazio da carteira)
+
+```
+23 — Refatorar Watchlist.tsx em componentes menores
+
+Contexto: Watchlist.tsx (src/components/ceiling/Watchlist.tsx) é o maior
+arquivo do projeto e o que mais quebrou ao longo de toda essa auditoria:
+import duplicado do MetricBox, tipo editing/detail mal tipado, bug do
+OppFilter, e o cálculo duplicado da Tarefa 14.3 (que causava a grade de
+ativos vazia). Concentra hoje, num único componente: KPIs herói (net worth,
+renda consolidada, top/worst performer), gráfico de alocação, barra de
+filtros + toolbar de ações, grid/lista de ativos, e orquestração de 5
+diálogos. Além disso, o dropdown "+ Add Asset" (Add Equity / Add Fixed
+Income / Import Broker Note) está DUPLICADO no arquivo — uma cópia dentro
+do card de estado vazio (quando items.length === 0) e outra na toolbar
+principal, violando a Golden Rule 1 (reusabilidade).
+
+TAREFA: extrair 5 componentes novos em src/components/ceiling/watchlist/,
+cada um com responsabilidade única. Watchlist.tsx continua sendo o dono do
+estado (useState) e do useValuedPortfolio() — os componentes novos recebem
+tudo via props, não buscam dados por conta própria.
+
+1. AddAssetDropdown.tsx
+   Extrai o dropdown "+ Add Asset" (as 3 opções: Add Equity, Add Fixed
+   Income, Import Broker Note) num componente único e reutilizável,
+   substituindo as DUAS cópias hoje existentes no arquivo (a do card de
+   estado vazio e a da toolbar principal).
+   Props: onNavigateToScreener, onOpenFIWizard, onOpenBrokerUploader, e um
+   variant opcional (ex: "compact" | "default") apenas se o estilo do
+   botão realmente precisar diferir entre os dois locais — se o visual for
+   idêntico nos dois usos, nem precisa de variant, um único componente
+   basta.
+
+2. WatchlistKpiSection.tsx
+   Extrai: o bloco "mb-4 grid gap-3 lg:grid-cols-2" inteiro — AllocationChart,
+   NextPaymentBanner, card de Patrimônio Consolidado, e o grid de MetricBox
+   (renda consolidada, USD/BRL, top/worst performer).
+   Props: valuedItems, meta, totals, locale, typeFilter, onSelectType,
+   topAndWorst (JÁ CALCULADO pelo pai, não recalcular aqui).
+   ATENÇÃO CRÍTICA: o cálculo de `topAndWorst` (best/worst performer) deve
+   continuar sendo feito UMA ÚNICA VEZ no Watchlist.tsx (ou num hook
+   compartilhado) e passado como prop pronto para este componente — nunca
+   recalculado de forma independente dentro dele. Essa duplicação de
+   cálculo é exatamente o bug que causou a Tarefa 14.3 (grade vazia por
+   cálculo duplicado divergente do useValuedPortfolio). Mesma regra vale
+   pro contextStats usado no aviso "over/under valued" logo abaixo.
+
+3. WatchlistToolbar.tsx
+   Extrai: o bloco "flex flex-col sm:flex-row items-start... mb-4" —
+   WatchlistFilterBar, o AddAssetDropdown (componente novo do passo 1),
+   DataManagement, e os botões de toggle grid/tabela.
+   Props: typeFilters, counts, typeFilter, oppFilter, sortOption, os 3
+   setters correspondentes, viewMode, setViewMode, e os mesmos callbacks
+   onNavigateToScreener/onOpenFIWizard/onOpenBrokerUploader repassados pro
+   AddAssetDropdown.
+
+4. WatchlistAssetGrid.tsx
+   Extrai: o bloco condicional que decide entre "nenhum ativo encontrado
+   após filtro" / grid de AssetCard / WatchlistTable.
+   Props: filteredAndSorted, valuedItemsLength (pra distinguir "vazio por
+   filtro" de "vazio de verdade"), quotes, meta, viewMode, onEdit, onRemove,
+   onOpenDetail, onClearFilters.
+
+5. WatchlistDialogs.tsx
+   Extrai: os 5 diálogos no fim do JSX — EditItemDialog, AssetDetailSheet,
+   PaywallDialog, FixedIncomeWizardSheet, BrokerNoteUploader.
+   Props: editing, detail, showPaywall, showFIWizard, showBrokerNoteUploader
+   e todos os handlers de close/save correspondentes (onCloseDialog, onSave,
+   onCloseDetail, onPaywallOpenChange, onFIWizardOpenChange,
+   onBrokerUploaderOpenChange). Este componente é puramente apresentacional
+   — todo o estado continua no Watchlist.tsx.
+
+Além disso, atualizar o card de estado vazio (items.length === 0) pra usar
+o AddAssetDropdown novo em vez de manter sua cópia própria do dropdown.
+
+NÃO TOCAR:
+- Nenhuma lógica de negócio muda — nem cálculo de valuation, nem filtros,
+  nem ordenação. É refatoração pura de estrutura/apresentação.
+- Não alterar as props/assinaturas de AssetCard, WatchlistTable,
+  WatchlistFilterBar, AllocationChart — só como eles são chamados a partir
+  do novo local.
+- O bloco de "empty state total" (card tracejado "Comece adicionando um
+  ativo") pode continuar dentro do Watchlist.tsx — só o dropdown interno
+  dele precisa virar o AddAssetDropdown compartilhado, o resto do card não
+  precisa ser extraído.
+
+CRITÉRIO DE SUCESSO:
+- Watchlist.tsx vira um componente "casca" que só monta estado + os 5
+  componentes novos, nenhuma mudança visual.
+- O dropdown "+ Add Asset" não existe mais duplicado no código-fonte — só
+  uma implementação, usada nos dois locais.
+- tsc limpo, testes passando.
+- Confirmar ao vivo no navegador (não só compilação): grid de ativos
+  renderiza igual a antes, alternância grid/tabela funciona, filtros e
+  ordenação funcionam, abrir e salvar o diálogo de edição funciona, abrir o
+  sheet de detalhe funciona, dropdown "+ Add Asset" com as 3 opções
+  continua funcionando tanto no estado vazio quanto na toolbar principal,
+  top/worst performer e KPIs mostram os mesmos valores de antes da
+  refatoração.
+```
+
+---
+
+### 25 — Auditoria pré-produção (limpeza geral antes do commit final) ✅ CONCLUÍDA, 3 ITENS APROVADOS PENDENTES DE EXECUÇÃO (ver 25.1)
+
+```
+25 — Auditoria pré-produção (limpeza geral antes do commit final)
+
+Contexto: as tarefas anteriores da fila resolveram problemas específicos já
+identificados (CSRF, método depreciado, refatoração da Watchlist, etc.).
+Esta é uma varredura mais ampla, cobrindo higiene geral que nenhuma tarefa
+pontual tocou ainda, antes do commit final pra produção. É uma auditoria —
+reporte o que encontrar antes de corrigir qualquer coisa que pareça exigir
+decisão de produto ou risco de comportamento.
+
+TAREFA:
+
+1. Revisitar a versão do Nitro (Tarefa 22)
+   A Tarefa 22 trocou "nitro": "3.0.260603-beta" por "^3.0.0" no
+   package.json, afirmando que já existia versão estável. Isso está em
+   dúvida: verificar com `npm view nitro@3.0.0 time` (ou equivalente) a
+   data de publicação real dessa versão, e comparar com a documentação
+   oficial do projeto (github.com/nitrojs/nitro) pra confirmar se "3.0.0"
+   é uma release atual e mantida, ou uma tag antiga/órfã de antes do
+   esquema de versionamento por data (3.0.260xxx-beta) que o projeto usa
+   hoje. Se for uma tag antiga sem manutenção, reverter para a versão beta
+   mais recente disponível e documentar que a v3 do Nitro ainda não tem
+   uma linha estável oficial — não travar nisso, só deixar registrado.
+
+2. Vazamento de segredos e configuração de ambiente
+   - Confirmar que `.env` está no `.gitignore` e não existe nenhum arquivo
+     de credencial real rastreado pelo git (rodar `git status` e `git log
+     --all --full-history -- .env` ou equivalente)
+   - Confirmar que `.env.example` existe e lista todas as variáveis de
+     ambiente que o projeto realmente usa, sem valores reais
+   - Buscar por chaves de API, tokens ou credenciais hardcoded no
+     código-fonte (grep por padrões comuns: "api_key", "apikey",
+     "secret", "AIza", "sk-", etc.) — reportar qualquer ocorrência, não
+     apagar sem confirmar comigo primeiro
+
+3. Código de debug esquecido
+   - Buscar por `console.log`, `console.debug`, `debugger` fora de
+     blocos já protegidos por `import.meta.env.DEV` ou
+     `process.env.NODE_ENV === "development"` — reportar a lista, não
+     remover tudo automaticamente (alguns `console.warn`/`console.error`
+     em catch blocks são intencionais e devem ficar)
+
+4. Regras do Firestore
+   Revisar `firestore.rules` — confirmar que não há regra permissiva
+   demais (ex: `allow read, write: if true` em produção) antes de ir ao
+   ar. Reportar qualquer regra suspeita, não alterar sem confirmar comigo.
+
+5. Build, lint e testes limpos
+   Rodar `npm run build`, `npm run lint` e `npm run test` do zero e
+   confirmar que os três passam sem erro. Reportar quaisquer avisos
+   (warnings) que apareçam, mesmo que não quebrem o build.
+
+6. Dependências não usadas
+   Verificar se há pacotes em `dependencies`/`devDependencies` do
+   `package.json` que não são mais importados em lugar nenhum do código
+   (útil especialmente depois da Tarefa 14.1, que removeu o
+   vite-tsconfig-paths — confirmar que não sobrou mais nenhum caso
+   parecido). Reportar antes de remover.
+
+7. Isolamento DEV confirmado de ponta a ponta
+   Confirmar que o mecanismo de dados sintéticos (TEST_IPO_RECENTE em
+   apiService.functions.ts, Tarefa 14.5) e o botão "Restore Mock Data"
+   (DataManagement.tsx) estão genuinamente inacessíveis num build de
+   produção (`npm run build` sem `--mode development`) — não é suficiente
+   confiar no guard de código, testar de fato rodando o build de produção
+   e confirmando que o botão não aparece e o interceptor não responde.
+
+8. Arquivos que não deveriam ir pro commit
+   Confirmar que `dist/` (pasta de build) está no `.gitignore` e não está
+   rastreada pelo git. Mesma checagem pra qualquer pasta de output/cache
+   gerada localmente.
+
+NÃO TOCAR: nenhuma lógica de negócio muda nesta tarefa. Itens que exigem
+decisão (ex: remover uma dependência que parece não usada, apagar uma
+credencial encontrada, alterar uma regra do Firestore) devem ser
+reportados para eu decidir, não corrigidos automaticamente — exceção pros
+itens claramente mecânicos e de baixo risco (console.log solto fora de
+guard de DEV pode ser removido direto, reportando o que foi removido).
+
+CRITÉRIO DE SUCESSO: relatório único cobrindo os 8 itens acima, com
+build/lint/test confirmados limpos, e uma lista clara do que foi corrigido
+automaticamente vs. o que ficou pendente de decisão sua antes do commit
+final para produção.
+```
+
+---
+
+### 25.1 — Executar as 3 pendências da auditoria pré-produção ✅ CONCLUÍDO E CONFIRMADO (firestore.rules, vitest.config.ts e package.json verificados diretamente no código)
+
+```
+25.1 — Executar as 3 pendências da auditoria pré-produção
+
+Contexto: a Tarefa 25 levantou 3 itens que exigiam minha decisão antes de
+agir. Decidi as 3 — mas com uma correção importante no item 1, porque o
+relatório da 25 nomeou coleções do Firestore que não existem literalmente
+no código ("user_settings", "smart_allocation_targets"). Investiguei o
+código real antes de aprovar e o gap é outro, mais amplo.
+
+TAREFA:
+
+1. Regras do Firestore — ALVO CORRIGIDO
+   Confirmei em src/lib/useUserSettings.ts e src/lib/watchlist.ts que NÃO
+   existem coleções chamadas "user_settings" ou "smart_allocation_targets".
+   O que existe de verdade, sem nenhuma regra de segurança no
+   firestore.rules hoje:
+   - O documento users/{userId} em si (onde useUserSettings.ts grava o
+     campo `settings`, incluindo targetYield, displayCurrency,
+     smartAllocationTargets, etc. via setDoc(doc(db, "users", userId),
+     {...}, { merge: true }))
+   - A subcoleção users/{userId}/assets/{assetId} (onde watchlist.ts faz
+     todo o CRUD real da carteira — upsert, remove, update, upsertMany —
+     via doc(db, "users", userId, "assets", ...))
+
+   A regra existente pra `watchlist_items/{itemId}` no firestore.rules
+   NÃO cobre nenhum desses dois caminhos — ela só é usada num bloco de
+   migração local→nuvem que roda uma única vez (rows.forEach com
+   doc(db, "watchlist_items", ...) dentro de useWatchlist()), não no
+   fluxo normal de uso.
+
+   Adicionar ao firestore.rules:
+   a) Uma regra pra match /users/{userId} permitindo read/write só se
+      request.auth != null && request.auth.uid == userId
+   b) Uma regra pra match /users/{userId}/assets/{assetId} (subcoleção)
+      com a mesma condição de posse (auth.uid == userId do caminho)
+
+   Manter a regra de watchlist_items existente como está — não remover,
+   mesmo sendo usada só na migração; não é escopo desta tarefa.
+
+2. Formatação (Prettier) — SOMENTE formatação, não os `any`
+   Rodar `npm run format` (prettier --write) pra resolver a fatia
+   mecânica dos 2690 problemas do lint que são puramente de formatação.
+   NÃO tentar resolver os avisos de "Unexpected any" em massa — isso fica
+   de fora do escopo desta tarefa, é dívida técnica registrada, não
+   bloqueante pro commit. Depois de rodar o format, rodar `npm run lint`
+   de novo e reportar quantos problemas restam (devem ser majoritariamente
+   os `any`, não mais formatação).
+
+3. Remover vite-tsconfig-paths corretamente
+   Remover a dependência do package.json E remover o import/uso em
+   vitest.config.ts, MAS substituir por resolução nativa, igual o
+   vite.config.ts já faz — adicionar `resolve: { tsconfigPaths: true }`
+   no defineConfig do vitest.config.ts (não deixar sem equivalente, ou os
+   imports com alias @/ nos testes vão quebrar). Depois de trocar, rodar
+   `npm run test` e confirmar que os 29 testes continuam passando com os
+   imports @/ resolvendo normalmente. Só então rodar `npm install` pra
+   limpar a dependência do lockfile.
+
+NÃO TOCAR: nenhuma lógica de negócio muda. Não mexer nos avisos de
+"Unexpected any" do lint. Não alterar a regra de watchlist_items já
+existente.
+
+CRITÉRIO DE SUCESSO: firestore.rules cobrindo users/{userId} e
+users/{userId}/assets/{assetId} com posse validada por auth.uid;
+npm run format rodado e lint com a fatia de formatação zerada (só sobra
+"any"); vite-tsconfig-paths removido do package.json e vitest.config.ts,
+substituído por resolve.tsconfigPaths nativo, com os 29 testes passando
+normalmente depois da troca.
+```
+
+---
+
+### 26 — Commit e push final pro GitHub ✅ CONCLUÍDO E CONFIRMADO (push feito, Cloud Build disparou, site em produção atualizado)
+
+```
+26 — Commit e push final pro GitHub
+
+Contexto: todas as tarefas relevantes pra produção da fila (14.7, 22, 14.8, 
+23, 25, 25.1) foram concluídas e confirmadas. Chegou a hora de subir tudo 
+pro GitHub, atualizando o repositório remoto com o estado atual local.
+
+TAREFA:
+
+1. Antes de qualquer coisa, rodar `git status` e `git branch --show-current` 
+   e me reportar: em qual branch estamos, quantos arquivos modificados/
+   novos/deletados existem, e se há qualquer arquivo inesperado na lista 
+   (ex: algo que deveria estar no .gitignore mas apareceu como 
+   untracked — .env, node_modules, dist, etc. NÃO devem aparecer). Pausar 
+   aqui e me mostrar a lista antes de continuar se houver qualquer arquivo 
+   fora do esperado.
+
+2. Rodar `git diff --stat` (ou equivalente) pra um resumo de quantos 
+   arquivos mudaram e o volume de alterações, só pra eu ter noção do 
+   tamanho do commit antes de prosseguir.
+
+3. Adicionar todos os arquivos relevantes com `git add` (respeitando o 
+   .gitignore, que já está correto — node_modules, dist, .output, 
+   .vinxi, .nitro e .env todos excluídos)
+
+4. Criar UM commit com mensagem clara resumindo o escopo desta sessão 
+   (não precisa listar cada uma das ~15 tarefas individualmente, mas deve 
+   cobrir as frentes principais). Sugestão de estrutura pro corpo da 
+   mensagem:
+   
+   "Auditoria pré-produção: segurança, refatoração e limpeza
+
+   - Adiciona proteção CSRF nas server functions
+   - Corrige regras do Firestore (users/{userId} e subcoleção assets 
+     sem regra de segurança)
+   - Refatora Watchlist.tsx em componentes menores (AddAssetDropdown, 
+     WatchlistKpiSection, WatchlistToolbar, WatchlistAssetGrid, 
+     WatchlistDialogs)
+   - Cataloga corretoras suportadas na Wiki (/app/docs#supported-brokers)
+   - Reconstrói massa de dados de DEV com cobertura de casos de teste
+   - Remove vite-tsconfig-paths, substitui por resolução nativa
+   - Atualiza método depreciado do TanStack Start (validator)
+   - Roda Prettier em toda a base de código
+   - Remove scripts órfãos da raiz"
+   
+   Ajustar o texto acima conforme o que realmente está no diff — não 
+   inventar itens que não mudaram nesta leva de commits.
+
+5. Depois do commit criado (mas ANTES do push), rodar `git log -1 
+   --stat` e me mostrar o resultado — pausar aqui pra eu confirmar antes 
+   de você rodar o push de verdade.
+
+6. Só depois da minha confirmação explícita, rodar `git push` (push 
+   normal pro branch atual, sem --force e sem sobrescrever histórico)
+
+NÃO TOCAR: nenhum comando destrutivo (`git reset --hard`, `git 
+checkout` sobre arquivos não commitados, `git push --force`, `git rebase`, 
+`git commit --amend`). Não criar branch nova nem mudar de branch sem eu 
+pedir. Não pular a pausa de confirmação antes do push — mesmo que tudo 
+pareça certo.
+
+CRITÉRIO DE SUCESSO: um commit único, com mensagem clara e fiel ao que 
+realmente mudou, revisado por mim antes do push; push feito com sucesso 
+pro branch remoto sem sobrescrever nada; nenhum arquivo sensível 
+(.env, credenciais, node_modules, dist) subiu junto.
+```
+
+---
+
+### 27 — Corrigir pipeline de deploy: cloudbuild.yaml com build args e env vars de runtime ✅ CONCLUÍDO E CONFIRMADO (cloudbuild.yaml migrado pra Artifact Registry + variáveis nativas do Cloud Run, região corrigida pra us-east1, serviço duplicado em us-south1 identificado e removido, RESEND_API_KEY adiado por não estar em uso)
+
+```
+27 — Corrigir pipeline de deploy: cloudbuild.yaml com build args e env vars 
+de runtime
+
+Contexto: o deploy via Cloud Build conectado ao GitHub quebrou com 
+"COPY failed: stat app/.env: file does not exist". Causa raiz: o 
+Dockerfile tinha `COPY --from=builder /app/.env ./.env` e rodava com 
+`node --env-file=.env`, assumindo que o `.env` estaria disponível no 
+contexto de build — mas como o Cloud Build agora puxa o código direto do 
+GitHub (não de uma pasta local), e o `.env` corretamente nunca foi 
+commitado (é segredo, confirmado na auditoria de segurança da Tarefa 25), 
+o arquivo genuinamente não existe nesse contexto.
+
+Já CORRIGI O DOCKERFILE (não precisa mexer nele de novo, só confirmar que 
+bate com isto):
+- Removi `COPY --from=builder /app/.env ./.env` e o `--env-file=.env` do 
+  CMD (agora é só `CMD [ "node", "server.production.js" ]`), porque 
+  server.production.js já lê direto de `process.env` (não depende de 
+  arquivo) — vars de runtime devem vir do próprio Cloud Run, não de 
+  dentro da imagem.
+- Adicionei ARG + ENV pras 7 variáveis VITE_FIREBASE_* no estágio 
+  `builder`, ANTES do `RUN npm run build` — porque essas variáveis com 
+  prefixo VITE_ são inlinadas no bundle do cliente pelo Vite durante o 
+  build, então precisam existir nesse momento, não só em runtime.
+
+O QUE FALTA (esta tarefa):
+
+1. Criar um arquivo `cloudbuild.yaml` na raiz do projeto, substituindo o 
+   comportamento implícito atual do trigger (que só builda o Dockerfile 
+   sem passar build-args). O cloudbuild.yaml deve ter 3 steps:
+   
+   a) `docker build` passando cada VITE_FIREBASE_* como `--build-arg`, 
+      lendo de substitution variables prefixadas com underscore (padrão 
+      do Cloud Build), ex: `--build-arg 
+      VITE_FIREBASE_API_KEY=$_VITE_FIREBASE_API_KEY`. Repetir pros 7 
+      valores do .env.example (VITE_FIREBASE_API_KEY, 
+      VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, 
+      VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, 
+      VITE_FIREBASE_APP_ID, VITE_FIREBASE_MEASUREMENT_ID). Tag da imagem 
+      usando $PROJECT_ID e $COMMIT_SHA (substitutions automáticas do 
+      Cloud Build).
+   
+   b) `docker push` da imagem taggeada.
+   
+   c) `gcloud run deploy` fazendo o deploy da imagem no serviço Cloud Run 
+      existente, incluindo `--set-secrets RESEND_API_KEY=RESEND_API_KEY:latest` 
+      (assumindo que o segredo vai ser criado no Secret Manager — ver 
+      item 2) em vez de `--set-env-vars` puro, já que é uma API key.
+   
+   Declarar no final do arquivo um bloco `substitutions:` com valores 
+   default VAZIOS pras 7 variáveis VITE_FIREBASE_* (só os nomes, sem 
+   valor real — os valores de verdade vão ser configurados no trigger do 
+   Cloud Build pelo usuário, fora deste repositório).
+
+2. Escrever, junto do arquivo, um bloco de instruções em português (pode 
+   ser um comentário no topo do cloudbuild.yaml ou um markdown 
+   separado DEPLOY.md) explicando os 2 passos manuais que EU (não você, 
+   Antigravity) preciso fazer no Console do Google Cloud, já que envolvem 
+   segredos reais:
+   a) No trigger do Cloud Build (Cloud Build > Triggers > editar o 
+      trigger existente), adicionar as 7 substitution variables 
+      (_VITE_FIREBASE_API_KEY, etc.) com os valores reais do projeto 
+      Firebase.
+   b) Criar o segredo RESEND_API_KEY no Secret Manager (Security > 
+      Secret Manager) com o valor real, e conceder acesso à service 
+      account do Cloud Run pra ler esse segredo.
+
+NÃO TOCAR: não rodar nenhum comando `gcloud` que afete a infraestrutura 
+real (trigger, secret manager, deploy manual) — isso fica comigo, fora do 
+repositório. Não colocar nenhum valor real de API key ou segredo em 
+nenhum arquivo do repositório, nem como default de substitution. Não 
+mexer no Dockerfile além de confirmar que está como descrito acima.
+
+CRITÉRIO DE SUCESSO: cloudbuild.yaml criado e commitado, com os 3 steps 
+(build com build-args, push, deploy com secret), substitutions declaradas 
+sem valores reais, e instruções claras do que eu preciso configurar 
+manualmente no Console antes do próximo push disparar o trigger de novo.
+```
+
+---
+
+### 28 — Corrigir _DEPLOY_REGION do gatilho + logging do Cloud Build ✅ CONCLUÍDO E CONFIRMADO (corrigido ao vivo via Console: _DEPLOY_REGION estava salvo como us-south1 apesar da instrução anterior, corrigido pra us-east1; cloudbuild.yaml recebeu `logging: CLOUD_LOGGING_ONLY` pra satisfazer exigência do Cloud Build com service account explícita; build manual disparado e confirmado atualizando o serviço us-east1 correto; serviço duplicado em us-south1 removido)
+
+---
+
+## Pendências registradas, sem prompt ainda (aguardando decisão ou momento certo)
+
+- Decisão de monetização real (Free vs. Pro) — estrutura em DEV apenas, aguardando você decidir ativar
+- Lentidão do `npm run dev` por causa do OneDrive — ação do lado do Windows, não é prompt de código
+
+---
+
+### 29 — P3: Funcionalidades novas (Negócio Central) ⚪ AGUARDANDO DECISÃO DE INÍCIO
+
+Consolida os itens de negócio ainda não construídos dos Épicos 1 e 2 do
+`BACKLOG_V2.md`. Não são prompts prontos pra rodar — precisam de decisão
+de escopo e ordem antes de virarem tarefa individual. Ordem sugerida
+abaixo respeita dependências reais entre os itens (não é arbitrária).
+
+**29.1 — Cash Flow com dado real de proventos (não mais só projetado)** 🟡 (BACKLOG_V2 1.2) — PROMPT PRONTO, ver abaixo
+
+Base de tudo o que vem depois (29.3, IRPF). Escopo final, após discovery
+completo e decisão do usuário de NÃO adicionar UI nova (nada de aba, nada
+de seção de registro manual na v1) — só evoluir o que já existe com dado
+real, mantendo a tela como está hoje.
+
+**Achados que sustentam esse escopo:**
+- `paidAmount` em `src/lib/cashflow.ts` é hoje FALSO — `if (i <
+  currentMonthIndex) paidAmount = b.amount`, mesma matemática projetada
+  só pintada de verde pros meses passados. Bug de credibilidade real.
+- Brapi (`res.dividendsData.cashDividends`, ativos BR) e Yahoo
+  (`res.events.dividends`, ativos US) JÁ retornam proventos por evento
+  (não só total anual), com `paymentDate` e (na Brapi) `lastDatePrior` =
+  Data-Com — dado descartado hoje por `sumByYear()`. Não precisa de
+  registro manual nem integração B3 pra ter dado real de proventos.
+- Decisão final do usuário (após reprovar duas propostas de UI nova): se
+  a API já tem o dado, não faz sentido pedir pro usuário registrar nada
+  na v1 — registro manual fica de fora do escopo, possível v2.
+
+**Os 6 pontos aprovados** (ver Discovery de mercado 29.1 anterior pro
+benchmark completo com Investidor10):
+1. `paidAmount`/`announcedAmount` passam a vir de dado real da API, não
+   mais da projeção repintada.
+2. Terceiro gráfico NOVO, abaixo dos dois já existentes: por ativo, duas
+   barras — valor investido (`averagePrice × quantity`, já disponível)
+   vs. valor acumulado em proventos recebidos (soma dos eventos reais da
+   API × quantidade atual).
+3. Drill-down por mês (já existente) ganha o valor numérico por ativo —
+   hoje só mostra a barra, sem número.
+4. Rotular os montantes com formato compacto (`compactWithSymbol`, já
+   existe em `CashFlowSummary.tsx`) nos lugares que hoje mostram valor
+   por extenso.
+5. Remover o botão de exportar CSV (`CashFlowHeader`, prop `onExportCsv`).
+6. Trocar o título (`t.watchlist.cashFlowTitle` no i18n) de "Projected
+   monthly cash flow" pra só "Cash Flow" (e equivalente nos 3 idiomas).
+
+**Limitação conhecida, documentar em tooltip**: o "valor acumulado em
+proventos" assume que a quantidade atual do ativo é a mesma que o
+usuário tinha em cada pagamento passado — aproximado, não exato, se a
+posição mudou ao longo do tempo (sem histórico de transação ainda).
+
+---
+
+**PROMPT PRONTO — 29.1**
+
+```
+29.1 — Cash Flow com dado real de proventos (não mais só projetado)
+
+Contexto: a página Cash Flow (/app/cashflow, CashFlowCalendar.tsx) hoje 
+é 100% projetada. O gráfico já tem um conceito visual de "Confirmed" 
+(barra verde sólida, campo paidAmount em src/lib/cashflow.ts) vs 
+"Projected" (barra translizida) — mas paidAmount é FALSO hoje: 
+`if (i < currentMonthIndex) paidAmount = b.amount`, a mesma matemática 
+de projeção mensal (annualDividend/12), só pintada de verde pra meses 
+já passados. announcedAmount existe no tipo mas nunca é populado.
+
+Ao mesmo tempo, as APIs já consumidas hoje JÁ retornam histórico de 
+proventos por evento, não só total anual, e esse dado é descartado:
+- src/lib/api/brapi.server.ts: res.dividendsData.cashDividends (ativos 
+  BR) tem, por evento, paymentDate, lastDatePrior (= Data-Com) e rate 
+  (valor por ação/cota). Cobre 5 anos (range=5y na URL).
+- src/lib/api/yahoo.server.ts: res.events.dividends (ativos US/REITs) 
+  tem amount e date por evento (sem separar data-com de pagamento).
+
+Hoje ambos são colapsados em dividendHistory: [{year, amount}] via 
+sumByYear() antes de chegar em qualquer componente.
+
+DECISÃO DE ESCOPO (importante, já validada): NENHUMA UI de registro 
+manual de provento entra nesta tarefa. Nada de aba nova, nada de botão 
+"Registrar provento", nada de CRUD de lançamento. A página Cash Flow 
+continua com a MESMA estrutura visual de hoje (2 gráficos + cards de 
+resumo) — só fica mais honesta com dado real, mais um terceiro gráfico.
+
+TAREFA:
+
+1. Expor os eventos de dividendo por ativo (não só o agregado anual)
+   Adicionar ao retorno de fetchFromBrapi/fetchFromYahoo (ou a uma nova 
+   função auxiliar que os consome) um array de eventos brutos por ativo: 
+   { exDate, paymentDate, amountPerShare }. Pra Brapi, exDate = 
+   lastDatePrior; pra Yahoo, exDate = date (mesmo campo, sem separação). 
+   Não remover dividendHistory nem sumByYear — eles continuam 
+   alimentando o cálculo de valuation existente (getCanonicalAnnualDividend 
+   e afins), que NÃO muda nesta tarefa. Isso é só uma exposição adicional 
+   do dado que já vem da API, em paralelo ao que já existe.
+
+2. paidAmount real em buildMonthlyBuckets (src/lib/cashflow.ts)
+   Pra cada mês já passado, paidAmount deve vir da soma real dos eventos 
+   de dividendo cujo paymentDate cai naquele mês, multiplicado pela 
+   quantidade ATUAL do ativo (mesma limitação de sempre: não há 
+   histórico de transação, então assume quantidade constante). Meses 
+   futuros continuam projetados como hoje (projectedAmount, sem mudança). 
+   announcedAmount pode ficar de fora se não houver sinal claro de 
+   "anunciado mas ainda não pago" nos dados disponíveis — não inventar 
+   esse dado, só usar o que a API realmente fornece.
+
+3. Terceiro gráfico: investido vs. recebido, por ativo
+   Abaixo dos dois gráficos existentes (mensal + acumulado) em 
+   CashFlowChart.tsx, adicionar um gráfico de barras agrupadas por 
+   ativo: barra 1 = valor investido (averagePrice × quantity, já 
+   disponível no WatchlistItem), barra 2 = soma de todos os eventos de 
+   dividendo recebidos daquele ativo × quantidade atual. Seguir o mesmo 
+   padrão visual dos gráficos existentes (recharts, cores/tema atuais). 
+   Incluir uma nota/tooltip curta explicando que o valor recebido assume 
+   quantidade atual constante ao longo do tempo, não histórico exato.
+
+4. Valor numérico no drill-down por mês
+   No breakdown que já aparece ao clicar num mês (bloco 
+   selectedMonthData em CashFlowChart.tsx, gráfico horizontal de 
+   contribuintes), adicionar o rótulo de valor (compactWithSymbol) ao 
+   lado de cada barra — hoje só mostra o ticker no eixo Y, sem número 
+   visível na barra em si.
+
+5. Remover exportação CSV
+   Remover o botão de export em CashFlowHeader.tsx (prop onExportCsv) e 
+   a chamada correspondente em CashFlowCalendar.tsx. Pode manter 
+   exportCashFlowCsv em cashflow.ts sem uso, ou remover se não for usado 
+   em nenhum outro lugar — confirmar antes de apagar a função em si.
+
+6. Trocar o título
+   A chave t.watchlist.cashFlowTitle (nos 3 dicionários) hoje diz algo 
+   como "Projected monthly cash flow" — trocar pra só "Cash Flow" (e 
+   equivalente natural em pt-BR e es, mantendo o padrão dos outros 
+   títulos de página do app).
+
+NÃO TOCAR:
+- getAssetValuation, getCanonicalAnnualDividend e todo o motor de 
+  valuation continuam exatamente como estão — essa tarefa não mexe em 
+  preço-teto, margem de segurança, nem nenhum cálculo de valuation.
+- Nenhuma tela de registro/edição manual de provento — fora de escopo 
+  por decisão explícita.
+- Não alterar a estrutura de dividendHistory/sumByYear usada hoje pelo 
+  valuation — só adicionar exposição paralela dos eventos brutos.
+
+CRITÉRIO DE SUCESSO: gráfico mensal com barras "Confirmed" batendo com 
+proventos reais recebidos (não mais projeção repintada); terceiro 
+gráfico novo (investido vs. recebido por ativo) abaixo dos dois 
+existentes; drill-down por mês com valor numérico visível; sem botão de 
+CSV; título "Cash Flow"; nenhuma UI de registro manual adicionada; tsc 
+limpo, testes passando, confirmado ao vivo no navegador com a carteira 
+de teste (ativos com histórico de dividendo real da API).
+```
+
+**Retorno ao plano de implementação (30/07/2026)** — plano revisado 
+e aprovado com 3 correções, texto exato mandado de volta pro Antigravity:
+
+```
+O plano está aprovado, com 3 correções antes de começar a implementar:
+
+1. No passo 3b (lógica de paidAmount real em buildMonthlyBuckets), o 
+   trecho usa `bucketYear < currentYear`, mas `bucketYear` nunca foi 
+   definido em lugar nenhum — nem no código real, nem no resto do seu 
+   próprio plano. O buildMonthlyBuckets de hoje NÃO tem conceito de 
+   múltiplos anos (é sempre um array fixo de 12 posições representando 
+   os meses do ano corrente). Simplificar a condição pra só 
+   `if (i < currentMonthIndex)`, exatamente como a lógica atual já usa — 
+   sem introduzir nenhuma variável de ano nova.
+
+2. O passo 4c usa `<LabelList>` do recharts pro rótulo de valor no 
+   drill-down, mas o import atual no topo do CashFlowChart.tsx é 
+   `import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, 
+   ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";` — sem 
+   LabelList. Adicionar ao import.
+
+3. Respostas as 3 perguntas em aberto:
+   - Q1 (amount continua sendo só projeção mesmo pra meses passados): 
+     sim, confirmado, não mexer nisso.
+   - Q2 (mês atual continua projetado mesmo com pagamento parcial já 
+     ocorrido): sim, confirmado, não precisa checar paymentDate <= hoje, 
+     manter simples.
+   - Q3 (terceiro gráfico com muitos ativos): limitar aos top 10 ativos 
+     por valor investido, mesmo padrão que o drill-down existente já usa 
+     (`contributors.slice(0, 8)` em CashFlowChart.tsx) — manter 
+     consistência com o que já existe no código, não inventar um limite 
+     diferente.
+
+Fora essas 3 correções, pode seguir com o plano exatamente como 
+proposto — a arquitetura de useQueries + assetQueryOptions, a exposição 
+de dividendEvents em paralelo ao dividendHistory existente, e as 6 
+mudanças de UI estão todas corretas e batendo com o código real.
+```
+
+**Benchmark detalhado vs. Agenda de Dividendos do Investidor10:**
+Eles têm: toggle lista/calendário, filtro Data-Com vs. Data de Pagamento,
+busca por ticker, filtros por período/categoria/carteira, e um extra
+avançado ("Radar de Dividendos Inteligente") que PREVÊ data de anúncio
+futura por padrão histórico — esse último fica FORA de escopo do 29.1,
+é feature de dados de mercado, não o que o 29.1 resolve. Toggle lista/
+calendário e filtros avançados também ficam pra v2, não bloqueiam o
+lançamento.
+
+**Achado crítico (30/07/2026) — muda a arquitetura da feature:**
+As APIs já consumidas hoje (`fetchFromBrapi` em src/lib/api/brapi.server.ts,
+`fetchFromYahoo` em src/lib/api/yahoo.server.ts) JÁ retornam proventos
+POR EVENTO, não só total anual — o código de hoje descarta isso
+imediatamente via `sumByYear()`. Especificamente:
+- Brapi (`res.dividendsData.cashDividends`, ativos BR): cada evento tem
+  `paymentDate`, `lastDatePrior` (= Data-Com de verdade, mesmo campo que
+  o Investidor10 usa) e `rate` (valor por ação/cota). Cobre 5 anos
+  (`range=5y` na URL).
+- Yahoo (`res.events.dividends`, ativos US/REITs): cada evento tem
+  `amount` e `date` único (sem separar data-com de pagamento).
+
+ISSO MUDA O ESCOPO DO 29.1: não precisa ser só registro manual. Pra
+ativos já na carteira, a tela "Recebido" pode SUGERIR automaticamente os
+eventos que a API já devolve, cruzando com a quantidade atual do ativo
+— o usuário só confirma com 1 clique (ou ajusta a quantidade, caso a
+posição tenha mudado no período, já que não há histórico de transação
+ainda). Registro manual continua existindo pra cobrir o que a API não
+pegar (ativos com fallback de corretora, atraso de atualização, etc.),
+mas deixa de ser o único caminho. Isso aproxima bastante da experiência
+"automática" do Investidor10 sem precisar de integração B3 de verdade.
+
+Ajuste de schema decorrente: usar `exDate` (= `lastDatePrior` da Brapi)
+em vez de `declaredDate` genérico, já nomeando certo desde o início.
+
+**29.2 — Motor de WHT multi-moedas mais robusto** 🟡 (BACKLOG_V2 1.4)
+Já existe tratamento de imposto (30% US / 0% BR / 15% JCP) na camada de
+valuation. Falta um motor dedicado mais explícito pra múltiplas moedas, e
+cupons de renda fixa internacional (hoje só BR). Não depende do 29.1.
+
+**29.3 — Rentabilidade real vs. benchmark (TWR/IRR)** ⚪ (BACKLOG_V2 1.5)
+Depende do 29.1 (dado real de transação) pra calcular TWR de verdade.
+Comparar com CDI, IBOV, S&P 500 — fonte de benchmark externa a definir
+antes de escrever o prompt.
+
+**29.4 — Rebalanceamento por meta configurável** ⚪ (BACKLOG_V2 1.6)
+Evolui o "Gap Filler" que já existe no Smart Allocation. Usuário define
+alocação-alvo, app sugere aportes pra convergir. Não depende do 29.1.
+
+**29.5 — Alertas dinâmicos e notificações (push/e-mail)** ⚪ (BACKLOG_V2 2.2)
+Depende de infraestrutura de notificação (Firebase Cloud Messaging pro
+push; Resend pro e-mail — já tem `RESEND_API_KEY` prevista no
+`.env.example`, mas ainda não ativada, sem uso hoje). Confirmar
+infraestrutura disponível antes de prometer canal de notificação em
+qualquer prompt futuro.
+
+**29.6 — Corrigir "Best Month" usando valor real + expandir massa de dados** ✅ CONCLUÍDO E CONFIRMADO (troféu agora compara contra o valor efetivamente exibido — real pros meses passados, projetado pro resto — em vez da projeção teórica fixa; massa de dados de DEV expandida de 8 pra 18 ativos, cobrindo mais padrões de pagamento pros 3 gráficos do Cash Flow)
+Bug encontrado pelo usuário após testar a 29.1 ao vivo: o troéu de
+"melhor mês" continuava comparando contra `b.amount` (projeção pura),
+mesmo a barra visual já mostrando `paidAmount` real pros meses passados
+— podia acender o troéu num mês que não era o mais alto na tela.
+Corrigido em duas passadas: primeiro calcula o "valor efetivo" de cada
+mês (real ou projetado, o que estiver sendo exibido), depois `isBest`/
+`isWorst` comparam contra esse valor. Junto, `devMockData.ts` ganhou mais
+10 ativos (6 BR: VALE3, ITUB4, MXRF11, CPTS11, IFRA11, EGIE3; 4 US: STAG,
+JNJ, MPW, VYM), totalizando 18, pra estressar visualmente o terceiro
+gráfico (corte de top 10) e a dispersão de meses de pagamento.
+
+**Fora desta lista, tratados à parte por serem sensíveis:**
+- Módulo de IRPF (BACKLOG_V2 2.3) — depende do 29.1; item com implicação
+  financeira/legal real pro usuário, precisa de disclaimer e validação
+  numérica manual contra casos conhecidos antes de produção. Não tratar
+  como uma feature comum.
+- Assistente de IA (BACKLOG_V2 2.1) — ver Tarefa 30.
+
+Próximo passo real: você decidir por qual desses (29.1 a 29.5) começar —
+sugiro 29.1 primeiro, já que é pré-requisito de dois outros itens. Depois
+da decisão, eu monto o prompt individual completo (Contexto/Tarefa/Não
+Tocar/Critério de Sucesso) só daquele item.
+
+**Discovery de mercado (30/07/2026)** — pesquisa comparativa feita antes
+de escopar qualquer prompt, sem depender de input adicional do usuário:
+
+- **29.1 (proventos)**: confirmado como item OBRIGATÓRIO no mercado BR,
+  não diferencial — Investidor10 e StatusInvest tratam histórico de
+  proventos como core, distinguindo "a receber" (declarado) de "recebido"
+  (pago), base pro módulo de IRPF de ambos. Schema recomendado:
+  `declaredDate`, `paymentDate`, `grossValue`, `netValue` (já líquido do
+  WHT calculado hoje), `type` (dividendo/JCP/rendimento FII).
+- **29.3 (TWR/IRR)**: consenso técnico (Kitces, TFOCO, DonkyCapital) é
+  mostrar os DOIS lado a lado, não escolher um — TWR responde "a
+  estratégia foi boa?", IRR/XIRR responde "meu dinheiro rendeu quanto de
+  verdade?" (pondera timing dos aportes). Sequência recomendada: XIRR
+  primeiro (fórmula única por carteira, usa os mesmos dados do 29.1),
+  TWR completo como fase 2 (exige encadear sub-períodos geometricamente).
+- **29.4 (rebalanceamento)**: ferramentas internacionais conhecidas
+  (Wealthfront, Betterment, M1 Finance) EXECUTAM ordem automaticamente —
+  não se aplica, o app não é corretora. Categoria de mercado certa é tipo
+  Passiv/Portfolio Genius: monitoram desvio da meta e SUGEREM aporte, sem
+  executar. O "Gap Filler" já existente no Smart Allocation já está na
+  categoria certa — só precisa virar meta configurável persistente.
+- **29.5 (notificações)**: puramente infraestrutura (FCM + Resend), sem
+  padrão de mercado a copiar — segue dependendo da decisão de ativar
+  e-mail transacional.
+- **29.2 (WHT)**: nicho, pouca literatura comparável, já parcialmente
+  resolvido — baixa prioridade de pesquisa adicional.
+
+---
+
+### 30 — Itens regulatórios, administrativos e IA (fora do escopo central) ⚪ AGUARDANDO DECISÃO DE INÍCIO
+
+Consolida o restante do `BACKLOG_V2.md` que ainda não virou prompt e não
+é puramente "funcionalidade de investimento" — são itens regulatórios,
+administrativos, ou de inteligência, cada um com peso e risco diferentes.
+Mesma lógica da Tarefa 29: precisa de decisão de escopo antes de virar
+prompt individual.
+
+**30.1 — Assistente de IA (insights pessoais)** ⚪ (BACKLOG_V2 2.1)
+Não existe nenhum código relacionado hoje. Agente lendo a carteira e
+sugerindo ações (ex: alerta de desbalanceamento setorial). Decisão
+pendente antes de escopar: qual modelo/API de IA usar, e onde entra no
+fluxo do produto (proativo vs. sob demanda).
+
+**30.2 — Onboarding regulatório e perfilamento (KYC/Suitability)** ⚪ (BACKLOG_V2 4.2)
+Não existe. Nenhum fluxo de perfilamento de risco do investidor no
+código hoje. Item regulatório — vale confirmar com você se há exigência
+legal real disparando isso (CVM ou similar) antes de dimensionar o
+escopo, já que pode mudar bastante o tamanho da tarefa.
+
+**30.3 — Conformidade legal completa (LGPD & GDPR)** 🟡 (BACKLOG_V2 4.3)
+Parcial: já existe o item de menu "Privacidade (LGPD)" em Configurações,
+mas sem conteúdo funcional atrás. Faltam: banner de cookies, fluxo de
+"Direito ao Esquecimento" (excluir conta + limpar Firestore de verdade),
+exportação/portabilidade de dados. Tem risco legal real se ficar só no
+visual — vale priorizar se o produto já tem usuários reais na base.
+
+**30.4 — Painel administrativo (`/admin`)** ⚪ (BACKLOG_V2 3.2)
+Não existe, nenhuma rota `/admin` no projeto. Mesmo tratamento do item de
+monetização (3.1, já registrado acima): pode ser construído, mas fica
+sem decisão de ativação em produção por enquanto.
+
+Próximo passo real: o mesmo do 29 — decidir se algum desses entra na
+fila agora (o 30.3, LGPD, é o único com risco legal ativo, vale pensar
+nele primeiro se já há usuários reais usando o app) ou se todos ficam
+parados até você ter mais clareza de prioridade de negócio.
+
+---
+
+## Próximo item a rodar
+
+Fila de produção zerada (14.7, 22, 14.8, 23, 25, 25.1, 26, 27, 28 todos 
+✅). Restam só itens de baixa prioridade (não tocam produção) e decisões 
+de negócio em aberto — ver seção "Pendências registradas" acima.
+
+---
+
+### 31 — Cash Flow: investidor com histórico parcial (começou no meio do ano) ⚪ AGUARDANDO DECISÃO DE INÍCIO
+
+Problema levantado pelo usuário após a 29.1/29.6: o Cash Flow sempre
+mostra Jan-Dez do ano corrente, mesmo que o investidor só tenha começado
+a investir em junho, por exemplo. Discovery de mercado completo feito
+(Snowball Analytics, StatusInvest, Investidor10) antes de propor solução.
+
+**Bug real encontrado durante o discovery** (não é só questão de UX):
+`paidAmount` real (da 29.1) soma eventos de dividendo da API multiplicados
+pela quantidade ATUAL do ativo, sem checar se o usuário já tinha aquele
+ativo na data do evento. `WatchlistItem.addedAt` existe mas não é usado
+nesse cálculo hoje — resultado: dividendo "fantasma" pode aparecer como
+recebido em meses anteriores ao usuário sequer ter comprado o ativo.
+
+**Benchmark de mercado (30/07/2026):**
+- **Snowball Analytics**: tem um modo nomeado "Assets History" que faz
+  exatamente o backtesting de quantidade atual constante (mesmo
+  princípio do `quantityNote` já usado na 29.1) — confirma que essa
+  aproximação é padrão reconhecido de mercado, não gambiarra.
+- **StatusInvest**: fórmula de rentabilidade escala a janela pela data
+  real de entrada do ativo ("se o ativo tem menos de 2 anos na carteira,
+  será com base na data que ele iniciou") — valida o gating por data de
+  início como abordagem correta, não só trava calendário fixo.
+- **Investidor10**: quando não sabe a data real de compra (limite do
+  histórico da B3, pré-nov/2019), assume uma data de corte padrão
+  (01/11/2019) de forma explícita e documentável pro usuário — mesmo
+  princípio do `addedAt` como fronteira honesta quando não há dado
+  exato.
+- **Síntese**: nenhuma das 3 ferramentas (nem a paga internacional, nem
+  as 2 líderes do mercado BR) consegue precisão total sem histórico de
+  transação completo. Todas usam a melhor data disponível como
+  fronteira e são honestas sobre a limitação — valida a estrutura de 3
+  camadas abaixo como alinhada ao que os líderes de mercado fazem, não
+  uma solução de segunda linha.
+
+**Proposta em 3 camadas:**
+
+**Camada 1 (implementável agora, sem dado novo) — Gating por `addedAt`:**
+- Corrigir o bug: eventos de dividendo usados no cálculo de `paidAmount`
+  não podem ter `paymentDate` anterior ao `addedAt` daquele ativo
+  específico.
+- Dois modos de visualização: "Ano Calendário" (o que já existe, útil
+  pro futuro módulo de IRPF) e "Minha Jornada" (novo, modo padrão pra
+  carteira nova — gráfico começa no menor `addedAt` da carteira, sem
+  meses "mortos" no início).
+- Marco visual de início no gráfico (🌱 ou linha vertical sutil)
+  marcando onde a jornada começa, em vez de só esconder meses.
+
+**Camada 2 (próximo passo natural, usa infra que já existe) — Data de
+transação via nota importada:**
+O `b3Parser.ts` (Tarefa 17.2) já importa nota de corretagem em PDF — a
+data de negociação de cada operação está no documento, só não é
+capturada pra esse propósito hoje. Capturar isso trocaria `addedAt`
+("quando cliquei em adicionar no app") por uma data real de compra, sem
+precisar esperar o módulo de transações completo.
+
+**Camada 3 (futuro, é o próprio 29.3/IRPF) — Histórico de transação
+completo:**
+Precisão total (compras/vendas parciais ao longo do tempo), equivalente
+ao que Sharesight/Snowball pago oferecem. Já mapeado como sensível no
+`BACKLOG_V2` (módulo de IRPF), não precisa resolver agora.
+
+Próximo passo real: decidir se a Camada 1 entra na fila agora (é a única
+implementável sem dependência nova) ou se fica registrada pra depois do
+29.2-29.5.
+
+---
+
+**PROMPT PRONTO — 31 (Camada 1)**
+
+```
+31 — Cash Flow: corrigir dividendo fantasma + modo "Minha Jornada"
+
+Contexto: o Cash Flow (CashFlowCalendar.tsx) sempre mostra um array fixo 
+de 12 meses (MONTHS_EN/MONTHS_PT, sempre Jan-Dez do ano corrente, sem 
+conceito de ano múltiplo). buildMonthlyBuckets(items, currency, months, 
+dividendEventsMap) em src/lib/cashflow.ts mapeia isso 1:1 por índice.
+
+BUG REAL (não é só UX): o cálculo de paidAmount real (Tarefa 29.1) soma 
+eventos de dividendo da API multiplicados pela quantidade ATUAL do ativo, 
+sem checar se o usuário já possuía aquele ativo na data do evento. 
+WatchlistItem.addedAt (timestamp de quando o ativo foi adicionado à 
+carteira) existe mas não é usado nesse cálculo. Resultado: um ativo 
+adicionado em julho pode aparecer com dividendo "recebido" em março, 
+antes mesmo do usuário tê-lo comprado.
+
+Benchmark de mercado confirmado (Snowball Analytics, StatusInvest, 
+Investidor10) valida a solução: as 3 ferramentas usam a melhor data 
+disponível de entrada do ativo como fronteira pro cálculo, nenhuma finge 
+precisão que não tem.
+
+TAREFA:
+
+1. Corrigir o dividendo fantasma (prioridade máxima, é bug de dado)
+   Em buildMonthlyBuckets, ao somar os eventos reais de dividendo de um 
+   item pra calcular paidAmount, filtrar também por 
+   `new Date(ev.paymentDate ?? ev.exDate) >= new Date(item.addedAt)`. 
+   Eventos anteriores ao addedAt do item NÃO contam como recebidos. Isso 
+   vale pros 3 lugares que consomem dividendEventsMap hoje: 
+   buildMonthlyBuckets, computeInvestedVsReceived, e o drill-down por mês 
+   em CashFlowChart.tsx (breakdown de contribuintes) — todos precisam 
+   respeitar a mesma regra de corte, não só um lugar.
+
+2. Toggle "Ano Calendário" / "Minha Jornada"
+   Adicionar um seletor de modo em CashFlowCalendar.tsx (estado local, 
+   não precisa persistir em settings por enquanto). 
+   - "Ano Calendário": comportamento atual, Jan-Dez do ano corrente, 
+     inalterado.
+   - "Minha Jornada" (novo): calcular o menor addedAt entre todos os 
+     items da carteira. Se essa data cair dentro dos últimos 12 meses, 
+     o array de meses vai desse mês até o mês atual (pode ter menos de 
+     12 posições, sem meses "mortos" antes do início). Se a data for 
+     mais antiga que 12 meses atrás, usar uma janela rolante dos 
+     últimos 12 meses (mesmo comportamento visual de hoje, evitando 
+     arrays muito longos pra carteiras antigas — não é escopo desta 
+     tarefa resolver histórico multi-ano completo).
+   - Como os rótulos de mês hoje são strings simples ("Jan", "Fev"), e 
+     esse novo modo pode atravessar virada de ano, os buckets do modo 
+     "Minha Jornada" precisam de rótulo com ano quando necessário pra 
+     desambiguar (ex: "Jan/25" vs "Jan/26" se a janela cruzar dois 
+     anos) — avaliar a forma mais simples de fazer isso sem reescrever 
+     toda a tipagem de MonthBucket, e reportar a abordagem escolhida.
+   - Definir "Minha Jornada" como modo padrão (selecionado ao carregar a 
+     página) quando a carteira tiver menos de 12 meses de histórico 
+     (menor addedAt dentro dos últimos 12 meses); caso contrário, manter 
+     "Ano Calendário" como padrão.
+
+3. Marco visual de início
+   No gráfico mensal (CashFlowChart.tsx), se o mês do menor addedAt da 
+   carteira estiver dentro da janela visível (em qualquer um dos dois 
+   modos), marcar visualmente esse mês — usar ReferenceLine do recharts 
+   (mesmo padrão já usado pro "Best month", que tem o troféu) com um 
+   ícone ou rótulo indicando início da jornada (ex: emoji 🌱 ou texto 
+   curto "início"). Não remover ou conflitar com o marcador de 
+   "Best month" já existente — se caírem no mesmo mês, os dois devem 
+   conseguir coexistir visualmente.
+
+4. i18n
+   Os textos novos (labels do toggle "Ano Calendário"/"Minha Jornada", 
+   texto do marco de início) precisam entrar nos 3 dicionários, sem 
+   hardcode, seguindo a Golden Rule 2.
+
+NÃO TOCAR:
+- A regra de negócio de paidAmount pra meses futuros/atuais (projeção) 
+  não muda — só a parte que já é real (Tarefa 29.1/29.6).
+- getAssetValuation e o motor de valuation não mudam.
+- O terceiro gráfico (Investido vs. Recebido) já filtra implicitamente 
+  pelo dividendEventsMap corrigido no passo 1 — não precisa de UI nova 
+  pra ele nesta tarefa, só herda a correção do gating.
+
+CRITÉRIO DE SUCESSO: 
+- Um ativo adicionado recentemente não mostra mais dividendo "recebido" 
+  em meses anteriores à data em que foi adicionado — testar isso 
+  especificamente com um ativo de addedAt recente na massa de teste.
+- Toggle Ano Calendário / Minha Jornada funcionando, com Minha Jornada 
+  não mostrando meses antes do início real da carteira de teste.
+- Marco visual de início visível e não conflitando com o marcador de 
+  Best Month.
+- tsc limpo, testes passando, confirmado ao vivo no navegador.
+```
+
+**Plano de implementação aprovado (30/07/2026)** — 2 correcões solicitadas
+e resolvidas corretamente pelo Antigravity antes de começar a codar:
+1. `buildMonthlyBuckets` chamado 2x em `CashFlowCalendar.tsx` — sempre em
+   modo `"calendar"` pros cards de resumo (`computeCashFlowSummary`
+   intocado), e no modo ativo (`mode` state) pro `CashFlowChart`. Evita
+   qualquer risco no `avg = total/12` e `next30` hardcoded.
+2. Buckets do modo "journey" pré-construídos com `calendarMonth`
+   explícito (0-11) por posição, usando `.find(b => b.calendarMonth ===
+   m)` em vez de indexar direto no array — elimina risco de mapeamento
+   errado mesmo com janela não alinhada ao calendário.

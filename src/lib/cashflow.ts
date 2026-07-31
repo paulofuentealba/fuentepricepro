@@ -8,12 +8,16 @@ export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAG
 export interface MonthContributor {
   ticker: string;
   amount: number;
+  paidAmount?: number;
   type: WatchlistItem["type"];
 }
 
 export interface MonthBucket {
   month: string;
   monthIndex: number;
+  calendarMonth: number;
+  calendarYear: number;
+  isStartMonth?: boolean;
   amount: number;
   paidAmount: number;
   announcedAmount: number;
@@ -51,13 +55,76 @@ function fallbackMonthsForType(type: WatchlistItem["type"]): number[] {
 export function buildMonthlyBuckets(
   items: WatchlistItem[],
   currency: Currency,
-  months: string[],
+  monthsLabels: string[],
   dividendEventsMap: DividendEventsMap = {},
+  mode: "calendar" | "journey" = "calendar"
 ): MonthBucket[] {
-  const buckets: { amount: number; contributors: MonthContributor[] }[] = Array.from(
-    { length: 12 },
-    () => ({ amount: 0, contributors: [] }),
-  );
+  const currentYear = new Date().getFullYear();
+  const currentMonthIndex = new Date().getMonth();
+
+  // 1. Determine window
+  let startYear = currentYear;
+  let startMonth = 0;
+  let endYear = currentYear;
+  let endMonth = 11;
+
+  let earliestAddedAt = Date.now();
+  if (items.length > 0) {
+    earliestAddedAt = Math.min(...items.map((it) => it.addedAt));
+  }
+  const earliestDate = new Date(earliestAddedAt);
+
+  if (mode === "journey") {
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(currentYear - 1);
+    oneYearAgo.setMonth(currentMonthIndex + 1); // Rolling 12 months
+
+    let startDate = earliestDate;
+    if (startDate < oneYearAgo) {
+      startDate = oneYearAgo;
+    }
+
+    startYear = startDate.getFullYear();
+    startMonth = startDate.getMonth();
+    endYear = currentYear;
+    endMonth = currentMonthIndex;
+  }
+
+  // 2. Build bucket templates explicitly mapped to calendar months
+  const bucketTemplates: {
+    calendarMonth: number;
+    calendarYear: number;
+    monthLabel: string;
+    isStartMonth: boolean;
+    amount: number;
+    contributors: MonthContributor[];
+  }[] = [];
+
+  let y = startYear;
+  let m = startMonth;
+  while (y < endYear || (y === endYear && m <= endMonth)) {
+    const isCrossYear = startYear !== endYear;
+    let label = monthsLabels[m];
+    if (mode === "journey" && isCrossYear) {
+      label = `${label}/${y.toString().slice(2)}`;
+    }
+    bucketTemplates.push({
+      calendarMonth: m,
+      calendarYear: y,
+      monthLabel: label,
+      isStartMonth: mode === "journey" && m === earliestDate.getMonth() && y === earliestDate.getFullYear(),
+      amount: 0,
+      contributors: [],
+    });
+
+    m++;
+    if (m > 11) {
+      m = 0;
+      y++;
+    }
+  }
+
+  // 3. Distribute projected amounts
   for (const it of items) {
     if (it.currency !== currency) continue;
     const annual = it.annualDividend * it.quantity;
@@ -68,33 +135,38 @@ export function buildMonthlyBuckets(
         : fallbackMonthsForType(it.type);
     if (detected.length === 0) continue;
     const per = annual / detected.length;
-    for (const m of detected) {
-      buckets[m].amount += per;
-      buckets[m].contributors.push({ ticker: it.ticker, amount: per, type: it.type });
+    for (const d of detected) {
+      const bucket = bucketTemplates.find((b) => b.calendarMonth === d);
+      if (bucket) {
+        bucket.amount += per;
+        bucket.contributors.push({ ticker: it.ticker, amount: per, type: it.type });
+      }
     }
   }
 
-  const currentYear = new Date().getFullYear();
-  const currentMonthIndex = new Date().getMonth();
+  // 4. --- PASS 1: compute the effective displayed value per month ---
+  const effectiveAmounts: number[] = bucketTemplates.map((b) => {
+    const isPast = b.calendarYear < currentYear || (b.calendarYear === currentYear && b.calendarMonth < currentMonthIndex);
 
-  // --- PASS 1: compute the effective displayed value per month ---
-  // Past months use real paidAmount; current/future use projected b.amount.
-  // isBest/isWorst must compare against what is actually VISIBLE on the bar chart.
-  const effectiveAmounts: number[] = buckets.map((b, i) => {
-    if (i < currentMonthIndex) {
+    if (isPast) {
       let realPaid = 0;
       for (const contrib of b.contributors) {
         const events = dividendEventsMap[contrib.ticker] ?? [];
+        const item = items.find((it) => it.ticker === contrib.ticker);
+        const itemAddedAt = item ? item.addedAt : Date.now();
+
         const monthPaid = events
           .filter((ev) => {
             const dateStr = ev.paymentDate ?? ev.exDate;
             const d = new Date(dateStr);
-            return d.getUTCMonth() === i && d.getUTCFullYear() === currentYear;
+            // GHOST DIVIDEND FIX: Skip events before the asset was added
+            if (d.getTime() < itemAddedAt) return false;
+            
+            return d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear;
           })
-          .reduce((sum, ev) => {
-            const item = items.find((it) => it.ticker === contrib.ticker);
-            return sum + ev.amountPerShare * (item?.quantity ?? 0);
-          }, 0);
+          .reduce((sum, ev) => sum + ev.amountPerShare * (item?.quantity ?? 0), 0);
+
+        contrib.paidAmount = monthPaid;
         realPaid += monthPaid;
       }
       return realPaid;
@@ -106,29 +178,39 @@ export function buildMonthlyBuckets(
   const maxEffective = Math.max(...effectiveAmounts, 0);
   const minEffective = positiveEffective.length > 0 ? Math.min(...positiveEffective) : 0;
 
-  // --- PASS 2: build MonthBucket array ---
+  // 5. --- PASS 2: build MonthBucket array ---
   let running = 0;
-  return buckets.map((b, i) => {
+  return bucketTemplates.map((b, i) => {
     running += b.amount;
-    const sortedContribs = [...b.contributors].sort((a, b) => b.amount - a.amount);
+    const isPast = b.calendarYear < currentYear || (b.calendarYear === currentYear && b.calendarMonth < currentMonthIndex);
+
+    // Sort contributors based on effective paid amount for past months
+    const sortedContribs = [...b.contributors].sort((x, y) => {
+      const valX = isPast ? (x.paidAmount ?? 0) : x.amount;
+      const valY = isPast ? (y.paidAmount ?? 0) : y.amount;
+      return valY - valX;
+    });
+
     const topShare =
       b.amount > 0 && sortedContribs.length > 0 ? sortedContribs[0].amount / b.amount : 0;
 
     const effectiveAmount = effectiveAmounts[i];
-    const paidAmount = i < currentMonthIndex ? effectiveAmount : 0;
+    const paidAmount = isPast ? effectiveAmount : 0;
     const announcedAmount = 0;
-    const projectedAmount = i < currentMonthIndex ? 0 : b.amount;
+    const projectedAmount = isPast ? 0 : b.amount;
 
     return {
-      month: months[i],
+      month: b.monthLabel,
       monthIndex: i,
+      calendarMonth: b.calendarMonth,
+      calendarYear: b.calendarYear,
+      isStartMonth: b.isStartMonth,
       amount: b.amount, // kept as pure projection — used by summary/sparklines
       paidAmount,
       announcedAmount,
       projectedAmount,
       cumulativeTotal: running,
       contributors: sortedContribs,
-      // isBest/isWorst compare against the visually displayed value
       isBest: effectiveAmount > 0 && effectiveAmount === maxEffective && positiveEffective.length > 1,
       isWorst:
         effectiveAmount > 0 &&
@@ -184,7 +266,13 @@ export function computeInvestedVsReceived(
     .filter((it) => it.currency === currency && it.quantity > 0)
     .map((it) => {
       const events = dividendEventsMap[it.ticker] ?? [];
-      const totalReceivedPerShare = events.reduce((s, e) => s + e.amountPerShare, 0);
+      const totalReceivedPerShare = events
+        .filter((ev) => {
+          const dateStr = ev.paymentDate ?? ev.exDate;
+          return new Date(dateStr).getTime() >= it.addedAt;
+        })
+        .reduce((s, e) => s + e.amountPerShare, 0);
+        
       return {
         ticker: it.ticker,
         invested: (it.averagePrice ?? 0) * it.quantity,

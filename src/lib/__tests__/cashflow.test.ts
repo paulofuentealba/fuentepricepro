@@ -58,6 +58,8 @@ describe("Cashflow logic", () => {
     const buckets = Array.from({ length: 12 }, (_, i) => ({
       month: String(i),
       monthIndex: i,
+      calendarMonth: i,
+      calendarYear: 2026,
       amount: 100, // 100 per month
       cumulativeTotal: 100 * (i + 1),
       contributors: [],
@@ -129,6 +131,45 @@ describe("Cashflow logic", () => {
     expect(buckets[futureMonthIdx].isBest).toBe(false);
     // amount (pure projection) is still 100 for past month — unchanged
     expect(buckets[pastMonthIdx].amount).toBe(100);
+  });
+
+  it("filters out ghost dividends before addedAt date", () => {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    if (currentMonth < 2) return; // Need at least Jan and Feb to be past
+
+    const items = [
+      mkItem({
+        ticker: "GHOST",
+        annualDividend: 120,
+        quantity: 1,
+        paymentMonths: [1, 2], // Jan, Feb
+        addedAt: new Date(Date.UTC(currentYear, 1, 15)).getTime(), // Added mid-Feb
+      }),
+    ];
+
+    const dividendEventsMap = {
+      GHOST: [
+        {
+          exDate: new Date(Date.UTC(currentYear, 0, 10)).toISOString(), // Jan event (GHOST)
+          paymentDate: null,
+          amountPerShare: 10,
+        },
+        {
+          exDate: new Date(Date.UTC(currentYear, 1, 20)).toISOString(), // Late Feb event (VALID)
+          paymentDate: null,
+          amountPerShare: 10,
+        },
+      ],
+    };
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const buckets = buildMonthlyBuckets(items, "USD", months, dividendEventsMap, "calendar");
+
+    // Jan (index 0) was before addedAt -> realPaid should be 0, not 10
+    expect(buckets[0].paidAmount).toBe(0);
+    // Feb (index 1) is after addedAt -> realPaid should be 10
+    expect(buckets[1].paidAmount).toBe(10);
   });
 });
 

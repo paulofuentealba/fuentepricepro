@@ -402,7 +402,10 @@ export const es = {
       investedVsReceived: "Invertido vs. Recibido",
       invested: "Invertido",
       received: "Recibido",
-      quantityNote: "El importe recibido asume la cantidad actual constante (sin historial de transacciones).",
+      quantityNote: "El monto recibido asume que la cantidad actual se mantuvo durante todo el período (sin historial de transacciones).",
+      calendarYear: "Año Calendario",
+      myJourney: "Mi Viaje",
+      journeyStart: "🌱 Inicio",
     },
   },
 

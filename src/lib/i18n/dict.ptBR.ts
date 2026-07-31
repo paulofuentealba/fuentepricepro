@@ -397,7 +397,10 @@ export const ptBR = {
       investedVsReceived: "Investido vs. Recebido",
       invested: "Investido",
       received: "Recebido",
-      quantityNote: "Valor recebido considera quantidade atual constante (sem histórico de transações).",
+      quantityNote: "O valor recebido assume que a quantidade atual foi mantida durante todo o período (sem histórico de transações).",
+      calendarYear: "Ano Calendário",
+      myJourney: "Minha Jornada",
+      journeyStart: "🌱 Início",
     },
   },
 
