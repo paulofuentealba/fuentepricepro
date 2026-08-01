@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AssetCard } from "@/components/shared/AssetCard";
@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { DividendsHistoryPanel } from "./DividendsHistoryPanel";
 import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
 import { DividendHistoryChart } from "@/components/ceiling/result/DividendHistoryChart";
@@ -38,6 +39,12 @@ function WowInsights({
 }) {
   const { t, locale } = useI18n();
 
+  const margin = valuation.margin;
+  const marginStr = Math.abs(margin).toFixed(1);
+  const isBargain = margin > 10;
+  const isFair = margin >= 0 && margin <= 10;
+
+  let insightText = "";
   let badgeColor = "";
   let iconColor = "";
   if (isBargain) {
@@ -84,7 +91,7 @@ function WowInsights({
 
       <div className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/20 p-4">
         <div className="flex items-center gap-2 font-semibold text-muted-foreground">
-          <Calendar className="h-4 w-4" />
+          <CalendarIcon className="h-4 w-4" />
           <span>{t.result.insights.nextPayment}</span>
         </div>
         <p className="text-sm font-medium">
@@ -160,6 +167,86 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
   );
 }
 
+/* ── Scrollable Tabs wrapper (mobile: horizontal scroll, desktop: grid) ── */
+function ScrollableTabsList({
+  children,
+  className,
+  cols,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  cols: 2 | 4;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      ro.disconnect();
+    };
+  }, [checkScroll]);
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    const trigger = (e.target as HTMLElement).closest("[role='tab']");
+    if (trigger) {
+      trigger.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, []);
+
+  const gridClass = cols === 2 ? "sm:grid-cols-2" : "sm:grid-cols-4";
+
+  return (
+    <div className="relative mb-4">
+      {/* Left fade indicator */}
+      <div
+        className={cn(
+          "pointer-events-none absolute left-0 top-0 bottom-0 w-6 z-10 rounded-l-lg transition-opacity duration-200",
+          "bg-gradient-to-r from-muted to-transparent",
+          "sm:hidden",
+          canScrollLeft ? "opacity-100" : "opacity-0",
+        )}
+      />
+      {/* Right fade indicator */}
+      <div
+        className={cn(
+          "pointer-events-none absolute right-0 top-0 bottom-0 w-6 z-10 rounded-r-lg transition-opacity duration-200",
+          "bg-gradient-to-l from-muted to-transparent",
+          "sm:hidden",
+          canScrollRight ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <TabsList
+        ref={scrollRef as any}
+        className={cn(
+          /* Mobile: single horizontal row, scrollable, no fixed height */
+          "flex w-full overflow-x-auto scrollbar-none gap-1 p-1 h-auto",
+          /* Desktop (sm+): proper grid, fixed height, no overflow */
+          `sm:grid ${gridClass} sm:h-10 sm:overflow-visible`,
+          className,
+        )}
+        onClick={handleClick}
+      >
+        {children}
+      </TabsList>
+    </div>
+  );
+}
+
 interface AssetDetailSheetProps {
   item: ValuedWatchlistItem | null;
   onClose: () => void;
@@ -228,16 +315,16 @@ export function AssetDetailSheet({
           {!loading && asset && item && valuation && (
             <ErrorBoundary label="asset_detail_sheet">
               <Tabs defaultValue={item.type === "FIXED_INCOME" ? "myPosition" : "highlights"} className="w-full">
-                <TabsList className={item.type === "FIXED_INCOME" ? "grid w-full grid-cols-2 mb-4" : "grid w-full grid-cols-2 lg:grid-cols-4 mb-4"}>
-                  <TabsTrigger value="highlights" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.highlights}</TabsTrigger>
-                  <TabsTrigger value="myPosition" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.myPosition}</TabsTrigger>
+                <ScrollableTabsList cols={item.type === "FIXED_INCOME" ? 2 : 4}>
+                  <TabsTrigger value="highlights" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.highlights}</TabsTrigger>
+                  <TabsTrigger value="myPosition" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.myPosition}</TabsTrigger>
                   {item.type !== "FIXED_INCOME" && (
                     <>
-                      <TabsTrigger value="transactions" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.transactions}</TabsTrigger>
-                      <TabsTrigger value="dividends" className="text-xs sm:text-sm px-2 sm:px-3">{t.watchlist.tabs.dividends}</TabsTrigger>
+                      <TabsTrigger value="transactions" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.transactions}</TabsTrigger>
+                      <TabsTrigger value="dividends" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.dividends}</TabsTrigger>
                     </>
                   )}
-                </TabsList>
+                </ScrollableTabsList>
 
                 <TabsContent value="highlights" className="space-y-6 mt-0">
                   {item.type !== "FIXED_INCOME" ? (
