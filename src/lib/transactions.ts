@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
+import { useI18n } from "./i18n-provider";
 
 export interface Transaction {
   id: string;
@@ -146,6 +147,7 @@ function itemToRow(item: Transaction, userId: string) {
 // ---------- React Query Hook ----------
 export function useTransactions() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const queryKey = ["transactions", user?.uid ?? "local"];
 
@@ -234,7 +236,7 @@ export function useTransactions() {
       });
     },
     onError: (error) => {
-      toast.error("Failed to save transaction.");
+      toast.error(t.errors.saveTransactionFailed);
       console.error(error);
     },
   });
@@ -258,7 +260,7 @@ export function useTransactions() {
       });
     },
     onError: (error) => {
-      toast.error("Failed to delete transaction.");
+      toast.error(t.errors.deleteTransactionFailed);
       console.error(error);
     },
   });

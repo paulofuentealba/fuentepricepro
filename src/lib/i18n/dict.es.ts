@@ -13,6 +13,7 @@ export const es = {
     cancel: "Cancelar",
     prev: "Anterior",
     next: "Siguiente",
+    other: "Otros",
   },
   showcase: {
     title: "Escaparate",
@@ -225,8 +226,9 @@ export const es = {
     REIT: "REIT",
     FII: "FII",
     FII_INFRA: "FII-Infra",
-    FIAGRO: "Fiagro",
+    FIAGRO: "FIAGRO",
     ETF: "ETF",
+    FIXED_INCOME: "Renta Fija",
   } as Record<AssetType, string>,
   metrics: {
     peRatio: "Ratio PER",
@@ -244,6 +246,9 @@ export const es = {
   },
   errors: {
     notFound: "No pudimos encontrar ese ticker.",
+    saveProfileFailed: "Error al guardar el perfil.",
+    saveTransactionFailed: "Error al guardar la transacción.",
+    deleteTransactionFailed: "Error al eliminar la transacción.",
   },
   watchlist: {
     loading: "Cargando portafolio...",
@@ -467,6 +472,8 @@ export const es = {
     strategyLabel: "Estrategia de Asignación (elige hasta 2)",
     strategyMaxHint: "Puedes combinar hasta dos estrategias.",
     resetStrategies: "Restablecer estrategias",
+    maxConcentrationLabel: "Techo de Concentración (%)",
+    maxConcentrationHint: "Máximo por activo individual",
     strategies: {
       yield: "Rendimiento Máx.",
       margin: "Enfoque en Margen",
@@ -496,12 +503,15 @@ export const es = {
     targetPanelTitle: "Asignación Objetivo (%)",
     targetTotal: "Total: {{total}}%",
     targetTotalIdeal: "(Idealmente debe sumar 100%)",
+    currentAllocationPct: "Actual: {{pct}}%",
+    allocationDeviation: "Desviación: {{pct}}%",
+    concentrationViolation: "Por encima del techo",
     beforeCurrent: "Antes (Actual)",
     afterProjected: "Después (Proyectado)",
   },
 
   snowball: {
-    title: "Simulador de Efecto Bola de Nieve",
+    title: "Efecto Bola de Nieve",
     subtitle:
       "Descubre el poder del interés compuesto. Mira cuántos ingresos pasivos podría generar tu cartera actual en el futuro si reinviertes todos los dividendos más una contribución mensual fija.",
     monthlyContribution: "Contribución Mensual",
@@ -641,6 +651,8 @@ export const es = {
     overvalued: "SOBREVALORADO",
     selicAnchor: "Ancla Selic",
     breakdown: "Consenso Detallado",
+    pyramidTitle: "Modelo de Valoración Fuente",
+    consensusBadge: "Consenso",
   },
   paywall: {
     title: "Desbloquear Características Pro",
@@ -661,6 +673,9 @@ export const es = {
       "Nuestra metodología de valoración se enfoca en generar ingresos pasivos seguros y crecientes, usando múltiples modelos y márgenes de seguridad para evaluar oportunidades globales.",
     searchPlaceholder: "Buscar en Wiki...",
     navLink: "Wiki",
+    index: "Índice",
+    bazinFormula: "Precio Techo = Dividendo Promedio (Últimos Años) / 0.06",
+    gordonFormula: "Precio Justo = (Dividendo Actual × (1 + Crecimiento)) / (Tasa de Descuento - Crecimiento)",
     consensus: {
       title: "Consenso Fuente",
       description:

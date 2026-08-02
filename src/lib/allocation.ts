@@ -5,6 +5,16 @@ import { netAfterTax } from "./calculations";
 
 export type StrategyKey = "yield" | "margin" | "snowball" | "gapFiller" | "defensive";
 
+/**
+ * Tolerance margin (in percentage points) for Target Allocation deviation
+ * before it is visually flagged as "out of range" in the UI.
+ *
+ * This constant is intentionally isolated here (not inline in components)
+ * because it will be reused by the future Alerts/Notifications capability
+ * (Prompt D) as the trigger threshold for rebalancing notifications.
+ */
+export const ALLOCATION_TOLERANCE_PCT = 2;
+
 export const STRATEGY_ORDER: StrategyKey[] = [
   "yield",
   "margin",
@@ -88,6 +98,7 @@ export function computeSmartAllocation(
   excludedTickers: string[],
   targets: Record<AssetType, number>,
   exchangeRate: number,
+  maxConcentration: number | null = null,
 ): SmartAllocationResult | null {
   if (!Number.isFinite(capital) || capital <= 0) return null;
 
@@ -129,13 +140,26 @@ export function computeSmartAllocation(
   );
 
   let totalPortfolioBRL = 0;
+  let totalPortfolioTargetCurrency = 0;
   const currentAllocationBRL: Record<string, number> = {};
+  const currentAssetValueTargetCurrency: Record<string, number> = {};
   for (const it of items) {
     const val = it.currentPrice * it.quantity;
     if (val <= 0) continue;
     const inBrl = it.currency === "USD" ? val * exchangeRate : val;
     totalPortfolioBRL += inBrl;
     currentAllocationBRL[it.type] = (currentAllocationBRL[it.type] || 0) + inBrl;
+
+    let inTargetCurrency = val;
+    if (it.currency !== currency) {
+      if (currency === "BRL" && it.currency === "USD") {
+        inTargetCurrency = val * exchangeRate;
+      } else if (currency === "USD" && it.currency === "BRL") {
+        inTargetCurrency = val / exchangeRate;
+      }
+    }
+    totalPortfolioTargetCurrency += inTargetCurrency;
+    currentAssetValueTargetCurrency[it.ticker] = (currentAssetValueTargetCurrency[it.ticker] || 0) + inTargetCurrency;
   }
 
   const targetTotal = Object.values(targets).reduce((a, b) => a + (b || 0), 0);
@@ -208,10 +232,24 @@ export function computeSmartAllocation(
   let totalAddedIncome = 0;
 
   const recMap = new Map<string, Recommendation>();
+  const purchasedShares = new Map<string, number>();
+
+  const getMaxSharesAllowed = (ticker: string, currentPrice: number, alreadyBought: number) => {
+    if (!maxConcentration || maxConcentration >= 100) return Infinity;
+    const maxVal = ((totalPortfolioTargetCurrency + capital) * maxConcentration) / 100;
+    const currentVal = (currentAssetValueTargetCurrency[ticker] || 0) + (alreadyBought * currentPrice);
+    const allowedToBuy = Math.max(0, maxVal - currentVal);
+    return Math.floor(allowedToBuy / currentPrice);
+  };
 
   for (const { item, score } of ranked) {
     const budget = capital * (score / scoreSum);
-    const shares = Math.floor(budget / item.currentPrice);
+    let shares = Math.floor(budget / item.currentPrice);
+    
+    // Apply max concentration cap
+    const maxAllowed = getMaxSharesAllowed(item.ticker, item.currentPrice, 0);
+    shares = Math.min(shares, maxAllowed);
+    
     const cost = shares * item.currentPrice;
 
     if (shares > 0) {
@@ -225,6 +263,7 @@ export function computeSmartAllocation(
         currentIncome,
         newIncome: currentIncome,
       });
+      purchasedShares.set(item.ticker, shares);
       spent += cost;
       remaining -= cost;
     }
@@ -235,12 +274,17 @@ export function computeSmartAllocation(
     madeChanges = false;
     for (const { item } of ranked) {
       if (remaining >= item.currentPrice) {
-        const sharesToBuy = Math.floor(remaining / item.currentPrice);
+        let sharesToBuy = Math.floor(remaining / item.currentPrice);
+        const alreadyBought = purchasedShares.get(item.ticker) || 0;
+        const maxAllowed = getMaxSharesAllowed(item.ticker, item.currentPrice, alreadyBought);
+        sharesToBuy = Math.min(sharesToBuy, maxAllowed);
+
         if (sharesToBuy > 0) {
           const cost = sharesToBuy * item.currentPrice;
           spent += cost;
           remaining -= cost;
           madeChanges = true;
+          purchasedShares.set(item.ticker, alreadyBought + sharesToBuy);
 
           let rec = recMap.get(item.ticker);
           if (!rec) {

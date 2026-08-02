@@ -15,7 +15,7 @@ interface ConsensusPyramidProps {
 }
 
 export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
 
   const renderVertex = (label: string, value: number | null, positionClass: string) => {
     const isNull = value === null || value <= 0;
@@ -42,7 +42,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
       <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 h-48 bg-indigo-500/20 blur-[60px] rounded-full pointer-events-none" />
 
       <h3 className="mb-8 text-center text-xs font-semibold text-white/80 uppercase tracking-widest">
-        Fuente Valuation Model
+        {t.valuation.pyramidTitle}
       </h3>
 
       <div className="relative w-full max-w-[320px] mx-auto h-[260px]">
@@ -100,7 +100,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
           <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full" />
           <div className="relative rounded-full border border-emerald-500/50 bg-black px-5 py-2.5 shadow-[0_0_20px_rgba(16,185,129,0.2)] backdrop-blur-xl">
             <span className="block text-[10px] font-bold text-emerald-400 uppercase tracking-widest text-center mb-0.5 drop-shadow-md">
-              Consensus
+              {t.valuation.consensusBadge}
             </span>
             <span className="block text-xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
               {valuation.consensus !== null && valuation.consensus > 0

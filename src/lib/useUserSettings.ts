@@ -11,6 +11,7 @@ export interface UserSettings {
   targetYield: number;
   displayCurrency: Currency;
   smartAllocationTargets: Record<AssetType, number>;
+  maxConcentrationPerAsset?: number | null;
   monthlyLivingCostGoal?: number;
   estimatedMonthlyContribution?: number;
 }
@@ -18,6 +19,7 @@ export interface UserSettings {
 const DEFAULT_SETTINGS: UserSettings = {
   targetYield: 6,
   displayCurrency: "BRL",
+  maxConcentrationPerAsset: null,
   smartAllocationTargets: {
     STOCK_BR: 0,
     STOCK_US: 0,

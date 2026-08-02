@@ -53,10 +53,17 @@ export function formatCompactCurrency(
 
 export function cleanTicker(ticker: string): string {
   if (!ticker) return "";
-  return ticker;
+  // Strip Yahoo Finance market-suffix notation (e.g. "PETR4.SA" -> "PETR4",
+  // "AAPL34.SA" -> "AAPL34"). This used to be a no-op, which let any
+  // Brazilian ticker resolved via the Yahoo .SA fallback path in
+  // fetchAssetFn leak the suffix into storage and every screen that
+  // displays item.ticker. Applied on every load (rowToItem/readLocal in
+  // watchlist.ts), so previously-saved ".SA" tickers self-heal on next load.
+  return ticker.trim().toUpperCase().replace(/\.[A-Z]+$/i, "");
 }
 
 export function displayTicker(ticker: string): string {
-  if (!ticker) return "";
-  return ticker.replace(/\.[A-Z]+$/i, "");
+  // Kept as an alias for cleanTicker to avoid drift between the two — they
+  // used to implement the same suffix-stripping logic twice, out of sync.
+  return cleanTicker(ticker);
 }

@@ -212,9 +212,11 @@ function ComparatorCards({
           avgDividend: avgDiv,
           eps: data.metrics?.eps || null,
           bvps:
-            data.metrics?.pbRatio && data.currentPrice > 0
-              ? data.currentPrice / data.metrics.pbRatio
-              : null,
+            data.metrics?.bvps != null
+              ? data.metrics.bvps
+              : data.metrics?.pbRatio && data.currentPrice > 0
+                ? data.currentPrice / data.metrics.pbRatio
+                : null,
           dividendCagr: data.metrics?.dividendCagr5y || null,
           selicPct: selic ?? 10.5,
           currency: data.currency,
@@ -236,7 +238,7 @@ function ComparatorCards({
                   annualDividend: avgDiv,
                   quantity: 1,
                   averagePrice: data.currentPrice,
-                  sector: data.sector || "Outros",
+                  sector: data.sector || t.common.other,
                   createdAt: Date.now(),
                   valuation: val,
                 } as any
@@ -247,7 +249,7 @@ function ComparatorCards({
                   eps: data.metrics?.eps || null,
                   pbRatio: data.metrics?.pbRatio || null,
                   dividendCagr5y: data.metrics?.dividendCagr5y || null,
-                  sector: data.sector || "Outros",
+                  sector: data.sector || t.common.other,
                 } as any
               }
               variant="watchlist"
@@ -263,6 +265,7 @@ function ComparatorCards({
         onClose={() => setSelectedDetailItem(null)}
         hidePlayground
         hideGoalPlanner
+        hidePositionTabs
       />
     </TooltipProvider>
   );

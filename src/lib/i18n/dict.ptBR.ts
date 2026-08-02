@@ -13,6 +13,7 @@ export const ptBR = {
     cancel: "Cancelar",
     prev: "Anterior",
     next: "Próximo",
+    other: "Outros",
   },
   showcase: {
     title: "Vitrine",
@@ -223,8 +224,9 @@ export const ptBR = {
     REIT: "REIT",
     FII: "FII",
     FII_INFRA: "FII-Infra",
-    FIAGRO: "Fiagro",
+    FIAGRO: "FIAGRO",
     ETF: "ETF",
+    FIXED_INCOME: "Renda Fixa",
   } as Record<AssetType, string>,
   metrics: {
     peRatio: "P/L",
@@ -242,6 +244,9 @@ export const ptBR = {
   },
   errors: {
     notFound: "Não encontramos esse ticker.",
+    saveProfileFailed: "Falha ao salvar perfil.",
+    saveTransactionFailed: "Falha ao salvar transação.",
+    deleteTransactionFailed: "Falha ao excluir transação.",
   },
   watchlist: {
     loading: "Carregando portfólio...",
@@ -462,6 +467,8 @@ export const ptBR = {
     strategyLabel: "Estratégia de Alocação (até 2)",
     strategyMaxHint: "Você pode combinar até duas estratégias.",
     resetStrategies: "Redefinir estratégias",
+    maxConcentrationLabel: "Teto de Concentração (%)",
+    maxConcentrationHint: "Máximo por ativo individual",
     strategies: {
       yield: "Renda Máxima",
       margin: "Foco em Margem",
@@ -491,12 +498,15 @@ export const ptBR = {
     targetPanelTitle: "Metas de Alocação (%)",
     targetTotal: "Total: {{total}}%",
     targetTotalIdeal: "(O ideal é somar 100%)",
+    currentAllocationPct: "Atual: {{pct}}%",
+    allocationDeviation: "Desvio: {{pct}}%",
+    concentrationViolation: "Acima do teto",
     beforeCurrent: "Antes (Atual)",
     afterProjected: "Depois (Projetado)",
   },
 
   snowball: {
-    title: "Simulador Efeito Bola de Neve",
+    title: "Efeito Bola de Neve",
     subtitle:
       "Descubra o poder dos juros compostos. Veja quanto sua carteira atual pode gerar de renda passiva no futuro se você reinvestir todos os dividendos mensais somados a um aporte fixo.",
     monthlyContribution: "Aporte Mensal",
@@ -636,6 +646,8 @@ export const ptBR = {
     overvalued: "SUPERAVALIADO",
     selicAnchor: "Âncora Selic",
     breakdown: "Consenso Detalhado",
+    pyramidTitle: "Modelo de Valuation Fuente",
+    consensusBadge: "Consenso",
   },
   paywall: {
     title: "Desbloqueie os Recursos Pro",
@@ -656,6 +668,9 @@ export const ptBR = {
       "Nossa metodologia de valuation foca em gerar renda passiva segura e crescente, usando múltiplos modelos e margens de segurança para avaliar oportunidades globais.",
     searchPlaceholder: "Buscar na Wiki...",
     navLink: "Wiki",
+    index: "Índice",
+    bazinFormula: "Preço Teto = Dividendo Médio (Últimos Anos) / 0.06",
+    gordonFormula: "Preço Justo = (Dividendo Atual × (1 + Crescimento)) / (Taxa de Desconto - Crescimento)",
     consensus: {
       title: "O Consenso Fuente",
       description:

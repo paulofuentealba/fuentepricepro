@@ -20,6 +20,10 @@ export interface ApiAsset {
     peRatio: number | null;
     pbRatio: number | null;
     eps: number | null;
+    /** Book Value per Share, when the source API exposes it directly (more precise
+     * than deriving it from currentPrice / pbRatio downstream). Optional since not
+     * all sources (e.g. Yahoo) expose it directly. */
+    bvps?: number | null;
     roe: number | null;
     currentDy: number | null;
     capRate: number | null;

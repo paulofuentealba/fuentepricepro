@@ -162,7 +162,7 @@ export function RiskRadar() {
           </CardHeader>
           <CardContent>
             <div className="relative overflow-x-auto rounded-lg border border-border/50">
-              <table className="w-full text-left text-sm min-w-[700px]">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium">{t.riskRadar.asset}</th>
@@ -215,7 +215,7 @@ export function RiskRadar() {
           </CardHeader>
           <CardContent>
             <div className="relative overflow-x-auto rounded-lg border border-border/50">
-              <table className="w-full text-left text-sm min-w-[700px]">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium">{t.riskRadar.sector}</th>

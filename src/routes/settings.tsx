@@ -96,7 +96,7 @@ function SettingsPage() {
       toast.success(S.profile.saveSuccess);
     } catch (error) {
       console.error("Error saving profile", error);
-      toast.error("Failed to save profile.");
+      toast.error(t.errors.saveProfileFailed);
     } finally {
       setIsSavingProfile(false);
     }

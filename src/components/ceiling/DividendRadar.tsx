@@ -77,9 +77,11 @@ export function DividendRadar() {
           avgDividend: canonicalDiv,
           eps: asset.metrics?.eps ?? null,
           bvps:
-            asset.metrics?.pbRatio && asset.currentPrice > 0
-              ? asset.currentPrice / asset.metrics.pbRatio
-              : null,
+          asset.metrics?.bvps != null
+          ? asset.metrics.bvps
+          : asset.metrics?.pbRatio && asset.currentPrice > 0
+          ? asset.currentPrice / asset.metrics.pbRatio
+          : null,
           dividendCagr: asset.metrics?.dividendCagr5y ?? null,
           selicPct: selic ?? 10.5,
           currency: currency,
@@ -233,9 +235,7 @@ export function DividendRadar() {
                             variant="secondary"
                             className="text-[10px] font-semibold bg-muted text-muted-foreground border-transparent uppercase tracking-wider"
                           >
-                            {asset.type === "STOCK_BR" || asset.type === "STOCK_US"
-                              ? "Ações"
-                              : asset.type}
+                            {t.types[asset.type as keyof typeof t.types] || asset.type}
                           </Badge>
                         </TableCell>
                         <TableCell>

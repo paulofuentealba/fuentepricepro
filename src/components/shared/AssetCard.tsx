@@ -58,6 +58,7 @@ export interface AssetCardProps {
   hidePlayground?: boolean;
   hideGoalPlanner?: boolean;
   isSimulation?: boolean;
+  isConcentrationViolated?: boolean;
 
   // Specific to Allocation variant
   shares?: number;
@@ -163,7 +164,7 @@ function AllocationVariant({
 }
 
 function WatchlistVariant(props: AssetCardProps) {
-  const { item, quote, meta, onEdit, onRemove, onOpenDetail, onClose } = props;
+  const { item, quote, meta, onEdit, onRemove, onOpenDetail, onClose, isConcentrationViolated } = props;
   const { t, locale } = useI18n();
   const derived = useAssetCardDerived(item as WatchlistItem);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -258,8 +259,17 @@ function WatchlistVariant(props: AssetCardProps) {
           : derived.positive
             ? "focus-visible:border-emerald-500/60 focus-visible:ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
             : "focus-visible:border-rose-500/60 focus-visible:ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
+        isConcentrationViolated && "border-danger/60 ring-1 ring-danger/30",
       )}
     >
+      {isConcentrationViolated && (
+        <div
+          className="absolute left-2 top-2 z-20 rounded-full bg-danger/90 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white shadow"
+          title={t.smartAllocation.concentrationViolation}
+        >
+          {t.smartAllocation.concentrationViolation}
+        </div>
+      )}
       {onClose && (
         <button
           onClick={(e) => {
@@ -382,9 +392,11 @@ function SearchVariant({
     avgDividend: avg,
     eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
     bvps:
-      asset.metrics?.pbRatio && asset.currentPrice != null && asset.currentPrice > 0
-        ? asset.currentPrice / asset.metrics.pbRatio
-        : null,
+      asset.metrics?.bvps != null
+        ? asset.metrics.bvps
+        : asset.metrics?.pbRatio && asset.currentPrice != null && asset.currentPrice > 0
+          ? asset.currentPrice / asset.metrics.pbRatio
+          : null,
     dividendCagr: asset.metrics?.dividendCagr5y ?? null,
     selicPct: selic ?? 10.5,
     currency: asset.currency,

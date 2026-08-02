@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fuentepricepro.lovable.app/sitemap.xml
+Sitemap: https://fuentepricepro.com/sitemap.xml

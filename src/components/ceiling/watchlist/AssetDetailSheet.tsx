@@ -252,6 +252,10 @@ interface AssetDetailSheetProps {
   onClose: () => void;
   hidePlayground?: boolean;
   hideGoalPlanner?: boolean;
+  /** When true, hides the "My Position" and "Transactions" tabs — used when
+   * opening the sheet for a hypothetical/comparison item that isn't a real
+   * portfolio holding (e.g. from the Decision Desk / Comparator). */
+  hidePositionTabs?: boolean;
 }
 
 export function AssetDetailSheet({
@@ -259,6 +263,7 @@ export function AssetDetailSheet({
   onClose,
   hidePlayground,
   hideGoalPlanner,
+  hidePositionTabs,
 }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
   const { data: selic } = useSelic();
@@ -314,15 +319,17 @@ export function AssetDetailSheet({
           )}
           {!loading && asset && item && valuation && (
             <ErrorBoundary label="asset_detail_sheet">
-              <Tabs defaultValue={item.type === "FIXED_INCOME" ? "myPosition" : "highlights"} className="w-full">
-                <ScrollableTabsList cols={item.type === "FIXED_INCOME" ? 2 : 4}>
+              <Tabs defaultValue={item.type === "FIXED_INCOME" && !hidePositionTabs ? "myPosition" : "highlights"} className="w-full">
+                <ScrollableTabsList cols={item.type === "FIXED_INCOME" || hidePositionTabs ? 2 : 4}>
                   <TabsTrigger value="highlights" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.highlights}</TabsTrigger>
-                  <TabsTrigger value="myPosition" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.myPosition}</TabsTrigger>
+                  {!hidePositionTabs && (
+                    <TabsTrigger value="myPosition" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.myPosition}</TabsTrigger>
+                  )}
+                  {item.type !== "FIXED_INCOME" && !hidePositionTabs && (
+                    <TabsTrigger value="transactions" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.transactions}</TabsTrigger>
+                  )}
                   {item.type !== "FIXED_INCOME" && (
-                    <>
-                      <TabsTrigger value="transactions" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.transactions}</TabsTrigger>
-                      <TabsTrigger value="dividends" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.dividends}</TabsTrigger>
-                    </>
+                    <TabsTrigger value="dividends" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.dividends}</TabsTrigger>
                   )}
                 </ScrollableTabsList>
 
@@ -349,26 +356,30 @@ export function AssetDetailSheet({
                 </TabsContent>
 
                 <TabsContent value="myPosition" className="space-y-6 mt-0">
-                  <AssetHoldings item={item} activeMargin={valuation.margin} />
-                  {item.type === "FIXED_INCOME" && (
-                    <FixedIncomePanel item={item} />
+                  {!hidePositionTabs && (
+                    <>
+                      <AssetHoldings item={item} activeMargin={valuation.margin} />
+                      {item.type === "FIXED_INCOME" && (
+                        <FixedIncomePanel item={item} />
+                      )}
+                    </>
                   )}
                 </TabsContent>
 
-                {item.type !== "FIXED_INCOME" && (
-                  <>
-                    <TabsContent value="transactions" className="space-y-6 mt-0">
-                      <TransactionsPanel item={item} />
-                    </TabsContent>
+                {item.type !== "FIXED_INCOME" && !hidePositionTabs && (
+                  <TabsContent value="transactions" className="space-y-6 mt-0">
+                    <TransactionsPanel item={item} />
+                  </TabsContent>
+                )}
 
-                    <TabsContent value="dividends" className="space-y-6 mt-0">
-                      <DividendsHistoryPanel
-                        item={item}
-                        events={asset.dividendEvents ?? []}
-                        currency={asset.currency}
-                      />
-                    </TabsContent>
-                  </>
+                {item.type !== "FIXED_INCOME" && (
+                  <TabsContent value="dividends" className="space-y-6 mt-0">
+                    <DividendsHistoryPanel
+                      item={item}
+                      events={asset.dividendEvents ?? []}
+                      currency={asset.currency}
+                    />
+                  </TabsContent>
                 )}
               </Tabs>
             </ErrorBoundary>

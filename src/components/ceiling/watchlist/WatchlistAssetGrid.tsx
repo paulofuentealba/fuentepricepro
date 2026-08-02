@@ -14,6 +14,7 @@ interface WatchlistAssetGridProps {
   onRemove: (id: string) => void;
   onOpenDetail: (it: ValuedWatchlistItem) => void;
   onClearFilters: () => void;
+  concentrationViolators?: Set<string>;
 }
 
 export function WatchlistAssetGrid({
@@ -26,6 +27,7 @@ export function WatchlistAssetGrid({
   onRemove,
   onOpenDetail,
   onClearFilters,
+  concentrationViolators,
 }: WatchlistAssetGridProps) {
   const { t } = useI18n();
 
@@ -54,6 +56,7 @@ export function WatchlistAssetGrid({
             onEdit={onEdit}
             onRemove={onRemove}
             onOpenDetail={onOpenDetail}
+            isConcentrationViolated={concentrationViolators?.has(it.ticker)}
           />
         ))}
       </div>

@@ -74,6 +74,21 @@ Prompts já **concluídos** ficam só com resumo (a íntegra de cada um está no
 | 17.2   | Estender o parser pra 10 corretoras BR (CNPJs verificados por mim após achar 2 errados na 1ª tentativa: BTG e Itaú) | ✅ confirmado — 7 suportadas via SINACOR (Rico, Modal, BTG, Inter, NuInvest, Órama, Genial), 3 bancos tradicionais com fallback gracioso (Itaú, Bradesco, Santander/Toro); testes rodados com output real (8/8 passando) |
 | 21     | Discrepância `unknown_broker` vs `Malformed file` no `pdf-parser.test.ts`                                           | ✅ resolvido de quebra durante a 17.2 — os dois erros agora são conceitos distintos e corretos                                                                                                                           |
 
+### Fase 7 — Desenvolvimentos Pós-Auditoria (Commits Recentes)
+
+| #      | Título                                                                                                              | Status |
+| ------ | ------------------------------------------------------------------------------------------------------------------- | ------ |
+| 27     | feat(cashflow): proventos reais, terceiro grafico e i18n (Tarefa 29.1)                                              | ✅     |
+| 28     | fix(cashflow): base de isBest usa valor efetivo; expande mock data (Tarefa 30)                                      | ✅     |
+| 29     | feat(cashflow): add Minha Jornada mode and fix ghost dividends (Tarefa 31)                                          | ✅     |
+| 30     | feat/fix: UI da Watchlist, Transacoes e sinc. Firestore                                                             | ✅     |
+| 31     | fix: conversao segura de datas na watchlist para evitar Invalid time value                                          | ✅     |
+| 32     | fix: corrigir caminho da colecao Firestore na migracao da watchlist                                                 | ✅     |
+| 33     | fix: remover colecao legada portfolios e garantir limpeza completa de subcolecoes na exclusao de conta              | ✅     |
+| 34     | fix: remover regra orfa watchlist_items das firestore.rules                                                         | ✅     |
+| 35     | feat(watchlist): refactor investingSince UX to My Position tab in AssetDetailSheet                                  | ✅     |
+| 36     | fix(ui): scrollable tabs mobile & resolve WowInsights crash (b3f2144)                                               | ✅     |
+
 ---
 
 ## PARTE 2 — PENDENTES (texto completo, pronto pra rodar)
@@ -1694,7 +1709,7 @@ o primeiro mês da janela e o mês onde o ano muda mostram o sufixo
 
 ---
 
-### 38 — Corrigir USE_LOCAL_ONLY travado em produção (ativos e transações não iam pro Firestore) ⚪ PROMPT PRONTO
+### 38 — Corrigir USE_LOCAL_ONLY travado em produção (ativos e transações não iam pro Firestore) ✅ CONCLUÍDO E CONFIRMADO
 
 Problema levantado pelo usuário: ativo adicionado em produção não ia pro
 banco de dados. Causa raiz confirmada por mim direto no código: tanto
@@ -1849,8 +1864,7 @@ corte de texto nem overflow horizontal da sheet; tabela e cards de
 resumo confirmados sem problema equivalente.
 ```
 
-## Tarefa 40 — Mover "Investing Since" da Calculadora para AssetDetailSheet
-Status: Registrado, aguardando priorização (não é urgente — UX polish)
+### 40 — Mover "Investing Since" da Calculadora para AssetDetailSheet ✅ CONCLUÍDO E CONFIRMADO
 
 Contexto: Hoje "Investing Since" é pedido no momento de adicionar o ativo na
 Calculadora (fricção desnecessária). Deve ser removido de lá e virar um campo
@@ -1894,3 +1908,188 @@ Antes de aplicar, confirmar:
   "QTY" ou como linha de metadata acima dos cards);
 - se o date-picker reaproveitado mantém o mesmo comportamento mobile-first
   já validado nas outras abas.
+
+---
+
+### 41 — Correções e Limpezas Pós-Transações (Commits Diretos) ✅ CONCLUÍDO E CONFIRMADO
+- `a13d8ef` fix: conversao segura de datas na watchlist para evitar Invalid time value
+- `3c43259` fix: corrigir caminho da colecao Firestore na migracao da watchlist
+- `91d9ca0` fix: remover colecao legada portfolios e garantir limpeza completa de subcolecoes na exclusao de conta
+- `0ff5f82` fix: remover regra orfa watchlist_items das firestore.rules
+
+---
+
+### 43 — Rebalanceamento por Meta (VS3, capability "Risk & Allocation") — Prompts A/B/C 🟡 IMPLEMENTADO DIRETO NO CÓDIGO POR CLAUDE, AGUARDANDO VALIDAÇÃO VISUAL AO VIVO
+
+Contexto: o Antigravity (rodando Gemini 3.1 Pro) perdeu o fio da conversa
+repetidamente nesta frente de trabalho — reportou "sucesso" em tarefas que
+nunca implementou, misturou contexto de outra tarefa (scroll mobile do
+AssetDetailSheet) com esta por 3 respostas seguidas, e mesmo depois de um
+reset de contexto guiado (git status/diff real antes de agir) voltou a
+repetir pergunta já respondida. Diante disso, Claude implementou os prompts
+restantes diretamente via acesso de filesystem local, sem intermediação do
+Antigravity.
+
+**Prompt A — Alocação-Alvo por classe + Teto de Concentração por ativo**
+✅ Implementado (rodada anterior, pelo Antigravity) e ✅ validado ao vivo por
+Claude via Claude in Chrome: painel sem bloqueio Pro, todos os 8 tipos de
+ativo presentes, persistência confirmada após reload (Total: 100%, valores
+30/50/20/5 mantidos). `FEATURE_GATES.targetAllocation = false` e
+`FEATURE_GATES.maxConcentration = false` deixam tudo liberado por padrão,
+com estrutura pronta pra reativar via toggle quando o Painel Admin existir.
+
+**Prompt B — Cálculo de desvio + violação de teto (visual)**
+✅ Implementado diretamente por Claude, via acesso direto ao filesystem
+(`Filesystem:edit_file`), depois que 3 rodadas seguidas do Antigravity
+falharam em sequer tocar nos arquivos certos:
+- `ALLOCATION_TOLERANCE_PCT = 2` adicionada como constante isolada e
+  documentada em `src/lib/allocation.ts` (reuso futuro no Prompt D/Alertas).
+- `TargetAllocationPanel.tsx` ganhou a prop `currentAllocationPct` (que já
+  vinha sendo passada por `SmartAllocation.tsx` sem estar declarada na
+  interface — provável causa de erro de build silencioso) e a exibição de
+  "Atual: X%" / "Desvio: ±X%" abaixo de cada input, com cor de alerta
+  (`text-danger`) quando o desvio ultrapassa a margem de tolerância.
+- `Watchlist.tsx` ganhou o cálculo de `concentrationViolators` (Set de
+  tickers cujo % do portfólio consolidado em BRL ultrapassa
+  `maxConcentrationPerAsset`), propagado por `WatchlistAssetGrid.tsx` até
+  `AssetCard.tsx`, que agora mostra borda vermelha + badge "Above ceiling"
+  no card do ativo violador.
+- i18n: as chaves `currentAllocationPct`, `allocationDeviation`,
+  `concentrationViolation`, `beforeCurrent`, `afterProjected` já existiam
+  nos 3 dicionários (resíduo de uma rodada confusa anterior do Antigravity,
+  nunca consumido) — reaproveitadas, nenhuma string nova hardcoded.
+
+**Prompt C — Motor de sugestão de aporte ("Aporte Inteligente")**
+✅ Já estava implementado, sem que ninguém tivesse percebido — descoberto
+por Claude relendo `allocation.ts` com atenção: `computeSmartAllocation`
+já tinha o boost de score pra ativos sub-alocados em relação ao alvo
+(`Target Allocation Boost/Penalty`) e o cap rígido `getMaxSharesAllowed`
+que nunca deixa a sugestão ultrapassar o Teto de Concentração — construído
+junto da Tarefa/Prompt A sem ter sido rotulado como tal. Nunca sugere
+venda, só compra. O botão "Generate allocation" já existente é a interface
+desse motor — nenhum código novo necessário.
+
+**Prompt D — Alertas/gatilho de notificação**
+⏸️ Continua propositalmente parado, depende da capacidade de Alertas
+(29.5/30) ainda não construída. Registrado como pendência, não prompt.
+
+**PENDENTE**: validação visual ao vivo do Prompt B (desvio + violação de
+teto) — não foi possível concluir na sessão porque nem `localhost:5173`
+nem `localhost:5174` estavam respondendo no momento (nenhum `npm run dev`
+rodando). Assim que o Paulo subir o dev server, Claude retoma a validação
+via Claude in Chrome (mesma ferramenta já usada com sucesso pra validar o
+Prompt A). `npm run test`/`npm run build` também não puderam ser rodados
+por Claude (sem acesso de execução de comando na máquina do Paulo, só
+leitura/escrita de arquivo) — pendente de confirmação do Paulo ou retomada
+do Antigravity depois de resolvido o problema de contexto perdido.
+
+---
+
+### 44 — Auditoria completa do código (2 rodadas) ✅ CONCLUÍDA, VER ACHADOS ABAIXO
+
+Contexto: Paulo pediu uma auditoria completa de tudo que já foi pedido nas
+3 sessões do projeto, pra garantir que nada regrediu e que o código segue
+boas práticas, dado o crescimento do produto ("não podemos cair num caminho
+sem volta"). Claude fez a auditoria lendo o código-fonte diretamente
+(não só confiando no histórico do log), em duas rodadas.
+
+**Rodada 1 — áreas de maior risco (dado financeiro/segurança):**
+- ✅ Tarefa 38 (`USE_LOCAL_ONLY`) — confirmado correto em `watchlist.ts` e
+  `transactions.ts`
+- ✅ Paths do Firestore consistentes + `firestore.rules` cobrindo tudo
+- ✅ Exclusão de conta (LGPD) — ordem correta, sem coleta órfã
+- ✅ Crash `isBargain`, scroll mobile das abas, "Investing Since" editável
+- ✅ Dividendo fantasma, "Minha Jornada", rótulo de ano, Best/Worst Month
+  em `cashflow.ts`
+- ✅ CSRF (`start.ts`) ativo
+- 🔧 **Bug real encontrado e corrigido**: `.SA` aparecendo no ticker de
+  alguns ativos BR — causa raiz era `cleanTicker()` em `formatters.ts` ser
+  um no-op (não fazia nada apesar do nome). Corrigido pra limpar de
+  verdade; como é chamada em todo carregamento (Firestore/localStorage),
+  ativos já salvos com `.SA` se auto-corrigem sozinhos.
+- 🔧 3 toasts de erro hardcoded em inglês (`settings.tsx`,
+  `transactions.ts`) — corrigidos com chaves novas de i18n
+
+**Rodada 2 — Wiki, parser de corretagem, Global Radar, Sprints de UX:**
+- ✅ Global Radar — confirmado que é só um wrapper do `DividendRadar.tsx`,
+  já coberto na auditoria
+- ✅ Parser de corretagem (`b3Parser.ts`) — CNPJs conferidos um a um contra
+  a Wiki, 100% consistentes, sem drift entre documentação e código
+- ✅ MobileBottomNav, ResultSkeleton — amostra das Sprints de UX, limpos
+- 🔧 3 hardcodes na Wiki (`docs.tsx`): "Índice", fórmula do Bazin, fórmula
+  do Gordon — apareciam em português mesmo com o app em outro idioma
+- 🔧 Badge "Ações" hardcoded no `DividendRadar.tsx` → agora usa `t.types`
+- 🔧 Fallback de setor "Outros" hardcoded no `AssetComparator.tsx` → nova
+  chave `t.common.other`
+
+**Total da auditoria**: 9 bugs/hardcodes reais encontrados e corrigidos,
+nenhum regredido dos itens já marcados ✅ no histórico anterior.
+
+---
+
+### 45 — 7 correções pontuais reportadas pelo Paulo (screenshots) ✅ CONCLUÍDO (exceto item 5, registrado como backlog)
+
+1. **"Agribusiness (FIAGRO)" não fazia sentido** — ✅ simplificado pra só
+   `FIAGRO` nos 3 idiomas, consistente com FII/REIT/ETF (que também são
+   siglas puras, sem palavra descritiva grudada).
+
+2. **Consenso Fuente sempre com um pilar faltando** — ✅ **causa raiz real
+   encontrada e corrigida**. Testei a API da Brapi ao vivo (`curl`): o
+   parâmetro `fundamental=true` (usado no código) nunca trouxe o P/VP — só
+   P/L e LPA. O P/VP e o Valor Patrimonial por Ação de verdade vivem no
+   módulo `defaultKeyStatistics`, que exige token da Brapi pra qualquer
+   ticker fora dos 4 gratuitos de teste (PETR4/MGLU3/VALE3/ITUB4) —
+   confirmado testando ITSA4 sem token (erro `MISSING_TOKEN`). Resultado:
+   o Graham ficava "N/A" sistematicamente pra quase todo ativo BR.
+   - `brapi.server.ts`: agora usa `modules=defaultKeyStatistics` +
+     `Authorization: Bearer` quando `BRAPI_TOKEN` existe (fallback
+     gracioso pra quem não configurar, sem quebrar nada); lê
+     `bookValue`/`priceToBook` do módulo certo.
+   - Novo campo `bvps` direto em `ApiAsset.metrics` (mais preciso que
+     derivar via `currentPrice / pbRatio`).
+   - `DividendRadar.tsx`, `AssetComparator.tsx`, `AssetCard.tsx`
+     atualizados pra preferir `metrics.bvps` quando disponível.
+   - `.env.example` documentado, `.env` local do Paulo já recebeu o token
+     real (`BRAPI_TOKEN`), `cloudbuild.yaml` preparado com substitution
+     `_BRAPI_TOKEN` + `--set-env-vars` no deploy do Cloud Run.
+   - **Pendente do Paulo**: adicionar `_BRAPI_TOKEN` no gatilho do Cloud
+     Build (Console → Cloud Build → Triggers → editar → Substitution
+     variables), mesmo lugar das 7 chaves do Firebase.
+
+3. **Remover "Simulator" do nome** — ✅ `t.snowball.title` agora é só
+   "Snowball Effect" (e equivalentes em pt-BR/es), usado no menu lateral e
+   na navegação mobile.
+
+4. **Seção "How to Add a New Broker" na Wiki não faz sentido pro
+   investidor** — ✅ removida do `docs.tsx` (era conteúdo de dev, não de
+   usuário final).
+
+5. **Radar Global com ativos fixos, deveria atualizar a cada 12h** —
+   ⚠️ **Investigado, NÃO implementado ainda**. A Brapi não tem endpoint
+   gratuito pra ordenar por dividend yield (testado via `curl`, só ordena
+   por nome/preço/variação/volume/market cap). Um radar de verdade
+   dinâmico exigiria varrer o universo inteiro de tickers da B3 e calcular
+   yield de cada um — possívelmente centenas de chamadas de API. Registrado
+   como item de backlog pra discutir abordagem (ex: lista curada maior +
+   job agendado) antes de implementar, em vez de arriscar algo malfeito.
+
+6. **Tabela de Exposição Setorial quebrando com scroll horizontal feio no
+   Risk Radar** — ✅ corrigido: removido `min-w-[700px]` desnecessário nas
+   duas tabelas (Asset Concentration e Sector Exposure), que só têm 3
+   colunas simples e não precisavam desse mínimo artificial.
+
+7. **Abas "Minha Posição"/"Transações" não fazem sentido na Mesa de
+   Decisão** — ✅ nova prop `hidePositionTabs` no `AssetDetailSheet.tsx`,
+   passada como `true` pelo `AssetComparator.tsx` (já que os itens ali são
+   hipotéticos/comparação, não posições reais da carteira). Sheet mostra
+   só Highlights + Dividends nesse contexto.
+
+**Bônus encontrado no caminho**: mais 2 hardcodes no `ConsensusPyramid.tsx`
+("Fuente Valuation Model", "Consensus") corrigidos com chaves novas
+(`t.valuation.pyramidTitle`, `t.valuation.consensusBadge`).
+
+**PENDENTE do Paulo**: configurar `_BRAPI_TOKEN` no Cloud Build Console
+(ver item 2), depois rodar `npm run dev` e conferir se o Graham aparece
+com valor real (não N/A) num ativo BR normal (ex: ITSA4) antes de
+push pra produção. `npm run test`/`npm run build` também pendentes —
+Claude não executa comando na máquina do Paulo.

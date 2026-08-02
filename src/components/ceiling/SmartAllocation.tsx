@@ -41,6 +41,11 @@ function flagFor(currency: Currency): string {
   return currency === "USD" ? "🇺🇸" : "🇧🇷";
 }
 
+const FEATURE_GATES = {
+  targetAllocation: false, // Set to true to require PRO for Target Allocation rules
+  maxConcentration: false, // Set to true to require PRO for Max Concentration rule
+};
+
 export function SmartAllocation() {
   const { t, locale } = useI18n();
   const { valuedItems: items } = useValuedPortfolio();
@@ -59,6 +64,31 @@ export function SmartAllocation() {
   const targets = settings.smartAllocationTargets;
   const setTargets = (t: Record<AssetType, number>) =>
     updateSettings({ smartAllocationTargets: t });
+  const maxConcentration = settings.maxConcentrationPerAsset ?? null;
+  const setMaxConcentration = (val: number | null) =>
+    updateSettings({ maxConcentrationPerAsset: val });
+
+  const currentAllocationPct = useMemo(() => {
+    const allocMap: Record<string, number> = {
+      STOCK_BR: 0, STOCK_US: 0, FII: 0, REIT: 0, ETF: 0, FII_INFRA: 0, FIAGRO: 0, FIXED_INCOME: 0
+    };
+    let totalBRL = 0;
+    for (const it of valuedItems) {
+      const val = it.currentPrice * it.quantity;
+      if (val > 0) {
+        const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+        allocMap[it.type] = (allocMap[it.type] || 0) + inBrl;
+        totalBRL += inBrl;
+      }
+    }
+    const pctMap: Record<AssetType, number> = { ...allocMap } as Record<AssetType, number>;
+    if (totalBRL > 0) {
+      for (const key of Object.keys(pctMap) as AssetType[]) {
+        pctMap[key] = (pctMap[key] / totalBRL) * 100;
+      }
+    }
+    return pctMap;
+  }, [valuedItems, exchangeRate]);
 
   const { isPro } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
@@ -95,7 +125,8 @@ export function SmartAllocation() {
 
   const result = useMemo(() => {
     if (!generated) return null;
-    const effectiveTargets = isPro
+    const canUseTargetAllocation = !FEATURE_GATES.targetAllocation || isPro;
+    const effectiveTargets = canUseTargetAllocation
       ? targets
       : {
           STOCK_BR: 0,
@@ -107,6 +138,11 @@ export function SmartAllocation() {
           FIAGRO: 0,
           FIXED_INCOME: 0,
         };
+    
+    // Pass down the max concentration if allowed by feature gate
+    const canUseMaxConcentration = !FEATURE_GATES.maxConcentration || isPro;
+    const effectiveMaxConcentration = canUseMaxConcentration ? maxConcentration : null;
+
     return computeSmartAllocation(
       Number(capital),
       currency,
@@ -115,6 +151,7 @@ export function SmartAllocation() {
       excludedTickers,
       effectiveTargets,
       exchangeRate,
+      effectiveMaxConcentration
     );
   }, [
     generated,
@@ -124,6 +161,7 @@ export function SmartAllocation() {
     excludedTickers,
     activeStrategies,
     targets,
+    maxConcentration,
     exchangeRate,
     isPro,
   ]);
@@ -166,11 +204,17 @@ export function SmartAllocation() {
 
           <div className="relative">
             <div
-              className={!isPro ? "opacity-30 blur-[2px] pointer-events-none transition-all" : ""}
+              className={(FEATURE_GATES.targetAllocation && !isPro) ? "opacity-30 blur-[2px] pointer-events-none transition-all" : ""}
             >
-              <TargetAllocationPanel targets={targets} onChange={handleTargetsChange} />
+              <TargetAllocationPanel 
+                targets={targets} 
+                onChange={handleTargetsChange} 
+                maxConcentration={maxConcentration}
+                onMaxConcentrationChange={setMaxConcentration}
+                currentAllocationPct={currentAllocationPct}
+              />
             </div>
-            {!isPro && (
+            {(FEATURE_GATES.targetAllocation && !isPro) && (
               <div
                 className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer rounded-lg hover:bg-background/10 transition-colors"
                 onClick={() => setShowPaywall(true)}

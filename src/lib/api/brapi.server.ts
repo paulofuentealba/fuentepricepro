@@ -14,8 +14,20 @@ import {
 export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
   const clean = ticker.toUpperCase().replace(".SA", "");
   return dedupeInFlight(`brapi:asset:${clean}`, async () => {
-    const url = `https://brapi.dev/api/quote/${encodeURIComponent(clean)}?fundamental=true&dividends=true&range=5y&interval=1mo`;
-    const r = await fetchWithRetry(url);
+    const token = process.env.BRAPI_TOKEN;
+    // `fundamental=true` only returns basic P/L + LPA (EPS) at the root of the
+    // response — it does NOT include priceToBookRatio, so Graham (which needs
+    // BVPS) was always N/A. The real P/VP + Book Value per Share live under
+    // the `defaultKeyStatistics` module, which requires a Brapi token for any
+    // ticker outside the 4 free test tickers (PETR4/MGLU3/VALE3/ITUB4). Only
+    // request the module when a token is configured, so behavior for anyone
+    // without BRAPI_TOKEN set stays exactly as before (no broken requests).
+    const modulesParam = token ? "&modules=defaultKeyStatistics" : "";
+    const url = `https://brapi.dev/api/quote/${encodeURIComponent(clean)}?fundamental=true&dividends=true&range=5y&interval=1mo${modulesParam}`;
+    const r = await fetchWithRetry(
+      url,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+    );
     if (!r.ok) return null;
     const json = await r.json();
     const res = json?.results?.[0];
@@ -38,10 +50,24 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
     );
 
     const eps: number | null =
-      typeof res.earningsPerShare === "number" ? res.earningsPerShare : null;
+      typeof res.earningsPerShare === "number"
+        ? res.earningsPerShare
+        : typeof res.defaultKeyStatistics?.trailingEps === "number"
+          ? res.defaultKeyStatistics.trailingEps
+          : null;
     const pe: number | null = typeof res.priceEarnings === "number" ? res.priceEarnings : null;
+    // Prefer the direct Book Value per Share when available (defaultKeyStatistics.bookValue) —
+    // more precise than deriving it downstream from currentPrice / pbRatio.
+    const bvps: number | null =
+      typeof res.defaultKeyStatistics?.bookValue === "number"
+        ? res.defaultKeyStatistics.bookValue
+        : null;
     const pb: number | null =
-      typeof res.priceToBookRatio === "number" ? res.priceToBookRatio : null;
+      typeof res.priceToBookRatio === "number"
+        ? res.priceToBookRatio
+        : typeof res.defaultKeyStatistics?.priceToBook === "number"
+          ? res.defaultKeyStatistics.priceToBook
+          : null;
     const type = classifyBr(clean);
 
     // Next ex-dividend date: prefer future lastDatePrior (data com), else future paymentDate
@@ -92,6 +118,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         peRatio: pe,
         pbRatio: pb,
         eps,
+        bvps,
         roe: null,
         currentDy: null,
         capRate: null,

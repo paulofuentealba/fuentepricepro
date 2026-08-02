@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { useI18n } from "@/lib/i18n-provider";
 import type { AssetType } from "@/lib/domain";
 import { cn } from "@/lib/utils";
+import { ALLOCATION_TOLERANCE_PCT } from "@/lib/allocation";
 
 const ASSET_TYPES: AssetType[] = [
   "STOCK_BR",
@@ -15,14 +16,24 @@ const ASSET_TYPES: AssetType[] = [
   "ETF",
   "FII_INFRA",
   "FIAGRO",
+  "FIXED_INCOME",
 ];
 
 interface Props {
   targets: Record<AssetType, number>;
   onChange: (newTargets: Record<AssetType, number>) => void;
+  maxConcentration: number | null;
+  onMaxConcentrationChange: (val: number | null) => void;
+  currentAllocationPct?: Record<AssetType, number>;
 }
 
-export function TargetAllocationPanel({ targets, onChange }: Props) {
+export function TargetAllocationPanel({
+  targets,
+  onChange,
+  maxConcentration,
+  onMaxConcentrationChange,
+  currentAllocationPct,
+}: Props) {
   const { t } = useI18n();
   const [total, setTotal] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -74,32 +85,61 @@ export function TargetAllocationPanel({ targets, onChange }: Props) {
       {isOpen && (
         <div className="border-t border-border/60 p-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {ASSET_TYPES.map((type) => (
-              <div key={type} className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">{t.types[type] || type}</Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={targets[type] === 0 ? "" : targets[type]}
-                    onChange={(e) => handleChange(type, e.target.value)}
-                    className="pr-6 h-8 text-sm"
-                    placeholder="0"
+            {ASSET_TYPES.map((type) => {
+              const targetVal = targets[type] || 0;
+              const currentVal = currentAllocationPct?.[type] ?? null;
+              const deviation = currentVal !== null ? currentVal - targetVal : null;
+              const isOutOfTolerance =
+                deviation !== null && Math.abs(deviation) > ALLOCATION_TOLERANCE_PCT;
+
+              return (
+                <div key={type} className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{t.types[type] || type}</Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={targets[type] === 0 ? "" : targets[type]}
+                      onChange={(e) => handleChange(type, e.target.value)}
+                      className="pr-6 h-8 text-sm"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-2 top-1.5 text-xs text-muted-foreground">%</span>
+                  </div>
+                  <Slider
+                    aria-label="Ajustar alocação alvo"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[targetVal]}
+                    onValueChange={(val) => handleChange(type, val[0])}
+                    className="mt-2"
                   />
-                  <span className="absolute right-2 top-1.5 text-xs text-muted-foreground">%</span>
+                  {currentVal !== null && (
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-muted-foreground">
+                        {t.smartAllocation.currentAllocationPct.replace(
+                          "{{pct}}",
+                          currentVal.toFixed(1),
+                        )}
+                      </span>
+                      <span
+                        className={cn(
+                          "font-medium",
+                          isOutOfTolerance ? "text-danger" : "text-muted-foreground",
+                        )}
+                      >
+                        {t.smartAllocation.allocationDeviation.replace(
+                          "{{pct}}",
+                          (deviation! > 0 ? "+" : "") + deviation!.toFixed(1),
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <Slider
-                  aria-label="Ajustar alocação alvo"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={[targets[type] || 0]}
-                  onValueChange={(val) => handleChange(type, val[0])}
-                  className="mt-2"
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {total !== 100 && (
@@ -112,6 +152,32 @@ export function TargetAllocationPanel({ targets, onChange }: Props) {
               {t.smartAllocation.targetTotalIdeal}
             </div>
           )}
+
+          <div className="mt-6 pt-4 border-t border-border/60">
+            <div className="space-y-1.5 max-w-sm">
+              <Label className="text-sm font-semibold text-foreground">
+                {t.smartAllocation.maxConcentrationLabel}
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                {t.smartAllocation.maxConcentrationHint}
+              </p>
+              <div className="relative">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={maxConcentration === null ? "" : maxConcentration}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onMaxConcentrationChange(val === "" ? null : parseFloat(val));
+                  }}
+                  className="pr-6 h-9 text-sm"
+                  placeholder="Ex: 5"
+                />
+                <span className="absolute right-3 top-2 text-xs text-muted-foreground">%</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

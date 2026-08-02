@@ -95,7 +95,7 @@ function DocsPage() {
         <div className="md:col-span-1 hidden md:block">
           <div className="sticky top-20 space-y-4">
             <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-4">
-              Índice
+              {t.docs.index}
             </h3>
             <ul className="space-y-2 text-sm">
               {menuItems.map((item) => (
@@ -156,7 +156,7 @@ function DocsPage() {
                     {t.docs.bazin.description}
                   </p>
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 border border-muted/50">
-                    Preço Teto = Dividendo Médio (Últimos Anos) / 0.06
+                    {t.docs.bazinFormula}
                   </div>
                   <div className="bg-indigo-500/10 p-3 rounded-md text-xs text-indigo-200/80 border border-indigo-500/20">
                     {t.docs.bazin.example}
@@ -213,8 +213,7 @@ function DocsPage() {
                     {t.docs.gordon.description}
                   </p>
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 border border-muted/50">
-                    Preço Justo = (Dividendo Atual &times; (1 + Crescimento)) / (Taxa de Desconto -
-                    Crescimento)
+                    {t.docs.gordonFormula}
                   </div>
                   <div className="bg-blue-500/10 p-3 rounded-md text-xs text-blue-200/80 border border-blue-500/20">
                     {t.docs.gordon.example}
@@ -539,20 +538,6 @@ function DocsPage() {
                         <span className="font-semibold text-amber-500">Santander/Toro</span>
                         <span className="text-[10px]">51.014.223/0001-49</span>
                       </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-background/40 backdrop-blur-md border-slate-500/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base text-slate-400">
-                      <HelpCircle className="h-5 w-5" />
-                      {t.docs.supportedBrokers.howToAddTitle}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="text-sm text-muted-foreground leading-relaxed space-y-2 whitespace-pre-line bg-muted/20 p-4 rounded-md border border-border">
-                      {t.docs.supportedBrokers.howToAddDesc}
                     </div>
                   </CardContent>
                 </Card>

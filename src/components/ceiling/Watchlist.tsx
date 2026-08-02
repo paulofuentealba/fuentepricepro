@@ -9,6 +9,8 @@ import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPor
 import { useSettings } from "@/lib/settings";
 import { useSubscription } from "@/lib/subscription";
 import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
+import { useUserSettings } from "@/lib/useUserSettings";
+import { useExchangeRate } from "@/lib/useExchangeRate";
 
 import { AddAssetDropdown } from "./watchlist/AddAssetDropdown";
 import { WatchlistKpiSection } from "./watchlist/WatchlistKpiSection";
@@ -44,6 +46,36 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const { isPro } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
   const { targetYield: globalYield } = useSettings();
+  const { settings } = useUserSettings();
+  const maxConcentration = settings.maxConcentrationPerAsset ?? null;
+  const { data: exchangeData } = useExchangeRate();
+  const exchangeRate = exchangeData?.rate ?? 5;
+
+  // Tickers currently violating the user-defined Max Concentration cap.
+  // A ticker is flagged when its share of the total consolidated portfolio
+  // (converted to BRL) exceeds the configured percentage. There is no
+  // "under the cap" state to flag — this only ever produces violations.
+  const concentrationViolators = useMemo(() => {
+    const violators = new Set<string>();
+    if (!maxConcentration || maxConcentration >= 100) return violators;
+
+    let totalBRL = 0;
+    const valueByTicker: Record<string, number> = {};
+    for (const it of valuedItems) {
+      const val = it.currentPrice * it.quantity;
+      if (val <= 0) continue;
+      const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+      valueByTicker[it.ticker] = (valueByTicker[it.ticker] || 0) + inBrl;
+      totalBRL += inBrl;
+    }
+    if (totalBRL <= 0) return violators;
+
+    for (const [ticker, val] of Object.entries(valueByTicker)) {
+      const pct = (val / totalBRL) * 100;
+      if (pct > maxConcentration) violators.add(ticker);
+    }
+    return violators;
+  }, [valuedItems, maxConcentration, exchangeRate]);
 
   const topAndWorst = useMemo(() => {
     const valid = valuedItems.filter((i) => i.averagePrice && i.averagePrice > 0 && i.quantity > 0);
@@ -182,6 +214,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
                 setTypeFilter(null);
                 setOppFilter(null);
               }}
+              concentrationViolators={concentrationViolators}
             />
           </>
         )}

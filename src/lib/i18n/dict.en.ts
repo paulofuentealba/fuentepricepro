@@ -11,6 +11,7 @@ export const en = {
     cancel: "Cancel",
     prev: "Previous",
     next: "Next",
+    other: "Other",
   },
   showcase: {
     title: "Showcase",
@@ -221,8 +222,9 @@ export const en = {
     REIT: "REIT",
     FII: "FII",
     FII_INFRA: "FII-Infra",
-    FIAGRO: "Fiagro",
+    FIAGRO: "FIAGRO",
     ETF: "ETF",
+    FIXED_INCOME: "Fixed Income",
   } as Record<AssetType, string>,
   metrics: {
     peRatio: "P/E Ratio",
@@ -240,6 +242,9 @@ export const en = {
   },
   errors: {
     notFound: "We couldn't find that ticker.",
+    saveProfileFailed: "Failed to save profile.",
+    saveTransactionFailed: "Failed to save transaction.",
+    deleteTransactionFailed: "Failed to delete transaction.",
   },
   watchlist: {
     loading: "Loading portfolio...",
@@ -459,6 +464,8 @@ export const en = {
     strategyLabel: "Allocation Strategy (pick up to 2)",
     strategyMaxHint: "You can combine up to two strategies.",
     resetStrategies: "Reset strategies",
+    maxConcentrationLabel: "Max Concentration (%)",
+    maxConcentrationHint: "Maximum per individual asset",
     strategies: {
       yield: "Max Yield",
       margin: "Margin Focus",
@@ -487,12 +494,15 @@ export const en = {
     targetPanelTitle: "Target Allocation (%)",
     targetTotal: "Total: {{total}}%",
     targetTotalIdeal: "(Ideally should sum to 100%)",
+    currentAllocationPct: "Current: {{pct}}%",
+    allocationDeviation: "Deviation: {{pct}}%",
+    concentrationViolation: "Above ceiling",
     beforeCurrent: "Before (Current)",
     afterProjected: "After (Projected)",
   },
 
   snowball: {
-    title: "Snowball Effect Simulator",
+    title: "Snowball Effect",
     subtitle:
       "Discover the power of compound interest. See how much passive income your current portfolio could generate in the future if you reinvest all dividends plus a fixed monthly contribution.",
     monthlyContribution: "Monthly Contribution",
@@ -629,6 +639,8 @@ export const en = {
     overvalued: "OVERVALUED",
     selicAnchor: "Selic Anchor",
     breakdown: "Consensus Breakdown",
+    pyramidTitle: "Fuente Valuation Model",
+    consensusBadge: "Consensus",
   },
   paywall: {
     title: "Unlock Pro Features",
@@ -649,6 +661,9 @@ export const en = {
       "Our valuation methodology focuses on generating safe and growing passive income, using multiple models and safety margins to evaluate global opportunities.",
     searchPlaceholder: "Search Wiki...",
     navLink: "Wiki",
+    index: "Index",
+    bazinFormula: "Ceiling Price = Average Dividend (Last Years) / 0.06",
+    gordonFormula: "Fair Price = (Current Dividend × (1 + Growth)) / (Discount Rate - Growth)",
     consensus: {
       title: "Fuente Consensus",
       description:
