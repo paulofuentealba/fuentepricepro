@@ -1,0 +1,86 @@
+{
+  "TAEE11": {
+    "vpa": 7.362366851669963,
+    "lpa": 1.528657970459105,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:46.805Z"
+  },
+  "PETR4": {
+    "vpa": 32.399383845056974,
+    "lpa": 8.581526365003047,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:46.851Z"
+  },
+  "BBSE3": {
+    "vpa": 5.348919851653446,
+    "lpa": 5.635813330586175,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:46.884Z"
+  },
+  "VALE3": {
+    "vpa": 42.55895485720572,
+    "lpa": 2.6606386406236133,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:46.949Z"
+  },
+  "BBAS3": {
+    "vpa": 6.7511787516359485,
+    "lpa": 2.9283587489823732,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:46.949Z"
+  },
+  "ITUB4": {
+    "vpa": 213.19750502759024,
+    "lpa": 4.15793451447338,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:47.008Z"
+  },
+  "BBDC4": {
+    "vpa": 41.85804036362259,
+    "lpa": 2.2587432809512666,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:47.063Z"
+  },
+  "WEGE3": {
+    "vpa": 4.420290292239135,
+    "lpa": 1.6143542145790974,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:47.127Z"
+  },
+  "HGLG11": {
+    "vpa": null,
+    "lpa": null,
+    "vacancy": 3.2784700425539275,
+    "updatedAt": "2026-08-03T08:33:48.242Z"
+  },
+  "MXRF11": {
+    "vpa": null,
+    "lpa": null,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:48.242Z"
+  },
+  "AFHI11": {
+    "vpa": null,
+    "lpa": null,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:48.242Z"
+  },
+  "KNRI11": {
+    "vpa": null,
+    "lpa": null,
+    "vacancy": 0.089495883595256,
+    "updatedAt": "2026-08-03T08:33:48.242Z"
+  },
+  "XPLG11": {
+    "vpa": null,
+    "lpa": null,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:48.242Z"
+  },
+  "VISC11": {
+    "vpa": null,
+    "lpa": null,
+    "vacancy": null,
+    "updatedAt": "2026-08-03T08:33:48.242Z"
+  }
+}

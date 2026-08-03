@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 
 export function GuestWarningBanner() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { t } = useI18n();
 
-  if (user) return null;
+  if (loading || user) return null;
 
   return (
     <div className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-700 dark:text-amber-400 p-2 sm:p-3 flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm font-medium z-40 relative">

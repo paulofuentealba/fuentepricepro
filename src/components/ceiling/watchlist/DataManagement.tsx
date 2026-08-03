@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { DEV_MOCK_DATA } from "@/lib/__mocks__/devMockData";
 
 export function DataManagement() {
+  const { t } = useI18n();
   const { items, remove, upsertManyAsync } = useWatchlist();
 
   return (
@@ -31,7 +32,7 @@ export function DataManagement() {
             // Wait briefly to allow deletions to process, then insert mock data
             setTimeout(() => {
               upsertManyAsync(DEV_MOCK_DATA).then(() => {
-                toast.success("Massa de dados restaurada com sucesso!");
+                toast.success(t.toasts.mockDataRestored);
               });
             }, 300);
           }}

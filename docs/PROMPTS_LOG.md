@@ -2249,6 +2249,117 @@ Evidência direta:
 
 **Conclusão Final:** A CVM Dados Abertos **não publica dataset tabular estruturado com eventos de proventos (dividendos, JCP, rendimentos de FII) discriminados por data de pagamento** em nenhum dos datasets verificados. O `fre_cia_aberta_distribuicao_dividendos` mencionado no plan não existe no servidor; o `inf_mensal_fii_rendimento` (mencionado em conteúdo de LLM) nunca existiu. Avisos de pagamento de proventos continuam exclusivamente em PDF/HTML no sistema IPE.
 
+---
+
+### Prompt 18 — Implementação SEC EDGAR (Fase 2) ✅
+
+- **Objetivo**: Integrar a API oficial da SEC EDGAR para buscar dinamicamente o Book Value Per Share (BVPS) de ações e REITs americanos, suprimindo o fato de que a API do Yahoo Finance frequentemente retorna `null` para essa métrica nesses ativos (quebrando o cálculo do preço justo de Graham).
+- **Implementação Técnica (`src/lib/api/secEdgar.server.ts`)**:
+  - **Serviço Independente**: Criado `fetchSecEdgarFacts` com cache em memória (TTL de 24h) para o arquivo gigante `company_tickers.json` da SEC, resolvendo o ticker para o CIK de 10 dígitos.
+  - **Filtro XBRL Preciso**: Extrai `StockholdersEquity` e `EntityCommonStockSharesOutstanding` (com fallback para `CommonStockSharesOutstanding`). Para evitar uso de contextos desatualizados ou comparativos do ano anterior, os fatos (facts) XBRL são ordenados por `end` date em ordem decrescente, e apenas o primeiro registro (o mais recente) é utilizado.
+  - **Tolerância a Falhas**: Toda a operação é encapsulada em bloco try/catch global. Retorna silenciosamente `{ bvps: null }` se houver indisponibilidade da SEC EDGAR, ausência de fato contábil recente, ou se o CIK não existir (ex: em caso de falso positivo com um ticker BR como PETR4).
+- **Integração SSOT (`src/lib/apiService.functions.ts`)**:
+  - Injetado em `fetchAssetFn` especificamente no branch onde `isYahoo` é executado, **apenas** quando o retorno principal possuir `asset.metrics.bvps` como null ou undefined.
+  - Isso garante que a regra de SSOT seja mantida e a UI nunca dependa da SEC EDGAR diretamente, mantendo todos os cálculos centralizados no fluxo já existente do servidor.
+- **Verificação Dinâmica**:
+  - O script de validação dinâmica (`scripts/verify-sec-edgar.ts`) confirmou BVPS reais para:
+    - AAPL: ~7.36 (Referente ao Q3 - FY26, 2026-06-27, com PL de $107,52B)
+    - O (Realty Income): ~41.98
+    - JNJ: ~35.25
+    - KO: ~7.81
+    - TICKERFAKE123 (Inexistente): null
+- **Testes e Build**: Suíte de testes (41/41) passando sem quebras no mock, com build do Vite gerado e com os chunks corretos. BVPS americano destravado com sucesso na UI (Graham habilitado).
+
+---
+
+### Prompt 19 — Fix: Banner de Guest piscando no F5/CTRL+F5 ✅
+
+- **Objetivo**: Evitar o comportamento indesejado em que o `GuestWarningBanner` piscava momentaneamente ao recarregar a página (F5 ou CTRL+F5) para usuários autenticados.
+- **Causa Raiz**: O componente `GuestWarningBanner.tsx` dependia apenas do objeto `user` retornado pelo `useAuth()`. Durante a restauração da sessão via Firebase `onAuthStateChanged`, o estado inicial de `user` é `null` enquanto `loading` é `true`. O banner rendering-se imediatamente sem aguardar `loading` causava um flash do banner antes da autenticação ser confirmada.
+- **Solução (`src/components/ceiling/GuestWarningBanner.tsx`)**:
+  - Atualizada a desestruturação do hook `useAuth()` para extrair `loading`.
+  - Atualizado o Early Return para `if (loading || user) return null;`.
+- **Verificação**:
+  - Testado e validado: o banner não aparece para usuários autenticados durante a inicialização/reload.
+  - Testes unitários (41/41) e build de produção executados com sucesso sem erros.
+
+---
+
+### Prompt 20 — Hardening do Fallback de Classificação (`classify.ts`) ✅
+
+- **Objetivo**: Substituir a lista parcial de exceções hardcoded em `src/lib/classify.ts` por uma estrutura declarativa (`Set<string>`) documentada com base nos registros de Units (ações ON+PN terminadas em 11) da B3.
+- **Implementação Técnica (`src/lib/classify.ts`)**:
+  - Criado o conjunto `B3_STOCK_UNIT_PREFIXES` contendo 22 prefixos conhecidos de Ações Units da B3 (`TAEE`, `KLBN`, `SANB`, `BPAC`, `ENGI`, `ALUP`, `SAPR`, `IGTI`, `CPLE`, `ELET`, `SOMA`, `SULA`, `BIDI`, `TIET`, `PARD`, `MODL`, `ALPK`, `AURE`, `ALLD`, `STBP`, `RPMG`, `BMGB`).
+  - Adicionada documentação detalhada explicando a fonte dos dados (B3 - Empresas Listadas) e ressaltando que se trata de uma heurística de fallback ativada exclusivamente quando a API principal (`apiType`) não retornar a classificação do ativo.
+  - Refatorada a função `classifyBr` para consultar `B3_STOCK_UNIT_PREFIXES.has(prefix)`.
+- **Testes Unitários (`src/lib/__tests__/classify.test.ts`)**:
+  - Criada suíte de testes com 4 casos cobrindo:
+    1. Classificação de todas as 22 Units como `STOCK_BR`.
+    2. Classificação de FIIs reais (`HGLG11`, `MXRF11`, etc.) como `FII`.
+    3. Classificação de ações ordinárias/preferenciais padrão (`PETR4`, `VALE3`).
+    4. Garantia de que `apiType` tem prioridade absoluta sobre o fallback.
+- **Validação**: Testes totais subiram de 49 para **53 testes passados** (10 arquivos). Build de produção executado com sucesso.
+
+- **Re-verificação Rigorosa Item-a-Item (Prompt 20 - Correção/Re-checagem)**:
+  - Realizada re-checagem rigorosa dos 22 prefixos contra o cadastro de emissores CVM, Yahoo Finance (`query1.finance.yahoo.com`), B3 e notícias/RI de empresas.
+  - **Confirmados (16 prefixos)**:
+    - Ativos atuais (8): `TAEE`, `KLBN`, `SANB`, `BPAC`, `ENGI`, `ALUP`, `SAPR`, `IGTI`.
+    - Históricos convertidos/extintos (8): `CPLE` (Copel), `SULA` (SulAmérica), `BIDI` (Banco Inter), `TIET` (AES Tietê), `MODL` (Banco Modal), `AURE` (Auren Energia), `STBP` (Santos Brasil), `BMGB` (Banco BMG).
+  - **Removidos (6 prefixos falsos/não-units)**:
+    - `RPMG` (Manguinhos opera apenas como RPMG3 ON, nunca existiu RPMG11).
+    - `ELET` (Eletrobras operava apenas ELET3/ELET5/ELET6, nunca existiu ELET11).
+    - `SOMA` (Grupo Soma negociava apenas SOMA3 no Novo Mercado).
+    - `PARD` (Hermes Pardini negociava apenas PARD3).
+    - `ALPK` (Estapar negocia apenas ALPK3).
+    - `ALLD` (Allied Tecnologia negocia apenas ALLD3).
+  - Atualizados `B3_STOCK_UNIT_PREFIXES` em `classify.ts` e a suíte de teste em `classify.test.ts`. Testes (53/53) e build 100% limpos.
+
+---
+
+### Prompt 21 — Eliminação de Strings Hardcoded em Toasts e Paywall (Regra 2 i18n) ✅
+
+- **Objetivo**: Eliminar todas as chamadas de `toast.*` e textos de Paywall que continham strings em texto puro (violação da Regra 2 do `AGENTS.md`), integrando-as nos dicionários i18n (`dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts`).
+- **Chaves de i18n Adicionadas/Atualizadas**:
+  - **`toasts`**: `assetSaved`, `assetRemoved`, `watchlistCleared`, `imageGenerated`, `mockDataRestored`, `emptyWatchlist`, `exportSuccess`, `exportFailed`, `noValidRowsCsv`, `importComplete`, `importFailed`, `importAdded`, `importUpdated`, `importFailedCount`, `noChanges`, `assetsUpdatedCount`, `adjustAllocationTarget100`.
+  - **`errors`**: `copyFailed`, `imageGenerationFailed`, `syncFailedPrefix`, `saveAssetFailedPrefix`, `deleteAssetFailedPrefix`, `clearAssetsFailedPrefix`, `saveBatchFailedPrefix`, `updateAssetFailedPrefix`.
+  - **`authModal`**: `welcomeBack`, `authFailed`, `signInFailed`, `googleSignInFailed`.
+  - **`smartAllocation`**: `paywallTitle`, `paywallDesc`.
+- **Arquivos Refatorados**:
+  - `src/components/shared/AssetCard.tsx` (toasts de cópia e geração/compartilhamento de imagem com fallback corrigido).
+  - `src/components/ceiling/watchlist/DataManagement.tsx` (restauração de dados mock).
+  - `src/components/ceiling/watchlist/WatchlistIO.tsx` (toasts de exportação/importação CSV com interpolação de contagem).
+  - `src/components/ceiling/watchlist/WatchlistTable.tsx` (toast de atualização em massa).
+  - `src/components/ceiling/SmartAllocation.tsx` (alerta de alocação 100% e PaywallDialog).
+  - `src/lib/watchlist.ts` (mutações de save, delete, clear, batch e sync).
+  - `src/lib/auth-modal.tsx` & `src/routes/auth.tsx` (termos de uso e callbacks de auth).
+- **Varredura Final**: Varredura por `toast.(error|success|warning|info)("[^"]{4,}"` em `src` retornou **0 ocorrências**.
+- **Validação**: Testes totais (53/53) e build de produção SSR/Client executados com 100% de sucesso.
+
+---
+
+### Prompt 22 — Correção Arquitetural do Cache CVM no Firestore (Fase 3 Hardening) ✅
+
+- **Problema Diagnosticado**:
+  1. `fetchCvmEnrichedFacts` em `src/lib/api/cvm.server.ts` possuía uma checagem `if (typeof window !== "undefined")`, mas rodava em ambiente Node.js server (`createServerFn`), tornando o branch do Firestore código morto e forçando 100% dos dados pro fallback local `cvm_enriched.json`.
+  2. O arquivo importava o Client SDK (`firebase/firestore` com IndexedDB localCache), inadequado para Node server.
+  3. `firestore.rules` não possuía match explícito para `/enrichedFundamentals/{ticker}`.
+  4. `scripts/ingest-cvm.ts` usava Client SDK sem carregar variáveis de ambiente, falhando silenciosamente no catch.
+
+- **Soluções Implementadas**:
+  1. **Dependências & Módulo Admin SDK**: Instalação do `firebase-admin`, `dotenv` e `tsx`. Criação de `src/integrations/firebase/admin.ts` exportando `getAdminFirestore()` com guard `isFirebaseAdminConfigured()` (evitando crashes de unhandled gRPC em execuções locais sem ADC).
+  2. **Refatoração do `cvm.server.ts`**: Removida a checagem de `window`. Leitura via `firebase-admin` Firestore no servidor Node, com fallback gracioso para o JSON estático `cvm_enriched.json`.
+  3. **Atualização do `firestore.rules`**: Adicionada regra explícita `match /enrichedFundamentals/{ticker} { allow read: if true; allow write: if false; }` (leitura pública, escrita restrita ao Admin SDK).
+  4. **Atualização do `scripts/ingest-cvm.ts`**: Inclusão de `dotenv/config` e migração da escrita para Admin SDK (`adminDb.collection("enrichedFundamentals").doc(ticker).set(...)`).
+
+- **Evidências de Execução e Verificação**:
+  - Testes executados via `npx tsx scratch/test-cvm-server-read.ts` e `scratch/test-cvm-firestore-mock-key.ts`:
+    - `BBSE3`: VPA = `5.3489`, LPA = `5.6358`
+    - `HGLG11`: Vacância = `3.2785%`
+  - Fallback gracioso testado ao simular falha/ausência de credenciais do Firestore.
+  - Varredura em `src` confirmando que `enrichedFundamentals` é consumido exclusivamente via `fetchAssetFn` (SSOT mantido).
+  - Testes unitários (`npm run test`): 53/53 testes aprovados. Build de produção (`npm run build`) executado com sucesso.
+
+
 
 
 

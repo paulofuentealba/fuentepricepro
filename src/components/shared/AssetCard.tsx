@@ -199,9 +199,9 @@ function WatchlistVariant(props: AssetCardProps) {
       await navigator.clipboard.writeText(text);
       toast.success(t.watchlist.shareCopied);
     } catch {
-      toast.error("Could not copy to clipboard.");
+      toast.error(t.errors.copyFailed);
     }
-  }, [item, locale, t.watchlist.shareCopied, derived.yoc]);
+  }, [item, locale, t.watchlist.shareCopied, t.errors.copyFailed, derived.yoc]);
 
   const handleShareInsta = useCallback(async () => {
     if (!cardRef.current || !item) return;
@@ -229,10 +229,10 @@ function WatchlistVariant(props: AssetCardProps) {
         link.href = dataUrl;
         link.click();
       }
-      toast.success(t.watchlist.shareCopied || "Imagem gerada com sucesso!");
+      toast.success(t.toasts.imageGenerated);
     } catch (err) {
       console.error(err);
-      toast.error("Erro ao gerar imagem");
+      toast.error(t.errors.imageGenerationFailed);
     }
   }, [item, t]);
 

@@ -64,7 +64,7 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
 
     setIsEditing(false);
     if (updatedCount > 0) {
-      toast.success(`${updatedCount} ativo(s) atualizados.`);
+      toast.success(t.toasts.assetsUpdatedCount.replace("{{count}}", String(updatedCount)));
     }
   };
 

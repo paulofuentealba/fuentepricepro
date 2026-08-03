@@ -71,14 +71,14 @@ function AuthPage() {
     try {
       if (mode === "signup") {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast.success("Account created successfully!");
+        toast.success(t.authModal.successSignup);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Welcome back");
+        toast.success(t.authModal.welcomeBack);
         navigate({ to: "/" });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      toast.error(err instanceof Error ? err.message : t.authModal.authFailed);
     } finally {
       setBusy(false);
     }
@@ -93,7 +93,7 @@ function AuthPage() {
       await signInWithPopup(auth, provider);
       navigate({ to: "/" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+      toast.error(err instanceof Error ? err.message : t.authModal.googleSignInFailed);
       setBusy(false);
     }
   }

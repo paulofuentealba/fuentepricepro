@@ -105,7 +105,6 @@ Itens menores, sem épico específico, encontrados ao longo da auditoria:
 - **`Watchlist.tsx`** é o maior e mais frequentemente quebrado arquivo do projeto (KPIs, filtros, grid, orquestração de diálogos tudo junto) — candidato a quebrar em componentes menores quando houver tempo
 - **`nitro: "3.0.260603-beta"`** fixado como dependência de servidor — migrar pra versão estável assim que disponível
 - **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, `test-bbas3.ts`, `test-server.js`, `test_search.ts`) — resíduo de refatorações já concluídas, candidatos a remoção
-- **Fallback de classificação em `classify.ts`** usa uma lista crescente de exceções hardcoded (`!s.startsWith("TAEE")`, etc.) pro sufixo "11" — funciona porque o `apiType` da API cobre a maioria dos casos primeiro, mas é uma dívida técnica conhecida, não uma solução definitiva
 
 ---
 
@@ -118,6 +117,15 @@ Registrado aqui só pra contexto — não precisa de ação:
 - Auditoria completa de i18n, navegação mobile, acessibilidade WCAG AA, hierarquia visual do dashboard — resolvido nos Sprints 1 a 5 do P2
 - Refino do fluxo "Update Holdings" e consolidação do campo "Investing Since" em componente único `InvestingSinceField.tsx` (read-only quando há transações atreladas à menor data de transação) — resolvido no Prompt 14
 - `AGENTS.md` atualizado com as Regras 1-7 completas (incluindo a nova Regra 7 — governança/precedência do próprio arquivo) — item de débito técnico antigo removido por estar desatualizado
+- Correção do pisca/flicker do `GuestWarningBanner` no F5/CTRL+F5 para usuários autenticados (verificando estado `loading` de `useAuth()`) — resolvido no Prompt 19
+- SEC EDGAR integrado como fonte de enriquecimento de BVPS para ações/REITs US quando o Yahoo Finance não preenche a métrica, via `secEdgar.server.ts`, plugado em `fetchAssetFn` respeitando o princípio de SSOT — resolvido no Prompt 18
+- Fallback de classificação em `classify.ts` refatorado para conjunto declarativo `B3_STOCK_UNIT_PREFIXES` (16 prefixos confirmados individualmente contra B3/CVM/Yahoo Finance), com documentação de fonte e testes unitários dedicados em `classify.test.ts` — resolvido no Prompt 20
+- Eliminação completa de strings de texto puro em chamadas de `toast.*` e modal de Paywall, com integração nos 3 dicionários i18n (`dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts`) conforme a Regra 2 do `AGENTS.md` — resolvido no Prompt 21
+- **Fase 3 (CVM Dados Abertos - VPA/LPA + Vacância)**: Migração arquitetural da leitura e ingestão da CVM no Firestore de Client SDK para Firebase Admin SDK (`src/integrations/firebase/admin.ts`), remoção do check de `window` em `cvm.server.ts`, inclusão da regra em `firestore.rules` e script CLI `ingest-cvm.ts` atualizado — resolvido no Prompt 22 (Nota: a implementação original da Fase 3 possuía um bug onde o Firestore era ignorado em ambiente SSR Node.js por verificar `typeof window !== "undefined"` e usar o Client SDK; a falha foi corrigida nesta entrega).
+
+
+
+
 
 
 ---

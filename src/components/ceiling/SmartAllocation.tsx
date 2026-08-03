@@ -169,7 +169,7 @@ export function SmartAllocation() {
   const handleGenerate = () => {
     const totalTarget = Object.values(targets).reduce((acc, val) => acc + val, 0);
     if (totalTarget !== 100) {
-      toast.warning("Ajuste suas metas de alocação para 100% antes de gerar a recomendação.");
+      toast.warning(t.toasts.adjustAllocationTarget100);
       return;
     }
 
@@ -548,8 +548,8 @@ export function SmartAllocation() {
       <PaywallDialog
         open={showPaywall}
         onOpenChange={setShowPaywall}
-        title="Advanced Strategies Locked"
-        description="Free users can only use the default 'Yield' strategy. Upgrade to Pro to combine multiple strategies like Sector Concentration Penalty, Undervaluation, and Risk Parity!"
+        title={t.smartAllocation.paywallTitle}
+        description={t.smartAllocation.paywallDesc}
       />
     </section>
   );

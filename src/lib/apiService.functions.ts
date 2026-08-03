@@ -4,6 +4,8 @@ import { UA, fetchWithRetry } from "./api/http.server";
 import { classifyBr, classifyYahoo } from "./api/classify.server";
 import { fetchFromBrapi } from "./api/brapi.server";
 import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
+import { fetchSecEdgarFacts } from "./api/secEdgar.server";
+import { fetchCvmEnrichedFacts } from "./api/cvm.server";
 
 // Re-export public types so existing `@/lib/apiService.functions` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
@@ -170,6 +172,32 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
     }
 
     if (!asset) throw new Error("NOT_FOUND");
+    
+    // Enrich with SEC EDGAR for US stocks/REITs when Yahoo doesn't have BVPS
+    if (!looksBr && (asset.metrics.bvps == null || asset.metrics.bvps === undefined)) {
+      const secData = await fetchSecEdgarFacts(raw).catch(() => null);
+      if (secData?.bvps != null) {
+        asset.metrics.bvps = secData.bvps;
+      }
+    }
+
+    // Enrich with CVM Dados Abertos for BR assets (VPA/LPA & Vacancy)
+    if (looksBr) {
+      const cvmData = await fetchCvmEnrichedFacts(raw).catch(() => null);
+      if (cvmData) {
+        if (asset.metrics.bvps == null && cvmData.vpa != null) {
+          asset.metrics.bvps = cvmData.vpa;
+        }
+        if (asset.metrics.eps == null && cvmData.lpa != null) {
+          asset.metrics.eps = cvmData.lpa;
+          if (asset.epsCurrent == null) asset.epsCurrent = cvmData.lpa;
+        }
+        if (asset.metrics.vacancy == null && cvmData.vacancy != null) {
+          asset.metrics.vacancy = cvmData.vacancy;
+        }
+      }
+    }
+
     return { ...asset, ticker: cleanTicker(asset.ticker) };
   });
 

@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
+import { useI18n } from "./i18n-provider";
 import type { AssetType, Currency } from "./domain";
 import { assetQueryOptions } from "./queryOptions";
 import { cleanTicker } from "./formatters";
@@ -259,6 +260,7 @@ function itemToRow(item: WatchlistItem, userId: string): Row {
 
 // ---------- Seeding Logic Removed ----------
 export function useWatchlist() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const userId = user?.uid ?? null;
@@ -331,7 +333,7 @@ export function useWatchlist() {
       },
       (error) => {
         console.error("[watchlist] realtime sync failed", error);
-        toast.error("Erro na sincronização de dados: " + error.message);
+        toast.error(t.errors.syncFailedPrefix + error.message);
       },
     );
     return () => unsubscribe();
@@ -421,7 +423,7 @@ export function useWatchlist() {
           await withTimeout(setDoc(ref, row, { merge: true }));
         } catch (error: any) {
           console.error("[watchlist] error saving item:", error);
-          toast.error(`Erro ao salvar ativo: ${error.message}`);
+          toast.error(`${t.errors.saveAssetFailedPrefix}: ${error.message}`);
           throw error;
         }
       } else {
@@ -447,7 +449,7 @@ export function useWatchlist() {
       if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
     },
     onSuccess: () => {
-      toast.success("Ativo salvo com sucesso!");
+      toast.success(t.toasts.assetSaved);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
@@ -464,7 +466,7 @@ export function useWatchlist() {
           }
         } catch (error: any) {
           console.error("[watchlist] error removing item:", error);
-          toast.error(`Erro ao excluir ativo: ${error.message}`);
+          toast.error(`${t.errors.deleteAssetFailedPrefix}: ${error.message}`);
           throw error;
         }
       } else {
@@ -486,7 +488,7 @@ export function useWatchlist() {
       if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
     },
     onSuccess: () => {
-      toast.success("Ativo removido com sucesso!");
+      toast.success(t.toasts.assetRemoved);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
@@ -509,7 +511,7 @@ export function useWatchlist() {
           }
         } catch (error: any) {
           console.error("[watchlist] error clearing items:", error);
-          toast.error(`Erro ao limpar ativos: ${error.message}`);
+          toast.error(`${t.errors.clearAssetsFailedPrefix}: ${error.message}`);
           throw error;
         }
       } else {
@@ -526,7 +528,7 @@ export function useWatchlist() {
       if (context?.prev) queryClient.setQueryData(queryKey, context.prev);
     },
     onSuccess: () => {
-      toast.success("Watchlist limpa com sucesso!");
+      toast.success(t.toasts.watchlistCleared);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
@@ -555,7 +557,7 @@ export function useWatchlist() {
           }
         } catch (error: any) {
           console.error("[watchlist] error saving batch:", error);
-          toast.error(`Erro ao salvar múltiplos ativos: ${error.message}`);
+          toast.error(`${t.errors.saveBatchFailedPrefix}: ${error.message}`);
           throw error;
         }
       } else {
@@ -604,7 +606,7 @@ export function useWatchlist() {
           await withTimeout(setDoc(ref, row, { merge: true }));
         } catch (error: any) {
           console.error("[watchlist] error updating item:", error);
-          toast.error(`Erro ao atualizar ativo: ${error.message}`);
+          toast.error(`${t.errors.updateAssetFailedPrefix}: ${error.message}`);
           throw error;
         }
       } else {

@@ -85,7 +85,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
 
   async function handleOAuth(providerName: "google") {
     if (!termsAccepted) {
-      toast.error("Por favor, aceite os Termos de Uso e Política de Privacidade.");
+      toast.error(t.authModal.agreeTerms);
       return;
     }
     setBusy(true);
@@ -95,7 +95,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
       provider.addScope("email");
       await signInWithPopup(auth, provider);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : `${providerName} sign-in failed`);
+      toast.error(err instanceof Error ? err.message : t.authModal.signInFailed);
       setBusy(false);
     }
   }
@@ -103,7 +103,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     if (!termsAccepted) {
-      toast.error("Por favor, aceite os Termos de Uso e Política de Privacidade.");
+      toast.error(t.authModal.agreeTerms);
       return;
     }
     setBusy(true);

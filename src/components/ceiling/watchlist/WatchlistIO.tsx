@@ -29,19 +29,19 @@ export function WatchlistIO({ items, onImport }: Props) {
 
   const handleExport = useCallback(() => {
     if (items.length === 0) {
-      toast.info("Your watchlist is empty.");
+      toast.info(t.toasts.emptyWatchlist);
       return;
     }
     try {
       const csv = buildWatchlistCsv(items);
       const date = new Date().toISOString().slice(0, 10);
       downloadCsv(`watchlist-${date}.csv`, csv);
-      toast.success(`Exported ${items.length} assets.`);
+      toast.success(t.toasts.exportSuccess.replace("{{count}}", String(items.length)));
     } catch (err) {
       console.error("[export] failed", err);
-      toast.error("Export failed. Please try again.");
+      toast.error(t.toasts.exportFailed);
     }
-  }, [items]);
+  }, [items, t]);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -50,7 +50,7 @@ export function WatchlistIO({ items, onImport }: Props) {
         const text = await file.text();
         const rows = parseWatchlistCsv(text);
         if (rows.length === 0) {
-          toast.error("No valid rows found in CSV.");
+          toast.error(t.toasts.noValidRowsCsv);
           return;
         }
         let added = 0;
@@ -101,13 +101,14 @@ export function WatchlistIO({ items, onImport }: Props) {
           }
         }
         const parts: string[] = [];
-        if (added) parts.push(`${added} added`);
-        if (updated) parts.push(`${updated} updated`);
-        if (failed) parts.push(`${failed} failed`);
-        toast.success(`Import complete — ${parts.join(", ") || "no changes"}.`);
+        if (added) parts.push(t.toasts.importAdded.replace("{{count}}", String(added)));
+        if (updated) parts.push(t.toasts.importUpdated.replace("{{count}}", String(updated)));
+        if (failed) parts.push(t.toasts.importFailedCount.replace("{{count}}", String(failed)));
+        const summary = parts.join(", ") || t.toasts.noChanges;
+        toast.success(t.toasts.importComplete.replace("{{summary}}", summary));
       } catch (err) {
         console.error("[import] failed", err);
-        toast.error("Import failed. Check the CSV format.");
+        toast.error(t.toasts.importFailed);
       } finally {
         setImporting(false);
         if (fileRef.current) fileRef.current.value = "";
