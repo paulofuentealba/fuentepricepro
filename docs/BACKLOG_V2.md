@@ -121,7 +121,9 @@ Registrado aqui só pra contexto — não precisa de ação:
 - SEC EDGAR integrado como fonte de enriquecimento de BVPS para ações/REITs US quando o Yahoo Finance não preenche a métrica, via `secEdgar.server.ts`, plugado em `fetchAssetFn` respeitando o princípio de SSOT — resolvido no Prompt 18
 - Fallback de classificação em `classify.ts` refatorado para conjunto declarativo `B3_STOCK_UNIT_PREFIXES` (16 prefixos confirmados individualmente contra B3/CVM/Yahoo Finance), com documentação de fonte e testes unitários dedicados em `classify.test.ts` — resolvido no Prompt 20
 - Eliminação completa de strings de texto puro em chamadas de `toast.*` e modal de Paywall, com integração nos 3 dicionários i18n (`dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts`) conforme a Regra 2 do `AGENTS.md` — resolvido no Prompt 21
-- **Fase 3 (CVM Dados Abertos - VPA/LPA + Vacância)**: Migração arquitetural da leitura e ingestão da CVM no Firestore de Client SDK para Firebase Admin SDK (`src/integrations/firebase/admin.ts`), remoção do check de `window` em `cvm.server.ts`, inclusão da regra em `firestore.rules` e script CLI `ingest-cvm.ts` atualizado — resolvido no Prompt 22 (Nota: a implementação original da Fase 3 possuía um bug onde o Firestore era ignorado em ambiente SSR Node.js por verificar `typeof window !== "undefined"` e usar o Client SDK; a falha foi corrigida nesta entrega).
+- **Fase 3 (CVM Dados Abertos - VPA/LPA + Vacância)**: Migração arquitetural da leitura e ingestão da CVM no Firestore de Client SDK para Firebase Admin SDK (`src/integrations/firebase/admin.ts`), remoção do check de `window` em `cvm.server.ts`, inclusão da regra em `firestore.rules` e script CLI `ingest-cvm.ts` atualizado — resolvido no Prompt 22
+- **Fix Seleção de Conta DRE CVM**: Prioridade determinística estrita para conta `3.11` (Lucro Líquido Consolidado) sobre `3.09` (Operações Continuadas) em `scripts/ingest-cvm.ts`, corrigindo a divergência de LPA da BBSE3 (de 5.6358 de volta para 4.6448, alinhado com a Fase 1) e re-populando os dados no cache estático e no Firestore — resolvido no Prompt 23
+
 
 
 

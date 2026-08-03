@@ -126,20 +126,23 @@ async function main() {
         }
       }
 
-      // Find Net Income
+      // Find Net Income (Deterministic Priority: 3.11 first, fallback to 3.09)
       let netIncome: number | null = null;
-      for (const line of dreLines) {
-        if (!line) continue;
-        const cols = line.split(';');
-        const cdCvm = cols[4]?.replace(/"/g, '').trim();
-        const cdConta = cols[11]?.replace(/"/g, '').trim();
-        const ord = cols[8]?.replace(/"/g, '').trim();
-        if (cdCvm === meta.cdCvm && (cdConta === '3.11' || cdConta === '3.09') && ord === 'ÚLTIMO') {
-          const rawVal = parseFloat(cols[13]?.replace(/"/g, '').replace(',', '.') || '0');
-          const escala = cols[7]?.replace(/"/g, '').trim();
-          netIncome = escala === 'MIL' ? rawVal * 1000 : rawVal;
-          break;
+      for (const targetAccount of ['3.11', '3.09']) {
+        for (const line of dreLines) {
+          if (!line) continue;
+          const cols = line.split(';');
+          const cdCvm = cols[4]?.replace(/"/g, '').trim();
+          const cdConta = cols[11]?.replace(/"/g, '').trim();
+          const ord = cols[8]?.replace(/"/g, '').trim();
+          if (cdCvm === meta.cdCvm && cdConta === targetAccount && ord === 'ÚLTIMO') {
+            const rawVal = parseFloat(cols[13]?.replace(/"/g, '').replace(',', '.') || '0');
+            const escala = cols[7]?.replace(/"/g, '').trim();
+            netIncome = escala === 'MIL' ? rawVal * 1000 : rawVal;
+            break;
+          }
         }
+        if (netIncome !== null) break;
       }
 
       // Find Total Shares
