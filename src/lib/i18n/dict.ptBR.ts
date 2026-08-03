@@ -45,6 +45,7 @@ export const ptBR = {
     yieldOnCost: "Seu yield efetivo com base no seu preço médio de compra.",
     consensus: "Média dos modelos de valuation de Graham, Bazin e Gordon.",
     ceilingPrice: "Preço máximo que você deve pagar para atingir seu yield alvo.",
+    estimatedPaymentDate: "Data de pagamento estimada com base nas regras de distribuição do fundo.",
   },
   toasts: {
     assetAdded: "Ativo adicionado com sucesso.",

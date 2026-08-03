@@ -45,6 +45,7 @@ export const es = {
     yieldOnCost: "Su yield efectivo basado en su precio promedio de compra.",
     consensus: "Promedio de los modelos de valoración de Graham, Bazin y Gordon.",
     ceilingPrice: "Precio máximo que debe pagar para alcanzar su yield objetivo.",
+    estimatedPaymentDate: "Fecha de pago estimada según las reglas de distribución del fondo.",
   },
   toasts: {
     assetAdded: "Activo añadido con éxito.",

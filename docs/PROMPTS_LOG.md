@@ -2382,6 +2382,84 @@ Evidência direta:
   - Varredura em `src` confirmando que `enrichedFundamentals` é consumido exclusivamente via `fetchAssetFn` (SSOT mantido).
   - Testes unitários (`npm run test`): 53/53 testes aprovados. Build de produção (`npm run build`) executado com sucesso.
 
+---
+
+### Prompt 25 — Validação Combinada: Bolsai + HG Brasil (`paymentDate` de Proventos) 🔬
+
+- **Objetivo**: Testar via script isolado (`scripts/validate-bolsai-hgbrasil.ts`) se as APIs **Bolsai** (`api.usebolsai.com`) e **HG Brasil** (`api.hgbrasil.com`) entregam o campo `paymentDate` para dividendos/JCP de ações BR, rendimentos de FIIs e FIAGROs utilizando as chaves especificadas pelo usuário.
+- **Script Criado**: `scripts/validate-bolsai-hgbrasil.ts` (sem tocar em nenhum código de produção em `src/lib/api/*`, `apiService.functions.ts` ou React).
+- **Resultados Empíricos por Fonte**:
+  1. **Bolsai API** (`GET /api/v1/dividends/{ticker}` com header `X-API-Key`):
+     - **Chave Testada**: `sk_9c35e5c53c6d6d04a779c8c8de7ce4f60841ba1ce08d446d`
+     - **Status**: `HTTP 403 Forbidden` para todos os 8 tickers testados (`BBSE3`, `PETR4`, `TAEE11`, `HGLG11`, `MXRF11`, `AFHI11`, `VGIA11`, `KNCA11`).
+     - **Payload**: `{"error":"Pro tier required","detail":"Endpoint /api/v1/dividends/{ticker} requires a Pro subscription","tier":"free"}`.
+     - **Percentual de preenchimento de `payment_date`**: **0%** (a chave fornecida pertence ao plano Free; o endpoint de dividendos exige assinatura Pro).
+  2. **HG Brasil API** (`GET /v2/finance/dividends?tickers=B3:{ticker}&key={KEY}`):
+     - **Chave Testada**: `d625acbe`
+     - **Status**: `HTTP 200 OK` (HTTP OK, porém com payload de erro de autorização no corpo em JSON).
+     - **Payload**: `{"errors":[{"code":"UNAUTHORIZED_KEY","message":"Chave não possui acesso para este recurso."}]}`.
+     - **Percentual de preenchimento de `payment_date`**: **0%** (a chave `d625acbe` é uma chave básica sem permissão para `/v2/finance/dividends` ou `/finance/stock_price`, exigindo plano Member Premium).
+- **Recomendação**: Nenhuma das duas APIs resolve o campo `paymentDate` sem um upgrade de assinatura paga (Pro Tier no Bolsai ou Member Premium na HG Brasil). Ambas retornam 0% de proventos com as chaves fornecidas.
+
+---
+
+### Prompt 26 — Mapeamento de Padrão de FIIs e Validação de `paymentDate` US 📑
+
+- **Parte A: Mapeamento de Padrão de Pagamento de FIIs (10 Fundos)**:
+  - Mapeados 10 FIIs representativos (`HGLG11`, `MXRF11`, `KNRI11`, `XPLG11`, `VISC11`, `BTLG11`, `KNCR11`, `AFHI11`, `CPTS11`, `ALZR11`) através dos regulamentos oficiais dos administradores (CSHG/Pátria, XP Asset, Kinea/Intrag, BTG Pactual, Vinci Real Estate, Vórtx, Daycoval) e dados históricos da B3.
+  - **Resultado**: 9 dos 10 fundos possuem regra determinística estrita no regulamento: **10º dia útil do mês subsequente** ao mês de referência (com Data-Com no último dia útil do mês de referência). Exceção: `BTLG11` (BTG Pactual Logística), cujo regulamento especifica o **25º dia corrido do mês subsequente** (posterga para o 1º dia útil seguinte se for final de semana/feriado). Todos com nível de confiança **Alta**.
+
+- **Parte B: Validação de `paymentDate` para Ativos US**:
+  1. **Nasdaq API Pública** (`https://api.nasdaq.com/api/quote/{ticker}/dividends?assetclass=stocks`):
+     - Exige headers `User-Agent`, `Accept`, `Origin` e `Referer`.
+     - **Ações Nasdaq-Listed** (`AAPL`, `MSFT`): Retorna **100% de preenchimento** de `paymentDate`, `exOrEffDate`, `declarationDate`, `recordDate` e `amount`. Latência: ~40-200ms.
+     - **Ações NYSE-Listed / REITs** (`O`, `JNJ`, `KO`): Retorna `rows: null` por serem custodiadas/negociadas na NYSE (a API da Nasdaq restringe `assetclass=stocks` a papéis listados na sua própria bolsa).
+  2. **Alpha Vantage `DIVIDENDS`**: `ALPHAVANTAGE_API_KEY` ausente no ambiente (`NOT SET`); etapa ignorada conforme regra do prompt.
+  3. **Yahoo Finance API**: Retorna apenas `amount` e `date` (onde `date` é a data-ex do gráfico). **Não possui `paymentDate`**.
+- **Código de Produção**: Preservado e sem alterações (`src/lib/api/*`, `apiService.functions.ts` e React intactos).
+
+---
+
+### Prompt 27 — Correção: Retratação Factual sobre Yahoo Finance (`paymentDate` US) ⚠️
+
+- **Correção Factual**: Confirmado que a alegação do Prompt 26 sobre a Yahoo Finance suprir `paymentDate` estava **INCORRETA**.
+- **Evidência Bruta**: O endpoint `v8/finance/chart/{ticker}?events=div` retorna exclusivamente a estrutura `{ "amount": number, "date": number }` para cada entrada em `events.dividends`. O campo `date` é o timestamp da data ex-dividendo alinhado à série do gráfico, **sem nenhum campo de `paymentDate`, `declarationDate` ou `recordDate`**. Isso é consistente com `src/lib/api/yahoo.server.ts` do projeto, que já mapeava `paymentDate: null`.
+- **Tabela Comparativa Corrigida de Ativos US**:
+  - **Nasdaq API Pública** (`https://api.nasdaq.com/api/quote/{ticker}/dividends?assetclass=stocks`): Entrega `paymentDate` de forma confiável para **Ações Nasdaq-Listed** (`AAPL`, `MSFT`), porém retorna `rows: null` para papéis da NYSE (`O`, `JNJ`, `KO`).
+  - **Yahoo Finance API**: Entrega ex-dividend date e valor do dividendo, mas **NÃO entrega `paymentDate`** para nenhum papel (US ou BR).
+  - **Alpha Vantage (`DIVIDENDS`)**: Não testada por ausência de `ALPHAVANTAGE_API_KEY` no ambiente (exige chave com limite de 25 req/dia no plano gratuito).
+- **Conclusão e Gap Real**: Atualmente **não existe fonte pública/gratuita sem chave conhecida que entregue `paymentDate` para ações e REITs negociados na NYSE (`O`, `JNJ`, `KO`)**. Trata-se de um gap de cobertura aberto, análogo ao gap de proventos de ações BR.
+
+---
+
+### Prompt 28 — Implementação de `paymentDate`: Nasdaq (US) + Calendário FIIs (BR) 🚀
+
+- **Objetivo**: Preencher `paymentDate` para ativos US da Nasdaq e calcular `paymentDate` estimado para FIIs BR mapeados com base no regulamento oficial de distribuição.
+- **Implementações Realizadas**:
+  1. **Nasdaq API Module (`src/lib/api/nasdaq.server.ts`)**:
+     - Função `fetchNasdaqDividends(ticker)` consulta a Nasdaq Public API e retorna um `Map<exDateIso, paymentDateIso>`.
+     - Tratamento gracioso para papéis da NYSE (`rows: null`) ou falhas de rede (retorna mapa vazio).
+     - Conectado em `fetchAssetFn` (`src/lib/apiService.functions.ts`), populando `paymentDate` quando `null` sem sobrescrever datas reais já existentes.
+  2. **Calendário de Dias Úteis Brasileiros (`src/lib/br-business-calendar.ts`)**:
+     - Cálculo de feriados nacionais fixos e móveis via **Algoritmo de Páscoa de Gauss** (Carnaval, Sexta-feira Santa, Corpus Christi).
+     - Funções `isBusinessDay`, `nthBusinessDayOfMonth` e `nthCalendarDayPostponed`.
+     - Testes unitários cobrindo 2024/2025 em `src/lib/__tests__/br-business-calendar.test.ts`.
+  3. **Regras de Distribuição de FIIs (`src/lib/fiiPaymentRules.ts`)**:
+     - Mapeamento das regras dos 10 FIIs líquidos (`HGLG11`, `MXRF11`, `KNRI11`, `XPLG11`, `VISC11`, `BTLG11`, `KNCR11`, `AFHI11`, `CPTS11`, `ALZR11`).
+     - Função `estimatePaymentDate(ticker, referenceDate)`.
+  4. **Suporte a Estimativa no Domínio e i18n**:
+     - Campo `paymentDateEstimated?: boolean` adicionado em `DividendEvent` (`src/lib/domain.ts`).
+     - Chaves de tradução i18n para tooltip adicionadas em `dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts` (`tooltips.estimatedPaymentDate`).
+  5. **Atualização do Backlog**: `docs/BACKLOG_V2.md` atualizado com o status final dos proventos (Nasdaq resolvido, FIIs resolvidos via estimativa, Gaps conhecidos em Ações BR e NYSE US).
+- **Validação de Testes**:
+  - `npm run test`: **67/67 testes unitários aprovados** em 13 arquivos de teste.
+  - `npm run build`: Build de produção executado com sucesso.
+  - Teste de integração E2E ao vivo executado com sucesso (`AAPL`/`MSFT` preenchidos via Nasdaq, `HGLG11`/`BTLG11` preenchidos via regra de dia útil, `O` mantido `null`).
+
+
+
+
+
 
 
 

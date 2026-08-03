@@ -33,6 +33,8 @@ export interface DividendEvent {
   exDate: string;
   /** Payment date in ISO string. Null for Yahoo (API doesn't separate ex/pay dates). */
   paymentDate: string | null;
+  /** True if paymentDate is estimated via fund distribution rules. Defaults to false. */
+  paymentDateEstimated?: boolean;
   /** Dividend amount per share / quota. */
   amountPerShare: number;
 }

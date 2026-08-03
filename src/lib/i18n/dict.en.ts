@@ -43,6 +43,7 @@ export const en = {
     yieldOnCost: "Your effective yield based on your average purchase price.",
     consensus: "Average of Graham, Bazin and Gordon valuation models.",
     ceilingPrice: "Maximum price you should pay to achieve your target yield.",
+    estimatedPaymentDate: "Estimated payment date based on the fund's distribution rules.",
   },
   toasts: {
     assetAdded: "Asset added successfully.",

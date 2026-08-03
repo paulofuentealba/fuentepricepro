@@ -123,6 +123,12 @@ Registrado aqui só pra contexto — não precisa de ação:
 - Eliminação completa de strings de texto puro em chamadas de `toast.*` e modal de Paywall, com integração nos 3 dicionários i18n (`dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts`) conforme a Regra 2 do `AGENTS.md` — resolvido no Prompt 21
 - **Fase 3 (CVM Dados Abertos - VPA/LPA + Vacância)**: Migração arquitetural da leitura e ingestão da CVM no Firestore de Client SDK para Firebase Admin SDK (`src/integrations/firebase/admin.ts`), remoção do check de `window` em `cvm.server.ts`, inclusão da regra em `firestore.rules` e script CLI `ingest-cvm.ts` atualizado — resolvido no Prompt 22
 - **Fix Seleção de Conta DRE CVM**: Prioridade determinística estrita para conta `3.11` (Lucro Líquido Consolidado) sobre `3.09` (Operações Continuadas) em `scripts/ingest-cvm.ts`, corrigindo a divergência de LPA da BBSE3 (de 5.6358 de volta para 4.6448, alinhado com a Fase 1) e re-populando os dados no cache estático e no Firestore — resolvido no Prompt 23
+- **Enriquecimento de `paymentDate` (Ativos US Nasdaq + FIIs BR)**:
+  - ✅ **Ações Nasdaq-Listed US** (`AAPL`, `MSFT`): `paymentDate` resolvido via `fetchNasdaqDividends` (`src/lib/api/nasdaq.server.ts`) conectado a `fetchAssetFn`.
+  - ✅ **FIIs/FIAGRO/FI-Infra BR (Estimado)**: `paymentDate` calculado via regra de dias úteis e feriados brasileiros (`src/lib/br-business-calendar.ts` + `src/lib/fiiPaymentRules.ts`), com flag `paymentDateEstimated: true` e tooltip i18n nos 3 idiomas (10 fundos mapeados: `HGLG11`, `MXRF11`, `KNRI11`, `XPLG11`, `VISC11`, `BTLG11`, `KNCR11`, `AFHI11`, `CPTS11`, `ALZR11`).
+  - 🔴 **Gap Conhecido (Ações BR)**: Proventos de Ações BR permanecem sem `paymentDate` em APIs gratuitas (administrado por B3/CBLC, fora do escopo CVM; Bolsai e HG Brasil exigem assinaturas pagas).
+  - 🔴 **Gap Conhecido (Ações/REITs NYSE US)**: Ações e REITs negociados na NYSE (`O`, `JNJ`, `KO`) permanecem sem `paymentDate` em APIs gratuitas sem chave (a Nasdaq API restringe o cadastro a papéis Nasdaq-listed e a Yahoo Finance só possui ex-date).
+  - *Nota*: Se novos FIIs forem mapeados no futuro, a metodologia oficial de mapeamento via regulamento primário está documentada nos Prompts 24-27 em `PROMPTS_LOG.md`.
 
 
 

@@ -6,6 +6,8 @@ import { fetchFromBrapi } from "./api/brapi.server";
 import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
 import { fetchSecEdgarFacts } from "./api/secEdgar.server";
 import { fetchCvmEnrichedFacts } from "./api/cvm.server";
+import { fetchNasdaqDividends } from "./api/nasdaq.server";
+import { estimatePaymentDate } from "./fiiPaymentRules";
 
 // Re-export public types so existing `@/lib/apiService.functions` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
@@ -194,6 +196,38 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
         }
         if (asset.metrics.vacancy == null && cvmData.vacancy != null) {
           asset.metrics.vacancy = cvmData.vacancy;
+        }
+      }
+    }
+
+    // Enrich paymentDate for US Nasdaq stocks when paymentDate is null from Yahoo
+    if (!looksBr && asset.dividendEvents && asset.dividendEvents.length > 0) {
+      const nasdaqMap = await fetchNasdaqDividends(raw).catch(() => new Map<string, string>());
+      if (nasdaqMap.size > 0) {
+        for (const ev of asset.dividendEvents) {
+          if (ev.paymentDate == null && ev.exDate) {
+            const exIso = ev.exDate.slice(0, 10);
+            const match = nasdaqMap.get(exIso);
+            if (match) {
+              ev.paymentDate = `${match}T00:00:00.000Z`;
+            }
+          }
+        }
+      }
+    }
+
+    // Enrich paymentDate for BR FIIs/FIAGROs when paymentDate is null using business day rules
+    if (looksBr && asset.dividendEvents && asset.dividendEvents.length > 0) {
+      for (const ev of asset.dividendEvents) {
+        if (ev.paymentDate == null && ev.exDate) {
+          const exDateObj = new Date(ev.exDate);
+          if (Number.isFinite(exDateObj.getTime())) {
+            const estimated = estimatePaymentDate(raw, exDateObj);
+            if (estimated) {
+              ev.paymentDate = `${estimated}T00:00:00.000Z`;
+              ev.paymentDateEstimated = true;
+            }
+          }
         }
       }
     }
