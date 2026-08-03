@@ -2093,3 +2093,162 @@ nenhum regredido dos itens já marcados ✅ no histórico anterior.
 com valor real (não N/A) num ativo BR normal (ex: ITSA4) antes de
 push pra produção. `npm run test`/`npm run build` também pendentes —
 Claude não executa comando na máquina do Paulo.
+
+---
+
+### Prompt 14 — Refino do fluxo "Update Holdings" + consolidação do campo Investing Since ✅
+
+- **Componente Único `InvestingSinceField.tsx`**: Criado componente compartilhado em `src/components/ceiling/shared/InvestingSinceField.tsx`.
+- **Modo Read-Only Automático**: Quando o ativo possui transações lançadas (`firstTransactionDate != null`), o campo `investingSince` é exibido em formato estático `mmm/yyyy` com um `InfoTooltip` indicando `t.form.investingSinceReadOnlyHint` ("Data do primeiro lançamento"). Em ativos sem transações, mantém o Popover+Calendar editável.
+- **Substituição de Implementações Duplicadas**: `EditItemDialog.tsx` e `AssetDetailSheet.tsx` (`AssetHoldings`) refatorados para utilizar o componente único e a mesma lógica SSOT de filtro de transações do ticker (`transactions.filter(tx => tx.ticker === item.ticker)`).
+- **Ajustes de UI/i18n**:
+  - `form.avgPrice`: Atualizado de `"Average price (optional)"` para `"Average price"` em EN, `"Preço médio"` em PT-BR e `"Precio medio"` em ES.
+  - `form.investingSinceReadOnlyHint`: Adicionado nos 3 dicionários.
+  - `transactions.add`: Atualizado de `"Log Transaction"` para `"Add Transaction"` (EN) e `"Agregar Transacción"` (ES).
+  - Em `EditItemDialog.tsx`, removido o parágrafo `<p>` fixo abaixo do preço médio e substituído por `InfoTooltip` ao lado do Label quando houver transações.
+- **Validação e Build**: Testes unitários (41/41) e build Vite production concluídos com sucesso.
+
+---
+
+### Prompt 15 — API Enrichment Action Plan — Fase 1: Validação Isolada CVM Dados Abertos + SEC EDGAR ✅
+
+- **Objetivo**: Confirmar em scripts de validação isolados (`scripts/validate-cvm.ts` e `scripts/validate-sec-edgar.ts`), sem alterar código de produção ou Firestore, se CVM Dados Abertos e SEC EDGAR entregam dados financeiros com qualidade para VPA, LPA, Vacância e Proventos.
+- **Validação CVM Dados Abertos (`scripts/validate-cvm.ts`)**:
+  - **Mapeamento Ticker → CVM/CNPJ**: Resolvido com verificação de situação ATIVA:
+    - `TAEE11`: `CD_CVM 020257` | `CNPJ 07.859.971/0001-30` ("TRANSMISSORA ALIANÇA DE ENERGIA ELÉTRICA S.A.")
+    - `PETR4`: `CD_CVM 009512` | `CNPJ 33.000.167/0001-01` ("PETRÓLEO BRASILEIRO S.A. - PETROBRAS")
+    - `BBSE3`: `CD_CVM 023159` | `CNPJ 17.344.597/0001-94` ("BB SEGURIDADE PARTICIPAÇÕES S.A.")
+    - `HGLG11`: `CNPJ 11.728.688/0001-47` ("PÁTRIA LOG - FUNDO DE INVESTIMENTO IMOBILIÁRIO")
+    - `MXRF11`: `CNPJ 97.521.225/0001-25` ("FII MAXI RENDA RL")
+    - `AFHI11`: `CNPJ 36.642.293/0001-58` ("AF INVEST CRI FII")
+  - **DFP (Ações / DRE & BPP)**:
+    - `TAEE11`: PL = R$ 7.608.982.000, Lucro Líquido = R$ 1.579.863.000, Ações = 1.033.497.000 → **VPA = R$ 7,3624**, **LPA = R$ 1,5287**
+    - `PETR4`: PL = R$ 417.587.000.000, Lucro Líquido = R$ 110.605.000.000, Ações = 12.888.732.761 → **VPA = R$ 32,3994**, **LPA = R$ 8,5815**
+    - `BBSE3`: PL = R$ 10.384.393.000, Lucro Líquido = R$ 9.017.329.000, Ações = 1.941.214.909 → **VPA = R$ 5,3494**, **LPA = R$ 4,6452**
+  - **Informe Mensal FII (`INF_MENSAL`)**: Re-inspecionados rigorosamente todos os 3 CSVs (`ativo_passivo`, `complemento`, `geral`) de 2025 e 2026 e o Dicionário de Dados oficial (`meta_inf_mensal_fii.zip` - 974 linhas de schema). Confirmado que **não existem colunas de vacância** (`VACAN`: 0 ocorrências) no Informe Mensal.
+  - **Informe Trimestral FII (`INF_TRIMESTRAL`)**: Descoberto no dataset trimestral (`inf_trimestral_fii_imovel_2026.csv`) a coluna **`Percentual_Vacancia`** por imóvel individual (ex: HGLG11 relata 37 imóveis, como HGLG Guarulhos: 12,51%, TechTown: 17,10%, Master Labs: 14,92%, HGLG Betim: 0%). Fundos de papel (AFHI11, MXRF11) não possuem vacância física aplicável.
+  - **Proventos CVM (`IPE`)**: Verificado catálogo da CVM. Dividendos são arquivados em PDF/HTML como Avisos aos Acionistas via `CIA_ABERTA/DOC/IPE/` (links RAD CVM). Não há dataset tabular aberto de `paymentDate`.
+- **Validação SEC EDGAR (`scripts/validate-sec-edgar.ts`)**:
+  - **Resolução CIK via `company_tickers.json`**: `AAPL` (`0000320193`), `O` (`0000726728`), `JNJ` (`0000200406`), `KO` (`0000021344`).
+  - **Métricas XBRL / 10-Q**:
+    - `AAPL` (10-Q 2026-06-27): PL = $107,52B, Ações = 14,61B, EPS = $6.91 → **BVPS = $7.3599**, **LPA = $6.91** (Tempo: 214 ms)
+    - `O` (10-Q 2026-03-31): PL = $39,15B, Ações = 932,47M, EPS = $0.33 → **BVPS = $41.9824**, **LPA = $0.33** (Tempo: 192 ms)
+    - `JNJ` (10-Q 2026-06-28): PL = $84,97B, Ações = 3,12B, EPS = $4.47 → **BVPS = $27.2357**, **LPA = $4.47** (Tempo: 440 ms)
+    - `KO` (10-Q 2026-04-03): PL = $33,63B, Ações = 7,04B, EPS = $0.91 → **BVPS = $4.7774**, **LPA = $0.91** (Tempo: 209 ms)
+- **Desempenho & Governança**:
+  - SEC EDGAR: REST JSON direto, ~200ms por ativo.
+  - CVM Dados Abertos: Downloads em ZIP (~12.14 MB DFP), parse em memória com `AdmZip` em ~3s.
+  - Nenhum arquivo temporário commitado (`os.tmpdir()` utilizado). Código de produção (`src/`), Firestore e `docs/BACKLOG_V2.md` intactos.
+
+---
+
+### Prompt 16 — Re-checagem Rigorosa de Proventos em CVM Dados Abertos (FRE & FII INF_MENSAL) ✅
+
+- **Objetivo**: Inspecionar de forma completa e empiricamente comprovada a presença de datas de pagamento (`paymentDate`) no dataset FRE (Formulário de Referência) de Cias Abertas e no Informe Mensal de FIIs (`INF_MENSAL`).
+- **Parte A — Cias Abertas via FRE (`fre_cia_aberta_2025.zip`)**:
+  - **36 arquivos CSV inspecionados**. Grep por `dividen/provento/distribu` encontrou apenas 2 arquivos: `fre_cia_aberta_distribuicao_capital_2025.csv` (15 colunas) e `fre_cia_aberta_distribuicao_capital_classe_acao_2025.csv` (9 colunas).
+  - **Granularidade & Conteúdo**: Trata-se exclusivamente de um **resumo anual de distribuição de capital social / composição do shareholding** (quantidade de acionistas PF, PJ, Institucionais e % de ações em circulação).
+  - **Datas & Eventos**: **NÃO EXISTEM eventos por dividendo/JCP** nem coluna de data de pagamento (`paymentDate`). A única data além do período é `Data_Ultima_Assembleia`.
+- **Parte B — FIIs via Informe Mensal (`INF_MENSAL`)**:
+  - **`inf_mensal_fii_complemento_{ano}.csv` (30 colunas)**: Inspecionadas todas as 30 colunas. Não possui eventos por data de pagamento nem valor em R$/cota por evento; possui apenas as colunas de porcentagem agregada **`Percentual_Dividend_Yield_Mes`** (Col #29) e **`Percentual_Amortizacao_Cotas_Mes`** (Col #30).
+  - **`inf_mensal_fii_ativo_passivo_{ano}.csv` (52 colunas)**: Inspecionadas todas as 52 colunas. Contém apenas a coluna de saldo acumulado no balanço **`Rendimentos_Distribuir`** (Col #42 - ex: HGLG11 = R$ 46,64M, MXRF11 = R$ 41,15M).
+  - **`inf_mensal_fii_geral_{ano}.csv` (37 colunas)**: Inspecionadas todas as 37 colunas. Nenhuma coluna de proventos ou datas de pagamento.
+- **Conclusão Final de Proventos**: A CVM Dados Abertos **não possui tabela estruturada com eventos de dividendos por `paymentDate`**. Avisos aos acionistas continuam sendo arquivados como PDFs/HTMLs no sistema IPE (`CIA_ABERTA/DOC/IPE/`).
+
+---
+
+### Prompt 17 — Re-checagem Definitiva com Evidências Brutas (FRE + INF_MENSAL + varrimento histórico) ✅
+
+**Script:** `scripts/recheckagem-proventos.ts` — lê tudo ao vivo do servidor, sem cache de execuções anteriores. Deletado após execução.
+
+#### PARTE A — FRE: `fre_cia_aberta_distribuicao_dividendos`
+
+**O arquivo `fre_cia_aberta_distribuicao_dividendos_{ano}.csv` NÃO EXISTE na CVM Dados Abertos.**
+
+Evidência direta:
+- Catálogo `https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/` retornou **16 ZIPs** (2010–2025).
+- Baixados e abertos `fre_cia_aberta_2025.zip` (8.297 KB) e `fre_cia_aberta_2024.zip` (8.213 KB).
+- **`fre_cia_aberta_2025.zip` — listagem bruta completa (36 arquivos):**
+  ```
+  [1]  fre_cia_aberta_2025.csv
+  [2]  fre_cia_aberta_acao_entregue_2025.csv
+  [3]  fre_cia_aberta_administrador_declaracao_genero_2025.csv
+  [4]  fre_cia_aberta_administrador_declaracao_raca_2025.csv
+  [5]  fre_cia_aberta_administrador_membro_conselho_fiscal_2025.csv
+  [6]  fre_cia_aberta_administrador_PCD_2025.csv
+  [7]  fre_cia_aberta_auditor_2025.csv
+  [8]  fre_cia_aberta_capital_social_2025.csv
+  [9]  fre_cia_aberta_capital_social_classe_acao_2025.csv
+  [10] fre_cia_aberta_capital_social_titulo_conversivel_2025.csv
+  [11] fre_cia_aberta_distribuicao_capital_2025.csv          ← NOTE: "capital", NÃO "dividendos"
+  [12] fre_cia_aberta_distribuicao_capital_classe_acao_2025.csv
+  [13] fre_cia_aberta_empregado_local_declaracao_genero_2025.csv
+  [14] fre_cia_aberta_empregado_local_declaracao_raca_2025.csv
+  [15] fre_cia_aberta_empregado_local_faixa_etaria_2025.csv
+  [16] fre_cia_aberta_empregado_PCD_2025.csv
+  [17] fre_cia_aberta_empregado_posicao_declaracao_genero_2025.csv
+  [18] fre_cia_aberta_empregado_posicao_declaracao_raca_2025.csv
+  [19] fre_cia_aberta_empregado_posicao_faixa_etaria_2025.csv
+  [20] fre_cia_aberta_empregado_posicao_local_2025.csv
+  [21] fre_cia_aberta_membro_comite_2025.csv
+  [22] fre_cia_aberta_mercado_estrangeiro_2025.csv
+  [23] fre_cia_aberta_outro_valor_mobiliario_2025.csv
+  [24] fre_cia_aberta_participacao_sociedade_2025.csv
+  [25] fre_cia_aberta_posicao_acionaria_2025.csv
+  [26] fre_cia_aberta_posicao_acionaria_classe_acao_2025.csv
+  [27] fre_cia_aberta_relacao_familiar_2025.csv
+  [28] fre_cia_aberta_relacao_subordinacao_2025.csv
+  [29] fre_cia_aberta_remuneracao_acao_2025.csv
+  [30] fre_cia_aberta_remuneracao_maxima_minima_media_2025.csv
+  [31] fre_cia_aberta_remuneracao_total_orgao_2025.csv
+  [32] fre_cia_aberta_remuneracao_variavel_2025.csv
+  [33] fre_cia_aberta_responsavel_2025.csv
+  [34] fre_cia_aberta_titular_valor_mobiliario_2025.csv
+  [35] fre_cia_aberta_titulo_exterior_2025.csv
+  [36] fre_cia_aberta_transacao_parte_relacionada_2025.csv
+  ```
+- **Grep por `dividendo/provento/distribuicao` nos nomes** retornou 2 arquivos: `[11]` e `[12]` acima — ambos `distribuicao_capital`, que é **sharehoilding/free float**, não dividendos.
+- **`fre_cia_aberta_2024.zip` — mesmos 36 nomes**, nenhum com "dividendo".
+
+**Conteúdo do `fre_cia_aberta_distribuicao_capital_2025.csv` (arquivo mais próximo do esperado — inspecionado):**
+- Header bruto: `CNPJ_Companhia;Data_Referencia;Versao;ID_Documento;Nome_Companhia;Quantidade_Acionistas_PF;Quantidade_Acionistas_PJ;Quantidade_Acionistas_Investidores_Institucionais;Quantidade_Acoes_Ordinarias_Circulacao;Percentual_Acoes_Ordinarias_Circulacao;Quantidade_Acoes_Preferenciais_Circulacao;Percentual_Acoes_Preferenciais_Circulacao;Quantidade_Total_Acoes_Circulacao;Percentual_Total_Acoes_Circulacao;Data_Ultima_Assembleia`
+- **15 colunas — zero colunas de pagamento/evento de dividendo.**
+- Linha bruta BBSE3: `17.344.597/0001-94;2025-12-31;13;156950;BB SEGURIDADE PARTICIPAÇÕES S.A.;605394;2956;1270;616248544;31.742000;0;0.000000;616248544;31.742000;2026-03-27`
+
+**Conclusão PARTE A:** `fre_cia_aberta_distribuicao_dividendos_{ano}.csv` **não existe** em nenhum ano verificado (2024 e 2025). O nome mencionado no `api_enrichment_action_plan.md` (Item 3.5 do Anexo 24 da ICVM 480) ou não está publicado nos dados abertos ou o nome real é diferente. Os únicos arquivos com "distribuicao" no nome são de composição acionária (free float), sem `paymentDate`.
+
+---
+
+#### PARTE B — INF_MENSAL FII: listagem fresca + grep completo
+
+**`inf_mensal_fii_2026.zip` — listagem bruta (nova leitura ao vivo, 850 KB):**
+```
+[1] FILE | inf_mensal_fii_ativo_passivo_2026.csv | 1616.76 KB
+[2] FILE | inf_mensal_fii_complemento_2026.csv   | 1187.03 KB
+[3] FILE | inf_mensal_fii_geral_2026.csv          | 2957.70 KB
+```
+**Confirmado: 3 arquivos exatos, sem nenhum arquivo "rendimento" ou "distribuicao".**
+
+**`inf_mensal_fii_ativo_passivo_2026.csv` — 52 colunas, header bruto:**
+`CNPJ_Fundo_Classe;Data_Referencia;Versao;Total_Necessidades_Liquidez;...;Rendimentos_Distribuir;...;Total_Passivo`
+- Grep encontrou: `Rendimentos_Distribuir` (Col #42) — saldo contábil do passivo, **não um evento de pagamento**.
+- Valores: HGLG11=50.161.884,30 · MXRF11=46.028.560,70 · AFHI11=0
+
+**`inf_mensal_fii_complemento_2026.csv` — 30 colunas, header bruto:**
+`CNPJ_Fundo_Classe;Data_Referencia;Versao;...;Percentual_Rentabilidade_Efetiva_Mes;Percentual_Rentabilidade_Patrimonial_Mes;Percentual_Dividend_Yield_Mes;Percentual_Amortizacao_Cotas_Mes`
+- Grep encontrou: `Percentual_Dividend_Yield_Mes` (Col #29) e `Percentual_Amortizacao_Cotas_Mes` (Col #30).
+- Valores (% do mês): HGLG11=0.006635 · MXRF11=0.009328 · AFHI11=0
+- **Sem `Data_Pagamento`, `Data_Com`, `Rendimento_Por_Cota` ou qualquer coluna de evento individual.**
+
+**`inf_mensal_fii_geral_2026.csv` — 37 colunas:**
+- Grep: 0 colunas de proventos/pagamento encontradas.
+
+**Conclusão PARTE B:** Os 3 arquivos do `INF_MENSAL` reportam apenas métricas agregadas mensais (% yield, saldo de passivo). **Não há evento-por-evento com `Data_Pagamento` ou `Rendimento_Por_Cota` em nenhum deles** — confirmado por leitura direta ao vivo do servidor.
+
+---
+
+**Conclusão Final:** A CVM Dados Abertos **não publica dataset tabular estruturado com eventos de proventos (dividendos, JCP, rendimentos de FII) discriminados por data de pagamento** em nenhum dos datasets verificados. O `fre_cia_aberta_distribuicao_dividendos` mencionado no plan não existe no servidor; o `inf_mensal_fii_rendimento` (mencionado em conteúdo de LLM) nunca existiu. Avisos de pagamento de proventos continuam exclusivamente em PDF/HTML no sistema IPE.
+
+
+
+

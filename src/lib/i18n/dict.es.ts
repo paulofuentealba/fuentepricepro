@@ -141,7 +141,7 @@ export const es = {
     done: "Listo",
     targetYield: "Dividend yield objetivo",
     targetYieldHint: "Su rendimiento por dividendo anual deseado.",
-    avgPrice: "Precio medio (opcional)",
+    avgPrice: "Precio medio",
     avgPriceHint: "Su precio base — usado para calcular Yield on Cost.",
     calculatorTitle: "Playground",
     calculatorDesc: "Ajuste su rendimiento deseado para simular un nuevo Precio Techo.",
@@ -162,6 +162,7 @@ export const es = {
     advancedSettingsLockedDesc:
       "Los usuarios gratuitos no pueden aplicar tasas de impuestos personalizadas a los cálculos. ¡Actualiza a Pro para personalizar las reglas de impuestos (ej. 15% para JCP)!",
     investingSince: "Invirtiendo Desde",
+    investingSinceReadOnlyHint: "Fecha de la primera transacción",
     confirmTitle: "Confirma los detalles para",
     confirmDesc: "Selecciona la fecha aproximada en la que empezaste a invertir en este activo.",
   },
@@ -877,7 +878,7 @@ export const es = {
   },
   transactions: {
     title: "Historial de Transacciones",
-    add: "Registrar Transacción",
+    add: "Agregar Transacción",
     edit: "Editar Transacción",
     delete: "Eliminar",
     type: "Tipo",

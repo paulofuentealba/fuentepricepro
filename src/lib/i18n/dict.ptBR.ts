@@ -142,7 +142,7 @@ export const ptBR = {
     calculatorDesc: "Ajuste o yield desejado para simular um novo Preço Teto.",
     targetYield: "Dividend yield desejado",
     targetYieldHint: "Seu yield anual de dividendos desejado.",
-    avgPrice: "Preço médio (opcional)",
+    avgPrice: "Preço médio",
     avgPriceHint: "Seu preço médio — usado para calcular o Yield on Cost.",
     calculate: "Calcular preço teto",
     calculating: "Calculando...",
@@ -161,6 +161,7 @@ export const ptBR = {
     advancedSettingsLockedDesc:
       "Usuários gratuitos não podem aplicar taxas de imposto personalizadas aos cálculos. Mude para o Pro para customizar as regras de tributação (ex. 15% para JCP)!",
     investingSince: "Investindo desde",
+    investingSinceReadOnlyHint: "Data do primeiro lançamento",
     confirmTitle: "Confirme os detalhes de",
     confirmDesc: "Selecione a data aproximada em que você começou a investir neste ativo.",
   },

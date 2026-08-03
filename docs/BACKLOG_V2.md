@@ -104,7 +104,6 @@ Itens menores, sem épico específico, encontrados ao longo da auditoria:
 - **`pdf-parser.test.ts`** com 3 testes falhando por divergência entre o comportamento real (`'unknown_broker'`) e a expectativa do teste (`'Malformed file'`) — descobrir qual dos dois está desatualizado antes de mexer na lógica de parsing de corretora
 - **`Watchlist.tsx`** é o maior e mais frequentemente quebrado arquivo do projeto (KPIs, filtros, grid, orquestração de diálogos tudo junto) — candidato a quebrar em componentes menores quando houver tempo
 - **`nitro: "3.0.260603-beta"`** fixado como dependência de servidor — migrar pra versão estável assim que disponível
-- **`AGENTS.md`** documenta só as Golden Rules 1 e 2 originais — precisa ser atualizado com as versões revisadas das Regras 3 e 4, e incluir as Regras 5 e 6
 - **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, `test-bbas3.ts`, `test-server.js`, `test_search.ts`) — resíduo de refatorações já concluídas, candidatos a remoção
 - **Fallback de classificação em `classify.ts`** usa uma lista crescente de exceções hardcoded (`!s.startsWith("TAEE")`, etc.) pro sufixo "11" — funciona porque o `apiType` da API cobre a maioria dos casos primeiro, mas é uma dívida técnica conhecida, não uma solução definitiva
 
@@ -117,6 +116,9 @@ Registrado aqui só pra contexto — não precisa de ação:
 - Toda a causa raiz do bug de fidelidade do Fuente Consensus (dividendo-base divergente entre telas, BVPS calculado com preço de fonte errada, yield-alvo hardcoded no Comparador) — resolvido nos Prompts 1, 5 e 6
 - `.env` protegido no `.gitignore`, credenciais órfãs do Supabase removidas — resolvido
 - Auditoria completa de i18n, navegação mobile, acessibilidade WCAG AA, hierarquia visual do dashboard — resolvido nos Sprints 1 a 5 do P2
+- Refino do fluxo "Update Holdings" e consolidação do campo "Investing Since" em componente único `InvestingSinceField.tsx` (read-only quando há transações atreladas à menor data de transação) — resolvido no Prompt 14
+- `AGENTS.md` atualizado com as Regras 1-7 completas (incluindo a nova Regra 7 — governança/precedência do próprio arquivo) — item de débito técnico antigo removido por estar desatualizado
+
 
 ---
 

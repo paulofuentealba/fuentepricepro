@@ -138,7 +138,7 @@ export const en = {
     done: "Done",
     targetYield: "Target dividend yield",
     targetYieldHint: "Your desired annual dividend yield.",
-    avgPrice: "Average price (optional)",
+    avgPrice: "Average price",
     avgPriceHint: "Your cost basis — used to compute Yield on Cost.",
     calculatorTitle: "Playground",
     calculatorDesc: "Adjust your target yield to simulate a new ceiling price.",
@@ -159,6 +159,7 @@ export const en = {
     advancedSettingsLockedDesc:
       "Free users cannot apply custom tax rates to calculations. Upgrade to Pro to customize taxation rules (e.g. 15% for Brazilian JCP)!",
     investingSince: "Investing Since",
+    investingSinceReadOnlyHint: "Date of first transaction",
     confirmTitle: "Confirm details for",
     confirmDesc: "Select the approximate date you started investing in this asset.",
   },
@@ -863,7 +864,7 @@ export const en = {
   },
   transactions: {
     title: "Transaction History",
-    add: "Log Transaction",
+    add: "Add Transaction",
     edit: "Edit Transaction",
     delete: "Delete",
     type: "Type",

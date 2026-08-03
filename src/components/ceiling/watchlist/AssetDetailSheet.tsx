@@ -8,9 +8,7 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar as CalendarIcon, Pencil } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Info, Calendar as CalendarIcon } from "lucide-react";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +25,8 @@ import { useSelic } from "@/lib/useSelic";
 import { ConsensusPyramid } from "./ConsensusPyramid";
 import { FixedIncomePanel } from "./FixedIncomePanel";
 import { TransactionsPanel } from "./TransactionsPanel";
+import { InvestingSinceField } from "../shared/InvestingSinceField";
+import { useTransactions } from "@/lib/transactions";
 
 function WowInsights({
   item,
@@ -105,23 +105,15 @@ function WowInsights({
 }
 
 function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMargin: number }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const { update } = useWatchlist();
+  const { transactions } = useTransactions();
   const derived = useAssetCardDerived(item);
 
-  const rawDateMs = item.investingSince ?? item.addedAt ?? Date.now();
-  const dateObj = useMemo(() => new Date(rawDateMs), [rawDateMs]);
-
-  const formattedDate = useMemo(() => {
-    try {
-      const monthStr = new Intl.DateTimeFormat(locale, { month: "short" }).format(dateObj);
-      const yearStr = dateObj.getFullYear();
-      const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1);
-      return `${capitalizedMonth}/${yearStr}`;
-    } catch {
-      return new Date(rawDateMs).toLocaleDateString();
-    }
-  }, [dateObj, rawDateMs, locale]);
+  const firstTransactionDate = useMemo(() => {
+    const tickerTxs = transactions.filter((tx) => tx.ticker === item.ticker);
+    return tickerTxs.length ? Math.min(...tickerTxs.map((tx) => tx.date)) : null;
+  }, [transactions, item.ticker]);
 
   return (
     <div className="mb-6 rounded-lg border border-border/60 bg-muted/20 p-4 space-y-4">
@@ -132,31 +124,15 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
 
         <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground">{t.form.investingSince}:</span>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-border/50 bg-background/60 hover:bg-muted text-foreground transition-colors font-medium cursor-pointer"
-              >
-                <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-                <span>{formattedDate}</span>
-                <Pencil className="h-3 w-3 text-muted-foreground/70" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                selected={dateObj}
-                onSelect={(newDate) => {
-                  if (newDate) {
-                    update(item.id, { investingSince: newDate.getTime() });
-                  }
-                }}
-                disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <InvestingSinceField
+            value={item.investingSince ?? item.addedAt}
+            onChange={(newDate) => {
+              if (firstTransactionDate == null) {
+                update(item.id, { investingSince: newDate.getTime() });
+              }
+            }}
+            firstTransactionDate={firstTransactionDate}
+          />
         </div>
       </div>
 
