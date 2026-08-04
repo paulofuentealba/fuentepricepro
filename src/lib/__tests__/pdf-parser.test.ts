@@ -49,7 +49,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       });
     });
 
-    it("should detect all 12 supported SINACOR brokers including Itaú, Bradesco/Ágora, and Santander/Toro", () => {
+    it("should detect all 14 supported SINACOR brokers including Itaú, Bradesco/Ágora, Santander/Toro, BB, and Caixa", () => {
       const brokers = [
         { name: "XP", key: "02.332.886/0001-04" },
         { name: "CLEAR", key: "CLEAR CORRETORA" },
@@ -63,6 +63,8 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         { name: "ITAU", key: "61.194.353/0001-64 ITAU CORRETORA" },
         { name: "BRADESCO", key: "74.014.747/0001-35 AGORA CTVM" },
         { name: "SANTANDER", key: "29.162.769/0001-98 TORO CORRETORA" },
+        { name: "BB", key: "24.933.830/0001-30 BB BANCO DE INVESTIMENTO" },
+        { name: "CAIXA", key: "42.040.639/0001-40 CAIXA DTVM" },
       ];
 
       for (const b of brokers) {
@@ -80,6 +82,8 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         { name: "ITAU", key: "61.194.353/0001-64" },
         { name: "BRADESCO", key: "74.014.747/0001-35" },
         { name: "SANTANDER", key: "29.162.769/0001-98" },
+        { name: "BB", key: "24.933.830/0001-30" },
+        { name: "CAIXA", key: "42.040.639/0001-40" },
       ];
 
       for (const b of banks) {

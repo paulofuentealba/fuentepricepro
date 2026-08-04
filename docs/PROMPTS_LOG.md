@@ -94,6 +94,8 @@ Prompts já **concluídos** ficam só com resumo (a íntegra de cada um está no
 | 40     | feat(cashflow): Fase 2 do Épico 1 — Renda Realizada calculada automaticamente (`calculateRealizedIncome`)             | ✅     |
 | 41     | feat(irr): Fase 4 do Épico 1 — IRR da carteira (`portfolioIrr.ts`) + snapshots periódicos (`portfolioSnapshot.ts`)  | ✅     |
 | 42     | fix(irr): correção da classificação de moeda para posições BR encerradas via precedência em 3 níveis com `isBrTicker`   | ✅     |
+| 43     | feat(parser): Parte 0 — suporte Itaú/Bradesco/Santander-Toro + UX seletor de corretora + memória                      | ✅     |
+| 44     | feat(parser): Parte 1 do Épico 1 — suporte a Banco do Brasil (BB) e Caixa Econômica / Caixa DTVM (`42.040.639/0001-40`)| ✅     |
 
 ---
 

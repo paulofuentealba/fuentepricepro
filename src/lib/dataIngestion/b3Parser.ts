@@ -17,7 +17,9 @@ export type BrokerType =
   | "GENIAL"
   | "ITAU"
   | "BRADESCO"
-  | "SANTANDER";
+  | "SANTANDER"
+  | "BB"
+  | "CAIXA";
 
 export interface ParseResult {
   success: boolean;
@@ -43,6 +45,8 @@ export const ALL_SINACOR_BROKERS: BrokerType[] = [
   "ITAU",
   "BRADESCO",
   "SANTANDER",
+  "BB",
+  "CAIXA",
 ];
 
 /**
@@ -77,7 +81,7 @@ export function detectBroker(rawText: string): BrokerType | null {
   if (rawText.includes("13.293.225/0001-25") || rawText.includes("ORAMA")) return "ORAMA";
   if (rawText.includes("27.652.684/0001-62") || rawText.includes("GENIAL")) return "GENIAL";
 
-  // Bancos Tradicionais (Itaú, Bradesco/Ágora, Santander/Toro)
+  // Bancos Tradicionais
   if (rawText.includes("61.194.353/0001-64") || rawText.includes("ITAU CORRETORA")) return "ITAU";
   if (
     rawText.includes("74.014.747/0001-35") ||
@@ -93,6 +97,21 @@ export function detectBroker(rawText: string): BrokerType | null {
     rawText.includes("TORO")
   )
     return "SANTANDER";
+  if (
+    rawText.includes("24.933.830/0001-30") ||
+    rawText.includes("00.000.000/0001-91") ||
+    rawText.includes("00.801.279/0001-81") ||
+    rawText.includes("BB BANCO DE INVESTIMENTO") ||
+    rawText.includes("BANCO DO BRASIL")
+  )
+    return "BB";
+  if (
+    rawText.includes("00.360.305/0001-04") ||
+    rawText.includes("42.040.639/0001-40") ||
+    rawText.includes("CAIXA ECONOMICA") ||
+    rawText.includes("CAIXA DTVM")
+  )
+    return "CAIXA";
 
   return null;
 }

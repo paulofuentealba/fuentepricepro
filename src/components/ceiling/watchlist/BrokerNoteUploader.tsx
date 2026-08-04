@@ -40,6 +40,8 @@ const BROKER_LABELS: Record<BrokerType, string> = {
   ITAU: "Itaú Corretora",
   BRADESCO: "Bradesco / Ágora",
   SANTANDER: "Santander / Toro",
+  BB: "Banco do Brasil",
+  CAIXA: "Caixa Econômica Federal",
 };
 
 export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderProps) {
