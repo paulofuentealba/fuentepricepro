@@ -2,6 +2,7 @@ import type { Currency } from "@/lib/domain";
 import type { DividendEvent } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { type Transaction, getQuantityAtDate } from "@/lib/transactions";
+import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
 
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
 export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAGRO", "ETF", "REIT"];
@@ -21,6 +22,7 @@ export interface MonthBucket {
   isStartMonth?: boolean;
   amount: number;
   paidAmount: number;
+  realizedAmount: number;
   announcedAmount: number;
   projectedAmount: number;
   cumulativeTotal: number;
@@ -213,6 +215,32 @@ export function buildMonthlyBuckets(
     const announcedAmount = 0;
     const projectedAmount = isPast ? 0 : b.amount;
 
+    // Calculate SSOT Realized Income for this month/year bucket
+    let bucketRealized = 0;
+    if (transactions.length > 0) {
+      const assetMetaMap: Record<string, AssetTaxMeta> = {};
+      for (const item of items) {
+        assetMetaMap[item.ticker] = {
+          ticker: item.ticker,
+          type: item.type,
+          currency: item.currency,
+          customTaxRate: item.customTaxRate,
+        };
+      }
+      const realizedEvents = calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap);
+      for (const ev of realizedEvents) {
+        const item = items.find((it) => it.ticker === ev.ticker);
+        if (item && item.currency !== currency) continue;
+
+        const dateStr = ev.paymentDate || ev.exDate;
+        const d = new Date(dateStr);
+        if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
+          bucketRealized += ev.amountNet;
+        }
+      }
+    }
+    const realizedAmount = Math.round(bucketRealized * 100) / 100;
+
     return {
       month: b.monthLabel,
       monthIndex: i,
@@ -221,6 +249,7 @@ export function buildMonthlyBuckets(
       isStartMonth: b.isStartMonth,
       amount: b.amount, // kept as pure projection — used by summary/sparklines
       paidAmount,
+      realizedAmount,
       announcedAmount,
       projectedAmount,
       cumulativeTotal: running,

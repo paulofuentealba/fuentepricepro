@@ -87,6 +87,13 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
           </span>
         </div>
         <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-muted-foreground">
+          {payload[0].payload.realizedAmount > 0 && (
+            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+              <CheckCircle className="h-3 w-3 text-emerald-400" />
+              {t.tabs.chart.realized}:{" "}
+              {formatCurrency(payload[0].payload.realizedAmount, activeCurrency, locale)}
+            </span>
+          )}
           {payload[0].payload.paidAmount > 0 && (
             <span className="flex items-center gap-1 text-success">
               <CheckCircle className="h-3 w-3" />
@@ -212,13 +219,19 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
         {/* LEFT: Monthly Bar Chart */}
         <div className="flex flex-col">
           <div className="mb-2 flex items-center justify-between gap-2 px-1 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1 font-semibold text-foreground">
-              <span
-                className="inline-block h-2 w-3 rounded-sm"
-                style={{ backgroundColor: COLOR_BAR }}
-              />
-              {t.tabs.chart.monthly}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
+                <span
+                  className="inline-block h-2 w-3 rounded-sm"
+                  style={{ backgroundColor: COLOR_BAR }}
+                />
+                {t.tabs.chart.monthly}
+              </span>
+              <span className="inline-flex items-center gap-1 font-semibold text-emerald-400">
+                <span className="inline-block h-2 w-3 rounded-sm bg-emerald-500" />
+                {t.tabs.chart.realized}
+              </span>
+            </div>
             {bestMonth && (
               <span className="inline-flex items-center gap-1 text-warning">
                 <Award className="h-3 w-3" />
@@ -282,6 +295,23 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   content={<CustomTooltip />}
                 />
 
+                <Bar
+                  dataKey="realizedAmount"
+                  stackId="a"
+                  fill="rgb(16, 185, 129)"
+                  maxBarSize={40}
+                  onClick={handleBarClick}
+                  cursor="pointer"
+                >
+                  {data.map((entry, index) => (
+                    <Cell
+                      key={`cell-realized-${index}`}
+                      fillOpacity={
+                        selectedMonthIndex === null || selectedMonthIndex === index ? 1 : 0.3
+                      }
+                    />
+                  ))}
+                </Bar>
                 <Bar
                   dataKey="paidAmount"
                   stackId="a"

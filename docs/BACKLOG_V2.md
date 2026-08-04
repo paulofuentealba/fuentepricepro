@@ -19,10 +19,11 @@ Já existe: `src/lib/dataIngestion/b3Parser.ts` + `BrokerNoteUploader.tsx` fazem
 Falta: mais corretoras além de XP/Clear, outros layouts além de SINACOR, parsing de **proventos** (hoje só trades de compra são importados, nada de dividendo/JCP recebido), e a parte de Open Finance/API direta com B3/Avenue (não iniciada).
 Nota: existe também `src/lib/csv.ts` + `WatchlistIO.tsx`, mas isso é import/export da **posição atual** da carteira, não histórico de transação — não confundir com este item.
 
-### 1.2 Registro de proventos e renda realizada ⚪
+### 1.2 Registro de proventos e renda realizada 🟡
 
-Não existe hoje. O app só mostra renda **projetada**, nunca a renda de fato recebida. Precisa de: modelo de dado pra registrar proventos (data, ativo, valor líquido, tipo), tela de registro manual, e gráfico de renda realizada mês a mês ao lado da projetada.
-**Decisão arquitetural pendente**: esse é o item que sustenta o item 1.3 (rentabilidade real) e o item 2.3 (IRPF) — vale desenhar o schema de transações/proventos com cuidado antes de codar, já que os outros dois dependem dele.
+- **Cálculo Automático por Cruzamento (`src/lib/realizedIncome.ts`)**: ✅ **CONCLUÍDO NO PROMPT 33**. Função pura SSOT `calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap)` cruza o histórico de transações com as datas ex de cada provento para calcular a quantidade mantida em cada `exDate` e aplicar as regras de retenção na fonte (WHT 30% US, 15% JCP, isenção FII/BR).
+- **UI Integrada em Cash Flow (`CashFlowSummary.tsx` & `CashFlowChart.tsx`)**: ✅ Cards de resumo em destaque Emerald (Mês Atual, Ano Corrente, Total Histórico Realizado) e séries/barras comparativas no gráfico de Cash Flow com suporte i18n trilingue (PT, EN, ES).
+- **Importação/Conferência via PDF Extrato**: ⚪ Mantido para fase futura como mecanismo de conferência/auditoria por PDF de extrato.
 
 ### 1.3 Eventos Corporativos Automatizados ✅
 

@@ -455,6 +455,12 @@ export const en = {
       calendarYear: "Calendar Year",
       myJourney: "My Journey",
       journeyStart: "🌱 Start",
+      realized: "Realized",
+      realizedVsProjected: "Realized vs. Projected",
+      currentMonthRealized: "Current Month (Realized)",
+      currentYearRealized: "Current Year (Realized)",
+      allTimeRealized: "All-Time Realized",
+      realizedVsProjectedNote: "Calculated automatically by crossing transaction history with ex-dividend dates.",
     },
   },
 

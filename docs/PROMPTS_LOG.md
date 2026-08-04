@@ -88,6 +88,10 @@ Prompts já **concluídos** ficam só com resumo (a íntegra de cada um está no
 | 34     | fix: remover regra orfa watchlist_items das firestore.rules                                                         | ✅     |
 | 35     | feat(watchlist): refactor investingSince UX to My Position tab in AssetDetailSheet                                  | ✅     |
 | 36     | fix(ui): scrollable tabs mobile & resolve WowInsights crash (b3f2144)                                               | ✅     |
+| 37     | feat(onboarding): InvestorProfileFlow de 6 telas com salvamento incremental e resumo em Configurações                | ✅     |
+| 38     | fix(onboarding): corrigir race condition de hidratação do Firestore no InvestorProfileFlow                         | ✅     |
+| 39     | fix(events): validação end-to-end + fix endpoint Yahoo Finance (`&interval=1d&range=5y`) em `checkPendingSplitsFn`     | ✅     |
+| 40     | feat(cashflow): Fase 2 do Épico 1 — Renda Realizada calculada automaticamente (`calculateRealizedIncome`)             | ✅     |
 
 ---
 

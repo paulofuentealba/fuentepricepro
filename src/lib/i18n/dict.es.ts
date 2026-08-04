@@ -462,6 +462,12 @@ export const es = {
       calendarYear: "Año Calendario",
       myJourney: "Mi Viaje",
       journeyStart: "🌱 Inicio",
+      realized: "Realizado",
+      realizedVsProjected: "Realizado vs. Proyectado",
+      currentMonthRealized: "Mes Actual (Realizado)",
+      currentYearRealized: "Año Actual (Realizado)",
+      allTimeRealized: "Total Histórico Realizado",
+      realizedVsProjectedNote: "Calculado automáticamente cruzando el historial de transacciones con las fechas ex.",
     },
   },
 

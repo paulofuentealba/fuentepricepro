@@ -457,6 +457,12 @@ export const ptBR = {
       calendarYear: "Ano Calendário",
       myJourney: "Minha Jornada",
       journeyStart: "🌱 Início",
+      realized: "Realizado",
+      realizedVsProjected: "Realizado vs. Projetado",
+      currentMonthRealized: "Mês Atual (Realizado)",
+      currentYearRealized: "Ano Corrente (Realizado)",
+      allTimeRealized: "Total Histórico Realizado",
+      realizedVsProjectedNote: "Calculado automaticamente cruzando o histórico de transações com as datas ex de proventos.",
     },
   },
 

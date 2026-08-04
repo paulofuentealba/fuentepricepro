@@ -48,6 +48,8 @@ const MONTHS_PT = [
   "Dez",
 ];
 
+import { calculateRealizedIncome, computeRealizedIncomeSummary, type AssetTaxMeta } from "@/lib/realizedIncome";
+
 interface Props {
   items: WatchlistItem[];
   onNavigateToCalculator?: () => void;
@@ -98,6 +100,25 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   const { transactions } = useTransactions();
 
+  const realizedEvents = useMemo(() => {
+    if (transactions.length === 0) return [];
+    const assetMetaMap: Record<string, AssetTaxMeta> = {};
+    for (const item of items) {
+      assetMetaMap[item.ticker] = {
+        ticker: item.ticker,
+        type: item.type,
+        currency: item.currency,
+        customTaxRate: item.customTaxRate,
+      };
+    }
+    return calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap);
+  }, [transactions, dividendEventsMap, items]);
+
+  const realizedSummary = useMemo(
+    () => computeRealizedIncomeSummary(realizedEvents, activeCurrency),
+    [realizedEvents, activeCurrency]
+  );
+
   const calendarData = useMemo(
     () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, "calendar", transactions),
     [items, activeCurrency, months, dividendEventsMap, transactions],
@@ -122,7 +143,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     [calendarData],
   );
 
-  const hasData = chartData.some((d) => d.amount > 0);
+  const hasData = chartData.some((d) => d.amount > 0 || d.realizedAmount > 0);
   const bestMonth = chartData.find((d) => d.isBest);
 
   if (items.length === 0 || !hasData) {
@@ -142,6 +163,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
         />
         <CashFlowSummaryCards
           summary={summary}
+          realizedSummary={realizedSummary}
           activeCurrency={activeCurrency}
           sparklinePath={sparklinePath}
           cumulativePath={cumulativePath}
