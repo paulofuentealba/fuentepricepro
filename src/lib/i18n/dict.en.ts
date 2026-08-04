@@ -461,6 +461,11 @@ export const en = {
       currentYearRealized: "Current Year (Realized)",
       allTimeRealized: "All-Time Realized",
       realizedVsProjectedNote: "Calculated automatically by crossing transaction history with ex-dividend dates.",
+      irrTitle: "Portfolio Return (IRR)",
+      portfolioIrr: "Annualized IRR",
+      selicBenchmark: "Benchmark (Selic)",
+      irrTooltip: "Money-Weighted Internal Rate of Return (IRR). Accounts for exact timing of buys, sells, and dividends received.",
+      irrInsufficientData: "Insufficient data",
     },
   },
 

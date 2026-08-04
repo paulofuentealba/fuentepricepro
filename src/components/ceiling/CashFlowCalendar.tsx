@@ -49,6 +49,9 @@ const MONTHS_PT = [
 ];
 
 import { calculateRealizedIncome, computeRealizedIncomeSummary, type AssetTaxMeta } from "@/lib/realizedIncome";
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
+import { PortfolioIrrCard } from "./cashflow/PortfolioIrrCard";
+import { usePortfolioSnapshot } from "@/lib/portfolioSnapshot";
 
 interface Props {
   items: WatchlistItem[];
@@ -134,6 +137,19 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     [items, activeCurrency, dividendEventsMap, transactions],
   );
 
+  const { totals, valuedItems } = useValuedPortfolio();
+  const currentPortfolioValue = totals.consolidatedNetWorth;
+  const totalInvestedBRL = valuedItems.reduce((acc, it) => acc + (it.quantity * it.currentPrice), 0);
+
+  // Periodic daily snapshot recorded in Firestore (idempotent YYYY-MM-DD doc ID)
+  usePortfolioSnapshot(currentPortfolioValue, totalInvestedBRL);
+
+  const assetCurrenciesMap = useMemo(() => {
+    const map: Record<string, Currency> = {};
+    for (const it of items) map[it.ticker.toUpperCase()] = it.currency;
+    return map;
+  }, [items]);
+
   const summary = useMemo(() => computeCashFlowSummary(calendarData), [calendarData]);
 
   const finalCumulative = chartData[chartData.length - 1]?.cumulativeTotal ?? 0;
@@ -152,7 +168,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   return (
     <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-2xl">
-      <CardContent className="pt-5">
+      <CardContent className="pt-5 space-y-6">
         <CashFlowHeader
           title={t.watchlist.cashFlowTitle}
           availableCurrencies={availableCurrencies}
@@ -160,6 +176,13 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
           onCurrencyChange={(c) => updateSettings({ displayCurrency: c })}
           mode={mode}
           onModeChange={setMode}
+        />
+        <PortfolioIrrCard
+          transactions={transactions}
+          realizedEvents={realizedEvents}
+          currentPortfolioValue={currentPortfolioValue}
+          activeCurrency={activeCurrency}
+          assetCurrencies={assetCurrenciesMap}
         />
         <CashFlowSummaryCards
           summary={summary}

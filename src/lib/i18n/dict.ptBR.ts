@@ -463,6 +463,11 @@ export const ptBR = {
       currentYearRealized: "Ano Corrente (Realizado)",
       allTimeRealized: "Total Histórico Realizado",
       realizedVsProjectedNote: "Calculado automaticamente cruzando o histórico de transações com as datas ex de proventos.",
+      irrTitle: "Retorno da Carteira (IRR)",
+      portfolioIrr: "IRR Anualizado",
+      selicBenchmark: "Benchmark (Selic)",
+      irrTooltip: "Taxa Interna de Retorno (IRR) ponderada por dinheiro. Considera o momento exato de cada aporte, resgate e provento recebido.",
+      irrInsufficientData: "Dados insuficientes",
     },
   },
 

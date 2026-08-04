@@ -49,4 +49,23 @@ Ação: Nenhum prompt de tarefa dispensa a leitura deste arquivo. Se alguma
 instrução de um prompt específico conflitar com uma regra aqui, esta regra
 vence — o agente deve parar e sinalizar o conflito em vez de decidir por
 conta própria qual seguir.
-Antigravity: Sempre criar um plano de implementacao antes de qualquer alteracao. Pontuar observacoes e sugestoes dentro do plano.
+
+📋 8. Plano de Implementação Obrigatório Antes de Executar (Antigravity)
+Regra: Antes de qualquer alteração de código, o Antigravity deve apresentar
+um plano de implementação por escrito e aguardar aprovação — nunca pular
+direto para execução, mesmo em tarefas que pareçam pequenas ou óbvias.
+Ação: O plano deve conter, obrigatoriamente:
+(a) lista dos arquivos que serão criados/alterados;
+(b) a lógica central de cada mudança;
+(c) uma seção explícita de "Pontos de Atenção & Decisões de Arquitetura",
+    no formato risco → decisão, cobrindo qualquer trade-off, ambiguidade,
+    dependência ou dado que o Antigravity precisou assumir/decidir sozinho
+    durante a leitura do código (ex: qual algoritmo usar em caso de não
+    convergência, como tratar multi-moeda, como garantir idempotência).
+    Cada ponto deve nomear o risco identificado e a decisão tomada, não só
+    descrever o que vai ser construído.
+Só após aprovação explícita do revisor (Claude ou Paulo) o Antigravity
+prossegue para a implementação de fato. Pular esta etapa — ou entregar um
+plano que só lista arquivos sem os pontos de atenção — é uma violação desta
+regra, mesmo que o resultado final esteja correto. O plano existe para
+permitir correção ANTES do trabalho ser feito, não para documentar depois.

@@ -37,9 +37,11 @@ Concluído e Validado End-to-End:
 Parcial: `FixedIncomePanel.tsx` já existe pra títulos de Renda Fixa BR (CDB, Tesouro). O tratamento de imposto (30% US / 0% BR / 15% JCP) já existe na camada de cálculo de valuation (netAvgDividend com taxRate) e já está documentado na Wiki.
 Falta: um "motor" dedicado de WHT pra múltiplas moedas de forma mais robusta/explícita, e cupons de renda fixa internacional (hoje o foco é BR).
 
-### 1.5 Rentabilidade Real vs. Benchmark (TWR/IRR) ⚪
+### 1.5 Rentabilidade Real vs. Benchmark (TWR/IRR) 🟡
 
-Não existe. Depende do item 1.2 (dado real de transação) pra calcular TWR de verdade. Comparação com CDI, IBOV, S&P 500 — fonte de benchmark externa a definir.
+- **Cálculo de IRR da Carteira (`src/lib/portfolioIrr.ts` & `PortfolioIrrCard.tsx`)**: ✅ **CONCLUÍDO NO PROMPT 34**. Algoritmo híbrido Newton-Raphson + Bisseção que calcula a Taxa Interna de Retorno (Money-Weighted Return) considerando aportes, resgates, proventos na `paymentDate` e valor atual de mercado, comparando com o benchmark Selic.
+- **Snapshots Periódicos de Patrimônio (`portfolioSnapshot.ts` & Firestore)**: ✅ **CONCLUÍDO NO PROMPT 34**. Gravação diária client-side de snapshots em `users/{userId}/portfolioSnapshots/{YYYY-MM-DD}` (idempotente) como base de dados para o TWR futuro.
+- **TWR Acumulado**: ⚪ Aguarda acúmulo histórico de snapshots periódicos para cálculo de Time-Weighted Return de múltiplos subperíodos.
 
 ### 1.6 Rebalanceamento por Meta Configurável ⚪
 

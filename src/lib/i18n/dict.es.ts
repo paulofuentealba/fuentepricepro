@@ -468,6 +468,11 @@ export const es = {
       currentYearRealized: "Año Actual (Realizado)",
       allTimeRealized: "Total Histórico Realizado",
       realizedVsProjectedNote: "Calculado automáticamente cruzando el historial de transacciones con las fechas ex.",
+      irrTitle: "Retorno de Cartera (TIR)",
+      portfolioIrr: "TIR Anualizada",
+      selicBenchmark: "Referencia (Selic)",
+      irrTooltip: "Tasa Interna de Retorno (TIR) ponderada por dinero. Considera el momento exacto de cada compra, venta y dividendo.",
+      irrInsufficientData: "Datos insuficientes",
     },
   },
 
