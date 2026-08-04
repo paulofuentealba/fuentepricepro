@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { parseB3BrokerNote, ALL_SINACOR_BROKERS, type BrokerType } from "@/lib/dataIngestion/b3Parser";
-import { useTransactions, type Transaction } from "@/lib/transactions";
+import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist, makeId, WatchlistItem } from "@/lib/watchlist";
 import { useQueryClient } from "@tanstack/react-query";
 import { assetQueryOptions } from "@/lib/queryOptions";
@@ -33,6 +33,68 @@ export function parseDdMmYyyyToTimestamp(dateStr: string): number {
   }
   const fallback = new Date(dateStr).getTime();
   return isNaN(fallback) ? Date.now() : fallback;
+}
+
+export function consolidateTradesToWatchlistItems(
+  trades: { ticker: string; quantity: number; price: number; date: string }[],
+  existingTransactions: Transaction[],
+  newlyCreatedTransactions: Transaction[],
+  assetDataMap: Record<string, any> = {}
+): WatchlistItem[] {
+  const tradesByTicker = new Map<string, typeof trades>();
+  for (const trade of trades) {
+    const ticker = trade.ticker.toUpperCase();
+    const list = tradesByTicker.get(ticker) || [];
+    list.push(trade);
+    tradesByTicker.set(ticker, list);
+  }
+
+  const itemsToImport: WatchlistItem[] = [];
+
+  for (const [ticker, tickerTrades] of tradesByTicker.entries()) {
+    const lastTrade = tickerTrades[tickerTrades.length - 1];
+    const assetData = assetDataMap[ticker] || null;
+
+    const type = assetData?.type || classifyBr(ticker);
+    const annualDiv = assetData ? getCanonicalAnnualDividend(assetData, 3) : 0;
+    const target = 6;
+    const ceil = ceilingPrice(annualDiv, target);
+    const margin = safetyMargin(ceil, lastTrade.price);
+
+    const newlyCreatedIds = new Set(newlyCreatedTransactions.map((n) => n.id));
+    const existingForTicker = existingTransactions.filter(
+      (tx) => tx.ticker.toUpperCase() === ticker && !newlyCreatedIds.has(tx.id)
+    );
+    const newlyCreatedForTicker = newlyCreatedTransactions.filter(
+      (tx) => tx.ticker.toUpperCase() === ticker
+    );
+
+    const allTickerTransactions = [...existingForTicker, ...newlyCreatedForTicker];
+    const { quantity, averagePrice } = recalculateHoldingFromTransactions(allTickerTransactions);
+
+    itemsToImport.push({
+      id: makeId(ticker, type),
+      ticker: ticker,
+      name: assetData?.name || ticker,
+      type,
+      currency: "BRL",
+      currentPrice: lastTrade.price,
+      annualDividend: annualDiv,
+      targetYield: target,
+      ceilingPrice: ceil,
+      safetyMargin: margin,
+      quantity,
+      averagePrice,
+      paymentMonths: Array.isArray(assetData?.paymentMonths) ? assetData.paymentMonths : [],
+      payoutRatio: null,
+      targetMonthlyIncome: null,
+      customTaxRate: null,
+      sector: assetData?.sector || null,
+      addedAt: Date.now(),
+    } as WatchlistItem);
+  }
+
+  return itemsToImport;
 }
 
 interface BrokerNoteUploaderProps {
@@ -62,7 +124,7 @@ const BROKER_LABELS: Record<BrokerType, string> = {
 export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderProps) {
   const { t } = useI18n();
   const { upsertManyAsync } = useWatchlist();
-  const { upsert: upsertTransaction } = useTransactions();
+  const { transactions, upsert: upsertTransaction } = useTransactions();
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -126,7 +188,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
         throw new Error(t.brokerNote.malformedPdf);
       }
 
-      const itemsToImport: WatchlistItem[] = [];
+      const newlyCreatedTransactions: Transaction[] = [];
 
       for (const trade of result.trades) {
         const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
@@ -142,44 +204,29 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
         try {
           await upsertTransaction(transaction);
+          newlyCreatedTransactions.push(transaction);
         } catch (e) {
           console.error("Could not save transaction for trade", trade.ticker, e);
         }
-
-        let assetData: any = null;
-        try {
-          assetData = await queryClient.ensureQueryData(assetQueryOptions(trade.ticker));
-        } catch (e) {
-          console.warn("Could not fetch asset data for", trade.ticker);
-        }
-
-        const type = assetData?.type || classifyBr(trade.ticker);
-        const annualDiv = assetData ? getCanonicalAnnualDividend(assetData, 3) : 0;
-        const target = 6;
-        const ceil = ceilingPrice(annualDiv, target);
-        const margin = safetyMargin(ceil, trade.price);
-
-        itemsToImport.push({
-          id: makeId(trade.ticker, type),
-          ticker: trade.ticker,
-          name: assetData?.name || trade.ticker,
-          type,
-          currency: "BRL",
-          currentPrice: trade.price,
-          annualDividend: annualDiv,
-          targetYield: target,
-          ceilingPrice: ceil,
-          safetyMargin: margin,
-          quantity: trade.quantity,
-          averagePrice: trade.price,
-          paymentMonths: Array.isArray(assetData?.paymentMonths) ? assetData.paymentMonths : [],
-          payoutRatio: null,
-          targetMonthlyIncome: null,
-          customTaxRate: null,
-          sector: assetData?.sector || null,
-          addedAt: Date.now(),
-        } as WatchlistItem);
       }
+
+      const uniqueTickers = Array.from(new Set(result.trades.map((t) => t.ticker.toUpperCase())));
+      const assetDataMap: Record<string, any> = {};
+
+      for (const ticker of uniqueTickers) {
+        try {
+          assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
+        } catch (e) {
+          console.warn("Could not fetch asset data for", ticker);
+        }
+      }
+
+      const itemsToImport = consolidateTradesToWatchlistItems(
+        result.trades,
+        transactions,
+        newlyCreatedTransactions,
+        assetDataMap
+      );
 
       await upsertManyAsync(itemsToImport);
       toast.success(`${itemsToImport.length} ${t.brokerNote.successImport}`);

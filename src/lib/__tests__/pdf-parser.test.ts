@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { parseB3Float, parseB3BrokerNote } from "../dataIngestion/b3Parser";
-import { parseDdMmYyyyToTimestamp } from "@/components/ceiling/watchlist/BrokerNoteUploader";
+import {
+  parseDdMmYyyyToTimestamp,
+  consolidateTradesToWatchlistItems,
+} from "@/components/ceiling/watchlist/BrokerNoteUploader";
 import type { Transaction } from "@/lib/transactions";
 
 describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
@@ -38,6 +41,97 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(transaction.quantity).toBe(100);
       expect(transaction.pricePerShare).toBe(45.0);
       expect(transaction.fees).toBeNull();
+    });
+  });
+
+  describe("consolidateTradesToWatchlistItems", () => {
+    it("should consolidate multiple trades of the same ticker in the same note into a single WatchlistItem with weighted average price", () => {
+      const trades = [
+        { ticker: "WEGE3", quantity: 100, price: 40.0, date: "15/07/2026" },
+        { ticker: "WEGE3", quantity: 50, price: 42.0, date: "15/07/2026" },
+      ];
+
+      const newlyCreatedTx: Transaction[] = trades.map((t, idx) => ({
+        id: `tx-${idx}`,
+        ticker: t.ticker,
+        type: "buy",
+        date: parseDdMmYyyyToTimestamp(t.date),
+        quantity: t.quantity,
+        pricePerShare: t.price,
+      }));
+
+      const items = consolidateTradesToWatchlistItems(trades, [], newlyCreatedTx);
+
+      expect(items).toHaveLength(1);
+      expect(items[0].ticker).toBe("WEGE3");
+      expect(items[0].quantity).toBe(150);
+      // (100 * 40 + 50 * 42) / 150 = 6100 / 150 = 40.666666666666664
+      expect(items[0].averagePrice).toBeCloseTo(40.6667, 4);
+      expect(items[0].currentPrice).toBe(42.0); // last trade's price
+    });
+
+    it("should consolidate new note trades with pre-existing transactions for the same ticker", () => {
+      const preExistingTx: Transaction[] = [
+        {
+          id: "tx-old-1",
+          ticker: "WEGE3",
+          type: "buy",
+          date: parseDdMmYyyyToTimestamp("01/01/2026"),
+          quantity: 100,
+          pricePerShare: 30.0,
+        },
+      ];
+
+      const trades = [{ ticker: "WEGE3", quantity: 100, price: 40.0, date: "15/07/2026" }];
+
+      const newlyCreatedTx: Transaction[] = [
+        {
+          id: "tx-new-1",
+          ticker: "WEGE3",
+          type: "buy",
+          date: parseDdMmYyyyToTimestamp("15/07/2026"),
+          quantity: 100,
+          pricePerShare: 40.0,
+        },
+      ];
+
+      const items = consolidateTradesToWatchlistItems(trades, preExistingTx, newlyCreatedTx);
+
+      expect(items).toHaveLength(1);
+      expect(items[0].ticker).toBe("WEGE3");
+      expect(items[0].quantity).toBe(200);
+      // (100 * 30 + 100 * 40) / 200 = 7000 / 200 = 35.0
+      expect(items[0].averagePrice).toBe(35.0);
+    });
+
+    it("should correctly handle single unique tickers without regressions", () => {
+      const trades = [
+        { ticker: "WEGE3", quantity: 100, price: 40.0, date: "15/07/2026" },
+        { ticker: "PETR4", quantity: 200, price: 30.0, date: "15/07/2026" },
+      ];
+
+      const newlyCreatedTx: Transaction[] = trades.map((t, idx) => ({
+        id: `tx-${idx}`,
+        ticker: t.ticker,
+        type: "buy",
+        date: parseDdMmYyyyToTimestamp(t.date),
+        quantity: t.quantity,
+        pricePerShare: t.price,
+      }));
+
+      const items = consolidateTradesToWatchlistItems(trades, [], newlyCreatedTx);
+
+      expect(items).toHaveLength(2);
+      const wege = items.find((i) => i.ticker === "WEGE3");
+      const petr = items.find((i) => i.ticker === "PETR4");
+
+      expect(wege).toBeDefined();
+      expect(wege?.quantity).toBe(100);
+      expect(wege?.averagePrice).toBe(40.0);
+
+      expect(petr).toBeDefined();
+      expect(petr?.quantity).toBe(200);
+      expect(petr?.averagePrice).toBe(30.0);
     });
   });
 

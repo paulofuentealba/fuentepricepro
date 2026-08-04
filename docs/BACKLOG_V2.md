@@ -13,11 +13,11 @@ Este documento substitui todas as outras listas soltas (FPP-xxx da auditoria de 
 
 ## Épico 1 — Core de Investimentos e Automação (A Máquina)
 
-### 1.1 Importação automática e Notas de Corretagem 🟡
+### 1.1 Importação automática e Notas de Corretagem ✅
 
 - **Parsing de Notas SINACOR (14 Corretoras)**: ✅ **ATUALIZADO NO PROMPT 44**. `b3Parser.ts` estendido com suporte a **14 corretoras/bancos**: XP, Clear, Rico, Modal, BTG, Inter, NuInvest, Órama, Genial, Itaú, Bradesco / Ágora, Santander / Toro, Banco do Brasil (BB) e Caixa Econômica Federal / Caixa DTVM (`42.040.639/0001-40`).
 - **Gravação Automática em Transactions**: ✅ **CONCLUÍDO NO PROMPT 45**. `BrokerNoteUploader.tsx` estendido para gravar cada ordem em `Transaction[]` via `useTransactions().upsert` com ID determinístico (`tx-pdf-{ticker}-{timestamp}-{qty}-{price}`) para idempotência perfeita em re-importações, desbloqueando `realizedIncome.ts` e `portfolioIrr.ts`.
-- **Risco Pendente Mapeado**: ⚪ Consolidação de ordens duplicadas do mesmo ticker na watchlist (`WatchlistItem[]`) reservada para o próximo prompt.
+- **Consolidação de Ordens Duplicadas do Mesmo Ticker**: ✅ **CONCLUÍDO NO PROMPT FIX**. `BrokerNoteUploader.tsx` reestruturado para agrupar ordens por ticker e recalcular a posição total (`quantity` e `averagePrice`) via `recalculateHoldingFromTransactions`, combinando o histórico pré-existente do ativo com as novas transações da nota.
 - **Falta**: Outros layouts não-SINACOR (se surgirem) e integração Open Finance/B3 direta.
 Nota: existe também `src/lib/csv.ts` + `WatchlistIO.tsx`, mas isso é import/export da **posição atual** da carteira, não histórico de transação — não confundir com este item.
 
