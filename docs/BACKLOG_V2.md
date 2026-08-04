@@ -105,6 +105,7 @@ Itens menores, sem épico específico, encontrados ao longo da auditoria:
 - **`Watchlist.tsx`** é o maior e mais frequentemente quebrado arquivo do projeto (KPIs, filtros, grid, orquestração de diálogos tudo junto) — candidato a quebrar em componentes menores quando houver tempo
 - **`nitro: "3.0.260603-beta"`** fixado como dependência de servidor — migrar pra versão estável assim que disponível
 - **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, `test-bbas3.ts`, `test-server.js`, `test_search.ts`) — resíduo de refatorações já concluídas, candidatos a remoção
+- **Inconsistência de cores de CTA/botões primários**: o token `--primary` do tema (`styles.css`, azul-violeta) não é a cor real usada nos botões de ação principal do produto — o padrão real é `emerald-600`/`emerald-500` com glow, hardcoded em vários componentes (ex: `AddAssetDropdown.tsx`). Levantamento rápido encontrou pelo menos 22 arquivos em `src/components` usando classes de cor de botão diferentes (`bg-emerald-600`, `bg-blue-600`, `bg-indigo-600`, `bg-primary`) sem um padrão único. Ação futura: decidir qual é a cor oficial da marca (parece ser emerald, pelo padrão predominante e pelo botão mais visível do produto), atualizar o token `--primary` no `styles.css` pra refletir isso, e migrar os componentes que usam classes hardcoded pra usar o token. Este item de onboarding já nasceu seguindo o padrão emerald real, não o token desatualizado.
 
 ---
 

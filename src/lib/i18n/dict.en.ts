@@ -914,4 +914,62 @@ export const en = {
     confirmDelete: "Delete this transaction?",
     calculatedFromTransactions: "Calculated from {n} transactions. To edit, manage the transaction history in the asset details.",
   },
+  onboarding: {
+    welcome: {
+      title: "Let's personalize your experience",
+      subtitle: "Answer 4 quick questions (~30s) so the app adapts recommendations to your profile.",
+      startBtn: "Get Started",
+      skipAllBtn: "Skip for now",
+    },
+    questions: {
+      step: "Question {{current}} of 4",
+      skipStep: "Skip this question",
+      continue: "Continue",
+      q1: {
+        title: "What is your main investment goal?",
+        income: "Generate monthly passive income",
+        growth: "Grow wealth over the long term",
+        both: "A bit of both",
+      },
+      q2: {
+        title: "What is your investment horizon?",
+        short: "Less than 2 years",
+        mid: "2 to 5 years",
+        long: "More than 5 years",
+      },
+      q3: {
+        title: "How would you react if your portfolio fell 20% in a month?",
+        sell: "I would sell to prevent further losses",
+        hold: "I would hold my position",
+        buy: "I would buy more to take advantage of lower prices",
+      },
+      q4: {
+        title: "What is your level of investment experience?",
+        beginner: "Beginner",
+        mid: "Intermediate",
+        advanced: "Advanced",
+      },
+    },
+    result: {
+      title: "Your investor profile is ready!",
+      subtitle: "Based on your answers, we calculated your investor profile to personalize your experience.",
+      finishBtn: "Finish",
+      retakeBtn: "Retake Questionnaire",
+      profileLabel: "Investor Profile",
+      tiers: {
+        conservative: "Conservative",
+        moderate: "Moderate",
+        aggressive: "Aggressive",
+      },
+      sublabels: {
+        income: "Focused on Income",
+        growth: "Focused on Growth",
+      },
+      descriptions: {
+        conservative: "Your priority is capital preservation and income predictability.",
+        moderate: "You seek a balance between passive income generation and capital appreciation.",
+        aggressive: "You accept short-term fluctuations in pursuit of higher long-term returns.",
+      },
+    },
+  },
 };

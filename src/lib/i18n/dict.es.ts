@@ -928,4 +928,62 @@ export const es = {
     confirmDelete: "¿Eliminar esta transacción?",
     calculatedFromTransactions: "Calculado a partir de {n} transacciones. Para editar, gestione el historial de transacciones en los detalles del activo.",
   },
+  onboarding: {
+    welcome: {
+      title: "Personalicemos tu experiencia",
+      subtitle: "Responde 4 preguntas rápidas (~30s) para que la app adapte las recomendaciones a tu perfil.",
+      startBtn: "Comenzar",
+      skipAllBtn: "Omitir por ahora",
+    },
+    questions: {
+      step: "Pregunta {{current}} de 4",
+      skipStep: "Omitir esta pregunta",
+      continue: "Continuar",
+      q1: {
+        title: "¿Cuál es tu objetivo principal al invertir?",
+        income: "Generar ingresos pasivos mensuales",
+        growth: "Hacer crecer el patrimonio a largo plazo",
+        both: "Un poco de ambos",
+      },
+      q2: {
+        title: "¿Cuál es tu horizonte de inversión?",
+        short: "Menos de 2 años",
+        mid: "2 a 5 años",
+        long: "Más de 5 años",
+      },
+      q3: {
+        title: "¿Cómo reaccionarías si tu cartera cayera un 20% en un mes?",
+        sell: "Vendería para evitar más pérdidas",
+        hold: "Mantendría la posición",
+        buy: "Compraría más aprovechando el precio",
+      },
+      q4: {
+        title: "¿Cuál es tu nivel de experiencia en inversiones?",
+        beginner: "Principiante",
+        mid: "Intermedio",
+        advanced: "Avanzado",
+      },
+    },
+    result: {
+      title: "¡Tu perfil de inversor está listo!",
+      subtitle: "Según tus respuestas, calculamos tu perfil para personalizar tu experiencia en la app.",
+      finishBtn: "Concluir",
+      retakeBtn: "Rehacer Cuestionario",
+      profileLabel: "Perfil de Inversor",
+      tiers: {
+        conservative: "Conservador",
+        moderate: "Moderado",
+        aggressive: "Agresivo",
+      },
+      sublabels: {
+        income: "Enfocado en Ingresos",
+        growth: "Enfocado en Crecimiento",
+      },
+      descriptions: {
+        conservative: "Tu prioridad es la preservación del capital y la previsibilidad de los ingresos.",
+        moderate: "Buscas un equilibrio entre la generación de ingresos pasivos y la valorización del patrimonio.",
+        aggressive: "Aceptas oscilaciones a corto plazo en busca de mayores rendimientos a largo plazo.",
+      },
+    },
+  },
 } satisfies typeof en;

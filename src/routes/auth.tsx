@@ -18,6 +18,9 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 import { SuccessIconBox } from "@/components/shared/SuccessIconBox";
 import { useI18n } from "@/lib/i18n-provider";
 
+import { InvestorProfileFlow } from "@/components/onboarding/InvestorProfileFlow";
+import { useInvestorProfile } from "@/lib/useInvestorProfile";
+
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
@@ -56,14 +59,24 @@ function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const { t } = useI18n();
   const { user, loading } = useAuth();
+  const { profile, isPending: profilePending } = useInvestorProfile();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/" });
-  }, [user, loading, navigate]);
+    if (!loading && user && !profilePending && !showOnboarding) {
+      // If user is already authenticated and has either completed or skipped onboarding, redirect home
+      if (profile.completedAt || profile.skipped) {
+        navigate({ to: "/" });
+      } else {
+        // First time signup / uncompleted profile -> show onboarding
+        setShowOnboarding(true);
+      }
+    }
+  }, [user, loading, profilePending, profile, showOnboarding, navigate]);
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -72,10 +85,15 @@ function AuthPage() {
       if (mode === "signup") {
         await createUserWithEmailAndPassword(auth, email, password);
         toast.success(t.authModal.successSignup);
+        setShowOnboarding(true);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         toast.success(t.authModal.welcomeBack);
-        navigate({ to: "/" });
+        if (profile.completedAt || profile.skipped) {
+          navigate({ to: "/" });
+        } else {
+          setShowOnboarding(true);
+        }
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.authModal.authFailed);
@@ -91,11 +109,26 @@ function AuthPage() {
       provider.addScope("profile");
       provider.addScope("email");
       await signInWithPopup(auth, provider);
-      navigate({ to: "/" });
+      if (profile.completedAt || profile.skipped) {
+        navigate({ to: "/" });
+      } else {
+        setShowOnboarding(true);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.authModal.googleSignInFailed);
       setBusy(false);
     }
+  }
+
+  if (showOnboarding && user) {
+    return (
+      <InvestorProfileFlow
+        isModal={true}
+        onComplete={() => {
+          navigate({ to: "/" });
+        }}
+      />
+    );
   }
 
   return (
