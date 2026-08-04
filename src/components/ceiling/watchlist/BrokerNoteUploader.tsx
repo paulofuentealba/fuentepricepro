@@ -8,11 +8,20 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { UploadCloud, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
-import { parseB3BrokerNote, ALL_SINACOR_BROKERS, type BrokerType } from "@/lib/dataIngestion/b3Parser";
+import {
+  parseB3BrokerNote,
+  ALL_SINACOR_BROKERS,
+  type BrokerType,
+  type TradeRecord,
+  type UnresolvedTradeRecord,
+} from "@/lib/dataIngestion/b3Parser";
 import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist, makeId, WatchlistItem } from "@/lib/watchlist";
+import { useIssuerTickerMappings } from "@/lib/useIssuerTickerMappings";
 import { useQueryClient } from "@tanstack/react-query";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import { getCanonicalAnnualDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
@@ -125,14 +134,25 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
   const { t } = useI18n();
   const { upsertManyAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
+  const { mappings, saveMappings } = useIssuerTickerMappings();
   const queryClient = useQueryClient();
+
+  const [step, setStep] = useState<"upload" | "resolve">("upload");
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedBroker, setSelectedBroker] = useState<string>("AUTO");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [resolvedTrades, setResolvedTrades] = useState<TradeRecord[]>([]);
+  const [unresolvedTrades, setUnresolvedTrades] = useState<UnresolvedTradeRecord[]>([]);
+  const [tickerInputs, setTickerInputs] = useState<Record<string, string>>({});
+
   useEffect(() => {
     if (open) {
+      setStep("upload");
+      setResolvedTrades([]);
+      setUnresolvedTrades([]);
+      setTickerInputs({});
       const saved = localStorage.getItem(LAST_BROKER_KEY);
       if (saved && (saved === "AUTO" || ALL_SINACOR_BROKERS.includes(saved as BrokerType))) {
         setSelectedBroker(saved);
@@ -145,6 +165,52 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
   const handleBrokerChange = (val: string) => {
     setSelectedBroker(val);
     localStorage.setItem(LAST_BROKER_KEY, val);
+  };
+
+  const importTrades = async (allTrades: TradeRecord[]) => {
+    const newlyCreatedTransactions: Transaction[] = [];
+
+    for (const trade of allTrades) {
+      const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
+      const transaction: Transaction = {
+        id: `tx-pdf-${trade.ticker.toUpperCase()}-${txTimestamp}-${trade.quantity}-${trade.price}`,
+        ticker: trade.ticker.toUpperCase(),
+        type: trade.type || "buy",
+        date: txTimestamp,
+        quantity: trade.quantity,
+        pricePerShare: trade.price,
+        fees: null,
+      };
+
+      try {
+        await upsertTransaction(transaction);
+        newlyCreatedTransactions.push(transaction);
+      } catch (e) {
+        console.error("Could not save transaction for trade", trade.ticker, e);
+      }
+    }
+
+    const uniqueTickers = Array.from(new Set(allTrades.map((t) => t.ticker.toUpperCase())));
+    const assetDataMap: Record<string, any> = {};
+
+    for (const ticker of uniqueTickers) {
+      try {
+        assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
+      } catch (e) {
+        console.warn("Could not fetch asset data for", ticker);
+      }
+    }
+
+    const itemsToImport = consolidateTradesToWatchlistItems(
+      allTrades,
+      transactions,
+      newlyCreatedTransactions,
+      assetDataMap
+    );
+
+    await upsertManyAsync(itemsToImport);
+    toast.success(`${itemsToImport.length} ${t.brokerNote.successImport}`);
+    onOpenChange(false);
   };
 
   const processFile = async (file: File) => {
@@ -166,7 +232,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
         rawText += pageText + "\n";
       }
 
-      const result = parseB3BrokerNote(rawText, selectedBroker as BrokerType | "AUTO");
+      const result = parseB3BrokerNote(rawText, selectedBroker as BrokerType | "AUTO", mappings);
 
       if (result.brokerDivergence) {
         const detectedName = BROKER_LABELS[result.brokerDivergence.detected] || result.brokerDivergence.detected;
@@ -177,7 +243,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
         toast.info(notice);
       }
 
-      if (!result.success || !result.trades) {
+      if (!result.success) {
         if (result.error === "broker_layout_unsupported") {
           const bName = result.broker ? (BROKER_LABELS[result.broker] || result.broker) : "";
           throw new Error(t.brokerNote.brokerLayoutUnsupported.replace("{broker}", bName));
@@ -188,49 +254,23 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
         throw new Error(t.brokerNote.malformedPdf);
       }
 
-      const newlyCreatedTransactions: Transaction[] = [];
+      const autoTrades = result.trades || [];
+      const pendingUnresolved = result.unresolvedTrades || [];
 
-      for (const trade of result.trades) {
-        const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
-        const transaction: Transaction = {
-          id: `tx-pdf-${trade.ticker.toUpperCase()}-${txTimestamp}-${trade.quantity}-${trade.price}`,
-          ticker: trade.ticker.toUpperCase(),
-          type: "buy",
-          date: txTimestamp,
-          quantity: trade.quantity,
-          pricePerShare: trade.price,
-          fees: null,
-        };
-
-        try {
-          await upsertTransaction(transaction);
-          newlyCreatedTransactions.push(transaction);
-        } catch (e) {
-          console.error("Could not save transaction for trade", trade.ticker, e);
-        }
+      if (pendingUnresolved.length > 0) {
+        setResolvedTrades(autoTrades);
+        setUnresolvedTrades(pendingUnresolved);
+        const initialInputs: Record<string, string> = {};
+        pendingUnresolved.forEach((u) => {
+          initialInputs[u.id] = "";
+        });
+        setTickerInputs(initialInputs);
+        setStep("resolve");
+      } else if (autoTrades.length > 0) {
+        await importTrades(autoTrades);
+      } else {
+        throw new Error(t.brokerNote.malformedPdf);
       }
-
-      const uniqueTickers = Array.from(new Set(result.trades.map((t) => t.ticker.toUpperCase())));
-      const assetDataMap: Record<string, any> = {};
-
-      for (const ticker of uniqueTickers) {
-        try {
-          assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
-        } catch (e) {
-          console.warn("Could not fetch asset data for", ticker);
-        }
-      }
-
-      const itemsToImport = consolidateTradesToWatchlistItems(
-        result.trades,
-        transactions,
-        newlyCreatedTransactions,
-        assetDataMap
-      );
-
-      await upsertManyAsync(itemsToImport);
-      toast.success(`${itemsToImport.length} ${t.brokerNote.successImport}`);
-      onOpenChange(false);
     } catch (err: any) {
       toast.error(t.brokerNote.errorImport + ": " + err.message);
     } finally {
@@ -239,85 +279,200 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
     }
   };
 
+  const handleConfirmResolution = async () => {
+    const newMappings: Record<string, string> = {};
+    const newlyResolvedTrades: TradeRecord[] = [];
+
+    for (const item of unresolvedTrades) {
+      const entered = (tickerInputs[item.id] || "").trim().toUpperCase();
+      if (!entered) {
+        toast.error(t.brokerNote.invalidTickerError);
+        return;
+      }
+      newMappings[item.normalizedKey] = entered;
+      newlyResolvedTrades.push({
+        ticker: entered,
+        quantity: item.quantity,
+        price: item.price,
+        date: item.date,
+        type: item.type,
+      });
+    }
+
+    setIsProcessing(true);
+    try {
+      await saveMappings(newMappings);
+      const allTrades = [...resolvedTrades, ...newlyResolvedTrades];
+      await importTrades(allTrades);
+    } catch (e: any) {
+      toast.error(t.brokerNote.errorImport + ": " + e.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent closeLabel={t.common.close} className="sm:max-w-md border-border/60 bg-card">
         <DialogHeader>
-          <DialogTitle className="text-xl">{t.brokerNote.importTitle}</DialogTitle>
-          <DialogDescription className="sr-only">{t.brokerNote.importTitle}</DialogDescription>
+          <DialogTitle className="text-xl">
+            {step === "upload" ? t.brokerNote.importTitle : t.brokerNote.unresolvedTitle}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {step === "upload" ? t.brokerNote.importTitle : t.brokerNote.unresolvedTitle}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 mt-1">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t.brokerNote.selectBroker}
-            </Label>
-            <Select value={selectedBroker} onValueChange={handleBrokerChange}>
-              <SelectTrigger className="w-full bg-background/50">
-                <SelectValue placeholder={t.brokerNote.selectBroker} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AUTO">{t.brokerNote.autoDetect}</SelectItem>
-                {ALL_SINACOR_BROKERS.map((b) => (
-                  <SelectItem key={b} value={b}>
-                    {BROKER_LABELS[b]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {step === "upload" ? (
+          <div className="space-y-4 mt-1">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t.brokerNote.selectBroker}
+              </Label>
+              <Select value={selectedBroker} onValueChange={handleBrokerChange}>
+                <SelectTrigger className="w-full bg-background/50">
+                  <SelectValue placeholder={t.brokerNote.selectBroker} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AUTO">{t.brokerNote.autoDetect}</SelectItem>
+                  {ALL_SINACOR_BROKERS.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {BROKER_LABELS[b]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div
-            className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
-              isDragging ? "border-success bg-success/5 scale-[1.02]" : "border-border/60 bg-background/40 hover:bg-muted/50"
-            }`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-              if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                processFile(e.dataTransfer.files[0]);
-              }
-            }}
-            onClick={() => !isProcessing && fileInputRef.current?.click()}
-          >
-            {isProcessing ? (
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-full blur-md bg-success/20 animate-pulse"></div>
-                  <Loader2 className="h-10 w-10 text-success animate-spin relative z-10" />
-                </div>
-                <p className="text-sm font-medium text-foreground">{t.brokerNote.importing}</p>
-              </div>
-            ) : (
-              <>
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 mb-4 ring-1 ring-success/20 shadow-sm transition-transform group-hover:scale-110">
-                  <UploadCloud className="h-7 w-7 text-success" />
-                </div>
-                <p className="text-base font-semibold text-foreground text-center mb-1 tracking-tight">
-                  {t.brokerNote.dragDropText}
-                </p>
-                <p className="text-sm text-muted-foreground text-center">{t.brokerNote.orClick}</p>
-              </>
-            )}
-            <input
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                  processFile(e.target.files[0]);
+            <div
+              className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
+                isDragging ? "border-success bg-success/5 scale-[1.02]" : "border-border/60 bg-background/40 hover:bg-muted/50"
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  processFile(e.dataTransfer.files[0]);
                 }
               }}
-            />
+              onClick={() => !isProcessing && fileInputRef.current?.click()}
+            >
+              {isProcessing ? (
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full blur-md bg-success/20 animate-pulse"></div>
+                    <Loader2 className="h-10 w-10 text-success animate-spin relative z-10" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">{t.brokerNote.importing}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 mb-4 ring-1 ring-success/20 shadow-sm transition-transform group-hover:scale-110">
+                    <UploadCloud className="h-7 w-7 text-success" />
+                  </div>
+                  <p className="text-base font-semibold text-foreground text-center mb-1 tracking-tight">
+                    {t.brokerNote.dragDropText}
+                  </p>
+                  <p className="text-sm text-muted-foreground text-center">{t.brokerNote.orClick}</p>
+                </>
+              )}
+              <input
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    processFile(e.target.files[0]);
+                  }
+                }}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4 mt-1">
+            <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-200/90 leading-relaxed">
+                {t.brokerNote.unresolvedDesc}
+              </p>
+            </div>
+
+            <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
+              {unresolvedTrades.map((item) => {
+                const totalVal = (item.quantity * item.price).toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                });
+
+                return (
+                  <div
+                    key={item.id}
+                    className="p-3.5 rounded-xl bg-background/50 border border-border/60 space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-foreground truncate max-w-[200px]" title={item.rawSpecification}>
+                        {item.rawSpecification || item.normalizedKey}
+                      </span>
+                      <span
+                        className={`font-medium px-2 py-0.5 rounded text-[10px] uppercase ${
+                          item.type === "buy" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                        }`}
+                      >
+                        {item.type === "buy" ? t.brokerNote.typeBuy : t.brokerNote.typeSell}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {item.quantity} x {item.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      </span>
+                      <span className="font-semibold text-foreground">{totalVal}</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor={`ticker-${item.id}`} className="sr-only">
+                        {t.brokerNote.enterTicker}
+                      </Label>
+                      <Input
+                        id={`ticker-${item.id}`}
+                        value={tickerInputs[item.id] || ""}
+                        onChange={(e) =>
+                          setTickerInputs({
+                            ...tickerInputs,
+                            [item.id]: e.target.value.toUpperCase(),
+                          })
+                        }
+                        placeholder={t.brokerNote.enterTicker}
+                        className="bg-background/80 uppercase tracking-wide text-xs h-9 focus-visible:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <Button
+              onClick={handleConfirmResolution}
+              disabled={isProcessing}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all"
+            >
+              {isProcessing ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              )}
+              {t.brokerNote.confirmResolution}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
 }
+

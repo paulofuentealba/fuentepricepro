@@ -3,6 +3,18 @@ export interface TradeRecord {
   quantity: number;
   price: number;
   date: string;
+  type?: "buy" | "sell";
+}
+
+export interface UnresolvedTradeRecord {
+  id: string;
+  rawLine: string;
+  rawSpecification: string;
+  normalizedKey: string;
+  quantity: number;
+  price: number;
+  date: string;
+  type: "buy" | "sell";
 }
 
 export type BrokerType =
@@ -24,6 +36,7 @@ export type BrokerType =
 export interface ParseResult {
   success: boolean;
   trades?: TradeRecord[];
+  unresolvedTrades?: UnresolvedTradeRecord[];
   error?: string;
   broker?: BrokerType;
   brokerDivergence?: {
@@ -49,11 +62,67 @@ export const ALL_SINACOR_BROKERS: BrokerType[] = [
   "CAIXA",
 ];
 
+export const B3_SHORT_NAME_MAP: Record<string, string> = {
+  OI: "OIBR",
+  PETROBRAS: "PETR",
+  VALE: "VALE",
+  "VALE R DOCE": "VALE",
+  ITAUUNIBANCO: "ITUB",
+  ITAU: "ITUB",
+  "ITAU UNIBANCO": "ITUB",
+  BRADESCO: "BBDC",
+  "MAGAZ LUIZA": "MGLU",
+  MAGAZINE: "MGLU",
+  MGLU: "MGLU",
+  WEG: "WEGE",
+  KLABIN: "KLBN",
+  "KLABIN S/A": "KLBN",
+  AMBEV: "ABEV",
+  "AMBEV S/A": "ABEV",
+  USIMINAS: "USIM",
+  GERDAU: "GERD",
+  ELETROBRAS: "ELET",
+  SANTANDER: "SANB",
+  "BANCO DO BRASIL": "BBAS",
+  BRASIL: "BBAS",
+  TAESA: "TAEE",
+  SANPAR: "SAPR",
+  SANEPAR: "SAPR",
+  COPEL: "CPLE",
+  SUZANO: "SUZB",
+  JBS: "JBSS",
+  COSAN: "CSAN",
+  B3: "B3SA",
+  LOCALIZA: "RENT",
+  EQUATORIAL: "EQTL",
+  RAIADROGASIL: "RADL",
+  HAPVIDA: "HAPV",
+  PRIO: "PRIO",
+};
+
+const GOVERNANCE_TAGS = new Set(["N1", "N2", "NM", "EJ", "ED", "EX", "ER", "MB", "DRN"]);
+
+const CLASS_SUFFIX_MAP: Record<string, string> = {
+  ON: "3",
+  PN: "4",
+  PNA: "5",
+  PNB: "6",
+  PNC: "7",
+  PND: "8",
+  UNT: "11",
+  UNIT: "11",
+};
+
 /**
- * B3 Broker Note Parser
- * To see the list of supported brokers and instructions on how to add new ones,
- * please check the Wiki documentation at: /app/docs#supported-brokers
+ * Normalizes a raw issuer specification by removing governance/segment tags
+ * (e.g. "OI ON N1" -> "OI ON") while keeping issuer name and stock class.
  */
+export function normalizeIssuerSpecification(rawSpec: string): string {
+  if (!rawSpec) return "";
+  const tokens = rawSpec.trim().toUpperCase().split(/\s+/);
+  const filtered = tokens.filter((t) => !GOVERNANCE_TAGS.has(t));
+  return filtered.join(" ");
+}
 
 /**
  * Parses a Brazilian formatted float string (e.g., "1.500,00" or "45,00") into a valid number.
@@ -118,30 +187,36 @@ export function detectBroker(rawText: string): BrokerType | null {
 /**
  * Extracts trades using the standard B3 SINACOR layout guidelines.
  */
-export function parseSinacorLayout(rawText: string): TradeRecord[] {
+export function parseSinacorLayout(
+  rawText: string,
+  userMappings: Record<string, string> = {}
+): { trades: TradeRecord[]; unresolvedTrades: UnresolvedTradeRecord[] } {
   const trades: TradeRecord[] = [];
+  const unresolvedTrades: UnresolvedTradeRecord[] = [];
   const lines = rawText.split("\n");
 
-  // Look for standard B3 note date format: "15/07/2026"
   const dateMatch = rawText.match(/(\d{2}\/\d{2}\/\d{4})/);
   const documentDate = dateMatch ? dateMatch[1] : "Unknown";
 
+  let unresolvedIndex = 0;
+
   for (const line of lines) {
-    // Look for indicators of a trade line in Bovespa notes
-    if (line.includes("1-BOVESPA") || line.includes("VISTA")) {
+    if (line.includes("1-BOVESPA") || line.includes("VISTA") || line.includes("FRACIONARIO")) {
+      let type: "buy" | "sell" = "buy";
+      if (/\bV\b/.test(line) && !/\bC\b/.test(line.split("VISTA")[0] || line)) {
+        type = "sell";
+      }
+
+      // Step 1: Standard Ticker Match (4 letters + 1-2 digits + optional F)
       const tickerMatch = line.match(/\b([A-Z]{4}\d{1,2}[F]?)\b/);
       if (tickerMatch) {
         const rawTicker = tickerMatch[1];
-
-        // Only look for numbers AFTER the ticker to avoid catching "1" from "1-BOVESPA"
         const afterTicker = line.substring(tickerMatch.index! + rawTicker.length);
         const numbers = afterTicker.match(/\b(\d{1,3}(?:\.\d{3})*(?:,\d{2,4})?)\b/g);
 
         if (numbers && numbers.length >= 2) {
-          // Strip the trailing 'F' from fractional market tickers so they match our standard (e.g. PETR4F -> PETR4)
           const ticker =
             rawTicker.endsWith("F") && rawTicker.length > 5 ? rawTicker.slice(0, -1) : rawTicker;
-
           const quantity = parseB3Float(numbers[0]);
           const price = parseB3Float(numbers[1]);
 
@@ -150,22 +225,94 @@ export function parseSinacorLayout(rawText: string): TradeRecord[] {
             quantity,
             price,
             date: documentDate,
+            type,
           });
+          continue;
+        }
+      }
+
+      // Fallback: If standard ticker is not present, extract specification text and numbers
+      const marketAnchorMatch =
+        line.match(/(?:VISTA|FRACIONARIO)\s+(.+)/) || line.match(/BOVESPA\s+[CV]\s+(.+)/);
+
+      if (marketAnchorMatch) {
+        const afterMarket = marketAnchorMatch[1];
+        const numbersAfterMarket = afterMarket.match(/\b(\d{1,3}(?:\.\d{3})*(?:,\d{2,4})?)\b/g);
+        if (numbersAfterMarket && numbersAfterMarket.length >= 2) {
+          const quantityStr = numbersAfterMarket[0];
+          const priceStr = numbersAfterMarket[1];
+          const quantity = parseB3Float(quantityStr);
+          const price = parseB3Float(priceStr);
+
+          const qtyIdx = afterMarket.indexOf(quantityStr);
+          const rawSpecification = qtyIdx >= 0 ? afterMarket.substring(0, qtyIdx).trim() : afterMarket.trim();
+
+          const normalizedKey = normalizeIssuerSpecification(rawSpecification);
+
+          let resolvedTicker: string | null = null;
+
+          // Step 2: Check B3_SHORT_NAME_MAP
+          const tokens = normalizedKey.split(/\s+/);
+          let classSuffix = "3";
+          const issuerTokens: string[] = [];
+
+          for (const token of tokens) {
+            if (CLASS_SUFFIX_MAP[token]) {
+              classSuffix = CLASS_SUFFIX_MAP[token];
+            } else {
+              issuerTokens.push(token);
+            }
+          }
+          const shortNameCandidate = issuerTokens.join(" ");
+
+          if (B3_SHORT_NAME_MAP[shortNameCandidate]) {
+            resolvedTicker = B3_SHORT_NAME_MAP[shortNameCandidate] + classSuffix;
+          } else if (issuerTokens.length === 1 && B3_SHORT_NAME_MAP[issuerTokens[0]]) {
+            resolvedTicker = B3_SHORT_NAME_MAP[issuerTokens[0]] + classSuffix;
+          }
+
+          // Step 3: Check userMappings
+          if (!resolvedTicker && userMappings[normalizedKey]) {
+            resolvedTicker = userMappings[normalizedKey].trim().toUpperCase();
+          }
+
+          if (resolvedTicker) {
+            trades.push({
+              ticker: resolvedTicker,
+              quantity,
+              price,
+              date: documentDate,
+              type,
+            });
+          } else {
+            // Step 4: Unresolved trade
+            unresolvedTrades.push({
+              id: `unresolved-${unresolvedIndex++}`,
+              rawLine: line,
+              rawSpecification,
+              normalizedKey,
+              quantity,
+              price,
+              date: documentDate,
+              type,
+            });
+          }
         }
       }
     }
   }
 
-  return trades;
+  return { trades, unresolvedTrades };
 }
 
 /**
  * The main factory entry point. Detects broker and routes to the correct extractor.
- * Supports manual broker hints and divergence reporting.
+ * Supports manual broker hints, user mappings, and divergence reporting.
  */
 export function parseB3BrokerNote(
   rawText: string,
-  hintBroker?: BrokerType | "AUTO" | null
+  hintBroker?: BrokerType | "AUTO" | null,
+  userMappings: Record<string, string> = {}
 ): ParseResult {
   if (!rawText || rawText.trim() === "") {
     return { success: false, error: "Empty file" };
@@ -188,12 +335,15 @@ export function parseB3BrokerNote(
     }
 
     let trades: TradeRecord[] = [];
+    let unresolvedTrades: UnresolvedTradeRecord[] = [];
 
     if (ALL_SINACOR_BROKERS.includes(broker)) {
-      trades = parseSinacorLayout(rawText);
+      const parsed = parseSinacorLayout(rawText, userMappings);
+      trades = parsed.trades;
+      unresolvedTrades = parsed.unresolvedTrades;
     }
 
-    if (trades.length === 0) {
+    if (trades.length === 0 && unresolvedTrades.length === 0) {
       console.warn(`[b3Parser] Could not extract trades from detected broker: ${broker}`);
       return {
         success: false,
@@ -203,7 +353,7 @@ export function parseB3BrokerNote(
       };
     }
 
-    return { success: true, trades, broker, brokerDivergence };
+    return { success: true, trades, unresolvedTrades, broker, brokerDivergence };
   } catch (error) {
     return { success: false, error: "Malformed file" };
   }

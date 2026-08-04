@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseB3Float, parseB3BrokerNote } from "../dataIngestion/b3Parser";
+import { parseB3Float, parseB3BrokerNote, normalizeIssuerSpecification } from "../dataIngestion/b3Parser";
 import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
@@ -7,6 +7,14 @@ import {
 import type { Transaction } from "@/lib/transactions";
 
 describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
+  describe("normalizeIssuerSpecification", () => {
+    it("should strip governance and segment tags (N1, N2, NM, EJ, ED) leaving issuer and stock class", () => {
+      expect(normalizeIssuerSpecification("OI ON N1")).toBe("OI ON");
+      expect(normalizeIssuerSpecification("PETROBRAS PN ED")).toBe("PETROBRAS PN");
+      expect(normalizeIssuerSpecification("KLABIN S/A UNT N2")).toBe("KLABIN S/A UNT");
+    });
+  });
+
   describe("parseDdMmYyyyToTimestamp & Transaction Mapping", () => {
     it("should correctly convert DD/MM/YYYY date strings to UTC noon timestamps", () => {
       const ts = parseDdMmYyyyToTimestamp("15/07/2026");
@@ -171,6 +179,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         quantity: 100,
         price: 45.0,
         date: "15/07/2026",
+        type: "buy",
       });
 
       // Verify the fractional market (F) is stripped correctly
@@ -179,6 +188,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         quantity: 15,
         price: 30.0,
         date: "15/07/2026",
+        type: "sell",
       });
     });
 
@@ -272,5 +282,77 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(result.error).toBe("broker_layout_unsupported");
       expect(result.broker).toBe("XP");
     });
+
+    it("should resolve real Clear note fixture with short issuer name 'OI ON N1' to OIBR3 via B3_SHORT_NAME_MAP", () => {
+      const rawText = `
+        02.332.886/0011-78 CLEAR CORRETORA
+        Data pregão 24/01/2020
+        1-BOVESPA C VISTA OI ON N1 500 0,98 490,00 D
+      `;
+
+      const result = parseB3BrokerNote(rawText);
+
+      expect(result.success).toBe(true);
+      expect(result.broker).toBe("CLEAR");
+      expect(result.trades).toHaveLength(1);
+      expect(result.trades?.[0]).toEqual({
+        ticker: "OIBR3",
+        quantity: 500,
+        price: 0.98,
+        date: "24/01/2020",
+        type: "buy",
+      });
+      expect(result.unresolvedTrades).toHaveLength(0);
+    });
+
+    it("should return unresolvedTrades without failing the note when trade line contains an unknown issuer", () => {
+      const rawText = `
+        02.332.886/0011-78 CLEAR CORRETORA
+        Data pregão 24/01/2020
+        1-BOVESPA C VISTA UNKNOWN CO ON N1 500 0,98 490,00 D
+      `;
+
+      const result = parseB3BrokerNote(rawText);
+
+      expect(result.success).toBe(true);
+      expect(result.broker).toBe("CLEAR");
+      expect(result.trades).toHaveLength(0);
+      expect(result.unresolvedTrades).toHaveLength(1);
+      expect(result.unresolvedTrades?.[0]).toMatchObject({
+        rawSpecification: "UNKNOWN CO ON N1",
+        normalizedKey: "UNKNOWN CO ON",
+        quantity: 500,
+        price: 0.98,
+        date: "24/01/2020",
+        type: "buy",
+      });
+    });
+
+    it("should resolve unknown issuer trade line using userMappings", () => {
+      const rawText = `
+        02.332.886/0011-78 CLEAR CORRETORA
+        Data pregão 24/01/2020
+        1-BOVESPA C VISTA UNKNOWN CO ON N1 500 0,98 490,00 D
+      `;
+
+      const userMappings = {
+        "UNKNOWN CO ON": "UNKN3",
+      };
+
+      const result = parseB3BrokerNote(rawText, "AUTO", userMappings);
+
+      expect(result.success).toBe(true);
+      expect(result.broker).toBe("CLEAR");
+      expect(result.trades).toHaveLength(1);
+      expect(result.trades?.[0]).toEqual({
+        ticker: "UNKN3",
+        quantity: 500,
+        price: 0.98,
+        date: "24/01/2020",
+        type: "buy",
+      });
+      expect(result.unresolvedTrades).toHaveLength(0);
+    });
   });
 });
+
