@@ -100,7 +100,6 @@ export function detectBroker(rawText: string): BrokerType | null {
   if (
     rawText.includes("24.933.830/0001-30") ||
     rawText.includes("00.000.000/0001-91") ||
-    rawText.includes("00.801.279/0001-81") ||
     rawText.includes("BB BANCO DE INVESTIMENTO") ||
     rawText.includes("BANCO DO BRASIL")
   )
