@@ -128,6 +128,8 @@ export const ptBR = {
   },
   brokerNote: {
     importTitle: "Importar Nota de Corretagem",
+    selectBroker: "Selecione a Corretora",
+    autoDetect: "Auto-detectar Corretora",
     dragDropText: "Arraste e solte o seu PDF aqui",
     orClick: "ou clique para selecionar o arquivo",
     uploadPdf: "Fazer upload do PDF",
@@ -136,6 +138,8 @@ export const ptBR = {
     errorImport: "Falha ao ler formato do PDF",
     malformedPdf: "PDF malformado ou ilegível",
     unknownBroker: "Corretora não identificada ou formato inválido.",
+    brokerLayoutUnsupported: "Não conseguimos ler as ordens desta nota. O formato pode ser diferente do esperado para {broker}.",
+    divergenceNotice: "Nota identificada como {detected} (diferente da selecionada {selected}) e processada automaticamente.",
   },
   corporateEvents: {
     menuTitle: "Evento Corporativo (Desdobramento/Grup.)",

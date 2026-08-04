@@ -5,12 +5,45 @@ export interface TradeRecord {
   date: string;
 }
 
+export type BrokerType =
+  | "XP"
+  | "CLEAR"
+  | "RICO"
+  | "MODAL"
+  | "BTG"
+  | "INTER"
+  | "NUINVEST"
+  | "ORAMA"
+  | "GENIAL"
+  | "ITAU"
+  | "BRADESCO"
+  | "SANTANDER";
+
 export interface ParseResult {
   success: boolean;
   trades?: TradeRecord[];
   error?: string;
-  broker?: string;
+  broker?: BrokerType;
+  brokerDivergence?: {
+    selected: BrokerType;
+    detected: BrokerType;
+  };
 }
+
+export const ALL_SINACOR_BROKERS: BrokerType[] = [
+  "XP",
+  "CLEAR",
+  "RICO",
+  "MODAL",
+  "BTG",
+  "INTER",
+  "NUINVEST",
+  "ORAMA",
+  "GENIAL",
+  "ITAU",
+  "BRADESCO",
+  "SANTANDER",
+];
 
 /**
  * B3 Broker Note Parser
@@ -29,20 +62,6 @@ export function parseB3Float(value: string): number {
   return num;
 }
 
-export type BrokerType =
-  | "XP"
-  | "CLEAR"
-  | "RICO"
-  | "MODAL"
-  | "BTG"
-  | "INTER"
-  | "NUINVEST"
-  | "ORAMA"
-  | "GENIAL"
-  | "ITAU"
-  | "BRADESCO"
-  | "SANTANDER";
-
 export function detectBroker(rawText: string): BrokerType | null {
   // Grupo XP
   if (rawText.includes("02.332.886/0001-04") || rawText.includes("XP INVESTIMENTOS")) return "XP";
@@ -58,7 +77,7 @@ export function detectBroker(rawText: string): BrokerType | null {
   if (rawText.includes("13.293.225/0001-25") || rawText.includes("ORAMA")) return "ORAMA";
   if (rawText.includes("27.652.684/0001-62") || rawText.includes("GENIAL")) return "GENIAL";
 
-  // Bancos Tradicionais (risco de layout não-SINACOR, detectados para fallback gracioso)
+  // Bancos Tradicionais (Itaú, Bradesco/Ágora, Santander/Toro)
   if (rawText.includes("61.194.353/0001-64") || rawText.includes("ITAU CORRETORA")) return "ITAU";
   if (
     rawText.includes("74.014.747/0001-35") ||
@@ -124,14 +143,27 @@ export function parseSinacorLayout(rawText: string): TradeRecord[] {
 
 /**
  * The main factory entry point. Detects broker and routes to the correct extractor.
+ * Supports manual broker hints and divergence reporting.
  */
-export function parseB3BrokerNote(rawText: string): ParseResult {
+export function parseB3BrokerNote(
+  rawText: string,
+  hintBroker?: BrokerType | "AUTO" | null
+): ParseResult {
   if (!rawText || rawText.trim() === "") {
     return { success: false, error: "Empty file" };
   }
 
   try {
-    const broker = detectBroker(rawText);
+    const detected = detectBroker(rawText);
+    const selected = hintBroker && hintBroker !== "AUTO" ? hintBroker : null;
+
+    let broker: BrokerType | null = detected || selected;
+    let brokerDivergence: { selected: BrokerType; detected: BrokerType } | undefined;
+
+    if (selected && detected && selected !== detected) {
+      brokerDivergence = { selected, detected };
+      broker = detected; // Auto-detected header is source of truth for parsing
+    }
 
     if (!broker) {
       return { success: false, error: "unknown_broker" };
@@ -139,19 +171,21 @@ export function parseB3BrokerNote(rawText: string): ParseResult {
 
     let trades: TradeRecord[] = [];
 
-    if (
-      ["XP", "CLEAR", "RICO", "MODAL", "BTG", "INTER", "NUINVEST", "ORAMA", "GENIAL"].includes(
-        broker,
-      )
-    ) {
+    if (ALL_SINACOR_BROKERS.includes(broker)) {
       trades = parseSinacorLayout(rawText);
     }
 
     if (trades.length === 0) {
-      return { success: false, error: "Malformed file", broker };
+      console.warn(`[b3Parser] Could not extract trades from detected broker: ${broker}`);
+      return {
+        success: false,
+        error: "broker_layout_unsupported",
+        broker,
+        brokerDivergence,
+      };
     }
 
-    return { success: true, trades, broker };
+    return { success: true, trades, broker, brokerDivergence };
   } catch (error) {
     return { success: false, error: "Malformed file" };
   }

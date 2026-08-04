@@ -15,8 +15,9 @@ Este documento substitui todas as outras listas soltas (FPP-xxx da auditoria de 
 
 ### 1.1 Importação automática e Notas de Corretagem 🟡
 
-Já existe: `src/lib/dataIngestion/b3Parser.ts` + `BrokerNoteUploader.tsx` fazem upload de PDF, detectam corretora (XP, Clear) por CNPJ, fazem parsing de layout SINACOR, e importam trades. Corrigido recentemente para usar classificação e dividendo canônicos (antes tinha bugs bypassando essas funções centrais).
-Falta: mais corretoras além de XP/Clear, outros layouts além de SINACOR, parsing de **proventos** (hoje só trades de compra são importados, nada de dividendo/JCP recebido), e a parte de Open Finance/API direta com B3/Avenue (não iniciada).
+- **Parsing de Notas SINACOR (12 Corretoras)**: ✅ **ATUALIZADO NO PROMPT 43**. `b3Parser.ts` estendido com roteamento SINACOR ativado para **12 corretoras**: XP, Clear, Rico, Modal, BTG, Inter, NuInvest, Órama, Genial, **Itaú Corretora**, **Bradesco / Ágora** e **Santander / Toro**.
+- **UX com Seletor de Corretora e Memória**: ✅ **CONCLUÍDO NO PROMPT 43**. `BrokerNoteUploader.tsx` com `<Select>` manual (com opção Auto-detectar), persistência em `localStorage` (`ceilingPricePro.lastUsedBroker.v1`), notificação de divergência (`toast.info`) e mensagem de erro dedicada para layout não suportado (`broker_layout_unsupported`).
+- **Falta**: Outros layouts não-SINACOR (se surgirem), parsing de proventos por nota (hoje calcula via `realizedIncome.ts`), e integração Open Finance/B3 direta.
 Nota: existe também `src/lib/csv.ts` + `WatchlistIO.tsx`, mas isso é import/export da **posição atual** da carteira, não histórico de transação — não confundir com este item.
 
 ### 1.2 Registro de proventos e renda realizada 🟡
