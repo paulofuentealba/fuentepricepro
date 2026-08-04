@@ -15,9 +15,10 @@ Este documento substitui todas as outras listas soltas (FPP-xxx da auditoria de 
 
 ### 1.1 Importação automática e Notas de Corretagem 🟡
 
-- **Parsing de Notas SINACOR (14 Corretoras)**: ✅ **ATUALIZADO NO PROMPT 44**. `b3Parser.ts` estendido com suporte a **14 corretoras/bancos**: XP, Clear, Rico, Modal, BTG, Inter, NuInvest, Órama, Genial, Itaú, Bradesco / Ágora, Santander / Toro, **Banco do Brasil (BB)** e **Caixa Econômica Federal / Caixa DTVM** (com CNPJ verificado `42.040.639/0001-40`).
-- **UX com Seletor de Corretora e Memória**: ✅ **CONCLUÍDO NO PROMPT 43/44**. `BrokerNoteUploader.tsx` com `<Select>` manual, persistência em `localStorage` (`ceilingPricePro.lastUsedBroker.v1`), notificação de divergência (`toast.info`) e erro gracioso para layout não suportado (`broker_layout_unsupported`).
-- **Falta**: Outros layouts não-SINACOR (se surgirem), parsing de proventos por nota (hoje calcula via `realizedIncome.ts`), e integração Open Finance/B3 direta.
+- **Parsing de Notas SINACOR (14 Corretoras)**: ✅ **ATUALIZADO NO PROMPT 44**. `b3Parser.ts` estendido com suporte a **14 corretoras/bancos**: XP, Clear, Rico, Modal, BTG, Inter, NuInvest, Órama, Genial, Itaú, Bradesco / Ágora, Santander / Toro, Banco do Brasil (BB) e Caixa Econômica Federal / Caixa DTVM (`42.040.639/0001-40`).
+- **Gravação Automática em Transactions**: ✅ **CONCLUÍDO NO PROMPT 45**. `BrokerNoteUploader.tsx` estendido para gravar cada ordem em `Transaction[]` via `useTransactions().upsert` com ID determinístico (`tx-pdf-{ticker}-{timestamp}-{qty}-{price}`) para idempotência perfeita em re-importações, desbloqueando `realizedIncome.ts` e `portfolioIrr.ts`.
+- **Risco Pendente Mapeado**: ⚪ Consolidação de ordens duplicadas do mesmo ticker na watchlist (`WatchlistItem[]`) reservada para o próximo prompt.
+- **Falta**: Outros layouts não-SINACOR (se surgirem) e integração Open Finance/B3 direta.
 Nota: existe também `src/lib/csv.ts` + `WatchlistIO.tsx`, mas isso é import/export da **posição atual** da carteira, não histórico de transação — não confundir com este item.
 
 ### 1.2 Registro de proventos e renda realizada 🟡

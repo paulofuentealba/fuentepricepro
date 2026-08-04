@@ -1,7 +1,46 @@
 import { describe, it, expect } from "vitest";
 import { parseB3Float, parseB3BrokerNote } from "../dataIngestion/b3Parser";
+import { parseDdMmYyyyToTimestamp } from "@/components/ceiling/watchlist/BrokerNoteUploader";
+import type { Transaction } from "@/lib/transactions";
 
 describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
+  describe("parseDdMmYyyyToTimestamp & Transaction Mapping", () => {
+    it("should correctly convert DD/MM/YYYY date strings to UTC noon timestamps", () => {
+      const ts = parseDdMmYyyyToTimestamp("15/07/2026");
+      const expected = Date.UTC(2026, 6, 15, 12, 0, 0);
+      expect(ts).toBe(expected);
+    });
+
+    it("should generate deterministic Transaction payloads from parsed trades", () => {
+      const trade = {
+        ticker: "WEGE3",
+        quantity: 100,
+        price: 45.0,
+        date: "15/07/2026",
+      };
+
+      const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
+      const expectedId = `tx-pdf-WEGE3-${txTimestamp}-100-45`;
+
+      const transaction: Transaction = {
+        id: expectedId,
+        ticker: trade.ticker.toUpperCase(),
+        type: "buy",
+        date: txTimestamp,
+        quantity: trade.quantity,
+        pricePerShare: trade.price,
+        fees: null,
+      };
+
+      expect(transaction.id).toBe("tx-pdf-WEGE3-" + txTimestamp + "-100-45");
+      expect(transaction.ticker).toBe("WEGE3");
+      expect(transaction.type).toBe("buy");
+      expect(transaction.quantity).toBe(100);
+      expect(transaction.pricePerShare).toBe(45.0);
+      expect(transaction.fees).toBeNull();
+    });
+  });
+
   describe("parseB3Float (Type Mapping)", () => {
     it('should correctly map a Brazilian formatted string like "1.500,00" to a float of 1500.00', () => {
       expect(parseB3Float("1.500,00")).toBe(1500.0);

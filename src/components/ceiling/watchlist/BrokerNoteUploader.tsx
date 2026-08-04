@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { parseB3BrokerNote, ALL_SINACOR_BROKERS, type BrokerType } from "@/lib/dataIngestion/b3Parser";
+import { useTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist, makeId, WatchlistItem } from "@/lib/watchlist";
 import { useQueryClient } from "@tanstack/react-query";
 import { assetQueryOptions } from "@/lib/queryOptions";
@@ -19,6 +20,20 @@ import { classifyBr } from "@/lib/classify";
 import { toast } from "sonner";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
+export function parseDdMmYyyyToTimestamp(dateStr: string): number {
+  if (!dateStr) return Date.now();
+  const parts = dateStr.split("/");
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const d = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    if (!isNaN(d.getTime())) return d.getTime();
+  }
+  const fallback = new Date(dateStr).getTime();
+  return isNaN(fallback) ? Date.now() : fallback;
+}
 
 interface BrokerNoteUploaderProps {
   open: boolean;
@@ -47,6 +62,7 @@ const BROKER_LABELS: Record<BrokerType, string> = {
 export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderProps) {
   const { t } = useI18n();
   const { upsertManyAsync } = useWatchlist();
+  const { upsert: upsertTransaction } = useTransactions();
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -113,6 +129,23 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
       const itemsToImport: WatchlistItem[] = [];
 
       for (const trade of result.trades) {
+        const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
+        const transaction: Transaction = {
+          id: `tx-pdf-${trade.ticker.toUpperCase()}-${txTimestamp}-${trade.quantity}-${trade.price}`,
+          ticker: trade.ticker.toUpperCase(),
+          type: "buy",
+          date: txTimestamp,
+          quantity: trade.quantity,
+          pricePerShare: trade.price,
+          fees: null,
+        };
+
+        try {
+          await upsertTransaction(transaction);
+        } catch (e) {
+          console.error("Could not save transaction for trade", trade.ticker, e);
+        }
+
         let assetData: any = null;
         try {
           assetData = await queryClient.ensureQueryData(assetQueryOptions(trade.ticker));
