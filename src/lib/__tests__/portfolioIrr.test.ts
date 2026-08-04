@@ -124,5 +124,39 @@ describe("portfolioIrr", () => {
       expect(flows[3].amount).toBe(3500);
       expect(flows[3].date).toBe(now);
     });
+
+    it("correctly classifies closed BR positions without .SA as BRL (rate = 1) even when absent from assetCurrencies", () => {
+      const t0 = new Date("2024-01-01").getTime();
+      const t1 = new Date("2024-06-01").getTime();
+
+      // Closed BR position for PETR4 (no .SA suffix, position is 0 so omitted from active watchlist assetCurrencies map)
+      const txs: Transaction[] = [
+        {
+          id: "tx-buy",
+          ticker: "PETR4",
+          type: "buy",
+          date: t0,
+          quantity: 100,
+          pricePerShare: 30,
+        },
+        {
+          id: "tx-sell",
+          ticker: "PETR4",
+          type: "sell",
+          date: t1,
+          quantity: 100,
+          pricePerShare: 35,
+        },
+      ];
+
+      // assetCurrencies is empty because PETR4 is closed and not in active watchlist
+      const flows = buildCashFlowsFromPortfolio(txs, [], 0, Date.now(), 5.5, {});
+
+      expect(flows).toHaveLength(2);
+      // Buy should be -3000 (NOT converted by fxRate 5.5)
+      expect(flows[0].amount).toBe(-3000);
+      // Sell should be +3500 (NOT converted by fxRate 5.5)
+      expect(flows[1].amount).toBe(3500);
+    });
   });
 });

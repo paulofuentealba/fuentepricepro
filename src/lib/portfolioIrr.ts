@@ -1,6 +1,7 @@
 import { type Transaction } from "./transactions";
 import { type RealizedIncomeEvent } from "./realizedIncome";
 import { type Currency } from "./domain";
+import { isBrTicker } from "./classify";
 
 export interface CashFlow {
   date: number; // Timestamp in milliseconds
@@ -154,9 +155,11 @@ export function buildCashFlowsFromPortfolio(
 
   // 1. Transactions (Buys = negative cash out, Sells = positive cash in)
   for (const tx of transactions) {
-    if (!tx.date || tx.date > asOfDate || !tx.quantity || tx.quantity <= 0) continue;
-
-    const isUsd = assetCurrencies[tx.ticker.toUpperCase()] === "USD" || !tx.ticker.endsWith(".SA");
+    const tickerUpper = tx.ticker.toUpperCase();
+    const isUsd =
+      assetCurrencies[tickerUpper] !== undefined
+        ? assetCurrencies[tickerUpper] === "USD"
+        : !(tickerUpper.endsWith(".SA") || isBrTicker(tickerUpper));
     const rate = isUsd ? fxRateUsdToBrl : 1;
 
     const sharePrice = tx.pricePerShare || 0;
