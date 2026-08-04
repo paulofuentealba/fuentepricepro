@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useI18n } from "@/lib/i18n-provider";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import {
   calculateProfileTier,
+  determineResumptionStep,
   type ProfileGoal,
   type ProfileHorizon,
   type ProfileReaction,
@@ -28,7 +29,7 @@ import {
   Check,
   ChevronRight,
   ArrowLeft,
-  X,
+  Loader2,
 } from "lucide-react";
 
 interface InvestorProfileFlowProps {
@@ -39,44 +40,31 @@ interface InvestorProfileFlowProps {
 
 export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProfileFlowProps) {
   const { t } = useI18n();
-  const { profile, updateProfile } = useInvestorProfile();
+  const { profile, updateProfile, isPending } = useInvestorProfile();
   const O = t.onboarding;
 
   // Step 0: Welcome, 1: Goal, 2: Horizon, 3: Reaction, 4: Experience, 5: Result
   const [step, setStep] = useState<number>(0);
+  const hasResumedRef = useRef(false);
 
-  // Resume partial progress if user opens questionnaire with existing partial answers
+  const [selectedGoal, setSelectedGoal] = useState<ProfileGoal | null>(null);
+  const [selectedHorizon, setSelectedHorizon] = useState<ProfileHorizon | null>(null);
+  const [selectedReaction, setSelectedReaction] = useState<ProfileReaction | null>(null);
+  const [selectedExperience, setSelectedExperience] = useState<ProfileExperience | null>(null);
+
+  // Resume partial progress once the profile query resolves (gate by isPending, run once via ref)
   useEffect(() => {
-    if (profile.completedAt) {
-      // Already completed -> start at step 0 if retaking
-      return;
-    }
+    if (isPending || hasResumedRef.current) return;
+    hasResumedRef.current = true;
 
-    if (!profile.goal && !profile.horizon && !profile.reaction && !profile.experience) {
-      setStep(0);
-      return;
-    }
+    setSelectedGoal(profile.goal);
+    setSelectedHorizon(profile.horizon);
+    setSelectedReaction(profile.reaction);
+    setSelectedExperience(profile.experience);
 
-    // Resume at first unanswered step
-    if (!profile.goal) setStep(1);
-    else if (!profile.horizon) setStep(2);
-    else if (!profile.reaction) setStep(3);
-    else if (!profile.experience) setStep(4);
-    else setStep(5);
-  }, []);
-
-  const [selectedGoal, setSelectedGoal] = useState<ProfileGoal | null>(profile.goal);
-  const [selectedHorizon, setSelectedHorizon] = useState<ProfileHorizon | null>(profile.horizon);
-  const [selectedReaction, setSelectedReaction] = useState<ProfileReaction | null>(profile.reaction);
-  const [selectedExperience, setSelectedExperience] = useState<ProfileExperience | null>(profile.experience);
-
-  // Sync state if profile changes asynchronously
-  useEffect(() => {
-    if (profile.goal !== undefined) setSelectedGoal(profile.goal);
-    if (profile.horizon !== undefined) setSelectedHorizon(profile.horizon);
-    if (profile.reaction !== undefined) setSelectedReaction(profile.reaction);
-    if (profile.experience !== undefined) setSelectedExperience(profile.experience);
-  }, [profile]);
+    const initialStep = determineResumptionStep(profile);
+    setStep(initialStep);
+  }, [isPending, profile]);
 
   const handleSkipAll = () => {
     updateProfile({ skipped: true, completedAt: null });
@@ -126,6 +114,23 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
   };
 
   const TierIcon = getTierIcon();
+
+  if (isPending) {
+    const loadingCard = (
+      <div className="w-full max-w-lg mx-auto bg-card/95 border border-border/60 rounded-2xl p-12 flex flex-col items-center justify-center space-y-3 backdrop-blur-md shadow-2xl">
+        <Loader2 className="h-8 w-8 text-emerald-500 animate-spin" />
+        <p className="text-xs text-muted-foreground">{t.common.loading}</p>
+      </div>
+    );
+    if (isModal) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+          {loadingCard}
+        </div>
+      );
+    }
+    return loadingCard;
+  }
 
   const content = (
     <div className="w-full max-w-lg mx-auto bg-card/95 border border-border/60 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">

@@ -81,11 +81,16 @@ Não existe — confirmado, nenhuma rota `/admin` no projeto. Mesmo tratamento d
 
 ### 4.1 Otimização de Conversão e Onboarding 🟡
 
-Parcial: já existe um componente `LockedPanel` (com textos "Pro Feature" / "Unlock advanced features" já traduzidos nos 3 idiomas) sugerindo que parte do "cadeado visual" pra recursos Pro já foi implementada durante nossas rodadas de i18n. Falta confirmar cobertura completa e o "banner transparente sobre fonte de dados" (ex: avisar que cotação vem do Yahoo Finance) — isso não foi encontrado ainda.
+Parcial / Em evolução:
+- **Fluxo de Onboarding e Perfil de Investidor (`InvestorProfileFlow.tsx`)**: ✅ Construído questionário de 6 telas pós-cadastro (e opcional em Configurações) para identificação do perfil de investidor (Conservador, Moderado, Arrojado) com salvamento incremental e retomada automática de progresso.
+- **Paywall / Locked Panel**: Já existe `LockedPanel` traduzido nos 3 idiomas.
+- **Pendente**: Banner transparente sobre fonte de dados (ex: avisar que cotação vem do Yahoo Finance) e aplicação profunda da personalização na UI.
 
-### 4.2 Onboarding Regulatório e Perfilamento (KYC/Suitability) ⚪
+### 4.2 Onboarding Regulatório e Perfilamento (KYC/Suitability) 🟡
 
-Não existe. Nenhum fluxo de perfilamento de risco do investidor encontrado no código.
+Parcial (Personalização de UX vs. Suitability Regulatório Formal):
+- **O que foi feito**: Criado o questionário de Perfil de Investidor (`InvestorProfileFlow.tsx`), que classifica a tolerância a risco e objetivo do usuário (Conservador/Moderado/Arrojado e Renda/Crescimento) para personalização interna da experiência no app.
+- **Distinção importante**: Este perfilamento é estritamente voltado para a **experiência do usuário (UX)**. Não constitui uma análise formal de Suitability regulatório da CVM/ANBIMA (KYC legal), pois o Fuente Price Pro é uma ferramenta de planejamento e análise, não uma instituição financeira intermediária ou corretora.
 
 ### 4.3 Conformidade Legal (LGPD & GDPR) 🟡
 
