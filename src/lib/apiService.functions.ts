@@ -380,7 +380,7 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
 
     try {
       const res = await fetchWithRetry(
-        `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yhTicker)}?events=split`,
+        `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yhTicker)}?events=split&interval=1d&range=5y`,
         { headers: { "User-Agent": UA } },
         { timeoutMs: 3000, retries: 1 },
       );
