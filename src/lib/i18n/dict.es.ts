@@ -565,6 +565,8 @@ export const es = {
     targetTotalIdeal: "(Idealmente debe sumar 100%)",
     currentAllocationPct: "Actual: {{pct}}%",
     allocationDeviation: "Desviación: {{pct}}%",
+    overAllocatedTooltip: "{{diff}} puntos porcentuales por encima de la meta de asignación",
+    underAllocatedTooltip: "{{diff}} puntos porcentuales por debajo de la meta de asignación",
     concentrationViolation: "Por encima del techo",
     beforeCurrent: "Antes (Actual)",
     afterProjected: "Después (Proyectado)",

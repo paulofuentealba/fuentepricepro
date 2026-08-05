@@ -556,6 +556,8 @@ export const en = {
     targetTotalIdeal: "(Ideally should sum to 100%)",
     currentAllocationPct: "Current: {{pct}}%",
     allocationDeviation: "Deviation: {{pct}}%",
+    overAllocatedTooltip: "{{diff}} percentage points above target allocation",
+    underAllocatedTooltip: "{{diff}} percentage points below target allocation",
     concentrationViolation: "Above ceiling",
     beforeCurrent: "Before (Current)",
     afterProjected: "After (Projected)",

@@ -15,6 +15,32 @@ export type StrategyKey = "yield" | "margin" | "snowball" | "gapFiller" | "defen
  */
 export const ALLOCATION_TOLERANCE_PCT = 2;
 
+/**
+ * Calculates allocation deviation (in percentage points) between current allocation and target allocation.
+ * Returns null if currentVal is null or undefined.
+ */
+export function calculateAllocationDeviation(
+  currentVal: number | null | undefined,
+  targetVal: number,
+): number | null {
+  if (currentVal == null || !Number.isFinite(currentVal)) return null;
+  return currentVal - targetVal;
+}
+
+/**
+ * Checks if allocation deviation exceeds the specified tolerance percentage points.
+ * Returns false if currentVal is null or undefined.
+ */
+export function isOutOfTolerance(
+  currentVal: number | null | undefined,
+  targetVal: number,
+  tolerance: number = ALLOCATION_TOLERANCE_PCT,
+): boolean {
+  const deviation = calculateAllocationDeviation(currentVal, targetVal);
+  if (deviation == null) return false;
+  return Math.abs(deviation) > tolerance;
+}
+
 export const STRATEGY_ORDER: StrategyKey[] = [
   "yield",
   "margin",

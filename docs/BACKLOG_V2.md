@@ -48,11 +48,13 @@ Concluído e Validado:
 - **Snapshots Periódicos de Patrimônio (`portfolioSnapshot.ts` & Firestore)**: ✅ **CONCLUÍDO NO PROMPT 34**. Gravação diária client-side de snapshots em `users/{userId}/portfolioSnapshots/{YYYY-MM-DD}` (idempotente) como base de dados para o TWR futuro.
 - **TWR Acumulado**: ⚪ Aguarda acúmulo histórico de snapshots periódicos para cálculo de Time-Weighted Return de múltiplos subperíodos.
 
-### 1.6 Rebalanceamento por Meta Configurável ⚪
+### 1.6 Rebalanceamento por Meta Configurável ✅
 
-Não existe como feature dedicada, mas evolui o "Gap Filler" que já existe hoje (usado no Smart Allocation). Usuário define alocação-alvo, app sugere aportes pra convergir.
-
-**Nota sobre o texto original do backlog**: a formulação antiga ("implementar fórmulas de Preço Justo de Bazin/Graham") está desatualizada — Bazin, Graham e Gordon já são o núcleo do produto inteiro (Fuente Consensus). O que falta de verdade aqui é só TWR/IRR e o screener comparativo contra benchmark.
+Concluído e Validado:
+- **Painel de Metas de Alocação (`TargetAllocationPanel.tsx`)**: ✅ Permite definir e salvar a alocação-alvo (%) por classe de ativo (`AssetType`) e a concentração máxima individual.
+- **Sinalização Visual de Desvio (`calculateAllocationDeviation` / `isOutOfTolerance`)**: ✅ **CONCLUÍDO NO ITEM 1.6**. Destaque de desvios que ultrapassam a tolerância `ALLOCATION_TOLERANCE_PCT` (2 p.p.): tom `amber` para sobre-alocação (alerta de concentração) e tom `blue` para sub-alocação (oportunidade de aporte), com tooltip explicativo via `InfoTooltip`.
+- **Motor de Aporte Inteligente (`computeSmartAllocation`)**: ✅ Direciona os novos aportes priorizando ativos das classes sub-alocadas.
+- **Trabalho Futuro (Fora de Escopo)**: Sugestão de venda ativa para rebalanceamento estático sem novos aportes fica documentada como melhoria futura separada.
 
 ---
 

@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { PieChart, ChevronDown, ChevronUp } from "lucide-react";
+import { PieChart, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useI18n } from "@/lib/i18n-provider";
 import type { AssetType } from "@/lib/domain";
 import { cn } from "@/lib/utils";
-import { ALLOCATION_TOLERANCE_PCT } from "@/lib/allocation";
+import {
+  ALLOCATION_TOLERANCE_PCT,
+  calculateAllocationDeviation,
+  isOutOfTolerance,
+} from "@/lib/allocation";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 
 const ASSET_TYPES: AssetType[] = [
   "STOCK_BR",
@@ -88,13 +93,33 @@ export function TargetAllocationPanel({
             {ASSET_TYPES.map((type) => {
               const targetVal = targets[type] || 0;
               const currentVal = currentAllocationPct?.[type] ?? null;
-              const deviation = currentVal !== null ? currentVal - targetVal : null;
-              const isOutOfTolerance =
-                deviation !== null && Math.abs(deviation) > ALLOCATION_TOLERANCE_PCT;
+              const deviation = calculateAllocationDeviation(currentVal, targetVal);
+              const isOut = isOutOfTolerance(currentVal, targetVal, ALLOCATION_TOLERANCE_PCT);
+              const isOver = deviation !== null && deviation > 0;
+              const absDevStr = deviation !== null ? Math.abs(deviation).toFixed(1) : "";
+
+              const tooltipText = isOver
+                ? t.smartAllocation.overAllocatedTooltip.replace("{{diff}}", absDevStr)
+                : t.smartAllocation.underAllocatedTooltip.replace("{{diff}}", absDevStr);
 
               return (
                 <div key={type} className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">{t.types[type] || type}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">{t.types[type] || type}</Label>
+                    {isOut && (
+                      <InfoTooltip
+                        icon={
+                          <AlertTriangle
+                            className={cn(
+                              "h-3.5 w-3.5",
+                              isOver ? "text-amber-400" : "text-blue-400",
+                            )}
+                          />
+                        }
+                        content={tooltipText}
+                      />
+                    )}
+                  </div>
                   <div className="relative">
                     <Input
                       type="number"
@@ -127,7 +152,11 @@ export function TargetAllocationPanel({
                       <span
                         className={cn(
                           "font-medium",
-                          isOutOfTolerance ? "text-danger" : "text-muted-foreground",
+                          isOut
+                            ? isOver
+                              ? "text-amber-400"
+                              : "text-blue-400"
+                            : "text-muted-foreground",
                         )}
                       >
                         {t.smartAllocation.allocationDeviation.replace(

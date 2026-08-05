@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { computeSmartAllocation, normalize, scoreFor } from "../allocation";
+import {
+  computeSmartAllocation,
+  normalize,
+  scoreFor,
+  calculateAllocationDeviation,
+  isOutOfTolerance,
+} from "../allocation";
 import type { WatchlistItem } from "../watchlist";
 
 function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
@@ -32,6 +38,33 @@ describe("normalize", () => {
   it("returns zeros when max<=0", () => {
     expect(normalize([0, 0])).toEqual([0, 0]);
     expect(normalize([-1, -2])).toEqual([0, 0]);
+  });
+});
+
+describe("allocation tolerance and deviation helpers", () => {
+  it("calculateAllocationDeviation computes difference in percentage points", () => {
+    expect(calculateAllocationDeviation(35, 30)).toBe(5);
+    expect(calculateAllocationDeviation(20, 30)).toBe(-10);
+    expect(calculateAllocationDeviation(30, 30)).toBe(0);
+    expect(calculateAllocationDeviation(null, 30)).toBeNull();
+    expect(calculateAllocationDeviation(undefined, 30)).toBeNull();
+  });
+
+  it("isOutOfTolerance flags deviations exceeding threshold", () => {
+    // Tolerância padrão: 2 p.p.
+    expect(isOutOfTolerance(31, 30)).toBe(false); // desvio = +1 (<= 2)
+    expect(isOutOfTolerance(32, 30)).toBe(false); // desvio = +2 (<= 2)
+    expect(isOutOfTolerance(32.1, 30)).toBe(true); // desvio = +2.1 (> 2)
+    expect(isOutOfTolerance(28, 30)).toBe(false); // desvio = -2 (<= 2)
+    expect(isOutOfTolerance(27.9, 30)).toBe(true); // desvio = -2.1 (> 2)
+
+    // Com tolerância customizada
+    expect(isOutOfTolerance(34, 30, 5)).toBe(false); // desvio = 4 (<= 5)
+    expect(isOutOfTolerance(36, 30, 5)).toBe(true); // desvio = 6 (> 5)
+
+    // Trata valores nulos ou indefinidos como false (sem alerta)
+    expect(isOutOfTolerance(null, 30)).toBe(false);
+    expect(isOutOfTolerance(undefined, 30)).toBe(false);
   });
 });
 

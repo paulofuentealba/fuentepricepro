@@ -560,6 +560,8 @@ export const ptBR = {
     targetTotalIdeal: "(O ideal é somar 100%)",
     currentAllocationPct: "Atual: {{pct}}%",
     allocationDeviation: "Desvio: {{pct}}%",
+    overAllocatedTooltip: "{{diff}} pontos percentuais acima da meta de alocação",
+    underAllocatedTooltip: "{{diff}} pontos percentuais abaixo da meta de alocação",
     concentrationViolation: "Acima do teto",
     beforeCurrent: "Antes (Atual)",
     afterProjected: "Depois (Projetado)",

@@ -7,14 +7,15 @@ interface InfoTooltipProps {
   content: string | ReactNode;
   link?: string;
   className?: string;
+  icon?: ReactNode;
 }
 
-export function InfoTooltip({ content, link, className }: InfoTooltipProps) {
+export function InfoTooltip({ content, link, className, icon }: InfoTooltipProps) {
   const trigger = (
     <span
       className={`inline-flex items-center text-muted-foreground/70 hover:text-foreground transition-colors cursor-pointer ${className || ""}`}
     >
-      <HelpCircle className="h-3.5 w-3.5" />
+      {icon ?? <HelpCircle className="h-3.5 w-3.5" />}
     </span>
   );
 
