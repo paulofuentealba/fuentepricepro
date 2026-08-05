@@ -149,6 +149,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
             <TableRow>
               <TableHead>{t.watchlist.exDate}</TableHead>
               <TableHead>{t.watchlist.paymentDate}</TableHead>
+              <TableHead>{t.watchlist.type}</TableHead>
               <TableHead className="text-right">{t.watchlist.amountPerShare}</TableHead>
             </TableRow>
           </TableHeader>
@@ -160,6 +161,17 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
                 </TableCell>
                 <TableCell className="text-sm">
                   {ev.paymentDate ? formatResultDate(ev.paymentDate, locale) : "-"}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {ev.isJCP ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      {t.watchlist.jcp}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {t.watchlist.dividend}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm font-medium text-right text-emerald-500">
                   {formatCurrency(ev.amountPerShare, currency as any, locale)}

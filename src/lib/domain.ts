@@ -37,6 +37,8 @@ export interface DividendEvent {
   paymentDateEstimated?: boolean;
   /** Dividend amount per share / quota. */
   amountPerShare: number;
+  /** True if dividend is JCP (Juros sobre Capital Próprio - subject to 15% WHT). */
+  isJCP?: boolean;
 }
 
 export interface Asset {

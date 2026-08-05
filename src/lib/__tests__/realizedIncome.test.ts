@@ -19,12 +19,13 @@ describe("realizedIncome", () => {
   });
 
   describe("getTaxType", () => {
-    it("returns correct tax category for US and BR assets", () => {
+    it("returns correct tax category for US, BR, FII, and JCP assets", () => {
       expect(getTaxType("STOCK_US", "USD")).toBe("us_dividend");
       expect(getTaxType("REIT", "USD")).toBe("us_dividend");
       expect(getTaxType("FII", "BRL")).toBe("rendimento_fii");
       expect(getTaxType("FIAGRO", "BRL")).toBe("rendimento_fii");
       expect(getTaxType("STOCK_BR", "BRL")).toBe("dividend");
+      expect(getTaxType("STOCK_BR", "BRL", true)).toBe("jcp");
     });
   });
 
@@ -226,6 +227,47 @@ describe("realizedIncome", () => {
       expect(fiiRes.quantityHeld).toBe(200);
       expect(fiiRes.amountGross).toBe(220); // 200 * 1.1
       expect(fiiRes.taxType).toBe("rendimento_fii");
+    });
+
+    it("scenario 7: JCP event applies 15% withholding tax", () => {
+      const txs: Transaction[] = [
+        {
+          id: "t1",
+          ticker: "ITUB4",
+          type: "buy",
+          date: new Date("2024-01-01").getTime(),
+          quantity: 100,
+          pricePerShare: 30,
+        },
+      ];
+
+      const events: Record<string, DividendEvent[]> = {
+        ITUB4: [
+          {
+            exDate: "2024-01-15",
+            paymentDate: "2024-02-01",
+            amountPerShare: 1.0,
+            isJCP: true,
+          },
+        ],
+      };
+
+      const res = calculateRealizedIncome(txs, events, {
+        ITUB4: { ticker: "ITUB4", type: "STOCK_BR", currency: "BRL" },
+      });
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual({
+        ticker: "ITUB4",
+        exDate: "2024-01-15",
+        paymentDate: "2024-02-01",
+        paymentDateEstimated: false,
+        quantityHeld: 100,
+        amountPerShareGross: 1.0,
+        amountGross: 100,
+        amountNet: 85, // 100 * (1 - 0.15)
+        taxType: "jcp",
+      });
     });
   });
 

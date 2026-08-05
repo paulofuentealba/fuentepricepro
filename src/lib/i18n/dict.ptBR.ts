@@ -303,6 +303,11 @@ export const ptBR = {
     past12Months: "Últimos 12 Meses",
     exDate: "Data-Com",
     paymentDate: "Pagamento",
+    type: "Tipo",
+    dividend: "Dividendo",
+    jcp: "JCP",
+    dividendsTotal: "Dividendos",
+    jcpTotal: "JCP (Retido 15%)",
     amountPerShare: "Valor",
     page: "Página {current} de {total}",
     tabs: {

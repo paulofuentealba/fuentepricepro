@@ -37,6 +37,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
       paymentDate?: string;
       lastDatePrior?: string;
       rate: number;
+      label?: string;
     }>;
     const yearMap = sumByYear(
       cash
@@ -97,6 +98,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         exDate: d.lastDatePrior ?? d.paymentDate ?? "",
         paymentDate: d.paymentDate ?? null,
         amountPerShare: Number(d.rate),
+        isJCP: typeof d.label === "string" && d.label.toUpperCase().includes("JCP"),
       }))
       .filter((e) => e.exDate !== "");
 

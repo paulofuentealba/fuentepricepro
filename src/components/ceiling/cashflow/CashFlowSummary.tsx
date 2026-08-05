@@ -15,6 +15,8 @@ interface RealizedSummaryData {
   currentYear: number;
   allTimeTotal: number;
   eventsCount: number;
+  dividendTotal?: number;
+  jcpTotal?: number;
 }
 
 interface Props {
@@ -136,6 +138,26 @@ export function RealizedIncomeSummaryCards({
           </p>
         </div>
       </div>
+
+      {typeof realizedSummary.jcpTotal === "number" && realizedSummary.jcpTotal > 0 && (
+        <div className="pt-2 border-t border-emerald-500/20 flex flex-wrap items-center justify-between text-xs text-muted-foreground">
+          <span className="flex items-center gap-3">
+            <span>
+              {t.watchlist.dividendsTotal}:{" "}
+              <strong className="text-emerald-400 font-semibold">
+                {formatCurrency(realizedSummary.dividendTotal || 0, activeCurrency, locale)}
+              </strong>
+            </span>
+            <span>•</span>
+            <span>
+              {t.watchlist.jcpTotal}:{" "}
+              <strong className="text-amber-400 font-semibold">
+                {formatCurrency(realizedSummary.jcpTotal, activeCurrency, locale)}
+              </strong>
+            </span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }

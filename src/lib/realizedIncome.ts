@@ -26,7 +26,10 @@ export interface AssetTaxMeta {
 /**
  * Utility helper to determine the tax classification category.
  */
-export function getTaxType(type: AssetType, currency?: Currency): TaxType {
+export function getTaxType(type: AssetType, currency?: Currency, isJCP?: boolean): TaxType {
+  if (isJCP) {
+    return "jcp";
+  }
   if (isUsAsset(type, currency)) {
     return "us_dividend";
   }
@@ -145,9 +148,10 @@ export function calculateRealizedIncome(
           meta.type,
           meta.currency,
           meta.customTaxRate,
+          event.isJCP,
         );
         const amountNet = Math.round(rawNet * 10000) / 10000;
-        const taxType = getTaxType(meta.type, meta.currency);
+        const taxType = getTaxType(meta.type, meta.currency, event.isJCP);
 
         result.push({
           ticker,
@@ -177,6 +181,8 @@ export interface RealizedIncomeSummary {
   currentYear: number;
   allTimeTotal: number;
   eventsCount: number;
+  dividendTotal: number;
+  jcpTotal: number;
 }
 
 export function computeRealizedIncomeSummary(
@@ -190,10 +196,18 @@ export function computeRealizedIncomeSummary(
   let currentMonth = 0;
   let currentYear = 0;
   let allTimeTotal = 0;
+  let dividendTotal = 0;
+  let jcpTotal = 0;
 
   for (const ev of events) {
     const payDate = ev.paymentDate || ev.exDate;
     allTimeTotal += ev.amountNet;
+
+    if (ev.taxType === "jcp") {
+      jcpTotal += ev.amountNet;
+    } else {
+      dividendTotal += ev.amountNet;
+    }
 
     if (payDate.startsWith(currentYearStr)) {
       currentYear += ev.amountNet;
@@ -208,6 +222,8 @@ export function computeRealizedIncomeSummary(
     currentYear: Math.round(currentYear * 100) / 100,
     allTimeTotal: Math.round(allTimeTotal * 100) / 100,
     eventsCount: events.length,
+    dividendTotal: Math.round(dividendTotal * 100) / 100,
+    jcpTotal: Math.round(jcpTotal * 100) / 100,
   };
 }
 

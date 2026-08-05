@@ -36,6 +36,8 @@ export function safetyMargin(ceiling: number, current: number): number {
 
 /** US withholding tax applied to dividends paid to non-US foreign investors. */
 export const US_DIVIDEND_TAX_RATE = 0.3;
+/** Brazilian withholding tax applied to JCP (Juros sobre Capital Próprio). */
+export const JCP_TAX_RATE = 0.15;
 
 export function isUsAsset(type: AssetType, currency?: string): boolean {
   if (type === "STOCK_US" || type === "REIT") return true;
@@ -47,8 +49,10 @@ export function dividendTaxRate(
   type: AssetType,
   currency?: string,
   customTaxRate?: number | null,
+  isJCP?: boolean,
 ): number {
   if (typeof customTaxRate === "number" && customTaxRate >= 0) return customTaxRate / 100;
+  if (isJCP) return JCP_TAX_RATE;
   return isUsAsset(type, currency) ? US_DIVIDEND_TAX_RATE : 0;
 }
 
@@ -58,8 +62,9 @@ export function netAfterTax(
   type: AssetType,
   currency?: string,
   customTaxRate?: number | null,
+  isJCP?: boolean,
 ): number {
-  return gross * (1 - dividendTaxRate(type, currency, customTaxRate));
+  return gross * (1 - dividendTaxRate(type, currency, customTaxRate, isJCP));
 }
 
 // --- Epic 1: Advanced Valuation (Fuente Consensus) ---

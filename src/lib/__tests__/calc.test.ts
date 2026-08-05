@@ -39,4 +39,9 @@ describe("Bazin ceiling price math", () => {
     expect(netAfterTax(100, "REIT", "USD")).toBeCloseTo(70);
     expect(netAfterTax(100, "STOCK_BR", "BRL")).toBe(100);
   });
+
+  it("applies 15% withholding to JCP events", () => {
+    expect(dividendTaxRate("STOCK_BR", "BRL", undefined, true)).toBe(0.15);
+    expect(netAfterTax(100, "STOCK_BR", "BRL", undefined, true)).toBe(85);
+  });
 });

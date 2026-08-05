@@ -301,6 +301,11 @@ export const en = {
     past12Months: "Past 12 Months",
     exDate: "Ex-Date",
     paymentDate: "Payment",
+    type: "Type",
+    dividend: "Dividend",
+    jcp: "JCP",
+    dividendsTotal: "Dividends",
+    jcpTotal: "JCP (Taxed 15%)",
     amountPerShare: "Amount",
     page: "Page {current} of {total}",
     tabs: {
