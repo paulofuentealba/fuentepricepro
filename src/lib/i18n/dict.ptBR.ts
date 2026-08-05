@@ -562,6 +562,8 @@ export const ptBR = {
     allocationDeviation: "Desvio: {{pct}}%",
     overAllocatedTooltip: "{{diff}} pontos percentuais acima da meta de alocação",
     underAllocatedTooltip: "{{diff}} pontos percentuais abaixo da meta de alocação",
+    suggestedAllocationBtn: "Alocação Sugerida",
+    legalDisclaimer: "Esta é uma sugestão baseada no seu perfil e nos dados da sua carteira — não é uma recomendação de investimento. A decisão final é sempre sua.",
     concentrationViolation: "Acima do teto",
     beforeCurrent: "Antes (Atual)",
     afterProjected: "Depois (Projetado)",

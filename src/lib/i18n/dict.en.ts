@@ -558,6 +558,8 @@ export const en = {
     allocationDeviation: "Deviation: {{pct}}%",
     overAllocatedTooltip: "{{diff}} percentage points above target allocation",
     underAllocatedTooltip: "{{diff}} percentage points below target allocation",
+    suggestedAllocationBtn: "Suggested Allocation",
+    legalDisclaimer: "This is a suggestion based on your profile and portfolio data — it is not an investment recommendation. The final decision is always yours.",
     concentrationViolation: "Above ceiling",
     beforeCurrent: "Before (Current)",
     afterProjected: "After (Projected)",

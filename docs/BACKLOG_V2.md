@@ -52,7 +52,8 @@ Concluído e Validado:
 
 Concluído e Validado:
 - **Painel de Metas de Alocação (`TargetAllocationPanel.tsx`)**: ✅ Permite definir e salvar a alocação-alvo (%) por classe de ativo (`AssetType`) e a concentração máxima individual.
-- **Sinalização Visual de Desvio (`calculateAllocationDeviation` / `isOutOfTolerance`)**: ✅ **CONCLUÍDO NO ITEM 1.6**. Destaque de desvios que ultrapassam a tolerância `ALLOCATION_TOLERANCE_PCT` (2 p.p.): tom `amber` para sobre-alocação (alerta de concentração) e tom `blue` para sub-alocação (oportunidade de aporte), com tooltip explicativo via `InfoTooltip`.
+- **Sinalização Visual de Desvio (`calculateAllocationDeviation` / `isOutOfTolerance`)**: ✅ Destaque de desvios que ultrapassam a tolerância `ALLOCATION_TOLERANCE_PCT` (2 p.p.): tom `amber` para sobre-alocação (alerta de concentração) e tom `blue` para sub-alocação (oportunidade de aporte), com tooltip explicativo via `InfoTooltip`.
+- **Motor de Alocação Sugerida (`computeSuggestedAllocation`)**: ✅ **CONCLUÍDO NO ITEM 1.6 PROMPT 2**. Motor de sugestão paramétrica de metas por perfil do investidor (`useInvestorProfile`) e vieses de estratégias combinadas (`StrategyKey` com multiplicadores estáticos e margem de segurança dinâmica), com botão "Alocação Sugerida", aviso legal obrigatório em destaque e fluxo reordenado da tela.
 - **Motor de Aporte Inteligente (`computeSmartAllocation`)**: ✅ Direciona os novos aportes priorizando ativos das classes sub-alocadas.
 - **Trabalho Futuro (Fora de Escopo)**: Sugestão de venda ativa para rebalanceamento estático sem novos aportes fica documentada como melhoria futura separada.
 

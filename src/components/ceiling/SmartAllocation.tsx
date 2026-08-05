@@ -1,13 +1,11 @@
 import { useMemo, useState } from "react";
 import { useUserSettings } from "@/lib/useUserSettings";
-import { PieChart as PieChartIcon, Sparkles, TrendingUp, Wallet2, X } from "lucide-react";
+import { PieChart as PieChartIcon, Sparkles, TrendingUp, Wallet2, AlertCircle } from "lucide-react";
 import {
   BarChart,
   Bar,
-  Cell,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip as RechartsTooltip,
   Legend,
 } from "recharts";
@@ -33,9 +31,10 @@ import { useExchangeRate } from "@/lib/useExchangeRate";
 import type { AssetType } from "@/lib/domain";
 import { PaywallDialog } from "../ui/PaywallDialog";
 import { useSubscription } from "@/lib/subscription";
-import { getColorForAsset } from "./shared/chartColors";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { AssetCard } from "@/components/shared/AssetCard";
+import { useInvestorProfile } from "@/lib/useInvestorProfile";
+import { computeSuggestedAllocation } from "@/lib/suggestedAllocation";
 
 function flagFor(currency: Currency): string {
   return currency === "USD" ? "🇺🇸" : "🇧🇷";
@@ -50,6 +49,7 @@ export function SmartAllocation() {
   const { t, locale } = useI18n();
   const { valuedItems: items } = useValuedPortfolio();
   const valuedItems = items;
+  const { profile } = useInvestorProfile();
   const [capital, setCapital] = useState("");
   const [showOnlyImpacted, setShowOnlyImpacted] = useState(true);
   const { settings, updateSettings } = useUserSettings();
@@ -95,6 +95,15 @@ export function SmartAllocation() {
 
   const handleTargetsChange = (newTargets: Record<AssetType, number>) => {
     setTargets(newTargets);
+  };
+
+  const handleSuggestAllocation = () => {
+    const suggested = computeSuggestedAllocation(profile, activeStrategies, valuedItems);
+    handleTargetsChange(suggested);
+    toast.success(t.smartAllocation.suggestedAllocationBtn || "Alocação Sugerida");
+    if (capital && Number(capital) > 0 && hasCurrency[currency]) {
+      handleGenerate();
+    }
   };
 
   const hasCurrency = useMemo(
@@ -199,90 +208,15 @@ export function SmartAllocation() {
   return (
     <section className="mt-6">
       <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-2xl">
-        <CardContent className="space-y-4 pt-5">
+        <CardContent className="space-y-5 pt-5">
           <p className="text-xs text-muted-foreground">{t.smartAllocation.subtitle}</p>
 
-          <div className="relative">
-            <div
-              className={(FEATURE_GATES.targetAllocation && !isPro) ? "opacity-30 blur-[2px] pointer-events-none transition-all" : ""}
-            >
-              <TargetAllocationPanel 
-                targets={targets} 
-                onChange={handleTargetsChange} 
-                maxConcentration={maxConcentration}
-                onMaxConcentrationChange={setMaxConcentration}
-                currentAllocationPct={currentAllocationPct}
-              />
-            </div>
-            {(FEATURE_GATES.targetAllocation && !isPro) && (
-              <div
-                className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer rounded-lg hover:bg-background/10 transition-colors"
-                onClick={() => setShowPaywall(true)}
-              >
-                <div className="flex items-center gap-2 rounded-full bg-background/95 px-4 py-2 text-sm font-semibold text-foreground shadow-lg border border-border/60 backdrop-blur">
-                  <span className="text-amber-500 text-xs tracking-wider uppercase">
-                    {t.global.pro}
-                  </span>{" "}
-                  {t.smartAllocation.targetPanelTitle}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t.smartAllocation.strategyLabel}</Label>
-            <TooltipProvider delayDuration={150}>
-              <div className="flex flex-wrap gap-2">
-                {STRATEGY_ORDER.map((key) => {
-                  const active = strategies.includes(key);
-                  return (
-                    <Tooltip key={key}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => toggleStrategy(key)}
-                          className={cn(
-                            "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                            active
-                              ? "border-success bg-success text-success-foreground"
-                              : "border-border/60 bg-background/40 text-muted-foreground hover:text-foreground",
-                          )}
-                          aria-pressed={active}
-                        >
-                          {strategyLabels[key]}
-                          {!isPro && key !== "yield" && (
-                            <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-500/10 px-1 py-[1px] text-[8px] font-bold text-amber-500 uppercase tracking-wider">
-                              PRO
-                            </span>
-                          )}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-[220px] text-xs">
-                        <p>{strategyHints[key]}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            </TooltipProvider>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] text-muted-foreground">
-                {t.smartAllocation.strategyMaxHint}
-              </p>
-              <button
-                type="button"
-                onClick={handleResetStrategies}
-                disabled={isDefaultStrategies}
-                className="text-[11px] font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline"
-              >
-                {t.smartAllocation.resetStrategies}
-              </button>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+          {/* 1. Capital Value & Currency Toggle */}
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end p-4 rounded-xl border border-border/60 bg-background/40">
             <div className="space-y-2">
-              <Label htmlFor="sa-capital">{t.smartAllocation.capital}</Label>
+              <Label htmlFor="sa-capital" className="font-semibold text-foreground">
+                {t.smartAllocation.capital}
+              </Label>
               <Input
                 id="sa-capital"
                 type="number"
@@ -321,6 +255,104 @@ export function SmartAllocation() {
           {!hasCurrency[currency] && (
             <p className="text-xs text-muted-foreground">{t.smartAllocation.noAssetsInCurrency}</p>
           )}
+
+          {/* 2. Strategy Selection & Suggested Allocation Button + Legal Disclaimer */}
+          <div className="space-y-3 p-4 rounded-xl border border-border/60 bg-background/40">
+            <div className="space-y-2">
+              <Label htmlFor="sa-strategy" className="font-semibold text-foreground">{t.smartAllocation.strategyLabel}</Label>
+              <TooltipProvider delayDuration={150}>
+                <div className="flex flex-wrap gap-2">
+                  {STRATEGY_ORDER.map((key) => {
+                    const active = strategies.includes(key);
+                    return (
+                      <Tooltip key={key}>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => toggleStrategy(key)}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                              active
+                                ? "border-success bg-success text-success-foreground"
+                                : "border-border/60 bg-background/40 text-muted-foreground hover:text-foreground",
+                            )}
+                            aria-pressed={active}
+                          >
+                            {strategyLabels[key]}
+                            {!isPro && key !== "yield" && (
+                              <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-500/10 px-1 py-[1px] text-[8px] font-bold text-amber-500 uppercase tracking-wider">
+                                PRO
+                              </span>
+                            )}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[220px] text-xs">
+                          <p>{strategyHints[key]}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] text-muted-foreground">
+                  {t.smartAllocation.strategyMaxHint}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResetStrategies}
+                  disabled={isDefaultStrategies}
+                  className="text-[11px] font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline"
+                >
+                  {t.smartAllocation.resetStrategies}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <Button
+                onClick={handleSuggestAllocation}
+                variant="outline"
+                className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 font-semibold flex items-center justify-center gap-2 shrink-0"
+              >
+                <Sparkles className="h-4 w-4 text-amber-400" />
+                {t.smartAllocation.suggestedAllocationBtn}
+              </Button>
+
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 flex items-start gap-2 text-[11px] text-muted-foreground flex-1">
+                <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <p className="leading-snug">{t.smartAllocation.legalDisclaimer}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Target Allocation Panel (manual sliders prefilled with suggestion) */}
+          <div className="relative">
+            <div
+              className={(FEATURE_GATES.targetAllocation && !isPro) ? "opacity-30 blur-[2px] pointer-events-none transition-all" : ""}
+            >
+              <TargetAllocationPanel 
+                targets={targets} 
+                onChange={handleTargetsChange} 
+                maxConcentration={maxConcentration}
+                onMaxConcentrationChange={setMaxConcentration}
+                currentAllocationPct={currentAllocationPct}
+              />
+            </div>
+            {(FEATURE_GATES.targetAllocation && !isPro) && (
+              <div
+                className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer rounded-lg hover:bg-background/10 transition-colors"
+                onClick={() => setShowPaywall(true)}
+              >
+                <div className="flex items-center gap-2 rounded-full bg-background/95 px-4 py-2 text-sm font-semibold text-foreground shadow-lg border border-border/60 backdrop-blur">
+                  <span className="text-amber-500 text-xs tracking-wider uppercase">
+                    {t.global.pro}
+                  </span>{" "}
+                  {t.smartAllocation.targetPanelTitle}
+                </div>
+              </div>
+            )}
+          </div>
 
           {result && (
             <div className="mt-2 space-y-3">
