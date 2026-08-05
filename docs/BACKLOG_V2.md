@@ -22,11 +22,11 @@ Este documento substitui todas as outras listas soltas (FPP-xxx da auditoria de 
 - **Falta**: Outros layouts não-SINACOR (se surgirem) e integração Open Finance/B3 direta.
 Nota: existe também `src/lib/csv.ts` + `WatchlistIO.tsx`, mas isso é import/export da **posição atual** da carteira, não histórico de transação — não confundir com este item.
 
-### 1.2 Registro de proventos e renda realizada 🟡
+### 1.2 Registro de proventos e renda realizada ✅
 
 - **Cálculo Automático por Cruzamento (`src/lib/realizedIncome.ts`)**: ✅ **CONCLUÍDO NO PROMPT 33**. Função pura SSOT `calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap)` cruza o histórico de transações com as datas ex de cada provento para calcular a quantidade mantida em cada `exDate` e aplicar as regras de retenção na fonte (WHT 30% US, 15% JCP, isenção FII/BR).
 - **UI Integrada em Cash Flow (`CashFlowSummary.tsx` & `CashFlowChart.tsx`)**: ✅ Cards de resumo em destaque Emerald (Mês Atual, Ano Corrente, Total Histórico Realizado) e séries/barras comparativas no gráfico de Cash Flow com suporte i18n trilingue (PT, EN, ES).
-- **Importação/Conferência via PDF Extrato**: ⚪ Mantido para fase futura como mecanismo de conferência/auditoria por PDF de extrato.
+- **Gráfico Mensal de Proventos por Ativo + Fix SSOT ("My Income Summary")**: ✅ **CONCLUÍDO NO PROMPT FIX SSOT & CHART**. Substituída a lógica duplicada de `DividendsHistoryPanel.tsx` pela chamada SSOT a `calculateRealizedIncome` (usando valores líquidos `amountNet` pós-tributação), e criado o componente `AssetMonthlyDividendChart.tsx` integrando um gráfico mensal compacto (máx. 12 meses mais recentes com pagamento realizado $\le$ hoje, sem barras zeradas artificiais).
 
 ### 1.3 Eventos Corporativos Automatizados ✅
 

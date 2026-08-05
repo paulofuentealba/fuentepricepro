@@ -210,3 +210,53 @@ export function computeRealizedIncomeSummary(
     eventsCount: events.length,
   };
 }
+
+export interface MonthlyDividendBucket {
+  monthKey: string; // "YYYY-MM"
+  monthLabel: string; // Formatted label (e.g. "nov/25")
+  amountNet: number;
+}
+
+/**
+ * Groups realized income events by month (YYYY-MM), summing amountNet.
+ * Filters out future events where paymentDate (or exDate) > referenceDateStr (defaults to today ISO).
+ * Returns at most the 12 most recent months with dividends (no artificial zero-filling).
+ */
+export function groupRealizedIncomeByMonth(
+  events: RealizedIncomeEvent[],
+  referenceDateStr: string = new Date().toISOString().split("T")[0],
+  locale: string = "pt-BR"
+): MonthlyDividendBucket[] {
+  const monthMap: Record<string, number> = {};
+
+  for (const ev of events) {
+    const eventDate = ev.paymentDate || ev.exDate;
+    if (!eventDate || eventDate > referenceDateStr) continue;
+
+    const monthKey = eventDate.slice(0, 7); // "YYYY-MM"
+    monthMap[monthKey] = (monthMap[monthKey] || 0) + ev.amountNet;
+  }
+
+  const sortedMonthKeys = Object.keys(monthMap).sort();
+  // Take at most the 12 most recent months with dividends
+  const recentMonthKeys =
+    sortedMonthKeys.length > 12 ? sortedMonthKeys.slice(-12) : sortedMonthKeys;
+
+  const dateLocale = locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";
+
+  return recentMonthKeys.map((monthKey) => {
+    const [yearStr, monthStr] = monthKey.split("-");
+    const d = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 15);
+    const rawMonthName = new Intl.DateTimeFormat(dateLocale, { month: "short" }).format(d);
+    const monthName = rawMonthName.replace(".", "").toLowerCase();
+    const yearShort = yearStr.slice(-2);
+    const monthLabel = `${monthName}/${yearShort}`;
+
+    return {
+      monthKey,
+      monthLabel,
+      amountNet: Math.round(monthMap[monthKey] * 100) / 100,
+    };
+  });
+}
+

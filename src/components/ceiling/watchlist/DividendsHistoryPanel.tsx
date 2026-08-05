@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
-import { useTransactions, getQuantityAtDate } from "@/lib/transactions";
+import { useTransactions } from "@/lib/transactions";
 import type { WatchlistItem } from "@/lib/watchlist";
-import type { DividendEvent } from "@/lib/domain";
+import type { DividendEvent, Currency } from "@/lib/domain";
+import { calculateRealizedIncome } from "@/lib/realizedIncome";
+import { AssetMonthlyDividendChart } from "./AssetMonthlyDividendChart";
 import { formatCurrency } from "@/lib/i18n";
 import { formatResultDate } from "@/lib/resultCard";
 import { useI18n } from "@/lib/i18n-provider";
@@ -29,48 +31,58 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
-  const tickerTxs = useMemo(() => {
-    return transactions.filter(t => t.ticker === item.ticker);
-  }, [transactions, item.ticker]);
+  const dividendEventsMap = useMemo(() => ({ [item.ticker]: events }), [item.ticker, events]);
+  const assetMetaMap = useMemo(
+    () => ({
+      [item.ticker]: {
+        ticker: item.ticker,
+        type: item.type,
+        currency: item.currency as Currency,
+        customTaxRate: item.customTaxRate,
+      },
+    }),
+    [item.ticker, item.type, item.currency, item.customTaxRate]
+  );
 
-  const validEvents = useMemo(() => {
-    return events.filter((ev) => {
-      const dateStr = ev.paymentDate ?? ev.exDate;
-      const d = new Date(dateStr);
-      return d.getTime() >= item.investingSince;
-    }).sort((a, b) => {
-      const dA = new Date(a.paymentDate ?? a.exDate).getTime();
-      const dB = new Date(b.paymentDate ?? b.exDate).getTime();
-      return dB - dA;
+  const realizedEvents = useMemo(() => {
+    return calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap);
+  }, [transactions, dividendEventsMap, assetMetaMap]);
+
+  const pastRealizedEvents = useMemo(() => {
+    const todayISO = new Date().toISOString().split("T")[0];
+    return realizedEvents.filter((ev) => {
+      const dateStr = ev.paymentDate || ev.exDate;
+      return dateStr && dateStr <= todayISO;
     });
-  }, [events, item.investingSince]);
+  }, [realizedEvents]);
 
   const summary = useMemo(() => {
-    const now = Date.now();
+    const todayISO = new Date().toISOString().split("T")[0];
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const oneYearAgoMs = oneYearAgo.getTime();
+    const oneYearAgoISO = oneYearAgo.toISOString().split("T")[0];
 
-    let lastReceived = null;
+    const lastReceivedEvent =
+      pastRealizedEvents.length > 0 ? pastRealizedEvents[pastRealizedEvents.length - 1] : null;
+
     let total12m = 0;
-
-    for (const ev of validEvents) {
-      const dateStr = ev.paymentDate ?? ev.exDate;
-      const t = new Date(dateStr).getTime();
-      if (t > now) continue;
-
-      const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, t) : item.quantity;
-      const total = ev.amountPerShare * q;
-
-      if (!lastReceived) {
-        lastReceived = { amount: total, dateStr };
-      }
-      if (t >= oneYearAgoMs) {
-        total12m += total;
+    for (const ev of pastRealizedEvents) {
+      const dateStr = ev.paymentDate || ev.exDate;
+      if (dateStr >= oneYearAgoISO && dateStr <= todayISO) {
+        total12m += ev.amountNet;
       }
     }
-    return { lastReceived, total12m };
-  }, [validEvents, tickerTxs, item.quantity]);
+
+    return {
+      lastReceived: lastReceivedEvent
+        ? {
+            amount: lastReceivedEvent.amountNet,
+            dateStr: lastReceivedEvent.paymentDate || lastReceivedEvent.exDate,
+          }
+        : null,
+      total12m: Math.round(total12m * 100) / 100,
+    };
+  }, [pastRealizedEvents]);
 
   const marketEvents = useMemo(() => {
     return [...events].sort((a, b) => {
@@ -126,6 +138,8 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
               </p>
             </div>
           </div>
+
+          <AssetMonthlyDividendChart events={pastRealizedEvents} currency={currency} />
         </CardContent>
       </Card>
 

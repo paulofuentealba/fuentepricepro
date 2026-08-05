@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calculateRealizedIncome, getTaxType, normalizeDateStr } from "../realizedIncome";
+import {
+  calculateRealizedIncome,
+  getTaxType,
+  normalizeDateStr,
+  groupRealizedIncomeByMonth,
+} from "../realizedIncome";
 import { type Transaction } from "../transactions";
 import { type DividendEvent } from "../domain";
 
@@ -223,4 +228,125 @@ describe("realizedIncome", () => {
       expect(fiiRes.taxType).toBe("rendimento_fii");
     });
   });
+
+  describe("groupRealizedIncomeByMonth", () => {
+    it("groups events by YYYY-MM and sums amountNet, skipping future events", () => {
+      const events = [
+        {
+          ticker: "WEGE3",
+          exDate: "2024-01-10",
+          paymentDate: "2024-01-25",
+          quantityHeld: 100,
+          amountPerShareGross: 0.5,
+          amountGross: 50,
+          amountNet: 50,
+          taxType: "dividend" as const,
+        },
+        {
+          ticker: "WEGE3",
+          exDate: "2024-01-20",
+          paymentDate: "2024-01-30",
+          quantityHeld: 100,
+          amountPerShareGross: 0.3,
+          amountGross: 30,
+          amountNet: 30,
+          taxType: "dividend" as const,
+        },
+        {
+          ticker: "WEGE3",
+          exDate: "2024-02-10",
+          paymentDate: "2024-02-25",
+          quantityHeld: 100,
+          amountPerShareGross: 0.6,
+          amountGross: 60,
+          amountNet: 60,
+          taxType: "dividend" as const,
+        },
+        {
+          // Future event relative to 2024-03-01
+          ticker: "WEGE3",
+          exDate: "2024-03-15",
+          paymentDate: "2024-03-25",
+          paymentDateEstimated: true,
+          quantityHeld: 100,
+          amountPerShareGross: 1.0,
+          amountGross: 100,
+          amountNet: 100,
+          taxType: "dividend" as const,
+        },
+      ];
+
+      const refDate = "2024-03-01"; // Cutoff date
+      const result = groupRealizedIncomeByMonth(events, refDate, "pt-BR");
+
+      // Should contain 2 months (2024-01 and 2024-02), skipping 2024-03
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        monthKey: "2024-01",
+        amountNet: 80, // 50 + 30
+      });
+      expect(result[1]).toMatchObject({
+        monthKey: "2024-02",
+        amountNet: 60,
+      });
+    });
+
+    it("does NOT insert artificial zero-filled months for missing months", () => {
+      const events = [
+        {
+          ticker: "VRTA11",
+          exDate: "2024-01-10",
+          paymentDate: "2024-01-15",
+          quantityHeld: 50,
+          amountPerShareGross: 1.0,
+          amountGross: 50,
+          amountNet: 50,
+          taxType: "rendimento_fii" as const,
+        },
+        {
+          ticker: "VRTA11",
+          exDate: "2024-04-10",
+          paymentDate: "2024-04-15",
+          quantityHeld: 50,
+          amountPerShareGross: 1.0,
+          amountGross: 50,
+          amountNet: 50,
+          taxType: "rendimento_fii" as const,
+        },
+      ];
+
+      const result = groupRealizedIncomeByMonth(events, "2024-12-31");
+
+      // Only Jan and Apr should exist (no Feb/Mar zero buckets)
+      expect(result).toHaveLength(2);
+      expect(result[0].monthKey).toBe("2024-01");
+      expect(result[1].monthKey).toBe("2024-04");
+    });
+
+    it("limits to at most 12 most recent months when history exceeds 12 months", () => {
+      const events = Array.from({ length: 15 }, (_, i) => {
+        const monthNum = String((i % 12) + 1).padStart(2, "0");
+        const yearNum = 2023 + Math.floor(i / 12);
+        const dateStr = `${yearNum}-${monthNum}-15`;
+        return {
+          ticker: "PETR4",
+          exDate: dateStr,
+          paymentDate: dateStr,
+          quantityHeld: 100,
+          amountPerShareGross: 1.0,
+          amountGross: 100,
+          amountNet: 100,
+          taxType: "dividend" as const,
+        };
+      });
+
+      const result = groupRealizedIncomeByMonth(events, "2025-12-31");
+
+      expect(result.length).toBeLessThanOrEqual(12);
+      expect(result).toHaveLength(12);
+      // Last month should be the 15th item
+      expect(result[result.length - 1].monthKey).toBe("2024-03");
+    });
+  });
 });
+
