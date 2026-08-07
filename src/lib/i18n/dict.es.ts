@@ -703,6 +703,8 @@ export const es = {
       errorWrongPassword: "Contraseña incorrecta.",
       errorGeneral: "Error al eliminar la cuenta.",
       backupSuccess: "¡Copia de seguridad descargada con éxito!",
+      exportingBackup: "Exportando datos...",
+      backupError: "Error al exportar datos. Verifica tu conexión e inténtalo de nuevo.",
     },
   },
   valuation: {

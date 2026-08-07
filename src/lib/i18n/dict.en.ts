@@ -691,6 +691,8 @@ export const en = {
       errorWrongPassword: "Incorrect password.",
       errorGeneral: "Error deleting account.",
       backupSuccess: "Backup downloaded successfully!",
+      exportingBackup: "Exporting data...",
+      backupError: "Failed to export data. Please check your connection and try again.",
     },
   },
   valuation: {

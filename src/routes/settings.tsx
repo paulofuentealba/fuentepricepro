@@ -8,14 +8,7 @@ import {
   GoogleAuthProvider,
   reauthenticateWithPopup,
 } from "firebase/auth";
-import {
-  collection,
-  getDocs,
-  writeBatch,
-  doc,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc, getDoc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +31,7 @@ import {
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { calculateProfileTier } from "@/lib/investor-profile";
 import { InvestorProfileFlow } from "@/components/onboarding/InvestorProfileFlow";
+import { buildUserDataExport } from "@/lib/dataExport";
 import {
   Dialog,
   DialogContent,
@@ -326,32 +320,83 @@ function DeleteAccountWizard({
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [password, setPassword] = useState("");
   const [isBusy, setIsBusy] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [statusText, setStatusText] = useState("");
 
   // Reseta o wizard quando abre/fecha
   const handleClose = () => {
-    if (!isBusy) {
+    if (!isBusy && !isExporting) {
       setStep(1);
       setPassword("");
       onClose();
     }
   };
 
-  const handleExport = () => {
-    // Mock export
-    const data = JSON.stringify(
-      { userId: user.uid, email: user.email, exportedAt: new Date().toISOString(), portfolio: [] },
-      null,
-      2,
-    );
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "fuentepricepro_backup.json";
-    a.click();
-    toast.success(S.backupSuccess);
-    setStep(2);
+  const handleExport = async () => {
+    if (!user?.uid) return;
+    setIsExporting(true);
+
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const assetsRef = collection(db, "users", user.uid, "assets");
+      const txRef = collection(db, "users", user.uid, "transactions");
+      const snapshotsRef = collection(db, "users", user.uid, "portfolioSnapshots");
+
+      const [userDocSnap, assetsSnap, txSnap, snapshotsSnap] = await Promise.all([
+        getDoc(userDocRef),
+        getDocs(assetsRef),
+        getDocs(txRef),
+        getDocs(snapshotsRef),
+      ]);
+
+      const userDocData = userDocSnap.exists() ? userDocSnap.data() : null;
+      const assetsData = assetsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const txData = txSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const snapshotsData = snapshotsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      let localMappings: Record<string, string> = {};
+      try {
+        const rawLocal = window.localStorage.getItem("ceilingPricePro.issuerTickerMappings.v1");
+        if (rawLocal) {
+          const parsed = JSON.parse(rawLocal);
+          if (parsed && typeof parsed === "object") {
+            localMappings = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to read local issuerTickerMappings for export", e);
+      }
+
+      const payload = buildUserDataExport({
+        userDoc: userDocData,
+        localIssuerTickerMappings: localMappings,
+        assets: assetsData,
+        transactions: txData,
+        portfolioSnapshots: snapshotsData,
+        metadata: {
+          userId: user.uid,
+          email: user.email,
+          exportedAt: new Date().toISOString(),
+        },
+      });
+
+      const dataStr = JSON.stringify(payload, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `fuentepricepro_backup_${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success(S.backupSuccess);
+      setStep(2);
+    } catch (error) {
+      console.error("Export failed", error);
+      toast.error(S.backupError);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleDelete = async (e?: React.FormEvent) => {
@@ -446,12 +491,24 @@ function DeleteAccountWizard({
               <DialogDescription className="text-center pt-2">{S.step1Desc}</DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-3 mt-4">
-              <Button onClick={handleExport} className="w-full bg-primary text-primary-foreground">
-                {S.downloadBackup}
+              <Button
+                onClick={handleExport}
+                disabled={isExporting}
+                className="w-full bg-primary text-primary-foreground"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {S.exportingBackup}
+                  </>
+                ) : (
+                  S.downloadBackup
+                )}
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => setStep(2)}
+                disabled={isExporting}
                 className="w-full text-muted-foreground hover:text-destructive"
               >
                 {S.skip}
@@ -576,12 +633,7 @@ function InvestorProfileSettingsCard() {
         </p>
       </div>
 
-      {isRetaking && (
-        <InvestorProfileFlow
-          isModal={true}
-          onComplete={() => setIsRetaking(false)}
-        />
-      )}
+      {isRetaking && <InvestorProfileFlow isModal={true} onComplete={() => setIsRetaking(false)} />}
     </>
   );
 }

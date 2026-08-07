@@ -698,6 +698,8 @@ export const ptBR = {
       errorWrongPassword: "Senha incorreta.",
       errorGeneral: "Erro ao deletar conta.",
       backupSuccess: "Backup baixado com sucesso!",
+      exportingBackup: "Exportando dados...",
+      backupError: "Erro ao exportar dados. Verifique sua conexão e tente novamente.",
     },
   },
   valuation: {
