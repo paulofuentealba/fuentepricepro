@@ -107,7 +107,9 @@ Parcial (Personalização de UX vs. Suitability Regulatório Formal):
 
 ### 4.3 Conformidade Legal (LGPD & GDPR) 🟡
 
-Parcial: existe uma seção "Privacidade (LGPD)" na navegação de Configurações (só o item de menu, visto nas telas do produto). Não encontrado: banner de cookies, fluxo funcional de "Direito ao Esquecimento" (excluir conta + limpar Firestore), exportação/portabilidade de dados. Ou seja, tem o link, não tem o conteúdo atrás dele confirmado.
+- **Exportação de Dados (Portabilidade)**: ✅ **CONCLUÍDO**. `handleExport` em `src/routes/settings.tsx` realiza exportação assíncrona real de `assets`, `transactions`, `portfolioSnapshots` e perfil/configurações via função pura `buildUserDataExport` (`src/lib/dataExport.ts`).
+- **Direito ao Esquecimento (Exclusão de Conta)**: ✅ **CONCLUÍDO**. `handleDelete` em `src/routes/settings.tsx` expurga as 3 subcoleções (`assets`, `transactions`, `portfolioSnapshots`) e o documento raiz `users/{userId}`, na ordem correta (subcoleções antes do doc pai), via função pura `buildAccountDeletionPaths` (`src/lib/accountDeletion.ts`).
+- **Banner de Cookies / Consentimento**: 🟡 **Pendente**. Confirmado após varredura direta no código (`cookie`, `consent`, `banner`): não existe banner/modal de consentimento de cookies na interface (uso de cookies restrito ao estado visual da sidebar em `sidebar.tsx` e cookies internos de servidor para autenticação da API do Yahoo Finance em `yahoo.server.ts`).
 
 ### 4.4 Evolução UI/UX ("Pro Terminal Concept") ✅
 
@@ -147,7 +149,8 @@ Registrado aqui só pra contexto — não precisa de ação:
   - ✅ **FIIs/FIAGRO/FI-Infra BR (Estimado)**: `paymentDate` calculado via regra de dias úteis e feriados brasileiros (`src/lib/br-business-calendar.ts` + `src/lib/fiiPaymentRules.ts`), com flag `paymentDateEstimated: true` e tooltip i18n nos 3 idiomas (10 fundos mapeados: `HGLG11`, `MXRF11`, `KNRI11`, `XPLG11`, `VISC11`, `BTLG11`, `KNCR11`, `AFHI11`, `CPTS11`, `ALZR11`).
   - 🔴 **Gap Conhecido (Ações BR)**: Proventos de Ações BR permanecem sem `paymentDate` em APIs gratuitas (administrado por B3/CBLC, fora do escopo CVM; Bolsai e HG Brasil exigem assinaturas pagas).
   - 🔴 **Gap Conhecido (Ações/REITs NYSE US)**: Ações e REITs negociados na NYSE (`O`, `JNJ`, `KO`) permanecem sem `paymentDate` em APIs gratuitas sem chave (a Nasdaq API restringe o cadastro a papéis Nasdaq-listed e a Yahoo Finance só possui ex-date).
-  - *Nota*: Se novos FIIs forem mapeados no futuro, a metodologia oficial de mapeamento via regulamento primário está documentada nos Prompts 24-27 em `PROMPTS_LOG.md`.
+  - **Fase 0 - Item 0.1 (Exportação de Dados LGPD + Expurgo de portfolioSnapshots)**: ✅ **CONCLUÍDO E VALIDADO** (detalhado na Seção 4.3).
+- *Nota*: Se novos FIIs forem mapeados no futuro, a metodologia oficial de mapeamento via regulamento primário está documentada nos Prompts 24-27 em `PROMPTS_LOG.md`.
 
 
 

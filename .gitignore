@@ -39,3 +39,9 @@ dist-ssr
 # Temporary scratch
 scratch/
 
+# Local Claude Code config
+.claude/
+
+# Manual project backups
+zip/
+

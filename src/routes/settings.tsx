@@ -32,6 +32,7 @@ import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { calculateProfileTier } from "@/lib/investor-profile";
 import { InvestorProfileFlow } from "@/components/onboarding/InvestorProfileFlow";
 import { buildUserDataExport } from "@/lib/dataExport";
+import { buildAccountDeletionPaths } from "@/lib/accountDeletion";
 import {
   Dialog,
   DialogContent,
@@ -429,7 +430,7 @@ function DeleteAccountWizard({
 
       // 2. Client-Side Scrubbing (Deletar dados do Firestore)
       // A ordem de operação é CRÍTICA:
-      // Deletar as subcoleções (assets e transactions) PRIMEIRO.
+      // Deletar as subcoleções (assets, transactions e portfolioSnapshots) PRIMEIRO.
       // Se apagar o documento pai primeiro e a operação falhar na sequência,
       // as subcoleções tornam os dados órfãos no banco de dados.
 
@@ -441,12 +442,19 @@ function DeleteAccountWizard({
       const txRef = collection(db, "users", user.uid, "transactions");
       const txSnap = await getDocs(txRef);
 
-      // 2c. Coletar todas as referências (subcoleções primeiro, documento raiz por último)
-      const allRefs = [
-        ...assetsSnap.docs.map((d) => d.ref),
-        ...txSnap.docs.map((d) => d.ref),
-        doc(db, "users", user.uid),
-      ];
+      // 2c. Buscar todos os snapshots de portfólio do usuário (users/{uid}/portfolioSnapshots)
+      const snapshotsRef = collection(db, "users", user.uid, "portfolioSnapshots");
+      const snapshotsSnap = await getDocs(snapshotsRef);
+
+      // 2d. Montar lista de referências usando a função pura (subcoleções primeiro, documento raiz por último)
+      const deletionPaths = buildAccountDeletionPaths({
+        userId: user.uid,
+        assetIds: assetsSnap.docs.map((d) => d.id),
+        transactionIds: txSnap.docs.map((d) => d.id),
+        portfolioSnapshotIds: snapshotsSnap.docs.map((d) => d.id),
+      });
+
+      const allRefs = deletionPaths.map((path) => doc(db, path));
 
       // Executar a exclusão em lote no Firestore em grupos de até 400 operações
       for (let i = 0; i < allRefs.length; i += 400) {
