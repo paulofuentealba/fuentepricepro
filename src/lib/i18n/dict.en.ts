@@ -203,7 +203,7 @@ export const en = {
     investingSince: "Investing Since",
     investingSinceReadOnlyHint: "Date of first transaction",
     confirmTitle: "Confirm details for",
-    confirmDesc: "Select the approximate date you started investing in this asset.",
+    confirmDesc: "Confirm adding this asset to your portfolio.",
   },
   result: {
     title: "Results",
@@ -877,7 +877,7 @@ export const en = {
     searching: "Searching...",
     investingSince: "Investing Since",
     confirmTitle: "Confirm details for",
-    confirmDesc: "Select the approximate date you started investing in this asset.",
+    confirmDesc: "Confirm adding this asset to your portfolio.",
     loading: "Loading data...",
     metrics: {
       currentPrice: "Current Price",

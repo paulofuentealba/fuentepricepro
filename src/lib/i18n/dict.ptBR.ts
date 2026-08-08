@@ -205,7 +205,7 @@ export const ptBR = {
     investingSince: "Investindo desde",
     investingSinceReadOnlyHint: "Data do primeiro lançamento",
     confirmTitle: "Confirme os detalhes de",
-    confirmDesc: "Selecione a data aproximada em que você começou a investir neste ativo.",
+    confirmDesc: "Confirme a adição deste ativo à sua carteira.",
   },
   result: {
     title: "Resultados",
@@ -886,7 +886,7 @@ export const ptBR = {
     searching: "Buscando...",
     investingSince: "Investindo desde",
     confirmTitle: "Confirme os detalhes de",
-    confirmDesc: "Selecione a data aproximada em que você começou a investir neste ativo.",
+    confirmDesc: "Confirme a adição deste ativo à sua carteira.",
     loading: "Carregando dados...",
     metrics: {
       currentPrice: "Preço Atual",

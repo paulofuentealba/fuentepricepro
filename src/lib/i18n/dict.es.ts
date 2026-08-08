@@ -206,7 +206,7 @@ export const es = {
     investingSince: "Invirtiendo Desde",
     investingSinceReadOnlyHint: "Fecha de la primera transacción",
     confirmTitle: "Confirma los detalles para",
-    confirmDesc: "Selecciona la fecha aproximada en la que empezaste a invertir en este activo.",
+    confirmDesc: "Confirme la adición de este activo a su portafolio.",
   },
   result: {
     title: "Resultados",
@@ -891,7 +891,7 @@ export const es = {
     searching: "Buscando...",
     investingSince: "Invirtiendo Desde",
     confirmTitle: "Confirma los detalles para",
-    confirmDesc: "Selecciona la fecha aproximada en la que empezaste a invertir en este activo.",
+    confirmDesc: "Confirme la adición de este activo a su portafolio.",
     loading: "Cargando datos...",
     metrics: {
       currentPrice: "Precio Actual",

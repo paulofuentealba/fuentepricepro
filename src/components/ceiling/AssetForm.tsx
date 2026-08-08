@@ -19,7 +19,6 @@ import { searchQueryOptions, assetQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
 import { displayTicker } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { InvestingSinceField } from "@/components/ceiling/shared/InvestingSinceField";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
@@ -56,8 +55,6 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   const { targetYield: globalYield } = useSettings();
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const [confirmHit, setConfirmHit] = useState<SearchHit | null>(null);
-  const [investingSinceDate, setInvestingSinceDate] = useState<number>(Date.now());
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSubmittedRef = useRef(false);
 
@@ -162,74 +159,20 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
 
   const activeType: AssetType | null = manualType ?? selected?.type ?? null;
 
-  function pick(hit: SearchHit, autoSubmit = false) {
-    if (autoSubmit) {
-      onSubmit({
-        ticker: hit.ticker,
-        type: hit.type,
-        targetYield: globalYield,
-        averagePrice: null,
-        customTaxRate: null,
-        investingSince: Date.now(),
-      });
-      return;
-    }
-
-    setConfirmHit(hit);
-    setInvestingSinceDate(Date.now());
+  function pick(hit: SearchHit) {
+    setSelected(hit);
     setQuery(hit.ticker);
     setManualType(null);
     setEditingType(false);
     setOpen(false);
-  }
-
-  if (confirmHit) {
-    return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-        <div className="space-y-1">
-          <Label className="text-muted-foreground">{t.form.confirmTitle}</Label>
-          <div className="flex items-center gap-3">
-            <span className="text-xl font-bold">{displayTicker(confirmHit.ticker)}</span>
-            <Badge variant="secondary">{t.types[manualType ?? confirmHit.type]}</Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">{t.form.confirmDesc}</p>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-            {t.form.investingSince}
-          </Label>
-          <InvestingSinceField
-            value={investingSinceDate}
-            onChange={(d) => setInvestingSinceDate(d.getTime())}
-            firstTransactionDate={null}
-            className="w-full"
-          />
-        </div>
-
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="ghost" onClick={() => setConfirmHit(null)}>
-            {t.common.cancel}
-          </Button>
-          <Button
-            type="button"
-            disabled={isSubmitting}
-            onClick={() => {
-              onSubmit({
-                ticker: confirmHit.ticker,
-                type: manualType ?? confirmHit.type,
-                targetYield: globalYield,
-                averagePrice: null,
-                customTaxRate: null,
-                investingSince: investingSinceDate,
-              });
-            }}
-          >
-            {isSubmitting ? t.common.loading : t.form.done}
-          </Button>
-        </div>
-      </div>
-    );
+    onSubmit({
+      ticker: hit.ticker,
+      type: hit.type,
+      targetYield: globalYield,
+      averagePrice: null,
+      customTaxRate: null,
+      investingSince: Date.now(),
+    });
   }
 
   return (
