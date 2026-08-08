@@ -15,7 +15,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
   const { locale } = useI18n();
 
   const chartData = useMemo(() => {
-    return groupRealizedIncomeByMonth(events, undefined, toIntlLocale(locale));
+    return groupRealizedIncomeByMonth(events, undefined, locale);
   }, [events, locale]);
 
   if (chartData.length === 0) {

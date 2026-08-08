@@ -11,11 +11,11 @@ import type { SubscriptionTier } from "./subscription";
  */
 
 export interface FeatureGatesConfig {
-  freeAssetLimit: number;
-  [key: string]: boolean | number | string | undefined;
+  freeAssetLimit?: number;
+  [key: string]: boolean | number | undefined;
 }
 
-export const DEFAULT_FEATURE_GATES: FeatureGatesConfig = {
+export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: number } = {
   freeAssetLimit: 8,
 };
 

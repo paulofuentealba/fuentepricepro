@@ -2,6 +2,7 @@ import { type Transaction } from "./transactions";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
 import { toIntlLocale } from "./formatters";
+import { type Locale } from "./i18n";
 
 export type TaxType = "dividend" | "jcp" | "rendimento_fii" | "us_dividend";
 
@@ -242,7 +243,7 @@ export interface MonthlyDividendBucket {
 export function groupRealizedIncomeByMonth(
   events: RealizedIncomeEvent[],
   referenceDateStr: string = new Date().toISOString().split("T")[0],
-  locale: string = "pt-BR"
+  locale: Locale = "ptBR"
 ): MonthlyDividendBucket[] {
   const monthMap: Record<string, number> = {};
 

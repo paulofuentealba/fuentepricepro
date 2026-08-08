@@ -96,6 +96,7 @@ export function AddToWatchlistDialog({
         goalNum != null && Number.isFinite(goalNum) && goalNum > 0 ? goalNum : null,
       payoutRatio: asset.metrics?.payoutRatio ?? null,
       addedAt: existing?.addedAt ?? Date.now(),
+      investingSince: existing?.investingSince ?? Date.now(),
     };
     upsert(item);
     toast.success(existing ? t.toasts.assetUpdated : t.toasts.assetAdded);

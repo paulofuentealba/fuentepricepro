@@ -124,7 +124,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     if (!hit) return;
     autoSubmittedRef.current = true;
     setSelected(hit);
-    pick(hit, true);
+    pick(hit);
   }, [initialTicker, query, suggestions, globalYield, onSubmit]);
 
   useEffect(() => {

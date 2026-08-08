@@ -10,6 +10,7 @@ export interface AssetMetrics {
   peRatio: number | null;
   pbRatio: number | null;
   eps: number | null;
+  bvps?: number | null;
   roe: number | null;
   currentDy: number | null;
   capRate: number | null;

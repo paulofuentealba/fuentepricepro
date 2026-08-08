@@ -28,6 +28,7 @@ function mkItem(type: WatchlistItem["type"], safetyMargin: number): WatchlistIte
     customTaxRate: null,
     sector: null,
     addedAt: Date.now(),
+    investingSince: Date.now(),
   };
 }
 

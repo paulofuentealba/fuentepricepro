@@ -95,6 +95,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
       startDate: new Date(startDate).toISOString(),
       maturityDate: new Date(maturityDate).toISOString(),
       addedAt: Date.now(),
+      investingSince: Date.now(),
     });
 
     toast.success(t.watchlist.fixedIncomeWizard.success);

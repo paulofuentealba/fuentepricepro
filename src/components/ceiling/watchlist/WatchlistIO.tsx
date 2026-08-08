@@ -92,6 +92,7 @@ export function WatchlistIO({ items, onImport }: Props) {
               sector: existing?.sector ?? null,
               paymentMonths: Array.isArray(asset.paymentMonths) ? asset.paymentMonths : [],
               addedAt: existing?.addedAt ?? Date.now(),
+              investingSince: existing?.investingSince ?? Date.now(),
             };
             onImport(item);
             if (existing) updated++;

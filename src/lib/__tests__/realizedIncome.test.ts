@@ -319,7 +319,7 @@ describe("realizedIncome", () => {
       ];
 
       const refDate = "2024-03-01"; // Cutoff date
-      const result = groupRealizedIncomeByMonth(events, refDate, "pt-BR");
+      const result = groupRealizedIncomeByMonth(events, refDate, "ptBR");
 
       // Should contain 2 months (2024-01 and 2024-02), skipping 2024-03
       expect(result).toHaveLength(2);

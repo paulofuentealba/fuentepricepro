@@ -27,6 +27,7 @@ function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
     customTaxRate: null,
     sector: null,
     addedAt: 0,
+    investingSince: 0,
     ...overrides,
   };
 }

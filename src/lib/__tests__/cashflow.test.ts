@@ -70,6 +70,7 @@ describe("Cashflow logic", () => {
       paidAmount: 0,
       announcedAmount: 0,
       projectedAmount: 0,
+      realizedAmount: 0,
     }));
 
     const summary = computeCashFlowSummary(buckets);

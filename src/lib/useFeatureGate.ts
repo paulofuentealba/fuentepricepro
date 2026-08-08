@@ -15,5 +15,5 @@ export function useFeatureGate(key: FeatureGateKey): boolean | number {
   const { tier } = useSubscription();
   const { gates } = useFeatureGates();
 
-  return resolveFeatureGate(tier, gates, key);
+  return resolveFeatureGate(tier, gates, String(key));
 }
