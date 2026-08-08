@@ -578,6 +578,7 @@ export const ptBR = {
     suggestedAllocationBtn: "Alocação Sugerida",
     legalDisclaimer: "Esta é uma sugestão baseada no seu perfil e nos dados da sua carteira — não é uma recomendação de investimento. A decisão final é sempre sua.",
     concentrationViolation: "Acima do teto",
+    concentrationLimitBadge: "Concentração alta",
     beforeCurrent: "Antes (Atual)",
     afterProjected: "Depois (Projetado)",
   },

@@ -1,4 +1,4 @@
-import { CalendarClock, TrendingDown, TrendingUp } from "lucide-react";
+import { CalendarClock, TrendingDown, TrendingUp, ShieldAlert } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatPercent } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
@@ -7,9 +7,10 @@ import { formatExDate, type AssetMeta } from "../utils";
 
 interface Props {
   meta?: AssetMeta;
+  isConcentrationViolated?: boolean;
 }
 
-export function AssetCardTags({ meta }: Props) {
+export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
   const { t, locale } = useI18n();
   const exDateFormatted = meta?.exDividendDate
     ? formatExDate(meta.exDividendDate, locale as any)
@@ -17,10 +18,19 @@ export function AssetCardTags({ meta }: Props) {
   const cagr = meta?.dividendCagr5y ?? null;
   const cagrNegative = cagr != null && cagr < 0;
 
-  if (!exDateFormatted && cagr == null) return null;
+  if (!exDateFormatted && cagr == null && !isConcentrationViolated) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      {isConcentrationViolated && (
+        <span
+          className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400 ring-1 ring-amber-500/30"
+          title={t.smartAllocation.concentrationLimitBadge}
+        >
+          <ShieldAlert className="h-3 w-3 text-amber-400" />
+          <span>{t.smartAllocation.concentrationLimitBadge}</span>
+        </span>
+      )}
       {exDateFormatted && (
         <span className="inline-flex items-center gap-1 rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-border/60">
           <CalendarClock className="h-3 w-3" />

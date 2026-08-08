@@ -259,17 +259,9 @@ function WatchlistVariant(props: AssetCardProps) {
           : derived.positive
             ? "focus-visible:border-emerald-500/60 focus-visible:ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
             : "focus-visible:border-rose-500/60 focus-visible:ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
-        isConcentrationViolated && "border-danger/60 ring-1 ring-danger/30",
+        isConcentrationViolated && "border-amber-500/60 ring-1 ring-amber-500/30",
       )}
     >
-      {isConcentrationViolated && (
-        <div
-          className="absolute left-2 top-2 z-20 rounded-full bg-danger/90 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white shadow"
-          title={t.smartAllocation.concentrationViolation}
-        >
-          {t.smartAllocation.concentrationViolation}
-        </div>
-      )}
       {onClose && (
         <button
           onClick={(e) => {
@@ -293,7 +285,7 @@ function WatchlistVariant(props: AssetCardProps) {
           onRemove={handleRemove}
           isSimulation={props.isSimulation}
         />
-        <AssetCardTags meta={meta} />
+        <AssetCardTags meta={meta} isConcentrationViolated={isConcentrationViolated} />
       </div>
 
       <div

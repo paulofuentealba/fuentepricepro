@@ -583,6 +583,7 @@ export const es = {
     suggestedAllocationBtn: "Asignación Sugerida",
     legalDisclaimer: "Esta es una sugerencia basada en tu perfil y en los datos de tu cartera — no es una recomendación de inversión. La decisión final es siempre tuya.",
     concentrationViolation: "Por encima del techo",
+    concentrationLimitBadge: "Concentración alta",
     beforeCurrent: "Antes (Actual)",
     afterProjected: "Después (Proyectado)",
   },

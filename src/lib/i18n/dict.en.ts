@@ -574,6 +574,7 @@ export const en = {
     suggestedAllocationBtn: "Suggested Allocation",
     legalDisclaimer: "This is a suggestion based on your profile and portfolio data — it is not an investment recommendation. The final decision is always yours.",
     concentrationViolation: "Above ceiling",
+    concentrationLimitBadge: "High concentration",
     beforeCurrent: "Before (Current)",
     afterProjected: "After (Projected)",
   },
