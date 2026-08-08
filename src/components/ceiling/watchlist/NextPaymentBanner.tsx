@@ -32,8 +32,7 @@ function fallbackFrequency(type: AssetType): number {
 }
 
 export function NextPaymentBanner({ items, meta }: Props) {
-  const { locale } = useI18n();
-
+  const { t, locale } = useI18n();
   const upcomingList = useMemo<Upcoming[]>(() => {
     const now = Date.now();
     const list: Upcoming[] = [];
@@ -59,7 +58,7 @@ export function NextPaymentBanner({ items, meta }: Props) {
 
   if (upcomingList.length === 0) return null;
 
-  const label = locale === "en" ? "Upcoming Payments" : "Próximos Pagamentos";
+  const label = t.watchlist.upcomingPayments;
 
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-success/30 bg-success/5 p-4 text-sm w-full">

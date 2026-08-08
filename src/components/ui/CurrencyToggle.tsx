@@ -12,7 +12,7 @@ interface CurrencyToggleProps {
 
 export function CurrencyToggle({ value, onChange, className }: CurrencyToggleProps) {
   const { data: fx, dataUpdatedAt } = useQuery(exchangeRateQueryOptions());
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
 
   const formattedTime = dataUpdatedAt
     ? new Intl.DateTimeFormat(toIntlLocale(locale), {
@@ -58,7 +58,12 @@ export function CurrencyToggle({ value, onChange, className }: CurrencyTogglePro
       </div>
       {fx?.USDBRL && (
         <div className="text-[10px] text-muted-foreground mt-2 text-center opacity-70">
-          USD/BRL {fx.USDBRL.toFixed(2).replace(".", ",")} — cotação de {formattedTime}
+          USD/BRL{" "}
+          {new Intl.NumberFormat(toIntlLocale(locale), {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(fx.USDBRL)}
+          {formattedTime ? ` — ${t.common.quoteAsOf.replace("{{time}}", formattedTime)}` : ""}
         </div>
       )}
     </div>

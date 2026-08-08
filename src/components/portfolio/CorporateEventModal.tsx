@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useI18n } from "@/lib/i18n-provider";
+import { toIntlLocale } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import {
   applyCorporateEvent,
@@ -35,7 +36,7 @@ export function CorporateEventModal({
   onOpenChange,
   pendingEvent,
 }: CorporateEventModalProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { upsertAsync } = useWatchlist();
   const [eventType, setEventType] = useState<CorporateEventType>("split");
   const [ratio, setRatio] = useState<string>("4");
@@ -95,7 +96,7 @@ export function CorporateEventModal({
   };
 
   const formatCurrency = (val: number) =>
-    new Intl.NumberFormat(undefined, { style: "currency", currency: item.currency }).format(val);
+    new Intl.NumberFormat(toIntlLocale(locale), { style: "currency", currency: item.currency }).format(val);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -160,7 +161,9 @@ export function CorporateEventModal({
                 {t.corporateEvents.previewOriginal}
               </span>
               <span className="text-base font-medium text-foreground">
-                {item.quantity} shares @ {formatCurrency(item.averagePrice ?? item.currentPrice)}
+                {t.corporateEvents.sharesAt
+                  .replace("{{qty}}", String(item.quantity))
+                  .replace("{{price}}", formatCurrency(item.averagePrice ?? item.currentPrice))}
               </span>
             </div>
 
@@ -175,7 +178,9 @@ export function CorporateEventModal({
                 {t.corporateEvents.previewNew}
               </span>
               <span className="text-base font-bold text-success">
-                {newPosition.quantity} shares @ {formatCurrency(newPosition.averagePrice)}
+                {t.corporateEvents.sharesAt
+                  .replace("{{qty}}", String(newPosition.quantity))
+                  .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
               </span>
             </div>
           </div>

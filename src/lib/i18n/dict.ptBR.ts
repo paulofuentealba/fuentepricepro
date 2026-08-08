@@ -14,6 +14,7 @@ export const ptBR = {
     prev: "Anterior",
     next: "Próximo",
     other: "Outros",
+    quoteAsOf: "cotação de {{time}}",
   },
   showcase: {
     title: "Vitrine",
@@ -166,6 +167,7 @@ export const ptBR = {
     previewNew: "Nova Posição",
     applyButton: "Aplicar Evento",
     successMessage: "atualizado com sucesso.",
+    sharesAt: "{{qty}} ações a {{price}}",
   },
   publicEvents: {
     detectedBadge: "Desdobramento Detectado",
@@ -301,6 +303,7 @@ export const ptBR = {
   },
   watchlist: {
     loading: "Carregando portfólio...",
+    upcomingPayments: "Próximos Pagamentos",
     addBtn: "Adicionar à Watchlist",
     saveChanges: "Salvar Alterações",
     bulkEdit: "Edição Rápida",

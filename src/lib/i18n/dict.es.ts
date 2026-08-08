@@ -14,6 +14,7 @@ export const es = {
     prev: "Anterior",
     next: "Siguiente",
     other: "Otros",
+    quoteAsOf: "cotización de {{time}}",
   },
   showcase: {
     title: "Escaparate",
@@ -166,6 +167,7 @@ export const es = {
     previewNew: "Nueva Posición",
     applyButton: "Aplicar Evento",
     successMessage: "actualizado con éxito.",
+    sharesAt: "{{qty}} acciones a {{price}}",
   },
   publicEvents: {
     detectedBadge: "Desdoblamiento Detectado",
@@ -303,6 +305,7 @@ export const es = {
   },
   watchlist: {
     loading: "Cargando portafolio...",
+    upcomingPayments: "Próximos Pagos",
     addBtn: "Añadir a Watchlist",
     saveChanges: "Guardar Cambios",
     bulkEdit: "Edición Rápida",

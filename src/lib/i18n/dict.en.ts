@@ -12,6 +12,7 @@ export const en = {
     prev: "Previous",
     next: "Next",
     other: "Other",
+    quoteAsOf: "quote as of {{time}}",
   },
   showcase: {
     title: "Showcase",
@@ -164,6 +165,7 @@ export const en = {
     previewNew: "New Position",
     applyButton: "Apply Event",
     successMessage: "successfully updated.",
+    sharesAt: "{{qty}} shares @ {{price}}",
   },
   publicEvents: {
     detectedBadge: "Public Split Detected",
@@ -299,6 +301,7 @@ export const en = {
   },
   watchlist: {
     loading: "Loading portfolio...",
+    upcomingPayments: "Upcoming Payments",
     addBtn: "Add to Watchlist",
     saveChanges: "Save Changes",
     bulkEdit: "Bulk Edit",
