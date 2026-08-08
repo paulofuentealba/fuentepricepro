@@ -2959,6 +2959,82 @@ i  firestore: uploading rules firestore.rules...
 +  Deploy complete!
 ```
 
+---
+
+### Timeout/Retry em APIs Externas (SEC EDGAR & Selic BCB) ✅ CONCLUÍDO E VERIFICADO
+
+- **Contexto**: Adicionados controles explícitos de timeout e retry em integrações com APIs externas para evitar chamadas travadas e aumentar a resiliência do aplicativo.
+- **Arquivos Alterados**:
+  1. `src/lib/api/secEdgar.server.ts`:
+     - Substituted direct `fetch()` calls with `fetchWithRetry()` from `./http.server`.
+     - `company_tickers.json`: `timeoutMs: 5000`, `retries: 1`.
+     - `companyfacts/CIK${cik}.json`: `timeoutMs: 2500`, `retries: 1`.
+     - Retained headers (`User-Agent: SEC_USER_AGENT`) and graceful fallback (`{ bvps: null }`).
+  2. `src/lib/useSelic.ts`:
+     - Added local client-side `AbortController` timeout (`5000`ms) matching precedent established in `fetchMacroRatesFn` (`src/lib/apiService.functions.ts`).
+     - Kept zero server imports to preserve clean client bundle.
+     - Retained fallback `SELIC_FALLBACK` (10.5) on error or abort.
+
+- **Precedente de Timeout BCB**:
+  - `fetchMacroRatesFn` localizado em `src/lib/apiService.functions.ts` (linhas 415-460) utilizando `AbortController` com `5000ms` timeout para as séries do Banco Central (BCB SGS).
+
+- **Evidências de Validação**:
+  1. **`npm run test`**: 136 passed (22 test files passed, 1 skipped test file for firestore emulator rules).
+  2. **`npm run build`**: Compilação limpa do cliente (4098 módulos) e SSR (252 módulos).
+
+---
+
+### Migração de `useExchangeRate.ts` para SSOT (`exchangeRateQueryOptions`) ✅ CONCLUÍDO E VERIFICADO
+
+- **Contexto**: Migração do hook órfão `useExchangeRate.ts` (que chamava a API da AwesomeAPI diretamente do client) para a SSOT `exchangeRateQueryOptions()` (`fetchExchangeRatesFn` via Yahoo `BRL=X`, fallback `{ USDBRL: 5.5 }`).
+- **Busca Textual Obrigatória (`grep_search`)**:
+  A busca por `useExchangeRate` em `src/` revelou 5 componentes consumidores:
+  1. `src/components/ceiling/Watchlist.tsx`
+  2. `src/components/ceiling/FIProgressCard.tsx`
+  3. `src/components/ceiling/SmartAllocation.tsx`
+  4. `src/components/ceiling/watchlist/AllocationChart.tsx`
+  5. `src/components/ui/CurrencyToggle.tsx`
+- **Output Literal do Comando de Verificação Final (`grep_search`)**:
+  ```text
+  No results found
+  ```
+- **Ajuste em `CurrencyToggle.tsx`**:
+  - Utilizado `dataUpdatedAt` exposto pelo `useQuery(exchangeRateQueryOptions())` para formatar a hora da cotação (`cotação de HH:MM`) via `Intl.DateTimeFormat(toIntlLocale(locale), { hour: "2-digit", minute: "2-digit" })`, eliminando o parsing manual frágil de strings.
+- **Deleção**:
+  - Arquivo `src/lib/useExchangeRate.ts` removido do repositório com 0 dependências restantes.
+- **Evidências de Validação**:
+  1. **`npm run test`**: 136 passed (22 test files passed, 1 skipped test file para emulator).
+  2. **`npm run build`**: Compilação limpa do cliente (4098 módulos) e SSR (251 módulos).
+
+---
+
+### Fix Crítico: Token `--primary` (Ambos os Blocos CSS) + PaywallDialog ✅ CONCLUÍDO E VERIFICADO
+
+- **Causa Raiz & Descoberta**:
+  - `src/routes/__root.tsx` fixa `<html lang="en" className="dark">` de forma incondicional. A aplicação roda 100% do tempo na classe `.dark`.
+  - Corrigir apenas o bloco `:root` não teria tido nenhum efeito em produção. Portanto, ambos os blocos (`:root` e `.dark`) foram corrigidos para o tom Emerald (hue 162).
+
+- **Arquivos Alterados**:
+  1. `src/styles.css`:
+     - Bloco `:root`: `--primary: oklch(0.50 0.16 162)` (`#007d45`), `--ring`, `--sidebar-primary`, `--sidebar-ring`.
+     - Bloco `.dark`: `--primary: oklch(0.70 0.17 162)` (`#10b981`), `--ring`, `--sidebar-primary`, `--sidebar-ring`.
+  2. `src/components/ui/PaywallDialog.tsx`:
+     - Alterado o destino do botão de `<a href="/pricing">` (rota 404 inexistente) para `<a href="/settings">`.
+
+- **Cálculos Matemáticos de Contraste WCAG Exatos**:
+  - **`:root` (Ajustado via Opção A)**: `oklch(0.50 0.16 162)` vs `oklch(0.98 0 0)` (Branco `#fafafa`) $\to$ **5.12:1** (Aprovado em WCAG AA $\ge 4.5:1$).
+  - **`.dark` (Produção Ativa)**: `oklch(0.70 0.17 162)` vs `oklch(0.1 0.02 260)` (Dark Charcoal `#090d16`) $\to$ **8.46:1** (Supera WCAG AAA $\ge 7.0:1$).
+
+- **Confirmação dos Consumidores (25 Arquivos Verificados)**:
+  - Busca textual `grep -rlE "\b(bg-primary|text-primary|border-primary|ring-primary)\b" src/ --include="*.tsx"` confirmou exatamente a lista de 25 arquivos.
+
+- **Evidências de Validação**:
+  1. **`npm run test`**: 136 passed (22 test files passed, 1 skipped test file para emulator).
+  2. **`npm run build`**: Compilação limpa do cliente (4097 módulos) e SSR (251 módulos).
+
+
+
+
 
 
 

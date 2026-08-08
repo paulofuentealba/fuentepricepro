@@ -45,7 +45,7 @@ export function PaywallDialog({ open, onOpenChange, title, description }: Props)
 
         <DialogFooter className="flex-col gap-2 sm:flex-col">
           <Button asChild className="w-full bg-gradient-to-r from-primary to-primary/80">
-            <a href="/pricing">{t.paywall.button}</a>
+            <a href="/settings">{t.paywall.button}</a>
           </Button>
           <Button variant="ghost" className="w-full" onClick={() => onOpenChange(false)}>
             {t.paywall.cancel}
