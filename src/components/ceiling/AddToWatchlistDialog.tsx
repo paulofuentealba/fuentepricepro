@@ -26,9 +26,17 @@ interface Props {
   asset: Asset;
   targetYield: number;
   averagePrice: number | null;
+  buttonVariant?: "default" | "secondary" | "outline" | "ghost";
+  buttonClassName?: string;
 }
 
-export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props) {
+export function AddToWatchlistDialog({
+  asset,
+  targetYield,
+  averagePrice,
+  buttonVariant = "default",
+  buttonClassName,
+}: Props) {
   const { t } = useI18n();
   const { items, upsert } = useWatchlist();
   const { user } = useAuth();
@@ -99,9 +107,9 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
     return (
       <>
         <Button
-          variant="secondary"
+          variant={buttonVariant}
           size="sm"
-          className="gap-2"
+          className={cn("gap-2", buttonClassName)}
           onClick={() =>
             openAuthModal({
               message: "Sign in to save this asset to your watchlist. We'll add it right after.",
@@ -141,7 +149,7 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
         }}
       >
         <DialogTrigger asChild>
-          <Button variant="secondary" size="sm" className="gap-2">
+          <Button variant={buttonVariant} size="sm" className={cn("gap-2", buttonClassName)}>
             <Bookmark className="h-4 w-4" />
             {existing ? t.watchlist.updateBtn : t.watchlist.addBtn}
           </Button>

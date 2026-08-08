@@ -304,7 +304,7 @@ export const ptBR = {
   watchlist: {
     loading: "Carregando portfólio...",
     upcomingPayments: "Próximos Pagamentos",
-    addBtn: "Adicionar à Watchlist",
+    addBtn: "Adicionar à Minha Carteira",
     saveChanges: "Salvar Alterações",
     bulkEdit: "Edição Rápida",
     gridView: "Visão em Grade",
@@ -340,7 +340,7 @@ export const ptBR = {
       accruedBalance: "Saldo Atualizado",
     },
     updateBtn: "Atualizar Posição",
-    addTitle: "Adicionar à Watchlist",
+    addTitle: "Adicionar à Minha Carteira",
     updateTitle: "Atualizar Posição",
     quantity: "Quantidade",
     save: "Salvar",

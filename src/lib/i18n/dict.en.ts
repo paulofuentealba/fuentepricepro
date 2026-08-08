@@ -302,7 +302,7 @@ export const en = {
   watchlist: {
     loading: "Loading portfolio...",
     upcomingPayments: "Upcoming Payments",
-    addBtn: "Add to Watchlist",
+    addBtn: "Add to My Portfolio",
     saveChanges: "Save Changes",
     bulkEdit: "Bulk Edit",
     gridView: "Grid View",
@@ -338,7 +338,7 @@ export const en = {
       accruedBalance: "Accrued Balance",
     },
     updateBtn: "Update Holdings",
-    addTitle: "Add to Watchlist",
+    addTitle: "Add to My Portfolio",
     updateTitle: "Update Holdings",
     quantity: "Quantity owned",
     save: "Save",

@@ -306,7 +306,7 @@ export const es = {
   watchlist: {
     loading: "Cargando portafolio...",
     upcomingPayments: "Próximos Pagos",
-    addBtn: "Añadir a Watchlist",
+    addBtn: "Añadir a Mi Portafolio",
     saveChanges: "Guardar Cambios",
     bulkEdit: "Edición Rápida",
     gridView: "Vista en Cuadrícula",
@@ -342,7 +342,7 @@ export const es = {
       accruedBalance: "Saldo Acumulado",
     },
     updateBtn: "Actualizar Posición",
-    addTitle: "Añadir a la Watchlist",
+    addTitle: "Añadir a Mi Portafolio",
     updateTitle: "Actualizar Posición",
     quantity: "Cantidad poseída",
     save: "Guardar",

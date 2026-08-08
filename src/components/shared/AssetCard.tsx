@@ -456,23 +456,32 @@ function SearchVariant({
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{asset.name}</p>
         </div>
-        <div className="flex items-start gap-2">
-          <div className="text-right">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              {t.result.currentPrice}
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-start gap-2">
+            <div className="text-right">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                {t.result.currentPrice}
+              </div>
+              <div className="text-xl font-semibold text-foreground">
+                {formatCurrency(asset.currentPrice, asset.currency, locale)}
+              </div>
             </div>
-            <div className="text-xl font-semibold text-foreground">
-              {formatCurrency(asset.currentPrice, asset.currency, locale)}
-            </div>
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-label={t.result.share}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleShare}
-            aria-label={t.result.share}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
+          {!hideAddToWatchlist && (
+            <AddToWatchlistDialog
+              asset={asset}
+              targetYield={localTargetYield}
+              averagePrice={localAveragePrice ?? null}
+            />
+          )}
         </div>
       </CardHeader>
 
@@ -547,13 +556,6 @@ function SearchVariant({
             <Share2 className="mr-2 h-4 w-4" />
             {positive ? t.result.shareOpportunity : t.result.shareAnalysis}
           </Button>
-          {!hideAddToWatchlist && (
-            <AddToWatchlistDialog
-              asset={asset}
-              targetYield={localTargetYield}
-              averagePrice={localAveragePrice ?? null}
-            />
-          )}
         </div>
       </CardContent>
 
