@@ -34,8 +34,8 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden bg-background/90 backdrop-blur border-t border-border/60 h-[72px] pb-safe relative">
-      <div className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide px-3 items-center h-full gap-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden bg-background/90 backdrop-blur border-t border-border/60 min-h-[72px] pb-[env(safe-area-inset-bottom,0px)]">
+      <div className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide px-3 items-center h-[72px] gap-2">
         {tabs.map(({ key, path, label, icon: Icon }) => {
           const isActive = location.pathname.startsWith(path);
 
@@ -57,7 +57,7 @@ export function MobileBottomNav() {
         })}
       </div>
       {/* Fade Effect na direita para indicar scroll */}
-      <div className="absolute right-0 top-0 bottom-safe w-16 pointer-events-none bg-gradient-to-l from-background to-transparent" />
+      <div className="absolute right-0 top-0 bottom-[env(safe-area-inset-bottom,0px)] w-16 pointer-events-none bg-gradient-to-l from-background to-transparent" />
     </nav>
   );
 }
