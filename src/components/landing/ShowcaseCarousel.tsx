@@ -32,7 +32,7 @@ export function ShowcaseCarousel() {
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            aria-label="Scroll left"
+            aria-label={t.showcase.scrollLeft}
             onClick={() => scrollBy(-1)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:border-success/40 hover:text-success"
           >
@@ -40,7 +40,7 @@ export function ShowcaseCarousel() {
           </button>
           <button
             type="button"
-            aria-label="Scroll right"
+            aria-label={t.showcase.scrollRight}
             onClick={() => scrollBy(1)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:border-success/40 hover:text-success"
           >

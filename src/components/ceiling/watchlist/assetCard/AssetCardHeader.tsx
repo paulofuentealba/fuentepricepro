@@ -195,7 +195,7 @@ export function AssetCardHeader({
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button type="button" aria-label="More options" className={ICON_BUTTON}>
+            <button type="button" aria-label={t.watchlist.moreOptions} className={ICON_BUTTON}>
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>

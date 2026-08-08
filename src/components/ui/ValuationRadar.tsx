@@ -52,7 +52,7 @@ export function ValuationRadar({
                 <button
                   type="button"
                   className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer"
-                  aria-label="Consensus Breakdown"
+                  aria-label={t.valuation.breakdown}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {t.valuation.consensus}

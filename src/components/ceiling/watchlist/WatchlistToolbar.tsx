@@ -3,6 +3,7 @@ import { WatchlistFilterBar, type TypeFilter } from "./WatchlistFilterBar";
 import { AddAssetDropdown } from "./AddAssetDropdown";
 import { DataManagement } from "./DataManagement";
 import type { OppFilter, SortOption } from "@/lib/useAssetFilterSort";
+import { useI18n } from "@/lib/i18n-provider";
 
 interface WatchlistToolbarProps {
   typeFilters: TypeFilter[];
@@ -35,6 +36,7 @@ export function WatchlistToolbar({
   onOpenFIWizard,
   onOpenBrokerUploader,
 }: WatchlistToolbarProps) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
       <div className="flex-1 min-w-0">
@@ -65,7 +67,7 @@ export function WatchlistToolbar({
                 ? "bg-muted text-foreground shadow-sm"
                 : "text-muted-foreground hover:bg-muted/50"
             }`}
-            title="Grid View"
+            title={t.watchlist.gridView}
           >
             <LayoutGrid className="h-4 w-4" />
           </button>
@@ -77,7 +79,7 @@ export function WatchlistToolbar({
                 ? "bg-muted text-foreground shadow-sm"
                 : "text-muted-foreground hover:bg-muted/50"
             }`}
-            title="Table View (Bulk Edit)"
+            title={t.watchlist.tableView}
           >
             <List className="h-4 w-4" />
           </button>

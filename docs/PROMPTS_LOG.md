@@ -3028,9 +3028,38 @@ i  firestore: uploading rules firestore.rules...
 - **Confirmação dos Consumidores (25 Arquivos Verificados)**:
   - Busca textual `grep -rlE "\b(bg-primary|text-primary|border-primary|ring-primary)\b" src/ --include="*.tsx"` confirmou exatamente a lista de 25 arquivos.
 
+
 - **Evidências de Validação**:
   1. **`npm run test`**: 136 passed (22 test files passed, 1 skipped test file para emulator).
   2. **`npm run build`**: Compilação limpa do cliente (4097 módulos) e SSR (251 módulos).
+
+---
+
+### Item 4 — i18n dos Hardcodes de aria-label/title/placeholder ✅ CONCLUÍDO E VERIFICADO
+
+- **Escopo**: 14 ocorrências de hardcodes em `aria-label`, `title` e `placeholder` internacionalizadas em 9 componentes e 3 arquivos de dicionário.
+- **Confirmação de Arquitetura de Dicionário**:
+  - O namespace `header` **foi criado inteiramente novo** em todos os 3 dicionários (`dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts`), contendo `accountMenu` e `openMenu`.
+  - Exemplos numéricos mantêm a formatação idiomática por localidade (`Ex: 5000` / `e.g. 5000` / `Ej: 5000`).
+
+- **Diff dos 12 Arquivos Alterados**:
+  1. `src/lib/i18n/dict.en.ts`: adicionado namespace `header` + chaves em `showcase`, `form`, `result`, `watchlist`, `smartAllocation`, `valuation`, `fiMode`.
+  2. `src/lib/i18n/dict.ptBR.ts`: adicionado namespace `header` + chaves em `showcase`, `form`, `result`, `watchlist`, `smartAllocation`, `valuation`, `fiMode`.
+  3. `src/lib/i18n/dict.es.ts`: adicionado namespace `header` + chaves em `showcase`, `form`, `result`, `watchlist`, `smartAllocation`, `valuation`, `fiMode`.
+  4. `src/components/ceiling/GoalPlanner.tsx`: `aria-label={t.result.adjustMonthlyContribution}`
+  5. `src/components/ceiling/TargetAllocationPanel.tsx`: `aria-label={t.smartAllocation.adjustTargetAllocation}` e `placeholder={t.smartAllocation.maxConcentrationPlaceholder}`
+  6. `src/components/ceiling/watchlist/WatchlistToolbar.tsx`: `title={t.watchlist.gridView}` e `title={t.watchlist.tableView}` (adicionado `useI18n`)
+  7. `src/components/ceiling/watchlist/assetCard/AssetCardHeader.tsx`: `aria-label={t.watchlist.moreOptions}`
+  8. `src/components/ceiling/Header.tsx`: `aria-label={t.header.accountMenu}` e `aria-label={t.header.openMenu}`
+  9. `src/components/ceiling/FIProgressCard.tsx`: `placeholder={t.fiMode.monthlyCostGoalPlaceholder}` e `placeholder={t.fiMode.monthlyContributionPlaceholder}`
+  10. `src/components/ui/ValuationRadar.tsx`: `aria-label={t.valuation.consensusBreakdown}`
+  11. `src/components/ui/TargetYieldSlider.tsx`: `aria-label={t.form.adjustTargetYield}`
+  12. `src/components/landing/ShowcaseCarousel.tsx`: `aria-label={t.showcase.scrollLeft}` e `aria-label={t.showcase.scrollRight}`
+
+- **Evidências de Validação**:
+  1. **`npm run test`**: 136 passed, 0 failures (22 test files passed, 1 skipped).
+  2. **`npm run build`**: Client e SSR compilados com 0 erros.
+
 
 
 

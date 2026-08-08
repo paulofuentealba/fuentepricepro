@@ -133,7 +133,7 @@ export function TargetAllocationPanel({
                     <span className="absolute right-2 top-1.5 text-xs text-muted-foreground">%</span>
                   </div>
                   <Slider
-                    aria-label="Ajustar alocação alvo"
+                    aria-label={t.smartAllocation.adjustTargetAllocation}
                     min={0}
                     max={100}
                     step={1}
@@ -201,7 +201,7 @@ export function TargetAllocationPanel({
                     onMaxConcentrationChange(val === "" ? null : parseFloat(val));
                   }}
                   className="pr-6 h-9 text-sm"
-                  placeholder="Ex: 5"
+                  placeholder={t.smartAllocation.maxConcentrationPlaceholder}
                 />
                 <span className="absolute right-3 top-2 text-xs text-muted-foreground">%</span>
               </div>

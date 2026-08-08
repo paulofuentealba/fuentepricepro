@@ -89,7 +89,7 @@ function GoalPlannerImpl({ annualDividend, currentPrice, currency }: GoalPlanner
                   className="w-32 tabular-nums"
                 />
                 <Slider
-                  aria-label="Ajustar aporte mensal"
+                  aria-label={t.result.adjustMonthlyContribution}
                   value={[income]}
                   min={0}
                   max={5000}

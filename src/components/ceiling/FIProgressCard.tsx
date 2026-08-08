@@ -213,7 +213,7 @@ export function FIProgressCard() {
                         </Label>
                         <Input
                           type="number"
-                          placeholder="Ex: 5000"
+                          placeholder={t.fiMode.monthlyCostGoalPlaceholder}
                           value={tempCost}
                           onChange={(e) => setTempCost(e.target.value)}
                         />
@@ -224,7 +224,7 @@ export function FIProgressCard() {
                         </Label>
                         <Input
                           type="number"
-                          placeholder="Ex: 1000"
+                          placeholder={t.fiMode.monthlyContributionPlaceholder}
                           value={tempContribution}
                           onChange={(e) => setTempContribution(e.target.value)}
                         />

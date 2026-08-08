@@ -47,7 +47,7 @@ export function Header({ variant = "app" }: HeaderProps) {
     <button
       type="button"
       className="flex items-center justify-center rounded-full transition-colors"
-      aria-label="Account menu"
+      aria-label={t.header.accountMenu}
     >
       {user?.photoURL ? (
         <img
@@ -191,7 +191,7 @@ export function Header({ variant = "app" }: HeaderProps) {
           <div className="flex md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Button variant="ghost" size="icon" aria-label={t.header.openMenu}>
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>

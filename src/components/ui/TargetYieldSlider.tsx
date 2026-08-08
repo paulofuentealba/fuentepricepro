@@ -42,7 +42,7 @@ export function TargetYieldSlider({ value, onChange, label, className }: TargetY
         }}
       >
         <Slider
-          aria-label="Ajustar dividend yield alvo"
+          aria-label={t.form.adjustTargetYield}
           value={[value]}
           min={2}
           max={15}

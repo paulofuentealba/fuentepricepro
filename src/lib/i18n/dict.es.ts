@@ -31,6 +31,12 @@ export const es = {
     ceilingPrice: "Precio Techo",
     margin: "Margen de Seguridad",
     globalOpportunity: "Oportunidad Global",
+    scrollLeft: "Desplazar a la izquierda",
+    scrollRight: "Desplazar a la derecha",
+  },
+  header: {
+    accountMenu: "Menú de la cuenta",
+    openMenu: "Abrir menú",
   },
   lockedPanel: {
     title: "Función Pro",
@@ -174,6 +180,7 @@ export const es = {
     done: "Listo",
     targetYield: "Dividend yield objetivo",
     targetYieldHint: "Su rendimiento por dividendo anual deseado.",
+    adjustTargetYield: "Ajustar dividend yield objetivo",
     avgPrice: "Precio medio",
     avgPriceHint: "Su precio base — usado para calcular Yield on Cost.",
     calculatorTitle: "Playground",
@@ -249,6 +256,7 @@ export const es = {
     capitalRequired: "Capital estimado",
     noDividendData:
       "No hay suficientes datos de dividendos para proyectar acciones para este activo.",
+    adjustMonthlyContribution: "Ajustar aporte mensual",
     emptyTitle: "Listo cuando tú lo estés",
     emptyBody:
       "Busca un ticker y establece tu rendimiento objetivo para ver el precio techo y el margen de seguridad.",
@@ -297,6 +305,9 @@ export const es = {
     addBtn: "Añadir a Watchlist",
     saveChanges: "Guardar Cambios",
     bulkEdit: "Edición Rápida",
+    gridView: "Vista en Cuadrícula",
+    tableView: "Vista en Tabla (Edición Masiva)",
+    moreOptions: "Más opciones",
     simulationBadge: "Escenario / Simulación",
     noDividendHistory: "Sin historial de dividendos",
     noDividendHistoryDesc: "No pudimos encontrar pagos recientes de dividendos para este activo.",
@@ -534,6 +545,8 @@ export const es = {
     resetStrategies: "Restablecer estrategias",
     maxConcentrationLabel: "Techo de Concentración (%)",
     maxConcentrationHint: "Máximo por activo individual",
+    adjustTargetAllocation: "Ajustar asignación objetivo",
+    maxConcentrationPlaceholder: "Ej: 5",
     strategies: {
       yield: "Rendimiento Máx.",
       margin: "Enfoque en Margen",
@@ -927,6 +940,8 @@ export const es = {
     configTitle: "Configurar Objetivos IF",
     monthlyCostGoal: "Costo de Vida Mensual",
     monthlyContribution: "Contribución Mensual",
+    monthlyCostGoalPlaceholder: "Ej: 5000",
+    monthlyContributionPlaceholder: "Ej: 1000",
     saveGoal: "Guardar Objetivos",
     subtitle: "Rastree su camino hacia vivir de dividendos.",
     activate: "Active el Modo IF para ver el progreso",
