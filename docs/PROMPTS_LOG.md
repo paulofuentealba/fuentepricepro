@@ -3064,13 +3064,14 @@ i  firestore: uploading rules firestore.rules...
   18. `src/routes/settings.tsx`: (a) Badge de perfil e botão de refazer quiz $\to$ `primary`.
   19. `src/routes/index.tsx`: (a) Hero da landing, botões e destaques de seções $\to$ `primary`. (b) Valores de proventos/rendimentos em mockups $\to$ Mantidos `emerald`.
   20. `src/lib/useValuedPortfolio.ts`: Correção do fallback de setor $\to$ `sector: m?.sector || it.sector || t.common.other` (import do `useI18n` + chamada no hook).
-  21. `src/lib/usePortfolioRisk.ts`: Correção do fallback de setor $\to$ `const sector = item.sector || t.common.other` (import do `useI18n` + chamada no hook + `t` no `useMemo`).
+  21. `src/lib/usePortfolioRisk.ts`: Correção do fallback de setor $\to$ `const sector = item.sector || t.common.other` + fix da checagem de alerta de concentração `s.sector !== t.common.other` (commit `a66181e`).
   - **Intocados (100% Categoria b)**: `AssetCard.tsx`, `TransactionsPanel.tsx`, `AssetMonthlyDividendChart.tsx`, `AssetDetailSheet.tsx`, `AssetCardHeader.tsx`, `CashFlowSummary.tsx`, `PortfolioIrrCard.tsx`, `CashFlowChart.tsx`, `ValuationRadar.tsx`, `AssetCardTags.tsx`.
 
 - **Evidências de Validação**:
-  1. **`git diff --stat`**: 21 arquivos alterados, 136 inserções, 132 deleções.
+  1. **`git diff --stat`**: 21 arquivos alterados no commit inicial + 1 fix no `usePortfolioRisk.ts`.
   2. **`npm run test`**: 136 passed (22 test files passed, 1 skipped).
-  3. **`npm run build`**: Compilação limpa do cliente (4097 módulos em 9.80s) e SSR (251 módulos em 1.02s).
+  3. **`npm run build`**: Compilação limpa do cliente e SSR (0 erros).
+  4. **Busca por hardcodes de `"Outros"`**: Apenas 1 ocorrência legítima em todo `src/` (`src/lib/i18n/dict.ptBR.ts:16`).
 
 
 
