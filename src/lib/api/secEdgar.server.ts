@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./http.server";
+
 export interface SecEdgarFactsResult {
   bvps: number | null;
 }
@@ -16,9 +18,11 @@ async function getCikForTicker(ticker: string): Promise<string | null> {
   // Refresh cache if it's empty or expired
   if (!cikCache || now - cikCacheTimestamp > CIK_CACHE_TTL_MS) {
     try {
-      const response = await fetch('https://www.sec.gov/files/company_tickers.json', {
-        headers: { 'User-Agent': SEC_USER_AGENT },
-      });
+      const response = await fetchWithRetry(
+        'https://www.sec.gov/files/company_tickers.json',
+        { headers: { 'User-Agent': SEC_USER_AGENT } },
+        { timeoutMs: 5000, retries: 1 }
+      );
 
       if (!response.ok) {
         console.warn(`[SEC EDGAR] Failed to fetch company tickers. Status: ${response.status}`);
@@ -52,9 +56,11 @@ export async function fetchSecEdgarFacts(ticker: string): Promise<SecEdgarFactsR
       return { bvps: null };
     }
 
-    const response = await fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`, {
-      headers: { 'User-Agent': SEC_USER_AGENT },
-    });
+    const response = await fetchWithRetry(
+      `https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`,
+      { headers: { 'User-Agent': SEC_USER_AGENT } },
+      { timeoutMs: 2500, retries: 1 }
+    );
 
     if (!response.ok) {
       console.warn(`[SEC EDGAR] Failed to fetch facts for ${ticker} (CIK: ${cik}). Status: ${response.status}`);

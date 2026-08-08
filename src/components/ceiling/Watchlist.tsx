@@ -10,7 +10,8 @@ import { useSettings } from "@/lib/settings";
 import { useSubscription } from "@/lib/subscription";
 import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
 import { useUserSettings } from "@/lib/useUserSettings";
-import { useExchangeRate } from "@/lib/useExchangeRate";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 
 import { AddAssetDropdown } from "./watchlist/AddAssetDropdown";
 import { WatchlistKpiSection } from "./watchlist/WatchlistKpiSection";
@@ -48,8 +49,8 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const { targetYield: globalYield } = useSettings();
   const { settings } = useUserSettings();
   const maxConcentration = settings.maxConcentrationPerAsset ?? null;
-  const { data: exchangeData } = useExchangeRate();
-  const exchangeRate = exchangeData?.rate ?? 5;
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const exchangeRate = fx?.USDBRL ?? 5.5;
 
   // Tickers currently violating the user-defined Max Concentration cap.
   // A ticker is flagged when its share of the total consolidated portfolio

@@ -27,7 +27,8 @@ import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { cn } from "@/lib/utils";
 import { STRATEGY_ORDER, computeSmartAllocation, type StrategyKey } from "@/lib/allocation";
 import { TargetAllocationPanel } from "./TargetAllocationPanel";
-import { useExchangeRate } from "@/lib/useExchangeRate";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import type { AssetType } from "@/lib/domain";
 import { PaywallDialog } from "../ui/PaywallDialog";
 import { useSubscription } from "@/lib/subscription";
@@ -59,8 +60,8 @@ export function SmartAllocation() {
   const [excludedTickers, setExcludedTickers] = useState<string[]>([]);
   const [generated, setGenerated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { data: exchangeData } = useExchangeRate();
-  const exchangeRate = exchangeData?.rate ?? 5;
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const exchangeRate = fx?.USDBRL ?? 5.5;
   const targets = settings.smartAllocationTargets;
   const setTargets = (t: Record<AssetType, number>) =>
     updateSettings({ smartAllocationTargets: t });

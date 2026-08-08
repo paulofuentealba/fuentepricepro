@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Trophy, Target, Info } from "lucide-react";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
-import { useExchangeRate } from "@/lib/useExchangeRate";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -73,8 +74,8 @@ function formatDuration(months: number, t: any): string {
 export function FIProgressCard() {
   const { settings, updateSettings } = useUserSettings();
   const { valuedItems: items, isAppLoading } = useValuedPortfolio();
-  const { data: exchangeData } = useExchangeRate();
-  const usdRate = exchangeData?.rate ?? 5;
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const usdRate = fx?.USDBRL ?? 5.5;
   const { locale, t } = useI18n();
 
   const convertToBRL = (value: number, curr: string) => {
@@ -93,7 +94,7 @@ export function FIProgressCard() {
   // Conversions assuming user's base currency
   // For simplicity, we sum up current capital and projected monthly income in BRL,
   // then format it in the user's preferred currency if needed.
-  // Actually, useExchangeRate converts TO BRL. Let's just use BRL internally if smartAllocationCurrency is BRL.
+  // Actually, usdRate converts TO BRL. Let's just use BRL internally if smartAllocationCurrency is BRL.
   // If they want USD, we would divide by the exchange rate.
   // We will standardize everything in BRL for the calculation, then format.
 

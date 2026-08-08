@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { formatCurrency } from "@/lib/i18n";
-import { useExchangeRate } from "@/lib/useExchangeRate";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { getColorForAsset } from "../shared/chartColors";
 
@@ -33,8 +34,8 @@ const renderActiveShape = (props: any) => {
 
 export function AllocationChart({ items, selectedType, onSelectType }: Props) {
   const { t, locale } = useI18n();
-  const { data: exchangeData } = useExchangeRate();
-  const exchangeRate = exchangeData?.rate ?? 5;
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const exchangeRate = fx?.USDBRL ?? 5.5;
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   const data = useMemo(() => {
