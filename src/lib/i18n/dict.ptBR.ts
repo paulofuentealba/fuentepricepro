@@ -241,6 +241,7 @@ export const ptBR = {
       bargain: "Oportunidade de ouro! O ativo está {{margin}}% Descontado, com alto desconto.",
       fair: "Dentro da margem. O ativo está {{margin}}% Descontado, próximo do preço justo.",
       overvalued: "Atenção! O ativo está {{margin}}% Sobrevalorizado.",
+      dataInsufficient: "Dados insuficientes para consenso confiável.",
       nextPayment: "Próximo Pagamento",
       predictedMonth: "Mês previsto: {{month}}",
       noPaymentData: "Sem dados de pagamento previsível.",

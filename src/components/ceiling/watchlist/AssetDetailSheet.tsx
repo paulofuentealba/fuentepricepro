@@ -41,13 +41,18 @@ function WowInsights({
 
   const margin = valuation.margin;
   const marginStr = Math.abs(margin).toFixed(1);
+  const isImplausibleMargin = margin > 100 || !Number.isFinite(margin);
   const isBargain = margin > 10;
   const isFair = margin >= 0 && margin <= 10;
 
   let insightText = "";
   let badgeColor = "";
   let iconColor = "";
-  if (isBargain) {
+  if (isImplausibleMargin) {
+    insightText = t.result.insights.dataInsufficient;
+    badgeColor = "bg-slate-500/5 border-slate-500/20";
+    iconColor = "text-slate-400";
+  } else if (isBargain) {
     insightText = t.result.insights.bargain.replace("{{margin}}", marginStr);
     badgeColor = "bg-emerald-500/5 border-emerald-500/20";
     iconColor = "text-emerald-500";

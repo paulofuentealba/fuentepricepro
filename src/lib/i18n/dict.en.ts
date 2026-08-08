@@ -239,6 +239,7 @@ export const en = {
       bargain: "Golden opportunity! The asset is {{margin}}% Undervalued, high discount.",
       fair: "Within margin. The asset is {{margin}}% Undervalued, near fair price.",
       overvalued: "Warning! The asset is {{margin}}% Overvalued.",
+      dataInsufficient: "Insufficient data for reliable consensus.",
       nextPayment: "Next Payment",
       predictedMonth: "Predicted month: {{month}}",
       noPaymentData: "No predictable payment data.",

@@ -242,6 +242,7 @@ export const es = {
       bargain: "¡Oportunidad de oro! El activo está {{margin}}% Subvalorado.",
       fair: "Dentro del margen. El activo está {{margin}}% Subvalorado.",
       overvalued: "¡Cuidado! El activo está {{margin}}% Sobrevalorado.",
+      dataInsufficient: "Datos insuficientes para un consenso fiable.",
       nextPayment: "Próximo Pago",
       predictedMonth: "Mes previsto: {{month}}",
       noPaymentData: "Sin datos previsibles de pago.",
