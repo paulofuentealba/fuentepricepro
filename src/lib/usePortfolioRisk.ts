@@ -163,7 +163,7 @@ export function usePortfolioRisk() {
 
     // 3. Concentration Warnings
     sectors.forEach((s) => {
-      if (s.weightPct > 25 && s.sector !== "Outros") {
+      if (s.weightPct > 25 && s.sector !== t.common.other) {
         warnings.push({
           id: `conc_sector_${s.sector}`,
           type: "concentration",
