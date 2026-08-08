@@ -3033,32 +3033,45 @@ i  firestore: uploading rules firestore.rules...
   1. **`npm run test`**: 136 passed (22 test files passed, 1 skipped test file para emulator).
   2. **`npm run build`**: Compilação limpa do cliente (4097 módulos) e SSR (251 módulos).
 
+
+
 ---
 
-### Item 4 — i18n dos Hardcodes de aria-label/title/placeholder ✅ CONCLUÍDO E VERIFICADO
+### Item 3 — Limpeza de Hardcodes `emerald-*` & Correção do Fallback de Setor em Inglês ✅ CONCLUÍDO E VERIFICADO
 
-- **Escopo**: 14 ocorrências de hardcodes em `aria-label`, `title` e `placeholder` internacionalizadas em 9 componentes e 3 arquivos de dicionário.
-- **Confirmação de Arquitetura de Dicionário**:
-  - O namespace `header` **foi criado inteiramente novo** em todos os 3 dicionários (`dict.en.ts`, `dict.ptBR.ts`, `dict.es.ts`), contendo `accountMenu` e `openMenu`.
-  - Exemplos numéricos mantêm a formatação idiomática por localidade (`Ex: 5000` / `e.g. 5000` / `Ej: 5000`).
+- **Escopo & Regra de Classificação**:
+  - **(a) Cor da marca / CTA**: Substituídos por tokens semânticos (`bg-primary`, `text-primary`, `border-primary`, `ring-primary`, `shadow-primary/*`).
+  - **(b) Indicador semântico de mercado** (retorno positivo, lucro, proventos recebidos, desconto de valuation condicional `derived.positive`, nível de risco baixo): **MANTIDO hardcoded green** (`emerald-500` / `emerald-400` / `emerald-950/20`).
 
-- **Diff dos 12 Arquivos Alterados**:
-  1. `src/lib/i18n/dict.en.ts`: adicionado namespace `header` + chaves em `showcase`, `form`, `result`, `watchlist`, `smartAllocation`, `valuation`, `fiMode`.
-  2. `src/lib/i18n/dict.ptBR.ts`: adicionado namespace `header` + chaves em `showcase`, `form`, `result`, `watchlist`, `smartAllocation`, `valuation`, `fiMode`.
-  3. `src/lib/i18n/dict.es.ts`: adicionado namespace `header` + chaves em `showcase`, `form`, `result`, `watchlist`, `smartAllocation`, `valuation`, `fiMode`.
-  4. `src/components/ceiling/GoalPlanner.tsx`: `aria-label={t.result.adjustMonthlyContribution}`
-  5. `src/components/ceiling/TargetAllocationPanel.tsx`: `aria-label={t.smartAllocation.adjustTargetAllocation}` e `placeholder={t.smartAllocation.maxConcentrationPlaceholder}`
-  6. `src/components/ceiling/watchlist/WatchlistToolbar.tsx`: `title={t.watchlist.gridView}` e `title={t.watchlist.tableView}` (adicionado `useI18n`)
-  7. `src/components/ceiling/watchlist/assetCard/AssetCardHeader.tsx`: `aria-label={t.watchlist.moreOptions}`
-  8. `src/components/ceiling/Header.tsx`: `aria-label={t.header.accountMenu}` e `aria-label={t.header.openMenu}`
-  9. `src/components/ceiling/FIProgressCard.tsx`: `placeholder={t.fiMode.monthlyCostGoalPlaceholder}` e `placeholder={t.fiMode.monthlyContributionPlaceholder}`
-  10. `src/components/ui/ValuationRadar.tsx`: `aria-label={t.valuation.consensusBreakdown}`
-  11. `src/components/ui/TargetYieldSlider.tsx`: `aria-label={t.form.adjustTargetYield}`
-  12. `src/components/landing/ShowcaseCarousel.tsx`: `aria-label={t.showcase.scrollLeft}` e `aria-label={t.showcase.scrollRight}`
+- **Arquivos e Classificação (21 Arquivos Alterados, 10 Intocados)**:
+  1. `src/components/ceiling/Watchlist.tsx`: (a) Spinner de carregamento $\to$ `border-primary`.
+  2. `src/components/ceiling/watchlist/BrokerNoteUploader.tsx`: (a) Anel de foco e botão de confirmação $\to$ `primary`. (b) Badge de compra $\to$ Mantido `emerald-500/10`.
+  3. `src/components/ceiling/watchlist/GoalProgressBar.tsx`: (a) Barra de progresso e tom ativo $\to$ `primary`.
+  4. `src/components/ceiling/watchlist/AddAssetDropdown.tsx`: (a) Botão principal e hover de itens $\to$ `primary`.
+  5. `src/components/ceiling/watchlist/FixedIncomePanel.tsx`: (a) Glow e ícone de escudo $\to$ `primary`. (b) Rentabilidade de Renda Fixa $\to$ Mantida `emerald-400`.
+  6. `src/components/ceiling/watchlist/DividendsHistoryPanel.tsx`: (a) Ícone do histórico $\to$ `text-primary`. (b) Proventos recebidos $\to$ Mantidos `emerald-400`.
+  7. `src/components/ceiling/watchlist/WatchlistKpiSection.tsx`: (a) Bordas, ícone global e gradiente dos cards KPI $\to$ `primary`.
+  8. `src/components/ceiling/watchlist/ConsensusPyramid.tsx`: (a) Glow de fundo, linhas SVG e badge central $\to$ `primary`.
+  9. `src/components/ceiling/watchlist/FixedIncomeWizardSheet.tsx`: (a) Glow, etapas, anéis de foco e botões CTA $\to$ `primary`. (b) Card de resultado simulado $\to$ Mantido `emerald`.
+  10. `src/components/ceiling/Header.tsx`: (a) Badge de câmbio, botões de cadastro/terminal e links de hover mobile $\to$ `primary`.
+  11. `src/components/ceiling/AssetComparator.tsx`: (a) Ícones de balança e hover de busca $\to$ `primary`.
+  12. `src/components/ceiling/RiskRadar.tsx`: (a) Estado vazio, botão e barra de progresso $\to$ `primary`. (b) Badges de risco seguro $\to$ Mantidas `emerald`.
+  13. `src/components/ceiling/FIProgressCard.tsx`: (a) Glow, ícone de alvo, botões e gradiente da barra $\to$ `primary`. (b) % de cobertura passiva $\to$ Mantida `text-emerald-400`.
+  14. `src/components/landing/ShowcaseCarousel.tsx`: (a) Glow ambiente $\to$ `primary`.
+  15. `src/components/landing/showcase/ProCards.tsx`: (a) Sombras dos pro cards $\to$ `shadow-primary/10`.
+  16. `src/components/onboarding/InvestorProfileFlow.tsx`: (a) Fluxo de onboarding, etapas, seleções e botões $\to$ `primary`.
+  17. `src/routes/app/docs.tsx`: (a) Ícones e bordas de documentação $\to$ `primary`.
+  18. `src/routes/settings.tsx`: (a) Badge de perfil e botão de refazer quiz $\to$ `primary`.
+  19. `src/routes/index.tsx`: (a) Hero da landing, botões e destaques de seções $\to$ `primary`. (b) Valores de proventos/rendimentos em mockups $\to$ Mantidos `emerald`.
+  20. `src/lib/useValuedPortfolio.ts`: Correção do fallback de setor $\to$ `sector: m?.sector || it.sector || t.common.other` (import do `useI18n` + chamada no hook).
+  21. `src/lib/usePortfolioRisk.ts`: Correção do fallback de setor $\to$ `const sector = item.sector || t.common.other` (import do `useI18n` + chamada no hook + `t` no `useMemo`).
+  - **Intocados (100% Categoria b)**: `AssetCard.tsx`, `TransactionsPanel.tsx`, `AssetMonthlyDividendChart.tsx`, `AssetDetailSheet.tsx`, `AssetCardHeader.tsx`, `CashFlowSummary.tsx`, `PortfolioIrrCard.tsx`, `CashFlowChart.tsx`, `ValuationRadar.tsx`, `AssetCardTags.tsx`.
 
 - **Evidências de Validação**:
-  1. **`npm run test`**: 136 passed, 0 failures (22 test files passed, 1 skipped).
-  2. **`npm run build`**: Client e SSR compilados com 0 erros.
+  1. **`git diff --stat`**: 21 arquivos alterados, 136 inserções, 132 deleções.
+  2. **`npm run test`**: 136 passed (22 test files passed, 1 skipped).
+  3. **`npm run build`**: Compilação limpa do cliente (4097 módulos em 9.80s) e SSR (251 módulos em 1.02s).
+
 
 
 

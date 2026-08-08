@@ -612,13 +612,13 @@ function InvestorProfileSettingsCard() {
       <div className="p-6 rounded-xl border border-border/50 bg-card space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <TierIcon className="h-5 w-5 text-emerald-500" />
+            <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <TierIcon className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h4 className="font-semibold text-base">{t.onboarding.result.profileLabel}</h4>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-semibold uppercase tracking-wider">
                   {t.onboarding.result.tiers[tier]}
                 </span>
                 <span className="text-xs text-muted-foreground">
@@ -631,7 +631,7 @@ function InvestorProfileSettingsCard() {
             type="button"
             variant="outline"
             onClick={() => setIsRetaking(true)}
-            className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 self-start sm:self-auto"
+            className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary self-start sm:self-auto"
           >
             {t.onboarding.result.retakeBtn}
           </Button>

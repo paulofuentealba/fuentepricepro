@@ -7,6 +7,7 @@ import { getAssetValuation, netAfterTax, calculateFixedIncomeBalance } from "./c
 import { useSelic } from "./useSelic";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
+import { useI18n } from "./i18n-provider";
 
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields
@@ -17,6 +18,7 @@ export interface ValuedWatchlistItem extends WatchlistItem {
 }
 
 export function useValuedPortfolio() {
+  const { t } = useI18n();
   const { items, isPending: isWatchlistPending, ...rest } = useWatchlist();
   const { loading: isAuthLoading } = useAuth();
   const { targetYield: globalYield } = useSettings();
@@ -65,11 +67,11 @@ export function useValuedPortfolio() {
         ceilingPrice: valuation.activeCeiling ?? 0,
         safetyMargin: valuation.margin ?? 0,
         // Single Source of Truth for Sector: live meta > item DB > default
-        sector: m?.sector || it.sector || "Outros",
+        sector: m?.sector || it.sector || t.common.other,
         valuation,
       };
     });
-  }, [baseItems, quotes, meta, selic]);
+  }, [baseItems, quotes, meta, selic, t]);
 
   const totals = useMemo(() => {
     let usd = 0;

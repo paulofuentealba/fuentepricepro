@@ -150,7 +150,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center p-20 text-muted-foreground gap-4 w-full">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p>{t.watchlist.loading}</p>
       </div>
     );

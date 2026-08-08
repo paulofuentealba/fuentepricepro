@@ -173,7 +173,7 @@ export function FIProgressCard() {
           {isReached ? (
             <div className="absolute -top-1/2 -right-1/4 w-full h-full bg-yellow-500/10 blur-[100px] rounded-full animate-pulse" />
           ) : (
-            <div className="absolute -top-1/2 -left-1/4 w-[80%] h-[120%] bg-emerald-500/10 blur-[80px] rounded-full" />
+            <div className="absolute -top-1/2 -left-1/4 w-[80%] h-[120%] bg-primary/10 blur-[80px] rounded-full" />
           )}
         </div>
 
@@ -182,7 +182,7 @@ export function FIProgressCard() {
           <div className="w-full md:w-1/3 flex flex-col">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-emerald-400" />
+                <Target className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground tracking-widest">
                   Independência financeira
                 </h3>
@@ -231,7 +231,7 @@ export function FIProgressCard() {
                       </div>
                       <Button
                         onClick={handleSaveSettings}
-                        className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                       >
                         {t.fiMode.saveGoal}
                       </Button>
@@ -249,7 +249,7 @@ export function FIProgressCard() {
                 <Button
                   size="sm"
                   onClick={() => setIsSettingsOpen(true)}
-                  className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 w-full font-medium"
+                  className="bg-primary/20 text-primary hover:bg-primary/30 w-full font-medium"
                 >
                   {t.fiMode.activate}
                 </Button>
@@ -309,7 +309,7 @@ export function FIProgressCard() {
                   className={`absolute left-0 top-0 h-full rounded-full ${
                     isReached
                       ? "bg-gradient-to-r from-yellow-500 to-amber-300 shadow-[0_0_10px_rgba(234,179,8,0.5)]"
-                      : "bg-gradient-to-r from-emerald-600 to-emerald-400"
+                      : "bg-gradient-to-r from-primary to-primary/80"
                   }`}
                 />
               </div>

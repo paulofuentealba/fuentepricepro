@@ -449,7 +449,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
                           })
                         }
                         placeholder={t.brokerNote.enterTicker}
-                        className="bg-background/80 uppercase tracking-wide text-xs h-9 focus-visible:ring-emerald-500"
+                        className="bg-background/80 uppercase tracking-wide text-xs h-9 focus-visible:ring-primary"
                       />
                     </div>
                   </div>
@@ -460,7 +460,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
             <Button
               onClick={handleConfirmResolution}
               disabled={isProcessing}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-primary/30 transition-all"
             >
               {isProcessing ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />

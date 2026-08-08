@@ -86,7 +86,7 @@ export function AssetComparator() {
     <div className="w-full space-y-6">
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Scale className="w-6 h-6 text-emerald-500" />
+          <Scale className="w-6 h-6 text-primary" />
           {t.comparator.title}
         </h2>
         <p className="text-sm text-muted-foreground">{t.comparator.subtitle}</p>
@@ -122,7 +122,7 @@ export function AssetComparator() {
                     <button
                       type="button"
                       onClick={() => handleSelect(a)}
-                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors"
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       <span className="flex flex-col">
                         <span className="font-bold">{displayTicker(a.ticker)}</span>
@@ -146,8 +146,8 @@ export function AssetComparator() {
 
       {selectedTickers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/50 rounded-2xl bg-background/20 backdrop-blur mt-8">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6">
-            <Scale className="w-8 h-8 text-emerald-500" />
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+            <Scale className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">{t.comparator.emptyTitle}</h3>
           <p className="text-sm text-muted-foreground max-w-sm">{t.comparator.emptySubtitle}</p>

@@ -61,7 +61,7 @@ function LandingPage() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="dark min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-emerald-500/30 overflow-x-hidden flex flex-col relative">
+    <div className="dark min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-primary/30 overflow-x-hidden flex flex-col relative">
       <div className="sticky top-0 z-50 bg-[#030712]/80 backdrop-blur-md">
         <Header variant="landing" />
       </div>
@@ -70,7 +70,7 @@ function LandingPage() {
       <section className="relative w-full flex flex-col items-center justify-start pt-20 pb-0 px-4 sm:px-6 lg:px-8 z-20 bg-[#030712]">
         {/* Abstract Background Elements */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[800px] bg-emerald-500/10 blur-[120px] rounded-full" />
+          <div className="absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[800px] bg-primary/10 blur-[120px] rounded-full" />
           <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_10%,transparent_100%)]" />
         </div>
 
@@ -78,7 +78,7 @@ function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-sm font-medium text-emerald-400 backdrop-blur-sm shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-sm font-medium text-primary backdrop-blur-sm shadow-primary/15"
           >
             {L.badge}
           </motion.div>
@@ -91,7 +91,7 @@ function LandingPage() {
           >
             {L.heroHeadline1}
             <br className="hidden md:block" />
-            <span className="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               {L.heroHeadline2}
             </span>
           </motion.h1>
@@ -115,7 +115,7 @@ function LandingPage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-emerald-500 text-slate-950 hover:bg-emerald-400 text-lg font-semibold px-8 py-6 rounded-full shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] hover:scale-105"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold px-8 py-6 rounded-full shadow-primary/30 transition-all hover:shadow-primary/50 hover:scale-105"
               >
                 <Link to="/app">
                   {L.ctaTerminal} <ArrowRight className="ml-2 h-5 w-5" />
@@ -125,7 +125,7 @@ function LandingPage() {
               <Button
                 onClick={() => openAuthModal()}
                 size="lg"
-                className="bg-emerald-500 text-slate-950 hover:bg-emerald-400 text-lg font-semibold px-8 py-6 rounded-full shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] hover:scale-105"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold px-8 py-6 rounded-full shadow-primary/30 transition-all hover:shadow-primary/50 hover:scale-105"
               >
                 {L.ctaTerminal} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -167,9 +167,9 @@ function LandingPage() {
               <div className="p-8 h-[500px] grid grid-cols-12 gap-8 opacity-80">
                 {/* Sidebar */}
                 <div className="col-span-2 space-y-6 border-r border-white/5 pr-6">
-                  <div className="flex items-center gap-3 text-emerald-400">
+                  <div className="flex items-center gap-3 text-primary">
                     <Activity className="w-5 h-5 flex-shrink-0" />
-                    <div className="h-4 w-full bg-emerald-500/20 rounded" />
+                    <div className="h-4 w-full bg-primary/20 rounded" />
                   </div>
                   <div className="flex items-center gap-3 text-slate-500">
                     <Map className="w-5 h-5 flex-shrink-0" />
@@ -198,9 +198,9 @@ function LandingPage() {
 
                     {/* ROOT CAUSE FIX 2: Removed Diagonal SVG, added subtle glow */}
                     {/* Card 2: Monthly Yield */}
-                    <div className="h-32 bg-white/5 rounded-xl border border-emerald-500/10 p-5 flex flex-col justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-emerald-500/5" />
-                      <p className="text-xs text-emerald-400/80 mb-2 uppercase tracking-wider relative z-10">
+                    <div className="h-32 bg-white/5 rounded-xl border border-primary/10 p-5 flex flex-col justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-primary/5" />
+                      <p className="text-xs text-primary/80 mb-2 uppercase tracking-wider relative z-10">
                         Monthly Yield
                       </p>
                       <p className="text-2xl font-bold text-white relative z-10">
@@ -257,12 +257,12 @@ function LandingPage() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Card 1: Consenso Fuente (Full Width Hero Card) */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 group relative rounded-2xl border border-emerald-500/20 bg-emerald-950/10 backdrop-blur-md p-8 overflow-hidden hover:border-emerald-500/50 transition-all duration-500 flex flex-col md:flex-row gap-8 items-center shadow-[0_0_30px_rgba(16,185,129,0.05)]">
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 group relative rounded-2xl border border-primary/20 bg-primary/10 backdrop-blur-md p-8 overflow-hidden hover:border-primary/50 transition-all duration-500 flex flex-col md:flex-row gap-8 items-center shadow-primary/5">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
 
             <div className="relative z-10 flex-1">
-              <div className="h-12 w-12 rounded-lg bg-emerald-500/20 flex items-center justify-center mb-6 border border-emerald-500/30">
-                <Sparkles className="h-6 w-6 text-emerald-400" />
+              <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-6 border border-primary/30">
+                <Sparkles className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-4 leading-tight">{L.panel1Title}</h3>
               <p className="text-base text-slate-300 leading-relaxed max-w-lg">{L.panel1Sub}</p>
@@ -276,7 +276,7 @@ function LandingPage() {
                   <p className="text-xs text-slate-500">Banco do Brasil</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-emerald-400 font-mono border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 rounded tracking-wide">
+                  <p className="text-[10px] text-primary font-mono border border-primary/30 bg-primary/10 px-2 py-1 rounded tracking-wide">
                     {L.mockupBuySignal}
                   </p>
                 </div>
@@ -308,10 +308,10 @@ function LandingPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ delay: 0.8, duration: 0.4, ease: "easeOut" }}
-                className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-center relative overflow-hidden"
+                className="bg-primary/10 border border-primary/30 rounded-lg p-4 text-center relative overflow-hidden"
               >
-                <div className="absolute inset-0 bg-emerald-400/5 blur animate-pulse" />
-                <p className="relative z-10 text-[10px] text-emerald-400 uppercase tracking-widest font-bold mb-1">
+                <div className="absolute inset-0 bg-primary/5 blur animate-pulse" />
+                <p className="relative z-10 text-[10px] text-primary uppercase tracking-widest font-bold mb-1">
                   {L.mockupConsensus}
                 </p>
                 <p className="relative z-10 text-3xl font-bold text-white tracking-tight">
@@ -443,7 +443,7 @@ function LandingPage() {
                   <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-[10px] font-bold border border-blue-500/30">
                     US$
                   </div>
-                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-[10px] font-bold border border-emerald-500/30 -ml-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-bold border border-primary/30 -ml-2">
                     R$
                   </div>
                 </div>

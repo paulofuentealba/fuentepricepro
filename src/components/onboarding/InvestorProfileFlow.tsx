@@ -118,7 +118,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
   if (isPending) {
     const loadingCard = (
       <div className="w-full max-w-lg mx-auto bg-card/95 border border-border/60 rounded-2xl p-12 flex flex-col items-center justify-center space-y-3 backdrop-blur-md shadow-2xl">
-        <Loader2 className="h-8 w-8 text-emerald-500 animate-spin" />
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
         <p className="text-xs text-muted-foreground">{t.common.loading}</p>
       </div>
     );
@@ -145,13 +145,13 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back</span>
             </button>
-            <span className="font-medium text-emerald-400">
+            <span className="font-medium text-primary">
               {O.questions.step.replace("{{current}}", String(step))}
             </span>
           </div>
           <div className="w-full bg-muted/60 h-1.5 rounded-full overflow-hidden">
             <div
-              className="bg-emerald-500 h-full transition-all duration-300 ease-out"
+              className="bg-primary h-full transition-all duration-300 ease-out"
               style={{ width: `${(step / 4) * 100}%` }}
             />
           </div>
@@ -162,8 +162,8 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
         {/* Step 0: Welcome */}
         {step === 0 && (
           <div className="text-center space-y-6 py-4">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-              <Target className="w-8 h-8 text-emerald-500" />
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-primary/15">
+              <Target className="w-8 h-8 text-primary" />
             </div>
 
             <div className="space-y-2">
@@ -178,7 +178,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
             <div className="space-y-3 pt-4">
               <Button
                 onClick={() => setStep(1)}
-                className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all"
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-primary/40 transition-all"
               >
                 {O.welcome.startBtn}
                 <ChevronRight className="ml-2 h-4 w-4" />
@@ -214,15 +214,15 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
                     onClick={() => handleSelectGoal(id as ProfileGoal)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-500/12 text-emerald-400 font-medium shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                        : "border-border/60 bg-card/50 hover:border-emerald-500/40 hover:bg-muted/30 text-foreground"
+                        ? "border-primary bg-primary/12 text-primary font-medium shadow-primary/15"
+                        : "border-border/60 bg-card/50 hover:border-primary/40 hover:bg-muted/30 text-foreground"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`h-5 w-5 ${isSelected ? "text-emerald-500" : "text-muted-foreground"}`} />
+                      <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                       <span className="text-sm">{label}</span>
                     </div>
-                    {isSelected && <Check className="h-4 w-4 text-emerald-500" />}
+                    {isSelected && <Check className="h-4 w-4 text-primary" />}
                   </button>
                 );
               })}
@@ -237,7 +237,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
               </button>
               <Button
                 onClick={() => setStep(2)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 shadow-primary/30"
               >
                 {O.questions.continue}
               </Button>
@@ -265,15 +265,15 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
                     onClick={() => handleSelectHorizon(id as ProfileHorizon)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-500/12 text-emerald-400 font-medium shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                        : "border-border/60 bg-card/50 hover:border-emerald-500/40 hover:bg-muted/30 text-foreground"
+                        ? "border-primary bg-primary/12 text-primary font-medium shadow-primary/15"
+                        : "border-border/60 bg-card/50 hover:border-primary/40 hover:bg-muted/30 text-foreground"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`h-5 w-5 ${isSelected ? "text-emerald-500" : "text-muted-foreground"}`} />
+                      <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                       <span className="text-sm">{label}</span>
                     </div>
-                    {isSelected && <Check className="h-4 w-4 text-emerald-500" />}
+                    {isSelected && <Check className="h-4 w-4 text-primary" />}
                   </button>
                 );
               })}
@@ -288,7 +288,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
               </button>
               <Button
                 onClick={() => setStep(3)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 shadow-primary/30"
               >
                 {O.questions.continue}
               </Button>
@@ -316,15 +316,15 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
                     onClick={() => handleSelectReaction(id as ProfileReaction)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-500/12 text-emerald-400 font-medium shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                        : "border-border/60 bg-card/50 hover:border-emerald-500/40 hover:bg-muted/30 text-foreground"
+                        ? "border-primary bg-primary/12 text-primary font-medium shadow-primary/15"
+                        : "border-border/60 bg-card/50 hover:border-primary/40 hover:bg-muted/30 text-foreground"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`h-5 w-5 ${isSelected ? "text-emerald-500" : "text-muted-foreground"}`} />
+                      <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                       <span className="text-sm">{label}</span>
                     </div>
-                    {isSelected && <Check className="h-4 w-4 text-emerald-500" />}
+                    {isSelected && <Check className="h-4 w-4 text-primary" />}
                   </button>
                 );
               })}
@@ -339,7 +339,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
               </button>
               <Button
                 onClick={() => setStep(4)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 shadow-primary/30"
               >
                 {O.questions.continue}
               </Button>
@@ -367,15 +367,15 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
                     onClick={() => handleSelectExperience(id as ProfileExperience)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-500/12 text-emerald-400 font-medium shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                        : "border-border/60 bg-card/50 hover:border-emerald-500/40 hover:bg-muted/30 text-foreground"
+                        ? "border-primary bg-primary/12 text-primary font-medium shadow-primary/15"
+                        : "border-border/60 bg-card/50 hover:border-primary/40 hover:bg-muted/30 text-foreground"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`h-5 w-5 ${isSelected ? "text-emerald-500" : "text-muted-foreground"}`} />
+                      <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                       <span className="text-sm">{label}</span>
                     </div>
-                    {isSelected && <Check className="h-4 w-4 text-emerald-500" />}
+                    {isSelected && <Check className="h-4 w-4 text-primary" />}
                   </button>
                 );
               })}
@@ -390,7 +390,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
               </button>
               <Button
                 onClick={() => setStep(5)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-9 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 shadow-primary/30"
               >
                 {O.questions.continue}
               </Button>
@@ -404,10 +404,10 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
             {/* Visual Badge (~104px diameter) */}
             <div className="relative mx-auto w-28 h-28 flex items-center justify-center">
               {/* Outer dashed ring */}
-              <div className="absolute inset-0 rounded-full border-[1.5px] border-dashed border-emerald-500/45 animate-spin-slow" />
+              <div className="absolute inset-0 rounded-full border-[1.5px] border-dashed border-primary/45 animate-spin-slow" />
               {/* Inner circle with radial emerald gradient */}
-              <div className="w-22 h-22 rounded-full bg-gradient-to-b from-emerald-500/20 to-emerald-950/40 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.25)]">
-                <TierIcon className="w-10 h-10 text-emerald-400" />
+              <div className="w-22 h-22 rounded-full bg-gradient-to-b from-primary/20 to-primary/40 border border-primary/30 flex items-center justify-center shadow-primary/25">
+                <TierIcon className="w-10 h-10 text-primary" />
               </div>
             </div>
 
@@ -421,11 +421,11 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
             </div>
 
             {/* Profile Result Card */}
-            <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 space-y-2 text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-primary/30 bg-primary/10 space-y-2 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/40 text-primary text-xs font-semibold uppercase tracking-wider">
                 {O.result.tiers[tier]}
               </div>
-              <div className="text-xs font-medium text-emerald-300">
+              <div className="text-xs font-medium text-primary">
                 {O.result.sublabels[sublabel]}
               </div>
               <p className="text-xs text-muted-foreground pt-1">
@@ -435,7 +435,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
 
             <Button
               onClick={handleFinish}
-              className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-primary/40 transition-all"
             >
               {O.result.finishBtn}
             </Button>

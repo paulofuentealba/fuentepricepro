@@ -126,7 +126,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
       >
         <SheetHeader className="px-6 py-6 border-b border-border/60 relative overflow-hidden">
           {/* Decorative Glow */}
-          <div className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px]" />
+          <div className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/10 blur-[80px]" />
 
           <div className="flex items-center gap-2">
             {step > 1 && (
@@ -138,20 +138,20 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                 <ChevronLeft className="h-5 w-5" />
               </button>
             )}
-            <Shield className="h-5 w-5 text-emerald-400" />
+            <Shield className="h-5 w-5 text-primary" />
             <SheetTitle className="text-foreground">
               {t.watchlist.fixedIncomeWizard.title}
             </SheetTitle>
           </div>
           <div className="mt-4 flex items-center justify-between gap-2 px-1">
             <div
-              className={`h-1.5 flex-1 rounded-full ${step >= 1 ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-muted"}`}
+              className={`h-1.5 flex-1 rounded-full ${step >= 1 ? "bg-primary shadow-primary/50" : "bg-muted"}`}
             />
             <div
-              className={`h-1.5 flex-1 rounded-full ${step >= 2 ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-muted"}`}
+              className={`h-1.5 flex-1 rounded-full ${step >= 2 ? "bg-primary shadow-primary/50" : "bg-muted"}`}
             />
             <div
-              className={`h-1.5 flex-1 rounded-full ${step >= 3 ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-muted"}`}
+              className={`h-1.5 flex-1 rounded-full ${step >= 3 ? "bg-primary shadow-primary/50" : "bg-muted"}`}
             />
           </div>
         </SheetHeader>
@@ -168,10 +168,10 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                     key={idx}
                     type="button"
                     onClick={() => handleNextStep1(idx)}
-                    className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/40 p-4 transition-all hover:bg-muted/80 hover:border-emerald-500/50 group"
+                    className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/40 p-4 transition-all hover:bg-muted/80 hover:border-primary/50 group"
                   >
                     <span className="text-lg font-semibold text-foreground">{idx}</span>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-emerald-400 transition-colors" />
+                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                   </button>
                 ))}
               </div>
@@ -193,7 +193,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                   placeholder={t.watchlist.fixedIncomeWizard.assetNamePlaceholder}
                   value={assetName}
                   onChange={(e) => setAssetName(e.target.value)}
-                  className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50"
+                  className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   required
                 />
               </div>
@@ -209,7 +209,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                   placeholder="1000.00"
                   value={investedAmount}
                   onChange={(e) => setInvestedAmount(Number(e.target.value))}
-                  className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50"
+                  className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   required
                 />
               </div>
@@ -229,7 +229,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                   placeholder={indexer === "CDI" ? "110" : "6.5"}
                   value={rate}
                   onChange={(e) => setRate(Number(e.target.value))}
-                  className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50"
+                  className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   required
                 />
               </div>
@@ -244,7 +244,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="bg-card/50 border-border/50 text-foreground focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50"
+                    className="bg-card/50 border-border/50 text-foreground focus-visible:ring-primary/50 focus-visible:border-primary/50"
                     required
                   />
                 </div>
@@ -257,7 +257,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                     type="date"
                     value={maturityDate}
                     onChange={(e) => setMaturityDate(e.target.value)}
-                    className="bg-card/50 border-border/50 text-foreground focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50"
+                    className="bg-card/50 border-border/50 text-foreground focus-visible:ring-primary/50 focus-visible:border-primary/50"
                     required
                   />
                 </div>
@@ -343,7 +343,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
             <Button
               type="submit"
               form="fi-details-form"
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/30"
             >
               {t.watchlist.fixedIncomeWizard.calculate}
             </Button>
@@ -351,7 +351,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
           {step === 3 && (
             <Button
               onClick={handleConfirm}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/30"
             >
               {t.watchlist.fixedIncomeWizard.confirm}
             </Button>

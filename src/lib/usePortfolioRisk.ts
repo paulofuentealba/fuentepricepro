@@ -3,6 +3,7 @@ import { useValuedPortfolio } from "./useValuedPortfolio";
 import { useAuth } from "./auth-provider";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "./queryOptions";
+import { useI18n } from "./i18n-provider";
 
 export type RiskWarning = {
   id: string;
@@ -41,6 +42,7 @@ export type TypeConcentration = {
 };
 
 export function usePortfolioRisk() {
+  const { t } = useI18n();
   const { valuedItems: items } = useValuedPortfolio();
   const { user } = useAuth();
   const fxQuery = useQuery(exchangeRateQueryOptions());
@@ -89,7 +91,7 @@ export function usePortfolioRisk() {
       typeMap[item.type] = (typeMap[item.type] || 0) + value;
 
       // Sector
-      const sector = item.sector || "Outros";
+      const sector = item.sector || t.common.other;
       sectorMap[sector] = (sectorMap[sector] || 0) + value;
 
       // Warnings
@@ -194,5 +196,5 @@ export function usePortfolioRisk() {
       types,
       warnings,
     };
-  }, [items, baseCurrency, fx]);
+  }, [items, baseCurrency, fx, t]);
 }

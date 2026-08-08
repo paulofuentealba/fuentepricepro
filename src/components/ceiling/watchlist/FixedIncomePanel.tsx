@@ -49,12 +49,12 @@ export function FixedIncomePanel({ item }: Props) {
   return (
     <div className="relative mt-6 overflow-hidden rounded-xl border border-slate-700/50 bg-slate-900/50 backdrop-blur-md p-6 shadow-2xl">
       {/* Decorative Glow */}
-      <div className="pointer-events-none absolute -top-24 -left-24 h-48 w-48 rounded-full bg-emerald-500/10 blur-[80px]" />
+      <div className="pointer-events-none absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/10 blur-[80px]" />
 
       <div className="relative z-10">
         <div className="mb-4 flex items-center justify-between border-b border-slate-700/50 pb-4">
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-emerald-400" />
+            <Shield className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold text-slate-200">
               {t.watchlist.fixedIncomePanel.title}
             </h3>

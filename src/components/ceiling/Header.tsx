@@ -86,7 +86,7 @@ export function Header({ variant = "app" }: HeaderProps) {
         <div className="flex items-center gap-2">
           {/* Desktop Only Exchange Rate */}
           {variant === "app" && fx?.USDBRL && (
-            <div className="hidden items-center justify-center rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium tracking-tight text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)] backdrop-blur-sm md:flex">
+            <div className="hidden items-center justify-center rounded-md border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium tracking-tight text-primary shadow-primary/10 backdrop-blur-sm md:flex">
               USD/BRL R$ {fx.USDBRL.toFixed(2)}
             </div>
           )}
@@ -132,7 +132,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                   type="button"
                   size="sm"
                   onClick={() => openAuthModal()}
-                  className="bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-primary/20 hover:shadow-primary/30 transition-all"
                 >
                   {L.signUp}
                 </Button>
@@ -144,7 +144,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                 asChild
                 size="sm"
                 variant="outline"
-                className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 inline-flex shadow-[0_0_10px_rgba(16,185,129,0.1)] mr-2 transition-all"
+                className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary inline-flex shadow-primary/10 mr-2 transition-all"
               >
                 <Link to="/app">{L.goToTerminal}</Link>
               </Button>
@@ -204,7 +204,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                   {variant === "landing" && (
                     <a
                       href="#features"
-                      className="text-lg font-medium hover:text-emerald-400 transition-colors"
+                      className="text-lg font-medium hover:text-primary transition-colors"
                     >
                       {L.navFeatures}
                     </a>
@@ -230,21 +230,21 @@ export function Header({ variant = "app" }: HeaderProps) {
                       {variant === "landing" && (
                         <Link
                           to="/app"
-                          className="text-lg font-medium hover:text-emerald-400 transition-colors"
+                          className="text-lg font-medium hover:text-primary transition-colors"
                         >
                           {L.goToTerminal}
                         </Link>
                       )}
                       <Link
                         to="/app/docs"
-                        className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors"
+                        className="text-lg font-medium flex items-center gap-2 hover:text-primary transition-colors"
                       >
                         <BookOpen className="h-5 w-5" />
                         {t.docs.navLink}
                       </Link>
                       <Link
                         to="/settings"
-                        className="text-lg font-medium flex items-center gap-2 hover:text-emerald-400 transition-colors"
+                        className="text-lg font-medium flex items-center gap-2 hover:text-primary transition-colors"
                       >
                         <Settings className="h-5 w-5" />
                         {L.settings}
@@ -266,7 +266,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                         <Button
                           type="button"
                           onClick={() => openAuthModal()}
-                          className="w-full justify-center bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                          className="w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90"
                         >
                           {L.signUp}
                         </Button>

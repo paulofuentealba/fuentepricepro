@@ -84,7 +84,7 @@ function DocsPage() {
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in-0 slide-in-from-bottom-1 duration-300 pb-12">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-emerald-500" />
+          <BookOpen className="h-8 w-8 text-primary" />
           {t.docs.title}
         </h1>
         <p className="text-muted-foreground">{t.docs.description}</p>
@@ -129,10 +129,10 @@ function DocsPage() {
             {filterCard(t.docs.consensus.title, t.docs.consensus.description) && (
               <Card
                 id="consensus"
-                className="bg-background/60 backdrop-blur-md border-emerald-500/20 scroll-m-20"
+                className="bg-background/60 backdrop-blur-md border-primary/20 scroll-m-20"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-emerald-400">
+                  <CardTitle className="flex items-center gap-2 text-primary">
                     <Lightbulb className="h-5 w-5" />
                     {t.docs.consensus.title}
                   </CardTitle>
@@ -234,7 +234,7 @@ function DocsPage() {
               <Card id="safety-margin" className="bg-background/40 backdrop-blur-md scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <ShieldCheck className="h-5 w-5 text-emerald-400" />
+                    <ShieldCheck className="h-5 w-5 text-primary" />
                     {t.docs.metrics.safetyMargin.title}
                   </CardTitle>
                 </CardHeader>
@@ -251,7 +251,7 @@ function DocsPage() {
               <Card id="yield-on-cost" className="bg-background/40 backdrop-blur-md scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Percent className="h-5 w-5 text-emerald-400" />
+                    <Percent className="h-5 w-5 text-primary" />
                     {t.docs.metrics.yieldOnCost.title}
                   </CardTitle>
                 </CardHeader>
@@ -312,7 +312,7 @@ function DocsPage() {
               <Card id="snowball" className="bg-background/40 backdrop-blur-md scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <LineChart className="h-5 w-5 text-emerald-400" />
+                    <LineChart className="h-5 w-5 text-primary" />
                     {t.docs.concepts.snowball.title}
                   </CardTitle>
                 </CardHeader>
@@ -435,9 +435,9 @@ function DocsPage() {
               Object.values(t.docs.supportedBrokers).join(" "),
             ) && (
               <div className="grid gap-6">
-                <Card className="bg-background/40 backdrop-blur-md border-emerald-500/20">
+                <Card className="bg-background/40 backdrop-blur-md border-primary/20">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base text-emerald-400">
+                    <CardTitle className="flex items-center gap-2 text-base text-primary">
                       <FileText className="h-5 w-5" />
                       {t.docs.supportedBrokers.sinacorTitle}
                     </CardTitle>

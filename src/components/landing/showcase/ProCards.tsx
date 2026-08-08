@@ -17,7 +17,7 @@ export function ProAllocationCard() {
   const { t } = useI18n();
   const top3 = ["BBSE3", "VALE", "O"].map(cleanTicker);
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-success/50 bg-card/80 p-4 shadow-xl shadow-emerald-500/10 backdrop-blur">
+    <div className="flex h-full flex-col rounded-2xl border border-success/50 bg-card/80 p-4 shadow-xl shadow-primary/10 backdrop-blur">
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-success/40 bg-success/10 text-success">
           <Target className="h-5 w-5" />
@@ -69,7 +69,7 @@ export function ProForecastCard() {
     .join(" ");
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-success/50 bg-card/80 p-4 shadow-xl shadow-emerald-500/10 backdrop-blur">
+    <div className="flex h-full flex-col rounded-2xl border border-success/50 bg-card/80 p-4 shadow-xl shadow-primary/10 backdrop-blur">
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-success/40 bg-success/10 text-success">
           <Wallet className="h-5 w-5" />

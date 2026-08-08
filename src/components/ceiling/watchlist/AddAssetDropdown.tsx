@@ -24,7 +24,7 @@ export function AddAssetDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+        <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/40">
           <PlusCircle className="h-4 w-4" />
           {t.watchlist.addAssetDropdown || t.watchlist.addFirstAsset || "Add Asset"}
           <ChevronDown className="h-4 w-4 ml-1 opacity-70" />
@@ -32,7 +32,7 @@ export function AddAssetDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center" className="w-56 bg-slate-900 border-slate-700">
         <DropdownMenuItem
-          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-emerald-400"
+          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-primary"
           onClick={onNavigateToScreener}
         >
           <TrendingUp className="h-4 w-4" />
@@ -42,7 +42,7 @@ export function AddAssetDropdown({
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-emerald-400"
+          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-primary"
           onClick={onOpenFIWizard}
         >
           <Shield className="h-4 w-4" />
@@ -52,7 +52,7 @@ export function AddAssetDropdown({
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-emerald-400"
+          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-primary"
           onClick={onOpenBrokerUploader}
         >
           <FileType2 className="h-4 w-4" />

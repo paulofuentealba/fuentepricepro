@@ -18,12 +18,12 @@ export function RiskRadar() {
   if (risk.totalEquity === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/50 rounded-2xl bg-background/20 backdrop-blur mt-8">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6">
-          <ShieldAlert className="w-8 h-8 text-emerald-500" />
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+          <ShieldAlert className="w-8 h-8 text-primary" />
         </div>
         <h3 className="text-lg font-bold text-foreground mb-2">{t.riskRadar.emptyTitle}</h3>
         <p className="text-sm text-muted-foreground max-w-sm mb-6">{t.riskRadar.emptySubtitle}</p>
-        <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white">
+        <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Link to="/app">{t.emptyStates?.goToPortfolio || "Ir para a Carteira"}</Link>
         </Button>
       </div>
@@ -113,7 +113,7 @@ export function RiskRadar() {
                   </div>
                   <div className="h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-emerald-500 rounded-full"
+                      className="h-full bg-primary rounded-full"
                       style={{ width: `${Math.min(c.weightPct, 100)}%` }}
                     />
                   </div>

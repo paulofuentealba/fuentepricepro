@@ -21,7 +21,7 @@ export function ShowcaseCarousel() {
       {/* Ambient emerald glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[80%] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl"
+        className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[80%] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
       />
 
       {/* Heading with nav arrows */}

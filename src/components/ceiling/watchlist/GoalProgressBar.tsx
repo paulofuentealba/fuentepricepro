@@ -12,10 +12,10 @@ interface GoalProgressBarProps {
 }
 
 const CONTAINER_BASE = "rounded-md border p-2.5";
-const TONE_ACTIVE = "border-emerald-500/25 bg-emerald-500/5";
+const TONE_ACTIVE = "border-primary/25 bg-primary/5";
 const TONE_REACHED = "border-amber-400/40 bg-amber-400/10";
 const BAR_TRACK = "mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-background/60";
-const BAR_ACTIVE = "bg-emerald-500";
+const BAR_ACTIVE = "bg-primary";
 const BAR_REACHED = "bg-gradient-to-r from-amber-300 to-amber-500";
 
 function GoalProgressBarImpl({ goal, quantity, annualDividend, currency }: GoalProgressBarProps) {
@@ -41,7 +41,7 @@ function GoalProgressBarImpl({ goal, quantity, annualDividend, currency }: GoalP
   return (
     <div className={cn(CONTAINER_BASE, reached ? TONE_REACHED : TONE_ACTIVE)}>
       <div className="flex items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-wide">
-        <span className={reached ? "text-amber-300" : "text-emerald-300/90"}>
+        <span className={reached ? "text-amber-300" : "text-primary"}>
           {reached
             ? t.watchlist.goalReached
             : t.watchlist.goalProgress

@@ -54,13 +54,13 @@ export function WatchlistKpiSection({
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col rounded-xl border border-emerald-500/30 bg-background/60 backdrop-blur-md p-4 lg:p-6 transition-colors hover:bg-background/80">
+          <div className="flex flex-col rounded-xl border border-primary/30 bg-background/60 backdrop-blur-md p-4 lg:p-6 transition-colors hover:bg-background/80">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
               {t.watchlist.consolidatedNetWorth}
             </span>
             <div className="flex items-center gap-2 text-4xl lg:text-5xl font-bold tabular-nums">
-              <Globe className="h-8 w-8 text-emerald-400" />
-              <span className="bg-gradient-to-r from-white via-emerald-400 to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
+              <Globe className="h-8 w-8 text-primary" />
+              <span className="bg-gradient-to-r from-white via-primary to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
                 {formatCurrency(totals.consolidatedNetWorth, "BRL", locale)}
               </span>
             </div>
@@ -73,12 +73,12 @@ export function WatchlistKpiSection({
             label={t.watchlist.consolidatedIncome}
             value={
               <div className="flex items-center gap-2 text-2xl font-bold">
-                <Globe className="h-5 w-5 text-emerald-400" />
+                <Globe className="h-5 w-5 text-primary" />
                 {formatCurrency(totals.consolidatedIncome, "BRL", locale)}
               </div>
             }
             subValue={t.watchlist.consolidatedIncomeSub}
-            className="bg-background/60 backdrop-blur-md border border-emerald-500/20 py-4"
+            className="bg-background/60 backdrop-blur-md border border-primary/20 py-4"
           />
 
           <div className="grid grid-cols-2 gap-3">

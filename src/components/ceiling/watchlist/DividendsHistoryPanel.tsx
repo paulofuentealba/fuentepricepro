@@ -110,7 +110,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
       <Card className="bg-background/60 backdrop-blur-sm border-border/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <History className="h-4 w-4 text-emerald-500" />
+            <History className="h-4 w-4 text-primary" />
             {t.watchlist.myIncomeSummary}
           </CardTitle>
         </CardHeader>
