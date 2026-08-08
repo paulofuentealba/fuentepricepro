@@ -145,6 +145,32 @@ Dados de Mercado, a menos que a validação desta última falhe).
 
 ---
 
+## FECHAMENTO — Bolsai + HG Brasil (validação real, 2026-08-07)
+
+Script `scripts/validate-bolsai-hgbrasil.ts` executado com as chaves reais do `.env`
+contra 6 tickers (BBSE3, PETR4, TAEE11, HGLG11, MXRF11, AFHI11). Resultado:
+
+| API | Resultado | Causa |
+|---|---|---|
+| **Bolsai** | `403 Pro tier required` em 100% dos tickers testados | Chave é de tier free; endpoint `/api/v1/dividends/{ticker}` exige assinatura Pro |
+| **HG Brasil** | `UNAUTHORIZED_KEY` em 100% dos tickers testados | Chave válida (`key_status: valid`), mas sem acesso ao recurso `finance/dividends` no plano atual |
+
+**Veredicto: nenhuma das duas entrega `paymentDate` (ou qualquer dado) no plano
+gratuito.** Diferente do caso CVM, aqui não chegamos nem a avaliar qualidade de
+dado — é bloqueio de tier antes de qualquer resposta útil. Não há caminho
+gratuito viável nessas duas fontes.
+
+**Decisão**: capítulo encerrado. `paymentDate` para BR continua resolvido via
+estimativa de calendário comercial brasileiro (`fiiPaymentRules.ts`), até que
+**Dados de Mercado** (candidata já registrada acima) seja validada — essa
+continua sendo a próxima tentativa, não Bolsai/HG Brasil upgradado para Pro.
+
+**Pendência aberta para Paulo**: decidir se `BOLSAI_API_TOKEN` e
+`HGBRASIL_API_KEY` saem do `.env` agora (sem uso ativo) ou ficam registradas
+caso decida pagar algum dos planos Pro no futuro.
+
+---
+
 ## Nota de segurança
 As chaves de API usadas nos testes do relatório original (`api_enrichment_report_v3.md`)
 são de uso pessoal do Paulo para validação. Recomendação: mover para `.env.local`

@@ -69,3 +69,17 @@ prossegue para a implementação de fato. Pular esta etapa — ou entregar um
 plano que só lista arquivos sem os pontos de atenção — é uma violação desta
 regra, mesmo que o resultado final esteja correto. O plano existe para
 permitir correção ANTES do trabalho ser feito, não para documentar depois.
+
+🧭 9. Governança de Roles (Skills)
+Regra: Em toda atividade substantiva do projeto (revisão, plano, roadmap,
+desenho de solução, copy, UX), o Claude deve considerar explicitamente os
+seis papéis instalados: fuente-architecture-review, fuente-solution-architect,
+fuente-business-architect, fuente-product-manager, fuente-product-marketing,
+fuente-ux-designer.
+Ação: Se um papel não se aplica à atividade em questão, isso deve ser
+declarado explicitamente, com o motivo — nunca omitido silenciosamente.
+A fonte canônica de cada papel vive em skills/*/SKILL.md, versionada neste
+repositório; a versão instalada no Claude é uma cópia e deve ser
+resincronizada manualmente sempre que o SKILL.md correspondente for
+alterado aqui (rodar scripts/check.py --manifest após editar, depois
+reinstalar o skill).

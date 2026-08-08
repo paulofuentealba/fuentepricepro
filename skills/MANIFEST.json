@@ -1,0 +1,28 @@
+{
+  "skills": [
+    {
+      "name": "fuente-architecture-review",
+      "sha256": "d287602df5157ce1bd44821ad004cce91bf0da1ce6e5c6ec278f0a19f854b3c1"
+    },
+    {
+      "name": "fuente-business-architect",
+      "sha256": "3c1bb4d7734f1c1b2c6c642bee4c21dce777d918fa2cf2ebd94d7adff2b8eaaf"
+    },
+    {
+      "name": "fuente-product-manager",
+      "sha256": "0c9512764e1b1188f67c031035c97f70d07b9f5ac4f79132b9ebc756aed65764"
+    },
+    {
+      "name": "fuente-product-marketing",
+      "sha256": "633a594dc43f12323b324ae85da6714d18cec1dacefabde1499c3571564cb5fb"
+    },
+    {
+      "name": "fuente-solution-architect",
+      "sha256": "fb55a45196083a41ac298de0342e63121a36bd626c91e2e4016fa3af38a53d8a"
+    },
+    {
+      "name": "fuente-ux-designer",
+      "sha256": "80fe94aca5bb75da87ab432bf7fb90ff497799494ea508029243dff2cd686f53"
+    }
+  ]
+}
