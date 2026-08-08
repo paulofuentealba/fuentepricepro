@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, Search, Sparkles, Calendar as CalendarIcon } from "lucide-react";
+import { Pencil, Search, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -21,6 +19,7 @@ import { searchQueryOptions, assetQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
 import { displayTicker } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { InvestingSinceField } from "@/components/ceiling/shared/InvestingSinceField";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
@@ -58,6 +57,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [confirmHit, setConfirmHit] = useState<SearchHit | null>(null);
+  const [investingSinceDate, setInvestingSinceDate] = useState<number>(Date.now());
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSubmittedRef = useRef(false);
 
@@ -176,6 +176,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     }
 
     setConfirmHit(hit);
+    setInvestingSinceDate(Date.now());
     setQuery(hit.ticker);
     setManualType(null);
     setEditingType(false);
@@ -194,6 +195,18 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
           <p className="text-sm text-muted-foreground">{t.form.confirmDesc}</p>
         </div>
 
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+            {t.form.investingSince}
+          </Label>
+          <InvestingSinceField
+            value={investingSinceDate}
+            onChange={(d) => setInvestingSinceDate(d.getTime())}
+            firstTransactionDate={null}
+            className="w-full"
+          />
+        </div>
+
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" onClick={() => setConfirmHit(null)}>
             {t.common.cancel}
@@ -208,7 +221,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
                 targetYield: globalYield,
                 averagePrice: null,
                 customTaxRate: null,
-                investingSince: Date.now(),
+                investingSince: investingSinceDate,
               });
             }}
           >
