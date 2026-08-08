@@ -9,6 +9,7 @@
     "build": "npm run check-tagline && vite build",
     "build:dev": "npm run check-tagline && vite build --mode development",
     "test": "vitest run",
+    "test:rules": "npx firebase-tools emulators:exec --only firestore \"vitest run src/lib/__tests__/firestoreRules.test.ts\"",
     "test:watch": "vitest",
     "ingest:cvm": "tsx scripts/ingest-cvm.ts",
     "preview": "vite preview",
@@ -79,6 +80,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/adm-zip": "^0.5.8",
