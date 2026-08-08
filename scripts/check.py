@@ -26,6 +26,9 @@ REQUIRED_ROLES = {
     "fuente-product-manager",
     "fuente-product-marketing",
     "fuente-ux-designer",
+    "fuente-investidor-profissional",
+    "fuente-investidor-iniciante",
+    "fuente-advogado-lgpd-gdpr",
 }
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -93,7 +96,7 @@ def check_skill(skill_dir: Path) -> dict | None:
             fail(f"{skill_dir.name}: referencia '{ref}' que não existe em skills/")
 
     if skill_dir.name not in REQUIRED_ROLES:
-        warn(f"{skill_dir.name}: fora dos 6 papéis canônicos da Regra 9")
+        warn(f"{skill_dir.name}: fora dos 9 papéis canônicos da Regra 9")
 
     sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
     return {"name": skill_dir.name, "sha256": sha256}

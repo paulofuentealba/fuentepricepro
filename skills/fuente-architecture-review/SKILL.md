@@ -92,4 +92,4 @@ Usar ⚠️ quando a regra é parcialmente atendida ou requer confirmação de P
 
 ## Lembrete final
 
-Static code analysis ≠ behavioral proof. Mesmo que todas as 9 regras deste checklist estejam ✅, isso não substitui a verificação comportamental (build limpo, teste em dispositivo real, observação do Firestore Console) antes de aprovar push para produção.
+Static code analysis ≠ behavioral proof. Mesmo que todas as 9 regras deste checklist estejam ✅, isso não substitui a verificação comportamental: todo relatório de conclusão de tarefa deve comprovar obrigatoriamente a aprovação dos 3 gates de verificação (`npx tsc --noEmit` limpo sem 0 erros, `npm run test` sem falhas, e `npm run build` limpo) antes de aprovar push para produção.

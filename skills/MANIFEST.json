@@ -1,12 +1,24 @@
 {
   "skills": [
     {
+      "name": "fuente-advogado-lgpd-gdpr",
+      "sha256": "e8423a7b3f81d533eae9f9f21815116cbda0cba3a737e9d407fff7abff61cbcf"
+    },
+    {
       "name": "fuente-architecture-review",
-      "sha256": "d287602df5157ce1bd44821ad004cce91bf0da1ce6e5c6ec278f0a19f854b3c1"
+      "sha256": "f3e534595606109ba6fee9c758d1929828a88c2dce1663da94c1698b730ffd97"
     },
     {
       "name": "fuente-business-architect",
       "sha256": "3c1bb4d7734f1c1b2c6c642bee4c21dce777d918fa2cf2ebd94d7adff2b8eaaf"
+    },
+    {
+      "name": "fuente-investidor-iniciante",
+      "sha256": "2bb5b3384bdc3982ddbbd9499016ff130008ced1d533c914ad19e17c79acfa9c"
+    },
+    {
+      "name": "fuente-investidor-profissional",
+      "sha256": "d6e61593771a29e8ea3ac70ca669ea1ac7e88fe0f109d8e4c35195a6ea7525ba"
     },
     {
       "name": "fuente-product-manager",

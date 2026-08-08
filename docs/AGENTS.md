@@ -69,13 +69,18 @@ prossegue para a implementação de fato. Pular esta etapa — ou entregar um
 plano que só lista arquivos sem os pontos de atenção — é uma violação desta
 regra, mesmo que o resultado final esteja correto. O plano existe para
 permitir correção ANTES do trabalho ser feito, não para documentar depois.
+Todo relatório de conclusão de tarefa deve comprovar obrigatoriamente a
+aprovação dos 3 gates de verificação: `npx tsc --noEmit` limpo (0 erros),
+`npm run test` sem falhas, e `npm run build` limpo — os três obrigatoriamente,
+não só dois.
 
 🧭 9. Governança de Roles (Skills)
 Regra: Em toda atividade substantiva do projeto (revisão, plano, roadmap,
 desenho de solução, copy, UX), o Claude deve considerar explicitamente os
-seis papéis instalados: fuente-architecture-review, fuente-solution-architect,
+nove papéis instalados: fuente-architecture-review, fuente-solution-architect,
 fuente-business-architect, fuente-product-manager, fuente-product-marketing,
-fuente-ux-designer.
+fuente-ux-designer, fuente-investidor-profissional, fuente-investidor-iniciante,
+fuente-advogado-lgpd-gdpr.
 Ação: Se um papel não se aplica à atividade em questão, isso deve ser
 declarado explicitamente, com o motivo — nunca omitido silenciosamente.
 A fonte canônica de cada papel vive em skills/*/SKILL.md, versionada neste

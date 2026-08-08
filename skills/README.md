@@ -22,6 +22,9 @@ skills/
   fuente-product-manager/SKILL.md
   fuente-product-marketing/SKILL.md
   fuente-ux-designer/SKILL.md
+  fuente-investidor-profissional/SKILL.md
+  fuente-investidor-iniciante/SKILL.md
+  fuente-advogado-lgpd-gdpr/SKILL.md
 scripts/
   check.py
 ```
@@ -42,12 +45,12 @@ python3 scripts/check.py --manifest   # regenera MANIFEST.json após editar
 | `description` | Excede 1024 chars (limite da plataforma) |
 | Corpo | Menor que 200 chars — stub disfarçado de skill |
 | Referências cruzadas | Um skill cita `fuente-*` que não existe |
-| **Regra 9** | Algum dos 6 papéis obrigatórios está ausente |
+| **Regra 9** | Algum dos 9 papéis obrigatórios está ausente |
 | **Sincronia AGENTS.md** | O skill de review cobre menos regras que o `AGENTS.md` |
 | **Drift de conteúdo** | SKILL.md foi editado sem regenerar o `MANIFEST.json` |
 
 Avisos (não bloqueiam): `description` curta demais para acionar bem,
-`description` sem menção ao projeto, skill fora dos 6 papéis canônicos.
+`description` sem menção ao projeto, skill fora dos 9 papéis canônicos.
 
 ## Fluxo de alteração
 
