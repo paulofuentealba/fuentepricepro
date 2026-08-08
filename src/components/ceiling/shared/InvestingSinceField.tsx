@@ -5,6 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n-provider";
+import { toIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export interface InvestingSinceFieldProps {
@@ -32,7 +33,7 @@ export function InvestingSinceField({
   const formattedFirstTxDate = useMemo(() => {
     if (!firstTxDateObj) return "";
     try {
-      const monthStr = new Intl.DateTimeFormat(locale, { month: "short" }).format(firstTxDateObj);
+      const monthStr = new Intl.DateTimeFormat(toIntlLocale(locale), { month: "short" }).format(firstTxDateObj);
       const yearStr = firstTxDateObj.getFullYear();
       const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1);
       return `${capitalizedMonth}/${yearStr}`;
@@ -49,7 +50,7 @@ export function InvestingSinceField({
   const formattedSelectedDate = useMemo(() => {
     if (!selectedDate) return null;
     try {
-      return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(selectedDate);
+      return new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(selectedDate);
     } catch {
       return selectedDate.toLocaleDateString();
     }

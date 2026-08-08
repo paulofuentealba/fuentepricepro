@@ -9,6 +9,7 @@ export {
   formatNumber,
   formatCompactCurrency,
   displayTicker,
+  toIntlLocale,
 } from "./formatters";
 
 export const dict = { en, ptBR, es };

@@ -1,6 +1,6 @@
 import type { Asset } from "@/lib/domain";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
-import { formatCurrency, formatPercent, type Locale } from "@/lib/i18n";
+import { formatCurrency, formatPercent, toIntlLocale, type Locale } from "@/lib/i18n";
 
 export type Timeframe = 1 | 3 | 5;
 export const TIMEFRAMES: Timeframe[] = [1, 3, 5];
@@ -21,7 +21,7 @@ export function computeAvgDividend(asset: Asset, timeframe: Timeframe) {
 export function formatResultDate(iso: string, locale: Locale): string | null {
   const d = new Date(iso);
   if (!Number.isFinite(d.getTime())) return null;
-  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

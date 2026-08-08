@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { CalendarClock } from "lucide-react";
-import { formatCurrency, displayTicker } from "@/lib/i18n";
+import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { netAfterTax } from "@/lib/calculations";
 import type { WatchlistItem } from "@/lib/watchlist";
@@ -74,7 +74,7 @@ export function NextPaymentBanner({ items, meta }: Props) {
 
       <div className="flex flex-col gap-2">
         {(upcomingList || []).map((upcoming, idx) => {
-          const dateLabel = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
+          const dateLabel = new Intl.DateTimeFormat(toIntlLocale(locale), {
             day: "2-digit",
             month: "short",
           }).format(upcoming.date);

@@ -3,7 +3,7 @@ import { CalendarClock, TrendingUp, Coins } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
 import { displayTicker } from "@/lib/i18n";
-import { formatCurrency, type Locale } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale, type Locale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { CashFlowSummary } from "@/lib/cashflow";
 
@@ -203,7 +203,7 @@ function SummaryStatCard({
 
 export function compactWithSymbol(v: number, currency: Currency, locale: Locale): string {
   const symbol = currency === "USD" ? "$" : "R$";
-  const compact = new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR", {
+  const compact = new Intl.NumberFormat(toIntlLocale(locale), {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(v);

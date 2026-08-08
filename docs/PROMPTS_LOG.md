@@ -2748,4 +2748,219 @@ rendering chunks...
 - **Conclusão**: O Item 0.1 da Fase 0 foi integralmente corrigido, testado e validado. Status atualizado em `BACKLOG_V2.md`.
 
 
+---
+
+### Fix Crash "Invalid language tag: ptBR" + Consolidação de Locale ✅ CONCLUÍDO E VERIFICADO
+
+- **Contexto**: Relatório de erro de runtime em `TransactionForm.tsx:110` (e `TransactionsPanel.tsx:87`), onde clicar em "Lançar Transação" acionava o `ErrorBoundary` com `RangeError: Invalid language tag: ptBR` vindo de `new Intl.DateTimeFormat(locale, ...)`.
+- **Causa Raiz**: O estado da aplicação em `useI18n()` fornece o código interno de idioma `"en" | "ptBR" | "es"`. `Intl.DateTimeFormat` exige uma tag de idioma BCP 47 válida (`"pt-BR"`, `"en-US"`, `"es-ES"`). A ausência de hífen em `"ptBR"` causava `RangeError` imediato em `Intl.DateTimeFormat(locale, ...)`. Adicionalmente, diversos componentes possuíam ternários manuais incompletos (`locale === "en" ? "en-US" : "pt-BR"`) que faziam com que o idioma espanhol (`"es"`) sofresse fallback para o locale brasileiro (`"pt-BR"`).
+- **Alterações Realizadas**:
+  1. Criada a função pura exportada `toIntlLocale(locale: Locale): string` em `src/lib/formatters.ts`:
+     `return locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";`
+  2. Re-exportada `toIntlLocale` em `src/lib/i18n.ts`.
+  3. Criado arquivo de testes unitários `src/lib/__tests__/formatters.test.ts` cobrindo `toIntlLocale`, `formatPercent` e `formatNumber`.
+  4. Atualizadas as chamadas `formatPercent` e `formatNumber` em `src/lib/formatters.ts` para utilizar `toIntlLocale(locale)`.
+  5. Atualizadas todas as chamadas cruas de `new Intl.DateTimeFormat(locale, ...)` e `new Intl.NumberFormat(locale, ...)` em todo a aplicação:
+     - `src/components/ceiling/watchlist/TransactionForm.tsx:110`
+     - `src/components/ceiling/watchlist/TransactionsPanel.tsx:87`
+     - `src/components/ceiling/shared/InvestingSinceField.tsx:36, 53`
+     - `src/components/ui/CurrencyToggle.tsx:22`
+  6. Consolidados todos os ternários parciais em todo a codebase para utilizar `toIntlLocale(locale)`:
+     - `src/lib/resultCard.ts:24`
+     - `src/lib/realizedIncome.ts:261`
+     - `src/components/ceiling/watchlist/AssetMonthlyDividendChart.tsx:18`
+     - `src/components/ceiling/GoalPlanner.tsx:47`
+     - `src/components/ceiling/SnowballSimulator.tsx:219`
+     - `src/components/ceiling/cashflow/CashFlowSummary.tsx:206`
+     - `src/components/ceiling/watchlist/AssetDetailSheet.tsx:75`
+     - `src/components/ceiling/watchlist/FixedIncomePanel.tsx:39`
+     - `src/components/ceiling/watchlist/GoalProgressBar.tsx:35`
+     - `src/components/ceiling/watchlist/NextPaymentBanner.tsx:77`
+     - `src/components/ceiling/watchlist/assetCard/AssetCardFinancials.tsx:43`
+     - `src/components/ceiling/watchlist/utils.ts:12`
+- **Evidências de Validação**:
+
+**Output de `npm run test`**:
+```
+ RUN  v4.1.10 C:/Users/paulo/OneDrive/Fuente Price Pro
+
+ ✓ src/lib/__tests__/formatters.test.ts (3 tests) 15ms
+ ✓ src/lib/__tests__/nasdaq.test.ts (3 tests) 22ms
+ ✓ src/lib/__tests__/portfolioIrr.test.ts (6 tests) 6ms
+ ✓ src/lib/__tests__/realizedIncome.test.ts (12 tests) 23ms
+ ✓ src/lib/__tests__/calc.test.ts (6 tests) 7ms
+ ✓ src/lib/__tests__/dataExport.test.ts (4 tests) 6ms
+ ✓ src/lib/__tests__/allocation.test.ts (12 tests) 6ms
+ ✓ src/lib/__tests__/suggestedAllocation.test.ts (8 tests) 5ms
+ ✓ src/lib/__tests__/cashflow.test.ts (5 tests) 12ms
+ ✓ src/lib/__tests__/secEdgar.test.ts (5 tests) 6ms
+ ✓ src/lib/__tests__/accountDeletion.test.ts (3 tests) 3ms
+ ✓ src/lib/__tests__/investor-profile.test.ts (10 tests) 8ms
+ ✓ src/lib/__tests__/classify.test.ts (4 tests) 3ms
+ ✓ src/lib/__tests__/fiiPaymentRules.test.ts (6 tests) 4ms
+ ✓ src/lib/__tests__/watchlist.test.ts (3 tests) 5ms
+ ✓ src/lib/__tests__/br-business-calendar.test.ts (5 tests) 3ms
+ ✓ src/lib/__tests__/transactions.test.ts (6 tests) 3ms
+ ✓ src/lib/__tests__/cvm.test.ts (3 tests) 3ms
+ ✓ src/lib/__tests__/pdf-parser.test.ts (18 tests) 11ms
+ ✓ src/lib/__tests__/corporate-events.test.ts (4 tests) 3ms
+ ✓ src/lib/__tests__/issuerTickerMappings.test.ts (2 tests) 88ms
+
+ Test Files  21 passed (21)
+      Tests  128 passed (128)
+   Start at  18:03:16
+   Duration  1.94s (transform 1.21s, setup 0ms, import 4.21s, tests 244ms, environment 1.32s)
+```
+
+**Output de `npm run build`**:
+```
+vite v8.1.3 building client environment for production...
+transforming...✓ 2344 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 2.48s
+vite v8.1.3 building ssr environment for production...
+transforming...✓ 250 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 809ms
+```
+
+---
+
+### Prompt 1 — Fundação de Entitlement (F1 + F2) & Watchlist Limit Gate ✅ CONCLUÍDO E VERIFICADO
+
+- **Contexto**: Correção dos achados críticos F1 (`isPro: true` hardcoded em `src/lib/subscription.tsx`) e F2 (ausência de módulo centralizado de `FEATURE_GATES`). Separação arquitetural entre **Entitlement do Usuário** (`users/{uid}.subscriptionStatus`) e **Configuração do Gate** (`config/featureGates`), com Firestore `onSnapshot` em tempo real.
+- **Arquivos Criados/Alterados**:
+  1. `src/lib/subscription.tsx` (Reescrito): Lê `users/{uid}.subscriptionStatus` via `onSnapshot`. Fail-safe: `subscriptionStatus !== 'pro'` ou guests -> `'free'`. `isPro` deriva de `tier === 'pro'`.
+  2. `src/lib/featureGates.ts` (Novo): Hook `useFeatureGates()` (lê `config/featureGates` em tempo real com fallback para `DEFAULT_FEATURE_GATES = { freeAssetLimit: 8 }`) e função pura `resolveFeatureGate(tier, gatesConfig, key)`.
+  3. `src/lib/useFeatureGate.ts` (Novo): Hook único e público de consumo que combina `useSubscription()` e `useFeatureGates()` via `resolveFeatureGate`.
+  4. `firestore.rules` (Atualizado): Adicionada regra para `match /config/featureGates` (`allow read: if request.auth != null; allow write: if false;`).
+  5. `scripts/seed-feature-gates.ts` (Novo): Script idempotente via Firebase Admin SDK para popular o doc `config/featureGates`.
+  6. `src/lib/__tests__/featureGates.test.ts` (Novo): Testes unitários para `resolveFeatureGate` (8 testes passando).
+  7. `src/components/ceiling/AddToWatchlistDialog.tsx` (Atualizado): Substituído limite hardcoded `5` por `useFeatureGate('freeAssetLimit')` e adicionadas chaves de i18n traduzidas com interpolação `{{limit}}`.
+  8. `dict.ptBR.ts`, `dict.en.ts`, `dict.es.ts` (Atualizados): Atualizada a chave `limitReachedDesc` nos 3 dicionários para utilizar `{{limit}}` dinâmico.
+
+- **Evidências de Validação**:
+
+**Output de `npm run test`**:
+```
+ RUN  v4.1.10 C:/Users/paulo/OneDrive/Fuente Price Pro
+
+ ✓ src/lib/__tests__/formatters.test.ts (3 tests) 17ms
+ ✓ src/lib/__tests__/investor-profile.test.ts (10 tests) 3ms
+ ✓ src/lib/__tests__/realizedIncome.test.ts (12 tests) 24ms
+ ✓ src/lib/__tests__/nasdaq.test.ts (3 tests) 20ms
+ ✓ src/lib/__tests__/calc.test.ts (6 tests) 3ms
+ ✓ src/lib/__tests__/secEdgar.test.ts (5 tests) 4ms
+ ✓ src/lib/__tests__/dataExport.test.ts (4 tests) 5ms
+ ✓ src/lib/__tests__/portfolioIrr.test.ts (6 tests) 7ms
+ ✓ src/lib/__tests__/cashflow.test.ts (5 tests) 12ms
+ ✓ src/lib/__tests__/allocation.test.ts (12 tests) 6ms
+ ✓ src/lib/__tests__/suggestedAllocation.test.ts (8 tests) 10ms
+ ✓ src/lib/__tests__/watchlist.test.ts (3 tests) 3ms
+ ✓ src/lib/__tests__/fiiPaymentRules.test.ts (6 tests) 4ms
+ ✓ src/lib/__tests__/br-business-calendar.test.ts (5 tests) 4ms
+ ✓ src/lib/__tests__/classify.test.ts (4 tests) 6ms
+ ✓ src/lib/__tests__/accountDeletion.test.ts (3 tests) 6ms
+ ✓ src/lib/__tests__/transactions.test.ts (6 tests) 3ms
+ ✓ src/lib/__tests__/featureGates.test.ts (8 tests) 6ms
+ ✓ src/lib/__tests__/cvm.test.ts (3 tests) 3ms
+ ✓ src/lib/__tests__/corporate-events.test.ts (4 tests) 4ms
+ ✓ src/lib/__tests__/pdf-parser.test.ts (18 tests) 10ms
+ ✓ src/lib/__tests__/issuerTickerMappings.test.ts (2 tests) 86ms
+
+ Test Files  22 passed (22)
+      Tests  136 passed (136)
+   Start at  20:58:56
+   Duration  2.48s
+```
+
+**Output de `npm run build`**:
+```
+vite v8.1.3 building client environment for production...
+transforming...✓ 2344 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 2.40s
+vite v8.1.3 building ssr environment for production...
+transforming...✓ 252 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 716ms
+```
+
+---
+
+### Fix Crítico de Segurança: `subscriptionStatus` Gravável pelo Client ✅ CONCLUÍDO, VERIFICADO COM EMULATOR E DEPLOYADO
+
+- **Contexto & Causa Raiz**: A regra pré-existente `allow read, write: if request.auth != null && request.auth.uid == userId;` em `match /users/{userId}` permitia escrita irrestrita pelo client em todos os campos do documento `users/{uid}`, permitindo que qualquer usuário autenticado executasse `updateDoc(doc(db, "users", uid), { subscriptionStatus: "pro" })` diretamente via console do navegador e se concedesse Pro gratuitamente.
+- **Correção Aplicada (`firestore.rules`)**:
+  - Separados os fluxos de `allow create`, `allow update`, `allow delete` e `allow read`.
+  - `allow create`: Proíbe expressamente a presença de `subscriptionStatus` ou `stripeCustomerId` no primeiro `setDoc` do client no cadastro.
+  - `allow update`: Valida via `!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus', 'stripeCustomerId'])` para impedir que o client altere ou adicione esses campos.
+  - `allow delete` / `allow read`: Preservados para `request.auth.uid == userId`.
+- **Setup de Infraestrutura de Teste de Regras**:
+  - Instalado `@firebase/rules-unit-testing` como `devDependency`.
+  - Configurado `firebase.json` com bloco `emulators` (`firestore` porta 8080).
+  - Adicionado script `"test:rules": "npx firebase-tools emulators:exec --only firestore \"vitest run src/lib/__tests__/firestoreRules.test.ts\""` no `package.json`.
+  - Criada a suíte `src/lib/__tests__/firestoreRules.test.ts` (executada exclusivamente via `test:rules`, ignorada no `npm run test` padrão).
+
+- **Evidências de Validação Comportamental**:
+
+1. **`npm run test:rules` (4 testes executados contra o Firestore Emulator)**:
+```text
+i  Running script: vitest run src/lib/__tests__/firestoreRules.test.ts
+
+ RUN  v4.1.10 C:/Users/paulo/OneDrive/Fuente Price Pro
+
+ ✓ src/lib/__tests__/firestoreRules.test.ts (4 tests) 2474ms
+     ✓ 1. DENIES authenticated client updateDoc adding or updating subscriptionStatus or stripeCustomerId  1006ms
+     ✓ 2. ALLOWS authenticated client updating legitimate fields (settings, investorProfile, issuerTickerMappings)
+     ✓ 3. ALLOWS initial account creation without protected fields, but DENIES creation with subscriptionStatus or stripeCustomerId
+     ✓ 4. ALLOWS Admin SDK context (rules disabled) to read and write subscriptionStatus and stripeCustomerId
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  21:50:22
+   Duration  3.65s (transform 44ms, setup 0ms, import 1.01s, tests 2.47s, environment 0ms)
+
++  Script exited successfully (code 0)
+```
+
+2. **`npm run test` (Suíte Padrão de Testes de Unidade, sem emulator)**:
+```text
+ Test Files  22 passed | 1 skipped (23)
+      Tests  136 passed | 4 skipped (140)
+   Start at  21:50:33
+   Duration  2.26s
+```
+
+3. **`npm run build` (Compilação Limpa)**:
+```text
+vite v8.1.3 building client environment for production...
+✓ 2344 modules transformed.
+✓ built in 3.19s
+vite v8.1.3 building ssr environment for production...
+✓ 252 modules transformed.
+✓ built in 1.74s
+```
+
+4. **Deploy Real em Produção (`npx firebase-tools deploy --only firestore:rules`)**:
+```text
+=== Deploying to 'fuente-price-pro'...
+
+i  deploying firestore
+i  firestore: ensuring required API firestore.googleapis.com is enabled...
++  cloud.firestore: rules file firestore.rules compiled successfully
+i  firestore: uploading rules firestore.rules...
++  firestore: released rules firestore.rules to cloud.firestore
+
++  Deploy complete!
+```
+
+
+
+
+
 

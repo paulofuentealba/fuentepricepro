@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { useAuth } from "@/lib/auth-provider";
 import { useAuthModal } from "@/lib/auth-modal";
@@ -44,7 +44,7 @@ function GoalPlannerImpl({ annualDividend, currentPrice, currency }: GoalPlanner
   }, [income, annualDividend, currentPrice]);
 
   const sharesLabel = useMemo(
-    () => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR").format(sharesNeeded),
+    () => new Intl.NumberFormat(toIntlLocale(locale)).format(sharesNeeded),
     [sharesNeeded, locale],
   );
 

@@ -18,7 +18,7 @@ import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
 import { DividendHistoryChart } from "@/components/ceiling/result/DividendHistoryChart";
 
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
-import { formatCurrency, displayTicker } from "@/lib/i18n";
+import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
 
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
@@ -72,7 +72,7 @@ function WowInsights({
   let monthName = "";
   if (nextPayment) {
     const date = new Date(2024, nextPayment - 1, 1);
-    monthName = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
+    monthName = new Intl.DateTimeFormat(toIntlLocale(locale), {
       month: "long",
     }).format(date);
     // Capitalize first letter

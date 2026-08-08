@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 import type { Currency } from "@/lib/domain";
@@ -32,7 +32,7 @@ function GoalProgressBarImpl({ goal, quantity, annualDividend, currency }: GoalP
     };
   }, [goal, quantity, annualDividend]);
 
-  const fmt = useMemo(() => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR"), [locale]);
+  const fmt = useMemo(() => new Intl.NumberFormat(toIntlLocale(locale)), [locale]);
 
   if (!progress) return null;
 

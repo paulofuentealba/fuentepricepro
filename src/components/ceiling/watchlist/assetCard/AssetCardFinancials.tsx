@@ -1,7 +1,7 @@
 import { useCallback, useMemo, type KeyboardEvent, type MouseEvent } from "react";
 import { ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatPercent, formatCurrency } from "@/lib/i18n";
+import { formatPercent, formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { PriceTag } from "../../shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
@@ -40,7 +40,7 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
   }, []);
 
   const quantityLabel = useMemo(
-    () => new Intl.NumberFormat(locale === "en" ? "en-US" : "pt-BR").format(item.quantity),
+    () => new Intl.NumberFormat(toIntlLocale(locale)).format(item.quantity),
     [item.quantity, locale],
   );
 

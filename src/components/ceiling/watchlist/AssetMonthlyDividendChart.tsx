@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import type { RealizedIncomeEvent } from "@/lib/realizedIncome";
 import { groupRealizedIncomeByMonth } from "@/lib/realizedIncome";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
@@ -15,8 +15,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
   const { locale } = useI18n();
 
   const chartData = useMemo(() => {
-    const locStr = locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";
-    return groupRealizedIncomeByMonth(events, undefined, locStr);
+    return groupRealizedIncomeByMonth(events, undefined, toIntlLocale(locale));
   }, [events, locale]);
 
   if (chartData.length === 0) {

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useWatchlist } from "@/lib/watchlist";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
@@ -216,10 +216,7 @@ export function SnowballSimulator() {
                       fontSize={11}
                       tick={{ fill: "hsl(var(--muted-foreground))" }}
                       tickFormatter={(v: number) =>
-                        new Intl.NumberFormat(
-                          locale === "en" ? "en-US" : locale === "ptBR" ? "pt-BR" : "es-ES",
-                          { notation: "compact" },
-                        ).format(v)
+                        new Intl.NumberFormat(toIntlLocale(locale), { notation: "compact" }).format(v)
                       }
                     />
                     <ChartTooltip

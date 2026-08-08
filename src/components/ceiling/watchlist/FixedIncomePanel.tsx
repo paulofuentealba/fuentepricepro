@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { useQuery } from "@tanstack/react-query";
 import { macroRatesQueryOptions } from "@/lib/queryOptions";
 import { calculateFixedIncomeBalance } from "@/lib/calculations";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 
 interface Props {
   item: WatchlistItem;
@@ -36,7 +36,7 @@ export function FixedIncomePanel({ item }: Props) {
   if (item.maturityDate) {
     try {
       const date = new Date(item.maturityDate);
-      maturityDisplay = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
+      maturityDisplay = new Intl.DateTimeFormat(toIntlLocale(locale), {
         day: "2-digit",
         month: "short",
         year: "numeric",

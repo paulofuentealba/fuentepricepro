@@ -1,6 +1,7 @@
 import { type Transaction } from "./transactions";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
+import { toIntlLocale } from "./formatters";
 
 export type TaxType = "dividend" | "jcp" | "rendimento_fii" | "us_dividend";
 
@@ -258,7 +259,7 @@ export function groupRealizedIncomeByMonth(
   const recentMonthKeys =
     sortedMonthKeys.length > 12 ? sortedMonthKeys.slice(-12) : sortedMonthKeys;
 
-  const dateLocale = locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";
+  const dateLocale = toIntlLocale(locale);
 
   return recentMonthKeys.map((monthKey) => {
     const [yearStr, monthStr] = monthKey.split("-");

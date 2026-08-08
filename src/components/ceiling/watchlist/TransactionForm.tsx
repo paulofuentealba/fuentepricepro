@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n-provider";
-import { displayTicker } from "@/lib/i18n";
+import { displayTicker, toIntlLocale } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { Transaction } from "@/lib/transactions";
 import { getQuantityAtDate } from "@/lib/transactions";
@@ -107,7 +107,7 @@ export function TransactionForm({ item, open, onClose, onSave, existingTransacti
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date) : <span>{t.transactions.date}</span>}
+                    {date ? new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(date) : <span>{t.transactions.date}</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

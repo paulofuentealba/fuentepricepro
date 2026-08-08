@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useExchangeRate } from "@/lib/useExchangeRate";
 import { useI18n } from "@/lib/i18n-provider";
+import { toIntlLocale } from "@/lib/i18n";
 
 interface CurrencyToggleProps {
   value: "BR" | "US";
@@ -18,7 +19,7 @@ export function CurrencyToggle({ value, onChange, className }: CurrencyTogglePro
       // The API returns time in BRT (UTC-3), e.g., "2024-05-10 14:32:00"
       const dateInBrt = exchangeData.date.replace(" ", "T") + "-03:00";
       const dateObj = new Date(dateInBrt);
-      formattedTime = new Intl.DateTimeFormat(locale, {
+      formattedTime = new Intl.DateTimeFormat(toIntlLocale(locale), {
         hour: "2-digit",
         minute: "2-digit",
       }).format(dateObj);

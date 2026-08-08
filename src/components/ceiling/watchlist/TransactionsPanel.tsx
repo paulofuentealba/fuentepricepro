@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Plus, Edit2, Trash2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { TransactionForm } from "./TransactionForm";
@@ -84,7 +84,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
                     {tx.type === 'buy' ? t.transactions.buy : t.transactions.sell}
                   </div>
                   <div className="text-muted-foreground text-xs">
-                    {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(tx.date)}
+                    {new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(tx.date)}
                   </div>
                 </div>
               </div>

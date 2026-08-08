@@ -21,9 +21,12 @@ export function formatCurrency(value: number, currency: Currency, _locale: Local
   return `${currencySymbol(currency)} ${num}`;
 }
 
+export function toIntlLocale(locale: Locale): string {
+  return locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";
+}
+
 export function formatPercent(value: number, locale: Locale, digits = 2): string {
-  const l = locale === "en" ? "en-US" : locale === "ptBR" ? "pt-BR" : "es-ES";
-  return new Intl.NumberFormat(l, {
+  return new Intl.NumberFormat(toIntlLocale(locale), {
     style: "percent",
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
@@ -31,8 +34,7 @@ export function formatPercent(value: number, locale: Locale, digits = 2): string
 }
 
 export function formatNumber(value: number, locale: Locale, digits = 2): string {
-  const l = locale === "en" ? "en-US" : locale === "ptBR" ? "pt-BR" : "es-ES";
-  return new Intl.NumberFormat(l, {
+  return new Intl.NumberFormat(toIntlLocale(locale), {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   }).format(value);
