@@ -92,7 +92,7 @@ export function AssetComparator() {
         <p className="text-sm text-muted-foreground">{t.comparator.subtitle}</p>
       </div>
 
-      <div ref={containerRef} className="relative w-full max-w-xl mx-auto">
+      <div ref={containerRef} className="relative z-30 w-full max-w-xl mx-auto">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -114,7 +114,7 @@ export function AssetComparator() {
         </div>
 
         {open && selectedTickers.length < 3 && query.length >= 2 && (
-          <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-border/50 bg-popover/90 backdrop-blur-xl shadow-2xl">
+          <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-border/50 bg-popover/90 backdrop-blur-xl shadow-2xl">
             {suggestions.length > 0 ? (
               <ul className="max-h-64 overflow-auto py-1">
                 {suggestions.map((a) => (

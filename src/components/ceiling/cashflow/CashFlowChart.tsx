@@ -24,7 +24,7 @@ import { compactWithSymbol } from "./CashFlowSummary";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 
-const COLOR_BAR = "var(--success)";
+const COLOR_BAR = "hsl(var(--success))";
 const COLOR_LINE = "var(--primary)";
 const COLOR_INVESTED = "oklch(0.55 0.02 250)";
 
@@ -477,7 +477,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 config={{}}
                 className="h-full w-full animate-in fade-in zoom-in-95 duration-300"
               >
-                <AreaChart data={data} margin={{ top: 24, right: 0, left: 0, bottom: 0 }}>
+                <AreaChart data={data} margin={{ top: 24, right: 16, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={COLOR_LINE} stopOpacity={0.4} />

@@ -65,7 +65,7 @@ function ScreenerRoute() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_1fr] animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
-      <Card className="h-fit border-border/60 bg-card/60">
+      <Card className="relative z-30 h-fit border-border/60 bg-card/60">
         <CardContent className="pt-6">
           <AssetForm
             onSubmit={handleSubmit}

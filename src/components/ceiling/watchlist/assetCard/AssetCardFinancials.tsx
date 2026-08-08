@@ -47,7 +47,17 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
   return (
     <>
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <MetricBox label={t.watchlist.qtyShort} value={quantityLabel} />
+        <MetricBox
+          label={t.watchlist.qtyShort}
+          value={quantityLabel}
+          subValue={
+            hasAvg && item.averagePrice != null ? (
+              <span>
+                {t.watchlist.averagePrice}: <PriceTag value={item.averagePrice} currency={item.currency} />
+              </span>
+            ) : undefined
+          }
+        />
 
         <MetricBox
           label={t.result.safetyMargin}

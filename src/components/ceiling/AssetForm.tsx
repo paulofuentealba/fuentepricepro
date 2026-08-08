@@ -177,7 +177,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
 
   return (
     <div className="space-y-5">
-      <div ref={containerRef} className="relative space-y-2">
+      <div ref={containerRef} className="relative z-30 space-y-2">
         <Label htmlFor="ticker" className="text-xs uppercase tracking-wider text-muted-foreground">
           {t.form.ticker}
         </Label>
@@ -202,7 +202,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
         </div>
 
         {open && suggestions.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover shadow-lg">
+          <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover shadow-lg">
             <ul className="max-h-64 overflow-auto py-1">
               {suggestions.map((a, idx) => (
                 <li key={a.ticker}>
@@ -228,12 +228,12 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
           </div>
         )}
         {open && shouldSearch && !searching && suggestions.length === 0 && (
-          <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
+          <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
             {t.form.noAssetsFound}
           </div>
         )}
         {open && searching && (
-          <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
+          <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
             {t.form.searching}
           </div>
         )}
