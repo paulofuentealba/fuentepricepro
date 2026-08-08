@@ -435,7 +435,7 @@ export const ptBR = {
     },
     limitReached: "Limite da Watchlist Atingido",
     limitReachedDesc:
-      "Usuários gratuitos podem adicionar até 5 ativos à sua watchlist. Faça o upgrade para Pro para ter ativos ilimitados e recursos avançados do portfólio!",
+      "Usuários gratuitos podem adicionar até {{limit}} ativos à sua watchlist. Faça o upgrade para Pro para ter ativos ilimitados e recursos avançados do portfólio!",
     addFirstAsset: "Adicione seu primeiro ativo",
     allocationByType: "Alocação por Tipo",
     assets: "ativos",

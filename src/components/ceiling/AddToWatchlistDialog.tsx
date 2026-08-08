@@ -19,7 +19,7 @@ import { formatCurrency, displayTicker } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useAuth } from "@/lib/auth-provider";
 import { useAuthModal } from "@/lib/auth-modal";
-import { useSubscription } from "@/lib/subscription";
+import { useFeatureGate } from "@/lib/useFeatureGate";
 import { PaywallDialog } from "../ui/PaywallDialog";
 
 interface Props {
@@ -33,7 +33,7 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
   const { items, upsert } = useWatchlist();
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
-  const { isPro } = useSubscription();
+  const freeAssetLimit = useFeatureGate("freeAssetLimit") as number;
   const id = `${asset.type.toLowerCase()}:${asset.ticker}`;
   const existing = items.find((i) => i.id === id);
 
@@ -93,6 +93,8 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
     setOpen(false);
   }
 
+  const paywallDescription = t.watchlist.limitReachedDesc.replace("{{limit}}", String(freeAssetLimit));
+
   if (!user) {
     return (
       <>
@@ -104,7 +106,7 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
             openAuthModal({
               message: "Sign in to save this asset to your watchlist. We'll add it right after.",
               onSuccess: () => {
-                if (!isPro && items.length >= 5 && !existing) {
+                if (items.length >= freeAssetLimit && !existing) {
                   setShowPaywall(true);
                 } else {
                   setOpen(true);
@@ -119,8 +121,8 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
         <PaywallDialog
           open={showPaywall}
           onOpenChange={setShowPaywall}
-          title="Watchlist Limit Reached"
-          description="Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!"
+          title={t.watchlist.limitReached}
+          description={paywallDescription}
         />
       </>
     );
@@ -131,7 +133,7 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
       <Dialog
         open={open}
         onOpenChange={(v) => {
-          if (v && !isPro && items.length >= 5 && !existing) {
+          if (v && items.length >= freeAssetLimit && !existing) {
             setShowPaywall(true);
             return;
           }
@@ -205,8 +207,8 @@ export function AddToWatchlistDialog({ asset, targetYield, averagePrice }: Props
       <PaywallDialog
         open={showPaywall}
         onOpenChange={setShowPaywall}
-        title="Watchlist Limit Reached"
-        description="Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!"
+        title={t.watchlist.limitReached}
+        description={paywallDescription}
       />
     </>
   );

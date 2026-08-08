@@ -78,11 +78,11 @@ Não existe. Relatório de imposto sobre dividendos/JCP e cálculo de DARF em ve
 
 ## Épico 3 — Monetização e Administração (O Negócio) 🔒
 
-### 3.1 Controle Real de Planos (Free vs. PRO)
+### 3.1 Controle Real de Planos (Free vs. PRO) 🟡 (Fundação Concluída)
 
-**Confirmado no código**: `isPro` está hardcoded como `true` em `src/lib/subscription.tsx`, pra todo usuário, sempre. O paywall visual (limite de 5 ativos, `PaywallDialog`) existe na interface mas nunca bloqueia ninguém de verdade.
-**Decisão do Paulo (não é bug)**: essa é uma escolha deliberada por enquanto — não há diferenciação real entre free/pro além do login. Não integrado a nenhum gateway (nenhum pacote `stripe` no `package.json`, nenhuma rota `/pricing`).
-**Plano pra um futuro próximo**: construir a estrutura real de permissão (lógica de tier no Firestore, checkout Stripe) mas mantê-la **desativada em produção** — testar só em DEV via flag de ambiente, seguindo o mesmo padrão já usado em `DataManagement.tsx` (`import.meta.env.DEV`). Não ativar sem decisão explícita.
+- **Fundação de Entitlement & Feature Gates**: ✅ **CONCLUÍDO (Prompt 1)**. `src/lib/subscription.tsx` reescrito para ler `users/{uid}.subscriptionStatus` via `onSnapshot` em tempo real, com fail-safe para `'free'`. Criados `src/lib/featureGates.ts` (lê `config/featureGates` via `onSnapshot` com fallback para `DEFAULT_FEATURE_GATES = { freeAssetLimit: 8 }` e função pura `resolveFeatureGate`) e `src/lib/useFeatureGate.ts` (hook público único). Regra de segurança adicionada em `firestore.rules` e script `scripts/seed-feature-gates.ts` criado. `AddToWatchlistDialog.tsx` migrado para `useFeatureGate('freeAssetLimit')` e dicionários i18n atualizados com interpolação `{{limit}}`.
+- **Integração com Stripe (Prompt 2)**: Pendente (Checkout e webhook Stripe).
+- **Status do Épico**: Mantido como 🔒 até a conclusão do Prompt 2 (Stripe).
 
 ### 3.2 Painel Administrativo (`/admin`)
 

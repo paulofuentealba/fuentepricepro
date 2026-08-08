@@ -434,7 +434,7 @@ export const en = {
     },
     limitReached: "Watchlist Limit Reached",
     limitReachedDesc:
-      "Free users can add up to 5 assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!",
+      "Free users can add up to {{limit}} assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!",
     addFirstAsset: "Add your first asset",
     allocationByType: "Allocation by Type",
     assets: "assets",
