@@ -337,7 +337,7 @@ export const fetchRadarFn = createServerFn({ method: "GET" }).handler(async () =
         } else {
           asset = await fetchFromYahoo(t);
         }
-        if (asset && asset.metrics.dividendCagr5y) {
+        if (asset) {
           return { ...asset, ticker: cleanTicker(asset.ticker) };
         }
       } catch (e) {

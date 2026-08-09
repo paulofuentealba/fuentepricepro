@@ -103,8 +103,7 @@ export function DividendRadar() {
             ? new Date(asset.exDividendDate).toISOString().split("T")[0]
             : null,
         };
-      })
-      .filter((asset: any) => asset.ceiling > asset.currentPrice) || [];
+      }) || [];
 
   const {
     typeFilter,
