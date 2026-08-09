@@ -3416,6 +3416,21 @@ i  firestore: uploading rules firestore.rules...
   2. **`npm run test`**: **145 passed** | 4 skipped (25 arquivos de teste aprovados).
   3. **`npm run build`**: Client (4097 módulos) e SSR (251 módulos) compilados com sucesso.
 
+---
+
+### Item 7: Estado de Erro Explícito vs. Renderizar Zero ✅ CONCLUÍDO E VERIFICADO
+
+- **Causa Raiz & Diagnóstico**:
+  - Quando um cálculo de valuation não possuía dados de proventos (ex: `avgDividend <= 0` ou ausência de modelo válido), o motor `getAssetValuation` atribuía `0` como fallback. A UI renderizava `R$ 0,00` e `0,00%` de margem de segurança como se fosse um valor numérico real de zero.
+- **Correções Implementadas**:
+  - **`src/lib/calculations.ts`**: Adicionada a flag `isUnavailable: boolean` no retorno de `getAssetValuation`, identificando com precisão a ausência de modelo (`consensus === null && bazin === null`). Teste adicionado em `calc.test.ts`.
+  - **Dicionários de Tradução (`dict.*.ts`)**: Adicionada a chave `t.result.calculationUnavailable` ("Cálculo indisponível" / "Calculation unavailable" / "Cálculo no disponible").
+  - **`ResultStats.tsx` & `AssetCard.tsx`**: Atualizado o card "Preço Teto" e "Margem de Segurança" para exibir a mensagem discreta em cinza itálico **"Cálculo indisponível"** quando `isUnavailable` for `true` ou `ceiling <= 0`.
+- **Evidências Literais de Validação**:
+  1. **`npx tsc --noEmit`**: **0 erros** (Exit code 0).
+  2. **`npm run test`**: **146 passed** | 4 skipped (25 arquivos de teste aprovados).
+  3. **`npm run build`**: Client (4097 módulos em 1.36s) e SSR (251 módulos em 765ms) compilados limpos sem erros.
+
 
 
 
