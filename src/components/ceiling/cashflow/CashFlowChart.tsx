@@ -107,46 +107,14 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
         </div>
         <div className="flex flex-col gap-1 text-[10px]">
           {realizedConfirmedSum > 0 && (
-            <div className="space-y-0.5">
-              <div className="flex items-center justify-between font-semibold text-success">
-                <span className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3 text-success" />
-                  {t.tabs.chart.realizedAndConfirmed}
-                </span>
-                <span className="tabular-nums">
-                  {formatCurrency(realizedConfirmedSum, activeCurrency, locale)}
-                </span>
-              </div>
-              {((bucket.realizedAmount > 0 ? 1 : 0) +
-                (bucket.paidAmount > 0 ? 1 : 0) +
-                (bucket.announcedAmount > 0 ? 1 : 0)) > 1 && (
-                <div className="pl-4 space-y-0.5 text-[9.5px] text-muted-foreground">
-                  {bucket.realizedAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span>• {t.tabs.chart.realized}</span>
-                      <span className="tabular-nums">
-                        {formatCurrency(bucket.realizedAmount, activeCurrency, locale)}
-                      </span>
-                    </div>
-                  )}
-                  {bucket.paidAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span>• {t.tabs.chart.confirmed}</span>
-                      <span className="tabular-nums">
-                        {formatCurrency(bucket.paidAmount, activeCurrency, locale)}
-                      </span>
-                    </div>
-                  )}
-                  {bucket.announcedAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span>• {t.tabs.chart.provisioned}</span>
-                      <span className="tabular-nums">
-                        {formatCurrency(bucket.announcedAmount, activeCurrency, locale)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
+            <div className="flex items-center justify-between font-semibold text-success">
+              <span className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-success" />
+                {t.tabs.chart.confirmed}
+              </span>
+              <span className="tabular-nums">
+                {formatCurrency(realizedConfirmedSum, activeCurrency, locale)}
+              </span>
             </div>
           )}
 
@@ -244,13 +212,13 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
         <div className="flex flex-col gap-0.5 text-[11px]">
           <span className="flex justify-between gap-4">
             <span className="text-muted-foreground">{t.tabs.chart.invested}</span>
-            <span className="font-semibold tabular-nums text-foreground">
+            <span className="font-semibold tabular-nums text-success">
               {compactWithSymbol(item.invested, activeCurrency, locale)}
             </span>
           </span>
           <span className="flex justify-between gap-4">
             <span className="text-muted-foreground">{t.tabs.chart.received}</span>
-            <span className="font-semibold tabular-nums text-success">
+            <span className="font-semibold tabular-nums text-comparison">
               {compactWithSymbol(item.received, activeCurrency, locale)}
             </span>
           </span>
@@ -268,7 +236,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1 font-semibold" style={{ color: "var(--realized)" }}>
                 <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: "var(--realized)" }} />
-                {t.tabs.chart.realized}
+                {t.tabs.chart.confirmed}
               </span>
               <span className="inline-flex items-center gap-1 font-semibold text-foreground">
                 <span
