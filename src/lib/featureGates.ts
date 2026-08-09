@@ -15,6 +15,12 @@ export interface FeatureGatesConfig {
   [key: string]: boolean | number | undefined;
 }
 
+/**
+ * Master Paywall Toggle
+ * When set to true (DISABLE_PAYWALLS = true), all feature gates and Pro restrictions are bypassed/unlocked globally.
+ */
+export const DISABLE_PAYWALLS = true;
+
 export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: number } = {
   freeAssetLimit: 8,
 };

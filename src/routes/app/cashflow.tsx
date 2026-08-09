@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowCalendar } from "@/components/ceiling/CashFlowCalendar";
 import { LockedPanel } from "@/components/ceiling/LockedPanel";
 import { useAuth } from "@/lib/auth-provider";
+import { useSubscription } from "@/lib/subscription";
 import { useWatchlist } from "@/lib/watchlist";
 
 export const Route = createFileRoute("/app/cashflow")({
@@ -10,9 +11,10 @@ export const Route = createFileRoute("/app/cashflow")({
 
 function CashFlow() {
   const { user } = useAuth();
+  const { isPro } = useSubscription();
   const { items } = useWatchlist();
 
-  if (!user) {
+  if (!user && !isPro) {
     return <LockedPanel />;
   }
 

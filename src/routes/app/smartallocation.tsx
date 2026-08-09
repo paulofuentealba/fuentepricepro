@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SmartAllocation } from "@/components/ceiling/SmartAllocation";
 import { LockedPanel } from "@/components/ceiling/LockedPanel";
 import { useAuth } from "@/lib/auth-provider";
+import { useSubscription } from "@/lib/subscription";
 
 export const Route = createFileRoute("/app/smartallocation")({
   component: SmartAllocationRoute,
@@ -9,8 +10,9 @@ export const Route = createFileRoute("/app/smartallocation")({
 
 function SmartAllocationRoute() {
   const { user } = useAuth();
+  const { isPro } = useSubscription();
 
-  if (!user) {
+  if (!user && !isPro) {
     return <LockedPanel />;
   }
 
