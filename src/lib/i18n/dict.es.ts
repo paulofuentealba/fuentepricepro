@@ -923,6 +923,7 @@ export const es = {
     mixedClassesWarning: "Los activos comparados no pertenecen a la misma clase o categoría.",
     noAssetsFound: "Ningún activo encontrado",
     searching: "Buscando...",
+    exportCsv: "Exportar CSV",
     investingSince: "Invirtiendo Desde",
     confirmTitle: "Confirma los detalles para",
     confirmDesc: "Confirme la adición de este activo a su portafolio.",

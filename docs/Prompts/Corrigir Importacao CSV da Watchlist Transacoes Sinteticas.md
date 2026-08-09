@@ -14,7 +14,7 @@ Nesta Fase 1 do Item 1.7, a importação foi migrada para criar **transações s
 - Para **ativos novos na watchlist**: Cria a primeira transação sintética do tipo `buy` com `quantity` e `pricePerShare` importados do CSV, rotulada com `notes: t.transactions.csvImportAdjustment`.
 - Para **ativos já existentes**:
   - Calcula o delta entre a posição atual (derivada de `recalculateHoldingFromTransactions`) e a quantidade do CSV.
-  - Se `delta > 0`: Cria uma transação sintética de compra (`buy`) para a quantidade delta com Preço por Cota/Ação calculado proporcionalmente para atingir o Preço Médio importado.
+  - Se `delta > 0`: Cria uma transação sintética de compra (`buy`) para a quantidade delta com Preço por Cota/Ação calculated proporcionalmente para atingir o Preço Médio importado.
   - Se `delta < 0`: Cria uma transação sintética de venda (`sell`) para a quantidade delta.
   - Se `delta === 0` com atualização de Preço Médio: Atualiza a transação sintética original.
 - Atualizado o container `DataManagement.tsx` para montar o componente `<WatchlistIO items={items} onImport={upsert} />` na interface da Watchlist.

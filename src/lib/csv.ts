@@ -32,6 +32,63 @@ export function buildWatchlistCsv(items: WatchlistItem[]): string {
   return [header.join(","), ...rows].join("\n");
 }
 
+export interface ComparatorExportRow {
+  ticker: string;
+  name: string;
+  type: string;
+  currentPrice: number;
+  ceilingPrice: number | null;
+  safetyMargin: number | null;
+  dividendYield: number | null;
+  cagr5y: number | null;
+  peRatio: number | null;
+  pbRatio: number | null;
+  bazin: number | null;
+  graham: number | null;
+  gordon: number | null;
+  consensus: number | null;
+}
+
+export function buildComparatorCsv(rows: ComparatorExportRow[]): string {
+  const header = [
+    "Ticker",
+    "Nome",
+    "Tipo",
+    "Preço Atual",
+    "Preço Teto",
+    "Margem de Segurança (%)",
+    "Dividend Yield (%)",
+    "CAGR 5A (%)",
+    "P/L",
+    "P/VP",
+    "Bazin",
+    "Graham",
+    "Gordon",
+    "Consenso",
+  ];
+  const csvRows = rows.map((r) =>
+    [
+      r.ticker,
+      r.name,
+      r.type,
+      r.currentPrice,
+      r.ceilingPrice ?? "",
+      r.safetyMargin ?? "",
+      r.dividendYield ?? "",
+      r.cagr5y ?? "",
+      r.peRatio ?? "",
+      r.pbRatio ?? "",
+      r.bazin ?? "",
+      r.graham ?? "",
+      r.gordon ?? "",
+      r.consensus ?? "",
+    ]
+      .map(csvEscape)
+      .join(","),
+  );
+  return [header.map(csvEscape).join(","), ...csvRows].join("\n");
+}
+
 function parseCsvLine(line: string): string[] {
   const out: string[] = [];
   let cur = "";

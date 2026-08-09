@@ -909,6 +909,7 @@ export const en = {
     mixedClassesWarning: "The compared assets do not belong to the same class or category.",
     noAssetsFound: "No assets found",
     searching: "Searching...",
+    exportCsv: "Export CSV",
     investingSince: "Investing Since",
     confirmTitle: "Confirm details for",
     confirmDesc: "Confirm adding this asset to your portfolio.",

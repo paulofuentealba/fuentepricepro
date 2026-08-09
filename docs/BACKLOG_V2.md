@@ -57,16 +57,17 @@ Concluído e Validado:
 - **Motor de Aporte Inteligente (`computeSmartAllocation`)**: ✅ Direciona os novos aportes priorizando ativos das classes sub-alocadas.
 - **Trabalho Futuro (Fora de Escopo)**: Sugestão de venda ativa para rebalanceamento estático sem novos aportes fica documentada como melhoria futura separada.
 
-### 1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks 🟡 (Fase 1 Concluída)
+### 1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks 🟡 (Fase 1 e Fase 2 Concluídas)
 
 - **Exportação & Importação da Watchlist (CSV)**: 🟡 **FASE 1 CONCLUÍDA (Fevereiro/2026)**.
   - Exportação (`buildWatchlistCsv`) e Importação (`parseWatchlistCsv` + `WatchlistIO.tsx`) integradas e alinhadas ao SSOT de transações (`useTransactions`, `recalculateHoldingFromTransactions`).
   - A importação de CSV gera transações sintéticas automáticas para o histórico do ativo (rotuladas com `Ajuste via importação CSV`), calculando os deltas de posição e preservando o Preço Médio e Quantidade calculados em toda a aplicação.
-- **Exportação de Dados do Comparador (CSV/Excel)**: ⚪ Item futuro (P2/P3).
-  - Permitir exportar em CSV/Excel os dados da tabela comparativa de ativos no Comparador (`/app/comparator`), incluindo P/E, P/VP, Dividend Yield, CAGR, Margem de Segurança e Preço Teto.
+- **Exportação de Dados do Comparador (CSV)**: 🟡 **FASE 2 CONCLUÍDA (Fevereiro/2026)**.
+  - Exportação em CSV (`buildComparatorCsv` + `AssetComparator.tsx`) disponível quando há 1+ ativos selecionados no Comparador.
+  - Exporta os 14 indicadores fundamentais e de valuation (`Ticker`, `Nome`, `Tipo`, `Preço Atual`, `Preço Teto`, `Margem de Segurança (%)`, `Dividend Yield (%)`, `CAGR 5A (%)`, `P/L`, `P/VP`, `Bazin`, `Graham`, `Gordon`, `Consenso`), com células vazias para valores nulos.
 - **Importação de Dados por Planilha Avançada (Template com Data de Compra)**: ⚪ Item futuro (Fase 3).
   - Gerar e disponibilizar modelo contendo: `Ticker`, `Data da Compra` (`AAAA-MM-DD`), `Quantidade` e `Valor Unitário` para importar transações com datas históricas específicas.
-- **Comparação com Benchmarks / Índices de Mercado no Comparador**: ⚪ Item futuro (P2/P3).
+- **Comparação com Benchmarks / Índices de Mercado no Comparador**: ⚪ Item futuro (Fase 4).
   - Permitir selecionar e sobrepor índices de referência de mercado (`CDI/Selic`, `IBOVESPA`, `S&P 500`) em relação ao desempenho histórico dos ativos comparados.
 
 ---

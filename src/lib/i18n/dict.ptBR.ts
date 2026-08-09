@@ -918,6 +918,7 @@ export const ptBR = {
     mixedClassesWarning: "Os ativos comparados não pertencem à mesma classe ou categoria.",
     noAssetsFound: "Nenhum ativo encontrado",
     searching: "Buscando...",
+    exportCsv: "Exportar CSV",
     investingSince: "Investindo desde",
     confirmTitle: "Confirme os detalhes de",
     confirmDesc: "Confirme a adição deste ativo à sua carteira.",

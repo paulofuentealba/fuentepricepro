@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, X, Scale, Info, Plus } from "lucide-react";
+import { Search, X, Scale, Info, Plus, Download } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import { AssetDetailSheet } from "./watchlist/AssetDetailSheet";
 import { useSettings } from "@/lib/settings";
 import { useWatchlist } from "@/lib/watchlist";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
+import { buildComparatorCsv, downloadCsv, type ComparatorExportRow } from "@/lib/csv";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
@@ -169,7 +171,7 @@ export function AssetComparator() {
           <p className="text-sm text-muted-foreground max-w-sm">{t.comparator.emptySubtitle}</p>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-8">
           <ComparatorCards tickers={selectedTickers} onRemove={handleRemove} />
         </div>
       )}
@@ -197,28 +199,13 @@ function ComparatorCards({
 
   const isLoading = queries.some((q: any) => q.isFetching);
 
-  if (isLoading) {
-    return (
-      <div className="col-span-full py-12 text-center text-muted-foreground">
-        {t.comparator.loading}
-      </div>
-    );
-  }
-
   // Extract data
   const dataMap = queries.map((q: any) => q.data).filter(Boolean) as Asset[];
 
-  const types = new Set(dataMap.map((d) => d.type));
-  const hasMixedClasses = types.size > 1;
-
-  return (
-    <TooltipProvider delayDuration={100}>
-      {hasMixedClasses && (
-        <div className="col-span-full text-xs text-muted-foreground opacity-60 text-center pb-4">
-          {t.comparator.mixedClassesWarning}
-        </div>
-      )}
-      {dataMap.map((data) => {
+  const handleExportCsv = useCallback(() => {
+    if (dataMap.length === 0) return;
+    try {
+      const rows: ComparatorExportRow[] = dataMap.map((data) => {
         const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
         const activeYield = savedItem?.targetYield ?? globalYield;
         const avgDiv = getCanonicalAnnualDividend(data, 3);
@@ -239,43 +226,133 @@ function ComparatorCards({
           type: data.type,
         });
 
-        return (
-          <div key={data.ticker} className="relative group animate-in fade-in zoom-in-95">
-            <AssetCard
-              item={
-                {
-                  id: data.ticker,
-                  ticker: data.ticker,
-                  name: data.name,
-                  currency: data.currency,
-                  type: data.type,
-                  currentPrice: data.currentPrice,
-                  targetYield: activeYield,
-                  annualDividend: avgDiv,
-                  quantity: 1,
-                  averagePrice: data.currentPrice,
-                  sector: data.sector || t.common.other,
-                  createdAt: Date.now(),
-                  valuation: val,
-                } as any
-              }
-              isSimulation={activeYield !== savedItem?.targetYield}
-              meta={
-                {
-                  eps: data.metrics?.eps || null,
-                  pbRatio: data.metrics?.pbRatio || null,
-                  dividendCagr5y: data.metrics?.dividendCagr5y || null,
-                  sector: data.sector || t.common.other,
-                } as any
-              }
-              variant="watchlist"
-              hideAddToWatchlist
-              onClose={(ticker) => onRemove(ticker)}
-              onOpenDetail={(item) => setSelectedDetailItem(item)}
-            />
-          </div>
-        );
-      })}
+        const dy = data.currentPrice > 0 && avgDiv > 0 ? (avgDiv / data.currentPrice) * 100 : null;
+
+        return {
+          ticker: data.ticker,
+          name: data.name,
+          type: data.type,
+          currentPrice: data.currentPrice,
+          ceilingPrice: val.isUnavailable ? null : val.activeCeiling,
+          safetyMargin: val.isUnavailable ? null : val.margin,
+          dividendYield: dy,
+          cagr5y: data.metrics?.dividendCagr5y ?? null,
+          peRatio:
+            data.metrics?.peRatio ??
+            (data.metrics?.eps && data.metrics.eps > 0 && data.currentPrice > 0
+              ? data.currentPrice / data.metrics.eps
+              : null),
+          pbRatio: data.metrics?.pbRatio ?? null,
+          bazin: val.bazin,
+          graham: val.graham,
+          gordon: val.gordon,
+          consensus: val.consensus,
+        };
+      });
+
+      const csv = buildComparatorCsv(rows);
+      const date = new Date().toISOString().slice(0, 10);
+      downloadCsv(`comparador-${date}.csv`, csv);
+      toast.success(t.toasts.exportSuccess.replace("{{count}}", String(rows.length)));
+    } catch (err) {
+      console.error("[comparator-export] failed", err);
+      toast.error(t.toasts.exportFailed);
+    }
+  }, [dataMap, portfolioItems, globalYield, selic, t]);
+
+  if (isLoading) {
+    return (
+      <div className="col-span-full py-12 text-center text-muted-foreground">
+        {t.comparator.loading}
+      </div>
+    );
+  }
+
+  const types = new Set(dataMap.map((d) => d.type));
+  const hasMixedClasses = types.size > 1;
+
+  return (
+    <TooltipProvider delayDuration={100}>
+      <div className="flex items-center justify-between mb-4 px-1">
+        <span className="text-xs text-muted-foreground">
+          {dataMap.length} {dataMap.length === 1 ? "ativo comparado" : "ativos comparados"}
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 px-3 text-xs border-border/60 hover:bg-muted"
+          onClick={handleExportCsv}
+        >
+          <Download className="h-3.5 w-3.5" />
+          {t.comparator.exportCsv}
+        </Button>
+      </div>
+      {hasMixedClasses && (
+        <div className="col-span-full text-xs text-muted-foreground opacity-60 text-center pb-4">
+          {t.comparator.mixedClassesWarning}
+        </div>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {dataMap.map((data) => {
+          const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
+          const activeYield = savedItem?.targetYield ?? globalYield;
+          const avgDiv = getCanonicalAnnualDividend(data, 3);
+          const val = getAssetValuation({
+            targetYield: activeYield,
+            currentPrice: data.currentPrice,
+            avgDividend: avgDiv,
+            eps: data.metrics?.eps || null,
+            bvps:
+              data.metrics?.bvps != null
+                ? data.metrics.bvps
+                : data.metrics?.pbRatio && data.currentPrice > 0
+                  ? data.currentPrice / data.metrics.pbRatio
+                  : null,
+            dividendCagr: data.metrics?.dividendCagr5y || null,
+            selicPct: selic ?? 10.5,
+            currency: data.currency,
+            type: data.type,
+          });
+
+          return (
+            <div key={data.ticker} className="relative group animate-in fade-in zoom-in-95">
+              <AssetCard
+                item={
+                  {
+                    id: data.ticker,
+                    ticker: data.ticker,
+                    name: data.name,
+                    currency: data.currency,
+                    type: data.type,
+                    currentPrice: data.currentPrice,
+                    targetYield: activeYield,
+                    annualDividend: avgDiv,
+                    quantity: 1,
+                    averagePrice: data.currentPrice,
+                    sector: data.sector || t.common.other,
+                    createdAt: Date.now(),
+                    valuation: val,
+                  } as any
+                }
+                isSimulation={activeYield !== savedItem?.targetYield}
+                meta={
+                  {
+                    eps: data.metrics?.eps || null,
+                    pbRatio: data.metrics?.pbRatio || null,
+                    dividendCagr5y: data.metrics?.dividendCagr5y || null,
+                    sector: data.sector || t.common.other,
+                  } as any
+                }
+                variant="watchlist"
+                hideAddToWatchlist
+                onClose={(ticker) => onRemove(ticker)}
+                onOpenDetail={(item) => setSelectedDetailItem(item)}
+              />
+            </div>
+          );
+        })}
+      </div>
       <AssetDetailSheet
         item={selectedDetailItem}
         onClose={() => setSelectedDetailItem(null)}
