@@ -103,5 +103,24 @@ describe("getAssetValuation — Gordon Guard & Robust Consensus", () => {
     expect(result.gordon).toBeCloseTo(40.03, 1);
     // Median of [30, 40, 40.032] is 40
     expect(result.consensus).toBeCloseTo(40);
+    expect(result.activeCeiling).toBeCloseTo(40);
+  });
+
+  it("verifies VALE3 @ 6% target yield has matching activeCeiling and consensus", () => {
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 62.0,
+      avgDividend: 2.954,
+      eps: 2.66,
+      bvps: 42.56,
+      dividendCagr: 5.0,
+      selicPct: 10.5,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    expect(result.consensus).not.toBeNull();
+    expect(result.activeCeiling).toBe(result.consensus);
+    expect(result.activeCeiling).toBeGreaterThan(0);
   });
 });

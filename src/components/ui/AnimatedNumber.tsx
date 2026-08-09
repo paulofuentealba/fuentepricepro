@@ -21,8 +21,8 @@ export function AnimatedNumber({
   className,
 }: AnimatedNumberProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-  const motionValue = useMotionValue(0);
+  const inView = useInView(ref, { once: true, margin: "0px" });
+  const motionValue = useMotionValue(value);
 
   const springValue = useSpring(motionValue, {
     damping: 60,
@@ -31,9 +31,12 @@ export function AnimatedNumber({
 
   useEffect(() => {
     if (inView) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         motionValue.set(value);
       }, delay);
+      return () => clearTimeout(timer);
+    } else {
+      motionValue.set(value);
     }
   }, [inView, value, motionValue, delay]);
 
