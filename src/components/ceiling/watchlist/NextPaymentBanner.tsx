@@ -14,7 +14,7 @@ interface Props {
   dividendEventsMap?: DividendEventsMap;
 }
 
-interface Upcoming {
+export interface UpcomingPayment {
   item: WatchlistItem;
   date: Date;
   estimatedAmount: number;
@@ -34,84 +34,95 @@ function fallbackFrequency(type: AssetType): number {
   }
 }
 
-export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props) {
-  const { t, locale } = useI18n();
+export function computeUpcomingPayments(
+  items: WatchlistItem[],
+  meta: Record<string, AssetMeta>,
+  dividendEventsMap: DividendEventsMap = {},
+  nowMs: number = Date.now(),
+): { displayList: UpcomingPayment[]; totalCount: number } {
+  const list: UpcomingPayment[] = [];
 
-  const { displayList, totalCount } = useMemo(() => {
-    const now = Date.now();
-    const list: Upcoming[] = [];
+  for (const it of items) {
+    if (it.quantity <= 0) continue;
 
-    for (const it of items) {
-      if (it.quantity <= 0) continue;
+    const events = dividendEventsMap[it.ticker] ?? [];
 
-      const events = dividendEventsMap[it.ticker] ?? [];
-      let foundEvent = false;
+    // 1. Primary path: look for future paymentDate in DividendEvents
+    const futurePaymentEvents = events
+      .filter((ev) => {
+        if (!ev.paymentDate) return false;
+        const time = new Date(ev.paymentDate).getTime();
+        return Number.isFinite(time) && time > nowMs;
+      })
+      .sort((a, b) => new Date(a.paymentDate!).getTime() - new Date(b.paymentDate!).getTime());
 
-      // 1. Primary path: look for future paymentDate in DividendEvents
-      for (const ev of events) {
-        if (!ev.paymentDate) continue;
-        const d = new Date(ev.paymentDate);
-        const time = d.getTime();
-        if (Number.isFinite(time) && time > now) {
-          foundEvent = true;
-          const gross = ev.amountPerShare * it.quantity;
-          const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate, ev.isJCP);
-          list.push({
-            item: it,
-            date: d,
-            estimatedAmount: amountNet,
-            isEstimated: !!ev.paymentDateEstimated,
-          });
-        }
-      }
-
+    if (futurePaymentEvents.length > 0) {
+      // Take ONLY the earliest future paymentDate event for this ticker
+      const ev = futurePaymentEvents[0];
+      const d = new Date(ev.paymentDate!);
+      const gross = ev.amountPerShare * it.quantity;
+      const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate, ev.isJCP);
+      list.push({
+        item: it,
+        date: d,
+        estimatedAmount: amountNet,
+        isEstimated: !!ev.paymentDateEstimated,
+      });
+    } else {
       // 2. Fallback: if no future paymentDate in events, check exDate or meta fallback
-      if (!foundEvent) {
-        const futureExDateEvent = events.find((ev) => {
-          const d = new Date(ev.exDate);
-          return Number.isFinite(d.getTime()) && d.getTime() > now;
-        });
+      const futureExDateEvent = events.find((ev) => {
+        const d = new Date(ev.exDate);
+        return Number.isFinite(d.getTime()) && d.getTime() > nowMs;
+      });
 
-        if (futureExDateEvent) {
-          const d = new Date(futureExDateEvent.exDate);
-          const gross = futureExDateEvent.amountPerShare * it.quantity;
-          const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate, futureExDateEvent.isJCP);
-          list.push({
-            item: it,
-            date: d,
-            estimatedAmount: amountNet,
-            isEstimated: true,
-          });
-        } else {
-          // Heuristic fallback using meta exDividendDate if future
-          const iso = meta[it.ticker]?.exDividendDate;
-          if (iso) {
-            const d = new Date(iso);
-            const time = d.getTime();
-            if (Number.isFinite(time) && time > now) {
-              const historical = it.paymentMonths?.length ?? 0;
-              const freq = historical > 0 ? historical : fallbackFrequency(it.type);
-              const perPaymentPerShare = freq > 0 ? it.annualDividend / freq : it.annualDividend;
-              const gross = perPaymentPerShare * it.quantity;
-              const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate);
-              list.push({
-                item: it,
-                date: d,
-                estimatedAmount: amountNet,
-                isEstimated: true,
-              });
-            }
+      if (futureExDateEvent) {
+        const d = new Date(futureExDateEvent.exDate);
+        const gross = futureExDateEvent.amountPerShare * it.quantity;
+        const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate, futureExDateEvent.isJCP);
+        list.push({
+          item: it,
+          date: d,
+          estimatedAmount: amountNet,
+          isEstimated: true,
+        });
+      } else {
+        // Heuristic fallback using meta exDividendDate if future
+        const iso = meta[it.ticker]?.exDividendDate;
+        if (iso) {
+          const d = new Date(iso);
+          const time = d.getTime();
+          if (Number.isFinite(time) && time > nowMs) {
+            const historical = it.paymentMonths?.length ?? 0;
+            const freq = historical > 0 ? historical : fallbackFrequency(it.type);
+            const perPaymentPerShare = freq > 0 ? it.annualDividend / freq : it.annualDividend;
+            const gross = perPaymentPerShare * it.quantity;
+            const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate);
+            list.push({
+              item: it,
+              date: d,
+              estimatedAmount: amountNet,
+              isEstimated: true,
+            });
           }
         }
       }
     }
+  }
 
-    list.sort((a, b) => a.date.getTime() - b.date.getTime());
-    return {
-      displayList: list.slice(0, 4),
-      totalCount: list.length,
-    };
-  }, [items, meta, dividendEventsMap]);
+  list.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return {
+    displayList: list.slice(0, 4),
+    totalCount: list.length,
+  };
+}
+
+export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props) {
+  const { t, locale } = useI18n();
+
+  const { displayList, totalCount } = useMemo(
+    () => computeUpcomingPayments(items, meta, dividendEventsMap),
+    [items, meta, dividendEventsMap],
+  );
 
   if (displayList.length === 0) return null;
 
