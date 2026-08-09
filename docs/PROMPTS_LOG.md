@@ -3448,6 +3448,18 @@ i  firestore: uploading rules firestore.rules...
   2. **`npm run test`**: **146 passed** | 4 skipped (25 arquivos de teste aprovados).
   3. **`npm run build`**: Client (4097 módulos em 1.37s) e SSR (251 módulos em 765ms) compilados limpos sem erros.
 
+---
+
+### Item 10: Registrar Exportação/Benchmark no Backlog ✅ CONCLUÍDO (APENAS DOCUMENTAÇÃO)
+
+- **Ação Realizada**:
+  - Inclusão formal da seção `1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks` em `docs/BACKLOG_V2.md`.
+  - Mapeadas as regras para:
+    1. **Exportação (CSV/Excel)** no Comparador (`/app/comparator`) e Watchlist (`/app/watchlist`).
+    2. **Importação por Planilha Simples** (`Ticker`, `Data da Compra`, `Quantidade`, `Valor Unitário`) com atualização dinâmica de preço médio, posições e proventos para ativos existentes ou inclusão na carteira para ativos novos.
+    3. **Comparação com Benchmarks** de mercado (CDI/Selic, IBOVESPA e S&P 500) por classe de ativo no Comparador.
+  - **Nenhum código de aplicação foi alterado** (estritamente documentação conforme solicitado).
+
 
 
 
