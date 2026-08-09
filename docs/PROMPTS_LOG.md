@@ -3403,7 +3403,7 @@ i  firestore: uploading rules firestore.rules...
 
 ---
 
-### Desativação Global de Paywalls / Trava de Features (Toggle-Off) ✅ CONCLUÍDO E VERIFICADO
+### Item 3: Desativação Global de Paywalls / Trava de Features (Toggle-Off) ✅ CONCLUÍDO E VERIFICADO
 
 - **Decisão do Usuário**: Solicitação de desativação total de paywalls ("toggle-off").
 - **Ações Implementadas**:
