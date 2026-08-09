@@ -204,7 +204,8 @@ export function SnowballSimulator() {
                     />
                     <XAxis
                       dataKey="year"
-                      fontSize={11}
+                      interval={0}
+                      fontSize={10}
                       tickLine={false}
                       axisLine={false}
                       tick={{ fill: "hsl(var(--muted-foreground))" }}
