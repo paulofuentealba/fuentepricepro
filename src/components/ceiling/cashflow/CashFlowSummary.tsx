@@ -35,7 +35,6 @@ export function CashFlowSummaryCards({
   cumulativePath,
 }: Props) {
   const { t, locale } = useI18n();
-  const isEn = locale === "en";
   return (
     <div className="space-y-4 mb-6">
       {realizedSummary && realizedSummary.eventsCount > 0 && (
@@ -47,24 +46,24 @@ export function CashFlowSummaryCards({
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <SummaryStatCard
-          label={isEn ? "Annual Projected" : "Projeção Anual"}
+          label={t.tabs.cashflow.annualTotal}
           value={formatCurrency(summary.total, activeCurrency, locale)}
           sparkline={sparklinePath}
           sparkColor={COLOR_BAR}
         />
         <SummaryStatCard
-          label={isEn ? "Monthly Average" : "Média Mensal"}
+          label={t.tabs.cashflow.monthlyAverage}
           value={formatCurrency(summary.avg, activeCurrency, locale)}
           sparkline={cumulativePath}
           sparkColor={COLOR_LINE}
         />
         <SummaryStatCard
-          label={isEn ? "Next 30 days" : "Próximos 30 dias"}
+          label={t.tabs.cashflow.next30Days}
           value={formatCurrency(summary.next30, activeCurrency, locale)}
           icon={<CalendarClock className="h-3.5 w-3.5 text-success/70" />}
         />
         <SummaryStatCard
-          label={isEn ? "Top Payer" : "Maior Pagador"}
+          label={t.tabs.cashflow.topPayer}
           value={
             summary.top
               ? `${displayTicker(summary.top.ticker)} · ${formatCurrency(summary.top.amount, activeCurrency, locale)}`

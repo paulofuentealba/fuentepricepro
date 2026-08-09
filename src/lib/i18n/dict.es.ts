@@ -522,6 +522,7 @@ export const es = {
       myJourney: "Mi Viaje",
       journeyStart: "🌱 Inicio",
       realized: "Realizado",
+      realizedAndConfirmed: "Realizado / Confirmado",
       realizedVsProjected: "Realizado vs. Proyectado",
       currentMonthRealized: "Mes Actual (Realizado)",
       currentYearRealized: "Año Actual (Realizado)",
@@ -532,6 +533,12 @@ export const es = {
       selicBenchmark: "Referencia (Selic)",
       irrTooltip: "Tasa Interna de Retorno (TIR) ponderada por dinero. Considera el momento exacto de cada compra, venta y dividendo.",
       irrInsufficientData: "Datos insuficientes",
+    },
+    cashflow: {
+      annualTotal: "Total Anual (Realizado + Proyectado)",
+      monthlyAverage: "Promedio Mensual",
+      next30Days: "Próximos 30 Días",
+      topPayer: "Mayor Pagador",
     },
   },
 

@@ -515,6 +515,7 @@ export const en = {
       myJourney: "My Journey",
       journeyStart: "🌱 Start",
       realized: "Realized",
+      realizedAndConfirmed: "Realized / Confirmed",
       realizedVsProjected: "Realized vs. Projected",
       currentMonthRealized: "Current Month (Realized)",
       currentYearRealized: "Current Year (Realized)",
@@ -525,6 +526,12 @@ export const en = {
       selicBenchmark: "Benchmark (Selic)",
       irrTooltip: "Money-Weighted Internal Rate of Return (IRR). Accounts for exact timing of buys, sells, and dividends received.",
       irrInsufficientData: "Insufficient data",
+    },
+    cashflow: {
+      annualTotal: "Annual Total (Realized + Projected)",
+      monthlyAverage: "Monthly Average",
+      next30Days: "Next 30 Days",
+      topPayer: "Top Payer",
     },
   },
 

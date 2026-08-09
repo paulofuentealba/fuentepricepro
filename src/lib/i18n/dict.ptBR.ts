@@ -517,6 +517,7 @@ export const ptBR = {
       myJourney: "Minha Jornada",
       journeyStart: "🌱 Início",
       realized: "Realizado",
+      realizedAndConfirmed: "Realizado / Confirmado",
       realizedVsProjected: "Realizado vs. Projetado",
       currentMonthRealized: "Mês Atual (Realizado)",
       currentYearRealized: "Ano Corrente (Realizado)",
@@ -527,6 +528,12 @@ export const ptBR = {
       selicBenchmark: "Benchmark (Selic)",
       irrTooltip: "Taxa Interna de Retorno (IRR) ponderada por dinheiro. Considera o momento exato de cada aporte, resgate e provento recebido.",
       irrInsufficientData: "Dados insuficientes",
+    },
+    cashflow: {
+      annualTotal: "Total Anual (Realizado + Projetado)",
+      monthlyAverage: "Média Mensal",
+      next30Days: "Próximos 30 Dias",
+      topPayer: "Maior Pagador",
     },
   },
 

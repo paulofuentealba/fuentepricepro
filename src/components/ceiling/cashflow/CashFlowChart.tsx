@@ -70,55 +70,96 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
     payload?: Array<{ payload: MonthBucket }>;
   }) => {
     if (!active || !payload || !payload.length) return null;
-    const { month, amount, contributors, concentratedTicker, isBest, isWorst } = payload[0].payload;
-    if (amount <= 0) return null;
+    const bucket = payload[0].payload;
+    const { month, contributors, concentratedTicker, isBest, isWorst } = bucket;
+    
+    const realizedConfirmedSum =
+      (bucket.realizedAmount || 0) + (bucket.paidAmount || 0) + (bucket.announcedAmount || 0);
+    const projectedSum = bucket.projectedAmount || 0;
+    const effectiveTotal =
+      realizedConfirmedSum + projectedSum > 0
+        ? realizedConfirmedSum + projectedSum
+        : bucket.amount;
+
+    if (effectiveTotal <= 0) return null;
     const topN = 4;
     const shown = contributors.slice(0, contributors.length > 5 ? topN : 5);
     const remaining = contributors.length - shown.length;
     return (
-      <div className="min-w-[200px] rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur">
-        <div className="flex items-baseline justify-between gap-3">
+      <div className="min-w-[210px] rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur">
+        <div className="flex items-baseline justify-between gap-3 border-b border-border/40 pb-1.5 mb-1.5">
           <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
             {isBest && <Award className="h-3 w-3 text-warning" />}
             {month}
           </span>
           <span
-            className={cn(
-              "text-xs font-semibold",
-              isBest ? "text-warning" : isWorst ? "text-muted-foreground" : "text-success",
-            )}
+            className="text-xs font-bold tabular-nums"
+            style={{
+              color: isBest
+                ? "var(--warning)"
+                : isWorst
+                  ? "var(--muted-foreground)"
+                  : "var(--success)",
+            }}
           >
-            {formatCurrency(amount, activeCurrency, locale)}
+            {formatCurrency(effectiveTotal, activeCurrency, locale)}
           </span>
         </div>
-        <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-muted-foreground">
-          {payload[0].payload.realizedAmount > 0 && (
-            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-              <CheckCircle className="h-3 w-3 text-emerald-400" />
-              {t.tabs.chart.realized}:{" "}
-              {formatCurrency(payload[0].payload.realizedAmount, activeCurrency, locale)}
-            </span>
+        <div className="flex flex-col gap-1 text-[10px]">
+          {realizedConfirmedSum > 0 && (
+            <div className="space-y-0.5">
+              <div className="flex items-center justify-between font-semibold text-success">
+                <span className="flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 text-success" />
+                  {t.tabs.chart.realizedAndConfirmed}
+                </span>
+                <span className="tabular-nums">
+                  {formatCurrency(realizedConfirmedSum, activeCurrency, locale)}
+                </span>
+              </div>
+              {((bucket.realizedAmount > 0 ? 1 : 0) +
+                (bucket.paidAmount > 0 ? 1 : 0) +
+                (bucket.announcedAmount > 0 ? 1 : 0)) > 1 && (
+                <div className="pl-4 space-y-0.5 text-[9.5px] text-muted-foreground">
+                  {bucket.realizedAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>• {t.tabs.chart.realized}</span>
+                      <span className="tabular-nums">
+                        {formatCurrency(bucket.realizedAmount, activeCurrency, locale)}
+                      </span>
+                    </div>
+                  )}
+                  {bucket.paidAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>• {t.tabs.chart.confirmed}</span>
+                      <span className="tabular-nums">
+                        {formatCurrency(bucket.paidAmount, activeCurrency, locale)}
+                      </span>
+                    </div>
+                  )}
+                  {bucket.announcedAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>• {t.tabs.chart.provisioned}</span>
+                      <span className="tabular-nums">
+                        {formatCurrency(bucket.announcedAmount, activeCurrency, locale)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
-          {payload[0].payload.paidAmount > 0 && (
-            <span className="flex items-center gap-1 text-success">
-              <CheckCircle className="h-3 w-3" />
-              {t.tabs.chart.confirmed}:{" "}
-              {formatCurrency(payload[0].payload.paidAmount, activeCurrency, locale)}
-            </span>
-          )}
-          {payload[0].payload.announcedAmount > 0 && (
-            <span className="flex items-center gap-1 text-foreground">
-              <Clock className="h-3 w-3" />
-              {t.tabs.chart.provisioned}:{" "}
-              {formatCurrency(payload[0].payload.announcedAmount, activeCurrency, locale)}
-            </span>
-          )}
-          {payload[0].payload.projectedAmount > 0 && (
-            <span className="flex items-center gap-1 opacity-70">
-              <TrendingUp className="h-3 w-3" />
-              {t.tabs.chart.projected}:{" "}
-              {formatCurrency(payload[0].payload.projectedAmount, activeCurrency, locale)}
-            </span>
+
+          {projectedSum > 0 && (
+            <div className="flex items-center justify-between font-semibold text-comparison">
+              <span className="flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-comparison" />
+                {t.tabs.chart.projected}
+              </span>
+              <span className="tabular-nums">
+                {formatCurrency(projectedSum, activeCurrency, locale)}
+              </span>
+            </div>
           )}
         </div>
         {concentratedTicker && (
@@ -225,8 +266,8 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
         <div className="flex flex-col">
           <div className="mb-2 flex items-center justify-between gap-2 px-1 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 font-semibold text-emerald-400">
-                <span className="inline-block h-2 w-3 rounded-sm bg-emerald-500" />
+              <span className="inline-flex items-center gap-1 font-semibold" style={{ color: "var(--realized)" }}>
+                <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: "var(--realized)" }} />
                 {t.tabs.chart.realized}
               </span>
               <span className="inline-flex items-center gap-1 font-semibold text-foreground">
@@ -255,7 +296,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     height="6"
                     patternUnits="userSpaceOnUse"
                   >
-                    <rect width="3" height="6" fill={COLOR_BAR} />
+                    <rect width="3" height="6" fill="var(--realized)" />
                     <rect x="3" width="3" height="6" fill="transparent" />
                   </pattern>
                   <ChartGlowDef />
@@ -319,7 +360,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 <Bar
                   dataKey="paidAmount"
                   stackId="a"
-                  fill={COLOR_BAR}
+                  fill="var(--realized)"
                   maxBarSize={40}
                   onClick={handleBarClick}
                   cursor="pointer"
