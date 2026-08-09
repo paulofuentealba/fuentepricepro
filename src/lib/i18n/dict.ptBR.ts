@@ -304,6 +304,7 @@ export const ptBR = {
   watchlist: {
     loading: "Carregando portfólio...",
     upcomingPayments: "Próximos Pagamentos",
+    upcomingPaymentsCount: "{{x}} de {{total}} Próximos Pagamentos",
     addBtn: "Adicionar à Minha Carteira",
     saveChanges: "Salvar Alterações",
     bulkEdit: "Edição Rápida",

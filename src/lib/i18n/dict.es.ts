@@ -306,6 +306,7 @@ export const es = {
   watchlist: {
     loading: "Cargando portafolio...",
     upcomingPayments: "Próximos Pagos",
+    upcomingPaymentsCount: "{{x}} de {{total}} Próximos Pagos",
     addBtn: "Añadir a Mi Portafolio",
     saveChanges: "Guardar Cambios",
     bulkEdit: "Edición Rápida",

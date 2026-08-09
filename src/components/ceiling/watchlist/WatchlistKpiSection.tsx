@@ -1,3 +1,7 @@
+import { useMemo } from "react";
+import { useQueries } from "@tanstack/react-query";
+import { assetQueryOptions } from "@/lib/queryOptions";
+import type { DividendEventsMap } from "@/lib/cashflow";
 import { Globe, TrendingDown, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
@@ -41,6 +45,23 @@ export function WatchlistKpiSection({
 }: WatchlistKpiSectionProps) {
   const { t } = useI18n();
 
+  // Fetch fresh Asset data (with dividendEvents) for each watchlist item in parallel.
+  // Cached by TanStack Query (staleTime=5min), cheap after first load.
+  const assetQueries = useQueries({
+    queries: valuedItems.map((it) => assetQueryOptions(it.ticker)),
+  });
+
+  const dividendEventsMap = useMemo<DividendEventsMap>(() => {
+    const map: DividendEventsMap = {};
+    assetQueries.forEach((q, i) => {
+      const ticker = valuedItems[i]?.ticker;
+      if (ticker && q.data?.dividendEvents) {
+        map[ticker] = q.data.dividendEvents;
+      }
+    });
+    return map;
+  }, [assetQueries, valuedItems]);
+
   return (
     <>
       <div className="mb-4 grid gap-3 lg:grid-cols-2">
@@ -50,7 +71,11 @@ export function WatchlistKpiSection({
             selectedType={typeFilter}
             onSelectType={onSelectType}
           />
-          <NextPaymentBanner items={valuedItems} meta={meta} />
+          <NextPaymentBanner
+            items={valuedItems}
+            meta={meta}
+            dividendEventsMap={dividendEventsMap}
+          />
         </div>
 
         <div className="flex flex-col gap-3">

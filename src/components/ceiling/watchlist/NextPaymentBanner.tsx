@@ -6,16 +6,19 @@ import { netAfterTax } from "@/lib/calculations";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { AssetType } from "@/lib/domain";
 import type { AssetMeta } from "./utils";
+import type { DividendEventsMap } from "@/lib/cashflow";
 
 interface Props {
   items: WatchlistItem[];
   meta: Record<string, AssetMeta>;
+  dividendEventsMap?: DividendEventsMap;
 }
 
 interface Upcoming {
   item: WatchlistItem;
   date: Date;
-  estimated: number;
+  estimatedAmount: number;
+  isEstimated: boolean;
 }
 
 /** Fallback payments-per-year when the API returned no historical payment months. */
@@ -31,34 +34,93 @@ function fallbackFrequency(type: AssetType): number {
   }
 }
 
-export function NextPaymentBanner({ items, meta }: Props) {
+export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props) {
   const { t, locale } = useI18n();
-  const upcomingList = useMemo<Upcoming[]>(() => {
+
+  const { displayList, totalCount } = useMemo(() => {
     const now = Date.now();
     const list: Upcoming[] = [];
+
     for (const it of items) {
-      const iso = meta[it.ticker]?.exDividendDate;
-      if (!iso) continue;
-      const d = new Date(iso);
-      const t = d.getTime();
-      if (!Number.isFinite(t) || t <= now) continue;
+      if (it.quantity <= 0) continue;
 
-      const historical = it.paymentMonths?.length ?? 0;
-      const freq = historical > 0 ? historical : fallbackFrequency(it.type);
-      const perPaymentPerShare = freq > 0 ? it.annualDividend / freq : it.annualDividend;
-      const gross = perPaymentPerShare * it.quantity;
-      const estimated = netAfterTax(gross, it.type, it.currency);
+      const events = dividendEventsMap[it.ticker] ?? [];
+      let foundEvent = false;
 
-      list.push({ item: it, date: d, estimated });
+      // 1. Primary path: look for future paymentDate in DividendEvents
+      for (const ev of events) {
+        if (!ev.paymentDate) continue;
+        const d = new Date(ev.paymentDate);
+        const time = d.getTime();
+        if (Number.isFinite(time) && time > now) {
+          foundEvent = true;
+          const gross = ev.amountPerShare * it.quantity;
+          const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate, ev.isJCP);
+          list.push({
+            item: it,
+            date: d,
+            estimatedAmount: amountNet,
+            isEstimated: !!ev.paymentDateEstimated,
+          });
+        }
+      }
+
+      // 2. Fallback: if no future paymentDate in events, check exDate or meta fallback
+      if (!foundEvent) {
+        const futureExDateEvent = events.find((ev) => {
+          const d = new Date(ev.exDate);
+          return Number.isFinite(d.getTime()) && d.getTime() > now;
+        });
+
+        if (futureExDateEvent) {
+          const d = new Date(futureExDateEvent.exDate);
+          const gross = futureExDateEvent.amountPerShare * it.quantity;
+          const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate, futureExDateEvent.isJCP);
+          list.push({
+            item: it,
+            date: d,
+            estimatedAmount: amountNet,
+            isEstimated: true,
+          });
+        } else {
+          // Heuristic fallback using meta exDividendDate if future
+          const iso = meta[it.ticker]?.exDividendDate;
+          if (iso) {
+            const d = new Date(iso);
+            const time = d.getTime();
+            if (Number.isFinite(time) && time > now) {
+              const historical = it.paymentMonths?.length ?? 0;
+              const freq = historical > 0 ? historical : fallbackFrequency(it.type);
+              const perPaymentPerShare = freq > 0 ? it.annualDividend / freq : it.annualDividend;
+              const gross = perPaymentPerShare * it.quantity;
+              const amountNet = netAfterTax(gross, it.type, it.currency, it.customTaxRate);
+              list.push({
+                item: it,
+                date: d,
+                estimatedAmount: amountNet,
+                isEstimated: true,
+              });
+            }
+          }
+        }
+      }
     }
 
     list.sort((a, b) => a.date.getTime() - b.date.getTime());
-    return list.slice(0, 4);
-  }, [items, meta]);
+    return {
+      displayList: list.slice(0, 4),
+      totalCount: list.length,
+    };
+  }, [items, meta, dividendEventsMap]);
 
-  if (upcomingList.length === 0) return null;
+  if (displayList.length === 0) return null;
 
-  const label = t.watchlist.upcomingPayments;
+  const label =
+    totalCount > 4 && t.watchlist.upcomingPaymentsCount
+      ? t.watchlist.upcomingPaymentsCount
+          .replace("{{x}}", displayList.length.toString())
+          .replace("{{total}}", totalCount.toString())
+      : t.watchlist.upcomingPayments;
 
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-success/30 bg-success/5 p-4 text-sm w-full">
@@ -72,7 +134,7 @@ export function NextPaymentBanner({ items, meta }: Props) {
       </div>
 
       <div className="flex flex-col gap-2">
-        {(upcomingList || []).map((upcoming, idx) => {
+        {displayList.map((upcoming, idx) => {
           const dateLabel = new Intl.DateTimeFormat(toIntlLocale(locale), {
             day: "2-digit",
             month: "short",
@@ -87,10 +149,12 @@ export function NextPaymentBanner({ items, meta }: Props) {
                 <span className="font-semibold text-foreground text-sm">
                   {displayTicker(upcoming.item.ticker)}
                 </span>
-                <span className="text-muted-foreground text-[10px] uppercase">· {dateLabel}</span>
+                <span className="text-muted-foreground text-[10px] uppercase">
+                  · {dateLabel} {upcoming.isEstimated && <span className="normal-case opacity-75">(est.)</span>}
+                </span>
               </div>
               <span className="font-medium text-success text-sm tabular-nums">
-                {formatCurrency(upcoming.estimated, upcoming.item.currency, locale)}
+                {formatCurrency(upcoming.estimatedAmount, upcoming.item.currency, locale)}
               </span>
             </div>
           );
