@@ -1,4 +1,4 @@
-# Prompt para Antigravity — Diagnóstico e Correção: Smart Allocation Vazio & Artefatos Visuais no Cash Flow
+# Diagnóstico e Correção: Smart Allocation Vazio & Artefatos Visuais no Cash Flow
 
 > [!NOTE]
 > Documentação técnica da investigação ao vivo e correções de causas raízes confirmadas para a alocação inteligente zerada e as riscas vermelhas no gráfico do Cash Flow.

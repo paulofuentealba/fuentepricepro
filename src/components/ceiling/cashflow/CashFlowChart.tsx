@@ -24,9 +24,14 @@ import { compactWithSymbol } from "./CashFlowSummary";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 
-const COLOR_BAR = "hsl(var(--success))";
+const COLOR_BAR = "var(--success)";
 const COLOR_LINE = "var(--primary)";
-const COLOR_INVESTED = "oklch(0.55 0.02 250)";
+const COLOR_INVESTED = "var(--comparison)";
+const COLOR_GRID = "color-mix(in oklab, var(--border) 40%, transparent)";
+const COLOR_MUTED_FG = "var(--muted-foreground)";
+const COLOR_FOREGROUND = "var(--foreground)";
+const COLOR_CURSOR = "color-mix(in oklab, var(--primary) 8%, transparent)";
+const COLOR_CURSOR_STRONG = "color-mix(in oklab, var(--primary) 20%, transparent)";
 
 interface Props {
   data: MonthBucket[];
@@ -220,16 +225,16 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
         <div className="flex flex-col">
           <div className="mb-2 flex items-center justify-between gap-2 px-1 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
-                <span
-                  className="inline-block h-2 w-3 rounded-sm"
-                  style={{ backgroundColor: COLOR_BAR }}
-                />
-                {t.tabs.chart.monthly}
-              </span>
               <span className="inline-flex items-center gap-1 font-semibold text-emerald-400">
                 <span className="inline-block h-2 w-3 rounded-sm bg-emerald-500" />
                 {t.tabs.chart.realized}
+              </span>
+              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
+                <span
+                  className="inline-block h-2 w-3 rounded-sm"
+                  style={{ backgroundColor: COLOR_INVESTED }}
+                />
+                {t.tabs.chart.projected}
               </span>
             </div>
             {bestMonth && (
@@ -258,7 +263,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 <CartesianGrid
                   vertical={false}
                   strokeDasharray="3 3"
-                  stroke="hsl(var(--border) / 0.4)"
+                  stroke={COLOR_GRID}
                 />
                 <XAxis
                   dataKey="month"
@@ -272,7 +277,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       <text
                         x={x}
                         y={y + 12}
-                        fill={isSelected ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
+                        fill={isSelected ? COLOR_FOREGROUND : COLOR_MUTED_FG}
                         className="text-[9px] sm:text-[11px]"
                         fontWeight={isSelected ? 600 : 400}
                         textAnchor="middle"
@@ -286,18 +291,18 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   tickLine={false}
                   axisLine={false}
                   width={50}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: COLOR_MUTED_FG, fontSize: 10 }}
                   tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
+                  cursor={{ fill: COLOR_CURSOR }}
                   content={<CustomTooltip />}
                 />
 
                 <Bar
                   dataKey="realizedAmount"
                   stackId="a"
-                  fill="rgb(16, 185, 129)"
+                  fill="var(--realized)"
                   maxBarSize={40}
                   onClick={handleBarClick}
                   cursor="pointer"
@@ -348,7 +353,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 <Bar
                   dataKey="projectedAmount"
                   stackId="a"
-                  fill={COLOR_BAR}
+                  fill={COLOR_INVESTED}
                   maxBarSize={40}
                   radius={[4, 4, 0, 0]}
                   onClick={handleBarClick}
@@ -358,7 +363,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     <Cell
                       key={`cell-proj-${index}`}
                       fillOpacity={
-                        selectedMonthIndex === null || selectedMonthIndex === index ? 0.4 : 0.15
+                        selectedMonthIndex === null || selectedMonthIndex === index ? 0.85 : 0.3
                       }
                     />
                   ))}
@@ -440,7 +445,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     horizontal={true}
                     vertical={false}
                     strokeDasharray="3 3"
-                    stroke="hsl(var(--border) / 0.4)"
+                    stroke={COLOR_GRID}
                   />
                   <XAxis type="number" hide />
                   <YAxis
@@ -449,10 +454,10 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     tickLine={false}
                     axisLine={false}
                     width={60}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
+                    tick={{ fill: COLOR_MUTED_FG, fontSize: 11, fontWeight: 500 }}
                   />
                   <ChartTooltip
-                    cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
+                    cursor={{ fill: COLOR_CURSOR }}
                     content={<BreakdownTooltip />}
                   />
                   <Bar dataKey="amount" fill={COLOR_LINE} radius={[0, 4, 4, 0]} barSize={20}>
@@ -460,7 +465,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       dataKey="amount"
                       position="right"
                       formatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
-                      style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      style={{ fill: COLOR_MUTED_FG, fontSize: 10 }}
                     />
                     {breakdownData.map((entry, index) => (
                       <Cell
@@ -487,7 +492,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   <CartesianGrid
                     vertical={false}
                     strokeDasharray="3 3"
-                    stroke="hsl(var(--border) / 0.4)"
+                    stroke={COLOR_GRID}
                   />
                   <XAxis
                     dataKey="month"
@@ -498,7 +503,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       <text
                         x={x}
                         y={y + 12}
-                        fill="hsl(var(--muted-foreground))"
+                        fill={COLOR_MUTED_FG}
                         className="text-[9px] sm:text-[11px]"
                         textAnchor="middle"
                       >
@@ -510,12 +515,12 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     tickLine={false}
                     axisLine={false}
                     width={56}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                    tick={{ fill: COLOR_MUTED_FG, fontSize: 10 }}
                     tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                   />
                   <ChartTooltip
                     cursor={{
-                      stroke: "hsl(var(--primary) / 0.2)",
+                      stroke: COLOR_CURSOR_STRONG,
                       strokeWidth: 2,
                       fill: "transparent",
                     }}
@@ -544,9 +549,9 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
           <div className="mb-2 flex items-center gap-3 px-1 text-[11px] text-muted-foreground">
             <span className="font-semibold text-foreground">{t.tabs.chart.investedVsReceived}</span>
             <span className="flex items-center gap-2">
-              <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: COLOR_INVESTED }} />
-              {t.tabs.chart.invested}
               <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: COLOR_BAR }} />
+              {t.tabs.chart.invested}
+              <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: COLOR_INVESTED }} />
               {t.tabs.chart.received}
             </span>
           </div>
@@ -561,7 +566,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 <CartesianGrid
                   vertical={false}
                   strokeDasharray="3 3"
-                  stroke="hsl(var(--border) / 0.4)"
+                  stroke={COLOR_GRID}
                 />
                 <XAxis
                   dataKey="ticker"
@@ -571,7 +576,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     <text
                       x={x}
                       y={y + 12}
-                      fill="hsl(var(--muted-foreground))"
+                      fill={COLOR_MUTED_FG}
                       fontSize={10}
                       textAnchor="middle"
                     >
@@ -583,15 +588,15 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   tickLine={false}
                   axisLine={false}
                   width={50}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: COLOR_MUTED_FG, fontSize: 10 }}
                   tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
+                  cursor={{ fill: COLOR_CURSOR }}
                   content={<InvestedVsReceivedTooltip />}
                 />
-                <Bar dataKey="invested" fill={COLOR_INVESTED} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.75} />
-                <Bar dataKey="received" fill={COLOR_BAR} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.9} />
+                <Bar dataKey="invested" fill={COLOR_BAR} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.75} />
+                <Bar dataKey="received" fill={COLOR_INVESTED} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.9} />
               </BarChart>
             </ChartContainer>
           </div>

@@ -7,8 +7,8 @@ import { formatCurrency, toIntlLocale, type Locale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { CashFlowSummary } from "@/lib/cashflow";
 
-const COLOR_BAR = "oklch(0.75 0.17 160)";
-const COLOR_LINE = "oklch(0.78 0.16 85)";
+const COLOR_BAR = "var(--success)";
+const COLOR_LINE = "var(--primary)";
 
 interface RealizedSummaryData {
   currentMonth: number;

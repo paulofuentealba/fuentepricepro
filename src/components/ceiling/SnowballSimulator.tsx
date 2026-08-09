@@ -39,7 +39,7 @@ export function SnowballSimulator() {
     },
     Principal: {
       label: t.snowball.principal,
-      color: "var(--chart-4)",
+      color: "var(--comparison)",
     },
   } satisfies ChartConfig;
 
@@ -200,7 +200,7 @@ export function SnowballSimulator() {
                     <CartesianGrid
                       vertical={false}
                       strokeDasharray="3 3"
-                      stroke="hsl(var(--muted-foreground)/0.2)"
+                      stroke="hsl(var(--border) / 0.4)"
                     />
                     <XAxis
                       dataKey="year"
@@ -208,21 +208,21 @@ export function SnowballSimulator() {
                       fontSize={10}
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fill: "var(--muted-foreground)" }}
                       dy={10}
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
                       fontSize={11}
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fill: "var(--muted-foreground)" }}
                       tickFormatter={(v: number) =>
                         new Intl.NumberFormat(toIntlLocale(locale), { notation: "compact" }).format(v)
                       }
                     />
                     <ChartTooltip
                       cursor={{
-                        stroke: "hsl(var(--muted-foreground)/0.4)",
+                        stroke: "hsl(var(--border) / 0.6)",
                         strokeWidth: 1,
                         strokeDasharray: "4 4",
                       }}

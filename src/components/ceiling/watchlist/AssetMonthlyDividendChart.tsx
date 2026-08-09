@@ -44,21 +44,21 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
               dataKey="monthLabel"
               tickLine={false}
               axisLine={false}
-              tick={{ fill: "oklch(0.6 0.02 250)", fontSize: 10 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
             />
             <YAxis
               tickLine={false}
               axisLine={false}
               width={45}
-              tick={{ fill: "oklch(0.6 0.02 250)", fontSize: 9 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 9 }}
               tickFormatter={(v: number) =>
                 v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(Math.round(v))
               }
             />
             <ChartTooltip content={<CustomTooltip />} />
-            <Bar dataKey="amountNet" fill="rgb(16, 185, 129)" radius={[4, 4, 0, 0]} maxBarSize={32}>
+            <Bar dataKey="amountNet" fill="var(--success)" radius={[4, 4, 0, 0]} maxBarSize={32}>
               {chartData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill="rgb(16, 185, 129)" />
+                <Cell key={`cell-${index}`} fill="var(--success)" />
               ))}
             </Bar>
           </BarChart>

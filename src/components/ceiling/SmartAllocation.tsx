@@ -437,7 +437,7 @@ export function SmartAllocation() {
                       <div className="h-[280px] rounded-xl border border-border/60 bg-background/40 p-4">
                         <ChartContainer
                           config={{
-                            before: { color: "var(--primary)" },
+                            before: { color: "var(--comparison)" },
                             after: { color: "var(--success)" },
                           }}
                           className="h-full w-full"
@@ -474,7 +474,7 @@ export function SmartAllocation() {
                             <Bar
                               dataKey="before"
                               name={t.smartAllocation.beforeCurrent}
-                              fill="var(--primary)"
+                              fill="var(--comparison)"
                               radius={[0, 4, 4, 0]}
                               barSize={12}
                             />
