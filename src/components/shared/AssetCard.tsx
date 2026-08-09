@@ -499,6 +499,7 @@ function SearchVariant({
             yocPct={yocPct}
             exDateFormatted={exDateFormatted}
             ceiling={activeCeiling}
+            isUnavailable={valuation.isUnavailable}
             targetYield={localTargetYield}
             margin={margin}
             positive={positive}

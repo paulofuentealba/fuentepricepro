@@ -44,6 +44,7 @@ interface Props {
   yocPct: number | null;
   exDateFormatted: string | null;
   ceiling: number;
+  isUnavailable?: boolean;
   targetYield: number;
   margin: number;
   positive: boolean;
@@ -68,6 +69,7 @@ export function ResultStats({
   yocPct,
   exDateFormatted,
   ceiling,
+  isUnavailable,
   targetYield,
   margin,
   positive,
@@ -302,10 +304,16 @@ export function ResultStats({
             </span>
           </div>
           <div className="mt-2 text-3xl font-bold text-foreground">
-            <AnimatedNumber
-              value={ceiling}
-              format={(v) => formatCurrency(v, asset.currency, locale)}
-            />
+            {!isUnavailable && ceiling > 0 ? (
+              <AnimatedNumber
+                value={ceiling}
+                format={(v) => formatCurrency(v, asset.currency, locale)}
+              />
+            ) : (
+              <span className="text-xl font-medium text-muted-foreground/80 italic">
+                {t.result.calculationUnavailable}
+              </span>
+            )}
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             @ {formatPercent(targetYield, locale, 2)} {t.form.targetYield.toLowerCase()}
@@ -315,10 +323,10 @@ export function ResultStats({
         <div
           className={
             "rounded-xl border p-4 " +
-            (positive ? "border-success/30 bg-success/10" : "border-danger/30 bg-danger/10")
+            (!isUnavailable && positive ? "border-success/30 bg-success/10" : "border-muted/30 bg-muted/10")
           }
         >
-          <div className={"flex items-center gap-2 " + (positive ? "text-success" : "text-danger")}>
+          <div className={"flex items-center gap-2 " + (!isUnavailable && positive ? "text-success" : "text-muted-foreground")}>
             <Shield className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">
               {t.result.safetyMargin}{" "}
@@ -330,13 +338,21 @@ export function ResultStats({
             </span>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-foreground">
-              {formatPercent(margin, locale, 2)}
-            </span>
-            {positive ? (
-              <ArrowUpRight className="h-5 w-5 text-success" />
+            {!isUnavailable && ceiling > 0 ? (
+              <>
+                <span className="text-3xl font-bold text-foreground">
+                  {formatPercent(margin, locale, 2)}
+                </span>
+                {positive ? (
+                  <ArrowUpRight className="h-5 w-5 text-success" />
+                ) : (
+                  <ArrowDownRight className="h-5 w-5 text-danger" />
+                )}
+              </>
             ) : (
-              <ArrowDownRight className="h-5 w-5 text-danger" />
+              <span className="text-xl font-medium text-muted-foreground/80 italic">
+                {t.result.calculationUnavailable}
+              </span>
             )}
           </div>
           <div className="mt-1 text-xs text-muted-foreground">

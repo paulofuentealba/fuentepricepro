@@ -140,6 +140,7 @@ export function getAssetValuation({
       activeCeiling: currentPrice,
       margin: 0,
       positive: true,
+      isUnavailable: true,
     };
   }
 
@@ -149,9 +150,10 @@ export function getAssetValuation({
       graham: null,
       gordon: null,
       consensus: null,
-      activeCeiling: currentPrice,
+      activeCeiling: currentPrice > 0 ? currentPrice : 0,
       margin: 0,
       positive: true,
+      isUnavailable: true,
     };
   }
 
@@ -183,10 +185,20 @@ export function getAssetValuation({
         : (sorted[mid - 1] + sorted[mid]) / 2;
   }
 
+  const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
-  const margin = currentPrice > 0 ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const margin = (currentPrice > 0 && !isUnavailable) ? (activeCeiling / currentPrice - 1) * 100 : 0;
 
-  return { bazin, graham, gordon, consensus, activeCeiling, margin, positive: margin >= 0 };
+  return {
+    bazin,
+    graham,
+    gordon,
+    consensus,
+    activeCeiling,
+    margin,
+    positive: margin >= 0,
+    isUnavailable,
+  };
 }
 
 export function calculateFixedIncomeBalance(

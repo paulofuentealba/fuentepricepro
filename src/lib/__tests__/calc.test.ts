@@ -122,5 +122,22 @@ describe("getAssetValuation — Gordon Guard & Robust Consensus", () => {
     expect(result.consensus).not.toBeNull();
     expect(result.activeCeiling).toBe(result.consensus);
     expect(result.activeCeiling).toBeGreaterThan(0);
+    expect(result.isUnavailable).toBe(false);
+  });
+
+  it("returns isUnavailable: true when asset has no dividend history", () => {
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 50.0,
+      avgDividend: 0,
+      eps: null,
+      bvps: null,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    expect(result.isUnavailable).toBe(true);
+    expect(result.consensus).toBeNull();
+    expect(result.bazin).toBeNull();
   });
 });

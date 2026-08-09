@@ -226,6 +226,7 @@ export const ptBR = {
     safetyMargin: "Margem de segurança",
     marketIndicators: "Indicadores de mercado",
     updatedAt: "Atualizado em",
+    calculationUnavailable: "Cálculo indisponível",
     undervalued: "Descontado",
     overvalued: "Sobrevalorizado",
     yieldOnCost: "Yield on Cost",

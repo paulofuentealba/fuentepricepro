@@ -227,6 +227,7 @@ export const es = {
     safetyMargin: "Margen de seguridad",
     marketIndicators: "Indicadores de mercado",
     updatedAt: "Actualizado el",
+    calculationUnavailable: "Cálculo no disponible",
     undervalued: "Subvalorado",
     overvalued: "Sobrevalorado",
     yieldOnCost: "Yield on Cost",

@@ -224,6 +224,7 @@ export const en = {
     safetyMargin: "Safety margin",
     marketIndicators: "Market indicators",
     updatedAt: "Updated at",
+    calculationUnavailable: "Calculation unavailable",
     undervalued: "Undervalued",
     overvalued: "Overvalued",
     yieldOnCost: "Yield on Cost",
