@@ -219,4 +219,25 @@ describe("Cashflow logic", () => {
       expect(buckets[1].paidAmount).toBe(200);
     }
   });
+
+  it("includes and converts USD assets (STOCK_US and ETF) when display currency is BRL", () => {
+    const items = [
+      mkItem({
+        ticker: "VOO",
+        type: "ETF",
+        currency: "USD",
+        annualDividend: 120, // $120 USD/year
+        quantity: 1,
+        paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      }),
+    ];
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    // Target currency BRL, fxRate = 5.0 (so $10 USD/month becomes R$ 50 BRL/month)
+    const buckets = buildMonthlyBuckets(items, "BRL", months, {}, "calendar", [], 5.0);
+
+    expect(buckets[0].amount).toBe(50);
+    expect(buckets[0].contributors[0].ticker).toBe("VOO");
+    expect(buckets[0].contributors[0].amount).toBe(50);
+  });
 });

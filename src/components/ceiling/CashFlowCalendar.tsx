@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -13,7 +13,7 @@ import {
   type DividendEventsMap,
 } from "@/lib/cashflow";
 import { useTransactions } from "@/lib/transactions";
-import { assetQueryOptions } from "@/lib/queryOptions";
+import { assetQueryOptions, exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { CashFlowHeader } from "./cashflow/CashFlowHeader";
 import { CashFlowSummaryCards } from "./cashflow/CashFlowSummary";
 import { CashFlowChart } from "./cashflow/CashFlowChart";
@@ -122,19 +122,22 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     [realizedEvents, activeCurrency]
   );
 
+  const { data: fxData } = useQuery(exchangeRateQueryOptions());
+  const fxRate = fxData?.USDBRL ?? 5.5;
+
   const calendarData = useMemo(
-    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, "calendar", transactions),
-    [items, activeCurrency, months, dividendEventsMap, transactions],
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, "calendar", transactions, fxRate),
+    [items, activeCurrency, months, dividendEventsMap, transactions, fxRate],
   );
 
   const chartData = useMemo(
-    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, mode, transactions),
-    [items, activeCurrency, months, dividendEventsMap, mode, transactions],
+    () => buildMonthlyBuckets(items, activeCurrency, months, dividendEventsMap, mode, transactions, fxRate),
+    [items, activeCurrency, months, dividendEventsMap, mode, transactions, fxRate],
   );
 
   const investedVsReceived = useMemo(
-    () => computeInvestedVsReceived(items, activeCurrency, dividendEventsMap, transactions),
-    [items, activeCurrency, dividendEventsMap, transactions],
+    () => computeInvestedVsReceived(items, activeCurrency, dividendEventsMap, transactions, fxRate),
+    [items, activeCurrency, dividendEventsMap, transactions, fxRate],
   );
 
   const { totals, valuedItems } = useValuedPortfolio();

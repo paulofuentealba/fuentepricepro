@@ -55,13 +55,25 @@ function fallbackMonthsForType(type: WatchlistItem["type"]): number[] {
   return MONTHLY_TYPES.includes(type) ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : QUARTERLY_MONTHS;
 }
 
+export function getFxMultiplier(
+  assetCurrency: Currency,
+  targetCurrency: Currency,
+  fxRate: number = 5.5
+): number {
+  if (assetCurrency === targetCurrency) return 1;
+  if (assetCurrency === "USD" && targetCurrency === "BRL") return fxRate > 0 ? fxRate : 5.5;
+  if (assetCurrency === "BRL" && targetCurrency === "USD") return fxRate > 0 ? 1 / fxRate : 1 / 5.5;
+  return 1;
+}
+
 export function buildMonthlyBuckets(
   items: WatchlistItem[],
   currency: Currency,
   monthsLabels: string[],
   dividendEventsMap: DividendEventsMap = {},
   mode: "calendar" | "journey" = "calendar",
-  transactions: Transaction[] = []
+  transactions: Transaction[] = [],
+  fxRate: number = 5.5
 ): MonthBucket[] {
   const currentYear = new Date().getFullYear();
   const currentMonthIndex = new Date().getMonth();
@@ -133,10 +145,10 @@ export function buildMonthlyBuckets(
     }
   }
 
-  // 3. Distribute projected amounts
+  // 3. Distribute projected amounts (with currency conversion)
   for (const it of items) {
-    if (it.currency !== currency) continue;
-    const annual = it.annualDividend * it.quantity;
+    const fx = getFxMultiplier(it.currency, currency, fxRate);
+    const annual = it.annualDividend * it.quantity * fx;
     if (annual <= 0) continue;
     const detected =
       Array.isArray(it.paymentMonths) && it.paymentMonths.length > 0
@@ -163,6 +175,7 @@ export function buildMonthlyBuckets(
         const events = dividendEventsMap[contrib.ticker] ?? [];
         const item = items.find((it) => it.ticker === contrib.ticker);
         const itemInvestingSince = item ? item.investingSince : Date.now();
+        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
 
         const tickerTxs = transactions.filter(t => t.ticker === contrib.ticker);
 
@@ -179,7 +192,7 @@ export function buildMonthlyBuckets(
             const dateStr = ev.paymentDate ?? ev.exDate;
             const dateNum = new Date(dateStr).getTime();
             const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, dateNum) : (item?.quantity ?? 0);
-            return sum + ev.amountPerShare * q;
+            return sum + ev.amountPerShare * q * fx;
           }, 0);
 
         contrib.paidAmount = monthPaid;
@@ -230,12 +243,12 @@ export function buildMonthlyBuckets(
       const realizedEvents = calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap);
       for (const ev of realizedEvents) {
         const item = items.find((it) => it.ticker === ev.ticker);
-        if (item && item.currency !== currency) continue;
+        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
 
         const dateStr = ev.paymentDate || ev.exDate;
         const d = new Date(dateStr);
         if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
-          bucketRealized += ev.amountNet;
+          bucketRealized += ev.amountNet * fx;
         }
       }
     }
@@ -304,11 +317,13 @@ export function computeInvestedVsReceived(
   items: WatchlistItem[],
   currency: Currency,
   dividendEventsMap: DividendEventsMap,
-  transactions: Transaction[] = []
+  transactions: Transaction[] = [],
+  fxRate: number = 5.5
 ): InvestedVsReceivedItem[] {
   return items
-    .filter((it) => it.currency === currency && it.quantity > 0)
+    .filter((it) => it.quantity > 0)
     .map((it) => {
+      const fx = getFxMultiplier(it.currency, currency, fxRate);
       const events = dividendEventsMap[it.ticker] ?? [];
       const tickerTxs = transactions.filter(t => t.ticker === it.ticker);
       
@@ -321,12 +336,12 @@ export function computeInvestedVsReceived(
           const dateStr = ev.paymentDate ?? ev.exDate;
           const dateNum = new Date(dateStr).getTime();
           const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, dateNum) : it.quantity;
-          return s + ev.amountPerShare * q;
+          return s + ev.amountPerShare * q * fx;
         }, 0);
         
       return {
         ticker: it.ticker,
-        invested: (it.averagePrice ?? 0) * it.quantity,
+        invested: (it.averagePrice ?? 0) * it.quantity * fx,
         received: totalReceived,
       };
     })
