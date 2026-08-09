@@ -11,6 +11,7 @@ import { getAssetValuation, avgDividend } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { displayTicker } from "@/lib/i18n";
+import { getShareClassBadge } from "@/lib/classify";
 import { useI18n } from "@/lib/i18n-provider";
 import type { SearchHit } from "@/lib/apiService.functions";
 import type { AssetType, Asset } from "@/lib/domain";
@@ -117,23 +118,38 @@ export function AssetComparator() {
           <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-border/50 bg-popover/90 backdrop-blur-xl shadow-2xl">
             {suggestions.length > 0 ? (
               <ul className="max-h-64 overflow-auto py-1">
-                {suggestions.map((a) => (
-                  <li key={a.ticker}>
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(a)}
-                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-primary/10 hover:text-primary transition-colors"
-                    >
-                      <span className="flex flex-col">
-                        <span className="font-bold">{displayTicker(a.ticker)}</span>
-                        <span className="text-xs text-muted-foreground">{a.name}</span>
-                      </span>
-                      <Badge variant="secondary" className="shrink-0">
-                        {t.types[a.type]}
-                      </Badge>
-                    </button>
-                  </li>
-                ))}
+                {suggestions.map((a) => {
+                  const sc = getShareClassBadge(a.ticker, a.type);
+                  return (
+                    <li key={a.ticker}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(a)}
+                        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-primary/10 hover:text-primary transition-colors"
+                      >
+                        <span className="flex flex-col">
+                          <span className="flex items-center gap-1.5 font-bold text-foreground">
+                            {displayTicker(a.ticker)}
+                            {sc && (
+                              <span
+                                className={cn(
+                                  "text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
+                                  sc.className,
+                                )}
+                              >
+                                {sc.label}
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{a.name}</span>
+                        </span>
+                        <Badge variant="secondary" className="shrink-0">
+                          {t.types[a.type]}
+                        </Badge>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <div className="p-4 text-center text-sm text-muted-foreground">

@@ -60,18 +60,22 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
     ]);
 
     if (brRes.status === "fulfilled" && brRes.value?.stocks) {
-      for (const s of brRes.value.stocks.slice(0, 6)) {
+      for (const s of brRes.value.stocks.slice(0, 10)) {
         if (typeof s === "string") {
-          // Fallback in case of old API response
           const t = String(s).toUpperCase();
           const cleaned = cleanTicker(t);
           if (seen.has(cleaned)) continue;
+          if (t.endsWith("F") && seen.has(t.slice(0, -1))) continue;
           seen.add(cleaned);
           results.push({ ticker: cleaned, name: t, type: classifyBr(t), sector: null });
         } else if (s.stock) {
           const t = String(s.stock).toUpperCase();
           const cleaned = cleanTicker(t);
+          if (s.type === "option" || (t.length >= 6 && /^[A-Z]{4}\d{1,2}[A-Z]$/.test(t) && !t.endsWith("F"))) {
+            continue;
+          }
           if (seen.has(cleaned)) continue;
+          if (t.endsWith("F") && seen.has(t.slice(0, -1))) continue;
           seen.add(cleaned);
           results.push({
             ticker: cleaned,

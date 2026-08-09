@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { classifyBr, B3_STOCK_UNIT_PREFIXES } from "../classify";
+import { classifyBr, B3_STOCK_UNIT_PREFIXES, getShareClassBadge } from "../classify";
 
 describe("classifyBr", () => {
   it("classifies all known B3 stock units (ending in 11) as STOCK_BR in fallback mode", () => {
@@ -43,5 +43,15 @@ describe("classifyBr", () => {
     // ETF & BDR apiType mappings
     expect(classifyBr("BOVA11", "etf")).toBe("ETF");
     expect(classifyBr("AAPL34", "bdr")).toBe("STOCK_US");
+  });
+});
+
+describe("getShareClassBadge", () => {
+  it("returns correct share class badges for B3 tickers", () => {
+    expect(getShareClassBadge("VALE3")?.label).toBe("ON");
+    expect(getShareClassBadge("PETR4")?.label).toBe("PN");
+    expect(getShareClassBadge("TAEE11", "STOCK_BR")?.label).toBe("UNIT");
+    expect(getShareClassBadge("AAPL34")?.label).toBe("BDR");
+    expect(getShareClassBadge("VALE3F")?.label).toBe("Fracionário");
   });
 });

@@ -18,6 +18,7 @@ import type { SearchHit } from "@/lib/apiService.functions";
 import { searchQueryOptions, assetQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
 import { displayTicker } from "@/lib/i18n";
+import { getShareClassBadge } from "@/lib/classify";
 import { useSettings } from "@/lib/settings";
 
 const ALL_TYPES: AssetType[] = [
@@ -204,26 +205,41 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
         {open && suggestions.length > 0 && (
           <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover shadow-lg">
             <ul className="max-h-64 overflow-auto py-1">
-              {suggestions.map((a, idx) => (
-                <li key={a.ticker}>
-                  <button
-                    type="button"
-                    onClick={() => pick(a)}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
-                      highlightedIndex === idx && "bg-accent text-accent-foreground",
-                    )}
-                  >
-                    <span className="flex flex-col">
-                      <span className="font-medium text-foreground">{displayTicker(a.ticker)}</span>
-                      <span className="line-clamp-1 text-xs text-muted-foreground">{a.name}</span>
-                    </span>
-                    <Badge variant="secondary" className="shrink-0">
-                      {t.types[a.type]}
-                    </Badge>
-                  </button>
-                </li>
-              ))}
+              {suggestions.map((a, idx) => {
+                const sc = getShareClassBadge(a.ticker, a.type);
+                return (
+                  <li key={a.ticker}>
+                    <button
+                      type="button"
+                      onClick={() => pick(a)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
+                        highlightedIndex === idx && "bg-accent text-accent-foreground",
+                      )}
+                    >
+                      <span className="flex flex-col">
+                        <span className="flex items-center gap-1.5 font-medium text-foreground">
+                          {displayTicker(a.ticker)}
+                          {sc && (
+                            <span
+                              className={cn(
+                                "text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
+                                sc.className,
+                              )}
+                            >
+                              {sc.label}
+                            </span>
+                          )}
+                        </span>
+                        <span className="line-clamp-1 text-xs text-muted-foreground">{a.name}</span>
+                      </span>
+                      <Badge variant="secondary" className="shrink-0">
+                        {t.types[a.type]}
+                      </Badge>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

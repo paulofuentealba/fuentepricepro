@@ -221,8 +221,12 @@ export function ResultStats({
           }}
         >
           <summary className="flex cursor-pointer items-center justify-between font-medium">
-            <span className="text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               {t.form.taxExceptions}{" "}
+              <InfoTooltip
+                content={t.tooltips?.taxExceptions || t.form.taxExceptionsBody.replace(/<[^>]*>/g, "")}
+                link="/app/docs#tax-exceptions"
+              />
               {!isPro && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500 uppercase tracking-wider">
                   {t.form.taxExceptionsPro}
@@ -317,7 +321,12 @@ export function ResultStats({
           <div className={"flex items-center gap-2 " + (positive ? "text-success" : "text-danger")}>
             <Shield className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">
-              {t.result.safetyMargin}
+              {t.result.safetyMargin}{" "}
+              <InfoTooltip
+                content={t.tooltips?.safetyMargin || "Margem de Segurança"}
+                link="/app/docs#safety-margin"
+                className="ml-1"
+              />
             </span>
           </div>
           <div className="mt-2 flex items-baseline gap-2">

@@ -58,3 +58,52 @@ export function classifyBr(symbol: string, apiType?: string): AssetType {
   return "STOCK_BR";
 }
 
+export function getShareClassBadge(
+  ticker: string,
+  type?: string,
+): { label: string; className: string } | null {
+  const clean = ticker.trim().toUpperCase().replace(/\.SA$/, "");
+  if (!clean) return null;
+
+  // BDRs (34 or 35)
+  if (/^[A-Z]{4}(34|35)$/.test(clean)) {
+    return {
+      label: "BDR",
+      className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    };
+  }
+  // Units (11 with Stock type or in B3_STOCK_UNIT_PREFIXES)
+  if (
+    clean.endsWith("11") &&
+    (type === "STOCK_BR" || B3_STOCK_UNIT_PREFIXES.has(clean.slice(0, -2)))
+  ) {
+    return {
+      label: "UNIT",
+      className: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+    };
+  }
+  // Fractional Lot (...F)
+  if (/^[A-Z]{4}\d{1,2}F$/.test(clean)) {
+    return {
+      label: "Fracionário",
+      className: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    };
+  }
+  // ON Stock (...3)
+  if (/^[A-Z]{4}3$/.test(clean)) {
+    return {
+      label: "ON",
+      className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    };
+  }
+  // PN Stock (...4, 5, 6, 7, 8)
+  if (/^[A-Z]{4}[4-8]$/.test(clean)) {
+    return {
+      label: "PN",
+      className: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+    };
+  }
+
+  return null;
+}
+
