@@ -77,16 +77,6 @@ export function grahamPrice(lpa: number, vpa: number): number | null {
 
 export const DEFAULT_SELIC = 0.105; // 10.5% as Selic Anchor
 
-export function gordonPrice(
-  d1: number,
-  k: number = DEFAULT_SELIC,
-  g: number = 0.04,
-): number | null {
-  if (typeof d1 !== "number" || typeof k !== "number" || typeof g !== "number") return null;
-  if (k <= g) return null;
-  return d1 / (k - g);
-}
-
 export function consensusPrice(prices: (number | null | undefined)[]): number | null {
   const validPrices = prices.filter(
     (p): p is number => typeof p === "number" && p > 0 && isFinite(p),
@@ -104,6 +94,74 @@ export function consensusPrice(prices: (number | null | undefined)[]): number | 
 export const GORDON_MIN_DISCOUNT_MARGIN = 0.02;
 
 /**
+ * PENDENTE DE VALIDAÇÃO DE MODELAGEM FINANCEIRA - Aguarda confirmação de Paulo
+ * Terminal growth rate for 2-stage Gordon Growth Model (H-Model).
+ */
+export const GORDON_TERMINAL_GROWTH_RATE = 0.03; // 3.0%
+
+/**
+ * PENDENTE DE VALIDAÇÃO DE MODELAGEM FINANCEIRA - Aguarda confirmação de Paulo
+ * Horizon in years for the high-growth transition period.
+ */
+export const GORDON_HIGH_GROWTH_YEARS = 5; // 5 years
+
+/**
+ * PENDENTE DE VALIDAÇÃO DE MODELAGEM FINANCEIRA - Aguarda confirmação de Paulo
+ * Maximum allowable YoY growth volatility (sample std dev) before flagging Gordon confidence as "low".
+ */
+export const GORDON_MAX_GROWTH_VOLATILITY = 0.35; // 35%
+
+export function calculateDividendGrowthVolatility(
+  history?: readonly { year: number; amount: number }[]
+): number | null {
+  if (!history || history.length < 3) return null;
+  const sorted = [...history]
+    .filter((p) => Number.isFinite(p.amount) && p.amount > 0)
+    .sort((a, b) => a.year - b.year);
+  if (sorted.length < 3) return null;
+
+  const yoyGrowths: number[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1].amount;
+    const curr = sorted[i].amount;
+    if (prev > 0) {
+      yoyGrowths.push((curr - prev) / prev);
+    }
+  }
+  if (yoyGrowths.length < 2) return null;
+
+  const mean = yoyGrowths.reduce((sum, v) => sum + v, 0) / yoyGrowths.length;
+  const variance =
+    yoyGrowths.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (yoyGrowths.length - 1);
+  return Math.sqrt(variance);
+}
+
+export function gordonPrice(
+  d0: number,
+  k: number = DEFAULT_SELIC,
+  gInitial?: number | null,
+  gTerminal: number = GORDON_TERMINAL_GROWTH_RATE,
+  years: number = GORDON_HIGH_GROWTH_YEARS
+): number | null {
+  if (typeof d0 !== "number" || typeof k !== "number" || d0 <= 0) return null;
+
+  // Single-stage fallback if gInitial is null or undefined
+  if (gInitial == null) {
+    if (k - 0 < GORDON_MIN_DISCOUNT_MARGIN) return null;
+    return d0 / k;
+  }
+
+  // Singularity guard applies to gTerminal
+  if (k - gTerminal < GORDON_MIN_DISCOUNT_MARGIN) return null;
+
+  // H-Model 2-Stage Gordon Valuation
+  const h = years / 2; // Half-life (2.5 years for 5-year horizon)
+  const terminalValue = (d0 * (1 + gTerminal)) / (k - gTerminal);
+  const transitionValue = (d0 * h * (gInitial - gTerminal)) / (k - gTerminal);
+  return terminalValue + transitionValue;
+}
+
+/**
  * Universal valuation engine.
  * Calculates all models and the consensus margin of safety in one place.
  */
@@ -114,6 +172,7 @@ export function getAssetValuation({
   eps,
   bvps,
   dividendCagr,
+  dividendHistory,
   selicPct = 10.5,
   currency,
   type,
@@ -125,6 +184,7 @@ export function getAssetValuation({
   eps?: number | null;
   bvps?: number | null;
   dividendCagr?: number | null;
+  dividendHistory?: readonly { year: number; amount: number }[];
   selicPct?: number;
   currency: string;
   type: AssetType;
@@ -136,6 +196,7 @@ export function getAssetValuation({
       bazin: null,
       graham: null,
       gordon: null,
+      gordonConfidence: null,
       consensus: null,
       activeCeiling: currentPrice,
       margin: 0,
@@ -149,6 +210,7 @@ export function getAssetValuation({
       bazin: null,
       graham: null,
       gordon: null,
+      gordonConfidence: null,
       consensus: null,
       activeCeiling: currentPrice > 0 ? currentPrice : 0,
       margin: 0,
@@ -166,12 +228,19 @@ export function getAssetValuation({
   // 2. Graham Model: Math.sqrt(22.5 * EPS * BVPS)
   const graham = eps && bvps && eps > 0 && bvps > 0 ? Math.sqrt(22.5 * eps * bvps) : null;
 
-  // 3. Gordon Model: NextYearDiv / (DiscountRate - CAGR)
-  // Protected against singularity explosion when (k - g) < GORDON_MIN_DISCOUNT_MARGIN (2.0 percentage points)
+  // 3. Gordon Model (2-Stage H-Model with Fallback & Volatility Check)
   const k = selicPct / 100;
-  const g = dividendCagr ? dividendCagr / 100 : 0; // assuming dividendCagr is in percentage like selicPct
-  const nextYearDiv = netAvgDividend * (1 + g);
-  const gordon = (k - g) >= GORDON_MIN_DISCOUNT_MARGIN ? nextYearDiv / (k - g) : null;
+  const gInitial = dividendCagr != null ? dividendCagr / 100 : null;
+  const gordon = gordonPrice(netAvgDividend, k, gInitial);
+
+  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
+  let gordonConfidence: "high" | "low" | null = null;
+  if (gordon !== null) {
+    gordonConfidence =
+      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
+        ? "low"
+        : "high";
+  }
 
   // 4. Consensus & Margin (Robust Median across valid models)
   const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
@@ -193,6 +262,7 @@ export function getAssetValuation({
     bazin,
     graham,
     gordon,
+    gordonConfidence,
     consensus,
     activeCeiling,
     margin,

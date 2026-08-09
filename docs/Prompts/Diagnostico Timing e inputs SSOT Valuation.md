@@ -75,4 +75,3 @@ Caso Paulo decida aprovar a padronização e propagação de `as_of` / SSOT de e
 - **Mensagem no Git**: `docs(diagnostic): Diagnóstico: as_of / Timing de Dado no SSOT de Valuation`
 - **Commit Short SHA**: `5eef7f7`
 - **Commit Full SHA**: `5eef7f78a601cc69a1dfc0b4a181ff03f80151be`
-

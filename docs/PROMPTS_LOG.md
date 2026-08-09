@@ -3452,26 +3452,6 @@ i  firestore: uploading rules firestore.rules...
 
 ### Item 10: Registrar Exportação/Benchmark no Backlog ✅ CONCLUÍDO (APENAS DOCUMENTAÇÃO)
 
-- **Ação Realizada**:
-  - Inclusão formal da seção `1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks` em `docs/BACKLOG_V2.md`.
-  - Mapeadas as regras para:
-    1. **Exportação (CSV/Excel)** no Comparador (`/app/comparator`) e Watchlist (`/app/watchlist`).
-    2. **Importação por Planilha Simples** (`Ticker`, `Data da Compra`, `Quantidade`, `Valor Unitário`) com atualização dinâmica de preço médio, posições e proventos para ativos existentes ou inclusão na carteira para ativos novos.
-    3. **Comparação com Benchmarks** de mercado (CDI/Selic, IBOVESPA e S&P 500) por classe de ativo no Comparador.
-  - **Nenhum código de aplicação foi alterado** (estritamente documentação conforme solicitado).
-
----
-
-### Item 11: Confirmar Registro do Disclaimer CVM ✅ CONCLUÍDO (APENAS DOCUMENTAÇÃO)
-
-- **Ação Realizada**:
-  - Verificado o arquivo `docs/BACKLOG_V2.md` e atualizadas as seções `2.3 (Módulo de IRPF)` e `4.2 (Onboarding Regulatório & Compliance CVM)`.
-  - Definido explicitamente que a implementação e exibição visível do **Disclaimer Regulatório CVM / ANBIMA** (isento de recomendação ou conselho de investimento/tributário, respaldado na skill `fuente-advogado-lgpd-gdpr` e em `anthropics/financial-services`) é um **pré-requisito bloqueante OBRIGATÓRIO pré-Fase 4 (IRPF)**.
-  - **Nenhum código de aplicação foi alterado** (item estritamente de compliance e documentação).
-
----
-
-### Item 12: Desligar Feature Gates em Produção via Config Firestore ✅ CONCLUÍDO E VERIFICADO
 
 - **Decisão Estratégica de Monetização**:
   - Desligamento de todos os paywalls/cadeados em produção mantendo a arquitetura de entitlement (`SubscriptionProvider`, `useFeatureGate`, `firestore.rules`) 100% preservada.
