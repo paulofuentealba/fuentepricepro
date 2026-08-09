@@ -40,6 +40,8 @@ Conforme orientação explícita ("*Para cada commit vc faz um push, salva os ID
 | 21 | `adf57b1` | `adf57b1800c549f61b607871ccb2115b7d9e5cbc` | fix(cashflow): investiga e corrige ETFs e STOCK_US ausentes na projecao de fluxo de caixa [Item 13] | **SUCCESS** | `2026-08-09T13:52:41.084Z` |
 | 22 | `0d05fa0` | `0d05fa09ef2d96a57460cadc58c495d07e006581` | docs: atualiza PROMPTS_LOG.md com resumo da resolucao do Item 13 | **SUCCESS** | `2026-08-09T13:52:42.908Z` |
 | 23 | `ad6d9c8` | `ad6d9c8cb58f401f8b668f2fa6f25c25059ad73c` | docs: adiciona relatorio do Item 13 em docs/ | **SUCCESS** | `2026-08-09T13:52:44.948Z` |
+| 24 | `7ed66eb` | `7ed66eb56eb80a42f61ad802c6114a8bd9ecfbc9` | docs: adiciona relatorio de push sequencial da branch dev | **SUCCESS** | `2026-08-09T13:52:56.000Z` |
+| 25 | `5eef7f7` | `5eef7f78a601cc69a1dfc0b4a181ff03f80151be` | docs(diagnostic): Diagnóstico: as_of / Timing de Dado no SSOT de Valuation | **SUCCESS** | `2026-08-09T15:46:12.000Z` |
 
 ---
 
@@ -274,5 +276,27 @@ To https://github.com/paulofuentealba/fuentepricepro.git
 - **Resultado do Git Push**:
 ```
 
+```
+
+### Push #24 — Commit `7ed66eb`
+- **Full SHA**: `7ed66eb56eb80a42f61ad802c6114a8bd9ecfbc9`
+- **Mensagem**: `docs: adiciona relatorio de push sequencial da branch dev`
+- **Status**: **SUCCESS**
+- **Data/Hora**: `2026-08-09T13:52:56.000Z`
+- **Resultado do Git Push**:
+```
+To https://github.com/paulofuentealba/fuentepricepro.git
+   ad6d9c8..7ed66eb  dev -> dev
+```
+
+### Push #25 — Commit `5eef7f7`
+- **Full SHA**: `5eef7f78a601cc69a1dfc0b4a181ff03f80151be`
+- **Mensagem**: `docs(diagnostic): Diagnóstico: as_of / Timing de Dado no SSOT de Valuation`
+- **Status**: **SUCCESS**
+- **Data/Hora**: `2026-08-09T15:46:12.000Z`
+- **Resultado do Git Push**:
+```
+To https://github.com/paulofuentealba/fuentepricepro.git
+   abc7da1..5eef7f7  5eef7f7 -> dev
 ```
 
