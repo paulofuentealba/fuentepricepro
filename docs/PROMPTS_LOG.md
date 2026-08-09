@@ -3460,6 +3460,15 @@ i  firestore: uploading rules firestore.rules...
     3. **Comparação com Benchmarks** de mercado (CDI/Selic, IBOVESPA e S&P 500) por classe de ativo no Comparador.
   - **Nenhum código de aplicação foi alterado** (estritamente documentação conforme solicitado).
 
+---
+
+### Item 11: Confirmar Registro do Disclaimer CVM ✅ CONCLUÍDO (APENAS DOCUMENTAÇÃO)
+
+- **Ação Realizada**:
+  - Verificado o arquivo `docs/BACKLOG_V2.md` e atualizadas as seções `2.3 (Módulo de IRPF)` e `4.2 (Onboarding Regulatório & Compliance CVM)`.
+  - Definido explicitamente que a implementação e exibição visível do **Disclaimer Regulatório CVM / ANBIMA** (isento de recomendação ou conselho de investimento/tributário, respaldado na skill `fuente-advogado-lgpd-gdpr` e em `anthropics/financial-services`) é um **pré-requisito bloqueante OBRIGATÓRIO pré-Fase 4 (IRPF)**.
+  - **Nenhum código de aplicação foi alterado** (item estritamente de compliance e documentação).
+
 
 
 
