@@ -3328,10 +3328,12 @@ i  firestore: uploading rules firestore.rules...
   1. **`WatchlistKpiSection.tsx`**: Constrói `dividendEventsMap` em paralelo via `useQueries(assetQueryOptions)` com cache do TanStack Query (`staleTime = 5min`). Passa para `NextPaymentBanner`.
   2. **`NextPaymentBanner.tsx`**: Filtra eventos onde `paymentDate > now` (em vez de `exDividendDate`). Utiliza o valor real declarado por cota (`amountPerShare`). Se não houver data de pagamento futura, utiliza o fallback com flag `isEstimated: true` e selo `(est.)`.
   3. **Rótulo Dinâmico com Contagem Total**: Se houver mais de 4 pagamentos futuros, exibe os 4 mais próximos e ajusta o cabeçalho para `"4 de {{total}} Próximos Pagamentos"` via i18n (`dict.ptBR.ts`, `dict.en.ts`, `dict.es.ts`).
+  4. **Deduplicação de Múltiplos Eventos Futuros por Ticker**: Refatorado `computeUpcomingPayments` para filtrar e ordenar eventos com `paymentDate > now`, selecionando estritamente **apenas o evento de pagamento mais próximo por ticker** (evitando duplicatas de ativos como PETR4 com múltiplos pagamentos anunciados).
 - **Evidências Literais de Validação**:
   1. **`npx tsc --noEmit`**: **0 erros** (Exit code 0).
-  2. **`npm run test`**: **140 passed** | 4 skipped (23 test files passed).
-  3. **`npm run build`**: Client (4097 módulos em 2.63s) e SSR (251 módulos em 844ms) compilados limpos.
+  2. **`npm run test`**: **142 passed** | 4 skipped (24 test files passed). Inclui novo arquivo de testes `nextPaymentBanner.test.ts` validando a seleção única do evento mais próximo.
+  3. **`npm run build`**: Client (4097 módulos em 1.49s) e SSR (251 módulos em 1.33s) compilados limpos.
+
 
 
 
