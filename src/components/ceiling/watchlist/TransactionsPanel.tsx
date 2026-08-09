@@ -80,8 +80,13 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
                   {tx.type === 'buy' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                 </div>
                 <div>
-                  <div className="font-medium">
-                    {tx.type === 'buy' ? t.transactions.buy : t.transactions.sell}
+                  <div className="font-medium flex items-center gap-2">
+                    <span>{tx.type === 'buy' ? t.transactions.buy : t.transactions.sell}</span>
+                    {tx.notes && (
+                      <span className="text-[10px] text-muted-foreground font-normal bg-muted px-1.5 py-0.5 rounded border border-border/40">
+                        {tx.notes}
+                      </span>
+                    )}
                   </div>
                   <div className="text-muted-foreground text-xs">
                     {new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(tx.date)}

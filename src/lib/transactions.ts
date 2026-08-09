@@ -23,6 +23,7 @@ export interface Transaction {
   quantity: number;
   pricePerShare: number;
   fees?: number | null; // corretagem/taxas, a Receita manda incluir no custo
+  notes?: string | null;
 }
 
 const STORAGE_KEY = "ceilingPricePro.transactions.v1";
@@ -134,6 +135,7 @@ function rowToItem(row: any): Transaction {
     quantity: typeof row.quantity === "number" ? row.quantity : 0,
     pricePerShare: typeof row.pricePerShare === "number" ? row.pricePerShare : 0,
     fees: row.fees ?? null,
+    notes: row.notes ?? null,
   };
 }
 

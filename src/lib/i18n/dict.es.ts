@@ -1015,6 +1015,7 @@ export const es = {
     perShare: "/ cuota",
     confirmDelete: "¿Eliminar esta transacción?",
     calculatedFromTransactions: "Calculado a partir de {n} transacciones. Para editar, gestione el historial de transacciones en los detalles del activo.",
+    csvImportAdjustment: "Ajuste vía importación CSV",
   },
   onboarding: {
     welcome: {

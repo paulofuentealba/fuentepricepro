@@ -1001,6 +1001,7 @@ export const en = {
     perShare: "/ share",
     confirmDelete: "Delete this transaction?",
     calculatedFromTransactions: "Calculated from {n} transactions. To edit, manage the transaction history in the asset details.",
+    csvImportAdjustment: "Adjustment via CSV import",
   },
   onboarding: {
     welcome: {
