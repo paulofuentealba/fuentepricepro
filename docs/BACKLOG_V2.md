@@ -102,9 +102,10 @@ Não existe. Relatório de imposto sobre dividendos/JCP e cálculo de DARF em ve
 
 ### 3.1 Controle Real de Planos (Free vs. PRO) 🟡 (Fundação Concluída)
 
-- **Fundação de Entitlement & Feature Gates**: ✅ **CONCLUÍDO (Prompt 1)**. `src/lib/subscription.tsx` reescrito para ler `users/{uid}.subscriptionStatus` via `onSnapshot` em tempo real, com fail-safe para `'free'`. Criados `src/lib/featureGates.ts` (lê `config/featureGates` via `onSnapshot` com fallback para `DEFAULT_FEATURE_GATES = { freeAssetLimit: 8 }` e função pura `resolveFeatureGate`) e `src/lib/useFeatureGate.ts` (hook público único). Regra de segurança adicionada em `firestore.rules` e script `scripts/seed-feature-gates.ts` criado. `AddToWatchlistDialog.tsx` migrado para `useFeatureGate('freeAssetLimit')` e dicionários i18n atualizados com interpolação `{{limit}}`.
-- **Integração com Stripe (Prompt 2)**: Pendente (Checkout e webhook Stripe).
-- **Status do Épico**: Mantido como 🔒 até a conclusão do Prompt 2 (Stripe).
+- **Fundação de Entitlement & Feature Gates**: ✅ **CONCLUÍDO (Prompt 1 & Item 12)**. `src/lib/subscription.tsx` reescrito para ler `users/{uid}.subscriptionStatus` via `onSnapshot` em tempo real. Criados `src/lib/featureGates.ts` (com fallback `DEFAULT_FEATURE_GATES = { freeAssetLimit: 8 }` e função pura `resolveFeatureGate`), `useFeatureGate.ts` e `scripts/update-feature-gates-permissive.ts`.
+- **Desligamento Temporário dos Paywalls via Configuração**: 🔓 **ITEM 12**. Por decisão estratégica de produto (reconsideração sobre Stripe vs. outras abordagens de monetização), todos os gates foram desligados em produção através da atualização do documento `config/featureGates` no Firestore com limite permissivo (`freeAssetLimit: 999999` e flags booleanas destravadas). A infraestrutura de entitlement permanece 100% intacta e pronta para reativação imediata via Firestore sem necessidade de novo deploy.
+- **Integração com Stripe (Prompt 2)**: Pendente (Decisão de monetização mantida em aberto).
+- **Status do Épico**: Mantido como 🔒 até a definição da estratégia final de monetização.
 
 ### 3.2 Painel Administrativo (`/admin`)
 
