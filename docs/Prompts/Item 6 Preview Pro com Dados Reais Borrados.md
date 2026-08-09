@@ -49,7 +49,7 @@
 
 ## 5. Registro de Commit
 
-- **Título do Commit**: `Item 6, Opção B: Preview Pro com Dados Reais Borrados`
+- **Título do Commit**: `Prompt para Antigravity — Item 6, Opção B: Preview Pro com Dados Reais Borrados`
 - **Mensagem no Git**: `feat(preview): implementa preview Pro com dados reais borrados (Opcao B do Item 6)`
-- **Commit Short SHA**: `82a4d9b`
-- **Commit Full SHA**: `82a4d9b09f456c6c74ad69151e33c1626dded0d4`
+- **Commit Short SHA**: `2e1acdd`
+- **Commit Full SHA**: `2e1acdd4c8fcf586dd80a84511cd88c0cd4bfeef`
