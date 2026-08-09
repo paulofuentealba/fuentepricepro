@@ -12,7 +12,7 @@ import { IndicatorGrid } from "../ceiling/IndicatorGrid";
 import { GoalPlanner } from "../ceiling/GoalPlanner";
 import { DividendHistoryChart } from "../ceiling/result/DividendHistoryChart";
 import { ResultStats } from "../ceiling/result/ResultStats";
-import { useSubscription } from "@/lib/subscription";
+import { useFeatureGate } from "@/lib/useFeatureGate";
 import { PaywallDialog } from "../ui/PaywallDialog";
 import { useState, useMemo } from "react";
 
@@ -368,7 +368,7 @@ function SearchVariant({
   const [localTargetYield, setLocalTargetYield] = useState(initialTargetYield);
   const [localAveragePrice, setLocalAveragePrice] = useState(initialAveragePrice);
   const [localCustomTaxRate, setLocalCustomTaxRate] = useState<number | null>(null);
-  const { isPro } = useSubscription();
+  const customTaxUnlocked = useFeatureGate("customTaxUnlocked") as boolean;
   const [showPaywall, setShowPaywall] = useState(false);
 
   const { avg, availableTimeframes } = useMemo(
@@ -508,7 +508,7 @@ function SearchVariant({
             onTargetYieldChange={setLocalTargetYield}
             onAveragePriceChange={setLocalAveragePrice}
             onCustomTaxRateChange={setLocalCustomTaxRate}
-            isPro={isPro}
+            isPro={customTaxUnlocked}
             onShowPaywall={() => setShowPaywall(true)}
           />
         )}

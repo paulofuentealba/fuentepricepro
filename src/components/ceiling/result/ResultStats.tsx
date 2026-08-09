@@ -1,3 +1,4 @@
+import { useFeatureGate } from "@/lib/useFeatureGate";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -82,6 +83,7 @@ export function ResultStats({
   onShowPaywall,
 }: Props) {
   const { t, locale } = useI18n();
+  const customTaxUnlocked = useFeatureGate("customTaxUnlocked") as boolean;
   return (
     <>
       {(yocPct != null || exDateFormatted) && (
@@ -216,7 +218,7 @@ export function ResultStats({
         <details
           className="group space-y-4 rounded-lg border border-border/50 bg-background/30 p-4 [&_summary::-webkit-details-marker]:hidden"
           onClick={(e) => {
-            if (!isPro) {
+            if (!customTaxUnlocked) {
               e.preventDefault();
               onShowPaywall();
             }
@@ -229,7 +231,7 @@ export function ResultStats({
                 content={t.tooltips?.taxExceptions || t.form.taxExceptionsBody.replace(/<[^>]*>/g, "")}
                 link="/app/docs#tax-exceptions"
               />
-              {!isPro && (
+              {!customTaxUnlocked && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500 uppercase tracking-wider">
                   {t.form.taxExceptionsPro}
                 </span>
@@ -274,11 +276,11 @@ export function ResultStats({
                   onChangeValue={(v) => {
                     const str = v === undefined ? "" : String(v);
                     const tx = str !== "" ? parseFloat(str) : null;
-                    const tax = isPro && tx !== null && tx >= 0 && tx <= 100 ? tx : null;
+                    const tax = customTaxUnlocked && tx !== null && tx >= 0 && tx <= 100 ? tx : null;
                     onCustomTaxRateChange(tax);
                   }}
                   className="h-10 pr-8 bg-background/50"
-                  disabled={!isPro}
+                  disabled={!customTaxUnlocked}
                 />
                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                   %

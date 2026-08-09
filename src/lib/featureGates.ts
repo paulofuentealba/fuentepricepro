@@ -12,17 +12,21 @@ import type { SubscriptionTier } from "./subscription";
 
 export interface FeatureGatesConfig {
   freeAssetLimit?: number;
+  cashflowUnlocked?: boolean;
+  smartAllocationUnlocked?: boolean;
+  customTaxUnlocked?: boolean;
+  sliderUnlocked?: boolean;
+  strategiesUnlocked?: boolean;
   [key: string]: boolean | number | undefined;
 }
 
-/**
- * Master Paywall Toggle
- * When set to true (DISABLE_PAYWALLS = true), all feature gates and Pro restrictions are bypassed/unlocked globally.
- */
-export const DISABLE_PAYWALLS = true;
-
 export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: number } = {
-  freeAssetLimit: 8,
+  freeAssetLimit: Number.POSITIVE_INFINITY,
+  cashflowUnlocked: true,
+  smartAllocationUnlocked: true,
+  customTaxUnlocked: true,
+  sliderUnlocked: true,
+  strategiesUnlocked: true,
 };
 
 export type FeatureGateKey = keyof typeof DEFAULT_FEATURE_GATES | string;
@@ -41,7 +45,7 @@ export function resolveFeatureGate(
   key: string
 ): boolean | number {
   const effectiveConfig = { ...DEFAULT_FEATURE_GATES, ...(gatesConfig || {}) };
-  const defaultValue = effectiveConfig[key] ?? false;
+  const defaultValue = effectiveConfig[key] ?? true;
 
   if (tier === "pro") {
     // Pro users bypass limits (Infinity) and unlock boolean flags (true)
@@ -51,7 +55,7 @@ export function resolveFeatureGate(
     return true;
   }
 
-  // Free tier receives the configured limit or flag
+  // Free tier receives the configured limit or flag from Firestore config or fail-open fallback
   return defaultValue;
 }
 

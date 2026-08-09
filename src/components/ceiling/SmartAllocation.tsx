@@ -32,6 +32,7 @@ import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import type { AssetType } from "@/lib/domain";
 import { PaywallDialog } from "../ui/PaywallDialog";
 import { useSubscription } from "@/lib/subscription";
+import { useFeatureGate } from "@/lib/useFeatureGate";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { AssetCard } from "@/components/shared/AssetCard";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
@@ -92,6 +93,7 @@ export function SmartAllocation() {
   }, [valuedItems, exchangeRate]);
 
   const { isPro } = useSubscription();
+  const strategiesUnlocked = useFeatureGate("strategiesUnlocked") as boolean;
   const [showPaywall, setShowPaywall] = useState(false);
 
   const handleTargetsChange = (newTargets: Record<AssetType, number>) => {
@@ -116,7 +118,7 @@ export function SmartAllocation() {
   );
 
   const toggleStrategy = (key: StrategyKey) => {
-    if (!isPro && key !== "yield") {
+    if (!strategiesUnlocked && key !== "yield") {
       setShowPaywall(true);
       return;
     }
@@ -280,7 +282,7 @@ export function SmartAllocation() {
                             aria-pressed={active}
                           >
                             {strategyLabels[key]}
-                            {!isPro && key !== "yield" && (
+                            {!strategiesUnlocked && key !== "yield" && (
                               <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-500/10 px-1 py-[1px] text-[8px] font-bold text-amber-500 uppercase tracking-wider">
                                 PRO
                               </span>

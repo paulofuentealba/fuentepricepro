@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowCalendar } from "@/components/ceiling/CashFlowCalendar";
 import { BlurredPreviewOverlay } from "@/components/ceiling/BlurredPreviewOverlay";
-import { useSubscription } from "@/lib/subscription";
+import { useFeatureGate } from "@/lib/useFeatureGate";
 import { useWatchlist } from "@/lib/watchlist";
 
 export const Route = createFileRoute("/app/cashflow")({
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/app/cashflow")({
 });
 
 function CashFlow() {
-  const { isPro } = useSubscription();
+  const cashflowUnlocked = useFeatureGate("cashflowUnlocked") as boolean;
   const { items } = useWatchlist();
 
   const calendarContent = (
@@ -18,7 +18,7 @@ function CashFlow() {
     </div>
   );
 
-  if (!isPro) {
+  if (!cashflowUnlocked) {
     return (
       <BlurredPreviewOverlay feature="cashflow">
         {calendarContent}

@@ -1,4 +1,4 @@
-# Prompt para Antigravity — Correção de Erro de Contexto `useI18n` em Boundary de Rota
+# Correção de Erro de Contexto `useI18n` em Boundary de Rota
 
 > [!NOTE]
 > Documentação técnica da solução implementada para tratar a exceção `Error: useI18n must be used within I18nProvider` e prevenir falhas em cascata no `Error Boundary` React do aplicativo.

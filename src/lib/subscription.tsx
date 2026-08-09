@@ -3,8 +3,6 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/integrations/firebase/client";
 import { useAuth } from "./auth-provider";
 
-import { DISABLE_PAYWALLS } from "./featureGates";
-
 export type SubscriptionTier = "free" | "pro";
 
 /**
@@ -62,11 +60,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [user]);
 
-  const isPro = DISABLE_PAYWALLS || tier === "pro";
-  const effectiveTier: SubscriptionTier = isPro ? "pro" : tier;
+  const isPro = tier === "pro";
 
   return (
-    <SubscriptionContext.Provider value={{ tier: effectiveTier, isPro, loading }}>
+    <SubscriptionContext.Provider value={{ tier, isPro, loading }}>
       {children}
     </SubscriptionContext.Provider>
   );
