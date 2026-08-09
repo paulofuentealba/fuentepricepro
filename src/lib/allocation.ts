@@ -85,7 +85,7 @@ export function scoreFor(
     case "defensive": {
       const consistency = (item.paymentMonths?.length ?? 0) / 12;
       const marginBonus = item.safetyMargin >= 0 ? 0.25 : 0;
-      return consistency + marginBonus;
+      return Math.max(consistency + marginBonus, 0.05);
     }
   }
 }

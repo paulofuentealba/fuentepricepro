@@ -100,12 +100,27 @@ export function SmartAllocation() {
     setTargets(newTargets);
   };
 
+  const doGenerate = (effectiveTargets: Record<AssetType, number>) => {
+    const totalTarget = Object.values(effectiveTargets).reduce((acc, val) => acc + val, 0);
+    if (totalTarget !== 100) {
+      toast.warning(t.toasts.adjustAllocationTarget100);
+      return;
+    }
+
+    setIsGenerating(true);
+    setTimeout(() => {
+      setExcludedTickers([]);
+      setGenerated(true);
+      setIsGenerating(false);
+    }, 600);
+  };
+
   const handleSuggestAllocation = () => {
     const suggested = computeSuggestedAllocation(profile, activeStrategies, valuedItems);
     handleTargetsChange(suggested);
     toast.success(t.smartAllocation.suggestedAllocationBtn || "Alocação Sugerida");
     if (capital && Number(capital) > 0 && hasCurrency[currency]) {
-      handleGenerate();
+      doGenerate(suggested);
     }
   };
 
@@ -179,18 +194,7 @@ export function SmartAllocation() {
   ]);
 
   const handleGenerate = () => {
-    const totalTarget = Object.values(targets).reduce((acc, val) => acc + val, 0);
-    if (totalTarget !== 100) {
-      toast.warning(t.toasts.adjustAllocationTarget100);
-      return;
-    }
-
-    setIsGenerating(true);
-    setTimeout(() => {
-      setExcludedTickers([]);
-      setGenerated(true);
-      setIsGenerating(false);
-    }, 600);
+    doGenerate(targets);
   };
 
   const handleExclude = (ticker: string) => {

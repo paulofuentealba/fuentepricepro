@@ -39,7 +39,7 @@ export function SnowballSimulator() {
     },
     Principal: {
       label: t.snowball.principal,
-      color: "var(--color-primary)",
+      color: "var(--chart-4)",
     },
   } satisfies ChartConfig;
 

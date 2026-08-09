@@ -246,20 +246,19 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 <defs>
                   <pattern
                     id="striped"
-                    width="4"
-                    height="4"
+                    width="6"
+                    height="6"
                     patternUnits="userSpaceOnUse"
-                    patternTransform="rotate(45)"
                   >
-                    <rect width="2" height="4" fill={COLOR_BAR} />
-                    <rect x="2" width="2" height="4" fill="transparent" />
+                    <rect width="3" height="6" fill={COLOR_BAR} />
+                    <rect x="3" width="3" height="6" fill="transparent" />
                   </pattern>
                   <ChartGlowDef />
                 </defs>
                 <CartesianGrid
                   vertical={false}
                   strokeDasharray="3 3"
-                  stroke="oklch(0.4 0.02 250 / 0.25)"
+                  stroke="hsl(var(--border) / 0.4)"
                 />
                 <XAxis
                   dataKey="month"
@@ -273,7 +272,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       <text
                         x={x}
                         y={y + 12}
-                        fill={isSelected ? "var(--foreground)" : "oklch(0.6 0.02 250)"}
+                        fill={isSelected ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
                         className="text-[9px] sm:text-[11px]"
                         fontWeight={isSelected ? 600 : 400}
                         textAnchor="middle"
@@ -287,11 +286,11 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   tickLine={false}
                   axisLine={false}
                   width={50}
-                  tick={{ fill: "oklch(0.6 0.02 250)", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                   tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "oklch(0.7 0.15 160 / 0.08)" }}
+                  cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
                   content={<CustomTooltip />}
                 />
 
@@ -441,7 +440,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     horizontal={true}
                     vertical={false}
                     strokeDasharray="3 3"
-                    stroke="oklch(0.4 0.02 250 / 0.25)"
+                    stroke="hsl(var(--border) / 0.4)"
                   />
                   <XAxis type="number" hide />
                   <YAxis
@@ -450,10 +449,10 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     tickLine={false}
                     axisLine={false}
                     width={60}
-                    tick={{ fill: "oklch(0.8 0.02 250)", fontSize: 11, fontWeight: 500 }}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
                   />
                   <ChartTooltip
-                    cursor={{ fill: "oklch(0.7 0.15 160 / 0.08)" }}
+                    cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
                     content={<BreakdownTooltip />}
                   />
                   <Bar dataKey="amount" fill={COLOR_LINE} radius={[0, 4, 4, 0]} barSize={20}>
@@ -461,7 +460,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       dataKey="amount"
                       position="right"
                       formatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
-                      style={{ fill: "oklch(0.75 0.02 250)", fontSize: 10 }}
+                      style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                     />
                     {breakdownData.map((entry, index) => (
                       <Cell
@@ -488,7 +487,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   <CartesianGrid
                     vertical={false}
                     strokeDasharray="3 3"
-                    stroke="oklch(0.4 0.02 250 / 0.25)"
+                    stroke="hsl(var(--border) / 0.4)"
                   />
                   <XAxis
                     dataKey="month"
@@ -499,7 +498,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       <text
                         x={x}
                         y={y + 12}
-                        fill="oklch(0.6 0.02 250)"
+                        fill="hsl(var(--muted-foreground))"
                         className="text-[9px] sm:text-[11px]"
                         textAnchor="middle"
                       >
@@ -511,12 +510,12 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     tickLine={false}
                     axisLine={false}
                     width={56}
-                    tick={{ fill: "oklch(0.6 0.02 250)", fontSize: 10 }}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                     tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                   />
                   <ChartTooltip
                     cursor={{
-                      stroke: "oklch(0.7 0.15 160 / 0.2)",
+                      stroke: "hsl(var(--primary) / 0.2)",
                       strokeWidth: 2,
                       fill: "transparent",
                     }}
@@ -562,7 +561,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 <CartesianGrid
                   vertical={false}
                   strokeDasharray="3 3"
-                  stroke="oklch(0.4 0.02 250 / 0.25)"
+                  stroke="hsl(var(--border) / 0.4)"
                 />
                 <XAxis
                   dataKey="ticker"
@@ -572,7 +571,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     <text
                       x={x}
                       y={y + 12}
-                      fill="oklch(0.6 0.02 250)"
+                      fill="hsl(var(--muted-foreground))"
                       fontSize={10}
                       textAnchor="middle"
                     >
@@ -584,11 +583,11 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   tickLine={false}
                   axisLine={false}
                   width={50}
-                  tick={{ fill: "oklch(0.6 0.02 250)", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                   tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "oklch(0.7 0.15 160 / 0.08)" }}
+                  cursor={{ fill: "hsl(var(--primary) / 0.08)" }}
                   content={<InvestedVsReceivedTooltip />}
                 />
                 <Bar dataKey="invested" fill={COLOR_INVESTED} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.75} />
