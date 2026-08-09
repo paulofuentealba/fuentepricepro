@@ -57,6 +57,24 @@ Concluído e Validado:
 - **Motor de Aporte Inteligente (`computeSmartAllocation`)**: ✅ Direciona os novos aportes priorizando ativos das classes sub-alocadas.
 - **Trabalho Futuro (Fora de Escopo)**: Sugestão de venda ativa para rebalanceamento estático sem novos aportes fica documentada como melhoria futura separada.
 
+### 1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks ⚪
+
+- **Exportação de Dados (CSV/Excel)**: ⚪ Item futuro (P2/P3).
+  - *Onde aplicar primeiro*:
+    1. **Comparador (`/app/comparator`)**: Permitir exportar em CSV/Excel os dados da tabela comparativa de ativos, incluindo indicadores fundamentalistas (P/E, P/VP, Dividend Yield, CAGR, Margem de Segurança, Preço Teto).
+    2. **Watchlist / Carteira (`/app/myportfolio` / `/app/watchlist`)**: Permitir download do snapshot da carteira com posições, preço médio, preço teto e proventos projetados.
+- **Importação de Dados por Planilha (CSV/Excel)**: ⚪ Item futuro (P2/P3).
+  - *Template de Importação Simples*: Gerar e disponibilizar para download um modelo básico contendo as colunas: `Ticker`, `Data da Compra` (ex: `AAAA-MM-DD` ou `DD/MM/AAAA`), `Quantidade` e `Valor Unitário` (formato análogo à adição manual de transação).
+  - *Comportamento de Ingestão*:
+    - **Se o ativo já existe na watchlist/carteira**: Adiciona/atualiza as transações vinculadas e recalcula dinamicamente todas as métricas decorrentes (preço médio, quantidade mantida, rentabilidade e proventos acumulados).
+    - **Se o ativo não existe**: Cria o ativo na carteira do usuário, registra a transação e atualiza todas as visualizações do produto.
+- **Comparação com Benchmarks / Índices de Mercado no Comparador**: ⚪ Item futuro (P2/P3).
+  - *Comparação no Comparador de Ativos (`/app/comparator`)*: Permitir selecionar e sobrepor índices de referência de mercado em relação ao desempenho histórico e rendimento dos ativos comparados.
+  - *Benchmarks sugeridos por classe e moeda*:
+    - **CDI / Selic**: Para ativos de Renda Fixa e FIIs/FIAGRO BR.
+    - **IBOVESPA (IBOV)**: Para Ações brasileiras (`STOCK_BR`).
+    - **S&P 500 (SPX)**: Para Ações e REITs internacionais (`STOCK_US`, `REIT_US`).
+
 ---
 
 ## Épico 2 — Inteligência e Engajamento (O Cérebro)
