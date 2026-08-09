@@ -66,3 +66,13 @@ Caso Paulo decida aprovar a padronização e propagação de `as_of` / SSOT de e
 ## 4. Próximos Passos
 > [!NOTE]
 > Diagnóstico concluído e registrado em `docs/PROMPTS_LOG.md`. **Nenhuma alteração de código foi realizada**. Aguardando decisão do usuário sobre como e quando aplicar as correções.
+
+---
+
+## 5. Registro de Commit
+
+- **Título do Commit (gerado via título do prompt)**: `Prompt para Antigravity — Diagnóstico: as_of / Timing de Dado no SSOT de Valuation`
+- **Mensagem no Git**: `docs(diagnostic): Diagnóstico: as_of / Timing de Dado no SSOT de Valuation`
+- **Commit Short SHA**: `5eef7f7`
+- **Commit Full SHA**: `5eef7f78a601cc69a1dfc0b4a181ff03f80151be`
+
