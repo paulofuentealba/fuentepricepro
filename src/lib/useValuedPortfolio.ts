@@ -9,6 +9,8 @@ import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
 
+import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "./transactions";
+
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields
   livePrice: number; // Actual current price used (quote or fallback)
@@ -20,18 +22,43 @@ export interface ValuedWatchlistItem extends WatchlistItem {
 export function useValuedPortfolio() {
   const { t } = useI18n();
   const { items, isPending: isWatchlistPending, ...rest } = useWatchlist();
+  const { transactions = [], isLoading: isTxLoading } = useTransactions();
   const { loading: isAuthLoading } = useAuth();
   const { targetYield: globalYield } = useSettings();
 
-  const isAppLoading = isAuthLoading || isWatchlistPending;
+  const isAppLoading = isAuthLoading || isWatchlistPending || isTxLoading;
 
-  // Base items with global yield fallback
+  // Group transactions by ticker
+  const txByTicker = useMemo(() => {
+    const map: Record<string, Transaction[]> = {};
+    for (const tx of transactions) {
+      if (!map[tx.ticker]) map[tx.ticker] = [];
+      map[tx.ticker].push(tx);
+    }
+    return map;
+  }, [transactions]);
+
+  // Base items with quantity & averagePrice derived from transactions (fallback to item DB if no transactions)
   const baseItems = useMemo(() => {
-    return (items || []).map((it) => ({
-      ...it,
-      targetYield: it.targetYield ?? globalYield,
-    }));
-  }, [items, globalYield]);
+    return (items || []).map((it) => {
+      const txs = txByTicker[it.ticker];
+      let quantity = it.quantity;
+      let averagePrice = it.averagePrice;
+
+      if (txs && txs.length > 0) {
+        const computed = recalculateHoldingFromTransactions(txs);
+        quantity = computed.quantity;
+        averagePrice = computed.averagePrice;
+      }
+
+      return {
+        ...it,
+        quantity,
+        averagePrice,
+        targetYield: it.targetYield ?? globalYield,
+      };
+    });
+  }, [items, globalYield, txByTicker]);
 
   // Live quotes and metadata
   const { quotes, meta, dataUpdatedAt: lastUpdatedAt } = useLiveQuotesAndMeta(baseItems);

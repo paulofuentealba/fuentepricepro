@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 // Test safeToISOString behavior indirectly or directly if exported
 // We can test itemToRow serialization resilience
 import { WatchlistItem } from "../watchlist";
+import { recalculateHoldingFromTransactions } from "../transactions";
 
 describe("watchlist itemToRow date resilience", () => {
   it("should safely convert item with undefined investingSince without throwing Invalid time value", () => {
@@ -107,5 +108,16 @@ describe("watchlist itemToRow date resilience", () => {
 
     const parsedMs = new Date(investing_since_iso).getTime();
     expect(parsedMs).toBe(targetDateMs);
+  });
+
+  it("should derive TRXF11 position (QTY 100) accurately from transaction history", () => {
+    const txs = [
+      { id: "tx1", ticker: "TRXF11", type: "buy" as const, date: 1700000000000, quantity: 70, pricePerShare: 100 },
+      { id: "tx2", ticker: "TRXF11", type: "buy" as const, date: 1705000000000, quantity: 30, pricePerShare: 105 },
+    ];
+    const holding = recalculateHoldingFromTransactions(txs);
+
+    expect(holding.quantity).toBe(100);
+    expect(holding.averagePrice).toBe(101.5);
   });
 });
