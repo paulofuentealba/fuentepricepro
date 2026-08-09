@@ -18,6 +18,12 @@ function getAllTsxFiles(dir: string): string[] {
   return results;
 }
 
+/**
+ * Known exception list for temporary violations.
+ * MUST remain empty (0 exceptions) when design system sweep is complete.
+ */
+const KNOWN_EXCEPTIONS: string[] = [];
+
 describe("Design System Color Tokens SSOT Gate", () => {
   const rootDir = path.resolve(__dirname, "../../..");
   const stylesCssPath = path.join(rootDir, "src/styles.css");
@@ -38,6 +44,10 @@ describe("Design System Color Tokens SSOT Gate", () => {
     ...getAllTsxFiles(path.join(rootDir, "src/components")),
     ...getAllTsxFiles(path.join(rootDir, "src/routes")),
   ];
+
+  it("should maintain KNOWN_EXCEPTIONS list completely empty (0 exceptions)", () => {
+    expect(KNOWN_EXCEPTIONS).toEqual([]);
+  });
 
   it("should extract defined oklch tokens from styles.css", () => {
     expect(oklchTokens.size).toBeGreaterThan(0);

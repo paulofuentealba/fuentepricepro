@@ -200,7 +200,7 @@ export function SnowballSimulator() {
                     <CartesianGrid
                       vertical={false}
                       strokeDasharray="3 3"
-                      stroke="hsl(var(--border) / 0.4)"
+                      stroke="color-mix(in oklab, var(--border) 40%, transparent)"
                     />
                     <XAxis
                       dataKey="year"
@@ -222,7 +222,7 @@ export function SnowballSimulator() {
                     />
                     <ChartTooltip
                       cursor={{
-                        stroke: "hsl(var(--border) / 0.6)",
+                        stroke: "color-mix(in oklab, var(--border) 60%, transparent)",
                         strokeWidth: 1,
                         strokeDasharray: "4 4",
                       }}

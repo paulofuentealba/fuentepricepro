@@ -55,7 +55,7 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
               domain={["dataMin - 10", "dataMax + 10"]}
             />
             <ChartTooltip
-              cursor={{ fill: "rgba(148,163,184,0.12)" }}
+              cursor={{ fill: "color-mix(in oklab, var(--muted-foreground) 12%, transparent)" }}
               content={
                 <ChartTooltipContent
                   formatter={(v: any, name: any) => {

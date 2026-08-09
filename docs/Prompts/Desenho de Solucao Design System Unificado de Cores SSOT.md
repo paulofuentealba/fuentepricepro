@@ -1,4 +1,4 @@
-# Prompt para Antigravity — Desenho de Solução: Design System Unificado de Cores (SSOT)
+# Desenho de Solução — Design System Unificado de Cores (SSOT)
 
 > [!NOTE]
 > Solução arquitetural completa para eliminar colisões e bugs de cores inline via catálogo único de tokens semânticos + gate estático automatizado de testes em `design-tokens.test.ts`.
