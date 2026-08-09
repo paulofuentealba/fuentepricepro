@@ -133,7 +133,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t.watchlist.past12Months}</p>
-              <p className="text-xl font-semibold text-emerald-500">
+              <p className="text-xl font-semibold text-success">
                 {formatCurrency(summary.total12m, currency as any, locale)}
               </p>
             </div>
@@ -164,16 +164,16 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
                 </TableCell>
                 <TableCell className="text-sm">
                   {ev.isJCP ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/20">
                       {t.watchlist.jcp}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-success/10 text-success border border-success/20">
                       {t.watchlist.dividend}
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="text-sm font-medium text-right text-emerald-500">
+                <TableCell className="text-sm font-medium text-right text-success">
                   {formatCurrency(ev.amountPerShare, currency as any, locale)}
                 </TableCell>
               </TableRow>

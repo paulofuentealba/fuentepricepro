@@ -309,16 +309,16 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-6 text-center shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-                <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-emerald-500/20 blur-[50px]" />
+              <div className="relative overflow-hidden rounded-xl border border-success/20 bg-success/10 p-6 text-center shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-success/20 blur-[50px]" />
 
-                <span className="block text-sm font-medium text-emerald-400/80 mb-2">
+                <span className="block text-sm font-medium text-success/80 mb-2">
                   {t.watchlist.fixedIncomeWizard.projectedValue}
                 </span>
-                <span className="block text-4xl font-bold text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]">
+                <span className="block text-4xl font-bold text-success drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]">
                   {formatCurrency(projectedBalance, "BRL", locale)}
                 </span>
-                <div className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-emerald-500">
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-success">
                   <CheckCircle2 className="h-4 w-4" />
                   <span>
                     +{formatCurrency(projectedProfit, "BRL", locale)}{" "}

@@ -255,11 +255,11 @@ function WatchlistVariant(props: AssetCardProps) {
         "cursor-pointer overflow-hidden border border-border/50 transition-all focus-visible:outline-none focus-visible:ring-1",
         "bg-background/60 backdrop-blur-md hover:bg-background/80 hover:shadow-2xl hover:border-white/10 group flex flex-col h-full relative",
         !hasConsensus
-          ? "focus-visible:border-slate-500/60 focus-visible:ring-slate-500/40 shadow-[0_0_15px_rgba(100,116,139,0.1)]"
+          ? "focus-visible:border-border/60 focus-visible:ring-border/40"
           : derived.positive
-            ? "focus-visible:border-emerald-500/60 focus-visible:ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-            : "focus-visible:border-rose-500/60 focus-visible:ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
-        isConcentrationViolated && "border-amber-500/60 ring-1 ring-amber-500/30",
+            ? "focus-visible:border-success/60 focus-visible:ring-success/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+            : "focus-visible:border-danger/60 focus-visible:ring-danger/40 shadow-[0_0_15px_rgba(244,63,94,0.1)]",
+        isConcentrationViolated && "border-warning/60 ring-1 ring-warning/30",
       )}
     >
       {onClose && (
@@ -291,13 +291,13 @@ function WatchlistVariant(props: AssetCardProps) {
       <div
         className={cn(
           "p-5 border-t border-white/5 bg-gradient-to-b relative overflow-hidden shrink-0 mt-auto",
-          derived.positive ? "from-emerald-950/20 to-black/40" : "from-rose-950/20 to-black/40",
+          derived.positive ? "from-success/10 to-background/40" : "from-danger/10 to-background/40",
         )}
       >
         <div
           className={cn(
             "absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl opacity-20 transition-opacity group-hover:opacity-40",
-            derived.positive ? "bg-emerald-500" : "bg-rose-500",
+            derived.positive ? "bg-success" : "bg-danger",
           )}
         />
         <ValuationRadar
@@ -448,7 +448,7 @@ function SearchVariant({
               localCustomTaxRate != null) && (
               <Badge
                 variant="outline"
-                className="text-[10px] text-amber-500/90 border-amber-500/30 bg-amber-500/10"
+                className="text-[10px] text-warning/90 border-warning/30 bg-warning/10"
               >
                 {t.watchlist.simulationBadge}
               </Badge>

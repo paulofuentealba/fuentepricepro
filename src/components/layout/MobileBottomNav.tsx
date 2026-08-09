@@ -46,11 +46,11 @@ export function MobileBottomNav() {
               className={cn(
                 "flex flex-row items-center gap-2 px-4 py-2 min-h-[44px] rounded-full snap-start whitespace-nowrap transition-colors",
                 isActive
-                  ? "bg-emerald-500/10 text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.2)]"
+                  ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_var(--primary)]"
                   : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
               )}
             >
-              <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-emerald-500")} />
+              <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-primary")} />
               <span className="text-sm font-medium tracking-tight">{label}</span>
             </Link>
           );

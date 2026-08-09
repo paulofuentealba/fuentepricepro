@@ -16,7 +16,7 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   const variants = {
     success: "bg-success/10 text-success ring-success/20",
-    warning: "bg-amber-500/10 text-amber-500 ring-amber-500/20",
+    warning: "bg-warning/10 text-warning ring-warning/20",
     danger: "bg-danger/10 text-danger ring-danger/20",
     default: "bg-primary/10 text-primary ring-primary/20",
   };

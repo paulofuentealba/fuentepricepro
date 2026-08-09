@@ -66,7 +66,7 @@ export function BlurredPreviewOverlay({ children, feature }: BlurredPreviewOverl
           <ul className="text-left space-y-2.5 pt-1">
             {bullets.map((bullet, idx) => (
               <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-foreground/90 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                 <span>{bullet}</span>
               </li>
             ))}

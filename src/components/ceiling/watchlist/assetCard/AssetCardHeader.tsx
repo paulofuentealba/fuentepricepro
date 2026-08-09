@@ -63,32 +63,32 @@ export function AssetCardHeader({
     if (item.safetyMargin < 0)
       return {
         level: "high",
-        color: "text-rose-500",
+        color: "text-danger",
         icon: "🔴",
         label: t.watchlist.risk.highCeiling,
       };
     if (item.payoutRatio != null && item.payoutRatio > 100)
       return {
         level: "high",
-        color: "text-rose-500",
+        color: "text-danger",
         icon: "🔴",
         label: t.watchlist.risk.highPayout,
       };
     if (item.payoutRatio != null && item.payoutRatio > 80)
       return {
         level: "medium",
-        color: "text-amber-500",
+        color: "text-warning",
         icon: "🟡",
         label: t.watchlist.risk.medPayout,
       };
     if (item.safetyMargin < 5)
       return {
         level: "medium",
-        color: "text-amber-500",
+        color: "text-warning",
         icon: "🟡",
         label: t.watchlist.risk.medMargin,
       };
-    return { level: "low", color: "text-emerald-500", icon: "🟢", label: t.watchlist.risk.low };
+    return { level: "low", color: "text-success", icon: "🟢", label: t.watchlist.risk.low };
   }, [item.safetyMargin, item.payoutRatio, t]);
 
   const currentYield = livePrice > 0 ? (item.annualDividend / livePrice) * 100 : 0;
@@ -117,7 +117,7 @@ export function AssetCardHeader({
           {isSimulation && (
             <Badge
               variant="outline"
-              className="text-[10px] text-amber-500/90 border-amber-500/30 bg-amber-500/10"
+              className="text-[10px] text-warning/90 border-warning/30 bg-warning/10"
             >
               {t.watchlist.simulationBadge}
             </Badge>
@@ -131,7 +131,7 @@ export function AssetCardHeader({
             <span
               className={cn(
                 "inline-flex items-center gap-0.5 text-[11px] font-medium tabular-nums",
-                changeUp ? "text-emerald-400/90" : "text-rose-400/90",
+                changeUp ? "text-success/90" : "text-danger/90",
               )}
               aria-label={changeUp ? "Up today" : "Down today"}
             >
@@ -145,7 +145,6 @@ export function AssetCardHeader({
                 variant="outline"
                 className={cn(
                   "px-1.5 py-0 h-5 border-transparent cursor-help transition-transform hover:scale-110",
-                  risk.color.replace("text-", "bg-").replace("500", "500/10"),
                   risk.color,
                 )}
               >
@@ -164,7 +163,7 @@ export function AssetCardHeader({
                 e.preventDefault();
                 onCorporateEvent();
               }}
-              className="px-2 py-0 h-5 bg-indigo-500 hover:bg-indigo-600 text-white animate-pulse border-none cursor-pointer transition-transform hover:scale-105 ml-1"
+              className="px-2 py-0 h-5 bg-primary hover:bg-primary/90 text-white animate-pulse border-none cursor-pointer transition-transform hover:scale-105 ml-1"
             >
               <span className="text-[10px] font-semibold">{t.publicEvents.detectedBadge}</span>
             </Badge>
@@ -174,7 +173,7 @@ export function AssetCardHeader({
               <TooltipTrigger asChild>
                 <Badge
                   variant="default"
-                  className="px-1.5 py-0 h-5 bg-indigo-500 hover:bg-indigo-600 text-white animate-pulse border-none cursor-help transition-transform hover:scale-110"
+                  className="px-1.5 py-0 h-5 bg-primary hover:bg-primary/90 text-white animate-pulse border-none cursor-help transition-transform hover:scale-110"
                 >
                   <Zap className="h-3 w-3 fill-white/20" />
                 </Badge>

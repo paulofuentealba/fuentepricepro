@@ -28,7 +28,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
     return (
       <div className="rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur text-xs">
         <p className="font-semibold text-foreground mb-0.5">{data.monthLabel}</p>
-        <p className="font-semibold text-emerald-500">
+        <p className="font-semibold text-success">
           {formatCurrency(data.amountNet, currency as any, locale)}
         </p>
       </div>

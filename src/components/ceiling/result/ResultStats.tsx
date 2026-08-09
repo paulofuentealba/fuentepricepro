@@ -138,7 +138,7 @@ export function ResultStats({
                     className={
                       "px-2.5 py-1 text-[10px] rounded-[4px] font-bold tabular-nums transition-all " +
                       (active
-                        ? "bg-indigo-600/80 text-white shadow-sm"
+                        ? "bg-primary/80 text-white shadow-sm"
                         : "text-muted-foreground hover:bg-white/5 hover:text-foreground") +
                       (!enabled ? " opacity-30 cursor-not-allowed" : "")
                     }
@@ -232,7 +232,7 @@ export function ResultStats({
                 link="/app/docs#tax-exceptions"
               />
               {!customTaxUnlocked && (
-                <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500 uppercase tracking-wider">
+                <span className="ml-2 inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning uppercase tracking-wider">
                   {t.form.taxExceptionsPro}
                 </span>
               )}

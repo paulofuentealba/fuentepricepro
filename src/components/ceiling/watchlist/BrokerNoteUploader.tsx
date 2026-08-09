@@ -396,9 +396,9 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
           </div>
         ) : (
           <div className="space-y-4 mt-1">
-            <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-200/90 leading-relaxed">
+            <div className="p-3.5 bg-warning/10 border border-warning/20 rounded-lg flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+              <p className="text-xs text-warning/90 leading-relaxed">
                 {t.brokerNote.unresolvedDesc}
               </p>
             </div>
@@ -421,7 +421,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
                       </span>
                       <span
                         className={`font-medium px-2 py-0.5 rounded text-[10px] uppercase ${
-                          item.type === "buy" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                          item.type === "buy" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
                         }`}
                       >
                         {item.type === "buy" ? t.brokerNote.typeBuy : t.brokerNote.typeSell}

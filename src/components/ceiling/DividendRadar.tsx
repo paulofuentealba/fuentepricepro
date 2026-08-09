@@ -261,7 +261,7 @@ export function DividendRadar() {
                         </TableCell>
                         <TableCell className="text-right">
                           {asset.exDate ? (
-                            <div className="font-medium text-amber-500/90">{asset.exDate}</div>
+                            <div className="font-medium text-warning/90">{asset.exDate}</div>
                           ) : (
                             <div className="text-xs text-muted-foreground">-</div>
                           )}

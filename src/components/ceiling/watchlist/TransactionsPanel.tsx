@@ -76,7 +76,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
           tickerTxs.map((tx) => (
             <div key={tx.id} className="flex items-center justify-between p-3 rounded-md border bg-card text-sm">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${tx.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                <div className={`p-2 rounded-full ${tx.type === 'buy' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
                   {tx.type === 'buy' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                 </div>
                 <div>

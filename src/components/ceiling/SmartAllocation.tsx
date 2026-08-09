@@ -287,7 +287,7 @@ export function SmartAllocation() {
                           >
                             {strategyLabels[key]}
                             {!strategiesUnlocked && key !== "yield" && (
-                              <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-500/10 px-1 py-[1px] text-[8px] font-bold text-amber-500 uppercase tracking-wider">
+                              <span className="ml-1.5 inline-flex items-center rounded-full bg-warning/10 px-1 py-[1px] text-[8px] font-bold text-warning uppercase tracking-wider">
                                 PRO
                               </span>
                             )}
@@ -320,14 +320,14 @@ export function SmartAllocation() {
               <Button
                 onClick={handleSuggestAllocation}
                 variant="outline"
-                className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 font-semibold flex items-center justify-center gap-2 shrink-0"
+                className="border-warning/40 text-warning hover:bg-warning/10 hover:text-warning/80 font-semibold flex items-center justify-center gap-2 shrink-0"
               >
-                <Sparkles className="h-4 w-4 text-amber-400" />
+                <Sparkles className="h-4 w-4 text-warning" />
                 {t.smartAllocation.suggestedAllocationBtn}
               </Button>
 
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 flex items-start gap-2 text-[11px] text-muted-foreground flex-1">
-                <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="rounded-lg border border-warning/30 bg-warning/5 p-2.5 flex items-start gap-2 text-[11px] text-muted-foreground flex-1">
+                <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
                 <p className="leading-snug">{t.smartAllocation.legalDisclaimer}</p>
               </div>
             </div>
@@ -352,7 +352,7 @@ export function SmartAllocation() {
                 onClick={() => setShowPaywall(true)}
               >
                 <div className="flex items-center gap-2 rounded-full bg-background/95 px-4 py-2 text-sm font-semibold text-foreground shadow-lg border border-border/60 backdrop-blur">
-                  <span className="text-amber-500 text-xs tracking-wider uppercase">
+                  <span className="text-warning text-xs tracking-wider uppercase">
                     {t.global.pro}
                   </span>{" "}
                   {t.smartAllocation.targetPanelTitle}

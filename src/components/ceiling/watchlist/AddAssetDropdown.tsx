@@ -30,35 +30,35 @@ export function AddAssetDropdown({
           <ChevronDown className="h-4 w-4 ml-1 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="w-56 bg-slate-900 border-slate-700">
+      <DropdownMenuContent align="center" className="w-56 bg-popover border-border">
         <DropdownMenuItem
-          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-primary"
+          className="cursor-pointer gap-2 py-3 focus:bg-accent focus:text-primary"
           onClick={onNavigateToScreener}
         >
           <TrendingUp className="h-4 w-4" />
           <div className="flex flex-col">
             <span className="font-medium">{t.watchlist.addEquity}</span>
-            <span className="text-xs text-slate-500">{t.watchlist.addEquityDesc}</span>
+            <span className="text-xs text-muted-foreground">{t.watchlist.addEquityDesc}</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-primary"
+          className="cursor-pointer gap-2 py-3 focus:bg-accent focus:text-primary"
           onClick={onOpenFIWizard}
         >
           <Shield className="h-4 w-4" />
           <div className="flex flex-col">
             <span className="font-medium">{t.watchlist.addFixedIncome}</span>
-            <span className="text-xs text-slate-500">{t.watchlist.addFixedIncomeDesc}</span>
+            <span className="text-xs text-muted-foreground">{t.watchlist.addFixedIncomeDesc}</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer gap-2 py-3 focus:bg-slate-800 focus:text-primary"
+          className="cursor-pointer gap-2 py-3 focus:bg-accent focus:text-primary"
           onClick={onOpenBrokerUploader}
         >
           <FileType2 className="h-4 w-4" />
           <div className="flex flex-col">
             <span className="font-medium">{t.watchlist.importBrokerNote}</span>
-            <span className="text-xs text-slate-500 truncate w-[160px]">
+            <span className="text-xs text-muted-foreground truncate w-[160px]">
               XP, Rico, Clear, BTG, Modal, Inter, NuInvest, Órama, Genial
             </span>
           </div>

@@ -128,15 +128,15 @@ export function Sidebar() {
                   "group relative flex items-center rounded-xl px-3 py-3 transition-colors text-sm font-medium",
                   isCollapsed ? "justify-center" : "justify-start gap-3",
                   isActive
-                    ? "bg-emerald-500/10 text-emerald-500 shadow-[inset_4px_0_0_0_rgba(16,185,129,1)]"
-                    : "text-slate-400 hover:bg-white/5 hover:text-foreground",
+                    ? "bg-primary/10 text-primary shadow-[inset_4px_0_0_0_var(--primary)]"
+                    : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
                 )}
               >
                 <Icon
                   className={cn(
                     "shrink-0",
                     isCollapsed ? "h-5 w-5" : "h-4 w-4",
-                    isActive ? "text-emerald-500" : "",
+                    isActive ? "text-primary" : "",
                   )}
                 />
 
@@ -144,7 +144,7 @@ export function Sidebar() {
 
                 {!isCollapsed && locked && (
                   <Lock
-                    className="h-3.5 w-3.5 text-muted-foreground shrink-0 ml-auto"
+                    className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 ml-auto"
                     aria-hidden
                   />
                 )}
@@ -246,7 +246,7 @@ export function Sidebar() {
                         </span>
                         <div className="flex items-center gap-2 mt-0.5">
                           {isPro ? (
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-emerald-500/70">
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-primary">
                               Pro
                             </span>
                           ) : (

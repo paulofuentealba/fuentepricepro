@@ -117,9 +117,9 @@ export function CorporateEventModal({
           {pendingEvent && (
             <Alert
               variant="default"
-              className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20"
+              className="bg-primary/10 text-primary border-primary/20"
             >
-              <AlertCircle className="h-4 w-4 stroke-indigo-500" />
+              <AlertCircle className="h-4 w-4 stroke-primary" />
               <AlertDescription className="ml-2 font-medium">
                 {t.publicEvents.modalAlert}
               </AlertDescription>

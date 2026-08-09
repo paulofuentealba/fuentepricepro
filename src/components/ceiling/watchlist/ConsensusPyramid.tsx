@@ -38,8 +38,8 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
   return (
     <div className="mb-6 rounded-xl border border-white/5 bg-[#0a0a0c] p-6 shadow-2xl relative overflow-hidden">
       {/* Background glowing effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/10 to-primary/10 pointer-events-none" />
-      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 h-48 bg-indigo-500/20 blur-[60px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-primary/5 pointer-events-none" />
+      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/20 blur-[60px] rounded-full pointer-events-none" />
 
       <h3 className="mb-8 text-center text-xs font-semibold text-white/80 uppercase tracking-widest">
         {t.valuation.pyramidTitle}
@@ -58,7 +58,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
             stroke="currentColor"
             strokeWidth="1.5"
             strokeDasharray="4 6"
-            className="text-indigo-500/30"
+            className="text-primary/30"
           />
           {/* Inner connections to center */}
           <line

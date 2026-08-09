@@ -171,7 +171,7 @@ export function FIProgressCard() {
         {/* Glow Effects */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           {isReached ? (
-            <div className="absolute -top-1/2 -right-1/4 w-full h-full bg-yellow-500/10 blur-[100px] rounded-full animate-pulse" />
+            <div className="absolute -top-1/2 -right-1/4 w-full h-full bg-warning/10 blur-[100px] rounded-full animate-pulse" />
           ) : (
             <div className="absolute -top-1/2 -left-1/4 w-[80%] h-[120%] bg-primary/10 blur-[80px] rounded-full" />
           )}
@@ -284,9 +284,9 @@ export function FIProgressCard() {
             <div className="w-full md:w-2/3 flex flex-col justify-center">
               <div className="flex justify-between items-end mb-2">
                 <div className="flex items-center gap-1.5">
-                  {isReached && <Trophy className="w-4 h-4 text-yellow-400" />}
+                  {isReached && <Trophy className="w-4 h-4 text-warning" />}
                   <span
-                    className={`text-xl font-bold ${isReached ? "text-yellow-400" : "text-emerald-400"}`}
+                    className={`text-xl font-bold ${isReached ? "text-warning" : "text-success"}`}
                   >
                     <AnimatedNumber value={coveragePercent} suffix="%" decimals={1} delay={300} />
                   </span>

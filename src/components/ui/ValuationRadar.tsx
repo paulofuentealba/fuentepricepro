@@ -62,7 +62,7 @@ export function ValuationRadar({
               <HoverCardContent
                 side="top"
                 align="start"
-                className="z-[999] w-48 p-3 bg-slate-900 border-slate-700 shadow-xl"
+                className="z-[999] w-48 p-3 bg-popover border-border shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex flex-col gap-2">
@@ -98,13 +98,13 @@ export function ValuationRadar({
             </HoverCard>
           </div>
           {isSafeBuy ? (
-            <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 text-[9px] uppercase font-bold px-1.5 py-0">
+            <Badge className="bg-success/10 text-success hover:bg-success/20 border-success/20 text-[9px] uppercase font-bold px-1.5 py-0">
               {t.valuation.safeBuy}
             </Badge>
           ) : (
             <Badge
               variant="outline"
-              className="bg-rose-500/5 text-rose-400 hover:bg-rose-500/10 border-rose-500/20 text-[9px] uppercase font-bold px-1.5 py-0"
+              className="bg-danger/5 text-danger hover:bg-danger/10 border-danger/20 text-[9px] uppercase font-bold px-1.5 py-0"
             >
               {t.valuation.overvalued}
             </Badge>
@@ -113,7 +113,7 @@ export function ValuationRadar({
         <div
           className={cn(
             "text-xl font-mono font-bold tracking-tighter drop-shadow-md",
-            isSafeBuy ? "text-emerald-400" : "text-rose-400",
+            isSafeBuy ? "text-success" : "text-danger",
           )}
         >
           {formatCurrency(consensus, currency, locale)}
@@ -133,14 +133,14 @@ export function ValuationRadar({
             fill="none"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-indigo-500/50"
+            className="text-primary/50"
           />
           <polygon
             points="50,25 80,70 20,70"
             fill="none"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-indigo-500/30"
+            className="text-primary/30"
           />
           <line
             x1="50"
@@ -149,7 +149,7 @@ export function ValuationRadar({
             y2="5"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-indigo-500/50"
+            className="text-primary/50"
           />
           <line
             x1="50"
@@ -158,7 +158,7 @@ export function ValuationRadar({
             y2="75"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-indigo-500/50"
+            className="text-primary/50"
           />
           <line
             x1="50"
@@ -167,7 +167,7 @@ export function ValuationRadar({
             y2="75"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-indigo-500/50"
+            className="text-primary/50"
           />
 
           {/* Data Polygon */}

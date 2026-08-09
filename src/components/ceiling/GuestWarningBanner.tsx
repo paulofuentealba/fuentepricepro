@@ -12,7 +12,7 @@ export function GuestWarningBanner() {
   if (loading || user) return null;
 
   return (
-    <div className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-700 dark:text-amber-400 p-2 sm:p-3 flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm font-medium z-40 relative">
+    <div className="w-full bg-warning/15 border-b border-warning/30 text-warning p-2 sm:p-3 flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm font-medium z-40 relative">
       <div className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 shrink-0" />
         <span>
@@ -21,7 +21,7 @@ export function GuestWarningBanner() {
       </div>
       <Button
         variant="link"
-        className="h-auto p-0 font-bold text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 underline underline-offset-2"
+        className="h-auto p-0 font-bold text-warning hover:text-warning/80 underline underline-offset-2"
         onClick={() => openAuthModal()}
       >
         {t.guestBanner.cta}

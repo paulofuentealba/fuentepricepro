@@ -24,10 +24,10 @@ export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
     <div className="flex flex-wrap items-center gap-1.5">
       {isConcentrationViolated && (
         <span
-          className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400 ring-1 ring-amber-500/30"
+          className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning ring-1 ring-warning/30"
           title={t.smartAllocation.concentrationLimitBadge}
         >
-          <ShieldAlert className="h-3 w-3 text-amber-400" />
+          <ShieldAlert className="h-3 w-3 text-warning" />
           <span>{t.smartAllocation.concentrationLimitBadge}</span>
         </span>
       )}
@@ -45,7 +45,7 @@ export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
               className={cn(
                 "inline-flex cursor-help items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1",
                 cagrNegative
-                  ? "bg-rose-500/10 text-rose-300/90 ring-rose-500/20"
+                  ? "bg-danger/10 text-danger ring-danger/20"
                   : "bg-background/60 text-muted-foreground ring-border/60",
               )}
             >

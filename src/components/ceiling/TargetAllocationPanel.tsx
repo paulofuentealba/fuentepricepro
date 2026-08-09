@@ -112,7 +112,7 @@ export function TargetAllocationPanel({
                           <AlertTriangle
                             className={cn(
                               "h-3.5 w-3.5",
-                              isOver ? "text-amber-400" : "text-blue-400",
+                              isOver ? "text-warning" : "text-comparison",
                             )}
                           />
                         }
@@ -154,8 +154,8 @@ export function TargetAllocationPanel({
                           "font-medium",
                           isOut
                             ? isOver
-                              ? "text-amber-400"
-                              : "text-blue-400"
+                              ? "text-warning"
+                              : "text-comparison"
                             : "text-muted-foreground",
                         )}
                       >

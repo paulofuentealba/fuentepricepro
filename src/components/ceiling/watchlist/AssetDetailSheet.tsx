@@ -50,20 +50,20 @@ function WowInsights({
   let iconColor = "";
   if (isImplausibleMargin) {
     insightText = t.result.insights.dataInsufficient;
-    badgeColor = "bg-slate-500/5 border-slate-500/20";
-    iconColor = "text-slate-400";
+    badgeColor = "bg-muted/30 border-border/50";
+    iconColor = "text-muted-foreground";
   } else if (isBargain) {
     insightText = t.result.insights.bargain.replace("{{margin}}", marginStr);
-    badgeColor = "bg-emerald-500/5 border-emerald-500/20";
-    iconColor = "text-emerald-500";
+    badgeColor = "bg-success/5 border-success/20";
+    iconColor = "text-success";
   } else if (isFair) {
     insightText = t.result.insights.fair.replace("{{margin}}", marginStr);
-    badgeColor = "bg-amber-500/5 border-amber-500/20";
-    iconColor = "text-amber-500";
+    badgeColor = "bg-warning/5 border-warning/20";
+    iconColor = "text-warning";
   } else {
     insightText = t.result.insights.overvalued.replace("{{margin}}", marginStr);
-    badgeColor = "bg-rose-500/5 border-rose-500/20";
-    iconColor = "text-rose-500";
+    badgeColor = "bg-danger/5 border-danger/20";
+    iconColor = "text-danger";
   }
 
   const today = new Date();
@@ -275,7 +275,7 @@ export function AssetDetailSheet({
       <SheetContent
         closeLabel={t.common.close}
         side="right"
-        className="w-full overflow-y-auto border-border/50 bg-slate-950/70 backdrop-blur-xl p-0 sm:max-w-2xl"
+        className="w-full overflow-y-auto border-border/50 bg-background/95 backdrop-blur-xl p-0 sm:max-w-2xl"
       >
         <SheetHeader className="border-b border-border/60 px-6 py-4">
           <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>

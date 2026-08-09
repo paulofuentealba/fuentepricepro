@@ -124,4 +124,33 @@ describe("Design System Color Tokens SSOT Gate", () => {
 
     expect(violations, `Found ${violations.length} hardcoded rgb/hex color(s) in charts:\n${violations.join("\n")}`).toEqual([]);
   });
+
+  it("should enforce no default Tailwind color scale classes (e.g., text-amber-400, bg-red-500)", () => {
+    const violations: string[] = [];
+    const tailwindPaletteRegex = /\b(text|bg|border|fill|stroke)-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}(?:\/[0-9]{1,3})?\b/;
+
+    for (const filePath of componentFiles) {
+      const normalizedPath = filePath.replace(/\\/g, "/");
+      // Exclude purely decorative public marketing and documentation pages
+      if (normalizedPath.endsWith("src/routes/index.tsx") || normalizedPath.endsWith("src/routes/app/docs.tsx")) {
+        continue;
+      }
+
+      const content = fs.readFileSync(filePath, "utf-8");
+      const lines = content.split("\n");
+
+      lines.forEach((line, idx) => {
+        if (tailwindPaletteRegex.test(line)) {
+          const match = line.match(tailwindPaletteRegex)?.[0];
+          const relPath = path.relative(rootDir, filePath);
+          violations.push(`${relPath}:${idx + 1} -> Hardcoded Tailwind palette class found (${match}): ${line.trim()}`);
+        }
+      });
+    }
+
+    expect(
+      violations,
+      `Found ${violations.length} hardcoded Tailwind palette class(es):\n${violations.join("\n")}`,
+    ).toEqual([]);
+  });
 });

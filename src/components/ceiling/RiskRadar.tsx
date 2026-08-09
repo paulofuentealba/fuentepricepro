@@ -44,9 +44,9 @@ export function RiskRadar() {
               const Icon = w.severity === "red" ? ShieldAlert : AlertCircle;
               const bgClass =
                 w.severity === "red"
-                  ? "bg-red-500/10 border-red-500/20"
-                  : "bg-amber-500/10 border-amber-500/20";
-              const textClass = w.severity === "red" ? "text-red-500" : "text-amber-500";
+                  ? "bg-danger/10 border-danger/20"
+                  : "bg-warning/10 border-warning/20";
+              const textClass = w.severity === "red" ? "text-danger" : "text-warning";
 
               let title = "";
               let desc = "";
@@ -142,7 +142,7 @@ export function RiskRadar() {
                   </div>
                   <div className="h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-blue-500 rounded-full"
+                      className="h-full bg-comparison rounded-full"
                       style={{ width: `${Math.min(tItem.weightPct, 100)}%` }}
                     />
                   </div>
@@ -175,10 +175,10 @@ export function RiskRadar() {
                     const isCritical = a.weightPct > 15;
                     const isWarning = a.weightPct > 10 && a.weightPct <= 15;
                     const badgeClass = isCritical
-                      ? "bg-red-500/10 text-red-500 border-red-500/20"
+                      ? "bg-danger/10 text-danger border-danger/20"
                       : isWarning
-                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                        : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+                        ? "bg-warning/10 text-warning border-warning/20"
+                        : "bg-success/10 text-success border-success/20";
                     const statusText = isCritical
                       ? t.riskRadar.critical
                       : isWarning
@@ -188,15 +188,20 @@ export function RiskRadar() {
                     return (
                       <tr key={a.id} className="hover:bg-muted/50 transition-colors">
                         <td className="px-4 py-3 font-medium text-foreground">
-                          {displayTicker(a.ticker)}
+                          {a.ticker}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums">
                           {formatPercent(a.weightPct, l)}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge variant="outline" className={badgeClass}>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold",
+                              badgeClass,
+                            )}
+                          >
                             {statusText}
-                          </Badge>
+                          </span>
                         </td>
                       </tr>
                     );
@@ -207,7 +212,7 @@ export function RiskRadar() {
           </CardContent>
         </Card>
 
-        {/* Sector Exposure */}
+        {/* Sector Concentration */}
         <Card className="bg-background/40 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="text-lg">{t.riskRadar.sectorExposure}</CardTitle>
@@ -228,7 +233,7 @@ export function RiskRadar() {
                     const isWarning = s.weightPct > 25;
                     const badgeClass = isWarning
                       ? "bg-destructive/10 text-destructive border-destructive/20"
-                      : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+                      : "bg-success/10 text-success border-success/20";
                     const statusText = isWarning ? t.riskRadar.concentrationRisk : t.riskRadar.safe;
 
                     return (
