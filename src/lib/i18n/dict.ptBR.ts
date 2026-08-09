@@ -45,6 +45,22 @@ export const ptBR = {
     button: "Assinar Pro",
     signIn: "Entrar",
   },
+  previewOverlay: {
+    cashflowTitle: "Projeção de Fluxo de Caixa Pro",
+    cashflowDesc: "Visualização avançada dos seus proventos futuros convertidos e distribuídos mês a mês.",
+    cashflowBullet1: "Projeção mensal de proventos com conversão cambial automática (USD/BRL).",
+    cashflowBullet2: "Métricas de comparação entre total investido e proventos recebidos.",
+    cashflowBullet3: "Histórico completo com visão por ativos e efeito bola de neve.",
+
+    smartAllocationTitle: "Motor de Alocação Ótima Pro",
+    smartAllocationDesc: "Otimize seus aportes com inteligência matemática baseada em Margem de Segurança e Yield.",
+    smartAllocationBullet1: "Recomendação exata de aportes para maximizar o dividendo recebido.",
+    smartAllocationBullet2: "Balanceamento dinâmico de carteira por preço teto e meta de yield.",
+    smartAllocationBullet3: "Simulação de rebalancamento automático sem distorcer o risco.",
+
+    unlockProCta: "Desbloquear Acesso Pro",
+    guaranteeText: "Acesso instantâneo a todas as ferramentas e modelos de valuation.",
+  },
   tooltips: {
     safetyMargin: "Desconto em relação ao preço teto. Quanto maior, melhor.",
     cagr: "Taxa de Crescimento Anual Composta dos dividendos em 5 anos.",

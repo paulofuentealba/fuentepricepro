@@ -43,6 +43,22 @@ export const en = {
     button: "Upgrade to Pro",
     signIn: "Sign In",
   },
+  previewOverlay: {
+    cashflowTitle: "Pro Cash Flow Projection",
+    cashflowDesc: "Advanced monthly visualization of your projected future dividends with auto FX conversion.",
+    cashflowBullet1: "Monthly dividend projections with automatic USD/BRL currency conversion.",
+    cashflowBullet2: "Invested capital vs dividend payout metrics and ratios.",
+    cashflowBullet3: "Full historical snowball effect tracking across all asset classes.",
+
+    smartAllocationTitle: "Pro Smart Allocation Engine",
+    smartAllocationDesc: "Optimize your contributions using safety margin and target yield algorithms.",
+    smartAllocationBullet1: "Exact contribution recommendations to maximize passive income.",
+    smartAllocationBullet2: "Dynamic portfolio rebalancing targeted at ceiling price and yield goals.",
+    smartAllocationBullet3: "Automated simulation without distorting asset risk profile.",
+
+    unlockProCta: "Unlock Pro Access",
+    guaranteeText: "Instant access to all tools and valuation engines.",
+  },
   tooltips: {
     safetyMargin: "Discount to the ceiling price. Higher is better.",
     cagr: "Compound Annual Growth Rate of dividends over 5 years.",

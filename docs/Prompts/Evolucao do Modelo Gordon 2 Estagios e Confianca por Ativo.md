@@ -1,4 +1,4 @@
-# Prompt para Antigravity — Evolução do Modelo Gordon (2 Estágios + Confiança por Ativo)
+# Evolução do Modelo Gordon (2 Estágios + Confiança por Ativo)
 
 > [!NOTE]
 > Documentação técnica da evolução do modelo de Gordon Growth para 2 estágios (H-Model) e adição do indicador de volatilidade de proventos (`gordonConfidence`) sem alterar o número de modelos do consenso (mantidos Bazin, Graham e Gordon).

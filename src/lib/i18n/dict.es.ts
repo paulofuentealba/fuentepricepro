@@ -45,6 +45,22 @@ export const es = {
     button: "Actualizar a Pro",
     signIn: "Iniciar Sesión",
   },
+  previewOverlay: {
+    cashflowTitle: "Proyección de Flujo de Caja Pro",
+    cashflowDesc: "Visualización avanzada de sus dividendos futuros proyectados con conversión de divisas.",
+    cashflowBullet1: "Proyección mensual de dividendos con conversión automática USD/BRL.",
+    cashflowBullet2: "Métricas entre el capital total invertido y los dividendos recibidos.",
+    cashflowBullet3: "Historial completo del efecto bola de nieve en todos sus activos.",
+
+    smartAllocationTitle: "Motor de Asignación Inteligente Pro",
+    smartAllocationDesc: "Optimice sus aportes con algoritmos de margen de seguridad y rendimiento objetivo.",
+    smartAllocationBullet1: "Recomendación exacta de aportes para maximizar ingresos pasivos.",
+    smartAllocationBullet2: "Reequilibrio dinámico enfocado en precio techo y metas de yield.",
+    smartAllocationBullet3: "Simulación de reequilibrio automático sin distorsionar el riesgo.",
+
+    unlockProCta: "Desbloquear Acceso Pro",
+    guaranteeText: "Acceso instantáneo a todas las herramientas y modelos de valoración.",
+  },
   tooltips: {
     safetyMargin: "Descuento sobre el precio techo. Mayor es mejor.",
     cagr: "Tasa de Crecimiento Anual Compuesto de dividendos a 5 años.",

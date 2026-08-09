@@ -3435,20 +3435,6 @@ i  firestore: uploading rules firestore.rules...
 
 ### Itens 8+9: Ajustes Pequenos de UX (DRIP, FI Mode, Eixo do Gráfico) ✅ CONCLUÍDO E VERIFICADO
 
-- **Causa Raiz & Diagnóstico**:
-  - **Item 8**: Jargões como "FI Mode" e "DRIP" eram apresentados na interface sem significado por extenso, causando atrito cognitivo para investidores iniciantes.
-  - **Item 9**: O eixo X do gráfico no `SnowballSimulator.tsx` suprimia automaticamente a renderização do rótulo "Year 9" / "Ano 9" devido ao cálculo padrão de colisão de ticks do Recharts.
-- **Correções Implementadas**:
-  - **Item 8**: Atualizadas as chaves nos 3 dicionários (`dict.ptBR.ts`, `dict.en.ts`, `dict.es.ts`):
-    - `fiMode.activate`: `"Ativar Modo IF (Independência Financeira) para ver progresso"`
-    - `snowball.reinvestDrip`: `"Reinvestir Dividendos (DRIP — Reinvestimento Automático de Dividendos)"` / `"Reinvest Dividends (DRIP — Dividend Reinvestment Plan)"` / `"Reinvertir Dividendos (DRIP — Plan de Reinversión de Dividendos)"`.
-  - **Item 9**: Adicionado `interval={0}` e `fontSize={10}` em `<XAxis>` no `SnowballSimulator.tsx`, forçando a renderização sequencial e ininterrupta de todos os rótulos de anos no gráfico (Ano 1 a Ano 10).
-- **Evidências Literais de Validação**:
-  1. **`npx tsc --noEmit`**: **0 erros** (Exit code 0).
-  2. **`npm run test`**: **146 passed** | 4 skipped (25 arquivos de teste aprovados).
-  3. **`npm run build`**: Client (4097 módulos em 1.37s) e SSR (251 módulos em 765ms) compilados limpos sem erros.
-
----
 
 ### Item 10: Registrar Exportação/Benchmark no Backlog ✅ CONCLUÍDO (APENAS DOCUMENTAÇÃO)
 
