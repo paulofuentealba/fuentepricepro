@@ -1,7 +1,7 @@
-# Prompt para Antigravity — Item 6, Opção B: Preview Pro com Dados Reais Borrados
+# Item 6 (Opção B): Preview Pro com Dados Reais Borrados
 
 > [!NOTE]
-> Documentação técnica da implementação do modelo de exibição do **Preview Pro com Dados Reais Borrados** (Opção B do Item 6) nas rotas bloqueadas por paywall (`/app/cashflow` e `/app/smartallocation`).
+> Implementação do modelo de exibição do **Preview Pro com Dados Reais Borrados** (Opção B do Item 6) nas rotas bloqueadas por paywall (`/app/cashflow` e `/app/smartallocation`).
 
 ---
 
