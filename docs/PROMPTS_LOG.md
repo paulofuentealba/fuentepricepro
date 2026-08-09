@@ -3486,6 +3486,19 @@ i  firestore: uploading rules firestore.rules...
   2. **`npm run test`**: **146 passed** | 4 skipped (25 arquivos de teste aprovados).
   3. **`npm run build`**: Client (4097 módulos em 1.45s) e SSR (251 módulos em 791ms) compilados limpos.
 
+---
+
+### Desativação Global Completa de Paywalls (Toggle-off Total) ✅ CONCLUÍDO E VERIFICADO
+
+- **Ação Realizada**:
+  - Ativado o comutador global `DISABLE_PAYWALLS = true` em `src/lib/featureGates.ts`.
+  - `SubscriptionProvider` (`subscription.tsx`) e `resolveFeatureGate` passam a conceder `isPro = true` e limites ilimitados (`Infinity`) para toda a aplicação.
+  - Todas as rotas (`/app/cashflow`, `/app/smartallocation`), sliders de Target Yield, alíquotas customizadas de imposto (JCP/WHT) e cotas da watchlist destravados 100%.
+- **Evidências Literais de Validação**:
+  1. **`npx tsc --noEmit`**: **0 erros** (Exit code 0).
+  2. **`npm run test`**: **146 passed** | 4 skipped (25 arquivos de teste aprovados).
+  3. **`npm run build`**: Client e SSR compilados com sucesso.
+
 
 
 
