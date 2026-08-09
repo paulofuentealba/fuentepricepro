@@ -6,6 +6,8 @@ import {
   netAfterTax,
   dividendTaxRate,
   isUsAsset,
+  getAssetValuation,
+  GORDON_MIN_DISCOUNT_MARGIN,
 } from "../calculations";
 
 describe("Bazin ceiling price math", () => {
@@ -43,5 +45,63 @@ describe("Bazin ceiling price math", () => {
   it("applies 15% withholding to JCP events", () => {
     expect(dividendTaxRate("STOCK_BR", "BRL", undefined, true)).toBe(0.15);
     expect(netAfterTax(100, "STOCK_BR", "BRL", undefined, true)).toBe(85);
+  });
+});
+
+describe("getAssetValuation — Gordon Guard & Robust Consensus", () => {
+  it("guards Gordon model when (k - g) < GORDON_MIN_DISCOUNT_MARGIN (e.g. Selic 10.5%, CAGR 10.3%)", () => {
+    // k = 0.105, g = 0.103 => k - g = 0.002 (< 0.02)
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 40,
+      avgDividend: 2.4, // Bazin = 2.4 / 0.06 = 40
+      dividendCagr: 10.3,
+      selicPct: 10.5,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    expect(result.gordon).toBeNull();
+    expect(result.bazin).toBeCloseTo(40);
+    expect(result.consensus).toBeCloseTo(40);
+    expect(result.margin).toBeCloseTo(0);
+  });
+
+  it("calculates Gordon model when (k - g) >= GORDON_MIN_DISCOUNT_MARGIN (e.g. Selic 10.5%, CAGR 5.0%)", () => {
+    // k = 0.105, g = 0.05 => k - g = 0.055 (>= 0.02)
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 40,
+      avgDividend: 2.4,
+      dividendCagr: 5.0,
+      selicPct: 10.5,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    // nextYearDiv = 2.4 * 1.05 = 2.52; gordon = 2.52 / 0.055 = 45.818...
+    expect(result.gordon).not.toBeNull();
+    expect(result.gordon!).toBeCloseTo(45.82, 1);
+  });
+
+  it("uses median consensus to prevent single outlier from distorting active ceiling", () => {
+    // bazin = 40, graham = 30, gordon = 50 => sorted [30, 40, 50] => median = 40
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 40,
+      avgDividend: 2.4,
+      eps: 2,
+      bvps: 20, // Graham = sqrt(22.5 * 2 * 20) = sqrt(900) = 30
+      dividendCagr: 4.25, // k = 0.105, g = 0.0425 => k - g = 0.0625 => nextDiv = 2.4 * 1.0425 = 2.502 => Gordon = 2.502 / 0.0625 = 40.032
+      selicPct: 10.5,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    expect(result.bazin).toBeCloseTo(40);
+    expect(result.graham).toBeCloseTo(30);
+    expect(result.gordon).toBeCloseTo(40.03, 1);
+    // Median of [30, 40, 40.032] is 40
+    expect(result.consensus).toBeCloseTo(40);
   });
 });

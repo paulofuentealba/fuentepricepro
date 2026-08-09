@@ -97,6 +97,13 @@ export function consensusPrice(prices: (number | null | undefined)[]): number | 
 }
 
 /**
+ * Minimum margin spread (k - g) required for Gordon Growth Model.
+ * Prevents mathematical singularity explosions when discount rate (Selic) is near CAGR.
+ * Default: 2.0 percentage points (0.02).
+ */
+export const GORDON_MIN_DISCOUNT_MARGIN = 0.02;
+
+/**
  * Universal valuation engine.
  * Calculates all models and the consensus margin of safety in one place.
  */
@@ -136,6 +143,18 @@ export function getAssetValuation({
     };
   }
 
+  if (currentPrice <= 0 || avgDividend <= 0) {
+    return {
+      bazin: null,
+      graham: null,
+      gordon: null,
+      consensus: null,
+      activeCeiling: currentPrice,
+      margin: 0,
+      positive: true,
+    };
+  }
+
   // Apply WHT (Withholding Tax) to dividends for US assets
   const isUS = isUsAsset(type, currency);
   const netAvgDividend = isUS ? avgDividend * (1 - US_DIVIDEND_TAX_RATE) : avgDividend;
@@ -146,15 +165,23 @@ export function getAssetValuation({
   const graham = eps && bvps && eps > 0 && bvps > 0 ? Math.sqrt(22.5 * eps * bvps) : null;
 
   // 3. Gordon Model: NextYearDiv / (DiscountRate - CAGR)
+  // Protected against singularity explosion when (k - g) < GORDON_MIN_DISCOUNT_MARGIN (2.0 percentage points)
   const k = selicPct / 100;
   const g = dividendCagr ? dividendCagr / 100 : 0; // assuming dividendCagr is in percentage like selicPct
   const nextYearDiv = netAvgDividend * (1 + g);
-  const gordon = k > g ? nextYearDiv / (k - g) : null;
+  const gordon = (k - g) >= GORDON_MIN_DISCOUNT_MARGIN ? nextYearDiv / (k - g) : null;
 
-  // 4. Consensus & Margin
+  // 4. Consensus & Margin (Robust Median across valid models)
   const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
-  const consensus =
-    validModels.length > 0 ? validModels.reduce((a, b) => a + b, 0) / validModels.length : null;
+  let consensus: number | null = null;
+  if (validModels.length > 0) {
+    const sorted = [...validModels].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    consensus =
+      sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
 
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
   const margin = currentPrice > 0 ? (activeCeiling / currentPrice - 1) * 100 : 0;
