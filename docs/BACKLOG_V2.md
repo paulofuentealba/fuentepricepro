@@ -90,7 +90,11 @@ Não existe. Depende de infraestrutura de notificação (Firebase Cloud Messagin
 ### 2.3 Módulo de IRPF ⚪
 
 Não existe. Relatório de imposto sobre dividendos/JCP e cálculo de DARF em vendas com ganho de capital. Depende do item 1.2 (histórico real de transações).
-**Atenção**: item sensível — erro de cálculo aqui tem implicação financeira/legal real pro usuário, não é só bug de UI. Precisa de disclaimer visível e validação numérica manual contra casos conhecidos antes de ir pra produção.
+
+> [!IMPORTANT]
+> **Pré-requisito Obrigatório de Compliance CVM (Item 11)**:
+> Antes do início de QUALQUER desenvolvimento da Fase 4 (Módulo de IRPF/DARF), é OBRIGATÓRIO a implementação e exibição visível do **Disclaimer Regulatório CVM / ANBIMA** em todas as telas principais e relatórios fiscais do produto, respaldado na governança legal (`fuente-advogado-lgpd-gdpr`) e na referência `anthropics/financial-services`.
+> **Texto de Isenção Regulatória**: Deve explicitar que o Fuente Price Pro é uma ferramenta quantitativa e educacional de planejamento de renda, e que **nenhum relatório, cálculo ou projeção constitui análise de valores mobiliários, recomendação de investimento ou aconselhamento fiscal/tributário formal**. Erros de apuração de DARF/IRPF possuem implicações legais reais para o usuário; a validação numérica manual e o aceite explícito do termo de isenção devem anteceder a liberação deste módulo.
 
 ---
 
@@ -117,11 +121,12 @@ Parcial / Em evolução:
 - **Paywall / Locked Panel**: Já existe `LockedPanel` traduzido nos 3 idiomas.
 - **Pendente**: Banner transparente sobre fonte de dados (ex: avisar que cotação vem do Yahoo Finance) e aplicação profunda da personalização na UI.
 
-### 4.2 Onboarding Regulatório e Perfilamento (KYC/Suitability) 🟡
+### 4.2 Onboarding Regulatório, Compliance CVM & Disclaimer de Isenção 🟡
 
-Parcial (Personalização de UX vs. Suitability Regulatório Formal):
+Parcial (Personalização de UX vs. Compliance Regulatório Formal):
 - **O que foi feito**: Criado o questionário de Perfil de Investidor (`InvestorProfileFlow.tsx`), que classifica a tolerância a risco e objetivo do usuário (Conservador/Moderado/Arrojado e Renda/Crescimento) para personalização interna da experiência no app.
 - **Distinção importante**: Este perfilamento é estritamente voltado para a **experiência do usuário (UX)**. Não constitui uma análise formal de Suitability regulatório da CVM/ANBIMA (KYC legal), pois o Fuente Price Pro é uma ferramenta de planejamento e análise, não uma instituição financeira intermediária ou corretora.
+- **Disclaimer Regulatório CVM (Pré-requisito Pré-Fase 4 - Item 11)**: ⚪ **PENDENTE**. Implementar aviso/rodapé global de isenção regulatória CVM respaldado nas diretrizes do `fuente-advogado-lgpd-gdpr` e no repositório de referência `anthropics/financial-services`. O texto deve deixar inequívoco que a plataforma opera sob caráter estritamente quantitativo e instrucional, e que nenhuma projeção de valuation, preço teto ou apuração fiscal representa recomendação de investimento ou consultoria financeira. Este disclaimer deve estar ativo em produção **antes do início de qualquer trabalho na Fase 4 (IRPF)**.
 
 ### 4.3 Conformidade Legal (LGPD & GDPR) 🟡
 
