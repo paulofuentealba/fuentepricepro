@@ -16,7 +16,7 @@ const ACTIVE_CLASSES = {
 } as const;
 
 const BASE_CLASSES =
-  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors";
+  "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-colors";
 const INACTIVE_CLASSES =
   "border-border/60 bg-background/40 text-muted-foreground hover:text-foreground";
 

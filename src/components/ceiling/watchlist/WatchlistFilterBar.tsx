@@ -39,9 +39,9 @@ export function WatchlistFilterBar({
   const { t } = useI18n();
   return (
     <div className="flex flex-wrap justify-start items-center gap-2 w-full">
-      <div className="flex flex-1 flex-wrap gap-2">
+      <div className="flex items-center flex-wrap gap-2">
         {typeFilter ? (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background/50 text-sm font-medium">
+          <div className="inline-flex h-8 items-center gap-2 px-3 rounded-full border border-border bg-background/50 text-xs font-medium">
             <div
               className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: getColorForAsset(typeFilter) }}
@@ -49,7 +49,7 @@ export function WatchlistFilterBar({
             {String(counts?.byType?.get(typeFilter) ?? 0)}
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background/50 text-sm font-medium text-muted-foreground">
+          <div className="inline-flex h-8 items-center gap-2 px-3 rounded-full border border-border bg-background/50 text-xs font-medium text-muted-foreground">
             {t.watchlist.filterAll} {String(counts?.total ?? 0)}
           </div>
         )}

@@ -383,6 +383,7 @@ export const en = {
     addFixedIncomeDesc: "Tesouro, CDBs, LCI/LCA",
     importBrokerNote: "Import Broker Note",
     addAssetDropdownImportFile: "Bring your file",
+    downloadTemplate: "Download CSV template",
     consolidatedNetWorth: "Consolidated Net Worth",
     consolidatedNetWorthSub: "Total Portfolio Value",
     consolidatedIncome: "Consolidated Projected Income",

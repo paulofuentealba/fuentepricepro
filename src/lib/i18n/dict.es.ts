@@ -387,6 +387,7 @@ export const es = {
     addFixedIncomeDesc: "Bonos, Letras",
     importBrokerNote: "Importar Nota de Corretaje",
     addAssetDropdownImportFile: "Traer mi archivo",
+    downloadTemplate: "Descargar plantilla CSV",
     consolidatedNetWorth: "Patrimonio Consolidado",
     consolidatedNetWorthSub: "Patrimonio Total",
     consolidatedIncome: "Ingreso Pasivo Proyectado",

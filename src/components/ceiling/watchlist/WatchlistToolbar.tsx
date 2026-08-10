@@ -38,7 +38,7 @@ export function WatchlistToolbar({
 }: WatchlistToolbarProps) {
   const { t } = useI18n();
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
       <div className="flex-1 min-w-0">
         <WatchlistFilterBar
           typeFilters={typeFilters}
@@ -51,37 +51,37 @@ export function WatchlistToolbar({
           onSetSortOption={onSetSortOption}
         />
       </div>
-      <div className="flex items-center gap-4 shrink-0 flex-wrap">
+      <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <AddAssetDropdown
           onNavigateToScreener={onNavigateToScreener}
           onOpenFIWizard={onOpenFIWizard}
           onOpenBrokerUploader={onOpenBrokerUploader}
         />
         <DataManagement />
-        <div className="flex items-center gap-1 rounded-md border border-border/60 bg-background/50 p-1 shrink-0">
+        <div className="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border/60 bg-background/50 p-0.5 shrink-0">
           <button
             type="button"
             onClick={() => setViewMode("grid")}
-            className={`rounded p-1.5 transition-colors ${
+            className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${
               viewMode === "grid"
-                ? "bg-muted text-foreground shadow-sm"
+                ? "bg-muted text-foreground shadow-sm font-medium"
                 : "text-muted-foreground hover:bg-muted/50"
             }`}
             title={t.watchlist.gridView}
           >
-            <LayoutGrid className="h-4 w-4" />
+            <LayoutGrid className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={() => setViewMode("table")}
-            className={`rounded p-1.5 transition-colors ${
+            className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${
               viewMode === "table"
-                ? "bg-muted text-foreground shadow-sm"
+                ? "bg-muted text-foreground shadow-sm font-medium"
                 : "text-muted-foreground hover:bg-muted/50"
             }`}
             title={t.watchlist.tableView}
           >
-            <List className="h-4 w-4" />
+            <List className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
