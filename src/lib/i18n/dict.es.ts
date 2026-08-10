@@ -392,6 +392,8 @@ export const es = {
     csvImportSub: "Suba su archivo de transacciones o plantilla completada",
     csvImportTemplateNotice: "¿Aún no tiene la plantilla?",
     csvImportTemplateNoticeSub: "Descargue nuestra plantilla CSV lista con el formato correcto.",
+    csvDragDropText: "Arrastra y suelta tu CSV aquí",
+    csvImporting: "Importando transacciones...",
     consolidatedNetWorth: "Patrimonio Consolidado",
     consolidatedNetWorthSub: "Patrimonio Total",
     consolidatedIncome: "Ingreso Pasivo Proyectado",

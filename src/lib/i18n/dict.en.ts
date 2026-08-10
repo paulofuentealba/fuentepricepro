@@ -388,6 +388,8 @@ export const en = {
     csvImportSub: "Upload your transactions file or completed template",
     csvImportTemplateNotice: "Don't have the spreadsheet yet?",
     csvImportTemplateNoticeSub: "Download our ready-made CSV template with correct headers.",
+    csvDragDropText: "Drag and drop your CSV here",
+    csvImporting: "Importing transactions...",
     consolidatedNetWorth: "Consolidated Net Worth",
     consolidatedNetWorthSub: "Total Portfolio Value",
     consolidatedIncome: "Consolidated Projected Income",

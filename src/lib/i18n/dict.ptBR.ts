@@ -390,6 +390,8 @@ export const ptBR = {
     csvImportSub: "Faça upload do seu arquivo de transações ou modelo preenchido",
     csvImportTemplateNotice: "Ainda não tem a planilha?",
     csvImportTemplateNoticeSub: "Baixe nosso modelo CSV pronto com o formato correto.",
+    csvDragDropText: "Arraste e solte o seu CSV aqui",
+    csvImporting: "Importando transações...",
     consolidatedNetWorth: "Patrimônio Consolidado",
     consolidatedNetWorthSub: "Patrimônio Total",
     consolidatedIncome: "Renda Passiva Projetada",

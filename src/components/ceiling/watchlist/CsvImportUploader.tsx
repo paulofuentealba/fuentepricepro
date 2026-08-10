@@ -57,12 +57,12 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
         </DialogHeader>
 
         <div className="space-y-4 my-2">
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-background/50 border border-border/60 gap-3">
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-foreground truncate">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-background/50 border border-border/60 gap-3">
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-semibold text-foreground">
                 {t.watchlist.csvImportTemplateNotice}
               </span>
-              <span className="text-[11px] text-muted-foreground truncate">
+              <span className="text-[11px] text-muted-foreground">
                 {t.watchlist.csvImportTemplateNoticeSub}
               </span>
             </div>
@@ -70,7 +70,7 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
               type="button"
               variant="outline"
               size="sm"
-              className="h-8 gap-1.5 px-3 text-xs shrink-0 border-border/60 hover:bg-muted font-medium"
+              className="h-8 gap-1.5 px-3 text-xs shrink-0 border-border/60 hover:bg-muted font-medium w-full sm:w-auto justify-center"
               onClick={handleDownloadTemplate}
             >
               <Download className="h-3.5 w-3.5" />
@@ -104,7 +104,7 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
                   <div className="absolute inset-0 rounded-full blur-md bg-success/20 animate-pulse"></div>
                   <Loader2 className="h-10 w-10 text-success animate-spin relative z-10" />
                 </div>
-                <p className="text-sm font-medium text-foreground">{t.brokerNote.importing}</p>
+                <p className="text-sm font-medium text-foreground">{t.watchlist.csvImporting}</p>
               </div>
             ) : (
               <>
@@ -112,7 +112,7 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
                   <UploadCloud className="h-7 w-7 text-success" />
                 </div>
                 <p className="text-base font-semibold text-foreground text-center mb-1 tracking-tight">
-                  {t.brokerNote.dragDropText}
+                  {t.watchlist.csvDragDropText}
                 </p>
                 <p className="text-sm text-muted-foreground text-center">{t.brokerNote.orClick}</p>
               </>
