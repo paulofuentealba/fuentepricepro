@@ -2,14 +2,31 @@ import { describe, it, expect, vi } from "vitest";
 import {
   calculateDailyCompoundedReturn,
   calculatePriceCumulativeReturn,
-  fetchBcbBenchmarkSeries,
-  fetchYahooBenchmarkSeries,
+  annualizeReturn,
   type DailyRatePoint,
   type PricePoint,
 } from "../benchmark";
+import {
+  fetchBcbBenchmarkSeries,
+  fetchYahooBenchmarkSeries,
+} from "../benchmark.server";
 import { fetchBenchmarkHistoryFn } from "../apiService.functions";
 
 describe("Benchmark History Calculations (Shared Layer SSOT)", () => {
+  it("should annualize cumulative returns correctly over a period of days", () => {
+    // 10% cumulative return in 180 days -> (1 + 0.10)^(365/180) - 1 = ~21.323% a.a.
+    const result180 = annualizeReturn(10, 180);
+    expect(result180).toBeGreaterThan(10);
+    expect(result180).toBeCloseTo(21.323, 2);
+
+    // 10% cumulative return in 365 days -> 10% a.a.
+    const result365 = annualizeReturn(10, 365);
+    expect(result365).toBeCloseTo(10, 2);
+
+    // Edge cases: days <= 0 or invalid return
+    expect(annualizeReturn(10, 0)).toBe(0);
+    expect(annualizeReturn(NaN, 100)).toBe(0);
+  });
   it("should calculate compounded cumulative return from daily rates (3 days at 0.05% compounding)", () => {
     // Baseline + 3 days of 0.05% daily rate
     const dailyRates: DailyRatePoint[] = [

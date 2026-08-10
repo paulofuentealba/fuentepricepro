@@ -466,11 +466,13 @@ export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
 // -------- Benchmark History Oracle --------
 
 import {
-  fetchBcbBenchmarkSeries,
-  fetchYahooBenchmarkSeries,
   type BenchmarkPoint,
   type BenchmarkType,
 } from "./benchmark";
+import {
+  fetchBcbBenchmarkSeries,
+  fetchYahooBenchmarkSeries,
+} from "./benchmark.server";
 
 export type { BenchmarkPoint, BenchmarkType };
 

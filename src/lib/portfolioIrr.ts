@@ -142,6 +142,7 @@ export function calculateIrr(cashFlows: CashFlow[], guess = 0.1): number | null 
  * @param asOfDate Current evaluation date (default Date.now()).
  * @param fxRateUsdToBrl Live USDBRL exchange rate (from exchangeRateQueryOptions SSOT).
  * @param assetCurrencies Record of ticker -> Currency mapping ("USD" | "BRL").
+ * @param targetCurrency Optional currency filter ("BRL" | "USD" | null). When specified, filters transactions & income events by currency and avoids FX conversion.
  */
 export function buildCashFlowsFromPortfolio(
   transactions: Transaction[],
@@ -149,7 +150,8 @@ export function buildCashFlowsFromPortfolio(
   currentPortfolioValue: number,
   asOfDate: number = Date.now(),
   fxRateUsdToBrl: number = 1,
-  assetCurrencies: Record<string, Currency> = {}
+  assetCurrencies: Record<string, Currency> = {},
+  targetCurrency?: Currency | null,
 ): CashFlow[] {
   const cashFlows: CashFlow[] = [];
 
@@ -160,16 +162,21 @@ export function buildCashFlowsFromPortfolio(
       assetCurrencies[tickerUpper] !== undefined
         ? assetCurrencies[tickerUpper] === "USD"
         : !(tickerUpper.endsWith(".SA") || isBrTicker(tickerUpper));
-    const rate = isUsd ? fxRateUsdToBrl : 1;
+    const txCurrency: Currency = isUsd ? "USD" : "BRL";
 
+    if (targetCurrency && txCurrency !== targetCurrency) {
+      continue;
+    }
+
+    const rate = targetCurrency ? 1 : isUsd ? fxRateUsdToBrl : 1;
     const sharePrice = tx.pricePerShare || 0;
     const fees = tx.fees || 0;
-    const totalCostBrl = (tx.quantity * sharePrice + fees) * rate;
+    const totalCost = (tx.quantity * sharePrice + fees) * rate;
 
     if (tx.type === "buy") {
-      cashFlows.push({ date: tx.date, amount: -totalCostBrl });
+      cashFlows.push({ date: tx.date, amount: -totalCost });
     } else if (tx.type === "sell") {
-      cashFlows.push({ date: tx.date, amount: +totalCostBrl });
+      cashFlows.push({ date: tx.date, amount: +totalCost });
     }
   }
 
@@ -183,11 +190,17 @@ export function buildCashFlowsFromPortfolio(
     if (isNaN(eventDate) || eventDate > asOfDate) continue;
 
     const isUsd = ev.taxType === "us_dividend" || assetCurrencies[ev.ticker.toUpperCase()] === "USD";
-    const rate = isUsd ? fxRateUsdToBrl : 1;
-    const amountNetBrl = ev.amountNet * rate;
+    const evCurrency: Currency = isUsd ? "USD" : "BRL";
 
-    if (amountNetBrl > 0) {
-      cashFlows.push({ date: eventDate, amount: amountNetBrl });
+    if (targetCurrency && evCurrency !== targetCurrency) {
+      continue;
+    }
+
+    const rate = targetCurrency ? 1 : isUsd ? fxRateUsdToBrl : 1;
+    const amountNet = ev.amountNet * rate;
+
+    if (amountNet > 0) {
+      cashFlows.push({ date: eventDate, amount: amountNet });
     }
   }
 

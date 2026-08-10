@@ -1,5 +1,3 @@
-import { UA, fetchWithRetry } from "./api/http.server";
-
 export type BenchmarkType = "CDI" | "SELIC" | "IBOV" | "SPX";
 
 export interface BenchmarkPoint {
@@ -46,6 +44,25 @@ export function calculateDailyCompoundedReturn(
 }
 
 /**
+ * Annualizes a cumulative percentage return over a given period of days using compound interest.
+ * Formula: ((1 + cumulativeReturnPct / 100) ^ (365 / days) - 1) * 100
+ *
+ * @param cumulativeReturnPct Total cumulative percentage return over the period (e.g., 10 for 10%).
+ * @param days Total days in the evaluation period.
+ * @returns Annualized percentage rate (e.g., 21.32 for 21.32% a.a.). Returns 0 if days <= 0 or input invalid.
+ */
+export function annualizeReturn(cumulativeReturnPct: number, days: number): number {
+  if (!days || days <= 0 || !Number.isFinite(cumulativeReturnPct)) {
+    return 0;
+  }
+  const factor = 1 + cumulativeReturnPct / 100;
+  if (factor <= 0) return -100;
+  const annualizedFactor = Math.pow(factor, 365 / days);
+  const annualizedPct = (annualizedFactor - 1) * 100;
+  return Number(annualizedPct.toFixed(4));
+}
+
+/**
  * Calculates price-based cumulative percentage returns from closing price series (e.g., IBOV/SPX).
  * Baseline price is the first valid price point in the series (0% return).
  * For each subsequent date: cumulativeReturnPct = ((price_t / price_0) - 1) * 100.
@@ -74,96 +91,4 @@ export function calculatePriceCumulativeReturn(
       cumulativeReturnPct: Number(cumulativeReturnPct.toFixed(6)),
     };
   });
-}
-
-function formatDateBcb(yyyyMmDd: string): string {
-  const parts = yyyyMmDd.split("-");
-  if (parts.length !== 3) return yyyyMmDd;
-  return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-
-function parseBcbDate(ddMmYyyy: string): string {
-  const parts = ddMmYyyy.split("/");
-  if (parts.length !== 3) return ddMmYyyy;
-  return `${parts[2]}-${parts[1]}-${parts[0]}`;
-}
-
-/**
- * Fetches daily interest rate series from Banco Central do Brasil (BCB) SGS.
- * Series 12: Taxa de juros - CDI diária (% a.d.)
- * Series 11: Taxa de juros - Selic diária (% a.d.)
- */
-export async function fetchBcbBenchmarkSeries(
-  seriesCode: number,
-  fromDate: string,
-  toDate: string,
-): Promise<BenchmarkPoint[]> {
-  try {
-    const dataInicial = formatDateBcb(fromDate);
-    const dataFinal = formatDateBcb(toDate);
-    const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${seriesCode}/dados?dataInicial=${encodeURIComponent(
-      dataInicial,
-    )}&dataFinal=${encodeURIComponent(dataFinal)}&formato=json`;
-
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 5000, retries: 1 });
-    if (!res.ok) return [];
-
-    const json = (await res.json()) as Array<{ data: string; valor: string }>;
-    if (!Array.isArray(json) || json.length === 0) return [];
-
-    const dailyRates: DailyRatePoint[] = json.map((item) => ({
-      date: parseBcbDate(item.data),
-      ratePct: parseFloat(item.valor) || 0,
-    }));
-
-    return calculateDailyCompoundedReturn(dailyRates);
-  } catch (err) {
-    console.warn(`[benchmark] BCB SGS series ${seriesCode} failed gracefully`, err);
-    return [];
-  }
-}
-
-/**
- * Fetches index historical prices from Yahoo Finance Chart API.
- * ^BVSP: IBOVESPA
- * ^GSPC: S&P 500
- */
-export async function fetchYahooBenchmarkSeries(
-  symbol: string,
-  fromDate: string,
-  toDate: string,
-): Promise<BenchmarkPoint[]> {
-  try {
-    const startSec = Math.floor(new Date(fromDate).getTime() / 1000);
-    const endSec = Math.floor(new Date(toDate).getTime() / 1000) + 86400;
-
-    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
-      symbol,
-    )}?interval=1d&period1=${startSec}&period2=${endSec}`;
-
-    const res = await fetchWithRetry(
-      url,
-      { headers: { "User-Agent": UA } },
-      { timeoutMs: 5000, retries: 1 },
-    );
-    if (!res.ok) return [];
-
-    const json = await res.json();
-    const result = json?.chart?.result?.[0];
-    const timestamps: number[] = result?.timestamp || [];
-    const closes: (number | null)[] = result?.indicators?.quote?.[0]?.close || [];
-
-    if (timestamps.length === 0 || closes.length === 0) return [];
-
-    const priceSeries: PricePoint[] = timestamps.map((ts, i) => {
-      const date = new Date(ts * 1000).toISOString().slice(0, 10);
-      const close = closes[i] != null && Number.isFinite(closes[i]) ? closes[i] : null;
-      return { date, close };
-    });
-
-    return calculatePriceCumulativeReturn(priceSeries);
-  } catch (err) {
-    console.warn(`[benchmark] Yahoo Finance chart for ${symbol} failed gracefully`, err);
-    return [];
-  }
 }

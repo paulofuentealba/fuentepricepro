@@ -158,5 +158,67 @@ describe("portfolioIrr", () => {
       // Sell should be +3500 (NOT converted by fxRate 5.5)
       expect(flows[1].amount).toBe(3500);
     });
+
+    it("filters cashflows strictly by targetCurrency without applying FX conversion", () => {
+      const t0 = new Date("2025-01-01").getTime();
+      const txs: Transaction[] = [
+        { id: "tx1", ticker: "PETR4.SA", type: "buy", date: t0, quantity: 100, pricePerShare: 30 },
+        { id: "tx2", ticker: "AAPL", type: "buy", date: t0, quantity: 10, pricePerShare: 150 },
+      ];
+
+      const realized: RealizedIncomeEvent[] = [
+        {
+          ticker: "PETR4.SA",
+          exDate: "2025-04-01",
+          paymentDate: "2025-05-15",
+          quantityHeld: 100,
+          amountPerShareGross: 1.0,
+          amountGross: 100,
+          amountNet: 100,
+          taxType: "dividend",
+        },
+        {
+          ticker: "AAPL",
+          exDate: "2025-06-01",
+          paymentDate: "2025-06-15",
+          quantityHeld: 10,
+          amountPerShareGross: 0.5,
+          amountGross: 5,
+          amountNet: 3.5,
+          taxType: "us_dividend",
+        },
+      ];
+
+      const assetCurrencies = { "PETR4.SA": "BRL" as const, AAPL: "USD" as const };
+
+      const endOfYear = new Date("2025-12-31").getTime();
+
+      // Filter BRL ONLY: Should include PETR4 buy (-3000) and PETR4 dividend (+100), excluding AAPL
+      const brlFlows = buildCashFlowsFromPortfolio(txs, realized, 3500, endOfYear, 5.0, assetCurrencies, "BRL");
+      expect(brlFlows.some((f) => f.amount === -3000)).toBe(true);
+      expect(brlFlows.some((f) => f.amount === 100)).toBe(true);
+      expect(brlFlows.some((f) => f.amount === -1500 || f.amount === -7500)).toBe(false); // No AAPL buy
+      expect(brlFlows.some((f) => f.amount === 3.5 || f.amount === 17.5)).toBe(false); // No AAPL dividend
+
+      // Filter USD ONLY: Should include AAPL buy (-1500, rate = 1) and AAPL dividend (+3.5, rate = 1), excluding PETR4
+      const usdFlows = buildCashFlowsFromPortfolio(txs, realized, 1800, endOfYear, 5.0, assetCurrencies, "USD");
+      expect(usdFlows.some((f) => f.amount === -1500)).toBe(true);
+      expect(usdFlows.some((f) => f.amount === 3.5)).toBe(true);
+      expect(usdFlows.some((f) => f.amount === -3000)).toBe(false); // No PETR4 buy
+      expect(usdFlows.some((f) => f.amount === 100)).toBe(false); // No PETR4 dividend
+    });
+
+    it("returns empty cashflow list for targetCurrency when portfolio has no assets in that currency", () => {
+      const t0 = new Date("2025-01-01").getTime();
+      const txs: Transaction[] = [
+        { id: "tx1", ticker: "VALE3.SA", type: "buy", date: t0, quantity: 100, pricePerShare: 60 },
+      ];
+
+      const assetCurrencies = { "VALE3.SA": "BRL" as const };
+
+      // Portfolio has ONLY BRL assets. Requesting USD cashflows should yield no buy/sell flows.
+      const usdFlows = buildCashFlowsFromPortfolio(txs, [], 0, t0 + 1000, 5.0, assetCurrencies, "USD");
+      expect(usdFlows).toEqual([]);
+    });
   });
 });
