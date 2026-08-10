@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useWatchlist } from "@/lib/watchlist";
 import { useI18n } from "@/lib/i18n-provider";
 import { toast } from "sonner";
-import { DEV_MOCK_DATA } from "@/lib/__mocks__/devMockData";
+import { DEV_MOCK_DATA } from "@/__fixtures__/devMockData";
 import { WatchlistIO } from "./WatchlistIO";
 
 export function DataManagement() {

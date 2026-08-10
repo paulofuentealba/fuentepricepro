@@ -42,6 +42,7 @@ export function usePortfolioSnapshot(totalValueBRL: number, totalInvestedBRL: nu
     hasAttemptedToday.current = true;
 
     async function recordSnapshot() {
+      if (import.meta.env.DEV) return;
       try {
         const payload: PortfolioSnapshot = {
           date: todayStr,

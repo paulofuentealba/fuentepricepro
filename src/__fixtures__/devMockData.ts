@@ -1,4 +1,4 @@
-import type { WatchlistItem } from "../watchlist";
+import type { WatchlistItem } from "@/lib/watchlist";
 
 export const DEV_MOCK_DATA: WatchlistItem[] = [
   // ── ATIVOS ORIGINAIS (8) ────────────────────────────────────────────────────
