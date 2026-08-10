@@ -15,6 +15,7 @@ export const ptBR = {
     next: "Próximo",
     other: "Outros",
     quoteAsOf: "cotação de {{time}}",
+    shares: "Cotas",
   },
   showcase: {
     title: "Vitrine",
@@ -38,6 +39,8 @@ export const ptBR = {
   header: {
     accountMenu: "Menu da conta",
     openMenu: "Abrir menu",
+    signIn: "Entrar",
+    language: "Idioma",
   },
   lockedPanel: {
     title: "Recurso Pro",
@@ -578,6 +581,8 @@ export const ptBR = {
     capital: "Capital disponível para investir",
     currency: "Moeda",
     generate: "Gerar recomendação",
+    calculating: "Calculando...",
+    recalculate: "Recalcular / Redefinir",
     noAssetsInCurrency: "Você ainda não tem ativos nesta moeda na sua watchlist.",
     emptyResult:
       "Nenhum ativo compatível com a estratégia nesta moeda. Ajuste a estratégia ou adicione novos ativos.",
@@ -920,6 +925,8 @@ export const ptBR = {
     },
   },
   comparator: {
+    assetCompared: "ativo comparado",
+    assetsCompared: "ativos comparados",
     title: "Filtro e Comparador de Ações",
     subtitle: "Selecione até 3 ativos para compará-los lado a lado.",
     searchPlaceholder: "Buscar ativo para comparar (ex: AAPL, ITUB4)",
@@ -1008,6 +1015,13 @@ export const ptBR = {
   },
   feedback: {
     buttonText: "Enviar Feedback",
+    title: "Ajude-nos a melhorar o Fuente Price Pro",
+    description: "Sua opinião guia nossos próximos passos. Conte-nos o que você gostaria de ver.",
+    placeholder: "Compartilhe uma ideia, elogio ou problema...",
+    send: "Enviar feedback",
+    cancel: "Cancelar",
+    success: "Obrigado! Seu feedback foi registrado.",
+    empty: "Escreva uma mensagem antes de enviar.",
   },
   transactions: {
     title: "Histórico de Transações",

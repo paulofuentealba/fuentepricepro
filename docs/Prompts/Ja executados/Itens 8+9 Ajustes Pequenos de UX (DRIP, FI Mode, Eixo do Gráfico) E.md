@@ -1,0 +1,1 @@
+### Itens 8+9: Ajustes Pequenos de UX (DRIP, FI Mode, Eixo do Gráfico) ✅ CONCLUÍDO E VERIFICADO

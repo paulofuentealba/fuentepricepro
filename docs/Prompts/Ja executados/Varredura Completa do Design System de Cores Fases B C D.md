@@ -1,4 +1,4 @@
-# Prompt para Antigravity — Varredura Completa de Design System de Cores (Fases B, C & D)
+# Relatório de Execução — Varredura Completa de Design System de Cores (Fases B, C & D)
 
 > [!NOTE]
 > Documentação técnica da execução das Fases B, C e D da varredura de cores no repositório, incluindo o gate estático automatizado `design-tokens.test.ts` com 0 exceções.

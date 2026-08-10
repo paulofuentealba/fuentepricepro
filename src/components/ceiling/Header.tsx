@@ -181,7 +181,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                   onClick={() => openAuthModal()}
                   className="bg-success text-success-foreground hover:bg-success/90"
                 >
-                  Sign In
+                  {t.header.signIn}
                 </Button>
               )
             )}
@@ -260,7 +260,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                         onClick={() => openAuthModal()}
                         className="w-full justify-center"
                       >
-                        {variant === "app" ? "Sign In" : L.login}
+                        {variant === "app" ? t.header.signIn : L.login}
                       </Button>
                       {variant === "landing" && (
                         <Button
@@ -276,7 +276,7 @@ export function Header({ variant = "app" }: HeaderProps) {
 
                   <div className="mt-auto flex flex-col gap-4 pb-8">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Language</span>
+                      <span className="text-sm font-medium">{t.header.language}</span>
                       <LanguageSwitcher className="inline-flex" />
                     </div>
                     {user && (

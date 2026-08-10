@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
+import { formatCurrency } from "@/lib/formatters";
 import {
   parseB3BrokerNote,
   ALL_SINACOR_BROKERS,
@@ -131,7 +132,7 @@ const BROKER_LABELS: Record<BrokerType, string> = {
 };
 
 export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { upsertManyAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const { mappings, saveMappings } = useIssuerTickerMappings();
@@ -405,10 +406,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
             <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
               {unresolvedTrades.map((item) => {
-                const totalVal = (item.quantity * item.price).toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                });
+                const totalVal = formatCurrency(item.quantity * item.price, "BRL", locale);
 
                 return (
                   <div
@@ -430,7 +428,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
-                        {item.quantity} x {item.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                        {item.quantity} x {formatCurrency(item.price, "BRL", locale)}
                       </span>
                       <span className="font-semibold text-foreground">{totalVal}</span>
                     </div>

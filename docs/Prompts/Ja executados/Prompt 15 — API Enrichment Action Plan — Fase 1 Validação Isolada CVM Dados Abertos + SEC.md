@@ -1,0 +1,31 @@
+### Prompt 15 — API Enrichment Action Plan — Fase 1: Validação Isolada CVM Dados Abertos + SEC EDGAR ✅
+
+- **Objetivo**: Confirmar em scripts de validação isolados (`scripts/validate-cvm.ts` e `scripts/validate-sec-edgar.ts`), sem alterar código de produção ou Firestore, se CVM Dados Abertos e SEC EDGAR entregam dados financeiros com qualidade para VPA, LPA, Vacância e Proventos.
+- **Validação CVM Dados Abertos (`scripts/validate-cvm.ts`)**:
+  - **Mapeamento Ticker → CVM/CNPJ**: Resolvido com verificação de situação ATIVA:
+    - `TAEE11`: `CD_CVM 020257` | `CNPJ 07.859.971/0001-30` ("TRANSMISSORA ALIANÇA DE ENERGIA ELÉTRICA S.A.")
+    - `PETR4`: `CD_CVM 009512` | `CNPJ 33.000.167/0001-01` ("PETRÓLEO BRASILEIRO S.A. - PETROBRAS")
+    - `BBSE3`: `CD_CVM 023159` | `CNPJ 17.344.597/0001-94` ("BB SEGURIDADE PARTICIPAÇÕES S.A.")
+    - `HGLG11`: `CNPJ 11.728.688/0001-47` ("PÁTRIA LOG - FUNDO DE INVESTIMENTO IMOBILIÁRIO")
+    - `MXRF11`: `CNPJ 97.521.225/0001-25` ("FII MAXI RENDA RL")
+    - `AFHI11`: `CNPJ 36.642.293/0001-58` ("AF INVEST CRI FII")
+  - **DFP (Ações / DRE & BPP)**:
+    - `TAEE11`: PL = R$ 7.608.982.000, Lucro Líquido = R$ 1.579.863.000, Ações = 1.033.497.000 → **VPA = R$ 7,3624**, **LPA = R$ 1,5287**
+    - `PETR4`: PL = R$ 417.587.000.000, Lucro Líquido = R$ 110.605.000.000, Ações = 12.888.732.761 → **VPA = R$ 32,3994**, **LPA = R$ 8,5815**
+    - `BBSE3`: PL = R$ 10.384.393.000, Lucro Líquido = R$ 9.017.329.000, Ações = 1.941.214.909 → **VPA = R$ 5,3494**, **LPA = R$ 4,6452**
+  - **Informe Mensal FII (`INF_MENSAL`)**: Re-inspecionados rigorosamente todos os 3 CSVs (`ativo_passivo`, `complemento`, `geral`) de 2025 e 2026 e o Dicionário de Dados oficial (`meta_inf_mensal_fii.zip` - 974 linhas de schema). Confirmado que **não existem colunas de vacância** (`VACAN`: 0 ocorrências) no Informe Mensal.
+  - **Informe Trimestral FII (`INF_TRIMESTRAL`)**: Descoberto no dataset trimestral (`inf_trimestral_fii_imovel_2026.csv`) a coluna **`Percentual_Vacancia`** por imóvel individual (ex: HGLG11 relata 37 imóveis, como HGLG Guarulhos: 12,51%, TechTown: 17,10%, Master Labs: 14,92%, HGLG Betim: 0%). Fundos de papel (AFHI11, MXRF11) não possuem vacância física aplicável.
+  - **Proventos CVM (`IPE`)**: Verificado catálogo da CVM. Dividendos são arquivados em PDF/HTML como Avisos aos Acionistas via `CIA_ABERTA/DOC/IPE/` (links RAD CVM). Não há dataset tabular aberto de `paymentDate`.
+- **Validação SEC EDGAR (`scripts/validate-sec-edgar.ts`)**:
+  - **Resolução CIK via `company_tickers.json`**: `AAPL` (`0000320193`), `O` (`0000726728`), `JNJ` (`0000200406`), `KO` (`0000021344`).
+  - **Métricas XBRL / 10-Q**:
+    - `AAPL` (10-Q 2026-06-27): PL = $107,52B, Ações = 14,61B, EPS = $6.91 → **BVPS = $7.3599**, **LPA = $6.91** (Tempo: 214 ms)
+    - `O` (10-Q 2026-03-31): PL = $39,15B, Ações = 932,47M, EPS = $0.33 → **BVPS = $41.9824**, **LPA = $0.33** (Tempo: 192 ms)
+    - `JNJ` (10-Q 2026-06-28): PL = $84,97B, Ações = 3,12B, EPS = $4.47 → **BVPS = $27.2357**, **LPA = $4.47** (Tempo: 440 ms)
+    - `KO` (10-Q 2026-04-03): PL = $33,63B, Ações = 7,04B, EPS = $0.91 → **BVPS = $4.7774**, **LPA = $0.91** (Tempo: 209 ms)
+- **Desempenho & Governança**:
+  - SEC EDGAR: REST JSON direto, ~200ms por ativo.
+  - CVM Dados Abertos: Downloads em ZIP (~12.14 MB DFP), parse em memória com `AdmZip` em ~3s.
+  - Nenhum arquivo temporário commitado (`os.tmpdir()` utilizado). Código de produção (`src/`), Firestore e `docs/BACKLOG_V2.md` intactos.
+
+---

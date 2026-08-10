@@ -139,7 +139,7 @@ function SettingsPage() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
               <span className="text-primary-foreground text-lg">F</span>
             </div>
-            <span className="hidden sm:inline-block">Fuente Price Pro</span>
+            <span className="hidden sm:inline-block">{t.appTitle}</span>
           </div>
           <Button variant="ghost" size="sm" onClick={() => (window.location.href = "/app")}>
             {S.backToDashboard}

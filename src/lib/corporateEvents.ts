@@ -79,8 +79,9 @@ export interface PendingCorporateEvent {
   ratio: number;
 }
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { checkPendingSplitsFn } from "./apiService.functions";
+import { corporateEventsQueryOptions } from "./queryOptions";
 import { type WatchlistItem } from "./watchlist";
 
 export function usePendingEvents(item: WatchlistItem | null) {
@@ -92,26 +93,16 @@ export function usePendingEvents(item: WatchlistItem | null) {
       ? item.addedAt - 1000 * 60 * 60 * 24
       : Date.now();
 
-  const { data: pendingEvents, isPending } = useQuery({
-    queryKey: ["pendingSplits", item?.ticker, lastSync],
-    queryFn: async () => {
-      if (!item) return [];
-      try {
-        const results = await checkPendingSplitsFn({
-          data: { ticker: item.ticker, sinceTimestamp: lastSync },
-        });
-
-        // Filter out anything already in appliedEvents
-        const appliedIds = new Set(item.appliedEvents?.map((e) => e.eventId) ?? []);
-        return results.filter((ev: any) => !appliedIds.has(ev.eventId)) as PendingCorporateEvent[];
-      } catch (err) {
-        console.error("Error fetching pending splits for", item.ticker, err);
-        return [];
-      }
-    },
+  const { data: rawEvents, isPending } = useQuery({
+    ...corporateEventsQueryOptions(item?.ticker, lastSync),
     enabled: !!item && item.quantity > 0,
-    staleTime: 1000 * 60 * 60 * 24, // Check at most once per 24 hours per asset to save bandwidth
   });
+
+  const pendingEvents = useMemo(() => {
+    if (!rawEvents || !item) return [];
+    const appliedIds = new Set(item.appliedEvents?.map((e) => e.eventId) ?? []);
+    return (rawEvents as any[]).filter((ev: any) => !appliedIds.has(ev.eventId)) as PendingCorporateEvent[];
+  }, [rawEvents, item]);
 
   return {
     pendingEvent: pendingEvents?.[0] ?? null,

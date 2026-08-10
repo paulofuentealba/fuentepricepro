@@ -252,9 +252,9 @@ export function SmartAllocation() {
               variant={generated ? "secondary" : "default"}
             >
               {isGenerating
-                ? "Calculando..."
+                ? t.smartAllocation.calculating
                 : generated
-                  ? "Recalculate / Reset"
+                  ? t.smartAllocation.recalculate
                   : t.smartAllocation.generate}
             </Button>
           </div>

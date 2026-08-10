@@ -7,6 +7,8 @@ import {
   fetchMacroRatesFn,
   fetchBenchmarkHistoryFn,
   fetchAssetPriceHistoryFn,
+  fetchRadarFn,
+  checkPendingSplitsFn,
   type LiveQuote,
   type SearchHit,
   type BenchmarkPoint,
@@ -100,5 +102,26 @@ export function assetPriceHistoryQueryOptions(
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
     enabled: Boolean(key && fromDate && toDate),
+  });
+}
+
+export function dividendRadarQueryOptions() {
+  return queryOptions({
+    queryKey: ["dividend-radar"] as const,
+    queryFn: () => fetchRadarFn(),
+    staleTime: 15 * 60_000, // 15 mins
+    gcTime: 30 * 60_000,
+  });
+}
+
+export function corporateEventsQueryOptions(ticker?: string, sinceTimestamp?: number) {
+  const key = (ticker || "").trim().toUpperCase();
+  const timestamp = sinceTimestamp ?? 0;
+  return queryOptions({
+    queryKey: ["pendingSplits", key, timestamp] as const,
+    queryFn: ({ signal }) =>
+      key ? checkPendingSplitsFn({ data: { ticker: key, sinceTimestamp: timestamp }, signal }) : Promise.resolve([]),
+    staleTime: 24 * 60 * 60_000, // 24 hours
+    gcTime: 48 * 60 * 60_000,
   });
 }

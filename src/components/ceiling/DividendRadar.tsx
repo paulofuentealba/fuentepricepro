@@ -29,7 +29,7 @@ import { useSettings } from "@/lib/settings";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchRadarFn } from "@/lib/apiService.functions";
+import { dividendRadarQueryOptions } from "@/lib/queryOptions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
 import {
@@ -53,11 +53,7 @@ export function DividendRadar() {
     data: radarData,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["dividend-radar", market],
-    queryFn: () => fetchRadarFn(),
-    staleTime: 1000 * 60 * 15, // 15 mins
-  });
+  } = useQuery(dividendRadarQueryOptions());
   const { data: selic } = useSelic();
 
   const rawData = market === "BR" ? radarData?.br : radarData?.us;

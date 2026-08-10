@@ -15,6 +15,7 @@ export const es = {
     next: "Siguiente",
     other: "Otros",
     quoteAsOf: "cotización de {{time}}",
+    shares: "Acciones",
   },
   showcase: {
     title: "Escaparate",
@@ -38,6 +39,8 @@ export const es = {
   header: {
     accountMenu: "Menú de la cuenta",
     openMenu: "Abrir menú",
+    signIn: "Iniciar sesión",
+    language: "Idioma",
   },
   lockedPanel: {
     title: "Función Pro",
@@ -583,6 +586,8 @@ export const es = {
     capital: "Capital disponible para invertir",
     currency: "Moneda",
     generate: "Generar asignación",
+    calculating: "Calculando...",
+    recalculate: "Recalcular / Restablecer",
     noAssetsInCurrency: "Aún no tienes activos en la watchlist en esta moneda.",
     emptyResult:
       "No hay activos que coincidan en esta moneda para la estrategia elegida. Ajusta la estrategia o añade nuevos activos.",
@@ -925,6 +930,8 @@ export const es = {
     },
   },
   comparator: {
+    assetCompared: "activo comparado",
+    assetsCompared: "activos comparados",
     title: "Filtro y Comparador de Acciones",
     subtitle: "Selecciona hasta 3 activos para compararlos lado a lado.",
     searchPlaceholder: "Buscar activo para comparar (ej: AAPL, ITUB4)",
@@ -1011,7 +1018,14 @@ export const es = {
     disabled: "Modo IF Desactivado",
   },
   feedback: {
-    buttonText: "Enviar Comentarios",
+    buttonText: "Enviar comentarios",
+    title: "Ayúdanos a mejorar Fuente Price Pro",
+    description: "Tu opinión guía nuestros próximos pasos. Cuéntanos qué te gustaría ver.",
+    placeholder: "Comparte una idea, elogio o problema...",
+    send: "Enviar comentarios",
+    cancel: "Cancelar",
+    success: "¡Gracias! Tu comentario ha sido registrado.",
+    empty: "Por favor escribe un mensaje antes de enviar.",
   },
   transactions: {
     title: "Historial de Transacciones",

@@ -1,4 +1,4 @@
-# Prompt para Antigravity — Divergências de Legenda, Terminologia e Cor no Cash Flow
+# Divergências de Legenda, Terminologia e Cor no Cash Flow
 
 > [!NOTE]
 > Diagnóstico empírico com causas raízes e soluções implementadas para as 4 divergências identificadas na tela do Cash Flow.
@@ -13,7 +13,7 @@
   - Estruturação do tooltip em 2 blocos principais correspondentes à legenda:
     1. **Realizado / Confirmado** (soma de `realizedAmount + paidAmount + announcedAmount`).
     2. **Projetado** (`projectedAmount`).
-  - Quando houver mais de uma componente em "Realizado / Confirmado", os sub-itens são exibidos de forma indentada com marcadores (`• Realizado`, `• Pago`, `• Provisionado`), mantendo total transparência sem poluir ou divergir do gráfico principal.
+  - Quando houver mais de uma componente em "Realizado / Confirmado", os sub-itens soam exibidos de forma indentada com marcadores (`• Realizado`, `• Pago`, `• Provisionado`), mantendo total transparência sem poluir ou divergir do gráfico principal.
 
 ---
 

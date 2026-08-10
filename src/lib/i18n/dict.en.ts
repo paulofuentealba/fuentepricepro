@@ -13,6 +13,7 @@ export const en = {
     next: "Next",
     other: "Other",
     quoteAsOf: "quote as of {{time}}",
+    shares: "Shares",
   },
   showcase: {
     title: "Showcase",
@@ -36,6 +37,8 @@ export const en = {
   header: {
     accountMenu: "Account menu",
     openMenu: "Open menu",
+    signIn: "Sign In",
+    language: "Language",
   },
   lockedPanel: {
     title: "Pro Feature",
@@ -575,6 +578,8 @@ export const en = {
     capital: "Available capital to invest",
     currency: "Currency",
     generate: "Generate allocation",
+    calculating: "Calculating...",
+    recalculate: "Recalculate / Reset",
     noAssetsInCurrency: "You don't have any watchlist assets in this currency yet.",
     emptyResult:
       "No matching assets in this currency for the chosen strategy. Adjust strategy or add new assets.",
@@ -913,6 +918,8 @@ export const en = {
     },
   },
   comparator: {
+    assetCompared: "asset compared",
+    assetsCompared: "assets compared",
     title: "Asset Filter & Comparator",
     subtitle: "Select up to 3 assets to compare them side-by-side.",
     searchPlaceholder: "Search asset to compare (e.g., AAPL, SCHD)",
@@ -997,7 +1004,14 @@ export const en = {
     disabled: "FI Mode Disabled",
   },
   feedback: {
-    buttonText: "Send Feedback",
+    buttonText: "Give Feedback",
+    title: "Help us improve Fuente Price Pro",
+    description: "Your input guides what we build next. Tell us what you'd like to see.",
+    placeholder: "Share an idea, kind word, or issue...",
+    send: "Send Feedback",
+    cancel: "Cancel",
+    success: "Thank you! Your feedback has been recorded.",
+    empty: "Please write a message before sending.",
   },
   transactions: {
     title: "Transaction History",

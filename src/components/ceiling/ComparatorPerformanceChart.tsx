@@ -16,7 +16,7 @@ import { isBrTicker } from "@/lib/classify";
 import type { Asset } from "@/lib/domain";
 import type { BenchmarkPoint } from "@/lib/benchmark";
 import { assetPriceHistoryQueryOptions, benchmarkHistoryQueryOptions } from "@/lib/queryOptions";
-import { displayTicker } from "@/lib/i18n";
+import { displayTicker, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,7 @@ function getDatesForRange(range: TimeRange): { fromDate: string; toDate: string 
 function formatDateLabel(dateStr: string, locale: string): string {
   try {
     const d = new Date(dateStr + "T00:00:00Z");
-    const m = d.toLocaleString(locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR", {
+    const m = d.toLocaleString(toIntlLocale(locale as any), {
       month: "short",
       timeZone: "UTC",
     });

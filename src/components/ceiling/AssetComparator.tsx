@@ -276,7 +276,7 @@ function ComparatorCards({
     <TooltipProvider delayDuration={100}>
       <div className="flex items-center justify-between mb-4 px-1">
         <span className="text-xs text-muted-foreground">
-          {dataMap.length} {dataMap.length === 1 ? "ativo comparado" : "ativos comparados"}
+          {dataMap.length} {dataMap.length === 1 ? t.comparator.assetCompared : t.comparator.assetsCompared}
         </span>
         <Button
           type="button"
