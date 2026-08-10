@@ -57,18 +57,18 @@ Concluído e Validado:
 - **Motor de Aporte Inteligente (`computeSmartAllocation`)**: ✅ Direciona os novos aportes priorizando ativos das classes sub-alocadas.
 - **Trabalho Futuro (Fora de Escopo)**: Sugestão de venda ativa para rebalanceamento estático sem novos aportes fica documentada como melhoria futura separada.
 
-### 1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks 🟡 (Fase 1 e Fase 2 Concluídas)
+### 1.7 Exportação, Importação (CSV/Excel) & Comparação com Benchmarks 🟢 (Fases 1, 2, 3 e 4 Concluídas)
 
-- **Exportação & Importação da Watchlist (CSV)**: 🟡 **FASE 1 CONCLUÍDA (Fevereiro/2026)**.
-  - Exportação (`buildWatchlistCsv`) e Importação (`parseWatchlistCsv` + `WatchlistIO.tsx`) integradas e alinhadas ao SSOT de transações (`useTransactions`, `recalculateHoldingFromTransactions`).
+- **Exportação & Importação da Watchlist (CSV)**: ✅ **FASE 1 CONCLUÍDA (Fevereiro/2026)**.
+  - Exportação (`buildWatchlistCsv`) e Importação (`parseWatchlistCsv` + `useWatchlistCsvImport`) integradas e alinhadas ao SSOT de transações (`useTransactions`, `recalculateHoldingFromTransactions`).
   - A importação de CSV gera transações sintéticas automáticas para o histórico do ativo (rotuladas com `Ajuste via importação CSV`), calculando os deltas de posição e preservando o Preço Médio e Quantidade calculados em toda a aplicação.
-- **Exportação de Dados do Comparador (CSV)**: 🟡 **FASE 2 CONCLUÍDA (Fevereiro/2026)**.
+- **Exportação de Dados do Comparador (CSV)**: ✅ **FASE 2 CONCLUÍDA (Fevereiro/2026)**.
   - Exportação em CSV (`buildComparatorCsv` + `AssetComparator.tsx`) disponível quando há 1+ ativos selecionados no Comparador.
   - Exporta os 14 indicadores fundamentais e de valuation (`Ticker`, `Nome`, `Tipo`, `Preço Atual`, `Preço Teto`, `Margem de Segurança (%)`, `Dividend Yield (%)`, `CAGR 5A (%)`, `P/L`, `P/VP`, `Bazin`, `Graham`, `Gordon`, `Consenso`), com células vazias para valores nulos.
-- **Importação de Dados por Planilha Avançada (Template com Data de Compra)**: ⚪ Item futuro (Fase 3).
-  - Gerar e disponibilizar modelo contendo: `Ticker`, `Data da Compra` (`AAAA-MM-DD`), `Quantidade` e `Valor Unitário` para importar transações com datas históricas específicas.
-- **Comparação com Benchmarks / Índices de Mercado no Comparador**: ⚪ Item futuro (Fase 4).
-  - Permitir selecionar e sobrepor índices de referência de mercado (`CDI/Selic`, `IBOVESPA`, `S&P 500`) em relação ao desempenho histórico dos ativos comparados.
+- **Importação de Dados por Planilha Avançada (Template com Data de Compra)**: ✅ **FASE 3 CONCLUÍDA (Fevereiro/2026)**.
+  - Disponibilizado modelo e parser flexível contendo `Ticker`, `Data da Compra`, `Quantidade`, `Valor Unitário` e `Tipo` (Compra/Venda), permitindo importar transações históricas reais nos 3 idiomas (PT/EN/ES) de forma unificada no modal `+ Add Asset`.
+- **Comparação com Benchmarks / Índices de Mercado no Comparador**: ✅ **FASE 4 CONCLUÍDA (Fevereiro/2026)**.
+  - Gráfico `ComparatorPerformanceChart.tsx` sobrepõe retorno acumulado percentual (`cumulativeReturnPct`) de até 3 ativos contra os benchmarks automáticos (IBOV para ativos BRL, S&P 500 para ativos USD, ou ambos em seleção mista), com seletores de período `6M`, `1A`, `5A`, tooltips detalhadas e suporte a falha graciosa.
 
 ---
 

@@ -6,6 +6,7 @@ import {
   fetchExchangeRatesFn,
   fetchMacroRatesFn,
   fetchBenchmarkHistoryFn,
+  fetchAssetPriceHistoryFn,
   type LiveQuote,
   type SearchHit,
   type BenchmarkPoint,
@@ -83,5 +84,21 @@ export function benchmarkHistoryQueryOptions(
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
     enabled: Boolean(benchmark && fromDate && toDate),
+  });
+}
+
+export function assetPriceHistoryQueryOptions(
+  ticker: string,
+  fromDate: string,
+  toDate: string,
+) {
+  const key = (ticker || "").trim().toUpperCase();
+  return queryOptions({
+    queryKey: ["assetPriceHistory", key, fromDate, toDate] as const,
+    queryFn: ({ signal }): Promise<BenchmarkPoint[]> =>
+      fetchAssetPriceHistoryFn({ data: { ticker: key, fromDate, toDate }, signal }),
+    staleTime: 86_400_000, // 24 hours
+    gcTime: 172_800_000, // 48 hours
+    enabled: Boolean(key && fromDate && toDate),
   });
 }

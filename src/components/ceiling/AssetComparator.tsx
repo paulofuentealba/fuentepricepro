@@ -23,6 +23,7 @@ import { useSettings } from "@/lib/settings";
 import { useWatchlist } from "@/lib/watchlist";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
 import { buildComparatorCsv, downloadCsv, type ComparatorExportRow } from "@/lib/csv";
+import { ComparatorPerformanceChart } from "./ComparatorPerformanceChart";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
@@ -288,6 +289,7 @@ function ComparatorCards({
           {t.comparator.exportCsv}
         </Button>
       </div>
+      <ComparatorPerformanceChart assets={dataMap} />
       {hasMixedClasses && (
         <div className="col-span-full text-xs text-muted-foreground opacity-60 text-center pb-4">
           {t.comparator.mixedClassesWarning}

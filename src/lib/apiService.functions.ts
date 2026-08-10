@@ -508,3 +508,37 @@ export const fetchBenchmarkHistoryFn = createServerFn({ method: "GET" })
       return [];
     }
   });
+
+/**
+ * Formats a ticker string for Yahoo Finance querying.
+ * Brazilian stocks (regex /^[A-Z]{4}\d{1,2}$/) receive .SA suffix if missing.
+ * US assets or custom symbols are returned trimmed in uppercase.
+ */
+export function formatYahooTicker(ticker: string): string {
+  const clean = (ticker || "").trim().toUpperCase();
+  if (!clean) return "";
+  const isBr = /^[A-Z]{4}\d{1,2}$/.test(clean);
+  if (isBr && !clean.endsWith(".SA")) {
+    return `${clean}.SA`;
+  }
+  return clean;
+}
+
+/**
+ * Server function to fetch historical price series and calculate cumulative return (%)
+ * for an individual asset ticker via Yahoo Finance.
+ */
+export const fetchAssetPriceHistoryFn = createServerFn({ method: "GET" })
+  .validator((data: { ticker: string; fromDate: string; toDate: string }) => data)
+  .handler(async ({ data }): Promise<BenchmarkPoint[]> => {
+    const { ticker, fromDate, toDate } = data || {};
+    if (!ticker || !fromDate || !toDate) return [];
+
+    try {
+      const yhSymbol = formatYahooTicker(ticker);
+      return await fetchYahooBenchmarkSeries(yhSymbol, fromDate, toDate);
+    } catch (err) {
+      console.warn(`[fetchAssetPriceHistoryFn] Failed for ${ticker}`, err);
+      return [];
+    }
+  });

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildComparatorCsv, type ComparatorExportRow } from "../csv";
+import { formatYahooTicker } from "../apiService.functions";
 
 describe("buildComparatorCsv (Item 1.7 Phase 2)", () => {
   it("should build CSV with correct headers, 2 rows, and empty cells for null values", () => {
@@ -58,5 +59,28 @@ describe("buildComparatorCsv (Item 1.7 Phase 2)", () => {
     expect(lines[2]).toBe(
       "PETR4,Petróleo Brasileiro S.A.,STOCK_BR,38,,,14.2,,3.8,1.1,45,,,45",
     );
+  });
+
+  describe("formatYahooTicker (Item 1.7 Phase 4)", () => {
+    it("appends .SA suffix to Brazilian stock tickers missing .SA", () => {
+      expect(formatYahooTicker("PETR4")).toBe("PETR4.SA");
+      expect(formatYahooTicker("VALE3")).toBe("VALE3.SA");
+      expect(formatYahooTicker("BBAS3")).toBe("BBAS3.SA");
+      expect(formatYahooTicker("TAEE11")).toBe("TAEE11.SA");
+    });
+
+    it("preserves Brazilian stock tickers that already have .SA", () => {
+      expect(formatYahooTicker("PETR4.SA")).toBe("PETR4.SA");
+      expect(formatYahooTicker("vale3.sa")).toBe("VALE3.SA");
+    });
+
+    it("preserves US tickers and custom symbols without adding .SA", () => {
+      expect(formatYahooTicker("AAPL")).toBe("AAPL");
+      expect(formatYahooTicker("MSFT")).toBe("MSFT");
+      expect(formatYahooTicker("O")).toBe("O");
+      expect(formatYahooTicker("VYM")).toBe("VYM");
+      expect(formatYahooTicker("^GSPC")).toBe("^GSPC");
+      expect(formatYahooTicker("^BVSP")).toBe("^BVSP");
+    });
   });
 });
