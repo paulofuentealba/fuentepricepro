@@ -52,8 +52,12 @@ export function AddToWatchlistDialog({
   const [avg, setAvg] = useState<string>("");
   const [goal, setGoal] = useState<string>("");
 
-  useEffect(() => {
-    if (open) {
+  const handleOpenChange = (v: boolean) => {
+    if (v) {
+      if (items.length >= freeAssetLimit && !existing) {
+        setShowPaywall(true);
+        return;
+      }
       setQuantity(existing ? String(existing.quantity) : "");
       setAvg(
         existing?.averagePrice != null
@@ -64,7 +68,8 @@ export function AddToWatchlistDialog({
       );
       setGoal(existing?.targetMonthlyIncome != null ? String(existing.targetMonthlyIncome) : "");
     }
-  }, [open, existing, averagePrice]);
+    setOpen(v);
+  };
 
   function handleSave() {
     const qty = Number(quantity);
@@ -150,16 +155,7 @@ export function AddToWatchlistDialog({
 
   return (
     <>
-      <Dialog
-        open={open}
-        onOpenChange={(v) => {
-          if (v && items.length >= freeAssetLimit && !existing) {
-            setShowPaywall(true);
-            return;
-          }
-          setOpen(v);
-        }}
-      >
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant={buttonVariant} size="sm" className={cn("gap-2", buttonClassName)}>
             <Bookmark className="h-4 w-4" />

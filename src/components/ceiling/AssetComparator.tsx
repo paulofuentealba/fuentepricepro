@@ -194,14 +194,21 @@ function ComparatorCards({
   const { data: selic } = useSelic();
   const [selectedDetailItem, setSelectedDetailItem] = useState<any>(null);
 
+  const queryOptionsList = useMemo(
+    () => tickers.map((ticker) => assetQueryOptions(ticker)),
+    [tickers],
+  );
   const queries = useQueries({
-    queries: tickers.map((ticker) => assetQueryOptions(ticker)),
+    queries: queryOptionsList,
   });
 
   const isLoading = queries.some((q: any) => q.isFetching);
 
-  // Extract data
-  const dataMap = queries.map((q: any) => q.data).filter(Boolean) as Asset[];
+  // Extract data (memoized)
+  const dataMap = useMemo(
+    () => queries.map((q: any) => q.data).filter(Boolean) as Asset[],
+    [queries],
+  );
 
   const handleExportCsv = useCallback(() => {
     if (dataMap.length === 0) return;
@@ -325,7 +332,7 @@ function ComparatorCards({
                     sector: data.sector || t.common.other,
                     createdAt: Date.now(),
                     valuation: val,
-                  } as any
+                  } as unknown as import("@/lib/useValuedPortfolio").ValuedWatchlistItem // Justification: synthetic WatchlistItem constructed for comparison card display
                 }
                 isSimulation={activeYield !== savedItem?.targetYield}
                 meta={
@@ -334,7 +341,7 @@ function ComparatorCards({
                     pbRatio: data.metrics?.pbRatio || null,
                     dividendCagr5y: data.metrics?.dividendCagr5y || null,
                     sector: data.sector || t.common.other,
-                  } as any
+                  } as any // Justification: partial AssetMeta object formatted for AssetCardTags
                 }
                 variant="watchlist"
                 hideAddToWatchlist

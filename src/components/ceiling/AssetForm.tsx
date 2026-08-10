@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Search, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +115,22 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     }
   }, [assetResult.data, selected]);
 
+  const pick = useCallback((hit: SearchHit) => {
+    setSelected(hit);
+    setQuery(hit.ticker);
+    setManualType(null);
+    setEditingType(false);
+    setOpen(false);
+    onSubmit({
+      ticker: hit.ticker,
+      type: hit.type,
+      targetYield: globalYield,
+      averagePrice: null,
+      customTaxRate: null,
+      investingSince: Date.now(),
+    });
+  }, [globalYield, onSubmit]);
+
   // Auto-select first hit and submit once, when a prefill ticker arrives.
   useEffect(() => {
     if (autoSubmittedRef.current) return;
@@ -126,7 +142,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
     autoSubmittedRef.current = true;
     setSelected(hit);
     pick(hit);
-  }, [initialTicker, query, suggestions, globalYield, onSubmit]);
+  }, [initialTicker, query, suggestions, pick]);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -159,22 +175,6 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
   }
 
   const activeType: AssetType | null = manualType ?? selected?.type ?? null;
-
-  function pick(hit: SearchHit) {
-    setSelected(hit);
-    setQuery(hit.ticker);
-    setManualType(null);
-    setEditingType(false);
-    setOpen(false);
-    onSubmit({
-      ticker: hit.ticker,
-      type: hit.type,
-      targetYield: globalYield,
-      averagePrice: null,
-      customTaxRate: null,
-      investingSince: Date.now(),
-    });
-  }
 
   return (
     <div className="space-y-5">

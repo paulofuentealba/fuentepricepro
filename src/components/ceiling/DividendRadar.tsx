@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, TrendingUp, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -59,9 +59,9 @@ export function DividendRadar() {
   const rawData = market === "BR" ? radarData?.br : radarData?.us;
 
   // Transform backend ApiAsset into the format needed for the table
-  const data =
-    rawData
-      ?.map((asset: any) => {
+  const data = useMemo(
+    () =>
+      rawData?.map((asset: any) => {
         const canonicalDiv = getCanonicalAnnualDividend(asset, 3);
         const dy = asset.currentPrice > 0 ? (canonicalDiv / asset.currentPrice) * 100 : 0;
         const assetType = asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US");
@@ -99,8 +99,11 @@ export function DividendRadar() {
             ? new Date(asset.exDividendDate).toISOString().split("T")[0]
             : null,
         };
-      }) || [];
+      }) || [],
+    [rawData, market, targetYield, selic],
+  );
 
+  // Justification: data elements match WatchlistItem fields needed by useAssetFilterSort
   const {
     typeFilter,
     setTypeFilter,
@@ -111,7 +114,7 @@ export function DividendRadar() {
     typeFilters,
     counts,
     filteredAndSorted,
-  } = useAssetFilterSort(data as any, "yield_desc");
+  } = useAssetFilterSort(data as unknown as import("@/lib/watchlist").WatchlistItem[], "yield_desc");
 
   return (
     <div className="space-y-6">

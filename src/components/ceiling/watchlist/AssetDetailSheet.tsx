@@ -212,7 +212,7 @@ function ScrollableTabsList({
         )}
       />
       <TabsList
-        ref={scrollRef as any}
+        ref={scrollRef as unknown as React.Ref<HTMLDivElement>} // Justification: scrollRef is a HTMLDivElement ref passed to Radix TabsList
         className={cn(
           /* Mobile: single horizontal row, scrollable, no fixed height */
           "flex w-full overflow-x-auto scrollbar-none gap-1 p-1 h-auto",

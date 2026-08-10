@@ -38,6 +38,12 @@ import { AssetCard } from "@/components/shared/AssetCard";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { computeSuggestedAllocation } from "@/lib/suggestedAllocation";
 
+const CHART_CONFIG_ALLOCATION = {
+  before: { color: "var(--comparison)" },
+  after: { color: "var(--success)" },
+};
+const BAR_CHART_MARGIN_ALLOCATION = { top: 0, right: 10, left: -20, bottom: 0 };
+
 function flagFor(currency: Currency): string {
   return currency === "USD" ? "🇺🇸" : "🇧🇷";
 }
@@ -192,6 +198,48 @@ export function SmartAllocation() {
     exchangeRate,
     isPro,
   ]);
+
+  const barDataMemo = useMemo(() => {
+    if (!result) return { barData: [], hasAny: false };
+    const beforeMap: Record<string, number> = {};
+    const afterMap: Record<string, number> = {};
+    let hasAny = false;
+
+    for (const it of items) {
+      const val = it.currentPrice * it.quantity;
+      if (val > 0) {
+        const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+        beforeMap[it.type] = (beforeMap[it.type] || 0) + inBrl;
+        afterMap[it.type] = (afterMap[it.type] || 0) + inBrl;
+        hasAny = true;
+      }
+    }
+
+    for (const r of result.recs) {
+      const cost = r.shares * r.item.currentPrice;
+      if (cost > 0) {
+        const inBrl = r.item.currency === "USD" ? cost * exchangeRate : cost;
+        afterMap[r.item.type] = (afterMap[r.item.type] || 0) + inBrl;
+      }
+    }
+
+    const typeNames = Array.from(
+      new Set([...Object.keys(beforeMap), ...Object.keys(afterMap)]),
+    );
+    let barData = typeNames
+      .map((type) => ({
+        name: t.types[type as AssetType] || type,
+        type,
+        before: beforeMap[type] || 0,
+        after: afterMap[type] || 0,
+      }))
+      .filter((d) => d.before > 0 || d.after > 0);
+
+    if (showOnlyImpacted) {
+      barData = barData.filter((d) => Math.abs(d.before - d.after) > 0.01);
+    }
+    return { barData, hasAny };
+  }, [result, items, exchangeRate, t, showOnlyImpacted]);
 
   const handleGenerate = () => {
     doGenerate(targets);
@@ -392,60 +440,20 @@ export function SmartAllocation() {
                   );
                 }
 
-                // Prepare PieChart data
-                const beforeMap: Record<string, number> = {};
-                const afterMap: Record<string, number> = {};
-                let hasAny = false;
-
-                for (const it of items) {
-                  const val = it.currentPrice * it.quantity;
-                  if (val > 0) {
-                    const inBrl = it.currency === "USD" ? val * exchangeRate : val;
-                    beforeMap[it.type] = (beforeMap[it.type] || 0) + inBrl;
-                    afterMap[it.type] = (afterMap[it.type] || 0) + inBrl;
-                    hasAny = true;
-                  }
-                }
-
-                for (const r of result.recs) {
-                  const cost = r.shares * r.item.currentPrice;
-                  if (cost > 0) {
-                    const inBrl = r.item.currency === "USD" ? cost * exchangeRate : cost;
-                    afterMap[r.item.type] = (afterMap[r.item.type] || 0) + inBrl;
-                  }
-                }
-
-                const typeNames = Array.from(
-                  new Set([...Object.keys(beforeMap), ...Object.keys(afterMap)]),
-                );
-                let barData = typeNames
-                  .map((type) => ({
-                    name: t.types[type as AssetType] || type,
-                    type,
-                    before: beforeMap[type] || 0,
-                    after: afterMap[type] || 0,
-                  }))
-                  .filter((d) => d.before > 0 || d.after > 0);
-
-                if (showOnlyImpacted) {
-                  barData = barData.filter((d) => Math.abs(d.before - d.after) > 0.01);
-                }
+                const { barData, hasAny } = barDataMemo;
 
                 return (
                   <>
                     {hasAny && (
                       <div className="h-[280px] rounded-xl border border-border/60 bg-background/40 p-4">
                         <ChartContainer
-                          config={{
-                            before: { color: "var(--comparison)" },
-                            after: { color: "var(--success)" },
-                          }}
+                          config={CHART_CONFIG_ALLOCATION}
                           className="h-full w-full"
                         >
                           <BarChart
                             data={barData}
                             layout="vertical"
-                            margin={{ top: 0, right: 10, left: -20, bottom: 0 }}
+                            margin={BAR_CHART_MARGIN_ALLOCATION}
                             barGap={2}
                             barCategoryGap={12}
                           >

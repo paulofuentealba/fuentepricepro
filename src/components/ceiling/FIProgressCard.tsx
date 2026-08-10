@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Trophy, Target, Info } from "lucide-react";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -78,10 +78,10 @@ export function FIProgressCard() {
   const usdRate = fx?.USDBRL ?? 5.5;
   const { locale, t } = useI18n();
 
-  const convertToBRL = (value: number, curr: string) => {
+  const convertToBRL = useCallback((value: number, curr: string) => {
     if (curr === "USD") return value * usdRate;
     return value;
-  };
+  }, [usdRate]);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCost, setTempCost] = useState(settings.monthlyLivingCostGoal?.toString() || "");
@@ -117,7 +117,7 @@ export function FIProgressCard() {
 
   // We need to work in the user's selected currency
   // Inverse convert if needed: BRL to USD
-  const toUserCurrency = (valueBRL: number) => {
+  const toUserCurrency = useCallback((valueBRL: number) => {
     if (currency === "USD") {
       // We can use a simple inverse. Assuming exchangeRate is BRL/USD
       // But wait, convertToBRL(1, "USD") returns 1 * exchangeRate.
@@ -126,7 +126,7 @@ export function FIProgressCard() {
       return valueBRL / rate;
     }
     return valueBRL;
-  };
+  }, [currency, convertToBRL]);
 
   const totalCapital = toUserCurrency(totalCapitalBRL);
   const currentMonthlyIncome = toUserCurrency(monthlyIncomeBRL);

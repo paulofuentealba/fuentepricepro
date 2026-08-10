@@ -707,6 +707,16 @@ export const ptBR = {
     swipeHint: "Deslize para ver mais →",
     settings: "Configurações",
     signOut: "Sair",
+    demo: {
+      consolidatedEquity: "Patrimônio Consolidado",
+      thisMonthGrowth: "+2,4% este mês",
+      monthlyYield: "Rendimento Mensal",
+      totalDividends: "Total em Dividendos",
+      tableAsset: "Ativo",
+      tablePrice: "Preço",
+      tableYield: "Yield",
+      tableConsensus: "Consenso",
+    },
   },
   settings: {
     title: "Configurações",

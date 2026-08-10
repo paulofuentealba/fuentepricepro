@@ -85,10 +85,12 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   const [mode, setMode] = useState<"calendar" | "journey">(defaultMode);
 
-  // Fetch fresh Asset data (with dividendEvents) for each watchlist item in parallel.
-  // TanStack Query caches these (staleTime=5min), so this is cheap after first load.
+  const queryOptions = useMemo(
+    () => items.map((it) => assetQueryOptions(it.ticker)),
+    [items],
+  );
   const assetQueries = useQueries({
-    queries: items.map((it) => assetQueryOptions(it.ticker)),
+    queries: queryOptions,
   });
 
   const dividendEventsMap = useMemo<DividendEventsMap>(() => {

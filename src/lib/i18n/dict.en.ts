@@ -701,7 +701,17 @@ export const en = {
     openApp: "Open App",
     swipeHint: "Swipe to see more →",
     settings: "Settings",
-    signOut: "Log Out",
+    signOut: "Sign Out",
+    demo: {
+      consolidatedEquity: "Consolidated Equity",
+      thisMonthGrowth: "+2.4% this month",
+      monthlyYield: "Monthly Yield",
+      totalDividends: "Total Dividends",
+      tableAsset: "Asset",
+      tablePrice: "Price",
+      tableYield: "Yield",
+      tableConsensus: "Consensus",
+    },
   },
   settings: {
     title: "Settings",

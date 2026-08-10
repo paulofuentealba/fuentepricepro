@@ -25,7 +25,7 @@ export function InfoTooltip({ content, link, className, icon }: InfoTooltipProps
         <TooltipTrigger asChild>
           {link ? (
             <Link
-              to={link as any}
+              to={link as any} // Justification: link path is a dynamic string route passed to TanStack Router Link component
               className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
             >
               {trigger}

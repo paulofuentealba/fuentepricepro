@@ -711,7 +711,17 @@ export const es = {
     openApp: "Abrir App",
     swipeHint: "Desliza para ver más →",
     settings: "Configuración",
-    signOut: "Cerrar sesión",
+    signOut: "Cerrar Sesión",
+    demo: {
+      consolidatedEquity: "Patrimonio Consolidado",
+      thisMonthGrowth: "+2.4% este mes",
+      monthlyYield: "Rendimiento Mensual",
+      totalDividends: "Total en Dividendos",
+      tableAsset: "Activo",
+      tablePrice: "Precio",
+      tableYield: "Yield",
+      tableConsensus: "Consenso",
+    },
   },
   settings: {
     title: "Configuración",

@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { Bar, ComposedChart, Cell, Line, XAxis, YAxis } from "recharts";
 import type { Asset } from "@/lib/domain";
+
+const DIVIDEND_HISTORY_CHART_CONFIG = { amount: { color: "var(--success)" }, yoy: { color: "var(--warning)" } };
+const DIVIDEND_HISTORY_CHART_MARGIN = { top: 12, right: 4, left: 4, bottom: 0 };
+const DIVIDEND_HISTORY_TOOLTIP_CURSOR = { fill: "color-mix(in oklab, var(--muted-foreground) 12%, transparent)" };
+
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatCurrency, type Locale } from "@/lib/i18n";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
@@ -34,10 +39,10 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
       </div>
       <div className="h-36 w-full">
         <ChartContainer
-          config={{ amount: { color: "var(--success)" }, yoy: { color: "var(--warning)" } }}
+          config={DIVIDEND_HISTORY_CHART_CONFIG}
           className="h-full w-full"
         >
-          <ComposedChart data={chartData} margin={{ top: 12, right: 4, left: 4, bottom: 0 }}>
+          <ComposedChart data={chartData} margin={DIVIDEND_HISTORY_CHART_MARGIN}>
             <defs>
               <ChartGlowDef />
             </defs>
@@ -55,7 +60,7 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
               domain={["dataMin - 10", "dataMax + 10"]}
             />
             <ChartTooltip
-              cursor={{ fill: "color-mix(in oklab, var(--muted-foreground) 12%, transparent)" }}
+              cursor={DIVIDEND_HISTORY_TOOLTIP_CURSOR}
               content={
                 <ChartTooltipContent
                   formatter={(v: any, name: any) => {

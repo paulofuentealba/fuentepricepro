@@ -188,12 +188,12 @@ function LandingPage() {
                     {/* Card 1: Consolidated Equity */}
                     <div className="h-32 bg-white/5 rounded-xl border border-white/5 p-5 flex flex-col justify-center">
                       <p className="text-xs text-slate-400 mb-2 uppercase tracking-wider">
-                        Consolidated Equity
+                        {t.landing.demo.consolidatedEquity}
                       </p>
                       <p className="text-2xl font-bold text-white tracking-tight">
                         <AnimatedNumber value={1458290} prefix="R$ " decimals={0} delay={300} />
                       </p>
-                      <p className="text-xs text-emerald-400 mt-2 font-mono">+2.4% this month</p>
+                      <p className="text-xs text-emerald-400 mt-2 font-mono">{t.landing.demo.thisMonthGrowth}</p>
                     </div>
 
                     {/* ROOT CAUSE FIX 2: Removed Diagonal SVG, added subtle glow */}
@@ -201,7 +201,7 @@ function LandingPage() {
                     <div className="h-32 bg-white/5 rounded-xl border border-primary/10 p-5 flex flex-col justify-center relative overflow-hidden">
                       <div className="absolute inset-0 bg-primary/5" />
                       <p className="text-xs text-primary/80 mb-2 uppercase tracking-wider relative z-10">
-                        Monthly Yield
+                        {t.landing.demo.monthlyYield}
                       </p>
                       <p className="text-2xl font-bold text-white relative z-10">
                         <AnimatedNumber value={1240.5} prefix="R$ " decimals={2} delay={450} />
@@ -212,7 +212,7 @@ function LandingPage() {
                     <div className="h-32 bg-white/5 rounded-xl border border-blue-500/10 p-5 flex flex-col justify-center relative overflow-hidden">
                       <div className="absolute inset-0 bg-blue-500/5" />
                       <p className="text-xs text-blue-400/80 mb-2 uppercase tracking-wider relative z-10">
-                        Total Dividends
+                        {t.landing.demo.totalDividends}
                       </p>
                       <p className="text-2xl font-bold text-white relative z-10">
                         <AnimatedNumber value={84200} prefix="R$ " decimals={0} delay={600} />
@@ -223,10 +223,10 @@ function LandingPage() {
                   {/* Table Area */}
                   <div className="bg-white/5 rounded-xl border border-white/5 p-5 mt-4">
                     <div className="grid grid-cols-4 gap-4 text-xs text-slate-500 border-b border-white/10 pb-3 mb-4">
-                      <div>Asset</div>
-                      <div>Price</div>
-                      <div>Yield</div>
-                      <div className="text-right">Consensus</div>
+                      <div>{t.landing.demo.tableAsset}</div>
+                      <div>{t.landing.demo.tablePrice}</div>
+                      <div>{t.landing.demo.tableYield}</div>
+                      <div className="text-right">{t.landing.demo.tableConsensus}</div>
                     </div>
                     <div className="space-y-4">
                       <div className="grid grid-cols-4 gap-4 text-sm text-slate-200">

@@ -121,7 +121,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
               {summary.lastReceived ? (
                 <>
                   <p className="text-xl font-semibold text-foreground">
-                    {formatCurrency(summary.lastReceived.amount, currency as any, locale)}
+                    {formatCurrency(summary.lastReceived.amount, currency as import("@/lib/domain").Currency, locale)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatResultDate(summary.lastReceived.dateStr, locale)}
@@ -134,7 +134,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
             <div>
               <p className="text-sm text-muted-foreground">{t.watchlist.past12Months}</p>
               <p className="text-xl font-semibold text-success">
-                {formatCurrency(summary.total12m, currency as any, locale)}
+                {formatCurrency(summary.total12m, currency as import("@/lib/domain").Currency, locale)}
               </p>
             </div>
           </div>

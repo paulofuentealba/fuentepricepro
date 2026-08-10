@@ -163,6 +163,11 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     );
   }
 
+  const handleClearFilters = useCallback(() => {
+    setTypeFilter(null);
+    setOppFilter(null);
+  }, [setTypeFilter, setOppFilter]);
+
   return (
     <TooltipProvider>
       <section>
@@ -230,10 +235,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
                 onEdit={handleEdit}
                 onRemove={handleRemove}
                 onOpenDetail={handleOpenDetail}
-                onClearFilters={() => {
-                  setTypeFilter(null);
-                  setOppFilter(null);
-                }}
+                onClearFilters={handleClearFilters}
                 concentrationViolators={concentrationViolators}
               />
             </WatchlistActionsProvider>

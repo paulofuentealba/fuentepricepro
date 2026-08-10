@@ -22,6 +22,8 @@ import type { ChartConfig } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 
+const SNOWBALL_CHART_MARGIN = { top: 20, right: 10, left: -20, bottom: 0 };
+
 // chartConfig moved inside component to support translations
 
 function flagFor(currency: Currency): string {
@@ -184,7 +186,7 @@ export function SnowballSimulator() {
                 <ChartContainer config={chartConfig} className="h-full w-full">
                   <AreaChart
                     data={projection.data}
-                    margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                    margin={SNOWBALL_CHART_MARGIN}
                   >
                     <defs>
                       <ChartGlowDef id="glowArea" blur={6} />

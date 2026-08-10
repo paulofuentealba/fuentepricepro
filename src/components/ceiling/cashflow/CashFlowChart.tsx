@@ -25,9 +25,16 @@ import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 
 const COLOR_BAR = "var(--success)";
+const COLOR_REALIZED = "var(--realized)";
+const COLOR_PROJECTED = "var(--projected)";
+const COLOR_GRID = "var(--chart-grid)";
+
+const CASHFLOW_EMPTY_CHART_CONFIG = {};
+const CASHFLOW_MAIN_BAR_MARGIN = { top: 24, right: 0, left: 0, bottom: 0 };
+const CASHFLOW_BREAKDOWN_BAR_MARGIN = { top: 24, right: 80, left: 0, bottom: 0 };
+
 const COLOR_LINE = "var(--primary)";
 const COLOR_INVESTED = "var(--comparison)";
-const COLOR_GRID = "color-mix(in oklab, var(--border) 40%, transparent)";
 const COLOR_MUTED_FG = "var(--muted-foreground)";
 const COLOR_FOREGROUND = "var(--foreground)";
 const COLOR_CURSOR = "color-mix(in oklab, var(--primary) 8%, transparent)";
@@ -255,8 +262,8 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
           </div>
 
           <div className="h-[280px] w-full">
-            <ChartContainer config={{}} className="h-full w-full">
-              <BarChart data={data} margin={{ top: 24, right: 0, left: 0, bottom: 0 }}>
+            <ChartContainer config={CASHFLOW_EMPTY_CHART_CONFIG} className="h-full w-full">
+              <BarChart data={data} margin={CASHFLOW_MAIN_BAR_MARGIN}>
                 <defs>
                   <pattern
                     id="striped"
@@ -442,13 +449,13 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
           <div className="h-[280px] w-full">
             {selectedMonthData ? (
               <ChartContainer
-                config={{}}
+                config={CASHFLOW_EMPTY_CHART_CONFIG}
                 className="h-full w-full animate-in fade-in zoom-in-95 duration-300"
               >
                 <BarChart
                   data={breakdownData}
                   layout="vertical"
-                  margin={{ top: 24, right: 80, left: 0, bottom: 0 }}
+                  margin={CASHFLOW_BREAKDOWN_BAR_MARGIN}
                 >
                   <CartesianGrid
                     horizontal={true}

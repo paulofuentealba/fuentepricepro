@@ -13,7 +13,7 @@ interface Props {
 export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
   const { t, locale } = useI18n();
   const exDateFormatted = meta?.exDividendDate
-    ? formatExDate(meta.exDividendDate, locale as any)
+    ? formatExDate(meta.exDividendDate, locale as import("@/lib/i18n").Locale)
     : null;
   const cagr = meta?.dividendCagr5y ?? null;
   const cagrNegative = cagr != null && cagr < 0;

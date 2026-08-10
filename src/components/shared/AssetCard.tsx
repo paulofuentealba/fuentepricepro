@@ -108,7 +108,7 @@ function AllocationVariant({
       <div className="mt-2 text-sm font-semibold text-foreground">
         {t.smartAllocation.buyShares
           .replace("{{qty}}", String(shares))
-          .replace("{{price}}", formatCurrency(item.currentPrice, item.currency, locale as any))}
+          .replace("{{price}}", formatCurrency(item.currentPrice, item.currency, locale as import("@/lib/i18n").Locale))}
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
@@ -117,7 +117,7 @@ function AllocationVariant({
             {t.smartAllocation.totalCost}
           </div>
           <div className="mt-0.5 text-sm font-medium tabular-nums text-foreground">
-            {formatCurrency(cost, item.currency, locale as any)}
+            {formatCurrency(cost, item.currency, locale as import("@/lib/i18n").Locale)}
           </div>
         </div>
         <div>
@@ -125,7 +125,7 @@ function AllocationVariant({
             {t.smartAllocation.addedIncome}
           </div>
           <div className="mt-0.5 text-sm font-semibold tabular-nums text-success">
-            +{formatCurrency(addedIncome, item.currency, locale as any)}
+            +{formatCurrency(addedIncome, item.currency, locale as import("@/lib/i18n").Locale)}
           </div>
         </div>
       </div>

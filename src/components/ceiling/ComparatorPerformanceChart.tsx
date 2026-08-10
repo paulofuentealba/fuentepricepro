@@ -28,6 +28,10 @@ const COLOR_GRID = "color-mix(in oklab, var(--border) 40%, transparent)";
 const COLOR_MUTED_FG = "var(--muted-foreground)";
 const COLOR_CURSOR = "color-mix(in oklab, var(--primary) 12%, transparent)";
 
+const COMPARATOR_CHART_MARGIN = { top: 10, right: 10, left: -20, bottom: 0 };
+const COMPARATOR_TOOLTIP_CURSOR = { stroke: COLOR_CURSOR, strokeWidth: 2 };
+const COMPARATOR_ACTIVE_DOT = { r: 4 };
+
 export type TimeRange = "6M" | "1A" | "5A";
 
 function getDatesForRange(range: TimeRange): { fromDate: string; toDate: string } {
@@ -186,7 +190,7 @@ export function ComparatorPerformanceChart({ assets }: Props) {
       ) : (
         <div className="h-[320px] w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <LineChart data={chartData} margin={COMPARATOR_CHART_MARGIN}>
               <CartesianGrid strokeDasharray="3 3" stroke={COLOR_GRID} vertical={false} />
               <XAxis
                 dataKey="formattedDate"
@@ -203,7 +207,7 @@ export function ComparatorPerformanceChart({ assets }: Props) {
                 axisLine={false}
                 tickFormatter={(v) => `${v > 0 ? "+" : ""}${v.toFixed(0)}%`}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: COLOR_CURSOR, strokeWidth: 2 }} />
+              <Tooltip content={<CustomTooltip />} cursor={COMPARATOR_TOOLTIP_CURSOR} />
 
               {/* Asset Lines */}
               {assets.map((a, idx) => (
@@ -215,7 +219,7 @@ export function ComparatorPerformanceChart({ assets }: Props) {
                   stroke={ASSET_COLORS[idx % ASSET_COLORS.length]}
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4 }}
+                  activeDot={COMPARATOR_ACTIVE_DOT}
                   connectNulls
                 />
               ))}
