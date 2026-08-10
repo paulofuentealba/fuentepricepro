@@ -67,13 +67,14 @@ export function useWatchlistCsvImport(
               const margin = safetyMargin(ceiling, asset.currentPrice);
 
               const txTimestamp = row.date || Date.now();
+              const txPrice = row.pricePerShare > 0 ? row.pricePerShare : asset.currentPrice;
               const tx: Transaction = {
-                id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${Math.random().toString(36).substring(2, 7)}`,
+                id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${row.quantity}-${txPrice}`,
                 ticker: uppercaseTicker,
                 type: row.type, // "buy" or "sell" (from column Tipo in PT/EN/ES or fallback "buy")
                 date: txTimestamp,
                 quantity: row.quantity,
-                pricePerShare: row.pricePerShare > 0 ? row.pricePerShare : asset.currentPrice,
+                pricePerShare: txPrice,
                 fees: null,
                 notes: t.transactions.csvImportAdjustment,
               };
@@ -122,7 +123,7 @@ export function useWatchlistCsvImport(
           const rows = parseWatchlistCsv(text);
           if (rows.length === 0) {
             toast.error(t.toasts.noValidRowsCsv);
-            return;
+            return false;
           }
           let added = 0;
           let updated = 0;
@@ -171,11 +172,12 @@ export function useWatchlistCsvImport(
               const noteText = t.transactions.csvImportAdjustment;
 
               if (existingAssetTxs.length === 0) {
+                const txDate = existing?.investingSince ?? txTimestamp;
                 const firstTx: Transaction = {
-                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${Math.random().toString(36).substring(2, 7)}`,
+                  id: `tx-csv-${uppercaseTicker}-${txDate}-${importedQty}-${importedAvgPrice}`,
                   ticker: uppercaseTicker,
                   type: "buy",
-                  date: existing?.investingSince ?? txTimestamp,
+                  date: txDate,
                   quantity: importedQty,
                   pricePerShare: importedAvgPrice,
                   fees: null,
@@ -188,26 +190,28 @@ export function useWatchlistCsvImport(
                 const currentTotalCost = currentQty * currentAvgPrice;
                 const requiredCostForDelta = targetTotalCost - currentTotalCost;
                 const pricePerShare = requiredCostForDelta > 0 ? requiredCostForDelta / delta : importedAvgPrice;
+                const buyPrice = pricePerShare > 0 ? pricePerShare : importedAvgPrice;
 
                 const buyTx: Transaction = {
-                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${Math.random().toString(36).substring(2, 7)}`,
+                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${delta}-${buyPrice}`,
                   ticker: uppercaseTicker,
                   type: "buy",
                   date: txTimestamp,
                   quantity: delta,
-                  pricePerShare: pricePerShare > 0 ? pricePerShare : importedAvgPrice,
+                  pricePerShare: buyPrice,
                   fees: null,
                   notes: noteText,
                 };
                 await upsertTransaction(buyTx);
                 workingTransactions.push(buyTx);
               } else if (delta < 0) {
+                const absDelta = Math.abs(delta);
                 const sellTx: Transaction = {
-                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${Math.random().toString(36).substring(2, 7)}`,
+                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${absDelta}-${importedAvgPrice}`,
                   ticker: uppercaseTicker,
                   type: "sell",
                   date: txTimestamp,
-                  quantity: Math.abs(delta),
+                  quantity: absDelta,
                   pricePerShare: importedAvgPrice,
                   fees: null,
                   notes: noteText,
