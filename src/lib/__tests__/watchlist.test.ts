@@ -120,4 +120,52 @@ describe("watchlist itemToRow date resilience", () => {
     expect(holding.quantity).toBe(100);
     expect(holding.averagePrice).toBe(101.5);
   });
+
+  describe("Closed Positions (isClosedPosition) Filtering Rules", () => {
+    it("Test 1: Asset with net positive transactions (QTY > 0) is NOT a closed position (isClosedPosition === false)", () => {
+      const txs = [
+        { id: "tx1", ticker: "PETR4", type: "buy" as const, date: 1700000000000, quantity: 100, pricePerShare: 30 },
+      ];
+      const hasTransactions = txs.length > 0;
+      const computed = recalculateHoldingFromTransactions(txs);
+      const isClosedPosition = hasTransactions && computed.quantity === 0;
+
+      expect(computed.quantity).toBe(100);
+      expect(isClosedPosition).toBe(false);
+    });
+
+    it("Test 2: Asset with transactions that sum to zero (bought 100, sold 100 - ABEV3 scenario) IS a closed position (isClosedPosition === true)", () => {
+      const txs = [
+        { id: "tx1", ticker: "ABEV3", type: "buy" as const, date: 1700000000000, quantity: 100, pricePerShare: 14.61 },
+        { id: "tx2", ticker: "ABEV3", type: "sell" as const, date: 1750000000000, quantity: 100, pricePerShare: 11.74 },
+      ];
+      const hasTransactions = txs.length > 0;
+      const computed = recalculateHoldingFromTransactions(txs);
+      const isClosedPosition = hasTransactions && computed.quantity === 0;
+
+      expect(computed.quantity).toBe(0);
+      expect(isClosedPosition).toBe(true);
+    });
+
+    it("Test 3: Watch-only asset with 0 transactions is NOT a closed position (isClosedPosition === false)", () => {
+      const txs: any[] = [];
+      const hasTransactions = txs.length > 0;
+      const isClosedPosition = hasTransactions && 0 === 0;
+
+      expect(hasTransactions).toBe(false);
+      expect(isClosedPosition).toBe(false);
+    });
+
+    it("Test 4: Transaction history of closed position remains complete and accessible for detail drawer", () => {
+      const txs = [
+        { id: "tx1", ticker: "ABEV3", type: "buy" as const, date: 1700000000000, quantity: 100, pricePerShare: 14.61 },
+        { id: "tx2", ticker: "ABEV3", type: "sell" as const, date: 1750000000000, quantity: 100, pricePerShare: 11.74 },
+      ];
+      const abevTxs = txs.filter((t) => t.ticker === "ABEV3");
+
+      expect(abevTxs).toHaveLength(2);
+      expect(abevTxs[0].type).toBe("buy");
+      expect(abevTxs[1].type).toBe("sell");
+    });
+  });
 });

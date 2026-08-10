@@ -17,6 +17,7 @@ export interface ValuedWatchlistItem extends WatchlistItem {
   // Overrides item.sector with meta.sector if available
   sector: string;
   valuation: ReturnType<typeof getAssetValuation>;
+  isClosedPosition: boolean;
 }
 
 export function useValuedPortfolio() {
@@ -44,17 +45,21 @@ export function useValuedPortfolio() {
       const txs = txByTicker[it.ticker];
       let quantity = it.quantity;
       let averagePrice = it.averagePrice;
+      const hasTransactions = Boolean(txs && txs.length > 0);
 
-      if (txs && txs.length > 0) {
+      if (hasTransactions && txs) {
         const computed = recalculateHoldingFromTransactions(txs);
         quantity = computed.quantity;
         averagePrice = computed.averagePrice;
       }
 
+      const isClosedPosition = hasTransactions && quantity === 0;
+
       return {
         ...it,
         quantity,
         averagePrice,
+        isClosedPosition,
         targetYield: it.targetYield ?? globalYield,
       };
     });
@@ -96,6 +101,7 @@ export function useValuedPortfolio() {
         // Single Source of Truth for Sector: live meta > item DB > default
         sector: m?.sector || it.sector || t.common.other,
         valuation,
+        isClosedPosition: it.isClosedPosition,
       };
     });
   }, [baseItems, quotes, meta, selic, t]);
@@ -108,6 +114,8 @@ export function useValuedPortfolio() {
     let countUsd = 0;
     let countBrl = 0;
     for (const it of valuedItems) {
+      if (it.isClosedPosition) continue;
+
       const income = netAfterTax(
         it.annualDividend * it.quantity,
         it.type,

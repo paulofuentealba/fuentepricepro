@@ -53,6 +53,11 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const exchangeRate = fx?.USDBRL ?? 5.5;
 
+  // Active valued items excluding closed positions (assets with transactions whose net quantity is 0)
+  const activeValuedItems = useMemo(() => {
+    return (valuedItems || []).filter((it) => !it.isClosedPosition);
+  }, [valuedItems]);
+
   // Tickers currently violating the user-defined Max Concentration cap.
   // A ticker is flagged when its share of the total consolidated portfolio
   // (converted to BRL) exceeds the configured percentage. There is no
@@ -63,7 +68,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
 
     let totalBRL = 0;
     const valueByTicker: Record<string, number> = {};
-    for (const it of valuedItems) {
+    for (const it of activeValuedItems) {
       const val = it.currentPrice * it.quantity;
       if (val <= 0) continue;
       const inBrl = it.currency === "USD" ? val * exchangeRate : val;
@@ -77,10 +82,10 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
       if (pct > maxConcentration) violators.add(ticker);
     }
     return violators;
-  }, [valuedItems, maxConcentration, exchangeRate]);
+  }, [activeValuedItems, maxConcentration, exchangeRate]);
 
   const topAndWorst = useMemo(() => {
-    const valid = valuedItems.filter((i) => i.averagePrice && i.averagePrice > 0 && i.quantity > 0);
+    const valid = activeValuedItems.filter((i) => i.averagePrice && i.averagePrice > 0 && i.quantity > 0);
     let best = null;
     let worst = null;
     let bestReturn = -Infinity;
@@ -102,7 +107,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
       best: bestReturn > 0 ? best : null,
       worst: worstReturn < 0 ? worst : null,
     };
-  }, [valuedItems, quotes]);
+  }, [activeValuedItems, quotes]);
 
   const {
     typeFilter,
@@ -114,18 +119,18 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     typeFilters,
     counts,
     filteredAndSorted,
-  } = useAssetFilterSort(valuedItems, "ticker_asc");
+  } = useAssetFilterSort(activeValuedItems, "ticker_asc");
 
   const contextStats = useMemo(() => {
     let over = 0;
     let under = 0;
-    const total = valuedItems.length;
-    for (const it of valuedItems) {
+    const total = activeValuedItems.length;
+    for (const it of activeValuedItems) {
       if (it.currentPrice > (it.ceilingPrice ?? 0)) over++;
       else under++;
     }
     return { over, under, total };
-  }, [valuedItems]);
+  }, [activeValuedItems]);
 
   const handleEdit = useCallback((it: ValuedWatchlistItem) => setEditing(it), []);
   const handleOpenDetail = useCallback((it: ValuedWatchlistItem) => setDetail(it), []);
@@ -178,7 +183,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
         ) : (
           <>
             <WatchlistKpiSection
-              valuedItems={valuedItems}
+              valuedItems={activeValuedItems}
               meta={meta}
               totals={totals}
               locale={locale}
@@ -207,7 +212,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
 
             <WatchlistAssetGrid
               filteredAndSorted={filteredAndSorted}
-              valuedItemsLength={valuedItems.length}
+              valuedItemsLength={activeValuedItems.length}
               quotes={quotes}
               meta={meta}
               viewMode={viewMode}
