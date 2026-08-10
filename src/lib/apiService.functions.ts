@@ -462,3 +462,47 @@ export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
     }
   },
 );
+
+// -------- Benchmark History Oracle --------
+
+import {
+  fetchBcbBenchmarkSeries,
+  fetchYahooBenchmarkSeries,
+  type BenchmarkPoint,
+  type BenchmarkType,
+} from "./benchmark";
+
+export type { BenchmarkPoint, BenchmarkType };
+
+export const fetchBenchmarkHistoryFn = createServerFn({ method: "GET" })
+  .validator(
+    (data: {
+      benchmark: BenchmarkType;
+      fromDate: string;
+      toDate: string;
+    }) => data,
+  )
+  .handler(async ({ data }): Promise<BenchmarkPoint[]> => {
+    const { benchmark, fromDate, toDate } = data || {};
+    if (!benchmark || !fromDate || !toDate) return [];
+
+    try {
+      switch (benchmark) {
+        case "CDI":
+          // BCB SGS Series 12: Taxa de juros - CDI diária (% a.d.)
+          return await fetchBcbBenchmarkSeries(12, fromDate, toDate);
+        case "SELIC":
+          // BCB SGS Series 11: Taxa de juros - Selic diária (% a.d.)
+          return await fetchBcbBenchmarkSeries(11, fromDate, toDate);
+        case "IBOV":
+          return await fetchYahooBenchmarkSeries("^BVSP", fromDate, toDate);
+        case "SPX":
+          return await fetchYahooBenchmarkSeries("^GSPC", fromDate, toDate);
+        default:
+          return [];
+      }
+    } catch (err) {
+      console.warn(`[fetchBenchmarkHistoryFn] Error fetching benchmark ${benchmark}`, err);
+      return [];
+    }
+  });

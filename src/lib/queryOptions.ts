@@ -5,8 +5,11 @@ import {
   searchAssetsFn,
   fetchExchangeRatesFn,
   fetchMacroRatesFn,
+  fetchBenchmarkHistoryFn,
   type LiveQuote,
   type SearchHit,
+  type BenchmarkPoint,
+  type BenchmarkType,
 } from "./apiService.functions";
 import type { Asset } from "./domain";
 
@@ -65,5 +68,20 @@ export function macroRatesQueryOptions() {
     queryFn: ({ signal }): Promise<{ cdi: number; ipca: number }> => fetchMacroRatesFn({ signal }),
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
+  });
+}
+
+export function benchmarkHistoryQueryOptions(
+  benchmark: BenchmarkType,
+  fromDate: string,
+  toDate: string,
+) {
+  return queryOptions({
+    queryKey: ["benchmarkHistory", benchmark, fromDate, toDate] as const,
+    queryFn: ({ signal }): Promise<BenchmarkPoint[]> =>
+      fetchBenchmarkHistoryFn({ data: { benchmark, fromDate, toDate }, signal }),
+    staleTime: 86_400_000, // 24 hours
+    gcTime: 172_800_000, // 48 hours
+    enabled: Boolean(benchmark && fromDate && toDate),
   });
 }
