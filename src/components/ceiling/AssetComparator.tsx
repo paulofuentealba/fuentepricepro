@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { searchQueryOptions, assetQueryOptions } from "@/lib/queryOptions";
 import { useQueries } from "@tanstack/react-query";
-import { getAssetValuation, avgDividend } from "@/lib/calculations";
+import { getAssetValuation, avgDividend, calculateBvps } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { displayTicker } from "@/lib/i18n";
@@ -215,19 +215,14 @@ function ComparatorCards({
           currentPrice: data.currentPrice,
           avgDividend: avgDiv,
           eps: data.metrics?.eps || null,
-          bvps:
-            data.metrics?.bvps != null
-              ? data.metrics.bvps
-              : data.metrics?.pbRatio && data.currentPrice > 0
-                ? data.currentPrice / data.metrics.pbRatio
-                : null,
+          bvps: calculateBvps(data.metrics?.bvps, data.metrics?.pbRatio, data.currentPrice),
           dividendCagr: data.metrics?.dividendCagr5y || null,
           selicPct: selic ?? 10.5,
           currency: data.currency,
           type: data.type,
         });
 
-        const dy = data.currentPrice > 0 && avgDiv > 0 ? (avgDiv / data.currentPrice) * 100 : null;
+        const dy = val.dividendYield;
 
         return {
           ticker: data.ticker,
@@ -305,12 +300,7 @@ function ComparatorCards({
             currentPrice: data.currentPrice,
             avgDividend: avgDiv,
             eps: data.metrics?.eps || null,
-            bvps:
-              data.metrics?.bvps != null
-                ? data.metrics.bvps
-                : data.metrics?.pbRatio && data.currentPrice > 0
-                  ? data.currentPrice / data.metrics.pbRatio
-                  : null,
+            bvps: calculateBvps(data.metrics?.bvps, data.metrics?.pbRatio, data.currentPrice),
             dividendCagr: data.metrics?.dividendCagr5y || null,
             selicPct: selic ?? 10.5,
             currency: data.currency,

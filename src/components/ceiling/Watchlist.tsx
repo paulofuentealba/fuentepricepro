@@ -19,6 +19,7 @@ import { WatchlistToolbar } from "./watchlist/WatchlistToolbar";
 import { WatchlistAssetGrid } from "./watchlist/WatchlistAssetGrid";
 import { WatchlistDialogs } from "./watchlist/WatchlistDialogs";
 import { DataManagement } from "./watchlist/DataManagement";
+import { WatchlistActionsProvider } from "./watchlist/WatchlistActionsContext";
 
 interface WatchlistProps {
   onNavigateToCalculator?: () => void;
@@ -210,21 +211,32 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               onOpenCsvImporter={() => setShowCsvImporter(true)}
             />
 
-            <WatchlistAssetGrid
-              filteredAndSorted={filteredAndSorted}
-              valuedItemsLength={activeValuedItems.length}
-              quotes={quotes}
-              meta={meta}
-              viewMode={viewMode}
-              onEdit={handleEdit}
-              onRemove={handleRemove}
-              onOpenDetail={handleOpenDetail}
-              onClearFilters={() => {
-                setTypeFilter(null);
-                setOppFilter(null);
+            <WatchlistActionsProvider
+              value={{
+                quotes,
+                meta,
+                onEdit: handleEdit,
+                onRemove: handleRemove,
+                onOpenDetail: handleOpenDetail,
+                concentrationViolators,
               }}
-              concentrationViolators={concentrationViolators}
-            />
+            >
+              <WatchlistAssetGrid
+                filteredAndSorted={filteredAndSorted}
+                valuedItemsLength={activeValuedItems.length}
+                quotes={quotes}
+                meta={meta}
+                viewMode={viewMode}
+                onEdit={handleEdit}
+                onRemove={handleRemove}
+                onOpenDetail={handleOpenDetail}
+                onClearFilters={() => {
+                  setTypeFilter(null);
+                  setOppFilter(null);
+                }}
+                concentrationViolators={concentrationViolators}
+              />
+            </WatchlistActionsProvider>
           </>
         )}
 

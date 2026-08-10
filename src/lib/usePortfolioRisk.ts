@@ -96,8 +96,7 @@ export function usePortfolioRisk() {
 
       // Warnings
       // 1. Yield Trap
-      const dividendYield =
-        item.currentPrice > 0 ? (item.annualDividend / item.currentPrice) * 100 : 0;
+      const dividendYield = item.valuation.dividendYield;
       if (dividendYield > 10 && item.safetyMargin < 0) {
         warnings.push({
           id: `yield_trap_${item.id}`,

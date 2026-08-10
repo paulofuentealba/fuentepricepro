@@ -3,6 +3,7 @@ import { AssetCard } from "@/components/shared/AssetCard";
 import { WatchlistTable } from "./WatchlistTable";
 import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
+import { useWatchlistActions } from "./WatchlistActionsContext";
 
 interface WatchlistAssetGridProps {
   filteredAndSorted: ValuedWatchlistItem[];
@@ -20,16 +21,24 @@ interface WatchlistAssetGridProps {
 export function WatchlistAssetGrid({
   filteredAndSorted,
   valuedItemsLength,
-  quotes,
-  meta,
+  quotes: propsQuotes,
+  meta: propsMeta,
   viewMode,
-  onEdit,
-  onRemove,
-  onOpenDetail,
+  onEdit: propsOnEdit,
+  onRemove: propsOnRemove,
+  onOpenDetail: propsOnOpenDetail,
   onClearFilters,
-  concentrationViolators,
+  concentrationViolators: propsConcentrationViolators,
 }: WatchlistAssetGridProps) {
   const { t } = useI18n();
+  const contextActions = useWatchlistActions();
+
+  const quotes = propsQuotes ?? contextActions?.quotes ?? {};
+  const meta = propsMeta ?? contextActions?.meta ?? {};
+  const onEdit = propsOnEdit ?? contextActions?.onEdit;
+  const onRemove = propsOnRemove ?? contextActions?.onRemove;
+  const onOpenDetail = propsOnOpenDetail ?? contextActions?.onOpenDetail;
+  const concentrationViolators = propsConcentrationViolators ?? contextActions?.concentrationViolators;
 
   if (filteredAndSorted.length === 0 && valuedItemsLength > 0) {
     return (

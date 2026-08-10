@@ -200,6 +200,7 @@ export function getAssetValuation({
       consensus: null,
       activeCeiling: currentPrice,
       margin: 0,
+      dividendYield: 0,
       positive: true,
       isUnavailable: true,
     };
@@ -214,6 +215,7 @@ export function getAssetValuation({
       consensus: null,
       activeCeiling: currentPrice > 0 ? currentPrice : 0,
       margin: 0,
+      dividendYield: 0,
       positive: true,
       isUnavailable: true,
     };
@@ -257,6 +259,7 @@ export function getAssetValuation({
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
   const margin = (currentPrice > 0 && !isUnavailable) ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
 
   return {
     bazin,
@@ -266,9 +269,22 @@ export function getAssetValuation({
     consensus,
     activeCeiling,
     margin,
+    dividendYield,
     positive: margin >= 0,
     isUnavailable,
   };
+}
+
+export function calculateBvps(
+  bvpsInput?: number | null,
+  pbRatio?: number | null,
+  currentPrice?: number | null,
+): number | null {
+  if (bvpsInput != null && bvpsInput > 0) return bvpsInput;
+  if (pbRatio != null && pbRatio > 0 && currentPrice != null && currentPrice > 0) {
+    return currentPrice / pbRatio;
+  }
+  return null;
 }
 
 export function calculateFixedIncomeBalance(

@@ -19,7 +19,7 @@ import { useState, useMemo } from "react";
 import { memo, useCallback, type KeyboardEvent, useRef } from "react";
 import { ValuationRadar } from "@/components/ui/ValuationRadar";
 import { useSelic } from "@/lib/useSelic";
-import { getAssetValuation } from "@/lib/calculations";
+import { getAssetValuation, calculateBvps } from "@/lib/calculations";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -383,12 +383,7 @@ function SearchVariant({
     currentPrice: asset.currentPrice,
     avgDividend: avg,
     eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
-    bvps:
-      asset.metrics?.bvps != null
-        ? asset.metrics.bvps
-        : asset.metrics?.pbRatio && asset.currentPrice != null && asset.currentPrice > 0
-          ? asset.currentPrice / asset.metrics.pbRatio
-          : null,
+    bvps: calculateBvps(asset.metrics?.bvps, asset.metrics?.pbRatio, asset.currentPrice),
     dividendCagr: asset.metrics?.dividendCagr5y ?? null,
     selicPct: selic ?? 10.5,
     currency: asset.currency,

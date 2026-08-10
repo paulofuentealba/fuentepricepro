@@ -8,6 +8,7 @@ import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { projectFixedIncomeValueAtMaturity } from "@/lib/calculations";
 import { useWatchlist, makeId } from "@/lib/watchlist";
+import { useTransactions } from "@/lib/transactions";
 import { useQuery } from "@tanstack/react-query";
 import { macroRatesQueryOptions } from "@/lib/queryOptions";
 import { ArrowRight, CheckCircle2, ChevronLeft, Shield } from "lucide-react";
@@ -23,6 +24,7 @@ type IndexerType = "CDI" | "IPCA" | "PRE";
 export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
   const { t, locale } = useI18n();
   const { upsert } = useWatchlist();
+  const { upsert: upsertTransaction } = useTransactions();
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -73,6 +75,19 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
     if (!assetName || !investedAmount || !rate || !startDate || !maturityDate) return;
 
     const ticker = `FI_${Date.now()}`;
+    const amount = Number(investedAmount);
+    const startTimestamp = startDate ? new Date(startDate).getTime() : Date.now();
+
+    upsertTransaction({
+      id: `tx-${ticker}-${startTimestamp}`,
+      ticker,
+      type: "buy",
+      date: startTimestamp,
+      quantity: 1,
+      pricePerShare: amount,
+      notes: "Aporte Inicial Renda Fixa",
+    });
+
     upsert({
       id: makeId(ticker, "FIXED_INCOME"),
       ticker,
@@ -80,8 +95,8 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
       type: "FIXED_INCOME",
       currency: "BRL",
       quantity: 1,
-      averagePrice: Number(investedAmount),
-      currentPrice: Number(investedAmount),
+      averagePrice: amount,
+      currentPrice: amount,
       targetYield: 6,
       annualDividend: 0,
       ceilingPrice: 0,
@@ -96,7 +111,7 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
       startDate: new Date(startDate).toISOString(),
       maturityDate: new Date(maturityDate).toISOString(),
       addedAt: Date.now(),
-      investingSince: Date.now(),
+      investingSince: startTimestamp,
     });
 
     toast.success(t.watchlist.fixedIncomeWizard.success);
