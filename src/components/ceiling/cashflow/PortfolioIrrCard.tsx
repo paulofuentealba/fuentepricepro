@@ -8,10 +8,9 @@ import { useSelic } from "@/lib/useSelic";
 import { benchmarkHistoryQueryOptions } from "@/lib/queryOptions";
 import { type Transaction } from "@/lib/transactions";
 import { type RealizedIncomeEvent } from "@/lib/realizedIncome";
-import { calculateIrr, buildCashFlowsFromPortfolio } from "@/lib/portfolioIrr";
+import { calculateIrr, buildCashFlowsFromPortfolio, getEffectiveTransactions, isUsdAsset } from "@/lib/portfolioIrr";
 import { annualizeReturn } from "@/lib/benchmark";
 import { useWatchlist } from "@/lib/watchlist";
-import { isBrTicker } from "@/lib/classify";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Props {
@@ -34,18 +33,18 @@ export function PortfolioIrrCard({
   const { data: selicRaw } = useSelic();
   const fallbackSelic = selicRaw ?? 10.5;
 
+  const effectiveTransactions = useMemo(() => {
+    return getEffectiveTransactions(transactions, items);
+  }, [transactions, items]);
+
   // Filter transactions for active currency
   const filteredTransactions = useMemo(() => {
-    return (transactions || []).filter((tx) => {
-      const tickerUpper = tx.ticker.toUpperCase();
-      const isUsd =
-        assetCurrencies[tickerUpper] !== undefined
-          ? assetCurrencies[tickerUpper] === "USD"
-          : !(tickerUpper.endsWith(".SA") || isBrTicker(tickerUpper));
+    return effectiveTransactions.filter((tx) => {
+      const isUsd = isUsdAsset(tx.ticker, assetCurrencies);
       const txCurrency: Currency = isUsd ? "USD" : "BRL";
       return txCurrency === activeCurrency;
     });
-  }, [transactions, assetCurrencies, activeCurrency]);
+  }, [effectiveTransactions, assetCurrencies, activeCurrency]);
 
   // Determine evaluation timeframe (fromDate to toDate)
   const { fromDate, toDate, daysInPeriod, hasTransactions } = useMemo(() => {
@@ -117,7 +116,7 @@ export function PortfolioIrrCard({
   const cashFlows = useMemo(
     () =>
       buildCashFlowsFromPortfolio(
-        transactions,
+        effectiveTransactions,
         realizedEvents,
         nativeCurrentValue,
         Date.now(),
@@ -125,7 +124,7 @@ export function PortfolioIrrCard({
         assetCurrencies,
         activeCurrency,
       ),
-    [transactions, realizedEvents, nativeCurrentValue, assetCurrencies, activeCurrency],
+    [effectiveTransactions, realizedEvents, nativeCurrentValue, assetCurrencies, activeCurrency],
   );
 
   const irrRate = useMemo(() => calculateIrr(cashFlows), [cashFlows]);

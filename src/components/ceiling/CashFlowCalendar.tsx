@@ -51,6 +51,7 @@ const MONTHS_PT = [
 import { calculateRealizedIncome, computeRealizedIncomeSummary, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { PortfolioIrrCard } from "./cashflow/PortfolioIrrCard";
+import { getEffectiveTransactions } from "@/lib/portfolioIrr";
 import { usePortfolioSnapshot } from "@/lib/portfolioSnapshot";
 
 interface Props {
@@ -103,8 +104,12 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   const { transactions } = useTransactions();
 
+  const effectiveTransactions = useMemo(() => {
+    return getEffectiveTransactions(transactions, items);
+  }, [transactions, items]);
+
   const realizedEvents = useMemo(() => {
-    if (transactions.length === 0) return [];
+    if (effectiveTransactions.length === 0) return [];
     const assetMetaMap: Record<string, AssetTaxMeta> = {};
     for (const item of items) {
       assetMetaMap[item.ticker] = {
@@ -114,8 +119,8 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
         customTaxRate: item.customTaxRate,
       };
     }
-    return calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap);
-  }, [transactions, dividendEventsMap, items]);
+    return calculateRealizedIncome(effectiveTransactions, dividendEventsMap, assetMetaMap);
+  }, [effectiveTransactions, dividendEventsMap, items]);
 
   const realizedSummary = useMemo(
     () => computeRealizedIncomeSummary(realizedEvents, activeCurrency),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateIrr, buildCashFlowsFromPortfolio, type CashFlow } from "../portfolioIrr";
+import { calculateIrr, buildCashFlowsFromPortfolio, getEffectiveTransactions, isUsdAsset, type CashFlow } from "../portfolioIrr";
 import { type Transaction } from "../transactions";
 import { type RealizedIncomeEvent } from "../realizedIncome";
 
@@ -219,6 +219,60 @@ describe("portfolioIrr", () => {
       // Portfolio has ONLY BRL assets. Requesting USD cashflows should yield no buy/sell flows.
       const usdFlows = buildCashFlowsFromPortfolio(txs, [], 0, t0 + 1000, 5.0, assetCurrencies, "USD");
       expect(usdFlows).toEqual([]);
+    });
+
+    it("regression test: generates effective USD transactions for USD watchlist items even when explicit transactions are missing or mismatched", () => {
+      const now = Date.now();
+      const mockItems: any[] = [
+        {
+          id: "us_stock:MSFT",
+          ticker: "MSFT",
+          name: "Microsoft Corporation",
+          type: "STOCK_US",
+          currency: "USD",
+          quantity: 10,
+          averagePrice: 400.0,
+          currentPrice: 420.0,
+          investingSince: now - 365 * 24 * 60 * 60 * 1000,
+        },
+        {
+          id: "brazilian_stock:PETR4.SA",
+          ticker: "PETR4.SA",
+          name: "Petróleo Brasileiro S.A.",
+          type: "STOCK_BR",
+          currency: "BRL",
+          quantity: 100,
+          averagePrice: 30.0,
+          currentPrice: 35.0,
+          investingSince: now - 365 * 24 * 60 * 60 * 1000,
+        },
+      ];
+
+      const assetCurrencies = { MSFT: "USD" as const, "PETR4.SA": "BRL" as const };
+
+      // Case A: Explicit transactions list is empty for USD assets
+      const explicitTxs: Transaction[] = [];
+      const effectiveTxs = getEffectiveTransactions(explicitTxs, mockItems);
+
+      expect(effectiveTxs.some((t) => t.ticker === "MSFT")).toBe(true);
+
+      const usdCashFlows = buildCashFlowsFromPortfolio(
+        effectiveTxs,
+        [],
+        4200, // 10 * 420
+        now,
+        1,
+        assetCurrencies,
+        "USD",
+      );
+
+      expect(usdCashFlows.length).toBeGreaterThanOrEqual(2); // Buy outflow + terminal value
+      const irr = calculateIrr(usdCashFlows);
+      expect(irr).not.toBeNull();
+
+      // Case B: Ticker format mismatch (e.g. lowercase "msft" or ticker without .SA)
+      expect(isUsdAsset("msft", assetCurrencies)).toBe(true);
+      expect(isUsdAsset("PETR4", assetCurrencies)).toBe(false);
     });
   });
 });

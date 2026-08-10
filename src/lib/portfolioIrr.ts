@@ -131,6 +131,86 @@ export function calculateIrr(cashFlows: CashFlow[], guess = 0.1): number | null 
   return Math.round(finalMid * 1000000) / 1000000;
 }
 
+import type { WatchlistItem } from "./watchlist";
+
+export function normalizeTicker(ticker: string): string {
+  return (ticker || "").trim().toUpperCase();
+}
+
+/**
+ * Determines whether an asset is USD or BRL with robust ticker normalization.
+ * Checks assetCurrencies map against exact ticker, ticker without .SA, and ticker with .SA.
+ * Falls back to check if ticker ends with .SA or matches Brazilian ticker format.
+ */
+export function isUsdAsset(
+  ticker: string,
+  assetCurrencies: Record<string, Currency> = {},
+): boolean {
+  const norm = normalizeTicker(ticker);
+  const normClean = norm.replace(/\.SA$/, "");
+
+  if (assetCurrencies[norm] !== undefined) {
+    return assetCurrencies[norm] === "USD";
+  }
+  if (assetCurrencies[normClean] !== undefined) {
+    return assetCurrencies[normClean] === "USD";
+  }
+  if (assetCurrencies[`${normClean}.SA`] !== undefined) {
+    return assetCurrencies[`${normClean}.SA`] === "USD";
+  }
+
+  return !(norm.endsWith(".SA") || isBrTicker(normClean));
+}
+
+/**
+ * Ensures every watchlist item with a positive position (quantity > 0) has at least one transaction.
+ * If no explicit transactions exist for a given ticker, a synthetic buy transaction is created
+ * using the item's quantity, averagePrice, and investingSince/addedAt date.
+ */
+export function getEffectiveTransactions(
+  transactions: Transaction[],
+  items: WatchlistItem[] = [],
+): Transaction[] {
+  const effective = [...(transactions || [])];
+
+  const existingTickers = new Set<string>();
+  for (const tx of effective) {
+    const norm = normalizeTicker(tx.ticker);
+    existingTickers.add(norm);
+    existingTickers.add(norm.replace(/\.SA$/, ""));
+  }
+
+  for (const item of items || []) {
+    if (!item || !item.ticker || !(item.quantity > 0)) continue;
+
+    const normItemTicker = normalizeTicker(item.ticker);
+    const normClean = normItemTicker.replace(/\.SA$/, "");
+
+    const hasExplicit = existingTickers.has(normItemTicker) || existingTickers.has(normClean);
+
+    if (!hasExplicit) {
+      const txDate = item.investingSince || item.addedAt || Date.now();
+      const price =
+        item.averagePrice && item.averagePrice > 0
+          ? item.averagePrice
+          : item.currentPrice || 0;
+
+      effective.push({
+        id: `synthetic-${normItemTicker}`,
+        ticker: item.ticker,
+        type: "buy",
+        date: txDate,
+        quantity: item.quantity,
+        pricePerShare: price,
+        fees: null,
+        notes: "Synthetic baseline transaction",
+      });
+    }
+  }
+
+  return effective;
+}
+
 /**
  * Builds standard CashFlow array from transactions, realized income events, and current portfolio value.
  *
@@ -157,11 +237,7 @@ export function buildCashFlowsFromPortfolio(
 
   // 1. Transactions (Buys = negative cash out, Sells = positive cash in)
   for (const tx of transactions) {
-    const tickerUpper = tx.ticker.toUpperCase();
-    const isUsd =
-      assetCurrencies[tickerUpper] !== undefined
-        ? assetCurrencies[tickerUpper] === "USD"
-        : !(tickerUpper.endsWith(".SA") || isBrTicker(tickerUpper));
+    const isUsd = isUsdAsset(tx.ticker, assetCurrencies);
     const txCurrency: Currency = isUsd ? "USD" : "BRL";
 
     if (targetCurrency && txCurrency !== targetCurrency) {
@@ -189,7 +265,7 @@ export function buildCashFlowsFromPortfolio(
     const eventDate = new Date(payDateStr).getTime();
     if (isNaN(eventDate) || eventDate > asOfDate) continue;
 
-    const isUsd = ev.taxType === "us_dividend" || assetCurrencies[ev.ticker.toUpperCase()] === "USD";
+    const isUsd = ev.taxType === "us_dividend" || isUsdAsset(ev.ticker, assetCurrencies);
     const evCurrency: Currency = isUsd ? "USD" : "BRL";
 
     if (targetCurrency && evCurrency !== targetCurrency) {
