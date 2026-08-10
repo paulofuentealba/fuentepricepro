@@ -4,6 +4,7 @@ import { AssetDetailSheet } from "./AssetDetailSheet";
 import { PaywallDialog } from "../../ui/PaywallDialog";
 import { FixedIncomeWizardSheet } from "./FixedIncomeWizardSheet";
 import { BrokerNoteUploader } from "./BrokerNoteUploader";
+import { CsvImportUploader } from "./CsvImportUploader";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 
@@ -13,12 +14,14 @@ interface WatchlistDialogsProps {
   showPaywall: boolean;
   showFIWizard: boolean;
   showBrokerNoteUploader: boolean;
+  showCsvImporter: boolean;
   onCloseDialog: () => void;
   onSave: (patch: Partial<WatchlistItem>) => void;
   onCloseDetail: () => void;
   onPaywallOpenChange: (open: boolean) => void;
   onFIWizardOpenChange: (open: boolean) => void;
   onBrokerUploaderOpenChange: (open: boolean) => void;
+  onCsvImporterOpenChange: (open: boolean) => void;
 }
 
 export function WatchlistDialogs({
@@ -27,12 +30,14 @@ export function WatchlistDialogs({
   showPaywall,
   showFIWizard,
   showBrokerNoteUploader,
+  showCsvImporter,
   onCloseDialog,
   onSave,
   onCloseDetail,
   onPaywallOpenChange,
   onFIWizardOpenChange,
   onBrokerUploaderOpenChange,
+  onCsvImporterOpenChange,
 }: WatchlistDialogsProps) {
   const { t } = useI18n();
 
@@ -48,6 +53,7 @@ export function WatchlistDialogs({
       />
       <FixedIncomeWizardSheet open={showFIWizard} onOpenChange={onFIWizardOpenChange} />
       <BrokerNoteUploader open={showBrokerNoteUploader} onOpenChange={onBrokerUploaderOpenChange} />
+      <CsvImportUploader open={showCsvImporter} onOpenChange={onCsvImporterOpenChange} />
     </>
   );
 }

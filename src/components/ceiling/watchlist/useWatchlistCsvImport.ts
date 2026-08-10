@@ -263,10 +263,12 @@ export function useWatchlistCsvImport(
           if (failed) parts.push(t.toasts.importFailedCount.replace("{{count}}", String(failed)));
           const summary = parts.join(", ") || t.toasts.noChanges;
           toast.success(t.toasts.importComplete.replace("{{summary}}", summary));
+          return true;
         }
       } catch (err) {
         console.error("[import] failed", err);
         toast.error(t.toasts.importFailed);
+        return false;
       } finally {
         setImporting(false);
         if (fileRef.current) fileRef.current.value = "";
@@ -292,5 +294,6 @@ export function useWatchlistCsvImport(
         if (f) void handleFile(f);
       },
     },
+    handleFile,
   };
 }

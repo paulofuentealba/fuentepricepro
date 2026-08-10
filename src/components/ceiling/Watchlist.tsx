@@ -28,6 +28,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const navigate = useNavigate();
   const [showFIWizard, setShowFIWizard] = useState(false);
   const [showBrokerNoteUploader, setShowBrokerNoteUploader] = useState(false);
+  const [showCsvImporter, setShowCsvImporter] = useState(false);
   const { t, locale } = useI18n();
   const {
     items,
@@ -167,6 +168,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
                 onNavigateToScreener={() => navigate({ to: "/app/screener" })}
                 onOpenFIWizard={() => setShowFIWizard(true)}
                 onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
+                onOpenCsvImporter={() => setShowCsvImporter(true)}
               />
               <div className="mt-4 flex justify-center w-full">
                 <DataManagement />
@@ -200,6 +202,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               onNavigateToScreener={() => navigate({ to: "/app/screener" })}
               onOpenFIWizard={() => setShowFIWizard(true)}
               onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
+              onOpenCsvImporter={() => setShowCsvImporter(true)}
             />
 
             <WatchlistAssetGrid
@@ -226,12 +229,14 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           showPaywall={showPaywall}
           showFIWizard={showFIWizard}
           showBrokerNoteUploader={showBrokerNoteUploader}
+          showCsvImporter={showCsvImporter}
           onCloseDialog={handleDialogClose}
           onSave={handleDialogSave}
           onCloseDetail={handleCloseDetail}
           onPaywallOpenChange={setShowPaywall}
           onFIWizardOpenChange={setShowFIWizard}
           onBrokerUploaderOpenChange={setShowBrokerNoteUploader}
+          onCsvImporterOpenChange={setShowCsvImporter}
         />
       </section>
     </TooltipProvider>

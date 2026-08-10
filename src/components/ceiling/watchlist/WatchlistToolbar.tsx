@@ -19,6 +19,7 @@ interface WatchlistToolbarProps {
   onNavigateToScreener: () => void;
   onOpenFIWizard: () => void;
   onOpenBrokerUploader: () => void;
+  onOpenCsvImporter: () => void;
 }
 
 export function WatchlistToolbar({
@@ -35,6 +36,7 @@ export function WatchlistToolbar({
   onNavigateToScreener,
   onOpenFIWizard,
   onOpenBrokerUploader,
+  onOpenCsvImporter,
 }: WatchlistToolbarProps) {
   const { t } = useI18n();
   return (
@@ -56,6 +58,7 @@ export function WatchlistToolbar({
           onNavigateToScreener={onNavigateToScreener}
           onOpenFIWizard={onOpenFIWizard}
           onOpenBrokerUploader={onOpenBrokerUploader}
+          onOpenCsvImporter={onOpenCsvImporter}
         />
         <DataManagement />
         <div className="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border/60 bg-background/50 p-0.5 shrink-0">
