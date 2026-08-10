@@ -5,8 +5,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, FileType2, PlusCircle, Shield, TrendingUp } from "lucide-react";
+import { ChevronDown, FileType2, PlusCircle, Shield, TrendingUp, FileSpreadsheet } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
+import { useWatchlist } from "@/lib/watchlist";
+import { useWatchlistCsvImport } from "./useWatchlistCsvImport";
 
 interface AddAssetDropdownProps {
   onNavigateToScreener: () => void;
@@ -20,9 +22,12 @@ export function AddAssetDropdown({
   onOpenBrokerUploader,
 }: AddAssetDropdownProps) {
   const { t } = useI18n();
+  const { items, upsert } = useWatchlist();
+  const { triggerImport, fileInputProps } = useWatchlistCsvImport(items, upsert);
 
   return (
     <DropdownMenu>
+      <input {...fileInputProps} />
       <DropdownMenuTrigger asChild>
         <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/40">
           <PlusCircle className="h-4 w-4" />
@@ -61,6 +66,16 @@ export function AddAssetDropdown({
             <span className="text-xs text-muted-foreground truncate w-[160px]">
               XP, Rico, Clear, BTG, Modal, Inter, NuInvest, Órama, Genial
             </span>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer gap-2 py-3 focus:bg-accent focus:text-primary"
+          onClick={triggerImport}
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          <div className="flex flex-col">
+            <span className="font-medium">{t.watchlist.addAssetDropdownImportFile}</span>
+            <span className="text-xs text-muted-foreground">CSV/Excel</span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>

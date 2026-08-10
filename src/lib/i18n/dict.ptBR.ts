@@ -384,6 +384,7 @@ export const ptBR = {
     addFixedIncome: "Adicionar Renda Fixa",
     addFixedIncomeDesc: "Tesouro Direto, CDBs, LCI/LCA",
     importBrokerNote: "Importar Nota de Corretagem",
+    addAssetDropdownImportFile: "Trazer meu arquivo",
     consolidatedNetWorth: "Patrimônio Consolidado",
     consolidatedNetWorthSub: "Patrimônio Total",
     consolidatedIncome: "Renda Passiva Projetada",
