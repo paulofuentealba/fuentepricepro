@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { AssetForm, type AssetFormValue } from "@/components/ceiling/AssetForm";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { AssetFormValue } from "@/components/ceiling/AssetForm";
 import { AssetCard } from "@/components/shared/AssetCard";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Asset } from "@/lib/domain";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
+
+const AssetForm = lazy(() =>
+  import("@/components/ceiling/AssetForm").then((m) => ({ default: m.AssetForm })),
+);
 
 export const Route = createFileRoute("/app/screener")({
   validateSearch: (search: Record<string, unknown>): { ticker?: string } => ({
@@ -22,7 +27,16 @@ export const Route = createFileRoute("/app/screener")({
   component: ScreenerRoute,
 });
 
-function ScreenerRoute() {
+function ScreenerSkeleton() {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+      <Skeleton className="h-[380px] rounded-2xl bg-muted/30" />
+      <Skeleton className="h-[380px] rounded-2xl bg-muted/30" />
+    </div>
+  );
+}
+
+function ScreenerContent() {
   const { ticker: initialTicker } = Route.useSearch();
   const { t } = useI18n();
   const queryClient = useQueryClient();
@@ -102,5 +116,13 @@ function ScreenerRoute() {
         )}
       </div>
     </div>
+  );
+}
+
+function ScreenerRoute() {
+  return (
+    <Suspense fallback={<ScreenerSkeleton />}>
+      <ScreenerContent />
+    </Suspense>
   );
 }
