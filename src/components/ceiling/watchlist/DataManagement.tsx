@@ -13,7 +13,7 @@ export function DataManagement() {
 
   return (
     <div className="flex items-center gap-2">
-      <WatchlistIO items={items} onImport={upsert} />
+      <WatchlistIO items={items} />
       {import.meta.env.DEV && (
         <Button
           variant="ghost"
