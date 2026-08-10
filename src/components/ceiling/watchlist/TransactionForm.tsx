@@ -1,14 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useI18n } from "@/lib/i18n-provider";
-import { displayTicker, toIntlLocale } from "@/lib/i18n";
+import { displayTicker } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { Transaction } from "@/lib/transactions";
 import { getQuantityAtDate } from "@/lib/transactions";
@@ -24,7 +21,7 @@ interface Props {
 }
 
 export function TransactionForm({ item, open, onClose, onSave, existingTransactions, initialData }: Props) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
 
   const [type, setType] = useState<"buy" | "sell">(initialData?.type ?? "buy");
   const [date, setDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : new Date());
@@ -97,29 +94,13 @@ export function TransactionForm({ item, open, onClose, onSave, existingTransacti
             
             <div className="space-y-2">
               <Label>{t.transactions.date}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(date) : <span>{t.transactions.date}</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(d) => d > new Date() || d < new Date("1990-01-01")}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                value={date}
+                onChange={(d) => setDate(d)}
+                placeholder={t.transactions.date}
+                disabled={(d) => d > new Date() || d < new Date("1990-01-01")}
+                rangeMode="past"
+              />
             </div>
           </div>
 

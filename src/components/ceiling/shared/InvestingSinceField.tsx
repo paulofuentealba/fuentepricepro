@@ -1,8 +1,6 @@
 import { useMemo } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DatePicker } from "@/components/ui/date-picker";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
@@ -42,20 +40,6 @@ export function InvestingSinceField({
     }
   }, [firstTxDateObj, locale]);
 
-  const selectedDate = useMemo(() => {
-    if (value == null) return undefined;
-    return new Date(value);
-  }, [value]);
-
-  const formattedSelectedDate = useMemo(() => {
-    if (!selectedDate) return null;
-    try {
-      return new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(selectedDate);
-    } catch {
-      return selectedDate.toLocaleDateString();
-    }
-  }, [selectedDate, locale]);
-
   if (isReadOnly) {
     return (
       <div
@@ -72,34 +56,14 @@ export function InvestingSinceField({
   }
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className={cn(
-            "justify-start text-left font-normal bg-background/60 border border-border/50 text-xs sm:text-sm h-9 px-3",
-            !selectedDate && "text-muted-foreground",
-            className,
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4 text-primary shrink-0" />
-          {formattedSelectedDate ? (
-            <span>{formattedSelectedDate}</span>
-          ) : (
-            <span>{t.form.investingSince}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-background" align="start">
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={(date) => date && onChange(date)}
-          disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
+    <DatePicker
+      value={value}
+      onChange={(date) => date && onChange(date)}
+      placeholder={t.form.investingSince}
+      disabled={(date) => date > new Date() || date < new Date("1990-01-01")}
+      rangeMode="past"
+      buttonClassName="text-xs sm:text-sm h-9 px-3"
+      className={className}
+    />
   );
 }

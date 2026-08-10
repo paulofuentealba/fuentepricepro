@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { projectFixedIncomeValueAtMaturity } from "@/lib/calculations";
@@ -240,26 +241,25 @@ export function FixedIncomeWizardSheet({ open, onOpenChange }: Props) {
                   <Label htmlFor="startDate" className="text-muted-foreground">
                     {t.watchlist.fixedIncomeWizard.startDate}
                   </Label>
-                  <Input
+                  <DatePicker
                     id="startDate"
-                    type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="bg-card/50 border-border/50 text-foreground focus-visible:ring-primary/50 focus-visible:border-primary/50"
-                    required
+                    onChange={(_d, dateStr) => setStartDate(dateStr)}
+                    rangeMode="past"
+                    disabled={(d) => d > new Date()}
+                    buttonClassName="bg-card/50 border-border/50 text-foreground focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="maturityDate" className="text-muted-foreground">
                     {t.watchlist.fixedIncomeWizard.maturityDate}
                   </Label>
-                  <Input
+                  <DatePicker
                     id="maturityDate"
-                    type="date"
                     value={maturityDate}
-                    onChange={(e) => setMaturityDate(e.target.value)}
-                    className="bg-card/50 border-border/50 text-foreground focus-visible:ring-primary/50 focus-visible:border-primary/50"
-                    required
+                    onChange={(_d, dateStr) => setMaturityDate(dateStr)}
+                    rangeMode="future"
+                    buttonClassName="bg-card/50 border-border/50 text-foreground focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
               </div>
