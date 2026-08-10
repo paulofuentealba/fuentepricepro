@@ -4,8 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import {
   getCanonicalAnnualDividend,
-  ceilingPrice,
-  safetyMargin,
+  getAssetValuation,
 } from "@/lib/calculations";
 import {
   parseWatchlistCsv,
@@ -63,8 +62,18 @@ export function useWatchlistCsvImport(
               const existing = existingById.get(id);
               const annual = getCanonicalAnnualDividend(asset, 3);
               const target = existing?.targetYield ?? 6;
-              const ceiling = ceilingPrice(annual, target);
-              const margin = safetyMargin(ceiling, asset.currentPrice);
+              const val = getAssetValuation({
+                targetYield: target,
+                currentPrice: asset.currentPrice,
+                avgDividend: annual,
+                eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
+                bvps: asset.metrics?.bvps ?? null,
+                dividendCagr: asset.metrics?.dividendCagr5y ?? null,
+                currency: asset.currency,
+                type,
+              });
+              const ceiling = val.activeCeiling;
+              const margin = val.margin;
 
               const txTimestamp = row.date || Date.now();
               const txPrice = row.pricePerShare > 0 ? row.pricePerShare : asset.currentPrice;
@@ -140,8 +149,18 @@ export function useWatchlistCsvImport(
               const existing = existingById.get(id);
               const annual = getCanonicalAnnualDividend(asset, 3);
               const target = existing?.targetYield ?? 6;
-              const ceiling = ceilingPrice(annual, target);
-              const margin = safetyMargin(ceiling, asset.currentPrice);
+              const val = getAssetValuation({
+                targetYield: target,
+                currentPrice: asset.currentPrice,
+                avgDividend: annual,
+                eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
+                bvps: asset.metrics?.bvps ?? null,
+                dividendCagr: asset.metrics?.dividendCagr5y ?? null,
+                currency: asset.currency,
+                type,
+              });
+              const ceiling = val.activeCeiling;
+              const margin = val.margin;
 
               const existingAssetTxs = workingTransactions.filter((tx) => tx.ticker === uppercaseTicker);
               const currentHolding = recalculateHoldingFromTransactions(existingAssetTxs);

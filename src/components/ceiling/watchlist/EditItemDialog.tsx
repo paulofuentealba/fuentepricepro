@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { MaskedInput } from "../shared/MaskedInput";
-import { ceilingPrice, safetyMargin, netAfterTax } from "@/lib/calculations";
+import { ceilingPrice, getAssetValuation, netAfterTax } from "@/lib/calculations";
 import { displayTicker, formatCurrency, formatPercent } from "@/lib/i18n";
 import { TrendingUp, Target, Wallet } from "lucide-react";
 import { PriceTag } from "../shared/AssetDataDisplay";
@@ -350,9 +350,20 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
               };
               if (y != null && Number.isFinite(y) && y > 0 && item) {
                 patch.targetYield = y;
-                const ceiling = ceilingPrice(item.annualDividend, y);
-                patch.ceilingPrice = ceiling;
-                patch.safetyMargin = safetyMargin(ceiling, item.currentPrice);
+                if (y === item.targetYield && item.valuation) {
+                  patch.ceilingPrice = item.valuation.activeCeiling;
+                  patch.safetyMargin = item.valuation.margin;
+                } else {
+                  const val = getAssetValuation({
+                    targetYield: y,
+                    currentPrice: item.currentPrice,
+                    avgDividend: item.annualDividend,
+                    currency: item.currency,
+                    type: item.type,
+                  });
+                  patch.ceilingPrice = val.activeCeiling;
+                  patch.safetyMargin = val.margin;
+                }
               }
               onSave(patch);
             }}

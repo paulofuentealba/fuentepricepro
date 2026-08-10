@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Asset } from "@/lib/domain";
-import { getCanonicalAnnualDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
+import { getCanonicalAnnualDividend, getAssetValuation } from "@/lib/calculations";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, displayTicker } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
@@ -75,8 +75,18 @@ export function AddToWatchlistDialog({
     const avgNum = avg.trim() === "" ? null : Number(avg);
     const goalNum = goal.trim() === "" ? null : Number(goal);
     const annual = getCanonicalAnnualDividend(asset, 3);
-    const ceiling = ceilingPrice(annual, targetYield);
-    const margin = safetyMargin(ceiling, asset.currentPrice);
+    const val = getAssetValuation({
+      targetYield,
+      currentPrice: asset.currentPrice,
+      avgDividend: annual,
+      eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
+      bvps: asset.metrics?.bvps ?? null,
+      dividendCagr: asset.metrics?.dividendCagr5y ?? null,
+      currency: asset.currency,
+      type: asset.type,
+    });
+    const ceiling = val.activeCeiling;
+    const margin = val.margin;
 
     const item: WatchlistItem = {
       id,

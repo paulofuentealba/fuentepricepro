@@ -25,7 +25,7 @@ import { useWatchlist, makeId, WatchlistItem } from "@/lib/watchlist";
 import { useIssuerTickerMappings } from "@/lib/useIssuerTickerMappings";
 import { useQueryClient } from "@tanstack/react-query";
 import { assetQueryOptions } from "@/lib/queryOptions";
-import { getCanonicalAnnualDividend, ceilingPrice, safetyMargin } from "@/lib/calculations";
+import { getCanonicalAnnualDividend, getAssetValuation } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { toast } from "sonner";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
@@ -68,8 +68,18 @@ export function consolidateTradesToWatchlistItems(
     const type = assetData?.type || classifyBr(ticker);
     const annualDiv = assetData ? getCanonicalAnnualDividend(assetData, 3) : 0;
     const target = 6;
-    const ceil = ceilingPrice(annualDiv, target);
-    const margin = safetyMargin(ceil, lastTrade.price);
+    const val = getAssetValuation({
+      targetYield: target,
+      currentPrice: lastTrade.price,
+      avgDividend: annualDiv,
+      eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
+      bvps: assetData?.metrics?.bvps ?? null,
+      dividendCagr: assetData?.metrics?.dividendCagr5y ?? null,
+      currency: assetData?.currency || (ticker.endsWith("3") || ticker.endsWith("4") || ticker.endsWith("11") ? "BRL" : "USD"),
+      type,
+    });
+    const ceil = val.activeCeiling;
+    const margin = val.margin;
 
     const newlyCreatedIds = new Set(newlyCreatedTransactions.map((n) => n.id));
     const existingForTicker = existingTransactions.filter(
