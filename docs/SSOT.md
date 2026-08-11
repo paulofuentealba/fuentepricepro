@@ -87,7 +87,7 @@ alertas de preço, comunidade/social, rating de risco mais elaborado.
 | 4.3 LGPD/GDPR | 🟡 Export e exclusão de conta ✅ concluídos e verificados. Banner de cookies/consentimento 🟡 pendente |
 | 4.4 UI/UX "Pro Terminal" | ✅ Essencialmente concluído |
 
-### Épico 5 — Horizonte FI (Redesign de Frontend v2) 🟡 Planejado, não iniciado
+### Épico 5 — Horizonte FI (Redesign de Frontend v2) 🟡 v1 do dashboard concluída, QA final com 2 achados de acessibilidade abertos
 
 Iniciativa de identidade visual nascida do diagnóstico de que o design system atual
 (shadcn/ui + tokens Tailwind v4) é tecnicamente maduro mas visualmente genérico —
@@ -98,13 +98,33 @@ lógica de negócio nova nesta fase).
 
 | Item | Status |
 |---|---|
-| 5.1 Design tokens (tipografia Fraunces+Inter, paleta petróleo `#2C6B63`) | 🟡 Prototipado em Artifact, aprovado por Paulo — falta portar para `styles.css` como tema paralelo |
-| 5.2 Elemento de assinatura "Horizonte FI" (linha de horizonte animada, canvas) | 🟡 Protótipo visual único — falta extrair `useFIProgress()` (hoje lógica presa dentro de `FIProgressCard.tsx`) antes de poder alimentar o componente real |
-| 5.3 Rota/estrutura paralela (`/app-v2` ou flag), zero regressão em v1 | ⚪ Não iniciado |
+| 5.1 Design tokens (tipografia Fraunces+Inter, paleta petróleo `#2C6B63`) | ✅ `src/styles/horizonte-tokens.css`, escopado em `[data-app-version="horizonte"]`, fontes locais `public/fonts/*.woff2` |
+| 5.2 Elemento de assinatura "Horizonte FI" (linha de horizonte animada, canvas) | ✅ `src/components/horizonte/HorizonteHero.tsx`, alimentado por `useFIProgress()` (extraído em prompt 47, testado) |
+| 5.3 Rota/estrutura paralela (`/app-v2` ou flag), zero regressão em v1 | ✅ `src/routes/app-v2*`; `git diff` do range 46-52 tocou só os diretórios previstos (ver auditoria do prompt 54 abaixo) |
 | 5.4 Persistência de trajetória histórica (snapshot de progresso ao longo do tempo) | 🔒 Decisão de negócio pendente — nenhuma coleção Firestore hoje suporta "progresso no tempo", só o estado atual |
 
-Prompts de execução (ordem 46-54) gerados em `docs/Prompts/`, a serem rodados no
-Antigravity sob revisão de Paulo/Claude, um de cada vez — ver Seção 6.
+Prompts de execução 46-52 implementados e commitados (`32174e3`…`6a7783a`). Prompt 53
+não existe como arquivo em `docs/Prompts/` (numeração pula de 52 para 54 — não é
+regressão desta auditoria, apenas um gap de numeração pré-existente). Prompt 54
+(QA final, ver `docs/Prompts/RESULTADO - 54 — Horizonte FI QA Final e Paridade v1.md`)
+resultado real, com evidência, dos 7 itens do checklist:
+
+| # | Item | Resultado |
+|---|---|---|
+| 1 | Zero regressão em v1 (escopo de arquivos) | ✅ Passou — `git diff --stat` do range 46-52 só tocou `src/routes/app-v2/`, `src/components/horizonte/`, `src/components/layout-v2/`, `src/lib/useFIProgress.ts`, `src/lib/selectors/`, `src/styles/horizonte-tokens.css`, `src/components/ceiling/FIProgressCard.tsx` (refactor previsto no prompt 47), testes e `public/fonts/` |
+| 2 | Paridade numérica (hero + tabela v2 vs. v1) | ✅ Passou — `useFIProgress()` reproduz a fórmula original de `FIProgressCard.tsx` sem alteração (comparado linha a linha), `PortfolioTableV2` usa o mesmo `useValuedPortfolio()`/`getAssetPnL()` da v1; coberto por `useFIProgress.test.ts` e `assetPnL.test.ts` |
+| 3 | Acessibilidade (teclado, `prefers-reduced-motion`, contraste AA) | ❌ Falhou — 2 achados: (a) `--h-ink-faint` sobre `--h-paper` mede 2.88:1 no claro e 3.75:1 no escuro (WCAG AA exige 4.5:1 para texto pequeno) — usado em `HorizonteHero` (marcos não atingidos) e potencialmente em outros textos secundários; (b) cabeçalhos ordenáveis de `PortfolioTableV2` (`SortableHeader`) usam `<th onClick>` sem `tabIndex`/`onKeyDown`/`role="button"` — não operável por teclado. `prefers-reduced-motion` está corretamente respeitado (confirmado por leitura de código em `HorizonteHero.tsx`) |
+| 4 | Responsividade (375px, grid empilha, tabela com scroll próprio) | ✅ Passou — `grid-cols-1 sm:grid-cols-3` nos cards do dashboard; `PortfolioTableV2` envolve a `<table>` em `div.overflow-x-auto` dedicado (não a página) |
+| 5 | Tema claro/escuro sem reload | ✅ Passou (com ressalva) — tokens respondem automaticamente a `prefers-color-scheme` (confirmado via DevTools: `--h-paper` mudou de `#f7f4ec` para `#15120c` ao alternar o color-scheme do SO); app não tem toggle manual de tema em nenhuma rota (v1 ou v2) — os seletores `[data-theme]` existem no CSS mas nenhum componente os aciona, então o teste real possível é só via SO. Redesenho do canvas em troca de tema não pôde ser confirmado visualmente (ambiente sem usuário de teste logado → hero em estado vazio, sem `<canvas>` montado), mas o código (`HorizonteHero.tsx`) registra listener em `matchMedia("(prefers-color-scheme: dark)")` que força redraw |
+| 6 | Fontes locais, zero requisição externa | ✅ Passou — Network (dev): `GET /fonts/fraunces-variable-normal.woff2` e `GET /fonts/inter-variable-normal.woff2`, ambos `localhost:5174`, nenhuma requisição a `fonts.googleapis.com` ou CDN |
+| 7 | `/app` não carrega tokens/fontes da v2 | ✅ Passou — Network (dev) em `/app`: nenhuma requisição a `horizonte-tokens.css` ou `*variable*.woff2`; em `/app-v2` as mesmas requisições aparecem. Build de produção: `horizonte-tokens.css` sai como chunk isolado (`index-D2P33_qO.css`, 3.8kB) referenciado só pelos chunks de `/app-v2` (confirmado via `grep` nos chunks — `myportfolio` v1 não referencia o CSS, só o `myportfolio` v2 que importa `PortfolioTableV2`) |
+
+Achado adicional fora do checklist: `package.json`/`package-lock.json` têm duas
+devDependencies (`@fontsource-variable/fraunces`, `@fontsource-variable/inter`)
+presentes no working tree mas nunca commitadas nos prompts 46-52 — não usadas em
+`src/` (fontes carregadas via `@font-face` local, não via pacote npm); ficaram como
+resíduo de prototipagem. Não bloqueia o Épico 5 mas deve ser limpo ou commitado
+numa próxima etapa de manutenção.
 
 ---
 
@@ -185,7 +205,7 @@ imediata via config, sem novo deploy.
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |
 | 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | 🟡 Débito técnico | P3 | Baixo risco |
 | 11 | **`nitro: beta`** | 🟡 Débito técnico | P3 | Migrar quando houver versão estável |
-| 12 | **Horizonte FI — v2 de frontend** (Épico 5, prompts 46-54 em `docs/Prompts/`) | 🟡 Prompts prontos, execução não iniciada | P1 | Diferencial de marca aprovado por Paulo (paleta petróleo); zero risco à v1 em produção, mas consome as 1-2 vagas de "em progresso" simultâneo — não paralelizar com item 1/2 |
+| 12 | **Horizonte FI — v2 de frontend** (Épico 5, prompts 46-54 em `docs/Prompts/`) | 🟡 Prompts 46-52 implementados e commitados; QA final (prompt 54) rodado — 5/7 itens do checklist passaram, 2 falharam (contraste AA de `--h-ink-faint` abaixo de 4.5:1 em ambos os temas; cabeçalhos ordenáveis de `PortfolioTableV2` não navegáveis por teclado). `/app-v2` segue fora de produção/navegação da v1, zero regressão confirmada por `git diff` de escopo | P1 | Diferencial de marca aprovado por Paulo (paleta petróleo); zero risco à v1 em produção. Próximo passo: prompt de correção dos 2 achados de acessibilidade antes de promover `/app-v2` a rota visível/produção |
 
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
 
