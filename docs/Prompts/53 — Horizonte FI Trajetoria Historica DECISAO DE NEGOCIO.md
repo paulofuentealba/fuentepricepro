@@ -45,3 +45,8 @@ ser decidido por Antigravity sozinho.
 
 🔒 **Parqueado.** Não iniciar execução até Paulo responder as 4 perguntas
 acima (ver SSOT Seção 6, item 12).
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

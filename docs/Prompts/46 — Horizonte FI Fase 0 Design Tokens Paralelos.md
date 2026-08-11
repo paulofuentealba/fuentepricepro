@@ -55,3 +55,8 @@ v1 hoje). Os tokens devem viver isolados, ativáveis só na v2.
 ## Fora de escopo (não fazer aqui)
 
 - Não criar rota nova, não tocar `Sidebar.tsx`, não tocar `styles.css`.
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

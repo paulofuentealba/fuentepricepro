@@ -45,3 +45,8 @@ Golden Rules do `AGENTS.md`).
 
 Ao final, atualizar a Seção 3 (Épico 5) e Seção 6 (item 12) do
 `docs/SSOT.md` com o resultado real — não deixar o SSOT desatualizado.
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

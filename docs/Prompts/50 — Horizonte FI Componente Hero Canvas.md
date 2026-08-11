@@ -55,3 +55,8 @@ Criar `src/components/horizonte/HorizonteHero.tsx`, consumindo dado real
 ## Fora de escopo
 
 - Não integrar ainda na rota `/app-v2` (isso é o prompt 51).
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

@@ -48,3 +48,8 @@ ainda** (isso vem nos prompts seguintes).
 ## Fora de escopo
 
 - Nenhuma lógica de dado nova. Nenhuma tela de conteúdo real ainda.
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

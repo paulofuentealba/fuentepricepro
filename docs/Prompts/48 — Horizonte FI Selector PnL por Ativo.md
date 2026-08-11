@@ -41,3 +41,8 @@ existente (zero risco à v1).
 
 - Não adicionar coluna de P&L nas tabelas da v1 hoje — isso seria mudança de
   produto na versão em produção, fora do escopo desta série de prompts.
+  
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

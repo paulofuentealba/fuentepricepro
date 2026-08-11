@@ -42,3 +42,8 @@ sacrificada por estética.
 
 - Não adicionar filtros/colunas que não existem na v1. Paridade de dado
   primeiro, melhoria de UX depois (backlog separado).
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

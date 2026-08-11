@@ -57,3 +57,8 @@ O componente "Horizonte FI" (prompt 50) depende deste hook. Sem essa extração,
 a v2 teria que reimplementar a fórmula — risco de divergência silenciosa entre
 v1 e v2 (o mesmo tipo de bug já resolvido uma vez no Fuente Consensus, ver
 Seção 4 do SSOT, "6 pontos divergentes unificados").
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório

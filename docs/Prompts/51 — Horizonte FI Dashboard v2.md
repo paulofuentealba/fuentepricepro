@@ -46,3 +46,8 @@ com dado real.
 
 - Tabela de carteira (prompt 52). Cash flow, radar, comparador, screener
   continuam apontando para v1 nesta fase (ver prompt 49).
+
+## Ao terminar
+
+- Gerar documento (resultado ou plano de impelementação), salvar na pasta e realizar o commit desta atividade usando nome da atividade como comentário.
+- Gerar o commit desta execução e adicionar ao documento final salvo no diretório
