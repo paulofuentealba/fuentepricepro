@@ -31,7 +31,7 @@ export function SidebarHorizonte() {
 
   const tabs = [
     { key: "myportfolio", path: "/app/myportfolio", label: t.tabs.portfolio, icon: FolderOpen },
-    { key: "screener", path: "/app/screener", label: t.tabs.calculator, icon: CalculatorIcon },
+    { key: "screener", path: "/app-v2/screener", label: t.tabs.calculator, icon: CalculatorIcon },
     { key: "comparator", path: "/app/comparator", label: t.tabs.comparator, icon: Scale },
     { key: "riskradar", path: "/app/riskradar", label: t.tabs.riskRadar, icon: ShieldAlert },
     { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
