@@ -77,14 +77,14 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number, alwaysShow
   ctx.restore();
 
   // Preenchimento "chão" com gradiente do accent até transparente.
-  // Nota: não usar `${accent}00` (hack de alpha via sufixo hex) — os tokens
-  // de cor (--primary) são definidos em oklch() em styles.css, e
-  // "oklch(...)00" não é uma cor CSS válida, o que faz addColorStop lançar
-  // exceção e o preenchimento inteiro falhar silenciosamente (bug real
-  // encontrado durante a correção do canvas em branco: o piso visual por si
-  // só não bastava, porque este addColorStop já quebrava o fill em
-  // qualquer nível). "transparent" funciona independente do formato de cor
-  // usado no token.
+  // Nota: não usar `${accent}00` (hack de alpha via sufixo hex) — o token
+  // --primary pode estar em um formato de cor moderno (definido em
+  // styles.css) cuja forma "<cor>00" não é válida como string CSS, o que
+  // faz addColorStop lançar exceção e o preenchimento inteiro falhar
+  // silenciosamente (bug real encontrado durante a correção do canvas em
+  // branco: o piso visual por si só não bastava, porque este addColorStop
+  // já quebrava o fill em qualquer nível). "transparent" funciona
+  // independente do formato de cor usado no token.
   const gradient = ctx.createLinearGradient(0, height, 0, levelY);
   gradient.addColorStop(0, accentStrong);
   gradient.addColorStop(1, "transparent");
