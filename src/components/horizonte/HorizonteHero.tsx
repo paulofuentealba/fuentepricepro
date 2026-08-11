@@ -45,9 +45,9 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, width, height);
 
-  const accent = readColor("--h-accent", "#2c6b63");
-  const accentStrong = readColor("--h-accent-strong", "#1f4e47");
-  const line = readColor("--h-line", "#e0d9cc");
+  const accent = readColor("--primary", "#2c6b63");
+  const accentStrong = readColor("--primary", "#1f4e47");
+  const line = readColor("--border", "#e0d9cc");
 
   const clampedLevel = Math.min(100, Math.max(0, levelPercent));
   // Piso visual mínimo: mesmo em progresso perto de 0%, a faixa preenchida
@@ -223,23 +223,14 @@ export function HorizonteHero() {
   );
 
   const content = hasNoAssets ? (
-    <div
-      className="w-full flex flex-col gap-2 rounded-xl p-6"
-      style={{ backgroundColor: "var(--h-paper-raised)", border: "1px solid var(--h-line)" }}
-    >
-      <span
-        className="text-xs font-medium uppercase tracking-widest"
-        style={{ color: "var(--h-ink-soft)" }}
-      >
+    <div className="w-full flex flex-col gap-2 rounded-xl bg-card border border-border p-6">
+      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
         Horizonte FI
       </span>
-      <span
-        className="text-2xl font-semibold"
-        style={{ fontFamily: "var(--h-font-display)", color: "var(--h-ink)" }}
-      >
+      <span className="text-2xl font-semibold font-serif text-foreground">
         Registre seu primeiro aporte para começar sua jornada
       </span>
-      <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
+      <span className="text-sm text-muted-foreground">
         Assim que você adicionar um ativo à carteira, sua linha do horizonte
         rumo à independência financeira aparece aqui.
       </span>
@@ -258,18 +249,11 @@ export function HorizonteHero() {
     <div className="w-full flex flex-col gap-4">
       <header className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
-          <span
-            className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: "var(--h-ink-soft)" }}
-          >
+          <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Horizonte FI
           </span>
           <span
-            className="text-4xl font-semibold"
-            style={{
-              fontFamily: "var(--h-font-display)",
-              color: isReached ? "var(--h-accent-strong)" : "var(--h-ink)",
-            }}
+            className={`text-4xl font-semibold font-serif ${isReached ? "text-primary" : "text-foreground"}`}
           >
             {isReached
               ? "Meta atingida"
@@ -277,7 +261,7 @@ export function HorizonteHero() {
                 ? capitalLabel
                 : `${coveragePercent.toFixed(1)}%`}
           </span>
-          <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
+          <span className="text-sm text-muted-foreground">
             {needsGoalSetup
               ? "acumulados · configure sua meta de gastos mensais para ver o progresso de renda"
               : `${capitalLabel} acumulados${!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}`}
@@ -297,26 +281,19 @@ export function HorizonteHero() {
         ref={canvasRef}
         role="img"
         aria-label={ariaLabel}
-        className="w-full h-24 rounded-xl"
-        style={{ backgroundColor: "var(--h-paper-raised)" }}
+        className="w-full h-24 rounded-xl bg-card"
       />
 
       {milestones.length > 0 && (
-        <ul
-          className="flex flex-wrap gap-2 pt-3 mt-1"
-          style={{ borderTop: "1px solid var(--h-line)" }}
-        >
+        <ul className="flex flex-wrap gap-2 pt-3 mt-1 border-t border-border">
           {milestones.map((milestone) => (
             <li
               key={milestone.label}
-              className="text-xs px-3 py-1 rounded-full border"
-              style={{
-                borderColor: milestone.achieved ? "var(--h-accent)" : "var(--h-line)",
-                color: milestone.achieved ? "var(--h-accent-strong)" : "var(--h-ink-faint)",
-                backgroundColor: milestone.achieved
-                  ? "color-mix(in srgb, var(--h-accent) 12%, transparent)"
-                  : "transparent",
-              }}
+              className={`text-xs px-3 py-1 rounded-full border ${
+                milestone.achieved
+                  ? "border-primary text-primary bg-primary/10"
+                  : "border-border text-muted-foreground"
+              }`}
             >
               {milestone.achieved ? "✓ " : ""}
               {milestone.label}

@@ -48,10 +48,9 @@ const MONTHS_PT = [
   "Dez",
 ];
 
-import { calculateRealizedIncome, computeRealizedIncomeSummary, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
+import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { PortfolioIrrCard } from "./cashflow/PortfolioIrrCard";
-import { getEffectiveTransactions } from "@/lib/portfolioIrr";
 import { usePortfolioSnapshot } from "@/lib/portfolioSnapshot";
 
 interface Props {
@@ -106,28 +105,14 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   const { transactions } = useTransactions();
 
-  const effectiveTransactions = useMemo(() => {
-    return getEffectiveTransactions(transactions, items);
-  }, [transactions, items]);
-
-  const realizedEvents = useMemo(() => {
-    if (effectiveTransactions.length === 0) return [];
-    const assetMetaMap: Record<string, AssetTaxMeta> = {};
-    for (const item of items) {
-      assetMetaMap[item.ticker] = {
-        ticker: item.ticker,
-        type: item.type,
-        currency: item.currency,
-        customTaxRate: item.customTaxRate,
-      };
-    }
-    return calculateRealizedIncome(effectiveTransactions, dividendEventsMap, assetMetaMap);
-  }, [effectiveTransactions, dividendEventsMap, items]);
-
-  const realizedSummary = useMemo(
-    () => computeRealizedIncomeSummary(realizedEvents, activeCurrency),
-    [realizedEvents, activeCurrency]
-  );
+  // SSOT: dividendEventsMap/effectiveTransactions -> realizedEvents/summary
+  // vem de `useRealizedIncomeSummary` (extraído desta duplicação — ver
+  // `src/lib/useRealizedIncomeSummary.ts`). `dividendEventsMap` continua
+  // calculado localmente logo abaixo porque também alimenta
+  // `buildMonthlyBuckets`/`computeInvestedVsReceived`, que não fazem parte
+  // do escopo do hook.
+  const { events: realizedEvents, summary: realizedSummary } =
+    useRealizedIncomeSummary(activeCurrency);
 
   const { data: fxData } = useQuery(exchangeRateQueryOptions());
   const fxRate = fxData?.USDBRL ?? 5.5;

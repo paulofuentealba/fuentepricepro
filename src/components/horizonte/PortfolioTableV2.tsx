@@ -23,7 +23,7 @@ type SortDirection = "asc" | "desc";
  * Regra de design "quiet cards": sem `backdrop-blur`/glow aqui — esse
  * tratamento é exclusivo do hero (prompt 50).
  */
-export function PortfolioTableV2() {
+export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
   const { locale } = useI18n();
   const { valuedItems, quotes, isAppLoading } = useValuedPortfolio();
   const [search, setSearch] = useState("");
@@ -49,7 +49,7 @@ export function PortfolioTableV2() {
     const dyOf = (it: ValuedWatchlistItem) =>
       it.currentPrice > 0 ? it.annualDividend / it.currentPrice : 0;
 
-    return [...filtered].sort((a, b) => {
+    const result = [...filtered].sort((a, b) => {
       switch (sortKey) {
         case "class":
           return dir * a.type.localeCompare(b.type);
@@ -71,7 +71,8 @@ export function PortfolioTableV2() {
           return dir * a.ticker.localeCompare(b.ticker);
       }
     });
-  }, [filtered, sortKey, sortDirection, quotes]);
+    return typeof limit === "number" ? result.slice(0, limit) : result;
+  }, [filtered, sortKey, sortDirection, quotes, limit]);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -93,23 +94,14 @@ export function PortfolioTableV2() {
 
   if (activeItems.length === 0) {
     return (
-      <div
-        className="w-full flex flex-col gap-2 rounded-xl p-6"
-        style={{ backgroundColor: "var(--h-paper-raised)", border: "1px solid var(--h-line)" }}
-      >
-        <span
-          className="text-xs font-medium uppercase tracking-widest"
-          style={{ color: "var(--h-ink-soft)" }}
-        >
+      <div className="w-full flex flex-col gap-2 rounded-xl bg-card border border-border p-6">
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
           Horizonte FI
         </span>
-        <span
-          className="text-2xl font-semibold"
-          style={{ fontFamily: "var(--h-font-display)", color: "var(--h-ink)" }}
-        >
+        <span className="text-2xl font-semibold font-serif text-foreground">
           Registre seu primeiro aporte para começar sua jornada
         </span>
-        <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
+        <span className="text-sm text-muted-foreground">
           Assim que você adicionar um ativo à carteira, sua tabela de posições
           aparece aqui.
         </span>
@@ -119,30 +111,20 @@ export function PortfolioTableV2() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Input
-        type="search"
-        placeholder="Buscar por ticker ou nome"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="max-w-sm"
-        style={{
-          backgroundColor: "var(--h-paper-raised)",
-          borderColor: "var(--h-line)",
-          color: "var(--h-ink)",
-        }}
-      />
+      {typeof limit !== "number" && (
+        <Input
+          type="search"
+          placeholder="Buscar por ticker ou nome"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-sm bg-card border-border text-foreground"
+        />
+      )}
 
-      <div
-        className="w-full overflow-x-auto rounded-xl"
-        style={{
-          backgroundColor: "var(--h-paper-raised)",
-          border: "1px solid var(--h-line)",
-          borderRadius: "var(--h-radius-xl)",
-        }}
-      >
+      <div className="w-full overflow-x-auto rounded-xl bg-card border border-border">
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--h-line)" }}>
+            <tr className="border-b border-border">
               <SortableHeader label="Ativo" sortKey="asset" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
               <SortableHeader label="Classe" sortKey="class" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
               <SortableHeader label="Posição" sortKey="position" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
@@ -198,8 +180,8 @@ function SortableHeader({
       role="button"
       tabIndex={0}
       aria-sort={ariaSort}
-      className="px-4 py-3 font-medium uppercase tracking-wide text-xs cursor-pointer select-none whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-      style={{ color: "var(--h-ink-soft)", textAlign: align, outlineColor: "var(--h-accent)" }}
+      className="px-4 py-3 font-medium uppercase tracking-wide text-xs cursor-pointer select-none whitespace-nowrap text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      style={{ textAlign: align }}
       onClick={() => onSort(sortKey)}
       onKeyDown={handleKeyDown}
     >
@@ -223,15 +205,11 @@ function PortfolioRow({
   const pnlPositive = pnlAbsolute >= 0;
 
   return (
-    <tr style={{ borderBottom: "1px solid var(--h-line)" }}>
+    <tr className="border-b border-border">
       <td className="px-4 py-3 whitespace-nowrap">
         <div className="flex flex-col">
-          <span className="font-medium" style={{ color: "var(--h-ink)" }}>
-            {item.ticker}
-          </span>
-          <span className="text-xs" style={{ color: "var(--h-ink-soft)" }}>
-            {item.name}
-          </span>
+          <span className="font-medium text-foreground">{item.ticker}</span>
+          <span className="text-xs text-muted-foreground">{item.name}</span>
         </div>
       </td>
       <td className="px-4 py-3 whitespace-nowrap">
@@ -245,28 +223,18 @@ function PortfolioRow({
           {item.type}
         </span>
       </td>
-      <td className="px-4 py-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
-        {item.quantity}
-      </td>
-      <td className="px-4 py-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
+      <td className="px-4 py-3 text-right tabular-nums">{item.quantity}</td>
+      <td className="px-4 py-3 text-right tabular-nums">
         {item.averagePrice != null ? formatCurrency(item.averagePrice, item.currency, locale) : "—"}
       </td>
       <td
-        className="px-4 py-3 text-right"
-        style={{
-          fontVariantNumeric: "tabular-nums",
-          color: changePct == null ? "var(--h-ink-soft)" : changePct >= 0 ? "var(--h-success)" : "var(--h-danger)",
-        }}
+        className={`px-4 py-3 text-right tabular-nums ${
+          changePct == null ? "text-muted-foreground" : changePct >= 0 ? "text-success" : "text-danger"
+        }`}
       >
         {changePct == null ? "—" : `${changePct >= 0 ? "+" : ""}${formatPercent(changePct, locale, 2)}`}
       </td>
-      <td
-        className="px-4 py-3 text-right"
-        style={{
-          fontVariantNumeric: "tabular-nums",
-          color: pnlPositive ? "var(--h-success)" : "var(--h-danger)",
-        }}
-      >
+      <td className={`px-4 py-3 text-right tabular-nums ${pnlPositive ? "text-success" : "text-danger"}`}>
         <div className="flex flex-col items-end">
           <span>{formatCurrency(pnlAbsolute, item.currency, locale)}</span>
           <span className="text-xs">
@@ -275,9 +243,7 @@ function PortfolioRow({
           </span>
         </div>
       </td>
-      <td className="px-4 py-3 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
-        {formatPercent(dy, locale, 2)}
-      </td>
+      <td className="px-4 py-3 text-right tabular-nums">{formatPercent(dy, locale, 2)}</td>
     </tr>
   );
 }
