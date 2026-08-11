@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
+import { useTransactions } from "@/lib/transactions";
+import { getMonthlyNetContribution } from "@/lib/selectors/monthlyContribution";
 import { formatCurrency, formatMonthsAsYearsMonths } from "@/lib/formatters";
 import { Button } from "@/components/ui/button";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { NewContributionDialog } from "./NewContributionDialog";
 
 /**
@@ -29,7 +34,7 @@ function readColor(varName: string, fallback: string): string {
   return value || fallback;
 }
 
-function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
+function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number, alwaysShowFloor: boolean) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
@@ -55,7 +60,7 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
   // vira um retângulo quase vazio, sem função visual clara. Isso é só
   // cosmético (não altera o valor numérico exibido no header).
   const MIN_VISUAL_LEVEL_PERCENT = 8;
-  const displayLevel = clampedLevel > 0
+  const displayLevel = clampedLevel > 0 || alwaysShowFloor
     ? Math.max(clampedLevel, MIN_VISUAL_LEVEL_PERCENT)
     : 0;
   const levelY = height - (displayLevel / 100) * height;
@@ -71,10 +76,18 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
   ctx.stroke();
   ctx.restore();
 
-  // Preenchimento "chão" com gradiente do accent até transparente
+  // Preenchimento "chão" com gradiente do accent até transparente.
+  // Nota: não usar `${accent}00` (hack de alpha via sufixo hex) — os tokens
+  // de cor (--primary) são definidos em oklch() em styles.css, e
+  // "oklch(...)00" não é uma cor CSS válida, o que faz addColorStop lançar
+  // exceção e o preenchimento inteiro falhar silenciosamente (bug real
+  // encontrado durante a correção do canvas em branco: o piso visual por si
+  // só não bastava, porque este addColorStop já quebrava o fill em
+  // qualquer nível). "transparent" funciona independente do formato de cor
+  // usado no token.
   const gradient = ctx.createLinearGradient(0, height, 0, levelY);
   gradient.addColorStop(0, accentStrong);
-  gradient.addColorStop(1, `${accent}00`);
+  gradient.addColorStop(1, "transparent");
 
   ctx.fillStyle = gradient;
   ctx.beginPath();
@@ -109,13 +122,29 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
 }
 
 export function HorizonteHero() {
-  const { coveragePercent, isReached, totalCapitalBRL, monthsToFI, isSetup } = useFIProgress();
-  const { items, isAppLoading } = useValuedPortfolio();
+  const { coveragePercent, isReached, totalCapitalBRL, monthsToFI, isSetup, monthlyIncomeBRL } =
+    useFIProgress();
+  const { items, isAppLoading, valuedItems } = useValuedPortfolio();
+  const { transactions = [] } = useTransactions();
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
   const hasNoAssets = !isAppLoading && items.length === 0;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const [, forceRedraw] = useState(0);
   const [showContributionDialog, setShowContributionDialog] = useState(false);
+
+  // Quando a meta de gastos mensais não está configurada, coveragePercent
+  // é forçado a 0 por definição (não há meta para comparar a renda) — isso
+  // não deve ser confundido com "0% de progresso patrimonial". Exibir
+  // "0.0%" nesse caso, ao lado de um marco de patrimônio já batido, é
+  // contraditório (bug real reportado: R$300k acumulados + milestone de
+  // R$100k batido, mas headline mostrando 0.0%). Ver useFIProgress.ts.
+  //
+  // Pelo mesmo motivo, o canvas do horizonte precisa de um piso visual
+  // (MIN_VISUAL_LEVEL_PERCENT) mesmo com coveragePercent === 0 nesse caso
+  // específico — do contrário o card fica com o canvas em branco (bug
+  // reportado: conta com patrimônio > 0 mas sem meta configurada).
+  const needsGoalSetup = !isSetup && totalCapitalBRL > 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -126,7 +155,7 @@ export function HorizonteHero() {
     ).matches;
 
     if (prefersReducedMotion) {
-      drawHorizon(canvas, coveragePercent);
+      drawHorizon(canvas, coveragePercent, needsGoalSetup);
       return;
     }
 
@@ -139,7 +168,7 @@ export function HorizonteHero() {
       const eased = easeOutCubic(progress);
       const currentLevel = coveragePercent * eased;
 
-      drawHorizon(canvas, currentLevel);
+      drawHorizon(canvas, currentLevel, needsGoalSetup);
 
       if (progress < 1) {
         animationFrameRef.current = requestAnimationFrame(step);
@@ -154,7 +183,7 @@ export function HorizonteHero() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [coveragePercent]);
+  }, [coveragePercent, needsGoalSetup]);
 
   // Redesenha ao trocar tema claro/escuro (tokens de cor mudam via CSS,
   // mas o canvas precisa ser repintado manualmente).
@@ -164,25 +193,43 @@ export function HorizonteHero() {
     const handleChange = () => {
       forceRedraw((n) => n + 1);
       const canvas = canvasRef.current;
-      if (canvas) drawHorizon(canvas, coveragePercent);
+      if (canvas) drawHorizon(canvas, coveragePercent, needsGoalSetup);
     };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [coveragePercent]);
+  }, [coveragePercent, needsGoalSetup]);
 
   // Redesenha em resize (canvas responsivo)
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
-      if (canvas) drawHorizon(canvas, coveragePercent);
+      if (canvas) drawHorizon(canvas, coveragePercent, needsGoalSetup);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [coveragePercent]);
+  }, [coveragePercent, needsGoalSetup]);
 
   const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0);
   const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", "ptBR");
+  const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", "ptBR");
+
+  // Aporte deste mês — mesmo cálculo usado anteriormente em app/index.tsx,
+  // movido para dentro do hero (item 3 da spec de correção). Mesmo padrão de
+  // conversão de moeda de useFIProgress.ts (USD -> BRL via
+  // exchangeRateQueryOptions; demais moedas passam direto).
+  const usdRate = fx?.USDBRL ?? 5.5;
+  const currencyByTicker = useMemo(() => {
+    const map: Record<string, "BRL" | "USD"> = {};
+    for (const item of valuedItems) map[item.ticker] = item.currency;
+    return map;
+  }, [valuedItems]);
+  const convertToBRL = (value: number, curr: string) => (curr === "USD" ? value * usdRate : value);
+  const monthlyContribution = useMemo(
+    () => getMonthlyNetContribution(transactions, Date.now(), convertToBRL, currencyByTicker),
+    [transactions, usdRate, currencyByTicker],
+  );
+  const monthlyContributionLabel = formatCurrency(monthlyContribution, "BRL", "ptBR");
 
   const milestones: { label: string; achieved: boolean }[] = [];
   if (totalCapitalBRL > 0) {
@@ -197,14 +244,6 @@ export function HorizonteHero() {
       achieved: coveragePercent >= 50,
     });
   }
-
-  // Quando a meta de gastos mensais não está configurada, coveragePercent
-  // é forçado a 0 por definição (não há meta para comparar a renda) — isso
-  // não deve ser confundido com "0% de progresso patrimonial". Exibir
-  // "0.0%" nesse caso, ao lado de um marco de patrimônio já batido, é
-  // contraditório (bug real reportado: R$300k acumulados + milestone de
-  // R$100k batido, mas headline mostrando 0.0%). Ver useFIProgress.ts.
-  const needsGoalSetup = !isSetup && totalCapitalBRL > 0;
 
   const ariaLabel = isReached
     ? "Linha do horizonte: meta de independência financeira atingida"
@@ -267,14 +306,30 @@ export function HorizonteHero() {
               : `${capitalLabel} acumulados${!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}`}
           </span>
         </div>
-        <Button
-          size="sm"
-          className="gap-1.5 shrink-0"
-          onClick={() => setShowContributionDialog(true)}
-        >
-          <PlusCircle className="h-4 w-4" />
-          Registrar aporte
-        </Button>
+        <div className="flex flex-col items-start gap-2 sm:items-end shrink-0">
+          <div className="flex flex-col items-start gap-1 sm:items-end">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              Aporte deste mês
+              <InfoTooltip content='"Aporte deste mês" é uma aproximação baseada nas transações registradas este mês (compra menos venda) — não é um extrato de aportes reais.' />
+            </span>
+            <span className="text-sm font-medium text-foreground">{monthlyContributionLabel}</span>
+          </div>
+          <div className="flex flex-col items-start gap-1 sm:items-end">
+            <span className="text-xs text-muted-foreground">Renda passiva atual</span>
+            <span className="text-sm font-medium text-foreground">
+              {passiveIncomeLabel}
+              <span className="text-xs text-muted-foreground">/mês</span>
+            </span>
+          </div>
+          <Button
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setShowContributionDialog(true)}
+          >
+            <PlusCircle className="h-4 w-4" />
+            Registrar aporte
+          </Button>
+        </div>
       </header>
 
       <canvas

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { HorizonteHero } from "@/components/horizonte/HorizonteHero";
 import { PortfolioTableV2 } from "@/components/horizonte/PortfolioTableV2";
@@ -11,21 +10,20 @@ import { db } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useFIProgress } from "@/lib/useFIProgress";
-import { useTransactions } from "@/lib/transactions";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { getLargestPosition } from "@/lib/selectors/largestPosition";
-import { getMonthlyNetContribution } from "@/lib/selectors/monthlyContribution";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
-import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { PlusCircle } from "lucide-react";
 
 /**
  * Home real de `/app` (rota sem redirect). Substitui a antiga rota
  * paralela `/app-v2` (ver Prompt "Correção Mover Horizonte FI para
- * Produção"): hero "Horizonte FI" + grid de 4 cards de resumo (patrimônio
- * total, proventos do ano, maior posição, aporte do mês) + prévia da
- * tabela de carteira (4 primeiras linhas, link "Ver tudo").
+ * Produção"): hero "Horizonte FI" (que já inclui "Aporte deste mês" e
+ * "Renda passiva atual" no cabeçalho — ver
+ * `components/horizonte/HorizonteHero.tsx`) + grid de 3 cards de resumo
+ * (patrimônio total, proventos do ano, maior posição) + prévia da tabela de
+ * carteira (4 primeiras linhas, link "Ver tudo").
  *
  * `useRealizedIncomeSummary()` é o SSOT de proventos realizados,
  * compartilhado com `CashFlowCalendar.tsx` — não há mais lógica de
@@ -74,10 +72,8 @@ function AppHome() {
   const { locale } = useI18n();
   const { user } = useAuth();
   const { valuedItems, totals, isAppLoading, quotes } = useValuedPortfolio();
-  const { transactions = [] } = useTransactions();
   const { summary: realizedSummary, isLoading: isRealizedLoading } = useRealizedIncomeSummary("BRL");
   const { coveragePercent } = useFIProgress();
-  const { data: fx } = useQuery(exchangeRateQueryOptions());
   const [showContributionDialog, setShowContributionDialog] = useState(false);
   const [previousSnapshot, setPreviousSnapshot] = useState<LastVisitSnapshot | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
@@ -108,21 +104,6 @@ function AppHome() {
           positive: largestPositionChangePct >= 0,
         }
       : null;
-
-  // Aporte deste mês — mesmo padrão de conversão de moeda de useFIProgress.ts
-  // (USD -> BRL via exchangeRateQueryOptions; demais moedas passam direto).
-  const usdRate = fx?.USDBRL ?? 5.5;
-  const currencyByTicker = useMemo(() => {
-    const map: Record<string, "BRL" | "USD"> = {};
-    for (const item of valuedItems) map[item.ticker] = item.currency;
-    return map;
-  }, [valuedItems]);
-  const convertToBRL = (value: number, curr: string) => (curr === "USD" ? value * usdRate : value);
-  const monthlyContribution = useMemo(
-    () => getMonthlyNetContribution(transactions, Date.now(), convertToBRL, currencyByTicker),
-    [transactions, usdRate, currencyByTicker],
-  );
-  const monthlyContributionLabel = formatCurrency(monthlyContribution, "BRL", locale);
 
   // Snapshot leve de "última visita" — users/{uid}.lastVisitSnapshot,
   // sobrescrito a cada carregamento, sem histórico (Parte 5 da spec). Lê o
@@ -178,7 +159,7 @@ function AppHome() {
         <p className="-mt-6 text-xs text-muted-foreground">{coverageDeltaLabel}</p>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <SummaryCard label="Patrimônio total" value={netWorthLabel} isLoading={isAppLoading} />
         <SummaryCard
           label="Proventos recebidos (ano)"
@@ -191,15 +172,6 @@ function AppHome() {
           delta={largestPositionDelta}
           isLoading={isAppLoading}
         />
-        <SummaryCard
-          label="Aporte deste mês"
-          value={monthlyContributionLabel}
-          isLoading={isAppLoading}
-        />
-        <p className="col-span-full -mt-2 text-xs text-muted-foreground">
-          "Aporte deste mês" é uma aproximação baseada nas transações registradas este mês
-          (compra menos venda) — não é um extrato de aportes reais.
-        </p>
       </div>
 
       <div className="flex flex-col gap-3">
