@@ -87,6 +87,7 @@ describe("useFIProgress", () => {
     expect(result.current.coveragePercent).toBeCloseTo(0.5, 5);
     expect(result.current.isReached).toBe(false);
     expect(result.current.monthsToFI).not.toBeNull();
+    expect(result.current.isSetup).toBe(true);
   });
 
   it("retorna isReached true quando a meta é atingida", () => {
@@ -129,5 +130,27 @@ describe("useFIProgress", () => {
     expect(result.current.isReached).toBe(false);
     expect(Number.isNaN(result.current.monthsToFI as any)).toBe(false);
     expect(result.current.monthsToFI).toBeNull();
+  });
+
+  it("expõe isSetup=false e coveragePercent=0 quando a meta de gastos não está configurada, mesmo com patrimônio positivo (bug real: Horizonte FI mostrando 0.0% com R$300k acumulados e milestone batido)", () => {
+    mockUseUserSettings.mockReturnValue({
+      settings: {
+        displayCurrency: "BRL",
+        monthlyLivingCostGoal: undefined,
+        estimatedMonthlyContribution: undefined,
+        targetYield: 6,
+      },
+    });
+    mockUseValuedPortfolio.mockReturnValue({
+      valuedItems: [makeItem({ quantity: 6000, currentPrice: 50.0675, annualDividend: 3 })],
+    });
+
+    const { result } = renderHook(() => useFIProgress());
+
+    // Patrimônio positivo (~R$300k), mas sem meta configurada.
+    expect(result.current.totalCapitalBRL).toBeGreaterThan(100_000);
+    expect(result.current.isSetup).toBe(false);
+    expect(result.current.coveragePercent).toBe(0);
+    expect(result.current.isReached).toBe(false);
   });
 });

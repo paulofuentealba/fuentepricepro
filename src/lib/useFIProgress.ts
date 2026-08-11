@@ -11,6 +11,15 @@ export interface FIProgressResult {
   totalCapitalBRL: number;
   monthlyIncomeBRL: number;
   monthsToFI: number | null;
+  /**
+   * Indica se o usuário já configurou uma meta de gastos mensais
+   * (`monthlyLivingCostGoal`). Quando `false`, `coveragePercent` é
+   * forçado a 0 por falta de meta — não por falta de progresso — e
+   * consumidores devem evitar exibir "0.0%" como se fosse ausência de
+   * patrimônio (ver `totalCapitalBRL`/`isSetup` para diferenciar os dois
+   * casos).
+   */
+  isSetup: boolean;
 }
 
 /**
@@ -130,5 +139,6 @@ export function useFIProgress(): FIProgressResult {
     totalCapitalBRL,
     monthlyIncomeBRL,
     monthsToFI,
+    isSetup,
   };
 }

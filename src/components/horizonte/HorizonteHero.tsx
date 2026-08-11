@@ -98,7 +98,7 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
 }
 
 export function HorizonteHero() {
-  const { coveragePercent, isReached, totalCapitalBRL, monthsToFI } = useFIProgress();
+  const { coveragePercent, isReached, totalCapitalBRL, monthsToFI, isSetup } = useFIProgress();
   const { items, isAppLoading } = useValuedPortfolio();
   const hasNoAssets = !isAppLoading && items.length === 0;
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -186,9 +186,19 @@ export function HorizonteHero() {
     });
   }
 
+  // Quando a meta de gastos mensais não está configurada, coveragePercent
+  // é forçado a 0 por definição (não há meta para comparar a renda) — isso
+  // não deve ser confundido com "0% de progresso patrimonial". Exibir
+  // "0.0%" nesse caso, ao lado de um marco de patrimônio já batido, é
+  // contraditório (bug real reportado: R$300k acumulados + milestone de
+  // R$100k batido, mas headline mostrando 0.0%). Ver useFIProgress.ts.
+  const needsGoalSetup = !isSetup && totalCapitalBRL > 0;
+
   const ariaLabel = isReached
     ? "Linha do horizonte: meta de independência financeira atingida"
-    : `Linha do horizonte em ${coveragePercent.toFixed(0)}% de progresso`;
+    : needsGoalSetup
+      ? `Linha do horizonte: patrimônio de ${capitalLabel}, configure sua meta de gastos para ver o progresso de renda`
+      : `Linha do horizonte em ${coveragePercent.toFixed(0)}% de progresso`;
 
   if (hasNoAssets) {
     return (
@@ -232,11 +242,16 @@ export function HorizonteHero() {
             color: isReached ? "var(--h-accent-strong)" : "var(--h-ink)",
           }}
         >
-          {isReached ? "Meta atingida" : `${coveragePercent.toFixed(1)}%`}
+          {isReached
+            ? "Meta atingida"
+            : needsGoalSetup
+              ? capitalLabel
+              : `${coveragePercent.toFixed(1)}%`}
         </span>
         <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
-          {capitalLabel} acumulados
-          {!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}
+          {needsGoalSetup
+            ? "acumulados · configure sua meta de gastos mensais para ver o progresso de renda"
+            : `${capitalLabel} acumulados${!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}`}
         </span>
       </header>
 
