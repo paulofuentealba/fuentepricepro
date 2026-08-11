@@ -119,6 +119,29 @@ cenários foi verificada por inspeção de código contra `useFIProgress()`:
   neste componente novo. Se for necessário internacionalizar futuramente,
   fica registrado aqui como pendência.
 
+## Adendo (sessão seguinte)
+
+Ao retomar esta atividade em uma sessão posterior, o componente já estava
+implementado e commitado (`b50b136`), mas havia uma alteração local não
+commitada: um estado vazio ("Registre seu primeiro aporte para começar sua
+jornada") exibido quando `useValuedPortfolio()` indica carteira vazia
+(`items.length === 0` e `!isAppLoading`). Essa mudança:
+
+- Usa apenas dado real (`useValuedPortfolio`), sem número mockado.
+- Evita mostrar "0.0%" travado/sem contexto para usuário sem nenhum ativo
+  cadastrado — cenário não coberto explicitamente no prompt original, mas
+  consistente com o critério "nenhum número é mockado" (0% sem contexto
+  seria enganoso).
+- Não altera nenhum dos 3 cenários de validação já descritos acima.
+
+Testes revalidados nesta sessão:
+- `npx tsc --noEmit -p .`: sem erros.
+- `npm run test`: `Test Files 34 passed | 1 skipped (35)`, `Tests 221 passed | 4 skipped (225)`.
+- `npm run build`: concluído com sucesso (`✓ built in 712ms`, apenas o
+  warning pré-existente de chunk size).
+
+Commit desta sessão: `Horizonte FI 50 - Estado vazio sem ativos no hero canvas`.
+
 ## Fora de escopo (conforme o prompt)
 
 - Integração do componente na rota `/app-v2` — fica para o prompt 51.

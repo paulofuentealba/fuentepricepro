@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useFIProgress } from "@/lib/useFIProgress";
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { formatCurrency, formatMonthsAsYearsMonths } from "@/lib/formatters";
 
 /**
@@ -98,6 +99,8 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
 
 export function HorizonteHero() {
   const { coveragePercent, isReached, totalCapitalBRL, monthsToFI } = useFIProgress();
+  const { items, isAppLoading } = useValuedPortfolio();
+  const hasNoAssets = !isAppLoading && items.length === 0;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const [, forceRedraw] = useState(0);
@@ -186,6 +189,32 @@ export function HorizonteHero() {
   const ariaLabel = isReached
     ? "Linha do horizonte: meta de independência financeira atingida"
     : `Linha do horizonte em ${coveragePercent.toFixed(0)}% de progresso`;
+
+  if (hasNoAssets) {
+    return (
+      <div
+        className="w-full flex flex-col gap-2 rounded-xl p-6"
+        style={{ backgroundColor: "var(--h-paper-raised)", border: "1px solid var(--h-line)" }}
+      >
+        <span
+          className="text-xs font-medium uppercase tracking-widest"
+          style={{ color: "var(--h-ink-soft)" }}
+        >
+          Horizonte FI
+        </span>
+        <span
+          className="text-2xl font-semibold"
+          style={{ fontFamily: "var(--h-font-display)", color: "var(--h-ink)" }}
+        >
+          Registre seu primeiro aporte para começar sua jornada
+        </span>
+        <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
+          Assim que você adicionar um ativo à carteira, sua linha do horizonte
+          rumo à independência financeira aparece aqui.
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col gap-4">
