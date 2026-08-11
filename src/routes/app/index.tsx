@@ -3,7 +3,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { HorizonteHero } from "@/components/horizonte/HorizonteHero";
 import { PortfolioTableV2 } from "@/components/horizonte/PortfolioTableV2";
-import { NewContributionDialog } from "@/components/horizonte/NewContributionDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/integrations/firebase/client";
@@ -14,7 +13,6 @@ import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { getLargestPosition } from "@/lib/selectors/largestPosition";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
-import { PlusCircle } from "lucide-react";
 
 /**
  * Home real de `/app` (rota sem redirect). Substitui a antiga rota
@@ -74,7 +72,6 @@ function AppHome() {
   const { valuedItems, totals, isAppLoading, quotes } = useValuedPortfolio();
   const { summary: realizedSummary, isLoading: isRealizedLoading } = useRealizedIncomeSummary("BRL");
   const { coveragePercent } = useFIProgress();
-  const [showContributionDialog, setShowContributionDialog] = useState(false);
   const [previousSnapshot, setPreviousSnapshot] = useState<LastVisitSnapshot | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
 
@@ -181,23 +178,10 @@ function AppHome() {
             <Button size="sm" variant="outline" className="gap-1.5" asChild>
               <Link to="/app/myportfolio">Ver tudo</Link>
             </Button>
-            <Button
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setShowContributionDialog(true)}
-            >
-              <PlusCircle className="h-4 w-4" />
-              Registrar aporte
-            </Button>
           </div>
         </div>
         <PortfolioTableV2 limit={4} />
       </div>
-
-      <NewContributionDialog
-        open={showContributionDialog}
-        onOpenChange={setShowContributionDialog}
-      />
     </div>
   );
 }
