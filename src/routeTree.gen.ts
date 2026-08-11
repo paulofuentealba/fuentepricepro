@@ -29,6 +29,7 @@ import { Route as AppComparatorRouteImport } from './routes/app.comparator'
 import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
 import { Route as AppV2ScreenerRouteImport } from './routes/app-v2/screener'
 import { Route as AppV2MyportfolioRouteImport } from './routes/app-v2/myportfolio'
+import { Route as AppV2GlobalradarRouteImport } from './routes/app-v2/globalradar'
 import { Route as AppV2ComparatorRouteImport } from './routes/app-v2/comparator'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -132,6 +133,11 @@ const AppV2MyportfolioRoute = AppV2MyportfolioRouteImport.update({
   path: '/myportfolio',
   getParentRoute: () => AppV2Route,
 } as any)
+const AppV2GlobalradarRoute = AppV2GlobalradarRouteImport.update({
+  id: '/globalradar',
+  path: '/globalradar',
+  getParentRoute: () => AppV2Route,
+} as any)
 const AppV2ComparatorRoute = AppV2ComparatorRouteImport.update({
   id: '/comparator',
   path: '/comparator',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app-v2/comparator': typeof AppV2ComparatorRoute
+  '/app-v2/globalradar': typeof AppV2GlobalradarRoute
   '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
   '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app-v2/comparator': typeof AppV2ComparatorRoute
+  '/app-v2/globalradar': typeof AppV2GlobalradarRoute
   '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
   '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app-v2/comparator': typeof AppV2ComparatorRoute
+  '/app-v2/globalradar': typeof AppV2GlobalradarRoute
   '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
   '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app-v2/comparator'
+    | '/app-v2/globalradar'
     | '/app-v2/myportfolio'
     | '/app-v2/screener'
     | '/app/cashflow'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app-v2/comparator'
+    | '/app-v2/globalradar'
     | '/app-v2/myportfolio'
     | '/app-v2/screener'
     | '/app/cashflow'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/app-v2/comparator'
+    | '/app-v2/globalradar'
     | '/app-v2/myportfolio'
     | '/app-v2/screener'
     | '/app/cashflow'
@@ -428,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppV2MyportfolioRouteImport
       parentRoute: typeof AppV2Route
     }
+    '/app-v2/globalradar': {
+      id: '/app-v2/globalradar'
+      path: '/globalradar'
+      fullPath: '/app-v2/globalradar'
+      preLoaderRoute: typeof AppV2GlobalradarRouteImport
+      parentRoute: typeof AppV2Route
+    }
     '/app-v2/comparator': {
       id: '/app-v2/comparator'
       path: '/comparator'
@@ -468,6 +487,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface AppV2RouteChildren {
   AppV2ComparatorRoute: typeof AppV2ComparatorRoute
+  AppV2GlobalradarRoute: typeof AppV2GlobalradarRoute
   AppV2MyportfolioRoute: typeof AppV2MyportfolioRoute
   AppV2ScreenerRoute: typeof AppV2ScreenerRoute
   AppV2IndexRoute: typeof AppV2IndexRoute
@@ -475,6 +495,7 @@ interface AppV2RouteChildren {
 
 const AppV2RouteChildren: AppV2RouteChildren = {
   AppV2ComparatorRoute: AppV2ComparatorRoute,
+  AppV2GlobalradarRoute: AppV2GlobalradarRoute,
   AppV2MyportfolioRoute: AppV2MyportfolioRoute,
   AppV2ScreenerRoute: AppV2ScreenerRoute,
   AppV2IndexRoute: AppV2IndexRoute,

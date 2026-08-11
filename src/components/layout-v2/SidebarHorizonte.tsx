@@ -34,7 +34,7 @@ export function SidebarHorizonte() {
     { key: "screener", path: "/app-v2/screener", label: t.tabs.calculator, icon: CalculatorIcon },
     { key: "comparator", path: "/app-v2/comparator", label: t.tabs.comparator, icon: Scale },
     { key: "riskradar", path: "/app/riskradar", label: t.tabs.riskRadar, icon: ShieldAlert },
-    { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
+    { key: "globalradar", path: "/app-v2/globalradar", label: t.tabs.radar, icon: Sparkles },
     {
       key: "cashflow",
       path: "/app/cashflow",
