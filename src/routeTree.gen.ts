@@ -12,11 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AppV2RouteImport } from './routes/app-v2'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
-import { Route as AppV2IndexRouteImport } from './routes/app-v2/index'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
 import { Route as AppSmartallocationRouteImport } from './routes/app/smartallocation'
@@ -27,11 +25,6 @@ import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
 import { Route as AppDocsRouteImport } from './routes/app/docs'
 import { Route as AppComparatorRouteImport } from './routes/app.comparator'
 import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
-import { Route as AppV2ScreenerRouteImport } from './routes/app-v2/screener'
-import { Route as AppV2RiskradarRouteImport } from './routes/app-v2/riskradar'
-import { Route as AppV2MyportfolioRouteImport } from './routes/app-v2/myportfolio'
-import { Route as AppV2GlobalradarRouteImport } from './routes/app-v2/globalradar'
-import { Route as AppV2ComparatorRouteImport } from './routes/app-v2/comparator'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -48,11 +41,6 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppV2Route = AppV2RouteImport.update({
-  id: '/app-v2',
-  path: '/app-v2',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -67,11 +55,6 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
-} as any)
-const AppV2IndexRoute = AppV2IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppV2Route,
 } as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   id: '/guides/dividend-valuation',
@@ -124,44 +107,13 @@ const AppCashflowRoute = AppCashflowRouteImport.update({
   path: '/cashflow',
   getParentRoute: () => AppRoute,
 } as any)
-const AppV2ScreenerRoute = AppV2ScreenerRouteImport.update({
-  id: '/screener',
-  path: '/screener',
-  getParentRoute: () => AppV2Route,
-} as any)
-const AppV2RiskradarRoute = AppV2RiskradarRouteImport.update({
-  id: '/riskradar',
-  path: '/riskradar',
-  getParentRoute: () => AppV2Route,
-} as any)
-const AppV2MyportfolioRoute = AppV2MyportfolioRouteImport.update({
-  id: '/myportfolio',
-  path: '/myportfolio',
-  getParentRoute: () => AppV2Route,
-} as any)
-const AppV2GlobalradarRoute = AppV2GlobalradarRouteImport.update({
-  id: '/globalradar',
-  path: '/globalradar',
-  getParentRoute: () => AppV2Route,
-} as any)
-const AppV2ComparatorRoute = AppV2ComparatorRouteImport.update({
-  id: '/comparator',
-  path: '/comparator',
-  getParentRoute: () => AppV2Route,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/app-v2': typeof AppV2RouteWithChildren
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/app-v2/comparator': typeof AppV2ComparatorRoute
-  '/app-v2/globalradar': typeof AppV2GlobalradarRoute
-  '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
-  '/app-v2/riskradar': typeof AppV2RiskradarRoute
-  '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
@@ -172,7 +124,6 @@ export interface FileRoutesByFullPath {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
-  '/app-v2/': typeof AppV2IndexRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -180,11 +131,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/app-v2/comparator': typeof AppV2ComparatorRoute
-  '/app-v2/globalradar': typeof AppV2GlobalradarRoute
-  '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
-  '/app-v2/riskradar': typeof AppV2RiskradarRoute
-  '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
@@ -195,22 +141,15 @@ export interface FileRoutesByTo {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
-  '/app-v2': typeof AppV2IndexRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/app-v2': typeof AppV2RouteWithChildren
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/app-v2/comparator': typeof AppV2ComparatorRoute
-  '/app-v2/globalradar': typeof AppV2GlobalradarRoute
-  '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
-  '/app-v2/riskradar': typeof AppV2RiskradarRoute
-  '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
@@ -221,7 +160,6 @@ export interface FileRoutesById {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
-  '/app-v2/': typeof AppV2IndexRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,15 +167,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
-    | '/app-v2'
     | '/auth'
     | '/settings'
     | '/sitemap.xml'
-    | '/app-v2/comparator'
-    | '/app-v2/globalradar'
-    | '/app-v2/myportfolio'
-    | '/app-v2/riskradar'
-    | '/app-v2/screener'
     | '/app/cashflow'
     | '/app/comparator'
     | '/app/docs'
@@ -248,7 +180,6 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
-    | '/app-v2/'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -256,11 +187,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/settings'
     | '/sitemap.xml'
-    | '/app-v2/comparator'
-    | '/app-v2/globalradar'
-    | '/app-v2/myportfolio'
-    | '/app-v2/riskradar'
-    | '/app-v2/screener'
     | '/app/cashflow'
     | '/app/comparator'
     | '/app/docs'
@@ -271,21 +197,14 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
-    | '/app-v2'
     | '/app'
   id:
     | '__root__'
     | '/'
     | '/app'
-    | '/app-v2'
     | '/auth'
     | '/settings'
     | '/sitemap.xml'
-    | '/app-v2/comparator'
-    | '/app-v2/globalradar'
-    | '/app-v2/myportfolio'
-    | '/app-v2/riskradar'
-    | '/app-v2/screener'
     | '/app/cashflow'
     | '/app/comparator'
     | '/app/docs'
@@ -296,14 +215,12 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
-    | '/app-v2/'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  AppV2Route: typeof AppV2RouteWithChildren
   AuthRoute: typeof AuthRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -333,13 +250,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app-v2': {
-      id: '/app-v2'
-      path: '/app-v2'
-      fullPath: '/app-v2'
-      preLoaderRoute: typeof AppV2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -360,13 +270,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
-    }
-    '/app-v2/': {
-      id: '/app-v2/'
-      path: '/'
-      fullPath: '/app-v2/'
-      preLoaderRoute: typeof AppV2IndexRouteImport
-      parentRoute: typeof AppV2Route
     }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
@@ -438,41 +341,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCashflowRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app-v2/screener': {
-      id: '/app-v2/screener'
-      path: '/screener'
-      fullPath: '/app-v2/screener'
-      preLoaderRoute: typeof AppV2ScreenerRouteImport
-      parentRoute: typeof AppV2Route
-    }
-    '/app-v2/riskradar': {
-      id: '/app-v2/riskradar'
-      path: '/riskradar'
-      fullPath: '/app-v2/riskradar'
-      preLoaderRoute: typeof AppV2RiskradarRouteImport
-      parentRoute: typeof AppV2Route
-    }
-    '/app-v2/myportfolio': {
-      id: '/app-v2/myportfolio'
-      path: '/myportfolio'
-      fullPath: '/app-v2/myportfolio'
-      preLoaderRoute: typeof AppV2MyportfolioRouteImport
-      parentRoute: typeof AppV2Route
-    }
-    '/app-v2/globalradar': {
-      id: '/app-v2/globalradar'
-      path: '/globalradar'
-      fullPath: '/app-v2/globalradar'
-      preLoaderRoute: typeof AppV2GlobalradarRouteImport
-      parentRoute: typeof AppV2Route
-    }
-    '/app-v2/comparator': {
-      id: '/app-v2/comparator'
-      path: '/comparator'
-      fullPath: '/app-v2/comparator'
-      preLoaderRoute: typeof AppV2ComparatorRouteImport
-      parentRoute: typeof AppV2Route
-    }
   }
 }
 
@@ -504,30 +372,9 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface AppV2RouteChildren {
-  AppV2ComparatorRoute: typeof AppV2ComparatorRoute
-  AppV2GlobalradarRoute: typeof AppV2GlobalradarRoute
-  AppV2MyportfolioRoute: typeof AppV2MyportfolioRoute
-  AppV2RiskradarRoute: typeof AppV2RiskradarRoute
-  AppV2ScreenerRoute: typeof AppV2ScreenerRoute
-  AppV2IndexRoute: typeof AppV2IndexRoute
-}
-
-const AppV2RouteChildren: AppV2RouteChildren = {
-  AppV2ComparatorRoute: AppV2ComparatorRoute,
-  AppV2GlobalradarRoute: AppV2GlobalradarRoute,
-  AppV2MyportfolioRoute: AppV2MyportfolioRoute,
-  AppV2RiskradarRoute: AppV2RiskradarRoute,
-  AppV2ScreenerRoute: AppV2ScreenerRoute,
-  AppV2IndexRoute: AppV2IndexRoute,
-}
-
-const AppV2RouteWithChildren = AppV2Route._addFileChildren(AppV2RouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  AppV2Route: AppV2RouteWithChildren,
   AuthRoute: AuthRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
