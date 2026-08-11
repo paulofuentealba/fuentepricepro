@@ -69,3 +69,28 @@ export function displayTicker(ticker: string): string {
   // used to implement the same suffix-stripping logic twice, out of sync.
   return cleanTicker(ticker);
 }
+
+/**
+ * Formata uma duração em meses como "X anos e Y meses" (pt-BR).
+ *
+ * - `months <= 0` -> "" (nada a formatar; caller decide o texto de "atingido").
+ * - `!Number.isFinite(months)` -> "" (nunca imprime "Infinity anos").
+ * - Singular/plural tratado ("1 ano" vs "2 anos", "1 mês" vs "2 meses").
+ * - Quando só há anos (ou só meses), omite a parte zerada em vez de "0 meses".
+ */
+export function formatMonthsAsYearsMonths(months: number): string {
+  if (!Number.isFinite(months) || months <= 0) return "";
+
+  const totalMonths = Math.round(months);
+  const years = Math.floor(totalMonths / 12);
+  const remainingMonths = totalMonths % 12;
+
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${years} ${years === 1 ? "ano" : "anos"}`);
+  if (remainingMonths > 0) {
+    parts.push(`${remainingMonths} ${remainingMonths === 1 ? "mês" : "meses"}`);
+  }
+
+  if (parts.length === 0) return "menos de 1 mês";
+  return parts.join(" e ");
+}
