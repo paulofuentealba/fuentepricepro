@@ -1054,6 +1054,7 @@ export const ptBR = {
     confirmDelete: "Excluir esta transação?",
     calculatedFromTransactions: "Calculado a partir de {n} transações. Para editar, gerencie o histórico de transações nos detalhes do ativo.",
     csvImportAdjustment: "Ajuste via importação CSV",
+    manualAdjustment: "Ajuste manual de posição",
   },
   onboarding: {
     welcome: {

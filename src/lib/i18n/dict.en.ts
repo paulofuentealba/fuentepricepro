@@ -1044,6 +1044,7 @@ export const en = {
     confirmDelete: "Delete this transaction?",
     calculatedFromTransactions: "Calculated from {n} transactions. To edit, manage the transaction history in the asset details.",
     csvImportAdjustment: "Adjustment via CSV import",
+    manualAdjustment: "Manual position adjustment",
   },
   onboarding: {
     welcome: {

@@ -102,3 +102,131 @@ describe("getQuantityAtDate", () => {
     expect(getQuantityAtDate(transactions, 500)).toBe(90);
   });
 });
+
+describe("Synthetic transaction emission on manual position edit (EditItemDialog / handleDialogSave)", () => {
+  function processManualEdit(
+    editing: { ticker: string; quantity: number; averagePrice: number; investingSince?: number; currentPrice: number },
+    patch: { quantity?: number; averagePrice?: number; investingSince?: number },
+    existingTxs: Transaction[],
+    manualNote: string = "Ajuste manual de posição"
+  ): Transaction[] {
+    const targetQty = patch.quantity ?? editing.quantity;
+    const targetAvgPrice = patch.averagePrice ?? editing.averagePrice;
+    const workingTxs = [...existingTxs];
+
+    if (targetQty != null && targetQty >= 0) {
+      const existingAssetTxs = workingTxs.filter((tx) => tx.ticker === editing.ticker);
+      const currentHolding = recalculateHoldingFromTransactions(existingAssetTxs);
+      const currentQty = currentHolding.quantity;
+      const currentAvgPrice = currentHolding.averagePrice;
+
+      const delta = targetQty - currentQty;
+      const txTimestamp = 1700000000000;
+
+      if (existingAssetTxs.length === 0 && targetQty > 0) {
+        const txDate = patch.investingSince ?? editing.investingSince ?? txTimestamp;
+        workingTxs.push({
+          id: `tx-manual-${editing.ticker}-${txTimestamp}`,
+          ticker: editing.ticker,
+          type: "buy",
+          date: txDate,
+          quantity: targetQty,
+          pricePerShare: targetAvgPrice && targetAvgPrice > 0 ? targetAvgPrice : editing.currentPrice,
+          fees: null,
+          notes: manualNote,
+        });
+      } else if (delta > 0) {
+        const targetTotalCost = targetQty * (targetAvgPrice && targetAvgPrice > 0 ? targetAvgPrice : currentAvgPrice);
+        const currentTotalCost = currentQty * currentAvgPrice;
+        const requiredCostForDelta = targetTotalCost - currentTotalCost;
+        const pricePerShare = requiredCostForDelta > 0 ? requiredCostForDelta / delta : (targetAvgPrice || currentAvgPrice);
+        const buyPrice = pricePerShare > 0 ? pricePerShare : (targetAvgPrice || currentAvgPrice);
+
+        workingTxs.push({
+          id: `tx-manual-${editing.ticker}-${txTimestamp}`,
+          ticker: editing.ticker,
+          type: "buy",
+          date: txTimestamp,
+          quantity: delta,
+          pricePerShare: buyPrice,
+          fees: null,
+          notes: manualNote,
+        });
+      } else if (delta < 0) {
+        const absDelta = Math.abs(delta);
+        const sellPrice = targetAvgPrice && targetAvgPrice > 0 ? targetAvgPrice : currentAvgPrice;
+        workingTxs.push({
+          id: `tx-manual-${editing.ticker}-${txTimestamp}`,
+          ticker: editing.ticker,
+          type: "sell",
+          date: txTimestamp,
+          quantity: absDelta,
+          pricePerShare: sellPrice,
+          fees: null,
+          notes: manualNote,
+        });
+      }
+    }
+    return workingTxs;
+  }
+
+  it("emits a synthetic buy transaction when quantity is increased manually", () => {
+    const initialTxs: Transaction[] = [
+      { id: "tx1", ticker: "PETR4", type: "buy", date: 1000, quantity: 100, pricePerShare: 30 },
+    ];
+    const editing = { ticker: "PETR4", quantity: 100, averagePrice: 30, currentPrice: 35 };
+    const patch = { quantity: 150, averagePrice: 32 };
+
+    const updatedTxs = processManualEdit(editing, patch, initialTxs);
+
+    expect(updatedTxs).toHaveLength(2);
+    const syntheticTx = updatedTxs[1];
+    expect(syntheticTx.type).toBe("buy");
+    expect(syntheticTx.quantity).toBe(50);
+    expect(syntheticTx.notes).toBe("Ajuste manual de posição");
+
+    // Target total cost: 150 * 32 = 4800. Initial cost: 100 * 30 = 3000. Delta cost: 1800 / 50 = 36.
+    expect(syntheticTx.pricePerShare).toBe(36);
+
+    const finalHolding = recalculateHoldingFromTransactions(updatedTxs);
+    expect(finalHolding.quantity).toBe(150);
+    expect(finalHolding.averagePrice).toBeCloseTo(32, 2);
+  });
+
+  it("emits a synthetic sell transaction when quantity is decreased manually", () => {
+    const initialTxs: Transaction[] = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: 1000, quantity: 200, pricePerShare: 60 },
+    ];
+    const editing = { ticker: "VALE3", quantity: 200, averagePrice: 60, currentPrice: 65 };
+    const patch = { quantity: 120 };
+
+    const updatedTxs = processManualEdit(editing, patch, initialTxs);
+
+    expect(updatedTxs).toHaveLength(2);
+    const syntheticTx = updatedTxs[1];
+    expect(syntheticTx.type).toBe("sell");
+    expect(syntheticTx.quantity).toBe(80);
+    expect(syntheticTx.notes).toBe("Ajuste manual de posição");
+
+    const finalHolding = recalculateHoldingFromTransactions(updatedTxs);
+    expect(finalHolding.quantity).toBe(120);
+    expect(finalHolding.averagePrice).toBe(60);
+  });
+
+  it("creates initial buy transaction when asset has 0 prior transactions", () => {
+    const editing = { ticker: "WEGE3", quantity: 0, averagePrice: 0, currentPrice: 40 };
+    const patch = { quantity: 50, averagePrice: 42 };
+
+    const updatedTxs = processManualEdit(editing, patch, []);
+
+    expect(updatedTxs).toHaveLength(1);
+    expect(updatedTxs[0].type).toBe("buy");
+    expect(updatedTxs[0].quantity).toBe(50);
+    expect(updatedTxs[0].pricePerShare).toBe(42);
+
+    const finalHolding = recalculateHoldingFromTransactions(updatedTxs);
+    expect(finalHolding.quantity).toBe(50);
+    expect(finalHolding.averagePrice).toBe(42);
+  });
+});
+
