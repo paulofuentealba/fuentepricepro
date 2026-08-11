@@ -47,7 +47,15 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number) {
   const line = readColor("--h-line", "#e0d9cc");
 
   const clampedLevel = Math.min(100, Math.max(0, levelPercent));
-  const levelY = height - (clampedLevel / 100) * height;
+  // Piso visual mínimo: mesmo em progresso perto de 0%, a faixa preenchida
+  // precisa ocupar uma fração perceptível do canvas — do contrário o card
+  // vira um retângulo quase vazio, sem função visual clara. Isso é só
+  // cosmético (não altera o valor numérico exibido no header).
+  const MIN_VISUAL_LEVEL_PERCENT = 8;
+  const displayLevel = clampedLevel > 0
+    ? Math.max(clampedLevel, MIN_VISUAL_LEVEL_PERCENT)
+    : 0;
+  const levelY = height - (displayLevel / 100) * height;
 
   // Linha pontilhada de referência no topo (100%)
   ctx.save();
@@ -259,12 +267,15 @@ export function HorizonteHero() {
         ref={canvasRef}
         role="img"
         aria-label={ariaLabel}
-        className="w-full h-40 rounded-xl"
+        className="w-full h-24 rounded-xl"
         style={{ backgroundColor: "var(--h-paper-raised)" }}
       />
 
       {milestones.length > 0 && (
-        <ul className="flex flex-wrap gap-2">
+        <ul
+          className="flex flex-wrap gap-2 pt-3 mt-1"
+          style={{ borderTop: "1px solid var(--h-line)" }}
+        >
           {milestones.map((milestone) => (
             <li
               key={milestone.label}
