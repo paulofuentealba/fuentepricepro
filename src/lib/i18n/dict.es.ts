@@ -1059,6 +1059,7 @@ export const es = {
     calculatedFromTransactions: "Calculado a partir de {n} transacciones. Para editar, gestione el historial de transacciones en los detalles del activo.",
     csvImportAdjustment: "Ajuste vía importación CSV",
     manualAdjustment: "Ajuste manual de posición",
+    newContributionTitle: "Registrar nuevo aporte",
   },
   onboarding: {
     welcome: {

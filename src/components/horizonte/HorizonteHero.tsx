@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { PlusCircle } from "lucide-react";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { formatCurrency, formatMonthsAsYearsMonths } from "@/lib/formatters";
+import { Button } from "@/components/ui/button";
+import { NewContributionDialog } from "./NewContributionDialog";
 
 /**
  * "Horizonte FI" — elemento hero de assinatura da v2 (Horizonte).
@@ -112,6 +115,7 @@ export function HorizonteHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const [, forceRedraw] = useState(0);
+  const [showContributionDialog, setShowContributionDialog] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -208,59 +212,85 @@ export function HorizonteHero() {
       ? `Linha do horizonte: patrimônio de ${capitalLabel}, configure sua meta de gastos para ver o progresso de renda`
       : `Linha do horizonte em ${coveragePercent.toFixed(0)}% de progresso`;
 
-  if (hasNoAssets) {
-    return (
-      <div
-        className="w-full flex flex-col gap-2 rounded-xl p-6"
-        style={{ backgroundColor: "var(--h-paper-raised)", border: "1px solid var(--h-line)" }}
-      >
-        <span
-          className="text-xs font-medium uppercase tracking-widest"
-          style={{ color: "var(--h-ink-soft)" }}
-        >
-          Horizonte FI
-        </span>
-        <span
-          className="text-2xl font-semibold"
-          style={{ fontFamily: "var(--h-font-display)", color: "var(--h-ink)" }}
-        >
-          Registre seu primeiro aporte para começar sua jornada
-        </span>
-        <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
-          Assim que você adicionar um ativo à carteira, sua linha do horizonte
-          rumo à independência financeira aparece aqui.
-        </span>
-      </div>
-    );
-  }
+  // NewContributionDialog is rendered exactly once, at a stable position in
+  // the tree, regardless of which branch below is active. Adding the first
+  // asset flips `hasNoAssets` mid-flow (the ticker search step already
+  // creates the watchlist item) — if the dialog lived inside each
+  // conditional branch it would unmount/remount when that flip happens,
+  // losing its in-progress state and dropping back to the search step.
+  const contributionDialog = (
+    <NewContributionDialog open={showContributionDialog} onOpenChange={setShowContributionDialog} />
+  );
 
-  return (
+  const content = hasNoAssets ? (
+    <div
+      className="w-full flex flex-col gap-2 rounded-xl p-6"
+      style={{ backgroundColor: "var(--h-paper-raised)", border: "1px solid var(--h-line)" }}
+    >
+      <span
+        className="text-xs font-medium uppercase tracking-widest"
+        style={{ color: "var(--h-ink-soft)" }}
+      >
+        Horizonte FI
+      </span>
+      <span
+        className="text-2xl font-semibold"
+        style={{ fontFamily: "var(--h-font-display)", color: "var(--h-ink)" }}
+      >
+        Registre seu primeiro aporte para começar sua jornada
+      </span>
+      <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
+        Assim que você adicionar um ativo à carteira, sua linha do horizonte
+        rumo à independência financeira aparece aqui.
+      </span>
+      <div>
+        <Button
+          size="sm"
+          className="mt-2 gap-1.5"
+          onClick={() => setShowContributionDialog(true)}
+        >
+          <PlusCircle className="h-4 w-4" />
+          Registrar aporte
+        </Button>
+      </div>
+    </div>
+  ) : (
     <div className="w-full flex flex-col gap-4">
-      <header className="flex flex-col gap-1">
-        <span
-          className="text-xs font-medium uppercase tracking-widest"
-          style={{ color: "var(--h-ink-soft)" }}
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <span
+            className="text-xs font-medium uppercase tracking-widest"
+            style={{ color: "var(--h-ink-soft)" }}
+          >
+            Horizonte FI
+          </span>
+          <span
+            className="text-4xl font-semibold"
+            style={{
+              fontFamily: "var(--h-font-display)",
+              color: isReached ? "var(--h-accent-strong)" : "var(--h-ink)",
+            }}
+          >
+            {isReached
+              ? "Meta atingida"
+              : needsGoalSetup
+                ? capitalLabel
+                : `${coveragePercent.toFixed(1)}%`}
+          </span>
+          <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
+            {needsGoalSetup
+              ? "acumulados · configure sua meta de gastos mensais para ver o progresso de renda"
+              : `${capitalLabel} acumulados${!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}`}
+          </span>
+        </div>
+        <Button
+          size="sm"
+          className="gap-1.5 shrink-0"
+          onClick={() => setShowContributionDialog(true)}
         >
-          Horizonte FI
-        </span>
-        <span
-          className="text-4xl font-semibold"
-          style={{
-            fontFamily: "var(--h-font-display)",
-            color: isReached ? "var(--h-accent-strong)" : "var(--h-ink)",
-          }}
-        >
-          {isReached
-            ? "Meta atingida"
-            : needsGoalSetup
-              ? capitalLabel
-              : `${coveragePercent.toFixed(1)}%`}
-        </span>
-        <span className="text-sm" style={{ color: "var(--h-ink-soft)" }}>
-          {needsGoalSetup
-            ? "acumulados · configure sua meta de gastos mensais para ver o progresso de renda"
-            : `${capitalLabel} acumulados${!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}`}
-        </span>
+          <PlusCircle className="h-4 w-4" />
+          Registrar aporte
+        </Button>
       </header>
 
       <canvas
@@ -295,5 +325,12 @@ export function HorizonteHero() {
         </ul>
       )}
     </div>
+  );
+
+  return (
+    <>
+      {content}
+      {contributionDialog}
+    </>
   );
 }

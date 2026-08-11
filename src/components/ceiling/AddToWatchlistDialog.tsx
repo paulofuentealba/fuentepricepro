@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Asset } from "@/lib/domain";
-import { getCanonicalAnnualDividend, getAssetValuation } from "@/lib/calculations";
+import { buildWatchlistItem } from "@/lib/buildWatchlistItem";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, displayTicker } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
@@ -79,40 +79,14 @@ export function AddToWatchlistDialog({
     }
     const avgNum = avg.trim() === "" ? null : Number(avg);
     const goalNum = goal.trim() === "" ? null : Number(goal);
-    const annual = getCanonicalAnnualDividend(asset, 3);
-    const val = getAssetValuation({
-      targetYield,
-      currentPrice: asset.currentPrice,
-      avgDividend: annual,
-      eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
-      bvps: asset.metrics?.bvps ?? null,
-      dividendCagr: asset.metrics?.dividendCagr5y ?? null,
-      currency: asset.currency,
-      type: asset.type,
-    });
-    const ceiling = val.activeCeiling;
-    const margin = val.margin;
 
-    const item: WatchlistItem = {
-      id,
-      ticker: asset.ticker,
-      name: asset.name,
-      type: asset.type,
-      currency: asset.currency,
-      currentPrice: asset.currentPrice,
-      annualDividend: annual,
+    const item: WatchlistItem = buildWatchlistItem(asset, {
       targetYield,
-      ceilingPrice: ceiling,
-      safetyMargin: margin,
       quantity: qty,
-      averagePrice: avgNum != null && Number.isFinite(avgNum) ? avgNum : null,
-      paymentMonths: Array.isArray(asset.paymentMonths) ? asset.paymentMonths : [],
-      targetMonthlyIncome:
-        goalNum != null && Number.isFinite(goalNum) && goalNum > 0 ? goalNum : null,
-      payoutRatio: asset.metrics?.payoutRatio ?? null,
-      addedAt: existing?.addedAt ?? Date.now(),
-      investingSince: existing?.investingSince ?? Date.now(),
-    };
+      averagePrice: avgNum,
+      targetMonthlyIncome: goalNum,
+      existing,
+    });
     upsert(item);
     toast.success(existing ? t.toasts.assetUpdated : t.toasts.assetAdded);
     setOpen(false);

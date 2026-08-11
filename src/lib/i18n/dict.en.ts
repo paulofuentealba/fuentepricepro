@@ -1045,6 +1045,7 @@ export const en = {
     calculatedFromTransactions: "Calculated from {n} transactions. To edit, manage the transaction history in the asset details.",
     csvImportAdjustment: "Adjustment via CSV import",
     manualAdjustment: "Manual position adjustment",
+    newContributionTitle: "Register new contribution",
   },
   onboarding: {
     welcome: {
