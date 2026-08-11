@@ -87,6 +87,25 @@ alertas de preço, comunidade/social, rating de risco mais elaborado.
 | 4.3 LGPD/GDPR | 🟡 Export e exclusão de conta ✅ concluídos e verificados. Banner de cookies/consentimento 🟡 pendente |
 | 4.4 UI/UX "Pro Terminal" | ✅ Essencialmente concluído |
 
+### Épico 5 — Horizonte FI (Redesign de Frontend v2) 🟡 Planejado, não iniciado
+
+Iniciativa de identidade visual nascida do diagnóstico de que o design system atual
+(shadcn/ui + tokens Tailwind v4) é tecnicamente maduro mas visualmente genérico —
+tipografia 100% system-font, verde-primário fazendo duplo papel (marca + P&L), sem
+elemento de assinatura. Decisão: construir como **v2 paralela**, sem tocar a versão
+atual em produção, reaproveitando 100% da camada de cálculo existente (nenhuma
+lógica de negócio nova nesta fase).
+
+| Item | Status |
+|---|---|
+| 5.1 Design tokens (tipografia Fraunces+Inter, paleta petróleo `#2C6B63`) | 🟡 Prototipado em Artifact, aprovado por Paulo — falta portar para `styles.css` como tema paralelo |
+| 5.2 Elemento de assinatura "Horizonte FI" (linha de horizonte animada, canvas) | 🟡 Protótipo visual único — falta extrair `useFIProgress()` (hoje lógica presa dentro de `FIProgressCard.tsx`) antes de poder alimentar o componente real |
+| 5.3 Rota/estrutura paralela (`/app-v2` ou flag), zero regressão em v1 | ⚪ Não iniciado |
+| 5.4 Persistência de trajetória histórica (snapshot de progresso ao longo do tempo) | 🔒 Decisão de negócio pendente — nenhuma coleção Firestore hoje suporta "progresso no tempo", só o estado atual |
+
+Prompts de execução (ordem 46-54) gerados em `docs/Prompts/`, a serem rodados no
+Antigravity sob revisão de Paulo/Claude, um de cada vez — ver Seção 6.
+
 ---
 
 ## 4. Linha do tempo recente (mais relevante — não histórico completo)
@@ -166,6 +185,7 @@ imediata via config, sem novo deploy.
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |
 | 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | 🟡 Débito técnico | P3 | Baixo risco |
 | 11 | **`nitro: beta`** | 🟡 Débito técnico | P3 | Migrar quando houver versão estável |
+| 12 | **Horizonte FI — v2 de frontend** (Épico 5, prompts 46-54 em `docs/Prompts/`) | 🟡 Prompts prontos, execução não iniciada | P1 | Diferencial de marca aprovado por Paulo (paleta petróleo); zero risco à v1 em produção, mas consome as 1-2 vagas de "em progresso" simultâneo — não paralelizar com item 1/2 |
 
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
 

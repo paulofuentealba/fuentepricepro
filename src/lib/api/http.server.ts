@@ -1,3 +1,5 @@
+import { reportIngestionStatus, type IngestionSource } from "./ingestionLog.server";
+
 export const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36";
 
@@ -39,7 +41,10 @@ const state: HttpState =
  * TanStack Query for response caching; this only prevents a stampede on the
  * upstream service.
  */
-export function dedupeInFlight<T>(key: string, fn: () => Promise<T>): Promise<T> {
+export function dedupeInFlight<T>(
+  key: string,
+  fn: () => Promise<T>,
+): Promise<T> {
   const existing = state.inflight.get(key) as Promise<T> | undefined;
   if (existing) return existing;
   const p = (async () => {
@@ -68,6 +73,7 @@ export async function minInterval(key: string, ms: number): Promise<void> {
  */
 export async function fetchWithRetry(
   input: string,
+  source: IngestionSource,
   init: RequestInit = {},
   opts: { timeoutMs?: number; retries?: number; baseDelayMs?: number } = {},
 ): Promise<Response> {
@@ -77,11 +83,24 @@ export async function fetchWithRetry(
   while (true) {
     try {
       const r = await fetchWithTimeout(input, init, timeoutMs);
-      if (r.ok || attempt >= retries) return r;
+      if (r.ok) {
+        reportIngestionStatus(source, "PASSED");
+        return r;
+      }
+      if (attempt >= retries) {
+        reportIngestionStatus(source, "FAILED", `HTTP ${r.status}`);
+        return r;
+      }
       const retryable = r.status === 429 || r.status >= 500;
-      if (!retryable) return r;
+      if (!retryable) {
+        reportIngestionStatus(source, "FAILED", `HTTP ${r.status}`);
+        return r;
+      }
     } catch (err) {
-      if (attempt >= retries) throw err;
+      if (attempt >= retries) {
+        reportIngestionStatus(source, "ERROR", err instanceof Error ? err.message : String(err));
+        throw err;
+      }
     }
     const delay = baseDelayMs * 2 ** attempt + Math.random() * baseDelayMs;
     await new Promise((r) => setTimeout(r, delay));

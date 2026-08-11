@@ -1,4 +1,5 @@
 import { dedupeInFlight, fetchWithRetry } from "./http.server";
+import { reportIngestionStatus } from "./ingestionLog.server";
 
 /**
  * Fetches dividend payment dates from Nasdaq Public API for a US stock.
@@ -11,7 +12,7 @@ export async function fetchNasdaqDividends(ticker: string): Promise<Map<string, 
     const map = new Map<string, string>();
     try {
       const url = `https://api.nasdaq.com/api/quote/${encodeURIComponent(clean)}/dividends?assetclass=stocks`;
-      const res = await fetchWithRetry(url, {
+      const res = await fetchWithRetry(url, "nasdaq", {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -24,7 +25,10 @@ export async function fetchNasdaqDividends(ticker: string): Promise<Map<string, 
       if (!res.ok) return map;
       const json = await res.json();
       const rows = json?.data?.dividends?.rows;
-      if (!Array.isArray(rows)) return map;
+      if (!Array.isArray(rows)) {
+        reportIngestionStatus("nasdaq", "INVALID", "missing dividends.rows array", clean);
+        return map;
+      }
 
       for (const row of rows) {
         if (!row?.exOrEffDate || !row?.paymentDate || row.paymentDate === "N/A") continue;

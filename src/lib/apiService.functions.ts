@@ -4,7 +4,8 @@ import { UA, fetchWithRetry } from "./api/http.server";
 import { classifyBr, classifyYahoo } from "./api/classify.server";
 import { fetchFromBrapi } from "./api/brapi.server";
 import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
-import { fetchSecEdgarFacts } from "./api/secEdgar.server";
+import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker } from "./api/secEdgar.server";
+import { calculatePiotroskiFScore, type PiotroskiResult } from "./calculations";
 import { fetchCvmEnrichedFacts } from "./api/cvm.server";
 import { fetchNasdaqDividends } from "./api/nasdaq.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
@@ -49,11 +50,13 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
     const [brRes, yhRes] = await Promise.allSettled([
       fetchWithRetry(
         `https://brapi.dev/api/quote/list?search=${encodeURIComponent(q)}`,
+        "brapi",
         {},
         { timeoutMs: 2500, retries: 0 },
       ).then((r: Response) => (r.ok ? r.json() : null)),
       fetchWithRetry(
         `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=6&newsCount=0`,
+        "yahoo",
         { headers: { "User-Agent": UA } },
         { timeoutMs: 2500, retries: 0 },
       ).then((r: Response) => (r.ok ? r.json() : null)),
@@ -385,6 +388,7 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
     try {
       const res = await fetchWithRetry(
         `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yhTicker)}?events=split&interval=1d&range=5y`,
+        "yahoo",
         { headers: { "User-Agent": UA } },
         { timeoutMs: 3000, retries: 1 },
       );
@@ -540,5 +544,71 @@ export const fetchAssetPriceHistoryFn = createServerFn({ method: "GET" })
     } catch (err) {
       console.warn(`[fetchAssetPriceHistoryFn] Failed for ${ticker}`, err);
       return [];
+    }
+  });
+
+// -------- Piotroski F-Score (US-only, Fase 1) --------
+
+export interface PiotroskiScoreResponse extends PiotroskiResult {
+  ticker: string;
+  cik: string | null;
+  /** Fiscal years actually used for the comparison, most recent first. Empty when
+   * fewer than 2 fiscal years of SEC EDGAR data were available. */
+  yearsUsed: number[];
+}
+
+const EMPTY_PIOTROSKI_CRITERIA: PiotroskiScoreResponse["criteria"] = {
+  positiveNetIncome: null,
+  positiveOperatingCashFlow: null,
+  roaImproving: null,
+  cashFlowExceedsNetIncome: null,
+  leverageDecreasing: null,
+  currentRatioImproving: null,
+  noNewShares: null,
+  grossMarginImproving: null,
+  assetTurnoverImproving: null,
+};
+
+/**
+ * Server function to compute the Piotroski F-Score for a US ticker from SEC
+ * EDGAR data. Fails soft — returns `score: null` with `criteriaAvailable: 0`
+ * when the ticker isn't found on SEC EDGAR or fewer than 2 fiscal years of
+ * data are available, never throws for a "just no data" case.
+ */
+export const fetchPiotroskiScoreFn = createServerFn({ method: "GET" })
+  .validator((data: { ticker: string }) => ({ ticker: sanitizeTicker(data?.ticker) }))
+  .handler(async ({ data }): Promise<PiotroskiScoreResponse> => {
+    const ticker = data.ticker;
+    const empty: PiotroskiScoreResponse = {
+      ticker,
+      cik: null,
+      score: null,
+      criteria: EMPTY_PIOTROSKI_CRITERIA,
+      criteriaAvailable: 0,
+      yearsUsed: [],
+    };
+    if (!ticker) return empty;
+
+    try {
+      const cik = await getCikForTicker(ticker);
+      if (!cik) return empty;
+
+      const facts = await fetchSecEdgarCompanyFacts(cik);
+      if (!facts || facts.years.length < 2) {
+        return { ...empty, cik };
+      }
+
+      const [current, prior] = facts.years;
+      const result = calculatePiotroskiFScore(current, prior);
+
+      return {
+        ticker,
+        cik,
+        ...result,
+        yearsUsed: [current.fiscalYear, prior.fiscalYear],
+      };
+    } catch (err) {
+      console.warn(`[fetchPiotroskiScoreFn] Failed for ${ticker}`, err);
+      return empty;
     }
   });

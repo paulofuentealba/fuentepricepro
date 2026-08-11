@@ -9,10 +9,12 @@ import {
   fetchAssetPriceHistoryFn,
   fetchRadarFn,
   checkPendingSplitsFn,
+  fetchPiotroskiScoreFn,
   type LiveQuote,
   type SearchHit,
   type BenchmarkPoint,
   type BenchmarkType,
+  type PiotroskiScoreResponse,
 } from "./apiService.functions";
 import type { Asset } from "./domain";
 
@@ -111,6 +113,18 @@ export function dividendRadarQueryOptions() {
     queryFn: () => fetchRadarFn(),
     staleTime: 15 * 60_000, // 15 mins
     gcTime: 30 * 60_000,
+  });
+}
+
+export function piotroskiScoreQueryOptions(ticker: string) {
+  const key = (ticker || "").trim().toUpperCase();
+  return queryOptions({
+    queryKey: ["piotroskiScore", key] as const,
+    queryFn: ({ signal }): Promise<PiotroskiScoreResponse> =>
+      fetchPiotroskiScoreFn({ data: { ticker: key }, signal }),
+    staleTime: 7 * 24 * 60 * 60_000, // 7 days — annual fundamental data, doesn't change daily
+    gcTime: 14 * 24 * 60 * 60_000,
+    enabled: Boolean(key),
   });
 }
 

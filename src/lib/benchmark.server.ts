@@ -1,4 +1,5 @@
 import { UA, fetchWithRetry } from "./api/http.server";
+import { reportIngestionStatus } from "./api/ingestionLog.server";
 import {
   calculateDailyCompoundedReturn,
   calculatePriceCumulativeReturn,
@@ -36,18 +37,23 @@ export async function fetchBcbBenchmarkSeries(
       dataInicial,
     )}&dataFinal=${encodeURIComponent(dataFinal)}&formato=json`;
 
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 5000, retries: 1 });
+    const res = await fetchWithRetry(url, "benchmark", {}, { timeoutMs: 5000, retries: 1 });
     if (!res.ok) return [];
 
     const json = (await res.json()) as Array<{ data: string; valor: string }>;
-    if (!Array.isArray(json) || json.length === 0) return [];
+    if (!Array.isArray(json) || json.length === 0) {
+      reportIngestionStatus("benchmark", "INVALID", `empty BCB series ${seriesCode}`);
+      return [];
+    }
 
     const dailyRates: DailyRatePoint[] = json.map((item) => ({
       date: parseBcbDate(item.data),
       ratePct: parseFloat(item.valor) || 0,
     }));
 
-    return calculateDailyCompoundedReturn(dailyRates);
+    const result = calculateDailyCompoundedReturn(dailyRates);
+    reportIngestionStatus("benchmark", "PASSED");
+    return result;
   } catch (err) {
     console.warn(`[benchmark] BCB SGS series ${seriesCode} failed gracefully`, err);
     return [];
@@ -74,6 +80,7 @@ export async function fetchYahooBenchmarkSeries(
 
     const res = await fetchWithRetry(
       url,
+      "benchmark",
       { headers: { "User-Agent": UA } },
       { timeoutMs: 5000, retries: 1 },
     );
@@ -84,7 +91,10 @@ export async function fetchYahooBenchmarkSeries(
     const timestamps: number[] = result?.timestamp || [];
     const closes: (number | null)[] = result?.indicators?.quote?.[0]?.close || [];
 
-    if (timestamps.length === 0 || closes.length === 0) return [];
+    if (timestamps.length === 0 || closes.length === 0) {
+      reportIngestionStatus("benchmark", "INVALID", `empty Yahoo chart series for ${symbol}`);
+      return [];
+    }
 
     const priceSeries: PricePoint[] = timestamps.map((ts, i) => {
       const date = new Date(ts * 1000).toISOString().slice(0, 10);
@@ -92,7 +102,9 @@ export async function fetchYahooBenchmarkSeries(
       return { date, close };
     });
 
-    return calculatePriceCumulativeReturn(priceSeries);
+    const benchmarkSeries = calculatePriceCumulativeReturn(priceSeries);
+    reportIngestionStatus("benchmark", "PASSED");
+    return benchmarkSeries;
   } catch (err) {
     console.warn(`[benchmark] Yahoo Finance chart for ${symbol} failed gracefully`, err);
     return [];

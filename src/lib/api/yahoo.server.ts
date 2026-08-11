@@ -1,7 +1,8 @@
 import type { Currency } from "../domain";
 import type { DividendEvent } from "../domain";
 import type { ApiAsset, LiveQuote, QuoteSummary } from "./types";
-import { UA, dedupeInFlight, fetchWithRetry, fetchWithTimeout, num } from "./http.server";
+import { UA, dedupeInFlight, fetchWithRetry, num } from "./http.server";
+import { reportIngestionStatus } from "./ingestionLog.server";
 import { classifyYahoo } from "./classify.server";
 import {
   dividendCagrPct,
@@ -28,10 +29,11 @@ export async function getYahooAuth(): Promise<{ crumb: string; cookie: string } 
     const fresh = g.__yahooAuth;
     if (fresh && fresh.expiresAt > Date.now()) return fresh;
     try {
-      const r = await fetchWithTimeout(
+      const r = await fetchWithRetry(
         "https://fc.yahoo.com",
+        "yahoo",
         { headers: { "User-Agent": UA } },
-        2000,
+        { timeoutMs: 2000, retries: 0 },
       );
       const setCookie = r.headers.get("set-cookie") || "";
       const cookie = setCookie
@@ -39,13 +41,17 @@ export async function getYahooAuth(): Promise<{ crumb: string; cookie: string } 
         .map((c) => c.split(";")[0].trim())
         .filter(Boolean)
         .join("; ");
-      if (!cookie) return null;
-      const cr = await fetchWithTimeout(
+      if (!cookie) {
+        reportIngestionStatus("yahoo", "INVALID", "missing set-cookie from fc.yahoo.com");
+        return null;
+      }
+      const cr = await fetchWithRetry(
         "https://query1.finance.yahoo.com/v1/test/getcrumb",
+        "yahoo",
         {
           headers: { "User-Agent": UA, Cookie: cookie },
         },
-        2000,
+        { timeoutMs: 2000, retries: 0 },
       );
       if (!cr.ok) return null;
       const crumb = (await cr.text()).trim();
@@ -68,10 +74,11 @@ export async function fetchYahooQuoteSummary(ticker: string): Promise<QuoteSumma
   const modules = "summaryDetail,defaultKeyStatistics,financialData,assetProfile,fundProfile";
   const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}&crumb=${encodeURIComponent(auth.crumb)}`;
   try {
-    const r = await fetchWithTimeout(
+    const r = await fetchWithRetry(
       url,
+      "yahoo",
       { headers: { "User-Agent": UA, Cookie: auth.cookie } },
-      2000,
+      { timeoutMs: 2000, retries: 0 },
     );
     if (!r.ok) {
       if (r.status === 401) invalidateYahooAuth();
@@ -79,7 +86,10 @@ export async function fetchYahooQuoteSummary(ticker: string): Promise<QuoteSumma
     }
     const j = await r.json();
     const res = j?.quoteSummary?.result?.[0];
-    if (!res) return null;
+    if (!res) {
+      reportIngestionStatus("yahoo", "INVALID", "missing quoteSummary.result[0]", ticker);
+      return null;
+    }
     const sd = res.summaryDetail ?? {};
     const ks = res.defaultKeyStatistics ?? {};
     const fd = res.financialData ?? {};
@@ -114,13 +124,17 @@ export async function fetchFromYahoo(ticker: string): Promise<ApiAsset | null> {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(t)}?range=5y&interval=1mo&events=div`;
     const r = await fetchWithRetry(
       url,
+      "yahoo",
       { headers: { "User-Agent": UA } },
       { timeoutMs: 2500, retries: 0 },
     );
     if (!r.ok) return null;
     const json = await r.json();
     const res = json?.chart?.result?.[0];
-    if (!res?.meta?.regularMarketPrice) return null;
+    if (!res?.meta?.regularMarketPrice) {
+      reportIngestionStatus("yahoo", "INVALID", "missing chart.result[0].meta.regularMarketPrice", t);
+      return null;
+    }
 
     const divsObj = (res.events?.dividends ?? {}) as Record<
       string,
@@ -200,13 +214,17 @@ export async function fetchYahooQuote(ticker: string): Promise<LiveQuote | null>
     try {
       const r = await fetchWithRetry(
         url,
+        "yahoo",
         { headers: { "User-Agent": UA } },
         { timeoutMs: 2500, retries: 0 },
       );
       if (!r.ok) return null;
       const json = await r.json();
       const meta = json?.chart?.result?.[0]?.meta;
-      if (!meta?.regularMarketPrice) return null;
+      if (!meta?.regularMarketPrice) {
+        reportIngestionStatus("yahoo", "INVALID", "missing chart.result[0].meta.regularMarketPrice", ticker);
+        return null;
+      }
       const price = Number(meta.regularMarketPrice);
       const prev = Number(meta.chartPreviousClose ?? meta.previousClose);
       const changePct = Number.isFinite(prev) && prev > 0 ? ((price - prev) / prev) * 100 : null;

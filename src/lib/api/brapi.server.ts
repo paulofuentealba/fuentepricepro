@@ -2,6 +2,7 @@ import type { Currency } from "../domain";
 import type { DividendEvent } from "../domain";
 import type { ApiAsset } from "./types";
 import { dedupeInFlight, fetchWithRetry } from "./http.server";
+import { reportIngestionStatus } from "./ingestionLog.server";
 import { classifyBr } from "./classify.server";
 import {
   dividendCagrPct,
@@ -26,12 +27,16 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
     const url = `https://brapi.dev/api/quote/${encodeURIComponent(clean)}?fundamental=true&dividends=true&range=5y&interval=1mo${modulesParam}`;
     const r = await fetchWithRetry(
       url,
+      "brapi",
       token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
     );
     if (!r.ok) return null;
     const json = await r.json();
     const res = json?.results?.[0];
-    if (!res || !res.regularMarketPrice) return null;
+    if (!res || !res.regularMarketPrice) {
+      reportIngestionStatus("brapi", "INVALID", "missing regularMarketPrice", clean);
+      return null;
+    }
 
     const cash = (res.dividendsData?.cashDividends ?? []) as Array<{
       paymentDate?: string;

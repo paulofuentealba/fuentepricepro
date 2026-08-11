@@ -36,5 +36,10 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if false; // só via Admin SDK (Firebase Functions/server), nunca client
     }
+
+    match /ingestionLog/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false; // só via Admin SDK (Firebase Functions/server), nunca client
+    }
   }
 }

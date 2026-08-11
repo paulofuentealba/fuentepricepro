@@ -366,3 +366,132 @@ export function projectFixedIncomeValueAtMaturity(
     projectedProfit: projectedBalance - principal,
   };
 }
+
+// ---------- Piotroski F-Score (US-only, Fase 1) ----------
+
+/** Raw fundamentals for a single fiscal year, as extracted from SEC EDGAR XBRL.
+ * Any field may be `null` when the source doesn't report it for that year. */
+export interface PiotroskiYearInput {
+  netIncome: number | null;
+  totalAssets: number | null;
+  operatingCashFlow: number | null;
+  longTermDebt: number | null;
+  currentAssets: number | null;
+  currentLiabilities: number | null;
+  sharesOutstanding: number | null;
+  grossProfit: number | null;
+  revenues: number | null;
+}
+
+export interface PiotroskiResult {
+  /** 0-9, or `null` when fewer than `PIOTROSKI_MIN_CRITERIA_AVAILABLE` of the 9
+   * criteria could be calculated — a partial score (e.g. "3 out of 4 known
+   * criteria") is misleading displayed as if it were "3 out of 9", so we
+   * withhold it entirely below the threshold instead. */
+  score: number | null;
+  criteria: {
+    positiveNetIncome: boolean | null;
+    positiveOperatingCashFlow: boolean | null;
+    roaImproving: boolean | null;
+    cashFlowExceedsNetIncome: boolean | null;
+    leverageDecreasing: boolean | null;
+    currentRatioImproving: boolean | null;
+    noNewShares: boolean | null;
+    grossMarginImproving: boolean | null;
+    assetTurnoverImproving: boolean | null;
+  };
+  /** How many of the 9 criteria had enough data (0-9). */
+  criteriaAvailable: number;
+}
+
+/** Below this many available criteria, `score` is withheld (`null`) rather than
+ * shown as a partial score out of 9. Chosen so a score is only ever shown when
+ * a clear majority of the 9 criteria were actually computable. */
+export const PIOTROSKI_MIN_CRITERIA_AVAILABLE = 6;
+
+function boolIf<T>(value: T | null, predicate: (v: T) => boolean): boolean | null {
+  return value === null ? null : predicate(value);
+}
+
+function ratio(numerator: number | null, denominator: number | null): number | null {
+  if (numerator === null || denominator === null || denominator === 0) return null;
+  return numerator / denominator;
+}
+
+function ratioImproved(
+  currentNumerator: number | null,
+  currentDenominator: number | null,
+  priorNumerator: number | null,
+  priorDenominator: number | null,
+  predicate: (current: number, prior: number) => boolean,
+): boolean | null {
+  const current = ratio(currentNumerator, currentDenominator);
+  const prior = ratio(priorNumerator, priorDenominator);
+  return current === null || prior === null ? null : predicate(current, prior);
+}
+
+/**
+ * Piotroski F-Score: 9 binary fundamental-strength criteria, comparing the
+ * current fiscal year against the prior one. Pure function — no I/O.
+ */
+export function calculatePiotroskiFScore(
+  current: PiotroskiYearInput,
+  prior: PiotroskiYearInput,
+): PiotroskiResult {
+  const criteria = {
+    positiveNetIncome: boolIf(current.netIncome, (v) => v > 0),
+    positiveOperatingCashFlow: boolIf(current.operatingCashFlow, (v) => v > 0),
+    roaImproving: ratioImproved(
+      current.netIncome,
+      current.totalAssets,
+      prior.netIncome,
+      prior.totalAssets,
+      (curr, prev) => curr > prev,
+    ),
+    cashFlowExceedsNetIncome:
+      current.operatingCashFlow === null || current.netIncome === null
+        ? null
+        : current.operatingCashFlow > current.netIncome,
+    leverageDecreasing: ratioImproved(
+      current.longTermDebt,
+      current.totalAssets,
+      prior.longTermDebt,
+      prior.totalAssets,
+      (curr, prev) => curr < prev,
+    ),
+    currentRatioImproving: ratioImproved(
+      current.currentAssets,
+      current.currentLiabilities,
+      prior.currentAssets,
+      prior.currentLiabilities,
+      (curr, prev) => curr > prev,
+    ),
+    noNewShares:
+      current.sharesOutstanding === null || prior.sharesOutstanding === null
+        ? null
+        : current.sharesOutstanding <= prior.sharesOutstanding,
+    grossMarginImproving: ratioImproved(
+      current.grossProfit,
+      current.revenues,
+      prior.grossProfit,
+      prior.revenues,
+      (curr, prev) => curr > prev,
+    ),
+    assetTurnoverImproving: ratioImproved(
+      current.revenues,
+      current.totalAssets,
+      prior.revenues,
+      prior.totalAssets,
+      (curr, prev) => curr > prev,
+    ),
+  };
+
+  const values = Object.values(criteria);
+  const criteriaAvailable = values.filter((v) => v !== null).length;
+  const score =
+    criteriaAvailable >= PIOTROSKI_MIN_CRITERIA_AVAILABLE
+      ? values.reduce((sum, v) => sum + (v === true ? 1 : 0), 0)
+      : null;
+
+  return { score, criteria, criteriaAvailable };
+}

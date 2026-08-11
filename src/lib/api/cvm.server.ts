@@ -1,4 +1,5 @@
 import { getAdminFirestore } from "../../integrations/firebase/admin";
+import { reportIngestionStatus } from "./ingestionLog.server";
 import cvmLocalCache from "./data/cvm_enriched.json";
 
 export interface CvmEnrichedData {
@@ -18,6 +19,7 @@ export async function fetchCvmEnrichedFacts(ticker: string): Promise<CvmEnriched
       const docSnap = await adminDb.collection("enrichedFundamentals").doc(cleanKey).get();
       if (docSnap.exists) {
         const data = docSnap.data() as CvmEnrichedData;
+        reportIngestionStatus("cvm", "PASSED", undefined, cleanKey);
         return {
           vpa: typeof data.vpa === "number" ? data.vpa : null,
           lpa: typeof data.lpa === "number" ? data.lpa : null,
@@ -28,11 +30,18 @@ export async function fetchCvmEnrichedFacts(ticker: string): Promise<CvmEnriched
     }
   } catch (error) {
     console.warn(`[CVM Server] Firestore read failed for ${cleanKey}, falling back to local JSON cache:`, error);
+    reportIngestionStatus(
+      "cvm",
+      "ERROR",
+      error instanceof Error ? error.message : String(error),
+      cleanKey,
+    );
   }
 
   // 2. Fallback to local JSON cache
   const localData = (cvmLocalCache as Record<string, CvmEnrichedData>)[cleanKey];
   if (localData) {
+    reportIngestionStatus("cvm", "WARNING", "fallback to local cache", cleanKey);
     return {
       vpa: typeof localData.vpa === "number" ? localData.vpa : null,
       lpa: typeof localData.lpa === "number" ? localData.lpa : null,
@@ -41,5 +50,6 @@ export async function fetchCvmEnrichedFacts(ticker: string): Promise<CvmEnriched
     };
   }
 
+  reportIngestionStatus("cvm", "INVALID", "no data in Firestore or local cache", cleanKey);
   return { vpa: null, lpa: null, vacancy: null };
 }

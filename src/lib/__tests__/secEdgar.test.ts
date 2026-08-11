@@ -1,5 +1,254 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchSecEdgarFacts } from "../api/secEdgar.server";
+import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts } from "../api/secEdgar.server";
+
+// Trimmed real fixture: values pulled directly from SEC EDGAR's live
+// https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json (Apple Inc.)
+// on 2026-08-11, keeping only the FY2024/FY2025 10-K entries for each tag
+// this module reads. Real fixture, not an invented shape — this is exactly
+// how SEC EDGAR nests `facts.us-gaap.{Tag}.units.{USD|shares}` entries with
+// `start`/`end`/`val`/`fy`/`fp`/`form`/`filed`/`accn`.
+const AAPL_COMPANY_FACTS_FIXTURE = {
+  facts: {
+    "us-gaap": {
+      NetIncomeLoss: {
+        units: {
+          USD: [
+            {
+              start: "2023-10-01",
+              end: "2024-09-28",
+              val: 93736000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              start: "2024-09-29",
+              end: "2025-09-27",
+              val: 112010000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      Assets: {
+        units: {
+          USD: [
+            {
+              end: "2024-09-28",
+              val: 364980000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              end: "2025-09-27",
+              val: 359241000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      NetCashProvidedByUsedInOperatingActivities: {
+        units: {
+          USD: [
+            {
+              start: "2023-10-01",
+              end: "2024-09-28",
+              val: 118254000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              start: "2024-09-29",
+              end: "2025-09-27",
+              val: 111482000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      LongTermDebtNoncurrent: {
+        units: {
+          USD: [
+            {
+              end: "2024-09-28",
+              val: 85750000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              end: "2025-09-27",
+              val: 78328000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      AssetsCurrent: {
+        units: {
+          USD: [
+            {
+              end: "2024-09-28",
+              val: 152987000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              end: "2025-09-27",
+              val: 147957000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      LiabilitiesCurrent: {
+        units: {
+          USD: [
+            {
+              end: "2024-09-28",
+              val: 176392000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              end: "2025-09-27",
+              val: 165631000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      CommonStockSharesOutstanding: {
+        units: {
+          shares: [
+            {
+              end: "2024-09-28",
+              val: 15116786000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              end: "2025-09-27",
+              val: 14773260000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      // Apple doesn't report GrossProfit directly on recent 10-Ks — it must be
+      // derived from Revenues - CostOfGoodsAndServicesSold (real behavior).
+      RevenueFromContractWithCustomerExcludingAssessedTax: {
+        units: {
+          USD: [
+            {
+              start: "2023-10-01",
+              end: "2024-09-28",
+              val: 391035000000,
+              fy: 2024,
+              fp: "FY",
+              form: "10-K",
+              filed: "2024-11-01",
+              accn: "0000320193-24-000123",
+            },
+            {
+              start: "2023-10-01",
+              end: "2024-09-28",
+              val: 391035000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              start: "2024-09-29",
+              end: "2025-09-27",
+              val: 416161000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+      CostOfGoodsAndServicesSold: {
+        units: {
+          USD: [
+            {
+              start: "2023-10-01",
+              end: "2024-09-28",
+              val: 210352000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+            {
+              start: "2024-09-29",
+              end: "2025-09-27",
+              val: 220960000000,
+              fy: 2025,
+              fp: "FY",
+              form: "10-K",
+              filed: "2025-10-31",
+              accn: "0000320193-25-000079",
+            },
+          ],
+        },
+      },
+    },
+  },
+};
 
 describe("secEdgar.server", () => {
   const originalFetch = global.fetch;
@@ -178,5 +427,79 @@ describe("secEdgar.server", () => {
 
     const result = await fetchSecEdgarFacts("AAPL");
     expect(result.bvps).toBeNull();
+  });
+});
+
+describe("fetchSecEdgarCompanyFacts", () => {
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it("extracts the last 2 fiscal years from a real SEC EDGAR companyfacts response", async () => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("CIK0000320193.json")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(AAPL_COMPANY_FACTS_FIXTURE),
+        });
+      }
+      return Promise.resolve({ ok: false, status: 404 });
+    }) as any;
+
+    const result = await fetchSecEdgarCompanyFacts("0000320193");
+    expect(result).not.toBeNull();
+    expect(result!.cik).toBe("0000320193");
+    expect(result!.years).toHaveLength(2);
+
+    const [fy2025, fy2024] = result!.years;
+    expect(fy2025.fiscalYear).toBe(2025);
+    expect(fy2025.periodEnd).toBe("2025-09-27");
+    expect(fy2025.netIncome).toBe(112010000000);
+    expect(fy2025.totalAssets).toBe(359241000000);
+    expect(fy2025.operatingCashFlow).toBe(111482000000);
+    expect(fy2025.longTermDebt).toBe(78328000000);
+    expect(fy2025.currentAssets).toBe(147957000000);
+    expect(fy2025.currentLiabilities).toBe(165631000000);
+    expect(fy2025.sharesOutstanding).toBe(14773260000);
+    expect(fy2025.revenues).toBe(416161000000);
+    // Derived: GrossProfit isn't reported directly by Apple, so it must be
+    // computed as Revenues - CostOfGoodsAndServicesSold.
+    expect(fy2025.grossProfit).toBe(416161000000 - 220960000000);
+
+    expect(fy2024.fiscalYear).toBe(2024);
+    expect(fy2024.periodEnd).toBe("2024-09-28");
+    expect(fy2024.netIncome).toBe(93736000000);
+    expect(fy2024.grossProfit).toBe(391035000000 - 210352000000);
+  });
+
+  it("returns null when the response has no us-gaap facts", async () => {
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve({ facts: {} }) }),
+    ) as any;
+
+    const result = await fetchSecEdgarCompanyFacts("0000000001");
+    expect(result).toBeNull();
+  });
+
+  it("returns null on HTTP failure", async () => {
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({ ok: false, status: 500 }),
+    ) as any;
+
+    const result = await fetchSecEdgarCompanyFacts("0000000001");
+    expect(result).toBeNull();
+  });
+
+  it("returns null on network error", async () => {
+    global.fetch = vi.fn().mockImplementation(() => Promise.reject(new Error("network down"))) as any;
+
+    const result = await fetchSecEdgarCompanyFacts("0000000001");
+    expect(result).toBeNull();
   });
 });
