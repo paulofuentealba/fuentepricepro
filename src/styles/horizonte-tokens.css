@@ -86,7 +86,7 @@
   /* Tipografia */
   --h-ink: #211c13;
   --h-ink-soft: #5c5243;
-  --h-ink-faint: #9c8f7a;
+  --h-ink-faint: #756a59;
 
   /* Estrutura */
   --h-line: #e0d9cc;
@@ -147,7 +147,7 @@
     --h-paper-raised: #1e1911;
     --h-ink: #f1eada;
     --h-ink-soft: #b8a98a;
-    --h-ink-faint: #7a6e5c;
+    --h-ink-faint: #8f8067;
     --h-line: #2e2820;
     --h-accent: #7bb5ab;
     --h-accent-strong: #a3d0c7;
@@ -174,7 +174,7 @@
   --h-paper-raised: #1e1911;
   --h-ink: #f1eada;
   --h-ink-soft: #b8a98a;
-  --h-ink-faint: #7a6e5c;
+  --h-ink-faint: #8f8067;
   --h-line: #2e2820;
   --h-accent: #7bb5ab;
   --h-accent-strong: #a3d0c7;
@@ -200,7 +200,7 @@
   --h-paper-raised: #ffffff;
   --h-ink: #211c13;
   --h-ink-soft: #5c5243;
-  --h-ink-faint: #9c8f7a;
+  --h-ink-faint: #756a59;
   --h-line: #e0d9cc;
   --h-accent: #2c6b63;
   --h-accent-strong: #1f4e47;

@@ -179,12 +179,29 @@ function SortableHeader({
   align: "left" | "right";
 }) {
   const isActive = active === sortKey;
+  const ariaSort: "ascending" | "descending" | "none" = isActive
+    ? direction === "asc"
+      ? "ascending"
+      : "descending"
+    : "none";
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTableCellElement>) {
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      onSort(sortKey);
+    }
+  }
+
   return (
     <th
       scope="col"
-      className="px-4 py-3 font-medium uppercase tracking-wide text-xs cursor-pointer select-none whitespace-nowrap"
-      style={{ color: "var(--h-ink-soft)", textAlign: align }}
+      role="button"
+      tabIndex={0}
+      aria-sort={ariaSort}
+      className="px-4 py-3 font-medium uppercase tracking-wide text-xs cursor-pointer select-none whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+      style={{ color: "var(--h-ink-soft)", textAlign: align, outlineColor: "var(--h-accent)" }}
       onClick={() => onSort(sortKey)}
+      onKeyDown={handleKeyDown}
     >
       {label}
       {isActive ? (direction === "asc" ? " ▲" : " ▼") : ""}
