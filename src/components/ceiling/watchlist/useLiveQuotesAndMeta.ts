@@ -40,6 +40,7 @@ export function useLiveQuotesAndMeta(items: WatchlistItem[]) {
           exDividendDate: asset.exDividendDate ?? null,
           dividendCagr5y: asset.metrics?.dividendCagr5y ?? null,
           eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
+          bvps: asset.metrics?.bvps ?? null,
           pbRatio: asset.metrics?.pbRatio ?? null,
           sector: asset.sector ?? null,
           canonicalDividend3y: getCanonicalAnnualDividend(asset, 3),

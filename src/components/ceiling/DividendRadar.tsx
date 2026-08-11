@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, TrendingUp, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
-import { getAssetValuation, getCanonicalAnnualDividend } from "@/lib/calculations";
+import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
 import { formatCurrency, formatPercent } from "@/lib/i18n";
@@ -72,12 +72,7 @@ export function DividendRadar() {
           currentPrice: asset.currentPrice,
           avgDividend: canonicalDiv,
           eps: asset.metrics?.eps ?? null,
-          bvps:
-          asset.metrics?.bvps != null
-          ? asset.metrics.bvps
-          : asset.metrics?.pbRatio && asset.currentPrice > 0
-          ? asset.currentPrice / asset.metrics.pbRatio
-          : null,
+          bvps: calculateBvps(asset.metrics?.bvps, asset.metrics?.pbRatio, asset.currentPrice),
           dividendCagr: asset.metrics?.dividendCagr5y ?? null,
           selicPct: selic ?? 10.5,
           currency: currency,

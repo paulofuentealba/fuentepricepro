@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useWatchlist, type WatchlistItem } from "./watchlist";
 import { useSettings } from "./settings";
 import { useLiveQuotesAndMeta } from "@/components/ceiling/watchlist/useLiveQuotesAndMeta";
-import { getAssetValuation, netAfterTax, calculateFixedIncomeBalance } from "./calculations";
+import { getAssetValuation, netAfterTax, calculateFixedIncomeBalance, calculateBvps } from "./calculations";
 import { useSelic } from "./useSelic";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
@@ -81,10 +81,7 @@ export function useValuedPortfolio() {
         currentPrice: livePrice,
         avgDividend: m?.canonicalDividend3y ?? it.annualDividend,
         eps: m?.eps,
-        bvps:
-          m?.pbRatio && m.currentPrice != null && m.currentPrice > 0
-            ? m.currentPrice / m.pbRatio
-            : null,
+        bvps: calculateBvps(m?.bvps, m?.pbRatio, livePrice),
         dividendCagr: m?.dividendCagr5y,
         selicPct: selic ?? 10.5,
         currency: it.currency,

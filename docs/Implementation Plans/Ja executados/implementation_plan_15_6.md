@@ -34,19 +34,106 @@ Esta atividade atende rigorosamente às **9 Regras de Ouro** do `AGENTS.md`:
 ### 3. Remoção de `p-4` dos Skeletons (Alinhamento de Padding do Layout Pai)
 - **Decisão:** Removido o padding `p-4` de **todas as 6 skeletons**. O layout pai `app.tsx` já aplica padding responsivo (`px-4 py-8 sm:px-6 sm:py-10`) ao redor do `<Outlet/>`. Remover o `p-4` interno previne duplo padding durante o carregamento e elimina qualquer pátio/pulo visual (CLS).
 
-### 4. Animação de Skeleton Única (Sem `animate-pulse` Redundante)
-- **Decisão:** Mantida apenas a animação interna `shimmer` do componente base `ui/skeleton.tsx`.
+---
+
+## Ordem Sequencial de Conversão (1 Rota por Vez)
+
+1. **Rota 1: `src/routes/app/riskradar.tsx`** (Radar de Risco) — *Concluído*
+2. **Rota 2: `src/routes/app/globalradar.tsx`** (Radar Global de Proventos)
+3. **Rota 3: `src/routes/app/screener.tsx`** (Screener & Form de Ativos)
+4. **Rota 4: `src/routes/app/smartallocation.tsx`** (Aporte Inteligente)
+5. **Rota 5: `src/routes/app/cashflow.tsx`** (Calendário de Fluxo de Caixa)
+6. **Rota 6: `src/routes/app/myportfolio.tsx`** (Minha Carteira & FI Progress — Rota principal)
 
 ---
 
-## Status Final da Conversão das 6 Rotas
+## Mapeamento Atualizado de Fallbacks / Skeletons Zero-CLS por Rota (Sem `p-4`)
 
-1. **Rota 1: `src/routes/app/riskradar.tsx`** — *Concluído* (Chunk: `RiskRadar-XMLzcdW4.js` | 15.45 kB)
-2. **Rota 2: `src/routes/app/globalradar.tsx`** — *Concluído* (Chunk: `DividendRadar-BU46yJAt.js` | 10.16 kB)
-3. **Rota 3: `src/routes/app/screener.tsx`** — *Concluído* (Chunk: `AssetForm-BZQcrBRZ.js` | 9.70 kB)
-4. **Rota 4: `src/routes/app/smartallocation.tsx`** — *Concluído* (Chunk: `SmartAllocation-B4Llyg9l.js` | 41.96 kB)
-5. **Rota 5: `src/routes/app/cashflow.tsx`** — *Concluído* (Chunk: `CashFlowCalendar-gi1lWtGu.js` | 70.73 kB)
-6. **Rota 6: `src/routes/app/myportfolio.tsx`** — *Concluído* (Chunks: `FIProgressCard-Do2Xecp4.js` | 12.05 kB e `Watchlist-CfHJNXfA.js` | 109.51 kB)
+### 1. `riskradar.tsx` Fallback
+```tsx
+function RiskRadarSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-44 w-full rounded-2xl bg-muted/30 animate-pulse" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Skeleton className="h-64 rounded-2xl bg-muted/30 animate-pulse" />
+        <Skeleton className="h-64 rounded-2xl bg-muted/30 animate-pulse" />
+      </div>
+    </div>
+  );
+}
+```
+
+### 2. `globalradar.tsx` Fallback
+```tsx
+function GlobalRadarSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-10 w-48 rounded-lg bg-muted/30 animate-pulse" />
+        <Skeleton className="h-10 w-64 rounded-lg bg-muted/30 animate-pulse" />
+      </div>
+      <Skeleton className="h-[400px] w-full rounded-2xl bg-muted/30 animate-pulse" />
+    </div>
+  );
+}
+```
+
+### 3. `screener.tsx` Fallback
+```tsx
+function ScreenerSkeleton() {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+      <Skeleton className="h-[380px] rounded-2xl bg-muted/30 animate-pulse" />
+      <Skeleton className="h-[380px] rounded-2xl bg-muted/30 animate-pulse" />
+    </div>
+  );
+}
+```
+
+### 4. `smartallocation.tsx` Fallback
+```tsx
+function SmartAllocationSkeleton() {
+  return (
+    <div className="space-y-6 mx-auto max-w-4xl">
+      <Skeleton className="h-32 w-full rounded-2xl bg-muted/30 animate-pulse" />
+      <Skeleton className="h-[320px] w-full rounded-2xl bg-muted/30 animate-pulse" />
+    </div>
+  );
+}
+```
+
+### 5. `cashflow.tsx` Fallback
+```tsx
+function CashFlowSkeleton() {
+  return (
+    <div className="space-y-6 mx-auto max-w-4xl">
+      <Skeleton className="h-28 w-full rounded-2xl bg-muted/30 animate-pulse" />
+      <Skeleton className="h-[380px] w-full rounded-2xl bg-muted/30 animate-pulse" />
+    </div>
+  );
+}
+```
+
+### 6. `myportfolio.tsx` Fallback
+```tsx
+function FIProgressCardSkeleton() {
+  return <Skeleton className="h-48 w-full rounded-2xl bg-muted/30 animate-pulse mb-6" />;
+}
+
+function WatchlistSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-10 w-full rounded-lg bg-muted/30 animate-pulse" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <Skeleton className="h-44 rounded-xl bg-muted/30 animate-pulse" />
+        <Skeleton className="h-44 rounded-xl bg-muted/30 animate-pulse" />
+        <Skeleton className="h-44 rounded-xl bg-muted/30 animate-pulse" />
+      </div>
+    </div>
+  );
+}
+```
 
 ---
 
@@ -54,5 +141,8 @@ Esta atividade atende rigorosamente às **9 Regras de Ouro** do `AGENTS.md`:
 
 ### Automated Verification Steps
 - Executar `npx tsc --noEmit` após a edição de cada rota e confirmar 0 erros.
-- Executar `npm run build` e confirmar a criação de chunks assíncronos dinâmicos gerados pelo Vite.
+- Executar `npm run build` e confirmar a criação de chunks assíncronos dinâmicos gerados pelo Vite (`assets/riskradar-*.js`, `assets/globalradar-*.js`, etc.).
 - Executar `npx vitest run` para garantir que 100% da suíte de testes permanece aprovada.
+
+### Manual Verification Steps
+- Abrir a rota convertida em conexão throttled (Slow 3G) e confirmar exibição do Shimmer Skeleton sem qualquer sobressalto ou "pulo" de layout visual.

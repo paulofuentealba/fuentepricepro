@@ -19,6 +19,7 @@ export interface AssetMeta {
   exDividendDate: string | null;
   dividendCagr5y: number | null;
   eps: number | null;
+  bvps: number | null;
   pbRatio: number | null;
   sector: string | null;
   canonicalDividend3y: number | null;

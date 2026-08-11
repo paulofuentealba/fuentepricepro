@@ -7,6 +7,7 @@ import {
   dividendTaxRate,
   isUsAsset,
   getAssetValuation,
+  calculateBvps,
   GORDON_MIN_DISCOUNT_MARGIN,
 } from "../calculations";
 
@@ -216,3 +217,53 @@ describe("2-Stage Gordon Growth (H-Model) & Volatility Confidence Tests", () => 
     expect(result.gordon!).toBeCloseTo(19.05, 1);
   });
 });
+
+describe("calculateBvps SSOT & convergence", () => {
+  it("prioritizes direct bvps over pbRatio recalculated value when direct bvps exists and diverges", () => {
+    // Direct bvps = 15.0, currentPrice = 100, pbRatio = 2.0 (100 / 2 = 50.0)
+    // Direct bvps (15.0) must prevail, NOT the 50.0 recalculated value
+    const directBvps = 15.0;
+    const pbRatio = 2.0;
+    const currentPrice = 100;
+
+    const result = calculateBvps(directBvps, pbRatio, currentPrice);
+    expect(result).toBe(15.0);
+
+    // Verify Graham model in getAssetValuation uses 15.0 (Graham = sqrt(22.5 * 2 * 15) = 25.98), NOT 47.43 (from 50.0)
+    const valuation = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 100,
+      avgDividend: 2,
+      eps: 2,
+      bvps: result,
+      selicPct: 10.5,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    expect(valuation.graham).toBeCloseTo(25.98, 2);
+  });
+
+  it("falls back to currentPrice / pbRatio when direct bvps is null or 0", () => {
+    expect(calculateBvps(null, 2.0, 100)).toBe(50);
+    expect(calculateBvps(0, 2.0, 100)).toBe(50);
+    expect(calculateBvps(undefined, 2.5, 50)).toBe(20);
+  });
+
+  it("returns null when neither direct bvps nor valid pbRatio/currentPrice are available", () => {
+    expect(calculateBvps(null, null, 100)).toBeNull();
+    expect(calculateBvps(null, 2.0, 0)).toBeNull();
+  });
+
+  it("guarantees useValuedPortfolio and AssetCard receive identical bvps for identical asset metrics", () => {
+    const assetMeta = { bvps: 18.5, pbRatio: 1.5 };
+    const currentPrice = 30;
+
+    const bvpsForValuedPortfolio = calculateBvps(assetMeta.bvps, assetMeta.pbRatio, currentPrice);
+    const bvpsForAssetCard = calculateBvps(assetMeta.bvps, assetMeta.pbRatio, currentPrice);
+
+    expect(bvpsForValuedPortfolio).toBe(bvpsForAssetCard);
+    expect(bvpsForValuedPortfolio).toBe(18.5);
+  });
+});
+
