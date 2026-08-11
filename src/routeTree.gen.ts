@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppV2RouteImport } from './routes/app-v2'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppV2IndexRouteImport } from './routes/app-v2/index'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
 import { Route as AppSmartallocationRouteImport } from './routes/app/smartallocation'
@@ -41,6 +43,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppV2Route = AppV2RouteImport.update({
+  id: '/app-v2',
+  path: '/app-v2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -55,6 +62,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AppV2IndexRoute = AppV2IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppV2Route,
 } as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   id: '/guides/dividend-valuation',
@@ -111,6 +123,7 @@ const AppCashflowRoute = AppCashflowRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app-v2': typeof AppV2RouteWithChildren
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -124,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/app-v2/': typeof AppV2IndexRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -141,12 +155,14 @@ export interface FileRoutesByTo {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/app-v2': typeof AppV2IndexRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app-v2': typeof AppV2RouteWithChildren
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -160,6 +176,7 @@ export interface FileRoutesById {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/app-v2/': typeof AppV2IndexRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -167,6 +184,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app-v2'
     | '/auth'
     | '/settings'
     | '/sitemap.xml'
@@ -180,6 +198,7 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/app-v2/'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -197,11 +216,13 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/app-v2'
     | '/app'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/app-v2'
     | '/auth'
     | '/settings'
     | '/sitemap.xml'
@@ -215,12 +236,14 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/app-v2/'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AppV2Route: typeof AppV2RouteWithChildren
   AuthRoute: typeof AuthRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -250,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app-v2': {
+      id: '/app-v2'
+      path: '/app-v2'
+      fullPath: '/app-v2'
+      preLoaderRoute: typeof AppV2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -270,6 +300,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app-v2/': {
+      id: '/app-v2/'
+      path: '/'
+      fullPath: '/app-v2/'
+      preLoaderRoute: typeof AppV2IndexRouteImport
+      parentRoute: typeof AppV2Route
     }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
@@ -372,9 +409,20 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AppV2RouteChildren {
+  AppV2IndexRoute: typeof AppV2IndexRoute
+}
+
+const AppV2RouteChildren: AppV2RouteChildren = {
+  AppV2IndexRoute: AppV2IndexRoute,
+}
+
+const AppV2RouteWithChildren = AppV2Route._addFileChildren(AppV2RouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AppV2Route: AppV2RouteWithChildren,
   AuthRoute: AuthRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
