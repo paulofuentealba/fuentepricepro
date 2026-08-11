@@ -28,6 +28,7 @@ import { Route as AppDocsRouteImport } from './routes/app/docs'
 import { Route as AppComparatorRouteImport } from './routes/app.comparator'
 import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
 import { Route as AppV2ScreenerRouteImport } from './routes/app-v2/screener'
+import { Route as AppV2RiskradarRouteImport } from './routes/app-v2/riskradar'
 import { Route as AppV2MyportfolioRouteImport } from './routes/app-v2/myportfolio'
 import { Route as AppV2GlobalradarRouteImport } from './routes/app-v2/globalradar'
 import { Route as AppV2ComparatorRouteImport } from './routes/app-v2/comparator'
@@ -128,6 +129,11 @@ const AppV2ScreenerRoute = AppV2ScreenerRouteImport.update({
   path: '/screener',
   getParentRoute: () => AppV2Route,
 } as any)
+const AppV2RiskradarRoute = AppV2RiskradarRouteImport.update({
+  id: '/riskradar',
+  path: '/riskradar',
+  getParentRoute: () => AppV2Route,
+} as any)
 const AppV2MyportfolioRoute = AppV2MyportfolioRouteImport.update({
   id: '/myportfolio',
   path: '/myportfolio',
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/app-v2/comparator': typeof AppV2ComparatorRoute
   '/app-v2/globalradar': typeof AppV2GlobalradarRoute
   '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
+  '/app-v2/riskradar': typeof AppV2RiskradarRoute
   '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/app-v2/comparator': typeof AppV2ComparatorRoute
   '/app-v2/globalradar': typeof AppV2GlobalradarRoute
   '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
+  '/app-v2/riskradar': typeof AppV2RiskradarRoute
   '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/app-v2/comparator': typeof AppV2ComparatorRoute
   '/app-v2/globalradar': typeof AppV2GlobalradarRoute
   '/app-v2/myportfolio': typeof AppV2MyportfolioRoute
+  '/app-v2/riskradar': typeof AppV2RiskradarRoute
   '/app-v2/screener': typeof AppV2ScreenerRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/app-v2/comparator'
     | '/app-v2/globalradar'
     | '/app-v2/myportfolio'
+    | '/app-v2/riskradar'
     | '/app-v2/screener'
     | '/app/cashflow'
     | '/app/comparator'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/app-v2/comparator'
     | '/app-v2/globalradar'
     | '/app-v2/myportfolio'
+    | '/app-v2/riskradar'
     | '/app-v2/screener'
     | '/app/cashflow'
     | '/app/comparator'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/app-v2/comparator'
     | '/app-v2/globalradar'
     | '/app-v2/myportfolio'
+    | '/app-v2/riskradar'
     | '/app-v2/screener'
     | '/app/cashflow'
     | '/app/comparator'
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppV2ScreenerRouteImport
       parentRoute: typeof AppV2Route
     }
+    '/app-v2/riskradar': {
+      id: '/app-v2/riskradar'
+      path: '/riskradar'
+      fullPath: '/app-v2/riskradar'
+      preLoaderRoute: typeof AppV2RiskradarRouteImport
+      parentRoute: typeof AppV2Route
+    }
     '/app-v2/myportfolio': {
       id: '/app-v2/myportfolio'
       path: '/myportfolio'
@@ -489,6 +508,7 @@ interface AppV2RouteChildren {
   AppV2ComparatorRoute: typeof AppV2ComparatorRoute
   AppV2GlobalradarRoute: typeof AppV2GlobalradarRoute
   AppV2MyportfolioRoute: typeof AppV2MyportfolioRoute
+  AppV2RiskradarRoute: typeof AppV2RiskradarRoute
   AppV2ScreenerRoute: typeof AppV2ScreenerRoute
   AppV2IndexRoute: typeof AppV2IndexRoute
 }
@@ -497,6 +517,7 @@ const AppV2RouteChildren: AppV2RouteChildren = {
   AppV2ComparatorRoute: AppV2ComparatorRoute,
   AppV2GlobalradarRoute: AppV2GlobalradarRoute,
   AppV2MyportfolioRoute: AppV2MyportfolioRoute,
+  AppV2RiskradarRoute: AppV2RiskradarRoute,
   AppV2ScreenerRoute: AppV2ScreenerRoute,
   AppV2IndexRoute: AppV2IndexRoute,
 }
