@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Trophy, Target, Info } from "lucide-react";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -21,39 +21,7 @@ import {
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
-
-function calculateMonthsToFI(
-  currentCapital: number,
-  monthlyContribution: number,
-  targetCapital: number,
-  annualYield: number,
-): number {
-  if (currentCapital >= targetCapital) return 0;
-
-  const r = annualYield / 100 / 12; // Monthly rate
-  if (r === 0) {
-    return monthlyContribution > 0
-      ? (targetCapital - currentCapital) / monthlyContribution
-      : Infinity;
-  }
-
-  // If no contribution and no capital, we will never reach it
-  if (monthlyContribution <= 0 && currentCapital <= 0) return Infinity;
-
-  const FV = targetCapital;
-  const PV = currentCapital;
-  const PMT = monthlyContribution;
-
-  const numerator = FV * r + PMT;
-  const denominator = PV * r + PMT;
-
-  // If denominator is 0 (shouldn't happen with positive PMT/PV), prevent division by zero
-  if (denominator <= 0) return Infinity;
-
-  const n = Math.log(numerator / denominator) / Math.log(1 + r);
-
-  return isNaN(n) || n < 0 ? Infinity : n;
-}
+import { useFIProgress } from "@/lib/useFIProgress";
 
 function formatDuration(months: number, t: any): string {
   if (!isFinite(months) || months > 1200) return t.fiMode.moreThan100;
@@ -73,7 +41,7 @@ function formatDuration(months: number, t: any): string {
 
 export function FIProgressCard() {
   const { settings, updateSettings } = useUserSettings();
-  const { valuedItems: items, isAppLoading } = useValuedPortfolio();
+  const { isAppLoading } = useValuedPortfolio();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const usdRate = fx?.USDBRL ?? 5.5;
   const { locale, t } = useI18n();
@@ -91,29 +59,7 @@ export function FIProgressCard() {
 
   const currency = settings.displayCurrency;
 
-  // Conversions assuming user's base currency
-  // For simplicity, we sum up current capital and projected monthly income in BRL,
-  // then format it in the user's preferred currency if needed.
-  // Actually, usdRate converts TO BRL. Let's just use BRL internally if smartAllocationCurrency is BRL.
-  // If they want USD, we would divide by the exchange rate.
-  // We will standardize everything in BRL for the calculation, then format.
-
-  const { totalCapitalBRL, monthlyIncomeBRL } = useMemo(() => {
-    let capital = 0;
-    let annualIncome = 0;
-
-    for (const item of items) {
-      if (item.quantity && item.quantity > 0) {
-        const itemCapital = item.quantity * (item.currentPrice || 0);
-        const itemIncome = item.quantity * (item.annualDividend || 0);
-
-        capital += convertToBRL(itemCapital, item.currency);
-        annualIncome += convertToBRL(itemIncome, item.currency);
-      }
-    }
-
-    return { totalCapitalBRL: capital, monthlyIncomeBRL: annualIncome / 12 };
-  }, [items, convertToBRL]);
+  const { coveragePercent, isReached, monthsToFI, monthlyIncomeBRL } = useFIProgress();
 
   // We need to work in the user's selected currency
   // Inverse convert if needed: BRL to USD
@@ -128,22 +74,10 @@ export function FIProgressCard() {
     return valueBRL;
   }, [currency, convertToBRL]);
 
-  const totalCapital = toUserCurrency(totalCapitalBRL);
   const currentMonthlyIncome = toUserCurrency(monthlyIncomeBRL);
   const monthlyCostGoal = settings.monthlyLivingCostGoal || 0;
-  const monthlyContribution = settings.estimatedMonthlyContribution || 0;
 
   const isSetup = monthlyCostGoal > 0;
-
-  const ratio = isSetup && monthlyCostGoal > 0 ? currentMonthlyIncome / monthlyCostGoal : 0;
-  const coveragePercent = Math.min(100, Math.max(0, ratio * 100));
-  const isReached = isSetup && ratio >= 1;
-
-  const targetCapital = isSetup ? monthlyCostGoal / (settings.targetYield / 100 / 12) : 0;
-  const monthsToFI =
-    isSetup && !isReached
-      ? calculateMonthsToFI(totalCapital, monthlyContribution, targetCapital, settings.targetYield)
-      : 0;
 
   const handleSaveSettings = () => {
     const cost = parseFloat(tempCost);
@@ -295,7 +229,9 @@ export function FIProgressCard() {
 
                 <div className="text-right">
                   <p className="text-xs font-mono text-muted-foreground">
-                    {isReached ? t.fiMode.achieved : formatDuration(monthsToFI, t)}
+                    {isReached
+                      ? t.fiMode.achieved
+                      : formatDuration(monthsToFI ?? Infinity, t)}
                   </p>
                 </div>
               </div>
