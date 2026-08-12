@@ -19,9 +19,21 @@ import { useState, useMemo } from "react";
 import { memo, useCallback, type KeyboardEvent, useRef } from "react";
 import { ValuationRadar } from "@/components/ui/ValuationRadar";
 import { useSelic } from "@/lib/useSelic";
-import { getAssetValuation, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
+import {
+  getAssetValuation,
+  calculateBvps,
+  calculateHistoricalYieldAverage,
+  GORDON_TERMINAL_GROWTH_RATE,
+} from "@/lib/calculations";
 import { useQuery } from "@tanstack/react-query";
-import { ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
+import { ipcaFiveYearAverageQueryOptions, assetPriceHistoryQueryOptions } from "@/lib/queryOptions";
+import { AlertTriangle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -72,6 +84,27 @@ export interface AssetCardProps {
 
 function flagFor(currency: string): string {
   return currency === "USD" ? "🇺🇸" : "🇧🇷";
+}
+
+/** Discreet badge shown next to the yield when `getAssetValuation` flags
+ * `yieldTrapWarning === true` (current yield > 2x the asset's own 5y
+ * historical average). Never rendered for `false`/`null` (indeterminate). */
+function YieldTrapBadge() {
+  const { t } = useI18n();
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 p-1 text-warning">
+            <AlertTriangle className="h-3 w-3" aria-label={t.result.yieldTrapWarning} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-[240px] text-xs">
+          {t.result.yieldTrapWarningTip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 function AllocationVariant({
@@ -288,6 +321,11 @@ function WatchlistVariant(props: AssetCardProps) {
           isSimulation={props.isSimulation}
         />
         <AssetCardTags meta={meta} isConcentrationViolated={isConcentrationViolated} />
+        {valuation.yieldTrapWarning === true && (
+          <div onClick={(e) => e.stopPropagation()} className="flex">
+            <YieldTrapBadge />
+          </div>
+        )}
       </div>
 
       <div
@@ -381,6 +419,26 @@ function SearchVariant({
   const { data: selic } = useSelic();
   const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
+  // Reuses fetchAssetPriceHistoryFn/assetPriceHistoryQueryOptions (already
+  // built for the Comparador chart) — 5y window, single asset, so this is a
+  // single extra request scoped to whichever ticker the user is inspecting,
+  // not an N-ticker fan-out across the whole portfolio.
+  const priceHistoryFromDate = useMemo(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 5);
+    return d.toISOString().slice(0, 10);
+  }, []);
+  const priceHistoryToDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const { data: priceHistory } = useQuery(
+    assetPriceHistoryQueryOptions(asset.ticker, priceHistoryFromDate, priceHistoryToDate),
+  );
+
+  const historicalYieldAverage = useMemo(
+    () =>
+      calculateHistoricalYieldAverage(asset.dividendHistory, priceHistory, asset.currentPrice),
+    [asset.dividendHistory, priceHistory, asset.currentPrice],
+  );
+
   const valuation = getAssetValuation({
     targetYield: localTargetYield,
     currentPrice: asset.currentPrice,
@@ -392,6 +450,7 @@ function SearchVariant({
     terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
     currency: asset.currency,
     type: asset.type,
+    historicalYieldAverage,
   });
 
   const activeCeiling = valuation.activeCeiling;
@@ -452,6 +511,7 @@ function SearchVariant({
                 {t.watchlist.simulationBadge}
               </Badge>
             )}
+            {valuation.yieldTrapWarning === true && <YieldTrapBadge />}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{asset.name}</p>
         </div>

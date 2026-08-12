@@ -1,5 +1,6 @@
 import type { Asset, AssetType } from "./domain";
 import type { WatchlistItem } from "./watchlist";
+import type { BenchmarkPoint } from "./benchmark";
 
 export function avgDividend(divs: readonly number[]): number {
   if (!divs.length) return 0;
@@ -140,6 +141,149 @@ export function calculateDividendGrowthVolatility(
   return Math.sqrt(variance);
 }
 
+/**
+ * Reconstructs the yearly closing price for each year present in
+ * `dividendHistory` from `priceHistory` (as returned by
+ * `fetchAssetPriceHistoryFn`/`assetPriceHistoryQueryOptions` — the same
+ * series already built for the Comparador chart), and computes
+ * `yield_ano = dividendo_ano / preço_de_fechamento_do_ano` for every year
+ * where both a dividend and a price point are available.
+ *
+ * `priceHistory` points carry `cumulativeReturnPct` (return since the
+ * series' first point), not an absolute price — see `BenchmarkPoint` /
+ * `calculatePriceCumulativeReturn` in `benchmark.ts`. To recover an
+ * absolute price we anchor the series to `currentPrice` (the live quote,
+ * known separately): `basePrice = currentPrice / (1 + lastReturnPct/100)`,
+ * then `price_t = basePrice * (1 + returnPct_t/100)` for any point `t`.
+ *
+ * Decision: uses each year's LAST available price point (closing price of
+ * the year) rather than an intra-year average — simpler to derive from the
+ * series (no need to bucket/average many daily points per year) and
+ * matches how "yield at year-end" is usually read.
+ *
+ * Same `length >= 3` reliability guard as `calculateDividendGrowthVolatility`:
+ * fewer than 3 years with both dividend and price data returns `null`
+ * (indeterminate), never a misleadingly precise average from 1-2 points.
+ */
+export function calculateHistoricalYieldAverage(
+  dividendHistory?: readonly { year: number; amount: number }[],
+  priceHistory?: readonly BenchmarkPoint[],
+  currentPrice?: number | null,
+): number | null {
+  if (!dividendHistory || dividendHistory.length < 3) return null;
+  if (!priceHistory || priceHistory.length === 0) return null;
+  if (typeof currentPrice !== "number" || !Number.isFinite(currentPrice) || currentPrice <= 0) {
+    return null;
+  }
+
+  const sortedPrices = [...priceHistory]
+    .filter((p) => p && typeof p.date === "string" && Number.isFinite(p.cumulativeReturnPct))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  if (sortedPrices.length === 0) return null;
+
+  const lastReturnPct = sortedPrices[sortedPrices.length - 1].cumulativeReturnPct;
+  const basePriceDenominator = 1 + lastReturnPct / 100;
+  if (basePriceDenominator <= 0) return null;
+  const basePrice = currentPrice / basePriceDenominator;
+  if (!Number.isFinite(basePrice) || basePrice <= 0) return null;
+
+  // Last price point available in each calendar year = that year's closing price.
+  const closingPriceByYear = new Map<number, number>();
+  for (const point of sortedPrices) {
+    const year = Number.parseInt(point.date.slice(0, 4), 10);
+    if (!Number.isFinite(year)) continue;
+    const price = basePrice * (1 + point.cumulativeReturnPct / 100);
+    if (price > 0) closingPriceByYear.set(year, price); // later points overwrite earlier ones (sorted asc)
+  }
+
+  // Expressed in percent (e.g. 5.2), same convention as `dividendYield` /
+  // `targetYield` elsewhere in this module — NOT a raw 0-1 fraction.
+  const yields: number[] = [];
+  for (const { year, amount } of dividendHistory) {
+    if (!Number.isFinite(amount) || amount <= 0) continue;
+    const closingPrice = closingPriceByYear.get(year);
+    if (closingPrice == null || closingPrice <= 0) continue;
+    yields.push((amount / closingPrice) * 100);
+  }
+
+  if (yields.length < 3) return null;
+  return yields.reduce((sum, v) => sum + v, 0) / yields.length;
+}
+
+/**
+ * Yield-trap check (Paulo, prompt 79): flags when the CURRENT dividend
+ * yield is more than 2x the asset's own 5-year historical yield average —
+ * a red flag that the "high yield" may be a shrinking price / unsustainable
+ * payout rather than real income. Returns `null` (indeterminate) whenever
+ * `historicalYieldAverage` is `null`, never a default `false` — we must
+ * never claim "not a trap" without enough data to know.
+ */
+export function isYieldTrap(
+  currentYield: number | null | undefined,
+  historicalYieldAverage: number | null | undefined,
+): boolean | null {
+  if (
+    typeof currentYield !== "number" ||
+    !Number.isFinite(currentYield) ||
+    typeof historicalYieldAverage !== "number" ||
+    !Number.isFinite(historicalYieldAverage) ||
+    historicalYieldAverage <= 0
+  ) {
+    return null;
+  }
+  return currentYield > historicalYieldAverage * 2;
+}
+
+/**
+ * Shareholder Yield = (dividendsPaid + netBuybacks) / marketCap, where
+ * netBuybacks is derived from the year-over-year change in shares
+ * outstanding (no separate buyback $ figure is available): a decrease in
+ * shares outstanding is a net buyback (positive contribution), an increase
+ * is net issuance (negative contribution) — valued at `pricePerShare`.
+ *
+ * Data source (prompt 79 investigation): `fetchSecEdgarCompanyFacts` already
+ * fetches `CommonStockSharesOutstanding` (used for the Piotroski F-Score)
+ * for up to 2 fiscal years — US tickers only (SEC EDGAR has no BR coverage).
+ * BR assets are out of scope for this metric in this round; callers should
+ * pass `null` for BR tickers rather than fabricate a value.
+ *
+ * Returns `null` (not `0`) whenever any required input is missing/invalid —
+ * never asserts a shareholder yield without real data behind it.
+ */
+export function calculateShareholderYield({
+  dividendsPaidTotal,
+  sharesOutstandingCurrent,
+  sharesOutstandingPrior,
+  pricePerShare,
+  marketCap,
+}: {
+  dividendsPaidTotal: number | null | undefined;
+  sharesOutstandingCurrent: number | null | undefined;
+  sharesOutstandingPrior: number | null | undefined;
+  pricePerShare: number | null | undefined;
+  marketCap: number | null | undefined;
+}): number | null {
+  if (
+    typeof dividendsPaidTotal !== "number" ||
+    !Number.isFinite(dividendsPaidTotal) ||
+    typeof sharesOutstandingCurrent !== "number" ||
+    !Number.isFinite(sharesOutstandingCurrent) ||
+    typeof sharesOutstandingPrior !== "number" ||
+    !Number.isFinite(sharesOutstandingPrior) ||
+    typeof pricePerShare !== "number" ||
+    !Number.isFinite(pricePerShare) ||
+    pricePerShare <= 0 ||
+    typeof marketCap !== "number" ||
+    !Number.isFinite(marketCap) ||
+    marketCap <= 0
+  ) {
+    return null;
+  }
+
+  const netBuybackValue = (sharesOutstandingPrior - sharesOutstandingCurrent) * pricePerShare;
+  return (dividendsPaidTotal + netBuybackValue) / marketCap;
+}
+
 export function gordonPrice(
   d0: number,
   k: number = DEFAULT_SELIC,
@@ -182,6 +326,8 @@ export function getAssetValuation({
   currency,
   type,
   exchangeRate,
+  historicalYieldAverage,
+  shareholderYield,
 }: {
   targetYield: number;
   currentPrice: number;
@@ -198,6 +344,16 @@ export function getAssetValuation({
   currency: string;
   type: AssetType;
   exchangeRate?: number;
+  /** Asset's own 5-year historical yield average (already computed by the
+   * caller via `calculateHistoricalYieldAverage`, from `dividendHistory` +
+   * `fetchAssetPriceHistoryFn`'s series) — same pattern as `selicPct` /
+   * `terminalGrowthRate`: resolved outside, threaded through here, this
+   * function stays pure/sync. `null`/`undefined` when indeterminate. */
+  historicalYieldAverage?: number | null;
+  /** Shareholder Yield, already computed by the caller (see
+   * `calculateShareholderYield`) — US-only (SEC EDGAR), `null` for BR
+   * assets or whenever data is insufficient. Just threaded through. */
+  shareholderYield?: number | null;
 }) {
   // Bypass complex math for Fixed Income
   if (type === "FIXED_INCOME") {
@@ -212,6 +368,8 @@ export function getAssetValuation({
       dividendYield: 0,
       positive: true,
       isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
     };
   }
 
@@ -227,6 +385,8 @@ export function getAssetValuation({
       dividendYield: 0,
       positive: true,
       isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
     };
   }
 
@@ -275,6 +435,12 @@ export function getAssetValuation({
   const margin = (currentPrice > 0 && !isUnavailable) ? (activeCeiling / currentPrice - 1) * 100 : 0;
   const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
 
+  // 5. Yield-Trap Check: current yield vs the asset's own 5y historical average.
+  const yieldTrapWarning = isYieldTrap(
+    dividendYield,
+    historicalYieldAverage ?? null,
+  );
+
   return {
     bazin,
     graham,
@@ -286,6 +452,8 @@ export function getAssetValuation({
     dividendYield,
     positive: margin >= 0,
     isUnavailable,
+    yieldTrapWarning,
+    shareholderYield: shareholderYield ?? null,
   };
 }
 

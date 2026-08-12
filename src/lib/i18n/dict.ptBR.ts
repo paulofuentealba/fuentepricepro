@@ -275,6 +275,9 @@ export const ptBR = {
     avgDividendLabel: "Dividendo médio",
     undervaluedTip: "Desconto atrativo. Boa margem para acumulação de longo prazo.",
     overvaluedTip: "Negociando acima do teto. Maior risco de perda de capital ou baixo yield.",
+    yieldTrapWarning: "Possível yield-trap",
+    yieldTrapWarningTip:
+      "Yield atual mais de 2x acima da média histórica de 5 anos do próprio ativo — investigue se é sustentável antes de considerar isso renda passiva confiável.",
     insights: {
       title: "Visão do Investidor",
       bargain: "Oportunidade de ouro! O ativo está {{margin}}% Descontado, com alto desconto.",

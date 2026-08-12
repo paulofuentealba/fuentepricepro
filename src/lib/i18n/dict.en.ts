@@ -273,6 +273,9 @@ export const en = {
     avgDividendLabel: "Avg. dividend",
     undervaluedTip: "Attractive discount. Good margin for long-term accumulation.",
     overvaluedTip: "Trading above ceiling. Higher risk of capital loss or low yield.",
+    yieldTrapWarning: "Possible yield trap",
+    yieldTrapWarningTip:
+      "Current yield is more than 2x this asset's own 5-year historical average — investigate whether it's sustainable before treating it as reliable passive income.",
     insights: {
       title: "Investor Vision",
       bargain: "Golden opportunity! The asset is {{margin}}% Undervalued, high discount.",

@@ -276,6 +276,9 @@ export const es = {
     avgDividendLabel: "Dividendo prom.",
     undervaluedTip: "Descuento atractivo. Buena oportunidad de acumulación.",
     overvaluedTip: "Cotizando por encima del techo. Mayor riesgo.",
+    yieldTrapWarning: "Posible yield trap",
+    yieldTrapWarningTip:
+      "El yield actual está más del doble del promedio histórico de 5 años del propio activo — investigue si es sostenible antes de considerarlo renta pasiva confiable.",
     insights: {
       title: "Visión del Inversor",
       bargain: "¡Oportunidad de oro! El activo está {{margin}}% Subvalorado.",

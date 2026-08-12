@@ -9,9 +9,13 @@ import {
   getAssetValuation,
   calculateBvps,
   gordonPrice,
+  calculateHistoricalYieldAverage,
+  isYieldTrap,
+  calculateShareholderYield,
   GORDON_MIN_DISCOUNT_MARGIN,
   GORDON_TERMINAL_GROWTH_RATE,
 } from "../calculations";
+import type { BenchmarkPoint } from "../benchmark";
 
 describe("Bazin ceiling price math", () => {
   it("averages dividends", () => {
@@ -305,6 +309,156 @@ describe("calculateBvps SSOT & convergence", () => {
 
     expect(bvpsForValuedPortfolio).toBe(bvpsForAssetCard);
     expect(bvpsForValuedPortfolio).toBe(18.5);
+  });
+});
+
+describe("Yield-Trap Check + Shareholder Yield (prompt 79)", () => {
+  it("calculateHistoricalYieldAverage: reconstructs yearly closing price from cumulative-return points and averages 5 years of yield correctly", () => {
+    // Synthetic 10%/year price growth from a basePrice of 100:
+    // 2020: 100, 2021: 110, 2022: 121, 2023: 133.1, 2024: 146.41 (= currentPrice)
+    const priceHistory: BenchmarkPoint[] = [
+      { date: "2020-12-31", cumulativeReturnPct: 0 },
+      { date: "2021-12-31", cumulativeReturnPct: 10 },
+      { date: "2022-12-31", cumulativeReturnPct: 21 },
+      { date: "2023-12-31", cumulativeReturnPct: 33.1 },
+      { date: "2024-12-31", cumulativeReturnPct: 46.41 },
+    ];
+    const dividendHistory = [
+      { year: 2020, amount: 5 },
+      { year: 2021, amount: 5 },
+      { year: 2022, amount: 5 },
+      { year: 2023, amount: 5 },
+      { year: 2024, amount: 5 },
+    ];
+    const currentPrice = 146.41;
+
+    const result = calculateHistoricalYieldAverage(dividendHistory, priceHistory, currentPrice);
+
+    // yields (%): 5/100, 5/110, 5/121, 5/133.1, 5/146.41 -> avg ~= 4.1699%
+    expect(result).not.toBeNull();
+    expect(result).toBeCloseTo(4.1699, 2);
+  });
+
+  it("calculateHistoricalYieldAverage returns null with fewer than 3 years of valid overlapping data", () => {
+    const priceHistory: BenchmarkPoint[] = [
+      { date: "2023-12-31", cumulativeReturnPct: 0 },
+      { date: "2024-12-31", cumulativeReturnPct: 10 },
+    ];
+    const dividendHistory = [
+      { year: 2023, amount: 5 },
+      { year: 2024, amount: 5 },
+    ];
+    expect(calculateHistoricalYieldAverage(dividendHistory, priceHistory, 110)).toBeNull();
+    expect(calculateHistoricalYieldAverage(undefined, priceHistory, 110)).toBeNull();
+    expect(calculateHistoricalYieldAverage(dividendHistory, undefined, 110)).toBeNull();
+  });
+
+  it("isYieldTrap: flags true when current yield is 2.5x the historical average", () => {
+    expect(isYieldTrap(10, 4)).toBe(true); // 10 > 4*2
+  });
+
+  it("isYieldTrap: returns false when current yield is only 1.2x the historical average", () => {
+    expect(isYieldTrap(4.8, 4)).toBe(false); // 4.8 <= 4*2
+  });
+
+  it("isYieldTrap: returns null (indeterminate) when historical average is unavailable, never a default false", () => {
+    expect(isYieldTrap(10, null)).toBeNull();
+    expect(isYieldTrap(10, undefined)).toBeNull();
+  });
+
+  it("calculateShareholderYield: positive net buyback (shares outstanding decreased) contributes positively", () => {
+    const result = calculateShareholderYield({
+      dividendsPaidTotal: 1_000_000,
+      sharesOutstandingCurrent: 950_000,
+      sharesOutstandingPrior: 1_000_000, // 50,000 shares bought back
+      pricePerShare: 20,
+      marketCap: 19_000_000,
+    });
+    // netBuyback = (1,000,000 - 950,000) * 20 = 1,000,000
+    // shareholderYield = (1,000,000 + 1,000,000) / 19,000,000
+    expect(result).toBeCloseTo(2_000_000 / 19_000_000, 6);
+    expect(result).toBeGreaterThan(0);
+  });
+
+  it("calculateShareholderYield: net share issuance (shares outstanding increased) contributes negatively", () => {
+    const result = calculateShareholderYield({
+      dividendsPaidTotal: 1_000_000,
+      sharesOutstandingCurrent: 1_100_000,
+      sharesOutstandingPrior: 1_000_000, // 100,000 new shares issued
+      pricePerShare: 20,
+      marketCap: 22_000_000,
+    });
+    // netBuyback = (1,000,000 - 1,100,000) * 20 = -2,000,000
+    // shareholderYield = (1,000,000 - 2,000,000) / 22,000,000 = negative
+    expect(result).toBeCloseTo(-1_000_000 / 22_000_000, 6);
+    expect(result).toBeLessThan(0);
+  });
+
+  it("calculateShareholderYield returns null (not 0) when required data is missing", () => {
+    expect(
+      calculateShareholderYield({
+        dividendsPaidTotal: null,
+        sharesOutstandingCurrent: 100,
+        sharesOutstandingPrior: 100,
+        pricePerShare: 10,
+        marketCap: 1000,
+      }),
+    ).toBeNull();
+    expect(
+      calculateShareholderYield({
+        dividendsPaidTotal: 100,
+        sharesOutstandingCurrent: 100,
+        sharesOutstandingPrior: 100,
+        pricePerShare: 10,
+        marketCap: 0,
+      }),
+    ).toBeNull();
+  });
+
+  it("getAssetValuation: yieldTrapWarning is null when historicalYieldAverage is not supplied, never a default false", () => {
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 100,
+      avgDividend: 10,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+    expect(result.yieldTrapWarning).toBeNull();
+    expect(result.shareholderYield).toBeNull();
+  });
+
+  it("getAssetValuation: yieldTrapWarning is true when dividendYield is more than 2x historicalYieldAverage", () => {
+    const result = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 100,
+      avgDividend: 20, // dividendYield = 20%
+      currency: "BRL",
+      type: "STOCK_BR",
+      historicalYieldAverage: 8, // 20% > 8%*2 = 16%
+    });
+    expect(result.yieldTrapWarning).toBe(true);
+  });
+
+  it("getAssetValuation: FIXED_INCOME and unavailable-data branches also return yieldTrapWarning/shareholderYield as null", () => {
+    const fi = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 100,
+      avgDividend: 10,
+      currency: "BRL",
+      type: "FIXED_INCOME",
+    });
+    expect(fi.yieldTrapWarning).toBeNull();
+    expect(fi.shareholderYield).toBeNull();
+
+    const unavailable = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 0,
+      avgDividend: 10,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+    expect(unavailable.yieldTrapWarning).toBeNull();
+    expect(unavailable.shareholderYield).toBeNull();
   });
 });
 

@@ -321,7 +321,7 @@ imediata via config, sem novo deploy.
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
 
 - **`as_of` diagnostic** — sprint atual, diagnóstico concluído em 09/08, aguardando decisão de correção
-- **Yield-trap check + shareholder yield** — próximo sprint, aguardando threshold de Paulo. Especificação de partida já existe via `Victorcorcos/winning-investments` (checklist Bazin: DY médio 5a, dívida/patrimônio)
+- ~~**Yield-trap check + shareholder yield**~~ — **resolvido (12/08, prompt 79)**: `calculateHistoricalYieldAverage`/`isYieldTrap`/`calculateShareholderYield` em `calculations.ts`, `yieldTrapWarning`/`shareholderYield` expostos no retorno de `getAssetValuation`, badge discreto em `AssetCard.tsx` (SearchVariant com fetch real via `assetPriceHistoryQueryOptions`; WatchlistVariant lê o campo se presente). **Limitação de cobertura**: `shareholderYield` fica sem wiring de fetch real neste round — `fetchSecEdgarCompanyFacts` (US-only, SEC EDGAR) não busca hoje `PaymentsOfDividends`/valor de recompra, só `sharesOutstanding` (2 anos); a função pura está pronta e testada, mas nenhum call site popula os inputs reais ainda (BR fica de fora por falta de fonte de dado, como já documentado pro Piotroski).
 - **Greenblatt Magic Formula** (candidato a 4º modelo) — P3, validado por 2 repos BR independentes
 - **Shadow Account behavioral diagnostics** — parqueado, aguardando catalogação de corretoras + decisão de produto
 - **Correlation regime visualization** — backlog
