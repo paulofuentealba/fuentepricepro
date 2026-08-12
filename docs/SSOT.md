@@ -309,7 +309,7 @@ imediata via config, sem novo deploy.
 | 7 | **`check.py` desatualizado vs. `AGENTS.md` real** (6 papéis vs. 9) | ✅ Resolvido (12/08) | P1 | Verificado: `REQUIRED_ROLES` em `scripts/check.py` já cobria os 9 papéis da Regra 9 (fix aplicado em commit anterior à auditoria); `python scripts/check.py` roda limpo (`9 skills válidos, 0 aviso(s)`), confirmando os 9 `SKILL.md` presentes em `skills/*/` |
 | 8 | **TWR acumulado** (Time-Weighted Return) | ⚪ Aguardando dado | P2 | Depende de acúmulo de snapshots periódicos já sendo gravados |
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |
-| 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | 🟡 Débito técnico | P3 | Baixo risco |
+| 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | ✅ Resolvido (12/08) | P3 | Auditoria (Prompt 71) não encontrou `clean.cjs`/`merge.cjs`/`.sh` na raiz — já não existiam. Únicos `.js` na raiz são `eslint.config.js` (carregado automaticamente pelo ESLint) e `server.production.js` (usado em `Dockerfile`, copiado e executado em produção); ambos legítimos, nada removido |
 | 11 | **`nitro: beta`** | 🟡 Débito técnico | P3 | Migrar quando houver versão estável |
 | 12 | **Modal "Registrar Aporte" em 1 tela única** | ✅ Resolvido (12/08) | — | Busca de ticker e formulário agora ficam visíveis juntos desde a abertura; campos começam desabilitados e habilitam no lugar ao escolher o ticker |
 | 13 | **Taxonomia de status de ingestão (PASSED/FAILED/ERROR)** | 🔍 Não verificado — `src/lib/api/ingestionLog.server.ts` existe no repositório, mas nunca foi auditado por Claude | P1 | Verificar antes de considerar concluído — não aceitar arquivo existir como prova de que está correto |
