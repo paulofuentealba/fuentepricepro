@@ -670,6 +670,10 @@ export const ptBR = {
     "Aviso: o Fuente Price Pro é uma ferramenta educacional e de análise quantitativa baseada em dados históricos. Projeções e cálculos de preço teto não constituem recomendação de investimento. Todas as decisões de investimento e riscos da carteira são de sua exclusiva responsabilidade.",
   disclaimer2:
     "O Fuente Price Pro é uma ferramenta de tecnologia desenvolvida para consolidação de dados e auxílio à tomada de decisão. As informações, cálculos e projeções geradas pela plataforma não constituem recomendação, indicação ou aconselhamento de investimento. A decisão final de alocação de capital é de inteira responsabilidade do utilizador.",
+  legal: {
+    lastUpdated: "Última atualização",
+    backToHome: "Voltar para a página inicial",
+  },
   landing: {
     badge: "✨ Construído para investidores de dividendos sérios",
     heroHeadline1: "Valuation Inteligente de Portfólio ",
@@ -679,9 +683,10 @@ export const ptBR = {
     ctaTerminal: "Acessar o Terminal Pro",
     navFeatures: "Funcionalidades",
     navAccess: "Acessar Terminal",
-    footerLegal1: "Legais",
+    footerLegal1: "Privacidade",
     footerLegal2: "Links externos",
     footerLegal3: "Termos de subscrição",
+    footerLegal4: "Termos de Uso",
     panel1Title: "Consenso Fuente: Valuation Inteligente",
     panel1Sub:
       "Sua tomada de decisão sem achismos. Combinamos Bazin, Graham e Gordon para calcular o Preço Teto Consolidado e a Margem de Segurança automática do seu ativo.",

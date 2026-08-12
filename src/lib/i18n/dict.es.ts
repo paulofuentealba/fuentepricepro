@@ -675,6 +675,10 @@ export const es = {
     "Descargo de responsabilidad: Fuente Price Pro es una herramienta educativa y de análisis cuantitativo basada en datos históricos. Las proyecciones y los cálculos de precio techo no constituyen asesoramiento o recomendaciones de inversión. Todas las decisiones de inversión y los riesgos de la cartera son de su exclusiva responsabilidad.",
   disclaimer2:
     "Fuente Price Pro es una herramienta tecnológica desarrollada para la consolidación de datos y la asistencia en la toma de decisiones. La información, los cálculos y las proyecciones generadas por la plataforma no constituyen recomendaciones, indicaciones ni asesoramiento de inversión. La decisión final de asignación de capital es entera responsabilidad del usuario.",
+  legal: {
+    lastUpdated: "Última actualización",
+    backToHome: "Volver al inicio",
+  },
   landing: {
     badge: "✨ Creado para inversores serios en dividendos",
     heroHeadline1: "Valoración Inteligente de Cartera ",
@@ -684,9 +688,10 @@ export const es = {
     ctaTerminal: "Acceder al Terminal Pro",
     navFeatures: "Funcionalidades",
     navAccess: "Acceder al Terminal",
-    footerLegal1: "Legal",
+    footerLegal1: "Privacidad",
     footerLegal2: "Enlaces externos",
     footerLegal3: "Términos de suscripción",
+    footerLegal4: "Términos de Uso",
     panel1Title: "Consenso Fuente: Valoración Inteligente",
     panel1Sub:
       "Tu toma de decisiones sin conjeturas. Combinamos Bazin, Graham y Gordon para calcular el Precio Techo Consolidado y el Margen de Seguridad automático de tu activo.",

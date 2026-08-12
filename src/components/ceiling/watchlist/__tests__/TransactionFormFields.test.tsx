@@ -26,6 +26,7 @@ const item: WatchlistItem = {
   paymentMonths: [],
   payoutRatio: null,
   addedAt: Date.now(),
+  investingSince: Date.now(),
 };
 
 function fillForm(quantity: string, price: string) {

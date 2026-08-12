@@ -164,6 +164,27 @@ evolução do Gordon para H-Model de 2 estágios com confiança por ativo, Item 
 Fase 2 (transações sintéticas nos 3 pontos de escrita manual), design system com
 token `--comparison` e lint automático contra cor hardcoded.
 
+**12/08** — Política de Privacidade e Termos de Uso publicados nas novas
+rotas públicas `/privacy` e `/terms` (sem autenticação), nos 3 idiomas.
+Conteúdo aprovado por Paulo (`docs/Prompts/politica_privacidade_rascunho.md`
++ `termos_de_uso_rascunho.md`) — só traduzido, não alterado em substância;
+3 placeholders `[preencher]` do rascunho preenchidos mecanicamente (data
+de publicação, e-mail de contato reaproveitado). Conteúdo estruturado em
+`src/lib/legal-content.ts`, fora dos dicts `i18n/dict.*.ts` (decisão:
+tamanho do texto jurídico tornaria os dicts, já com ~1000 linhas, difíceis
+de navegar). Layout reaproveitado de `guides.dividend-valuation.tsx`
+(único padrão existente de página pública de texto longo, sem auth) em vez
+de `settings.tsx`/`app/docs.tsx` (ambos exigem sessão, vivem sob `/app/`).
+Rodapé da landing conectado: "Legais" virou 2 links reais — "Privacidade"
+(`/privacy`) e novo "Termos de Uso" (`/terms`); "Termos de subscrição"
+identificado como documento distinto (termos de assinatura Pro, nunca
+redigido) e **não** apontado pra `/terms` — gap registrado como pendência
+nova (item 17), não inventado. Link cruzado real entre os dois documentos
+via `<Link>` do TanStack Router. Gates: `tsc --noEmit` ✅ (após regenerar
+`routeTree.gen.ts`), 241 testes ✅ (4 skipped, incluindo
+`design-tokens.test.ts` 6/6), `npm run build` ✅. Resultado:
+`docs/Prompts/RESULTADO - Publicar Privacidade e Termos.md`.
+
 **12/08** — Proteção contra duplicata em lançamento manual de transação
 (`TransactionFormFields.tsx`, compartilhado pelos 3 pontos de entrada:
 Registrar Aporte, Adicionar Renda Variável, edição via `TransactionsPanel`).
@@ -295,6 +316,7 @@ imediata via config, sem novo deploy.
 | 14 | **Piotroski F-Score (US-only)** | 🔍 Não verificado — `src/lib/__tests__/piotroski.test.ts` existe no repositório, mas nunca foi auditado por Claude | P2 | Idem — verificar antes de fechar |
 | 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ✅ Resolvido (12/08) | — | Botão trava durante o save (causa raiz do duplo-clique) + aviso client-side de possível duplicata (sem sobrescrever, decisão de produto) |
 | 16 | **Painel `/admin` + controle de acesso** | ⚪ Discovery gerado, não executado | P2 | Depende de decisão de Custom Claims vs. UID fixo antes de qualquer UI |
+| 17 | **Termos de Assinatura Pro** (`footerLegal3`, "Termos de subscrição") | ⚪ Pendente — nunca redigido | P2 | Distinto dos Termos de Uso gerais (já publicados em `/terms`); link do rodapé continua `href="#"` até esse conteúdo ser redigido e aprovado |
 
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
 

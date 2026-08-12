@@ -587,9 +587,13 @@ function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center justify-center gap-4 text-sm text-slate-500">
           <p>Fuente Price Pro &copy; {currentYear}</p>
           <div className="flex items-center gap-4 text-xs">
-            <a href="#" className="hover:text-slate-300 transition-colors">
+            <Link to="/privacy" className="hover:text-slate-300 transition-colors">
               {L.footerLegal1}
-            </a>
+            </Link>
+            <span>|</span>
+            <Link to="/terms" className="hover:text-slate-300 transition-colors">
+              {L.footerLegal4}
+            </Link>
             <span>|</span>
             <a href="#" className="hover:text-slate-300 transition-colors">
               {L.footerLegal2}
