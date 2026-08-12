@@ -135,7 +135,7 @@ tipografia Fraunces+Inter) **substituiu a identidade em produção diretamente**
 | 5.3 Home/dashboard real em `/app` | ✅ `src/routes/app/index.tsx` |
 | 5.4 Tabela de carteira com P&L, ordenação acessível | ✅ `PortfolioTableV2.tsx` (nome do arquivo mantido por histórico, não é mais "v2" no sentido de rota paralela) |
 | 5.5 Modal "Registrar Aporte" — 1 tela única, sem passo intermediário | ✅ Concluído — busca e formulário visíveis juntos desde a abertura, campos desabilitados até escolher o ticker |
-| 5.6 Persistência de trajetória histórica completa (gráfico ao longo do tempo) | 🔒 Decisão de negócio pendente — distinto do snapshot leve "desde a última visita" (já implementado); só o histórico completo continua parqueado |
+| 5.6 Persistência de trajetória histórica completa (gráfico ao longo do tempo) | ✅ `useHorizonteTrajectory` (`src/lib/horizonteTrajectory.ts`) lê `portfolioSnapshots/*` e alimenta uma sparkline em `HorizonteHero.tsx` (só aparece com ≥7 dias de dado). Backfill retroativo (`useHorizonteBackfill`, `src/lib/portfolioSnapshotBackfill.ts`) reconstrói só `totalInvestedBRL` a partir de `Transaction[]` — `totalValueBRL` fica `null` nesses dias (nunca inventado/interpolado); valor de mercado real só existe a partir de quando `usePortfolioSnapshot` (não alterado) gravou o dia em produção. Backfill de valor de mercado real via `fetchAssetPriceHistoryFn` foi avaliado e descartado por ora (custo de API + cobertura incerta pra ativos BR de baixa liquidez) — ver `docs/Prompts/RESULTADO - 78 — Trajetoria Historica Horizonte.md` |
 | 5.7 Estender identidade Horizonte pras demais rotas (Screener, Comparador, Radars, etc.) | ⚪ Backlog — specs existem (docs/Prompts 55-64) mas precisam reescrita pro padrão de produção direta antes de rodar |
 
 ---

@@ -1161,6 +1161,7 @@ export const es = {
     emptySubtitle: "Una vez que agregues un activo a tu cartera, tu tabla de posiciones aparecerá aquí.",
     heroEmptySubtitle:
       "Una vez que agregues un activo a tu cartera, tu línea del horizonte hacia la independencia financiera aparecerá aquí.",
+    trajectorySparklineLabel: "Trayectoria a lo largo del tiempo",
     searchPlaceholder: "Buscar por ticker o nombre",
     columnAsset: "Activo",
     columnClass: "Clase",

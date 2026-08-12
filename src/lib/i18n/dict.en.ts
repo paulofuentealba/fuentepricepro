@@ -1147,6 +1147,7 @@ export const en = {
     emptySubtitle: "Once you add an asset to your portfolio, your positions table appears here.",
     heroEmptySubtitle:
       "Once you add an asset to your portfolio, your horizon line toward financial independence appears here.",
+    trajectorySparklineLabel: "Trajectory over time",
     searchPlaceholder: "Search by ticker or name",
     columnAsset: "Asset",
     columnClass: "Class",

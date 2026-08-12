@@ -3,6 +3,7 @@ import { PlusCircle } from "lucide-react";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useTransactions } from "@/lib/transactions";
+import { useHorizonteTrajectory } from "@/lib/horizonteTrajectory";
 import { getMonthlyNetContribution } from "@/lib/selectors/monthlyContribution";
 import { formatCurrency, formatMonthsAsYearsMonths } from "@/lib/formatters";
 import { Button } from "@/components/ui/button";
@@ -122,12 +123,58 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number, alwaysShow
   ctx.restore();
 }
 
+/**
+ * Sparkline discreta da trajetória histórica (item 5.6 / prompt 78). Usa
+ * `totalValueBRL` quando disponível (dias em que o snapshot diário real já
+ * rodou) e cai pra `totalInvestedBRL` nos dias de backfill retroativo (sem
+ * valor de mercado histórico real) — só pra manter a linha contínua
+ * visualmente, nunca inventa/interpola um valor de mercado.
+ */
+function HorizonteTrajectorySparkline({
+  points,
+}: {
+  points: { date: string; totalValueBRL: number | null; totalInvestedBRL: number }[];
+}) {
+  const width = 240;
+  const height = 32;
+  const values = points.map((p) => p.totalValueBRL ?? p.totalInvestedBRL);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const coords = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * width;
+    const y = height - ((v - min) / range) * height;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="h-8 w-full max-w-[240px] text-primary"
+      role="img"
+      aria-hidden="true"
+      preserveAspectRatio="none"
+    >
+      <polyline
+        points={coords.join(" ")}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function HorizonteHero() {
   const { coveragePercent, isReached, totalCapitalBRL, monthsToFI, isSetup, monthlyIncomeBRL } =
     useFIProgress();
   const { locale, t } = useI18n();
   const { items, isAppLoading, valuedItems } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
+  const { points: trajectoryPoints, hasEnoughDataForSparkline } = useHorizonteTrajectory();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const hasNoAssets = !isAppLoading && items.length === 0;
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -212,7 +259,7 @@ export function HorizonteHero() {
     return () => window.removeEventListener("resize", handleResize);
   }, [coveragePercent, needsGoalSetup]);
 
-  const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0);
+  const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0, locale);
   const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", locale);
   const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", locale);
 
@@ -266,7 +313,7 @@ export function HorizonteHero() {
   const content = hasNoAssets ? (
     <div className="w-full flex flex-col gap-2 rounded-xl bg-card border border-border p-6">
       <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-        Horizonte FI
+        {t.tabs.financialIndependence}
       </span>
       <span className="text-2xl font-semibold font-serif text-foreground">
         {t.home.emptyTitle}
@@ -290,7 +337,7 @@ export function HorizonteHero() {
       <header className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Horizonte FI
+            {t.tabs.financialIndependence}
           </span>
           <span
             className={`text-4xl font-semibold font-serif ${isReached ? "text-primary" : "text-foreground"}`}
@@ -341,6 +388,13 @@ export function HorizonteHero() {
         aria-label={ariaLabel}
         className="w-full h-24 rounded-xl bg-card"
       />
+
+      {hasEnoughDataForSparkline && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">{t.home.trajectorySparklineLabel}</span>
+          <HorizonteTrajectorySparkline points={trajectoryPoints} />
+        </div>
+      )}
 
       {milestones.length > 0 && (
         <ul className="flex flex-wrap gap-2 pt-3 mt-1 border-t border-border">

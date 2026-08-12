@@ -1157,6 +1157,7 @@ export const ptBR = {
     emptySubtitle: "Assim que você adicionar um ativo à carteira, sua tabela de posições aparece aqui.",
     heroEmptySubtitle:
       "Assim que você adicionar um ativo à carteira, sua linha do horizonte rumo à independência financeira aparece aqui.",
+    trajectorySparklineLabel: "Trajetória ao longo do tempo",
     searchPlaceholder: "Buscar por ticker ou nome",
     columnAsset: "Ativo",
     columnClass: "Classe",
