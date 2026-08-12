@@ -94,8 +94,12 @@ export function consensusPrice(prices: (number | null | undefined)[]): number | 
 export const GORDON_MIN_DISCOUNT_MARGIN = 0.02;
 
 /**
- * PENDENTE DE VALIDAÇÃO DE MODELAGEM FINANCEIRA - Aguarda confirmação de Paulo
- * Terminal growth rate for 2-stage Gordon Growth Model (H-Model).
+ * Fallback terminal growth rate for the 2-stage Gordon Growth Model (H-Model),
+ * used when the dynamic rate (IPCA médio dos últimos 5 anos, fetched via
+ * `fetchIpcaFiveYearAverage` in `benchmark.server.ts`) is unavailable —
+ * network failure, or a cold cache on first load before the query resolves.
+ * Not a pending decision anymore: Paulo confirmed inflation-anchored terminal
+ * growth as the model, this constant is just its safety net.
  */
 export const GORDON_TERMINAL_GROWTH_RATE = 0.03; // 3.0%
 
@@ -174,6 +178,7 @@ export function getAssetValuation({
   dividendCagr,
   dividendHistory,
   selicPct = 10.5,
+  terminalGrowthRate,
   currency,
   type,
   exchangeRate,
@@ -186,6 +191,10 @@ export function getAssetValuation({
   dividendCagr?: number | null;
   dividendHistory?: readonly { year: number; amount: number }[];
   selicPct?: number;
+  /** Terminal growth rate for the Gordon 2-Stage model (e.g. IPCA médio de 5
+   * anos, resolved by the caller). Falls back to `GORDON_TERMINAL_GROWTH_RATE`
+   * when omitted — keeps this function pure, no I/O happens in here. */
+  terminalGrowthRate?: number;
   currency: string;
   type: AssetType;
   exchangeRate?: number;
@@ -233,7 +242,12 @@ export function getAssetValuation({
   // 3. Gordon Model (2-Stage H-Model with Fallback & Volatility Check)
   const k = selicPct / 100;
   const gInitial = dividendCagr != null ? dividendCagr / 100 : null;
-  const gordon = gordonPrice(netAvgDividend, k, gInitial);
+  const gordon = gordonPrice(
+    netAvgDividend,
+    k,
+    gInitial,
+    terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE,
+  );
 
   const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
   let gordonConfidence: "high" | "low" | null = null;

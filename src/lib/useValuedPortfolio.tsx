@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useWatchlist, type WatchlistItem } from "./watchlist";
 import { useSettings } from "./settings";
 import { useLiveQuotesAndMeta } from "@/components/ceiling/watchlist/useLiveQuotesAndMeta";
-import { getAssetValuation, netAfterTax, calculateFixedIncomeBalance, calculateBvps } from "./calculations";
+import { getAssetValuation, netAfterTax, calculateFixedIncomeBalance, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "./calculations";
 import { useSelic } from "./useSelic";
-import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
+import { exchangeRateQueryOptions, macroRatesQueryOptions, ipcaFiveYearAverageQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
 
@@ -70,6 +70,7 @@ function useValuedPortfolioComputation() {
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
   const valuedItems = useMemo<ValuedWatchlistItem[]>(() => {
     return baseItems.map((it) => {
@@ -84,6 +85,7 @@ function useValuedPortfolioComputation() {
         bvps: calculateBvps(m?.bvps, m?.pbRatio, livePrice),
         dividendCagr: m?.dividendCagr5y,
         selicPct: selic ?? 10.5,
+        terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
         currency: it.currency,
         type: it.type,
       });
@@ -101,7 +103,7 @@ function useValuedPortfolioComputation() {
         isClosedPosition: it.isClosedPosition,
       };
     });
-  }, [baseItems, quotes, meta, selic, t]);
+  }, [baseItems, quotes, meta, selic, ipcaAvg, t]);
 
   const totals = useMemo(() => {
     let usd = 0;

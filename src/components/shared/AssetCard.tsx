@@ -19,7 +19,9 @@ import { useState, useMemo } from "react";
 import { memo, useCallback, type KeyboardEvent, useRef } from "react";
 import { ValuationRadar } from "@/components/ui/ValuationRadar";
 import { useSelic } from "@/lib/useSelic";
-import { getAssetValuation, calculateBvps } from "@/lib/calculations";
+import { getAssetValuation, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
+import { useQuery } from "@tanstack/react-query";
+import { ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -377,6 +379,7 @@ function SearchVariant({
   );
 
   const { data: selic } = useSelic();
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
   const valuation = getAssetValuation({
     targetYield: localTargetYield,
@@ -386,6 +389,7 @@ function SearchVariant({
     bvps: calculateBvps(asset.metrics?.bvps, asset.metrics?.pbRatio, asset.currentPrice),
     dividendCagr: asset.metrics?.dividendCagr5y ?? null,
     selicPct: selic ?? 10.5,
+    terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
     currency: asset.currency,
     type: asset.type,
   });

@@ -10,6 +10,7 @@ import {
   fetchRadarFn,
   checkPendingSplitsFn,
   fetchPiotroskiScoreFn,
+  fetchIpcaFiveYearAverageFn,
   type LiveQuote,
   type SearchHit,
   type BenchmarkPoint,
@@ -73,6 +74,21 @@ export function macroRatesQueryOptions() {
     queryFn: ({ signal }): Promise<{ cdi: number; ipca: number }> => fetchMacroRatesFn({ signal }),
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
+  });
+}
+
+/**
+ * IPCA médio dos últimos 5 anos (anualizado via média geométrica),
+ * usado como taxa terminal dinâmica do Gordon 2-Estágios. `staleTime` de
+ * 30 dias — o IPCA é divulgado mensalmente pelo IBGE/BCB, então não há
+ * motivo pra recalcular a cada sessão.
+ */
+export function ipcaFiveYearAverageQueryOptions() {
+  return queryOptions({
+    queryKey: ["ipcaFiveYearAverage"] as const,
+    queryFn: (): Promise<number | null> => fetchIpcaFiveYearAverageFn(),
+    staleTime: 30 * 24 * 60 * 60_000, // 30 days
+    gcTime: 60 * 24 * 60 * 60_000, // 60 days
   });
 }
 

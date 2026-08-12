@@ -1,4 +1,5 @@
 import { memo, useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,8 @@ import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { MaskedInput } from "../shared/MaskedInput";
-import { ceilingPrice, getAssetValuation, netAfterTax } from "@/lib/calculations";
+import { ceilingPrice, getAssetValuation, netAfterTax, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
+import { ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import { displayTicker, formatCurrency, formatPercent } from "@/lib/i18n";
 import { TrendingUp, Target, Wallet } from "lucide-react";
 import { PriceTag } from "../shared/AssetDataDisplay";
@@ -37,6 +39,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
   const [investingSince, setInvestingSince] = useState<Date | undefined>(undefined);
   const open = item !== null;
   const { transactions } = useTransactions();
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
   
   const tickerTxs = useMemo(() => {
     if (!item) return [];
@@ -358,6 +361,7 @@ function EditItemDialogImpl({ item, onClose, onSave }: EditItemDialogProps) {
                     targetYield: y,
                     currentPrice: item.currentPrice,
                     avgDividend: item.annualDividend,
+                    terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
                     currency: item.currency,
                     type: item.type,
                   });

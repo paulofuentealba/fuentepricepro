@@ -8,7 +8,9 @@ import {
   isUsAsset,
   getAssetValuation,
   calculateBvps,
+  gordonPrice,
   GORDON_MIN_DISCOUNT_MARGIN,
+  GORDON_TERMINAL_GROWTH_RATE,
 } from "../calculations";
 
 describe("Bazin ceiling price math", () => {
@@ -215,6 +217,45 @@ describe("2-Stage Gordon Growth (H-Model) & Volatility Confidence Tests", () => 
 
     expect(result.gordon).not.toBeNull();
     expect(result.gordon!).toBeCloseTo(19.05, 1);
+  });
+});
+
+describe("terminalGrowthRate threading (IPCA médio de 5 anos dinâmico)", () => {
+  const base = {
+    targetYield: 6,
+    currentPrice: 100,
+    avgDividend: 10,
+    dividendCagr: 8.0,
+    selicPct: 10.5,
+    currency: "BRL" as const,
+    type: "STOCK_BR" as const,
+  };
+
+  it("gordonPrice uses the provided terminal growth rate instead of the constant", () => {
+    const k = 0.105;
+    const gInitial = 0.08;
+    const withConstant = gordonPrice(10, k, gInitial, GORDON_TERMINAL_GROWTH_RATE);
+    const withCustomRate = gordonPrice(10, k, gInitial, 0.045); // e.g. IPCA médio ~4.5%
+
+    expect(withCustomRate).not.toBeNull();
+    expect(withConstant).not.toBeNull();
+    expect(withCustomRate).not.toBeCloseTo(withConstant!, 4);
+  });
+
+  it("getAssetValuation forwards terminalGrowthRate to gordonPrice when provided", () => {
+    const withIpca = getAssetValuation({ ...base, terminalGrowthRate: 0.045 });
+    const withConstant = getAssetValuation({ ...base, terminalGrowthRate: GORDON_TERMINAL_GROWTH_RATE });
+
+    expect(withIpca.gordon).not.toBeNull();
+    expect(withConstant.gordon).not.toBeNull();
+    expect(withIpca.gordon).not.toBeCloseTo(withConstant.gordon!, 4);
+  });
+
+  it("getAssetValuation falls back to GORDON_TERMINAL_GROWTH_RATE when terminalGrowthRate is omitted", () => {
+    const omitted = getAssetValuation({ ...base });
+    const explicitConstant = getAssetValuation({ ...base, terminalGrowthRate: GORDON_TERMINAL_GROWTH_RATE });
+
+    expect(omitted.gordon).toBeCloseTo(explicitConstant.gordon!, 8);
   });
 });
 

@@ -487,6 +487,7 @@ import {
 import {
   fetchBcbBenchmarkSeries,
   fetchYahooBenchmarkSeries,
+  fetchIpcaFiveYearAverage,
 } from "./benchmark.server";
 
 export type { BenchmarkPoint, BenchmarkType };
@@ -523,6 +524,22 @@ export const fetchBenchmarkHistoryFn = createServerFn({ method: "GET" })
       return [];
     }
   });
+
+/**
+ * IPCA 5-year average (annualized), used as the dynamic terminal growth
+ * rate for the Gordon 2-Stage model. `null` when the BCB fetch fails or
+ * returns too few months — callers fall back to `GORDON_TERMINAL_GROWTH_RATE`.
+ */
+export const fetchIpcaFiveYearAverageFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<number | null> => {
+    try {
+      return await fetchIpcaFiveYearAverage();
+    } catch (err) {
+      console.warn("[fetchIpcaFiveYearAverageFn] failed", err);
+      return null;
+    }
+  },
+);
 
 /**
  * Formats a ticker string for Yahoo Finance querying.

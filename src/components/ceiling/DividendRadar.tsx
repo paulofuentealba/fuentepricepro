@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, TrendingUp, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
-import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps } from "@/lib/calculations";
+import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
 import { formatCurrency, formatPercent } from "@/lib/i18n";
@@ -29,7 +29,7 @@ import { useSettings } from "@/lib/settings";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { dividendRadarQueryOptions } from "@/lib/queryOptions";
+import { dividendRadarQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
 import {
@@ -55,6 +55,7 @@ export function DividendRadar() {
     isError,
   } = useQuery(dividendRadarQueryOptions());
   const { data: selic } = useSelic();
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
   const rawData = market === "BR" ? radarData?.br : radarData?.us;
 
@@ -75,6 +76,7 @@ export function DividendRadar() {
           bvps: calculateBvps(asset.metrics?.bvps, asset.metrics?.pbRatio, asset.currentPrice),
           dividendCagr: asset.metrics?.dividendCagr5y ?? null,
           selicPct: selic ?? 10.5,
+          terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
           currency: currency,
           type: assetType,
         });
@@ -95,7 +97,7 @@ export function DividendRadar() {
             : null,
         };
       }) || [],
-    [rawData, market, targetYield, selic],
+    [rawData, market, targetYield, selic, ipcaAvg],
   );
 
   // Justification: data elements match WatchlistItem fields needed by useAssetFilterSort

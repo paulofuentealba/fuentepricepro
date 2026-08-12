@@ -305,7 +305,7 @@ imediata via config, sem novo deploy.
 | 3 | **Banner de consentimento LGPD** (Fase 0, item 0.4) | 🟡 Pendente | P1 | Confirmado ausente no código |
 | 4 | **Disclaimer regulatório CVM** | ⚪ Pendente | P1 | Obrigatório antes de qualquer trabalho na Fase 4 (IRPF) |
 | 5 | **F3 — cor de CTA inconsistente** (`--primary` vs. `emerald` hardcoded, ~22 arquivos) | 🟡 Sem mudança | P2 | Resolver junto de qualquer PR que já toque `styles.css` |
-| 6 | **Guard de singularidade no Gordon (causa raiz matemática)** | ⚪ Pendente | P2 | Mitigação visual já existe (`AssetDetailSheet`); correção no motor (`calculations.ts`) ainda não |
+| 6 | **Guard de singularidade no Gordon (causa raiz matemática)** | ✅ Resolvido | P2 | Causa raiz matemática já corrigida (`GORDON_MIN_DISCOUNT_MARGIN` no motor, `calculations.ts`); Prompt 69 resolveu a última pendência — taxa terminal (`GORDON_TERMINAL_GROWTH_RATE`) deixou de ser valor fixo pendente de validação e passou a ser dinâmica (IPCA médio dos últimos 5 anos via `fetchIpcaFiveYearAverage`, `benchmark.server.ts`), com fallback pra constante quando indisponível |
 | 7 | **`check.py` desatualizado vs. `AGENTS.md` real** (6 papéis vs. 9) | 🟡 Pendente | P1 | Mesmo padrão de drift do F4 original — corrigir `REQUIRED_ROLES` no script |
 | 8 | **TWR acumulado** (Time-Weighted Return) | ⚪ Aguardando dado | P2 | Depende de acúmulo de snapshots periódicos já sendo gravados |
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |

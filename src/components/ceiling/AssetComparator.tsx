@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { searchQueryOptions, assetQueryOptions } from "@/lib/queryOptions";
+import { searchQueryOptions, assetQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import { useQueries } from "@tanstack/react-query";
-import { getAssetValuation, avgDividend, calculateBvps } from "@/lib/calculations";
+import { getAssetValuation, avgDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { displayTicker } from "@/lib/i18n";
@@ -43,6 +43,7 @@ export function AssetComparator() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { data: selic } = useSelic();
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
   const shouldSearch = query.trim().length > 0;
 
@@ -192,6 +193,7 @@ function ComparatorCards({
   const { items: portfolioItems } = useWatchlist();
   const { targetYield: globalYield } = useSettings();
   const { data: selic } = useSelic();
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
   const [selectedDetailItem, setSelectedDetailItem] = useState<any>(null);
 
   const queryOptionsList = useMemo(
@@ -225,6 +227,7 @@ function ComparatorCards({
           bvps: calculateBvps(data.metrics?.bvps, data.metrics?.pbRatio, data.currentPrice),
           dividendCagr: data.metrics?.dividendCagr5y || null,
           selicPct: selic ?? 10.5,
+          terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
           currency: data.currency,
           type: data.type,
         });
@@ -261,7 +264,7 @@ function ComparatorCards({
       console.error("[comparator-export] failed", err);
       toast.error(t.toasts.exportFailed);
     }
-  }, [dataMap, portfolioItems, globalYield, selic, t]);
+  }, [dataMap, portfolioItems, globalYield, selic, ipcaAvg, t]);
 
   if (isLoading) {
     return (
@@ -310,6 +313,7 @@ function ComparatorCards({
             bvps: calculateBvps(data.metrics?.bvps, data.metrics?.pbRatio, data.currentPrice),
             dividendCagr: data.metrics?.dividendCagr5y || null,
             selicPct: selic ?? 10.5,
+            terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
             currency: data.currency,
             type: data.type,
           });

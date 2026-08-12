@@ -1,10 +1,11 @@
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { assetQueryOptions } from "@/lib/queryOptions";
+import { assetQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import {
   getCanonicalAnnualDividend,
   getAssetValuation,
+  GORDON_TERMINAL_GROWTH_RATE,
 } from "@/lib/calculations";
 import {
   parseWatchlistCsv,
@@ -37,6 +38,10 @@ export function useWatchlistCsvImport(
       setImporting(true);
       try {
         const text = await file.text();
+        const ipcaAvg = await queryClient
+          .ensureQueryData(ipcaFiveYearAverageQueryOptions())
+          .catch(() => null);
+        const terminalGrowthRate = ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE;
 
         // Detect format: Phase 3 Advanced Transaction Template vs Phase 1 Simple Watchlist Format
         const isAdvancedTemplate = /data\s*da\s*compra|date|valor\s*unit[áa]rio/i.test(text);
@@ -69,6 +74,7 @@ export function useWatchlistCsvImport(
                 eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
                 bvps: asset.metrics?.bvps ?? null,
                 dividendCagr: asset.metrics?.dividendCagr5y ?? null,
+                terminalGrowthRate,
                 currency: asset.currency,
                 type,
               });
@@ -156,6 +162,7 @@ export function useWatchlistCsvImport(
                 eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
                 bvps: asset.metrics?.bvps ?? null,
                 dividendCagr: asset.metrics?.dividendCagr5y ?? null,
+                terminalGrowthRate,
                 currency: asset.currency,
                 type,
               });
