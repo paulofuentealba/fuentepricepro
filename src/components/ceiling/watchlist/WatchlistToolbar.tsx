@@ -16,7 +16,7 @@ interface WatchlistToolbarProps {
   onSetSortOption: (val: SortOption) => void;
   viewMode: "grid" | "table";
   setViewMode: (mode: "grid" | "table") => void;
-  onNavigateToScreener: () => void;
+  onOpenNewContribution: () => void;
   onOpenFIWizard: () => void;
   onOpenBrokerUploader: () => void;
   onOpenCsvImporter: () => void;
@@ -33,7 +33,7 @@ export function WatchlistToolbar({
   onSetSortOption,
   viewMode,
   setViewMode,
-  onNavigateToScreener,
+  onOpenNewContribution,
   onOpenFIWizard,
   onOpenBrokerUploader,
   onOpenCsvImporter,
@@ -55,7 +55,7 @@ export function WatchlistToolbar({
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <AddAssetDropdown
-          onNavigateToScreener={onNavigateToScreener}
+          onOpenNewContribution={onOpenNewContribution}
           onOpenFIWizard={onOpenFIWizard}
           onOpenBrokerUploader={onOpenBrokerUploader}
           onOpenCsvImporter={onOpenCsvImporter}

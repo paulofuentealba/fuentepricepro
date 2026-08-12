@@ -9,14 +9,14 @@ import { ChevronDown, FileType2, PlusCircle, Shield, TrendingUp, FileSpreadsheet
 import { useI18n } from "@/lib/i18n-provider";
 
 interface AddAssetDropdownProps {
-  onNavigateToScreener: () => void;
+  onOpenNewContribution: () => void;
   onOpenFIWizard: () => void;
   onOpenBrokerUploader: () => void;
   onOpenCsvImporter: () => void;
 }
 
 export function AddAssetDropdown({
-  onNavigateToScreener,
+  onOpenNewContribution,
   onOpenFIWizard,
   onOpenBrokerUploader,
   onOpenCsvImporter,
@@ -35,7 +35,7 @@ export function AddAssetDropdown({
       <DropdownMenuContent align="center" className="w-56 bg-popover border-border">
         <DropdownMenuItem
           className="cursor-pointer gap-2 py-2.5 focus:bg-accent focus:text-primary"
-          onClick={onNavigateToScreener}
+          onClick={onOpenNewContribution}
         >
           <TrendingUp className="h-4 w-4" />
           <div className="flex flex-col">

@@ -2,7 +2,7 @@ import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { EditItemDialog } from "./EditItemDialog";
 import { AssetDetailSheet } from "./AssetDetailSheet";
 import { PaywallDialog } from "../../ui/PaywallDialog";
-import { FixedIncomeWizardSheet } from "./FixedIncomeWizardSheet";
+import { AddFixedIncomeDialog } from "./AddFixedIncomeDialog";
 import { BrokerNoteUploader } from "./BrokerNoteUploader";
 import { CsvImportUploader } from "./CsvImportUploader";
 import { useI18n } from "@/lib/i18n-provider";
@@ -51,7 +51,7 @@ export function WatchlistDialogs({
         title={t.watchlist.limitReached}
         description={t.watchlist.limitReachedDesc}
       />
-      <FixedIncomeWizardSheet open={showFIWizard} onOpenChange={onFIWizardOpenChange} />
+      <AddFixedIncomeDialog open={showFIWizard} onOpenChange={onFIWizardOpenChange} />
       <BrokerNoteUploader open={showBrokerNoteUploader} onOpenChange={onBrokerUploaderOpenChange} />
       <CsvImportUploader open={showCsvImporter} onOpenChange={onCsvImporterOpenChange} />
     </>

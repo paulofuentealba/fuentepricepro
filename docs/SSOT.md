@@ -164,6 +164,24 @@ evolução do Gordon para H-Model de 2 estágios com confiança por ativo, Item 
 Fase 2 (transações sintéticas nos 3 pontos de escrita manual), design system com
 token `--comparison` e lint automático contra cor hardcoded.
 
+**12/08** — Dropdown "+ Adicionar Ativo" da Watchlist unificado no padrão de
+tela única. "Adicionar Renda Variável" deixou de **navegar** pra
+`/app/screener` e agora abre `NewContributionDialog.tsx` reaproveitado sem
+alteração (instância própria em `Watchlist.tsx`, `showNewContribution`,
+separada da do dashboard); prop `onNavigateToScreener` renomeada pra
+`onOpenNewContribution` em `AddAssetDropdown.tsx`/`WatchlistToolbar.tsx`.
+"Adicionar Renda Fixa" reescrita de `FixedIncomeWizardSheet.tsx` (`Sheet`, 3
+passos sequenciais) pra `AddFixedIncomeDialog.tsx` (`Dialog`, 1 tela única) —
+Indexador/Nome/Valor/Taxa/Datas todos visíveis juntos, prévia do valor
+projetado reativa (antes só aparecia no passo 3), botão desabilitado até
+campos obrigatórios preenchidos. Lógica de cálculo
+(`projectFixedIncomeValueAtMaturity`) e persistência (item + transação
+inicial com ID determinístico) reaproveitadas sem alteração — só a
+apresentação mudou. `TransactionFormFields.tsx`/`TickerSearchField.tsx`/
+`AddToWatchlistDialog.tsx`/`AssetCard.tsx` não tocados. Gates: `tsc --noEmit`
+✅, 237 testes ✅ (4 skipped), `npm run build` ✅. Resultado:
+`docs/Prompts/RESULTADO - Unificar Adicionar Ativo.md`.
+
 **12/08** — Modal "Registrar Aporte" (`NewContributionDialog.tsx`) passou a
 ser **1 tela única sem passos**: busca de ticker e campos da transação
 (Tipo/Data/Quantidade/Preço/Taxas) ficam visíveis juntos desde a abertura,

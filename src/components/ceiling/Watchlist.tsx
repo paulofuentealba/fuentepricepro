@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
@@ -21,13 +20,14 @@ import { WatchlistAssetGrid } from "./watchlist/WatchlistAssetGrid";
 import { WatchlistDialogs } from "./watchlist/WatchlistDialogs";
 import { DataManagement } from "./watchlist/DataManagement";
 import { WatchlistActionsProvider } from "./watchlist/WatchlistActionsContext";
+import { NewContributionDialog } from "../horizonte/NewContributionDialog";
 
 interface WatchlistProps {
   onNavigateToCalculator?: () => void;
 }
 
 export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
-  const navigate = useNavigate();
+  const [showNewContribution, setShowNewContribution] = useState(false);
   const [showFIWizard, setShowFIWizard] = useState(false);
   const [showBrokerNoteUploader, setShowBrokerNoteUploader] = useState(false);
   const [showCsvImporter, setShowCsvImporter] = useState(false);
@@ -251,7 +251,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
             <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <p className="text-sm text-muted-foreground">{t.watchlist.empty}</p>
               <AddAssetDropdown
-                onNavigateToScreener={() => navigate({ to: "/app/screener" })}
+                onOpenNewContribution={() => setShowNewContribution(true)}
                 onOpenFIWizard={() => setShowFIWizard(true)}
                 onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
                 onOpenCsvImporter={() => setShowCsvImporter(true)}
@@ -285,7 +285,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               onSetSortOption={setSortOption}
               viewMode={viewMode}
               setViewMode={setViewMode}
-              onNavigateToScreener={() => navigate({ to: "/app/screener" })}
+              onOpenNewContribution={() => setShowNewContribution(true)}
               onOpenFIWizard={() => setShowFIWizard(true)}
               onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
               onOpenCsvImporter={() => setShowCsvImporter(true)}
@@ -332,6 +332,8 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           onBrokerUploaderOpenChange={setShowBrokerNoteUploader}
           onCsvImporterOpenChange={setShowCsvImporter}
         />
+
+        <NewContributionDialog open={showNewContribution} onOpenChange={setShowNewContribution} />
       </section>
     </TooltipProvider>
   );
