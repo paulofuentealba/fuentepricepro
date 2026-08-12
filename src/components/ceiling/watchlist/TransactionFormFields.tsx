@@ -10,12 +10,15 @@ import { getQuantityAtDate } from "@/lib/transactions";
 import { MaskedInput } from "../shared/MaskedInput";
 
 interface Props {
-  item: WatchlistItem;
+  /** Null when no ticker has been picked yet (see `disabled`). */
+  item: WatchlistItem | null;
   onSave: (tx: Transaction) => void;
   existingTransactions: Transaction[];
   initialData?: Transaction | null;
   /** Called when the user cancels the form (e.g. closes the dialog). */
   onCancel?: () => void;
+  /** Disables all inputs + Save button, e.g. before a ticker is picked. */
+  disabled?: boolean;
 }
 
 /**
@@ -23,9 +26,17 @@ interface Props {
  * Price per share/Fees + Save/Cancel buttons. No `Dialog` of its own: the
  * caller owns the surrounding modal (see `TransactionForm.tsx` for the
  * single-form case and `NewContributionDialog.tsx` for the unified
- * search-then-form flow).
+ * search-and-form-together flow, where `item` starts `null` and the fields
+ * render disabled until a ticker is picked).
  */
-export function TransactionFormFields({ item, onSave, existingTransactions, initialData, onCancel }: Props) {
+export function TransactionFormFields({
+  item,
+  onSave,
+  existingTransactions,
+  initialData,
+  onCancel,
+  disabled,
+}: Props) {
   const { t } = useI18n();
 
   // corporate_action rows are auto-generated adjustments and are not editable
@@ -41,7 +52,7 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date) return;
+    if (disabled || !item || !date) return;
 
     const q = parseFloat(quantity);
     const p = parseFloat(pricePerShare);
@@ -74,14 +85,14 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
     onSave(tx);
   };
 
-  const currencySymbol = item.currency === "USD" ? "US$" : "R$";
+  const currencySymbol = item?.currency === "USD" ? "US$" : "R$";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>{t.transactions.type}</Label>
-          <Select value={type} onValueChange={(v: "buy"|"sell") => setType(v)}>
+          <Select value={type} onValueChange={(v: "buy"|"sell") => setType(v)} disabled={disabled}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -98,7 +109,7 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
             value={date}
             onChange={(d) => setDate(d)}
             placeholder={t.transactions.date}
-            disabled={(d) => d > new Date() || d < new Date("1990-01-01")}
+            disabled={disabled ? true : (d) => d > new Date() || d < new Date("1990-01-01")}
             rangeMode="past"
           />
         </div>
@@ -111,6 +122,7 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
           formatMode="numeric"
           value={quantity ? parseFloat(quantity) : null}
           onChangeValue={(v) => setQuantity(v !== undefined ? String(v) : "")}
+          disabled={disabled}
         />
       </div>
 
@@ -123,6 +135,7 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
             currencySymbol={currencySymbol}
             value={pricePerShare ? parseFloat(pricePerShare) : null}
             onChangeValue={(v) => setPricePerShare(v !== undefined ? String(v) : "")}
+            disabled={disabled}
           />
         </div>
         <div className="space-y-2">
@@ -133,6 +146,7 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
             currencySymbol={currencySymbol}
             value={fees ? parseFloat(fees) : null}
             onChangeValue={(v) => setFees(v !== undefined ? String(v) : "")}
+            disabled={disabled}
           />
         </div>
       </div>
@@ -143,7 +157,7 @@ export function TransactionFormFields({ item, onSave, existingTransactions, init
             {t.common.cancel}
           </Button>
         )}
-        <Button type="submit" disabled={!date || !quantity || !pricePerShare}>
+        <Button type="submit" disabled={disabled || !date || !quantity || !pricePerShare}>
           {t.common.save}
         </Button>
       </div>

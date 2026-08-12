@@ -112,8 +112,9 @@ tipografia Fraunces+Inter) **substituiu a identidade em produção diretamente**
   prévia de 4 linhas da carteira com link para a tela completa.
 - Modal "Registrar Aporte" (`NewContributionDialog.tsx`) unificado num único
   `<Dialog>` persistente (não fecha/reabre entre buscar ticker e preencher a
-  transação) — **ainda com um passo intermediário que Paulo pediu pra remover
-  por completo** (ver pendência abaixo, ainda não fechada).
+  transação) e, em 12/08, o passo intermediário foi removido por completo —
+  busca de ticker e formulário ficam visíveis juntos desde a abertura do
+  modal (ver item 5.5).
 - Os 2 achados de acessibilidade da QA anterior (contraste `--h-ink-faint`
   abaixo de AA; cabeçalhos de tabela não navegáveis por teclado) **resolveram-
   se como efeito colateral** da migração — o token de baixo contraste não
@@ -133,7 +134,7 @@ tipografia Fraunces+Inter) **substituiu a identidade em produção diretamente**
 | 5.2 Elemento de assinatura "Horizonte FI" (hero canvas) | ✅ `HorizonteHero.tsx`, tokens reais (não mais `--h-*`) |
 | 5.3 Home/dashboard real em `/app` | ✅ `src/routes/app/index.tsx` |
 | 5.4 Tabela de carteira com P&L, ordenação acessível | ✅ `PortfolioTableV2.tsx` (nome do arquivo mantido por histórico, não é mais "v2" no sentido de rota paralela) |
-| 5.5 Modal "Registrar Aporte" — 1 tela única, sem passo intermediário | 🟡 Pendente — unificado em 1 `Dialog`, mas ainda alterna entre busca e formulário; Paulo quer os dois visíveis juntos desde a abertura |
+| 5.5 Modal "Registrar Aporte" — 1 tela única, sem passo intermediário | ✅ Concluído — busca e formulário visíveis juntos desde a abertura, campos desabilitados até escolher o ticker |
 | 5.6 Persistência de trajetória histórica completa (gráfico ao longo do tempo) | 🔒 Decisão de negócio pendente — distinto do snapshot leve "desde a última visita" (já implementado); só o histórico completo continua parqueado |
 | 5.7 Estender identidade Horizonte pras demais rotas (Screener, Comparador, Radars, etc.) | ⚪ Backlog — specs existem (docs/Prompts 55-64) mas precisam reescrita pro padrão de produção direta antes de rodar |
 
@@ -162,6 +163,21 @@ gates (fim do switch `DISABLE_PAYWALLS`, fonte única `config/featureGates`),
 evolução do Gordon para H-Model de 2 estágios com confiança por ativo, Item 6C
 Fase 2 (transações sintéticas nos 3 pontos de escrita manual), design system com
 token `--comparison` e lint automático contra cor hardcoded.
+
+**12/08** — Modal "Registrar Aporte" (`NewContributionDialog.tsx`) passou a
+ser **1 tela única sem passos**: busca de ticker e campos da transação
+(Tipo/Data/Quantidade/Preço/Taxas) ficam visíveis juntos desde a abertura,
+começando desabilitados e habilitando no lugar quando um ticker é escolhido
+(sem swap condicional, sem `animate-in`). `TransactionFormFields.tsx` ganhou
+prop `disabled?: boolean` e passou a aceitar `item: WatchlistItem | null`;
+`TransactionForm.tsx`/`TransactionsPanel.tsx` mantidos idênticos (sempre
+passam `item` real, nunca `disabled`). Bloco de "ticker travado + botão
+Trocar" removido — a própria `TickerSearchField` já permite reeditar o
+ticker escolhido. Título do modal mantido estático (decisão: sem concatenar
+ticker, já que não há mais "passo 2"). Gates: `tsc --noEmit` ✅, 237 testes ✅
+(4 skipped), `npm run build` ✅. Resultado:
+`docs/Prompts/RESULTADO - Modal Registrar Aporte em 1 Tela Unica.md`. Item 12
+da Seção 6 (pendências) fechado.
 
 **12/08** — Corrigido bug do tab "Home" (`/app/`) do `Sidebar.tsx` ficando
 destacado em **todas** as rotas autenticadas (`startsWith(path)` casava
@@ -236,7 +252,7 @@ imediata via config, sem novo deploy.
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |
 | 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | 🟡 Débito técnico | P3 | Baixo risco |
 | 11 | **`nitro: beta`** | 🟡 Débito técnico | P3 | Migrar quando houver versão estável |
-| 12 | **Modal "Registrar Aporte" em 1 tela única** | 🟡 Pendente | P1 | `NewContributionDialog.tsx` já é 1 único `Dialog` persistente (bug do fecha/reabre já corrigido), mas ainda alterna entre busca de ticker e formulário como 2 passos sequenciais — Paulo quer os dois visíveis juntos desde a abertura |
+| 12 | **Modal "Registrar Aporte" em 1 tela única** | ✅ Resolvido (12/08) | — | Busca de ticker e formulário agora ficam visíveis juntos desde a abertura; campos começam desabilitados e habilitam no lugar ao escolher o ticker |
 | 13 | **Taxonomia de status de ingestão (PASSED/FAILED/ERROR)** | 🔍 Não verificado — `src/lib/api/ingestionLog.server.ts` existe no repositório, mas nunca foi auditado por Claude | P1 | Verificar antes de considerar concluído — não aceitar arquivo existir como prova de que está correto |
 | 14 | **Piotroski F-Score (US-only)** | 🔍 Não verificado — `src/lib/__tests__/piotroski.test.ts` existe no repositório, mas nunca foi auditado por Claude | P2 | Idem — verificar antes de fechar |
 | 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ⚪ Pendente, nunca chegou a virar prompt | P2 | Import CSV e PDF já são idempotentes (ID determinístico); lançamento manual duplo ainda gera transação duplicada se salvo 2x com os mesmos valores |
