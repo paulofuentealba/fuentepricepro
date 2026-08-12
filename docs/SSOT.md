@@ -315,7 +315,7 @@ imediata via config, sem novo deploy.
 | 13 | **Taxonomia de status de ingestão (PASSED/FAILED/ERROR)** | 🔍 Não verificado — `src/lib/api/ingestionLog.server.ts` existe no repositório, mas nunca foi auditado por Claude | P1 | Verificar antes de considerar concluído — não aceitar arquivo existir como prova de que está correto |
 | 14 | **Piotroski F-Score (US-only)** | 🔍 Não verificado — `src/lib/__tests__/piotroski.test.ts` existe no repositório, mas nunca foi auditado por Claude | P2 | Idem — verificar antes de fechar |
 | 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ✅ Resolvido (12/08) | — | Botão trava durante o save (causa raiz do duplo-clique) + aviso client-side de possível duplicata (sem sobrescrever, decisão de produto) |
-| 16 | **Painel `/admin` + controle de acesso** | ⚪ Discovery gerado, não executado | P2 | Depende de decisão de Custom Claims vs. UID fixo antes de qualquer UI |
+| 16 | **Painel `/admin` + controle de acesso** | ⚪ Discovery gerado, não executado | P2 | Ver `docs/Prompts/RESULTADO - 77 — Discovery Admin Controle de Acesso.md` — recomenda Custom Claims (não UID fixo) e identificou que `firestore.rules` hoje libera leitura de `config/featureGates`/`ingestionLog` a qualquer usuário autenticado. Aguarda decisão/revisão de Paulo antes de qualquer prompt de execução de UI |
 | 17 | **Termos de Assinatura Pro** (`footerLegal3`, "Termos de subscrição") | ⚪ Pendente — nunca redigido | P2 | Distinto dos Termos de Uso gerais (já publicados em `/terms`); link do rodapé continua `href="#"` até esse conteúdo ser redigido e aprovado |
 
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
