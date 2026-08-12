@@ -676,6 +676,10 @@ export const en = {
     accept: "Accept",
     reject: "Reject",
   },
+  regulatoryDisclaimer: {
+    message:
+      "Fuente Price Pro is an educational and quantitative analysis tool. No calculation, projection, or valuation consensus constitutes investment advice, securities analysis, or formal tax opinion. Consult a certified professional before deciding.",
+  },
   landing: {
     badge: "✨ Built for serious dividend investors",
     heroHeadline1: "Intelligent Portfolio Valuation ",

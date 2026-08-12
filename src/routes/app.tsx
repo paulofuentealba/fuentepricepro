@@ -13,6 +13,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GuestWarningBanner } from "@/components/ceiling/GuestWarningBanner";
 import { FeedbackWidget } from "@/components/ceiling/FeedbackWidget";
+import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
 import { useAuth } from "@/lib/auth-provider";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 
@@ -65,6 +66,7 @@ function AppLayout() {
           </div>
         </main>
       </div>
+      <RegulatoryDisclaimerBanner />
       <MobileBottomNav />
       <FeedbackWidget />
     </div>

@@ -681,6 +681,10 @@ export const ptBR = {
     accept: "Aceitar",
     reject: "Rejeitar",
   },
+  regulatoryDisclaimer: {
+    message:
+      "Fuente Price Pro é uma ferramenta educacional e de análise quantitativa. Nenhum cálculo, projeção ou consenso de valuation constitui recomendação de investimento, análise de valores mobiliários ou parecer fiscal formal. Consulte um profissional certificado antes de decidir.",
+  },
   landing: {
     badge: "✨ Construído para investidores de dividendos sérios",
     heroHeadline1: "Valuation Inteligente de Portfólio ",
