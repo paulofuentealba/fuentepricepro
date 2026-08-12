@@ -306,7 +306,7 @@ imediata via config, sem novo deploy.
 | 4 | **Disclaimer regulatório CVM** | ⚪ Pendente | P1 | Obrigatório antes de qualquer trabalho na Fase 4 (IRPF) |
 | 5 | **F3 — cor de CTA inconsistente** (`--primary` vs. `emerald` hardcoded, ~22 arquivos) | 🟡 Sem mudança | P2 | Resolver junto de qualquer PR que já toque `styles.css` |
 | 6 | **Guard de singularidade no Gordon (causa raiz matemática)** | ✅ Resolvido | P2 | Causa raiz matemática já corrigida (`GORDON_MIN_DISCOUNT_MARGIN` no motor, `calculations.ts`); Prompt 69 resolveu a última pendência — taxa terminal (`GORDON_TERMINAL_GROWTH_RATE`) deixou de ser valor fixo pendente de validação e passou a ser dinâmica (IPCA médio dos últimos 5 anos via `fetchIpcaFiveYearAverage`, `benchmark.server.ts`), com fallback pra constante quando indisponível |
-| 7 | **`check.py` desatualizado vs. `AGENTS.md` real** (6 papéis vs. 9) | 🟡 Pendente | P1 | Mesmo padrão de drift do F4 original — corrigir `REQUIRED_ROLES` no script |
+| 7 | **`check.py` desatualizado vs. `AGENTS.md` real** (6 papéis vs. 9) | ✅ Resolvido (12/08) | P1 | Verificado: `REQUIRED_ROLES` em `scripts/check.py` já cobria os 9 papéis da Regra 9 (fix aplicado em commit anterior à auditoria); `python scripts/check.py` roda limpo (`9 skills válidos, 0 aviso(s)`), confirmando os 9 `SKILL.md` presentes em `skills/*/` |
 | 8 | **TWR acumulado** (Time-Weighted Return) | ⚪ Aguardando dado | P2 | Depende de acúmulo de snapshots periódicos já sendo gravados |
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |
 | 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | 🟡 Débito técnico | P3 | Baixo risco |
@@ -337,7 +337,7 @@ imediata via config, sem novo deploy.
 
 - `pdf-parser.test.ts` com 3 testes falhando — divergência entre comportamento real e expectativa do teste, precisa decidir qual está desatualizado
 - `Watchlist.tsx` — já decomposto em 24 arquivos (concluído)
-- **`check.py` (linter de skills) desatualizado** — `REQUIRED_ROLES` só cobre 6 papéis, `AGENTS.md` real já tem 9 (ver item 7 da tabela acima)
+- ~~`check.py` (linter de skills) desatualizado~~ — **resolvido (12/08)**, `REQUIRED_ROLES` já cobre os 9 papéis da Regra 9 (ver item 7 da tabela acima)
 
 ---
 
@@ -378,7 +378,7 @@ imediata via config, sem novo deploy.
 - **GitHub** (`github.com/paulofuentealba/fuentepricepro`, branch `dev`) — fallback via clone + grep quando MCP cai.
 - **bash_tool sandbox** — validação (`tsc`, `vitest`); brace expansion falha silenciosamente, usar `mkdir` sequencial.
 - **Antigravity** — agente Gemini-based, opera em `[EXECUÇÃO]`.
-- **Skills** — 9 `SKILL.md` em `skills/*/` (canônico versionado), validados por `scripts/check.py` (desatualizado, ver Seção 7).
+- **Skills** — 9 `SKILL.md` em `skills/*/` (canônico versionado), validados por `scripts/check.py` (`REQUIRED_ROLES` atualizado, ver Seção 7).
 - **Firebase Emulator** — validação de regras de segurança (`test:rules`).
 - **Deploy** — Cloud Build → Cloud Run, região `us-east1` (não `us-south1`, erro já corrigido).
 - **APIs externas**: Brapi, Yahoo Finance, SEC EDGAR, Nasdaq, BCB SGS, CVM (batch script). Bolsai e HG Brasil bloqueados por tier pago.
