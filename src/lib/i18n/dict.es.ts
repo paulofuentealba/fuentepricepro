@@ -10,6 +10,7 @@ export const es = {
     close: "Cerrar",
     loading: "Cargando...",
     save: "Guardar",
+    saving: "Guardando...",
     cancel: "Cancelar",
     change: "Cambiar",
     prev: "Anterior",
@@ -17,6 +18,12 @@ export const es = {
     other: "Otros",
     quoteAsOf: "cotización de {{time}}",
     shares: "Acciones",
+    year: "año",
+    years: "años",
+    month: "mes",
+    months: "meses",
+    lessThanOneMonth: "menos de 1 mes",
+    durationSeparator: "y",
   },
   showcase: {
     title: "Escaparate",
@@ -505,7 +512,8 @@ export const es = {
   },
 
   tabs: {
-    calculator: "Calculadora",
+    financialIndependence: "Independencia Financiera",
+    screener: "Screener",
     portfolio: "Mi Cartera",
     cashFlow: "Flujo de Caja",
     smartAllocation: "Asignación Inteligente",
@@ -1062,6 +1070,10 @@ export const es = {
     csvImportAdjustment: "Ajuste vía importación CSV",
     manualAdjustment: "Ajuste manual de posición",
     newContributionTitle: "Registrar nuevo aporte",
+    duplicateWarningTitle: "Posible transacción duplicada",
+    duplicateWarningDescription: "Ya existe una transacción idéntica registrada para {{ticker}} en {{date}}. ¿Desea guardarla de todos modos?",
+    duplicateWarningConfirm: "Guardar de todos modos",
+    duplicateWarningCancel: "Cancelar",
   },
   onboarding: {
     welcome: {

@@ -1,9 +1,21 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useI18n } from "@/lib/i18n-provider";
+import { displayTicker, toIntlLocale } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { Transaction } from "@/lib/transactions";
 import { getQuantityAtDate } from "@/lib/transactions";
@@ -12,13 +24,23 @@ import { MaskedInput } from "../shared/MaskedInput";
 interface Props {
   /** Null when no ticker has been picked yet (see `disabled`). */
   item: WatchlistItem | null;
-  onSave: (tx: Transaction) => void;
+  onSave: (tx: Transaction) => void | Promise<void>;
   existingTransactions: Transaction[];
   initialData?: Transaction | null;
   /** Called when the user cancels the form (e.g. closes the dialog). */
   onCancel?: () => void;
   /** Disables all inputs + Save button, e.g. before a ticker is picked. */
   disabled?: boolean;
+}
+
+function isSameDay(a: number, b: number): boolean {
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
 }
 
 /**
@@ -37,7 +59,7 @@ export function TransactionFormFields({
   onCancel,
   disabled,
 }: Props) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   // corporate_action rows are auto-generated adjustments and are not editable
   // via the buy/sell form, so they safely fall back to "buy" as the initial value.
@@ -49,16 +71,22 @@ export function TransactionFormFields({
   const [quantity, setQuantity] = useState<string>(initialData?.quantity ? String(initialData.quantity) : "");
   const [pricePerShare, setPricePerShare] = useState<string>(initialData?.pricePerShare ? String(initialData.pricePerShare) : "");
   const [fees, setFees] = useState<string>(initialData?.fees ? String(initialData.fees) : "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [pendingDuplicate, setPendingDuplicate] = useState<Transaction | null>(null);
+  // React state updates from setIsSaving don't apply synchronously, so a
+  // rapid double-click (two handleSubmit calls in the same tick, before
+  // re-render) would both read isSaving=false. This ref is set immediately,
+  // in the same synchronous call, to close that window.
+  const savingRef = useRef(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (disabled || !item || !date) return;
+  const buildTransaction = (): Transaction | null => {
+    if (disabled || !item || !date) return null;
 
     const q = parseFloat(quantity);
     const p = parseFloat(pricePerShare);
     const f = fees ? parseFloat(fees) : 0;
 
-    if (isNaN(q) || isNaN(p) || q <= 0 || p <= 0) return;
+    if (isNaN(q) || isNaN(p) || q <= 0 || p <= 0) return null;
 
     // Validation for short selling
     if (type === "sell") {
@@ -68,11 +96,11 @@ export function TransactionFormFields({
       );
       if (q > maxQty) {
         alert(t.transactions.validateShort.replace("{{max}}", String(maxQty)));
-        return;
+        return null;
       }
     }
 
-    const tx: Transaction = {
+    return {
       id: initialData?.id ?? crypto.randomUUID(),
       ticker: item.ticker,
       type,
@@ -81,9 +109,60 @@ export function TransactionFormFields({
       pricePerShare: p,
       fees: f > 0 ? f : null,
     };
-
-    onSave(tx);
   };
+
+  // Client-side check against already-loaded transactions — not a
+  // determinism/overwrite mechanism like the CSV/PDF import ID (product
+  // decision: a manual entry with identical values may be a real, distinct
+  // second purchase, so we warn instead of silently colliding).
+  const findDuplicate = (tx: Transaction): Transaction | null =>
+    existingTransactions.find(
+      (existing) =>
+        existing.id !== tx.id &&
+        existing.ticker === tx.ticker &&
+        existing.type === tx.type &&
+        isSameDay(existing.date, tx.date) &&
+        existing.quantity === tx.quantity &&
+        existing.pricePerShare === tx.pricePerShare,
+    ) ?? null;
+
+  const persist = async (tx: Transaction) => {
+    savingRef.current = true;
+    setIsSaving(true);
+    try {
+      await onSave(tx);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (savingRef.current) return;
+    const tx = buildTransaction();
+    if (!tx) return;
+
+    if (findDuplicate(tx)) {
+      setPendingDuplicate(tx);
+      return;
+    }
+
+    await persist(tx);
+  };
+
+  const handleConfirmDuplicate = async () => {
+    if (!pendingDuplicate) return;
+    const tx = pendingDuplicate;
+    setPendingDuplicate(null);
+    await persist(tx);
+  };
+
+  const duplicateDateLabel = pendingDuplicate
+    ? new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(
+        new Date(pendingDuplicate.date),
+      )
+    : "";
 
   const currencySymbol = item?.currency === "USD" ? "US$" : "R$";
 
@@ -153,14 +232,36 @@ export function TransactionFormFields({
 
       <div className="flex justify-end gap-2 pt-4">
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
             {t.common.cancel}
           </Button>
         )}
-        <Button type="submit" disabled={disabled || !date || !quantity || !pricePerShare}>
-          {t.common.save}
+        <Button type="submit" disabled={disabled || isSaving || !date || !quantity || !pricePerShare}>
+          {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          {isSaving ? t.common.saving : t.common.save}
         </Button>
       </div>
+
+      <AlertDialog open={!!pendingDuplicate} onOpenChange={(open) => !open && setPendingDuplicate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.transactions.duplicateWarningTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.transactions.duplicateWarningDescription
+                .replace("{{ticker}}", pendingDuplicate ? displayTicker(pendingDuplicate.ticker) : "")
+                .replace("{{date}}", duplicateDateLabel)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel type="button" onClick={() => setPendingDuplicate(null)}>
+              {t.transactions.duplicateWarningCancel}
+            </AlertDialogCancel>
+            <AlertDialogAction type="button" onClick={handleConfirmDuplicate}>
+              {t.transactions.duplicateWarningConfirm}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 }

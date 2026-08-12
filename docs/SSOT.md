@@ -164,6 +164,26 @@ evolução do Gordon para H-Model de 2 estágios com confiança por ativo, Item 
 Fase 2 (transações sintéticas nos 3 pontos de escrita manual), design system com
 token `--comparison` e lint automático contra cor hardcoded.
 
+**12/08** — Proteção contra duplicata em lançamento manual de transação
+(`TransactionFormFields.tsx`, compartilhado pelos 3 pontos de entrada:
+Registrar Aporte, Adicionar Renda Variável, edição via `TransactionsPanel`).
+Causa raiz real do duplo-clique não era falta de ID determinístico (decisão
+de produto: **não** adotar sobrescrita silenciosa aqui, ao contrário do
+CSV/PDF — um lançamento manual idêntico pode ser uma segunda compra real) —
+era o botão Save não travar durante o `await onSave`. Corrigido com
+`isSaving`/`savingRef` (guard duplo: estado pra UI, ref pra fechar a janela
+de duplo-clique síncrono que `setState` sozinho não cobre) + spinner
+"Salvando..." (mesmo padrão do `BrokerNoteUploader.tsx`). Adicionado aviso
+client-side (`AlertDialog` do shadcn/ui, existia mas nunca tinha sido usado)
+quando detecta ticker+tipo+mesmo dia+quantidade+preço já existentes —
+avisa, não bloqueia, usuário decide. Chaves i18n novas nos 3 idiomas
+(`common.saving`, `transactions.duplicateWarning*`). Suíte de teste nova
+(`TransactionFormFields.test.tsx`, 4 testes) cobrindo os 5 cenários
+obrigatórios do prompt. Gates: `tsc --noEmit` ✅, 241 testes ✅ (4 skipped),
+`npm run build` ✅. Resultado:
+`docs/Prompts/RESULTADO - Idempotencia Lancamento Manual.md`. Item 15 da
+Seção 6 fechado.
+
 **12/08** — Dropdown "+ Adicionar Ativo" da Watchlist unificado no padrão de
 tela única. "Adicionar Renda Variável" deixou de **navegar** pra
 `/app/screener` e agora abre `NewContributionDialog.tsx` reaproveitado sem
@@ -273,7 +293,7 @@ imediata via config, sem novo deploy.
 | 12 | **Modal "Registrar Aporte" em 1 tela única** | ✅ Resolvido (12/08) | — | Busca de ticker e formulário agora ficam visíveis juntos desde a abertura; campos começam desabilitados e habilitam no lugar ao escolher o ticker |
 | 13 | **Taxonomia de status de ingestão (PASSED/FAILED/ERROR)** | 🔍 Não verificado — `src/lib/api/ingestionLog.server.ts` existe no repositório, mas nunca foi auditado por Claude | P1 | Verificar antes de considerar concluído — não aceitar arquivo existir como prova de que está correto |
 | 14 | **Piotroski F-Score (US-only)** | 🔍 Não verificado — `src/lib/__tests__/piotroski.test.ts` existe no repositório, mas nunca foi auditado por Claude | P2 | Idem — verificar antes de fechar |
-| 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ⚪ Pendente, nunca chegou a virar prompt | P2 | Import CSV e PDF já são idempotentes (ID determinístico); lançamento manual duplo ainda gera transação duplicada se salvo 2x com os mesmos valores |
+| 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ✅ Resolvido (12/08) | — | Botão trava durante o save (causa raiz do duplo-clique) + aviso client-side de possível duplicata (sem sobrescrever, decisão de produto) |
 | 16 | **Painel `/admin` + controle de acesso** | ⚪ Discovery gerado, não executado | P2 | Depende de decisão de Custom Claims vs. UID fixo antes de qualquer UI |
 
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)

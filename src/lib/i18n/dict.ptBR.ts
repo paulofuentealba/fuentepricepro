@@ -10,6 +10,7 @@ export const ptBR = {
     close: "Fechar",
     loading: "Carregando...",
     save: "Salvar",
+    saving: "Salvando...",
     cancel: "Cancelar",
     change: "Trocar",
     prev: "Anterior",
@@ -17,6 +18,12 @@ export const ptBR = {
     other: "Outros",
     quoteAsOf: "cotação de {{time}}",
     shares: "Cotas",
+    year: "ano",
+    years: "anos",
+    month: "mês",
+    months: "meses",
+    lessThanOneMonth: "menos de 1 mês",
+    durationSeparator: "e",
   },
   showcase: {
     title: "Vitrine",
@@ -500,7 +507,8 @@ export const ptBR = {
   },
 
   tabs: {
-    calculator: "Calculadora",
+    financialIndependence: "Independência Financeira",
+    screener: "Screener",
     portfolio: "Minha Carteira",
     cashFlow: "Fluxo de Caixa",
     smartAllocation: "Aporte Inteligente",
@@ -1058,6 +1066,10 @@ export const ptBR = {
     csvImportAdjustment: "Ajuste via importação CSV",
     manualAdjustment: "Ajuste manual de posição",
     newContributionTitle: "Registrar novo aporte",
+    duplicateWarningTitle: "Possível transação duplicada",
+    duplicateWarningDescription: "Já existe uma transação idêntica registrada para {{ticker}} em {{date}}. Deseja salvar mesmo assim?",
+    duplicateWarningConfirm: "Salvar mesmo assim",
+    duplicateWarningCancel: "Cancelar",
   },
   onboarding: {
     welcome: {

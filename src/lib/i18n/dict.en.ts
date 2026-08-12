@@ -8,6 +8,7 @@ export const en = {
     close: "Close",
     loading: "Loading...",
     save: "Save",
+    saving: "Saving...",
     cancel: "Cancel",
     change: "Change",
     prev: "Previous",
@@ -15,6 +16,12 @@ export const en = {
     other: "Other",
     quoteAsOf: "quote as of {{time}}",
     shares: "Shares",
+    year: "year",
+    years: "years",
+    month: "month",
+    months: "months",
+    lessThanOneMonth: "less than 1 month",
+    durationSeparator: "and",
   },
   showcase: {
     title: "Showcase",
@@ -498,7 +505,8 @@ export const en = {
   },
 
   tabs: {
-    calculator: "Calculator",
+    financialIndependence: "Financial Independence",
+    screener: "Screener",
     portfolio: "My Portfolio",
     cashFlow: "Cash Flow",
     smartAllocation: "Smart Allocation",
@@ -1048,6 +1056,10 @@ export const en = {
     csvImportAdjustment: "Adjustment via CSV import",
     manualAdjustment: "Manual position adjustment",
     newContributionTitle: "Register new contribution",
+    duplicateWarningTitle: "Possible duplicate transaction",
+    duplicateWarningDescription: "An identical transaction is already registered for {{ticker}} on {{date}}. Save it anyway?",
+    duplicateWarningConfirm: "Save anyway",
+    duplicateWarningCancel: "Cancel",
   },
   onboarding: {
     welcome: {
