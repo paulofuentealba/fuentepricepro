@@ -87,57 +87,55 @@ alertas de preço, comunidade/social, rating de risco mais elaborado.
 | 4.3 LGPD/GDPR | 🟡 Export e exclusão de conta ✅ concluídos e verificados. Banner de cookies/consentimento 🟡 pendente |
 | 4.4 UI/UX "Pro Terminal" | ✅ Essencialmente concluído |
 
-### Épico 5 — Horizonte FI (Redesign de Frontend v2) 🟡 Dashboard+Carteira concluídos, escopo expandido para todas as rotas (leva 55-64 em andamento)
+### Épico 5 — Horizonte FI (Nova Identidade Visual) 🟢 Em produção real, não é mais v2 paralela
 
-Iniciativa de identidade visual nascida do diagnóstico de que o design system atual
-(shadcn/ui + tokens Tailwind v4) é tecnicamente maduro mas visualmente genérico —
-tipografia 100% system-font, verde-primário fazendo duplo papel (marca + P&L), sem
-elemento de assinatura. Decisão: construir como **v2 paralela**, sem tocar a versão
-atual em produção, reaproveitando 100% da camada de cálculo existente (nenhuma
-lógica de negócio nova nesta fase).
+**Mudança de decisão registrada (11/08, chat `[EXECUÇÃO]` com Claude)**: a
+abordagem de v2 paralela (`/app-v2`, tokens escopados em
+`[data-app-version="horizonte"]`) foi **abandonada por decisão explícita de
+Paulo** — não "expandida para todas as rotas" como uma versão anterior deste
+documento registrava. A identidade Horizonte FI (paleta petróleo `#2C6B63`,
+tipografia Fraunces+Inter) **substituiu a identidade em produção diretamente**:
 
-**Correção de escopo (pós-leva 46-54)**: a primeira entrega cobriu só Dashboard e
-Carteira, deixando o resto do app na v1 — feedback do usuário foi que isso ficou
-inconsistente ("uma rota nova isolada, todo o resto diferente"). Decisão revisada:
-a v2 continua paralela (`/app-v2`), mas agora precisa cobrir **todas** as rotas
-autenticadas antes de qualquer promoção a padrão — Cash Flow, Global Radar, Risk
-Radar, Comparador, Smart Allocation, Snowball, Screener, Docs, Settings. Prompts
-55-64 (`docs/Prompts/`) cobrem essa expansão, com regra nova e não-negociável:
-**verificação visual real obrigatória** (navegador, não só leitura de código) antes
-de qualquer etapa ser marcada como concluída — a leva anterior teve um bug real
-(Horizonte FI mostrando "0.0%" contraditoriamente com patrimônio positivo) que só
-apareceu porque o usuário testou manualmente, não porque a auditoria automatizada
-pegou.
+- Os valores dos tokens já existentes (`--primary`, `--background`,
+  `--foreground`, `--card`, `--border`, `--muted-foreground`, `--success`,
+  `--danger`) foram trocados **direto em `src/styles.css`** (sem escopo), e
+  `--font-serif` (Fraunces) foi adicionado ao catálogo. `horizonte-tokens.css`
+  (a versão escopada) foi **deletado** — não existe mais.
+- `src/routes/app-v2/` foi **deletado por completo**. Não existe rota v2
+  paralela hoje.
+- `src/routes/app/index.tsx` (antes só um redirect pra `/app/myportfolio`)
+  agora é o **dashboard real de produção**: hero "Horizonte FI" (canvas
+  animado com `useFIProgress()`), 3 cards de resumo (Patrimônio Total,
+  Proventos do Ano via `useRealizedIncomeSummary()` extraído, Maior Posição),
+  "Aporte deste mês" e "Renda Passiva Atual" no próprio hero, snapshot leve de
+  "desde a última visita" (campo único em `users/{uid}`, sem histórico), e
+  prévia de 4 linhas da carteira com link para a tela completa.
+- Modal "Registrar Aporte" (`NewContributionDialog.tsx`) unificado num único
+  `<Dialog>` persistente (não fecha/reabre entre buscar ticker e preencher a
+  transação) — **ainda com um passo intermediário que Paulo pediu pra remover
+  por completo** (ver pendência abaixo, ainda não fechada).
+- Os 2 achados de acessibilidade da QA anterior (contraste `--h-ink-faint`
+  abaixo de AA; cabeçalhos de tabela não navegáveis por teclado) **resolveram-
+  se como efeito colateral** da migração — o token de baixo contraste não
+  existe mais (remapeado pro catálogo real) e `SortableHeader` já tem
+  `tabIndex`/`onKeyDown`.
+- Os prompts numerados 55-64 (`docs/Prompts/`) que propunham continuar a
+  abordagem de v2 paralela para as demais rotas (Screener, Comparador, Global
+  Radar, Risk Radar, Smart Allocation, Snowball, Cash Flow, Docs, Settings)
+  **existem só como arquivo de especificação, nunca foram executados** —
+  ficam como candidato de backlog caso Paulo decida estender a identidade
+  Horizonte pras demais telas, mas precisam ser reescritos pro padrão "direto
+  em produção" antes de rodar, não pro padrão `/app-v2` original.
 
 | Item | Status |
 |---|---|
-| 5.1 Design tokens (tipografia Fraunces+Inter, paleta petróleo `#2C6B63`) | ✅ `src/styles/horizonte-tokens.css`, escopado em `[data-app-version="horizonte"]`, fontes locais `public/fonts/*.woff2` |
-| 5.2 Elemento de assinatura "Horizonte FI" (linha de horizonte animada, canvas) | ✅ `src/components/horizonte/HorizonteHero.tsx`, alimentado por `useFIProgress()` (extraído em prompt 47, testado) |
-| 5.3 Rota/estrutura paralela (`/app-v2` ou flag), zero regressão em v1 | ✅ `src/routes/app-v2*`; `git diff` do range 46-52 tocou só os diretórios previstos (ver auditoria do prompt 54 abaixo) |
-| 5.4 Persistência de trajetória histórica (snapshot de progresso ao longo do tempo) | 🔒 Decisão de negócio pendente — nenhuma coleção Firestore hoje suporta "progresso no tempo", só o estado atual |
-
-Prompts de execução 46-52 implementados e commitados (`32174e3`…`6a7783a`). Prompt 53
-não existe como arquivo em `docs/Prompts/` (numeração pula de 52 para 54 — não é
-regressão desta auditoria, apenas um gap de numeração pré-existente). Prompt 54
-(QA final, ver `docs/Prompts/RESULTADO - 54 — Horizonte FI QA Final e Paridade v1.md`)
-resultado real, com evidência, dos 7 itens do checklist:
-
-| # | Item | Resultado |
-|---|---|---|
-| 1 | Zero regressão em v1 (escopo de arquivos) | ✅ Passou — `git diff --stat` do range 46-52 só tocou `src/routes/app-v2/`, `src/components/horizonte/`, `src/components/layout-v2/`, `src/lib/useFIProgress.ts`, `src/lib/selectors/`, `src/styles/horizonte-tokens.css`, `src/components/ceiling/FIProgressCard.tsx` (refactor previsto no prompt 47), testes e `public/fonts/` |
-| 2 | Paridade numérica (hero + tabela v2 vs. v1) | ✅ Passou — `useFIProgress()` reproduz a fórmula original de `FIProgressCard.tsx` sem alteração (comparado linha a linha), `PortfolioTableV2` usa o mesmo `useValuedPortfolio()`/`getAssetPnL()` da v1; coberto por `useFIProgress.test.ts` e `assetPnL.test.ts` |
-| 3 | Acessibilidade (teclado, `prefers-reduced-motion`, contraste AA) | ❌ Falhou — 2 achados: (a) `--h-ink-faint` sobre `--h-paper` mede 2.88:1 no claro e 3.75:1 no escuro (WCAG AA exige 4.5:1 para texto pequeno) — usado em `HorizonteHero` (marcos não atingidos) e potencialmente em outros textos secundários; (b) cabeçalhos ordenáveis de `PortfolioTableV2` (`SortableHeader`) usam `<th onClick>` sem `tabIndex`/`onKeyDown`/`role="button"` — não operável por teclado. `prefers-reduced-motion` está corretamente respeitado (confirmado por leitura de código em `HorizonteHero.tsx`) |
-| 4 | Responsividade (375px, grid empilha, tabela com scroll próprio) | ✅ Passou — `grid-cols-1 sm:grid-cols-3` nos cards do dashboard; `PortfolioTableV2` envolve a `<table>` em `div.overflow-x-auto` dedicado (não a página) |
-| 5 | Tema claro/escuro sem reload | ✅ Passou (com ressalva) — tokens respondem automaticamente a `prefers-color-scheme` (confirmado via DevTools: `--h-paper` mudou de `#f7f4ec` para `#15120c` ao alternar o color-scheme do SO); app não tem toggle manual de tema em nenhuma rota (v1 ou v2) — os seletores `[data-theme]` existem no CSS mas nenhum componente os aciona, então o teste real possível é só via SO. Redesenho do canvas em troca de tema não pôde ser confirmado visualmente (ambiente sem usuário de teste logado → hero em estado vazio, sem `<canvas>` montado), mas o código (`HorizonteHero.tsx`) registra listener em `matchMedia("(prefers-color-scheme: dark)")` que força redraw |
-| 6 | Fontes locais, zero requisição externa | ✅ Passou — Network (dev): `GET /fonts/fraunces-variable-normal.woff2` e `GET /fonts/inter-variable-normal.woff2`, ambos `localhost:5174`, nenhuma requisição a `fonts.googleapis.com` ou CDN |
-| 7 | `/app` não carrega tokens/fontes da v2 | ✅ Passou — Network (dev) em `/app`: nenhuma requisição a `horizonte-tokens.css` ou `*variable*.woff2`; em `/app-v2` as mesmas requisições aparecem. Build de produção: `horizonte-tokens.css` sai como chunk isolado (`index-D2P33_qO.css`, 3.8kB) referenciado só pelos chunks de `/app-v2` (confirmado via `grep` nos chunks — `myportfolio` v1 não referencia o CSS, só o `myportfolio` v2 que importa `PortfolioTableV2`) |
-
-Achado adicional fora do checklist: `package.json`/`package-lock.json` têm duas
-devDependencies (`@fontsource-variable/fraunces`, `@fontsource-variable/inter`)
-presentes no working tree mas nunca commitadas nos prompts 46-52 — não usadas em
-`src/` (fontes carregadas via `@font-face` local, não via pacote npm); ficaram como
-resíduo de prototipagem. Não bloqueia o Épico 5 mas deve ser limpo ou commitado
-numa próxima etapa de manutenção.
+| 5.1 Design tokens (Fraunces+Inter, paleta petróleo) em produção | ✅ `src/styles.css`, fontes locais `public/fonts/*.woff2` |
+| 5.2 Elemento de assinatura "Horizonte FI" (hero canvas) | ✅ `HorizonteHero.tsx`, tokens reais (não mais `--h-*`) |
+| 5.3 Home/dashboard real em `/app` | ✅ `src/routes/app/index.tsx` |
+| 5.4 Tabela de carteira com P&L, ordenação acessível | ✅ `PortfolioTableV2.tsx` (nome do arquivo mantido por histórico, não é mais "v2" no sentido de rota paralela) |
+| 5.5 Modal "Registrar Aporte" — 1 tela única, sem passo intermediário | 🟡 Pendente — unificado em 1 `Dialog`, mas ainda alterna entre busca e formulário; Paulo quer os dois visíveis juntos desde a abertura |
+| 5.6 Persistência de trajetória histórica completa (gráfico ao longo do tempo) | 🔒 Decisão de negócio pendente — distinto do snapshot leve "desde a última visita" (já implementado); só o histórico completo continua parqueado |
+| 5.7 Estender identidade Horizonte pras demais rotas (Screener, Comparador, Radars, etc.) | ⚪ Backlog — specs existem (docs/Prompts 55-64) mas precisam reescrita pro padrão de produção direta antes de rodar |
 
 ---
 
@@ -164,6 +162,26 @@ gates (fim do switch `DISABLE_PAYWALLS`, fonte única `config/featureGates`),
 evolução do Gordon para H-Model de 2 estágios com confiança por ativo, Item 6C
 Fase 2 (transações sintéticas nos 3 pontos de escrita manual), design system com
 token `--comparison` e lint automático contra cor hardcoded.
+
+**12/08** — Corrigido bug do tab "Home" (`/app/`) do `Sidebar.tsx` ficando
+destacado em **todas** as rotas autenticadas (`startsWith(path)` casava
+qualquer path com prefixo `/app/`). `isActive` agora trata `path === "/app/"`
+como comparação exata (`location.pathname === "/app/" || "/app"`), preservando
+`startsWith` para os demais tabs. Confirmado via `routeTree.gen.ts` que o
+TanStack Router normaliza a rota index como `/app/` (com barra final).
+`MobileBottomNav.tsx` audita o mesmo padrão `startsWith(path)`, mas não tem tab
+"home"/`/app/` — bug não se manifesta lá, nenhuma mudança necessária. Gates:
+`tsc --noEmit` ✅, 237 testes ✅ (4 skipped), `npm run build` ✅.
+
+**11-12/08** — Prompt 4 (correções UI i18n Home) executado: `formatMonthsAsYearsMonths`
+agora consulta dicionários i18n (não mais hardcoded em PT-BR); tabs do sidebar
+renomeadas (`calculator` → `screener`, novo `financialIndependence`); novo tab
+"Independência Financeira" adicionado como primeiro item do sidebar (ícone Compass);
+todas as 3 ocorrências de "Horizonte FI" hardcoded substituídas por
+`t.tabs.financialIndependence`. Investigação do "R$ 0,00" no sidebar confirmou que
+não é reprodutível — os cards de resumo estão na coluna de conteúdo (com labels), não
+no menu lateral. Gates: tsc ✅, 237 testes ✅, build ✅, Playwright DOM inspection
+3 idiomas ✅. Resultado: `docs/Prompts/Resultado - 4 — Correções UI i18n Home.md`.
 
 **09-10/08** (`[REVISÃO]` + `[ROADMAP]`) — Auditoria encontrou 4 achados (F1-F4):
 - **F1** (`isPro` hardcoded `true`) + **F2** (`FEATURE_GATES` real inexistente) →
@@ -218,14 +236,16 @@ imediata via config, sem novo deploy.
 | 9 | **Banner de Cookies** (Fase 4.3) | 🟡 Pendente | P2 | Distinto do banner de consentimento LGPD do item 3 |
 | 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | 🟡 Débito técnico | P3 | Baixo risco |
 | 11 | **`nitro: beta`** | 🟡 Débito técnico | P3 | Migrar quando houver versão estável |
-| 12 | **Horizonte FI — v2 de frontend** (Épico 5, prompts 46-54 em `docs/Prompts/`) | 🟡 Prompts 46-52 implementados e commitados; QA final (prompt 54) rodado — 5/7 itens do checklist passaram, 2 falharam (contraste AA de `--h-ink-faint` abaixo de 4.5:1 em ambos os temas; cabeçalhos ordenáveis de `PortfolioTableV2` não navegáveis por teclado). `/app-v2` segue fora de produção/navegação da v1, zero regressão confirmada por `git diff` de escopo | P1 | Diferencial de marca aprovado por Paulo (paleta petróleo); zero risco à v1 em produção. Próximo passo: prompt de correção dos 2 achados de acessibilidade antes de promover `/app-v2` a rota visível/produção |
+| 12 | **Modal "Registrar Aporte" em 1 tela única** | 🟡 Pendente | P1 | `NewContributionDialog.tsx` já é 1 único `Dialog` persistente (bug do fecha/reabre já corrigido), mas ainda alterna entre busca de ticker e formulário como 2 passos sequenciais — Paulo quer os dois visíveis juntos desde a abertura |
+| 13 | **Taxonomia de status de ingestão (PASSED/FAILED/ERROR)** | 🔍 Não verificado — `src/lib/api/ingestionLog.server.ts` existe no repositório, mas nunca foi auditado por Claude | P1 | Verificar antes de considerar concluído — não aceitar arquivo existir como prova de que está correto |
+| 14 | **Piotroski F-Score (US-only)** | 🔍 Não verificado — `src/lib/__tests__/piotroski.test.ts` existe no repositório, mas nunca foi auditado por Claude | P2 | Idem — verificar antes de fechar |
+| 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ⚪ Pendente, nunca chegou a virar prompt | P2 | Import CSV e PDF já são idempotentes (ID determinístico); lançamento manual duplo ainda gera transação duplicada se salvo 2x com os mesmos valores |
+| 16 | **Painel `/admin` + controle de acesso** | ⚪ Discovery gerado, não executado | P2 | Depende de decisão de Custom Claims vs. UID fixo antes de qualquer UI |
 
 ### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
 
 - **`as_of` diagnostic** — sprint atual, diagnóstico concluído em 09/08, aguardando decisão de correção
 - **Yield-trap check + shareholder yield** — próximo sprint, aguardando threshold de Paulo. Especificação de partida já existe via `Victorcorcos/winning-investments` (checklist Bazin: DY médio 5a, dívida/patrimônio)
-- **Taxonomia de status de ingestão** (`PASSED/FAILED/ERROR/...`, inspirado em `wilsonfreitas/brasa`) — P1, processo/confiabilidade
-- **Piotroski F-Score** — P2, feature nova, validar apetite com `fuente-investidor-profissional` antes
 - **Greenblatt Magic Formula** (candidato a 4º modelo) — P3, validado por 2 repos BR independentes
 - **Shadow Account behavioral diagnostics** — parqueado, aguardando catalogação de corretoras + decisão de produto
 - **Correlation regime visualization** — backlog

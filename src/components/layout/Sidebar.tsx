@@ -15,6 +15,7 @@ import {
   User,
   Settings,
   LogOut,
+  Compass,
 } from "lucide-react";
 import { useAuthModal } from "@/lib/auth-modal";
 import { useSubscription } from "@/lib/subscription";
@@ -58,8 +59,9 @@ export function Sidebar() {
   };
 
   const tabs = [
+    { key: "home", path: "/app/", label: t.tabs.financialIndependence, icon: Compass },
     { key: "myportfolio", path: "/app/myportfolio", label: t.tabs.portfolio, icon: FolderOpen },
-    { key: "screener", path: "/app/screener", label: t.tabs.calculator, icon: CalculatorIcon },
+    { key: "screener", path: "/app/screener", label: t.tabs.screener, icon: CalculatorIcon },
     { key: "comparator", path: "/app/comparator", label: t.tabs.comparator, icon: Scale },
     { key: "riskradar", path: "/app/riskradar", label: t.tabs.riskRadar, icon: ShieldAlert },
     { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
@@ -118,7 +120,10 @@ export function Sidebar() {
 
         <nav className="flex-1 py-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-2 [&::-webkit-scrollbar]:hidden">
           {tabs.map(({ key, path, label, icon: Icon, locked }) => {
-            const isActive = location.pathname.startsWith(path);
+            const isActive =
+              path === "/app/"
+                ? location.pathname === "/app/" || location.pathname === "/app"
+                : location.pathname.startsWith(path);
 
             const linkContent = (
               <Link
