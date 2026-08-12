@@ -679,6 +679,13 @@ export const es = {
     lastUpdated: "Última actualización",
     backToHome: "Volver al inicio",
   },
+  cookieBanner: {
+    message:
+      "Usamos cookies esenciales para el funcionamiento de Fuente Price Pro. Con su permiso, también nos gustaría usar cookies de analítica para entender cómo usa el producto y mejorarlo. Obtenga más información en nuestra",
+    privacyLinkLabel: "Política de Privacidad",
+    accept: "Aceptar",
+    reject: "Rechazar",
+  },
   landing: {
     badge: "✨ Creado para inversores serios en dividendos",
     heroHeadline1: "Valoración Inteligente de Cartera ",

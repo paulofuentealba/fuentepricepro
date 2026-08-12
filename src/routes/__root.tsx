@@ -18,6 +18,7 @@ import { I18nProvider } from "../lib/i18n-provider";
 import { SubscriptionProvider } from "../lib/subscription";
 import { SettingsProvider } from "../lib/settings";
 import { ValuedPortfolioProvider } from "../lib/useValuedPortfolio";
+import { CookieConsentBanner } from "../components/shared/CookieConsentBanner";
 
 function NotFoundComponent() {
   return (
@@ -145,6 +146,7 @@ function RootComponent() {
                   {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                   <Outlet />
                   <Toaster theme="dark" richColors position="top-right" />
+                  <CookieConsentBanner />
                 </ValuedPortfolioProvider>
               </AuthModalProvider>
             </SettingsProvider>

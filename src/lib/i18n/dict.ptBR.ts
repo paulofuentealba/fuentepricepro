@@ -674,6 +674,13 @@ export const ptBR = {
     lastUpdated: "Última atualização",
     backToHome: "Voltar para a página inicial",
   },
+  cookieBanner: {
+    message:
+      "Usamos cookies essenciais para o funcionamento do Fuente Price Pro. Com sua permissão, também gostaríamos de usar cookies de analytics para entender como você usa o produto e melhorá-lo. Saiba mais na nossa",
+    privacyLinkLabel: "Política de Privacidade",
+    accept: "Aceitar",
+    reject: "Rejeitar",
+  },
   landing: {
     badge: "✨ Construído para investidores de dividendos sérios",
     heroHeadline1: "Valuation Inteligente de Portfólio ",

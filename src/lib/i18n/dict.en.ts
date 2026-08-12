@@ -669,6 +669,13 @@ export const en = {
     lastUpdated: "Last updated",
     backToHome: "Back to home",
   },
+  cookieBanner: {
+    message:
+      "We use essential cookies to make Fuente Price Pro work. With your permission, we'd also like to use analytics cookies to understand how you use the product and improve it. Learn more in our",
+    privacyLinkLabel: "Privacy Policy",
+    accept: "Accept",
+    reject: "Reject",
+  },
   landing: {
     badge: "✨ Built for serious dividend investors",
     heroHeadline1: "Intelligent Portfolio Valuation ",
