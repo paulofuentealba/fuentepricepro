@@ -166,18 +166,29 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
       };
     }
 
-    const isYahoo = raw.includes(".") || /^[A-Z]{1,5}$/.test(raw);
     const looksBr = /^[A-Z]{4}\d{1,2}$/.test(raw);
 
     let asset: ApiAsset | null = null;
 
     if (looksBr) {
-      asset = await fetchFromBrapi(raw);
-      if (!asset) asset = await fetchFromYahoo(`${raw}.SA`);
-    } else if (isYahoo) {
-      asset = await fetchFromYahoo(raw);
+      try {
+        asset = await fetchFromBrapi(raw);
+      } catch (err) {
+        console.error(`[fetchAsset] Brapi error for ${raw}, falling back to Yahoo:`, err);
+      }
+      if (!asset) {
+        try {
+          asset = await fetchFromYahoo(`${raw}.SA`);
+        } catch (err) {
+          console.error(`[fetchAsset] Yahoo error for ${raw}.SA:`, err);
+        }
+      }
     } else {
-      asset = await fetchFromYahoo(raw);
+      try {
+        asset = await fetchFromYahoo(raw);
+      } catch (err) {
+        console.error(`[fetchAsset] Yahoo error for ${raw}:`, err);
+      }
     }
 
     if (!asset) throw new Error("NOT_FOUND");

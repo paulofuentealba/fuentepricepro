@@ -1,4 +1,5 @@
 import express from "express";
+import compression from "compression";
 import { Readable } from "stream";
 import server from "./dist/server/server.js";
 
@@ -6,6 +7,9 @@ const app = express();
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || "0.0.0.0";
 
+// Fix #6 (auditoria 3.4): Cloud Run não comprime automaticamente; bundles
+// (~1MB min) e HTML trafegavam 3-5× maiores. Middleware global antes do static.
+app.use(compression());
 app.use(express.static("dist/client"));
 
 app.use(async (req, res) => {

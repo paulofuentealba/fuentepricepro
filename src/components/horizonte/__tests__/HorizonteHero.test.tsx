@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HorizonteHero } from "@/components/horizonte/HorizonteHero";
 
 const mockUseFIProgress = vi.fn();
 const mockUseValuedPortfolio = vi.fn();
+const mockUseTransactions = vi.fn();
 
 vi.mock("@/lib/useFIProgress", () => ({
   useFIProgress: () => mockUseFIProgress(),
@@ -13,6 +16,34 @@ vi.mock("@/lib/useFIProgress", () => ({
 vi.mock("@/lib/useValuedPortfolio", () => ({
   useValuedPortfolio: () => mockUseValuedPortfolio(),
 }));
+
+vi.mock("@/lib/transactions", () => ({
+  useTransactions: () => mockUseTransactions(),
+}));
+
+vi.mock("@/components/horizonte/NewContributionDialog", () => ({
+  NewContributionDialog: () => null,
+}));
+
+function renderHero() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <HorizonteHero />
+    </QueryClientProvider>,
+  );
+}
+
+beforeEach(() => {
+  mockUseTransactions.mockReturnValue({ transactions: [] });
+  window.matchMedia = vi.fn().mockReturnValue({
+    matches: false,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  });
+});
 
 describe("HorizonteHero", () => {
   it("não exibe '0.0%' quando a meta de gastos não está configurada e há patrimônio positivo e milestone batido (regressão do bug real: R$300.405,55 acumulados + milestone R$100k batido mostrando 0.0%)", () => {
@@ -24,11 +55,12 @@ describe("HorizonteHero", () => {
       isSetup: false,
     });
     mockUseValuedPortfolio.mockReturnValue({
-      items: [{ id: "1" }],
+      items: [{ id: "1", ticker: "TEST4", currency: "BRL" }],
+      valuedItems: [{ id: "1", ticker: "TEST4", currency: "BRL" }],
       isAppLoading: false,
     });
 
-    render(<HorizonteHero />);
+    renderHero();
 
     // A headline nunca deve mostrar "0.0%" neste cenário contraditório.
     expect(screen.queryByText("0.0%")).not.toBeInTheDocument();
@@ -46,11 +78,12 @@ describe("HorizonteHero", () => {
       isSetup: true,
     });
     mockUseValuedPortfolio.mockReturnValue({
-      items: [{ id: "1" }],
+      items: [{ id: "1", ticker: "TEST4", currency: "BRL" }],
+      valuedItems: [{ id: "1", ticker: "TEST4", currency: "BRL" }],
       isAppLoading: false,
     });
 
-    render(<HorizonteHero />);
+    renderHero();
 
     expect(screen.getByText("42.5%")).toBeInTheDocument();
   });

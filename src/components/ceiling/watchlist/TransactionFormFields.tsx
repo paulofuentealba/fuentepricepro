@@ -28,7 +28,11 @@ interface Props {
 export function TransactionFormFields({ item, onSave, existingTransactions, initialData, onCancel }: Props) {
   const { t } = useI18n();
 
-  const [type, setType] = useState<"buy" | "sell">(initialData?.type ?? "buy");
+  // corporate_action rows are auto-generated adjustments and are not editable
+  // via the buy/sell form, so they safely fall back to "buy" as the initial value.
+  const [type, setType] = useState<"buy" | "sell">(
+    initialData?.type === "buy" || initialData?.type === "sell" ? initialData.type : "buy",
+  );
   const [date, setDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : new Date());
 
   const [quantity, setQuantity] = useState<string>(initialData?.quantity ? String(initialData.quantity) : "");

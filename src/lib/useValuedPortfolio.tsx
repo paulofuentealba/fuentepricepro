@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { createContext, useContext, useMemo, useState, useEffect, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWatchlist, type WatchlistItem } from "./watchlist";
 import { useSettings } from "./settings";
@@ -20,7 +20,7 @@ export interface ValuedWatchlistItem extends WatchlistItem {
   isClosedPosition: boolean;
 }
 
-export function useValuedPortfolio() {
+function useValuedPortfolioComputation() {
   const { t } = useI18n();
   const { items, isPending: isWatchlistPending, ...rest } = useWatchlist();
   const { transactions = [], isLoading: isTxLoading } = useTransactions();
@@ -168,4 +168,33 @@ export function useValuedPortfolio() {
     fx,
     selic,
   };
+}
+
+type ValuedPortfolioValue = ReturnType<typeof useValuedPortfolioComputation>;
+
+const ValuedPortfolioContext = createContext<ValuedPortfolioValue | null>(null);
+
+/**
+ * Fix #5 (auditoria 3.2): `useValuedPortfolio` registra listeners reais
+ * (onSnapshot de `users/{uid}/assets` via useWatchlist e de `users/{uid}/
+ * transactions`). Montá-lo 5× na home (`/app`) → ~10 listeners na mesma
+ * coleção. React Query deduplica queries, NÃO listeners. Elevamos a uma
+ * única instância via Provider no root; consumidores leem do contexto.
+ *
+ * O fallback para computação direta mantém o hook utilizável fora do
+ * provider (testes, rotas isoladas) sem quebrar o comportamento atual.
+ */
+export function ValuedPortfolioProvider({ children }: { children: ReactNode }) {
+  const value = useValuedPortfolioComputation();
+  return (
+    <ValuedPortfolioContext.Provider value={value}>
+      {children}
+    </ValuedPortfolioContext.Provider>
+  );
+}
+
+export function useValuedPortfolio() {
+  const ctx = useContext(ValuedPortfolioContext);
+  if (ctx) return ctx;
+  return useValuedPortfolioComputation();
 }

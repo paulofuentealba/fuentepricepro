@@ -2,6 +2,9 @@
   "name": "tanstack_start_ts",
   "private": true,
   "sideEffects": false,
+  "allowScripts": [
+    "compression"
+  ],
   "type": "module",
   "scripts": {
     "check-tagline": "node scripts/forbid-legacy-tagline.js",
@@ -52,6 +55,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "compression": "^1.8.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
     "embla-carousel-react": "^8.6.0",

@@ -65,6 +65,44 @@ describe("recalculateHoldingFromTransactions", () => {
     expect(result.averagePrice).toBe(0);
   });
 
+  it("should scale quantity and inverse-scale average price on a split (corporate_action)", () => {
+    const transactions: Transaction[] = [
+      { id: "1", ticker: "PETR4", type: "buy", date: 1000, quantity: 100, pricePerShare: 40 },
+      {
+        id: "2",
+        ticker: "PETR4",
+        type: "corporate_action",
+        date: 2000,
+        quantity: 0,
+        pricePerShare: 0,
+        factor: 4,
+      }, // 1:4 split
+    ];
+
+    const result = recalculateHoldingFromTransactions(transactions);
+    expect(result.quantity).toBe(400);
+    expect(result.averagePrice).toBeCloseTo(10, 6); // 40 / 4
+  });
+
+  it("should handle a grouping (inplit) via corporate_action factor", () => {
+    const transactions: Transaction[] = [
+      { id: "1", ticker: "X", type: "buy", date: 1000, quantity: 100, pricePerShare: 5 },
+      {
+        id: "2",
+        ticker: "X",
+        type: "corporate_action",
+        date: 2000,
+        quantity: 0,
+        pricePerShare: 0,
+        factor: 0.1,
+      }, // 10:1 grouping
+    ];
+
+    const result = recalculateHoldingFromTransactions(transactions);
+    expect(result.quantity).toBeCloseTo(10, 6);
+    expect(result.averagePrice).toBeCloseTo(50, 6); // 5 / 0.1
+  });
+
   it("should recalculate from scratch if buying after fully selling the position", () => {
     const transactions: Transaction[] = [
       { id: "1", ticker: "WEGE3", type: "buy", date: 1, quantity: 100, pricePerShare: 30 },
@@ -100,6 +138,31 @@ describe("getQuantityAtDate", () => {
     expect(getQuantityAtDate(transactions, 350)).toBe(80);
     // After final buy
     expect(getQuantityAtDate(transactions, 500)).toBe(90);
+  });
+
+  it("should scale quantity at date through a corporate action (split/grouping)", () => {
+    const transactions: Transaction[] = [
+      { id: "1", ticker: "VALE3", type: "buy", date: 100, quantity: 100, pricePerShare: 40 },
+      { id: "2", ticker: "VALE3", type: "corporate_action", date: 200, quantity: 0, pricePerShare: 0, factor: 4 },
+      { id: "3", ticker: "VALE3", type: "sell", date: 300, quantity: 50, pricePerShare: 10 },
+    ];
+
+    // Before the split
+    expect(getQuantityAtDate(transactions, 150)).toBe(100);
+    // After the split (100 × 4)
+    expect(getQuantityAtDate(transactions, 250)).toBe(400);
+    // After the post-split sale
+    expect(getQuantityAtDate(transactions, 400)).toBe(350);
+  });
+
+  it("should scale quantity at date through a grouping (factor < 1)", () => {
+    const transactions: Transaction[] = [
+      { id: "1", ticker: "VALE3", type: "buy", date: 100, quantity: 10, pricePerShare: 50 },
+      { id: "2", ticker: "VALE3", type: "corporate_action", date: 200, quantity: 0, pricePerShare: 0, factor: 0.1 },
+    ];
+
+    expect(getQuantityAtDate(transactions, 150)).toBe(10);
+    expect(getQuantityAtDate(transactions, 250)).toBe(1);
   });
 });
 

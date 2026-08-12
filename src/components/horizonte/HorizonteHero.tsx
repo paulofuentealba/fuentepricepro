@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { useI18n } from "@/lib/i18n-provider";
 import { NewContributionDialog } from "./NewContributionDialog";
 
 /**
@@ -124,6 +125,7 @@ function drawHorizon(canvas: HTMLCanvasElement, levelPercent: number, alwaysShow
 export function HorizonteHero() {
   const { coveragePercent, isReached, totalCapitalBRL, monthsToFI, isSetup, monthlyIncomeBRL } =
     useFIProgress();
+  const { locale, t } = useI18n();
   const { items, isAppLoading, valuedItems } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
@@ -211,8 +213,8 @@ export function HorizonteHero() {
   }, [coveragePercent, needsGoalSetup]);
 
   const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0);
-  const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", "ptBR");
-  const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", "ptBR");
+  const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", locale);
+  const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", locale);
 
   // Aporte deste mês — mesmo cálculo usado anteriormente em app/index.tsx,
   // movido para dentro do hero (item 3 da spec de correção). Mesmo padrão de
@@ -229,27 +231,27 @@ export function HorizonteHero() {
     () => getMonthlyNetContribution(transactions, Date.now(), convertToBRL, currencyByTicker),
     [transactions, usdRate, currencyByTicker],
   );
-  const monthlyContributionLabel = formatCurrency(monthlyContribution, "BRL", "ptBR");
+  const monthlyContributionLabel = formatCurrency(monthlyContribution, "BRL", locale);
 
   const milestones: { label: string; achieved: boolean }[] = [];
   if (totalCapitalBRL > 0) {
     milestones.push({
-      label: "Primeiros R$ 100 mil",
+      label: t.home.milestoneFirst100k,
       achieved: totalCapitalBRL >= 100_000,
     });
   }
   if (coveragePercent > 0) {
     milestones.push({
-      label: "Renda cobre 50% dos gastos",
+      label: t.home.milestoneHalfCoverage,
       achieved: coveragePercent >= 50,
     });
   }
 
   const ariaLabel = isReached
-    ? "Linha do horizonte: meta de independência financeira atingida"
+    ? t.home.ariaGoalReached
     : needsGoalSetup
-      ? `Linha do horizonte: patrimônio de ${capitalLabel}, configure sua meta de gastos para ver o progresso de renda`
-      : `Linha do horizonte em ${coveragePercent.toFixed(0)}% de progresso`;
+      ? t.home.ariaConfigureGoal.replace("{{capital}}", capitalLabel)
+      : t.home.ariaProgress.replace("{{percent}}", coveragePercent.toFixed(0));
 
   // NewContributionDialog is rendered exactly once, at a stable position in
   // the tree, regardless of which branch below is active. Adding the first
@@ -267,11 +269,10 @@ export function HorizonteHero() {
         Horizonte FI
       </span>
       <span className="text-2xl font-semibold font-serif text-foreground">
-        Registre seu primeiro aporte para começar sua jornada
+        {t.home.emptyTitle}
       </span>
       <span className="text-sm text-muted-foreground">
-        Assim que você adicionar um ativo à carteira, sua linha do horizonte
-        rumo à independência financeira aparece aqui.
+        {t.home.heroEmptySubtitle}
       </span>
       <div>
         <Button
@@ -280,7 +281,7 @@ export function HorizonteHero() {
           onClick={() => setShowContributionDialog(true)}
         >
           <PlusCircle className="h-4 w-4" />
-          Registrar aporte
+          {t.home.registerContribution}
         </Button>
       </div>
     </div>
@@ -295,30 +296,32 @@ export function HorizonteHero() {
             className={`text-4xl font-semibold font-serif ${isReached ? "text-primary" : "text-foreground"}`}
           >
             {isReached
-              ? "Meta atingida"
+              ? t.home.goalReached
               : needsGoalSetup
                 ? capitalLabel
                 : `${coveragePercent.toFixed(1)}%`}
           </span>
           <span className="text-sm text-muted-foreground">
             {needsGoalSetup
-              ? "acumulados · configure sua meta de gastos mensais para ver o progresso de renda"
-              : `${capitalLabel} acumulados${!isReached && monthsLabel ? ` · faltam ${monthsLabel}` : ""}`}
+              ? t.home.accumulatedConfigure
+              : `${capitalLabel} ${t.home.accumulated}${
+                  !isReached && monthsLabel ? ` · ${t.home.remaining.replace("{{months}}", monthsLabel)}` : ""
+                }`}
           </span>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end shrink-0">
           <div className="flex flex-col items-start gap-1 sm:items-end">
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              Aporte deste mês
-              <InfoTooltip content='"Aporte deste mês" é uma aproximação baseada nas transações registradas este mês (compra menos venda) — não é um extrato de aportes reais.' />
+              {t.home.contributionThisMonth}
+              <InfoTooltip content={t.home.contributionThisMonthTooltip} />
             </span>
             <span className="text-sm font-medium text-foreground">{monthlyContributionLabel}</span>
           </div>
           <div className="flex flex-col items-start gap-1 sm:items-end">
-            <span className="text-xs text-muted-foreground">Renda passiva atual</span>
+            <span className="text-xs text-muted-foreground">{t.home.passiveIncomeNow}</span>
             <span className="text-sm font-medium text-foreground">
               {passiveIncomeLabel}
-              <span className="text-xs text-muted-foreground">/mês</span>
+              <span className="text-xs text-muted-foreground">{t.home.perMonth}</span>
             </span>
           </div>
           <Button
@@ -327,7 +330,7 @@ export function HorizonteHero() {
             onClick={() => setShowContributionDialog(true)}
           >
             <PlusCircle className="h-4 w-4" />
-            Registrar aporte
+            {t.home.registerContribution}
           </Button>
         </div>
       </header>

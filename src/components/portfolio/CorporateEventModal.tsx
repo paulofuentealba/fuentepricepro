@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
+import { useTransactions } from "@/lib/transactions";
 import {
   applyCorporateEvent,
   type CorporateEventType,
@@ -38,6 +39,7 @@ export function CorporateEventModal({
 }: CorporateEventModalProps) {
   const { t, locale } = useI18n();
   const { upsertAsync } = useWatchlist();
+  const { transactions, upsert: upsertTransaction } = useTransactions();
   const [eventType, setEventType] = useState<CorporateEventType>("split");
   const [ratio, setRatio] = useState<string>("4");
 
@@ -87,6 +89,28 @@ export function CorporateEventModal({
         averagePrice: newPosition.averagePrice,
         appliedEvents: newAppliedEvents,
       };
+
+      // If the asset uses the transaction ledger, persist an idempotent
+      // corporate_action adjustment so derived positions / realized income
+      // reflect the split/grouping. Only when transactions already exist —
+      // otherwise the item-level update is the single source (writing a tx
+      // would switch the asset onto the ledger path unexpectedly).
+      const hasLedger = transactions.some((tx) => tx.ticker === item.ticker);
+      if (hasLedger) {
+        const eventId = pendingEvent?.eventId ?? `manual-${Date.now()}`;
+        const eventDate = pendingEvent?.date ?? Date.now();
+        await upsertTransaction({
+          id: `corp-${eventId}`,
+          ticker: item.ticker,
+          type: "corporate_action",
+          date: eventDate,
+          quantity: 0,
+          pricePerShare: 0,
+          factor,
+          notes: t.transactions.corporateAction,
+        });
+      }
+
       await upsertAsync(updatedItem);
       toast.success(`${item.ticker} ${t.corporateEvents.successMessage}`);
       onOpenChange(false);

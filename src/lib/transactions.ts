@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/integrations/firebase/client";
 import {
@@ -18,10 +18,17 @@ import { useI18n } from "./i18n-provider";
 export interface Transaction {
   id: string;
   ticker: string;
-  type: "buy" | "sell";
+  /**
+   * `corporate_action` marks a split/grouping adjustment: it multiplies the
+   * running quantity by `factor` and divides the average price by `factor`,
+   * preserving total invested capital. It carries no cash flow.
+   */
+  type: "buy" | "sell" | "corporate_action";
   date: number; // timestamp
   quantity: number;
   pricePerShare: number;
+  /** Multiplier for `corporate_action` transactions (split: ratio, grouping: 1/ratio). */
+  factor?: number | null;
   fees?: number | null; // corretagem/taxas, a Receita manda incluir no custo
   notes?: string | null;
 }
@@ -70,6 +77,16 @@ export function recalculateHoldingFromTransactions(transactions: Transaction[]):
         quantity = 0;
         averagePrice = 0; // Reset average price when position is fully closed
       }
+    } else if (tx.type === "corporate_action") {
+      const factor = tx.factor ?? 1;
+      if (Number.isFinite(factor) && factor > 0) {
+        // Split/grouping: scale quantity and inverse-scale average price so
+        // total invested capital stays identical. Applied in chronological
+        // order alongside buys/sells.
+        quantity *= factor;
+        averagePrice /= factor;
+        if (quantity < 0) quantity = 0;
+      }
     }
   }
 
@@ -90,6 +107,12 @@ export function getQuantityAtDate(transactions: Transaction[], date: number): nu
     } else if (tx.type === "sell") {
       quantity -= tx.quantity;
       if (quantity < 0) quantity = 0;
+    } else if (tx.type === "corporate_action") {
+      const factor = tx.factor ?? 1;
+      if (Number.isFinite(factor) && factor > 0) {
+        quantity *= factor;
+        if (quantity < 0) quantity = 0;
+      }
     }
   }
 
@@ -151,7 +174,11 @@ export function useTransactions() {
   const { user } = useAuth();
   const { t } = useI18n();
   const queryClient = useQueryClient();
-  const queryKey = ["transactions", user?.uid ?? "local"];
+  // Fix #5 (auditoria 3.1): a key era criada inline (identidade nova a cada
+  // render) e era dependência do useEffect do onSnapshot → cada snapshot
+  // re-renderizava, o efeito re-executava (unsubscribe + nova assinatura) e
+  // o loop se autossustentava. Memoizada como já é feito em useWatchlist.
+  const queryKey = useMemo(() => ["transactions", user?.uid ?? "local"], [user?.uid]);
 
   // 1. Fetch
   const { data = [], isLoading } = useQuery<Transaction[]>({

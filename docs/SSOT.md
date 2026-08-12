@@ -87,7 +87,7 @@ alertas de preço, comunidade/social, rating de risco mais elaborado.
 | 4.3 LGPD/GDPR | 🟡 Export e exclusão de conta ✅ concluídos e verificados. Banner de cookies/consentimento 🟡 pendente |
 | 4.4 UI/UX "Pro Terminal" | ✅ Essencialmente concluído |
 
-### Épico 5 — Horizonte FI (Redesign de Frontend v2) 🟡 v1 do dashboard concluída, QA final com 2 achados de acessibilidade abertos
+### Épico 5 — Horizonte FI (Redesign de Frontend v2) 🟡 Dashboard+Carteira concluídos, escopo expandido para todas as rotas (leva 55-64 em andamento)
 
 Iniciativa de identidade visual nascida do diagnóstico de que o design system atual
 (shadcn/ui + tokens Tailwind v4) é tecnicamente maduro mas visualmente genérico —
@@ -95,6 +95,19 @@ tipografia 100% system-font, verde-primário fazendo duplo papel (marca + P&L), 
 elemento de assinatura. Decisão: construir como **v2 paralela**, sem tocar a versão
 atual em produção, reaproveitando 100% da camada de cálculo existente (nenhuma
 lógica de negócio nova nesta fase).
+
+**Correção de escopo (pós-leva 46-54)**: a primeira entrega cobriu só Dashboard e
+Carteira, deixando o resto do app na v1 — feedback do usuário foi que isso ficou
+inconsistente ("uma rota nova isolada, todo o resto diferente"). Decisão revisada:
+a v2 continua paralela (`/app-v2`), mas agora precisa cobrir **todas** as rotas
+autenticadas antes de qualquer promoção a padrão — Cash Flow, Global Radar, Risk
+Radar, Comparador, Smart Allocation, Snowball, Screener, Docs, Settings. Prompts
+55-64 (`docs/Prompts/`) cobrem essa expansão, com regra nova e não-negociável:
+**verificação visual real obrigatória** (navegador, não só leitura de código) antes
+de qualquer etapa ser marcada como concluída — a leva anterior teve um bug real
+(Horizonte FI mostrando "0.0%" contraditoriamente com patrimônio positivo) que só
+apareceu porque o usuário testou manualmente, não porque a auditoria automatizada
+pegou.
 
 | Item | Status |
 |---|---|

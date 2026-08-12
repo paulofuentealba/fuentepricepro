@@ -67,7 +67,7 @@ function SummaryCard({
 }
 
 function AppHome() {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const { user } = useAuth();
   const { valuedItems, totals, isAppLoading, quotes } = useValuedPortfolio();
   const { summary: realizedSummary, isLoading: isRealizedLoading } = useRealizedIncomeSummary("BRL");
@@ -97,7 +97,7 @@ function AppHome() {
             largestPositionChangePct,
             locale,
             1,
-          )} hoje`,
+          )} ${t.home.today}`,
           positive: largestPositionChangePct >= 0,
         }
       : null;
@@ -146,8 +146,8 @@ function AppHome() {
     const delta = coveragePercent - previousSnapshot.coveragePercent;
     if (delta === 0) return null;
     const sign = delta > 0 ? "+" : "";
-    return `${sign}${delta.toFixed(1)} p.p. desde a última visita`;
-  }, [previousSnapshot, coveragePercent]);
+    return t.home.ppSinceLastVisit.replace("{{delta}}", `${sign}${delta.toFixed(1)}`);
+  }, [previousSnapshot, coveragePercent, t]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -157,14 +157,14 @@ function AppHome() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <SummaryCard label="Patrimônio total" value={netWorthLabel} isLoading={isAppLoading} />
+        <SummaryCard label={t.home.netWorth} value={netWorthLabel} isLoading={isAppLoading} />
         <SummaryCard
-          label="Proventos recebidos (ano)"
+          label={t.home.incomeYear}
           value={incomeLabel}
           isLoading={isAppLoading || isRealizedLoading}
         />
         <SummaryCard
-          label="Maior posição"
+          label={t.home.largestPosition}
           value={largestPositionLabel}
           delta={largestPositionDelta}
           isLoading={isAppLoading}
@@ -173,10 +173,10 @@ function AppHome() {
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold font-serif text-foreground">Sua carteira</h2>
+          <h2 className="text-lg font-semibold font-serif text-foreground">{t.home.yourPortfolio}</h2>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" className="gap-1.5" asChild>
-              <Link to="/app/myportfolio">Ver tudo</Link>
+              <Link to="/app/myportfolio">{t.home.viewAll}</Link>
             </Button>
           </div>
         </div>

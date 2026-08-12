@@ -67,6 +67,7 @@ describe("realizedIncome", () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toEqual({
         ticker: "BBSE3",
+        currency: "BRL",
         exDate: "2024-04-16",
         paymentDate: "2024-04-30",
         paymentDateEstimated: false,
@@ -259,6 +260,7 @@ describe("realizedIncome", () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toEqual({
         ticker: "ITUB4",
+        currency: "BRL",
         exDate: "2024-01-15",
         paymentDate: "2024-02-01",
         paymentDateEstimated: false,
@@ -276,6 +278,7 @@ describe("realizedIncome", () => {
       const events = [
         {
           ticker: "WEGE3",
+          currency: "BRL" as const,
           exDate: "2024-01-10",
           paymentDate: "2024-01-25",
           quantityHeld: 100,
@@ -286,6 +289,7 @@ describe("realizedIncome", () => {
         },
         {
           ticker: "WEGE3",
+          currency: "BRL" as const,
           exDate: "2024-01-20",
           paymentDate: "2024-01-30",
           quantityHeld: 100,
@@ -296,6 +300,7 @@ describe("realizedIncome", () => {
         },
         {
           ticker: "WEGE3",
+          currency: "BRL" as const,
           exDate: "2024-02-10",
           paymentDate: "2024-02-25",
           quantityHeld: 100,
@@ -307,6 +312,7 @@ describe("realizedIncome", () => {
         {
           // Future event relative to 2024-03-01
           ticker: "WEGE3",
+          currency: "BRL" as const,
           exDate: "2024-03-15",
           paymentDate: "2024-03-25",
           paymentDateEstimated: true,
@@ -337,6 +343,7 @@ describe("realizedIncome", () => {
       const events = [
         {
           ticker: "VRTA11",
+          currency: "BRL" as const,
           exDate: "2024-01-10",
           paymentDate: "2024-01-15",
           quantityHeld: 50,
@@ -347,6 +354,7 @@ describe("realizedIncome", () => {
         },
         {
           ticker: "VRTA11",
+          currency: "BRL" as const,
           exDate: "2024-04-10",
           paymentDate: "2024-04-15",
           quantityHeld: 50,
@@ -372,6 +380,7 @@ describe("realizedIncome", () => {
         const dateStr = `${yearNum}-${monthNum}-15`;
         return {
           ticker: "PETR4",
+          currency: "BRL" as const,
           exDate: dateStr,
           paymentDate: dateStr,
           quantityHeld: 100,

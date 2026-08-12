@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Edit2, Trash2, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Plus, Edit2, Trash2, ArrowUpRight, ArrowDownRight, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
@@ -76,12 +76,32 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
           tickerTxs.map((tx) => (
             <div key={tx.id} className="flex items-center justify-between p-3 rounded-md border bg-card text-sm">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${tx.type === 'buy' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-                  {tx.type === 'buy' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                <div
+                  className={`p-2 rounded-full ${
+                    tx.type === "corporate_action"
+                      ? "bg-primary/10 text-primary"
+                      : tx.type === "buy"
+                        ? "bg-success/10 text-success"
+                        : "bg-danger/10 text-danger"
+                  }`}
+                >
+                  {tx.type === "corporate_action" ? (
+                    <ArrowLeftRight className="h-4 w-4" />
+                  ) : tx.type === "buy" ? (
+                    <ArrowDownRight className="h-4 w-4" />
+                  ) : (
+                    <ArrowUpRight className="h-4 w-4" />
+                  )}
                 </div>
                 <div>
                   <div className="font-medium flex items-center gap-2">
-                    <span>{tx.type === 'buy' ? t.transactions.buy : t.transactions.sell}</span>
+                    <span>
+                      {tx.type === "corporate_action"
+                        ? t.transactions.corporateAction
+                        : tx.type === "buy"
+                          ? t.transactions.buy
+                          : t.transactions.sell}
+                    </span>
                     {tx.notes && (
                       <span className="text-[10px] text-muted-foreground font-normal bg-muted px-1.5 py-0.5 rounded border border-border/40">
                         {tx.notes}
@@ -96,15 +116,32 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
               
               <div className="flex items-center gap-6">
                 <div className="text-right hidden sm:block">
-                  <div className="font-medium">{tx.quantity} {t.transactions.qtyUnit}</div>
-                  <div className="text-muted-foreground text-xs">
-                    {formatCurrency(tx.pricePerShare, item.currency, locale)} {t.transactions.perShare}
-                  </div>
+                  {tx.type === "corporate_action" ? (
+                    <>
+                      <div className="font-medium">
+                        {typeof tx.factor === "number" && Number.isFinite(tx.factor)
+                          ? `${tx.factor}×`
+                          : "—"}
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        {t.transactions.corporateAction}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-medium">{tx.quantity} {t.transactions.qtyUnit}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {formatCurrency(tx.pricePerShare, item.currency, locale)} {t.transactions.perShare}
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingTx(tx); setIsFormOpen(true); }}>
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
+                  {tx.type !== "corporate_action" && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingTx(tx); setIsFormOpen(true); }}>
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-danger hover:text-danger hover:bg-danger/10" onClick={() => handleDelete(tx.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>

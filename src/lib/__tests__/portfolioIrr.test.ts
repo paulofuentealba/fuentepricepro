@@ -81,6 +81,7 @@ describe("portfolioIrr", () => {
       const realized: RealizedIncomeEvent[] = [
         {
           ticker: "PETR4.SA",
+          currency: "BRL",
           exDate: "2025-04-01",
           paymentDate: "2025-05-15", // Payment date is 1.5 months after exDate!
           quantityHeld: 100,
@@ -91,6 +92,7 @@ describe("portfolioIrr", () => {
         },
         {
           ticker: "AAPL",
+          currency: "USD",
           exDate: "2025-06-01",
           paymentDate: null, // Fallback to exDate!
           quantityHeld: 10,
@@ -169,6 +171,7 @@ describe("portfolioIrr", () => {
       const realized: RealizedIncomeEvent[] = [
         {
           ticker: "PETR4.SA",
+          currency: "BRL",
           exDate: "2025-04-01",
           paymentDate: "2025-05-15",
           quantityHeld: 100,
@@ -179,6 +182,7 @@ describe("portfolioIrr", () => {
         },
         {
           ticker: "AAPL",
+          currency: "USD",
           exDate: "2025-06-01",
           paymentDate: "2025-06-15",
           quantityHeld: 10,

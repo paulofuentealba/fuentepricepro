@@ -17,6 +17,7 @@ import { AuthModalProvider } from "../lib/auth-modal";
 import { I18nProvider } from "../lib/i18n-provider";
 import { SubscriptionProvider } from "../lib/subscription";
 import { SettingsProvider } from "../lib/settings";
+import { ValuedPortfolioProvider } from "../lib/useValuedPortfolio";
 
 function NotFoundComponent() {
   return (
@@ -140,9 +141,11 @@ function RootComponent() {
           <SubscriptionProvider>
             <SettingsProvider>
               <AuthModalProvider>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-                <Toaster theme="dark" richColors position="top-right" />
+                <ValuedPortfolioProvider>
+                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                  <Outlet />
+                  <Toaster theme="dark" richColors position="top-right" />
+                </ValuedPortfolioProvider>
               </AuthModalProvider>
             </SettingsProvider>
           </SubscriptionProvider>

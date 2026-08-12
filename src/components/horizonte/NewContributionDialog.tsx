@@ -132,7 +132,7 @@ export function NewContributionDialog({ open, onOpenChange }: Props) {
                   {displayTicker(workingItem.ticker)}
                 </span>
                 <Button type="button" variant="ghost" size="sm" onClick={handleChangeTicker}>
-                  Trocar
+                  {t.common.change}
                 </Button>
               </div>
             </div>

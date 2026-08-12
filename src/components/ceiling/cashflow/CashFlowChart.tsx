@@ -54,6 +54,17 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
 
   const selectedMonthData = selectedMonthIndex !== null ? data[selectedMonthIndex] : null;
 
+  // Fix #1 (auditoria 1.1): para um mês passado, `realizedAmount` (líquido, via
+  // calculateRealizedIncome) e `paidAmount` (bruto, via amountPerShare × qty)
+  // representam o MESMO dividendo. Empilhar os dois no mesmo stackId e somá-los
+  // no tooltip superestimava o mês (~2×). Usamos uma base única por mês:
+  // líquido realizado quando disponível, senão bruto pago (fallback para quem
+  // não usa o ledger de transações).
+  const chartData = data.map((bucket) => ({
+    ...bucket,
+    confirmedAmount: bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount,
+  }));
+
   // Take top 8 contributors to fit in a small horizontal bar chart without scrolling
   const breakdownData =
     selectedMonthData?.contributors.slice(0, 8).map((c) => ({
@@ -80,8 +91,11 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
     const bucket = payload[0].payload;
     const { month, contributors, concentratedTicker, isBest, isWorst } = bucket;
     
+    // Base única por mês (mesmo critério do gráfico): líquido realizado quando
+    // disponível, senão bruto pago. `announcedAmount` é um terceiro conceito
+    // (anunciado, não pago) e hoje é sempre 0.
     const realizedConfirmedSum =
-      (bucket.realizedAmount || 0) + (bucket.paidAmount || 0) + (bucket.announcedAmount || 0);
+      bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount || 0;
     const projectedSum = bucket.projectedAmount || 0;
     const effectiveTotal =
       realizedConfirmedSum + projectedSum > 0
@@ -263,7 +277,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
 
           <div className="h-[280px] w-full">
             <ChartContainer config={CASHFLOW_EMPTY_CHART_CONFIG} className="h-full w-full">
-              <BarChart data={data} margin={CASHFLOW_MAIN_BAR_MARGIN}>
+              <BarChart data={chartData} margin={CASHFLOW_MAIN_BAR_MARGIN}>
                 <defs>
                   <pattern
                     id="striped"
@@ -316,33 +330,16 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 />
 
                 <Bar
-                  dataKey="realizedAmount"
+                  dataKey="confirmedAmount"
                   stackId="a"
                   fill="var(--realized)"
                   maxBarSize={40}
                   onClick={handleBarClick}
                   cursor="pointer"
                 >
-                  {data.map((entry, index) => (
+                  {chartData.map((entry, index) => (
                     <Cell
-                      key={`cell-realized-${index}`}
-                      fillOpacity={
-                        selectedMonthIndex === null || selectedMonthIndex === index ? 1 : 0.3
-                      }
-                    />
-                  ))}
-                </Bar>
-                <Bar
-                  dataKey="paidAmount"
-                  stackId="a"
-                  fill="var(--realized)"
-                  maxBarSize={40}
-                  onClick={handleBarClick}
-                  cursor="pointer"
-                >
-                  {data.map((entry, index) => (
-                    <Cell
-                      key={`cell-paid-${index}`}
+                      key={`cell-confirmed-${index}`}
                       fillOpacity={
                         selectedMonthIndex === null || selectedMonthIndex === index ? 1 : 0.3
                       }
@@ -357,7 +354,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   onClick={handleBarClick}
                   cursor="pointer"
                 >
-                  {data.map((entry, index) => (
+                  {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-ann-${index}`}
                       fillOpacity={
@@ -375,7 +372,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   onClick={handleBarClick}
                   cursor="pointer"
                 >
-                  {data.map((entry, index) => (
+                  {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-proj-${index}`}
                       fillOpacity={

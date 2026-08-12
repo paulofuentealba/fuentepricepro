@@ -8,6 +8,8 @@ export type TaxType = "dividend" | "jcp" | "rendimento_fii" | "us_dividend";
 
 export interface RealizedIncomeEvent {
   ticker: string;
+  /** Native currency of the event (source of `amountNet`), used for FX conversion. */
+  currency: Currency;
   exDate: string; // ISO format "YYYY-MM-DD"
   paymentDate: string | null; // ISO format "YYYY-MM-DD" or null
   paymentDateEstimated?: boolean;
@@ -123,6 +125,9 @@ export function calculateRealizedIncome(
 
     const txs = (txByTicker[ticker] || []).sort((a, b) => a.date - b.date);
     const meta = getMeta(tickerRaw);
+    // Derive the event's native currency even when meta lacks `currency` (e.g. Map fallback).
+    const eventCurrency: Currency =
+      meta.currency ?? (isUsAsset(meta.type, meta.currency) ? "USD" : "BRL");
 
     for (const event of events) {
       const eventExDateStr = normalizeDateStr(event.exDate);
@@ -137,6 +142,9 @@ export function calculateRealizedIncome(
             quantityHeld += tx.quantity;
           } else if (tx.type === "sell") {
             quantityHeld -= tx.quantity;
+          } else if (tx.type === "corporate_action") {
+            const factor = tx.factor ?? 1;
+            if (Number.isFinite(factor) && factor > 0) quantityHeld *= factor;
           }
         }
       }
@@ -157,6 +165,7 @@ export function calculateRealizedIncome(
 
         result.push({
           ticker,
+          currency: eventCurrency,
           exDate: eventExDateStr,
           paymentDate: event.paymentDate ? normalizeDateStr(event.paymentDate) : null,
           paymentDateEstimated: event.paymentDateEstimated ?? false,
@@ -187,9 +196,29 @@ export interface RealizedIncomeSummary {
   jcpTotal: number;
 }
 
+/**
+ * Converts an amount from one currency to another using the given USD/BRL rate.
+ * Falls back to 5.5 when no valid rate is provided (same default the app uses
+ * elsewhere), and is an identity for same-currency conversions.
+ */
+export function convertCurrency(
+  amount: number,
+  from: Currency,
+  to: Currency,
+  fxRate?: number,
+): number {
+  if (from === to || amount === 0) return amount;
+  const rate =
+    typeof fxRate === "number" && Number.isFinite(fxRate) && fxRate > 0 ? fxRate : 5.5;
+  if (from === "USD" && to === "BRL") return amount * rate;
+  if (from === "BRL" && to === "USD") return amount / rate;
+  return amount;
+}
+
 export function computeRealizedIncomeSummary(
   events: RealizedIncomeEvent[],
-  currency: Currency = "BRL"
+  currency: Currency = "BRL",
+  fxRate?: number,
 ): RealizedIncomeSummary {
   const now = new Date();
   const currentYearStr = String(now.getFullYear());
@@ -203,19 +232,20 @@ export function computeRealizedIncomeSummary(
 
   for (const ev of events) {
     const payDate = ev.paymentDate || ev.exDate;
-    allTimeTotal += ev.amountNet;
+    const amountNet = convertCurrency(ev.amountNet, ev.currency, currency, fxRate);
+    allTimeTotal += amountNet;
 
     if (ev.taxType === "jcp") {
-      jcpTotal += ev.amountNet;
+      jcpTotal += amountNet;
     } else {
-      dividendTotal += ev.amountNet;
+      dividendTotal += amountNet;
     }
 
     if (payDate.startsWith(currentYearStr)) {
-      currentYear += ev.amountNet;
+      currentYear += amountNet;
     }
     if (payDate.startsWith(currentMonthStr)) {
-      currentMonth += ev.amountNet;
+      currentMonth += amountNet;
     }
   }
 

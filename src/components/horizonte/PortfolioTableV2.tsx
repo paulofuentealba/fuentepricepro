@@ -24,7 +24,7 @@ type SortDirection = "asc" | "desc";
  * tratamento é exclusivo do hero (prompt 50).
  */
 export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const { valuedItems, quotes, isAppLoading } = useValuedPortfolio();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("asset");
@@ -99,11 +99,10 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
           Horizonte FI
         </span>
         <span className="text-2xl font-semibold font-serif text-foreground">
-          Registre seu primeiro aporte para começar sua jornada
+          {t.home.emptyTitle}
         </span>
         <span className="text-sm text-muted-foreground">
-          Assim que você adicionar um ativo à carteira, sua tabela de posições
-          aparece aqui.
+          {t.home.emptySubtitle}
         </span>
       </div>
     );
@@ -114,7 +113,7 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
       {typeof limit !== "number" && (
         <Input
           type="search"
-          placeholder="Buscar por ticker ou nome"
+          placeholder={t.home.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm bg-card border-border text-foreground"
@@ -125,13 +124,13 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-border">
-              <SortableHeader label="Ativo" sortKey="asset" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
-              <SortableHeader label="Classe" sortKey="class" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
-              <SortableHeader label="Posição" sortKey="position" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
-              <SortableHeader label="Preço médio" sortKey="avgPrice" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
-              <SortableHeader label="Variação" sortKey="change" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
-              <SortableHeader label="P&L" sortKey="pnl" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
-              <SortableHeader label="Dividend Yield" sortKey="dy" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
+              <SortableHeader label={t.home.columnAsset} sortKey="asset" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
+              <SortableHeader label={t.home.columnClass} sortKey="class" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
+              <SortableHeader label={t.home.columnPosition} sortKey="position" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
+              <SortableHeader label={t.home.columnAvgPrice} sortKey="avgPrice" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
+              <SortableHeader label={t.home.columnChange} sortKey="change" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
+              <SortableHeader label={t.home.columnPnl} sortKey="pnl" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
+              <SortableHeader label={t.home.columnDy} sortKey="dy" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
             </tr>
           </thead>
           <tbody>

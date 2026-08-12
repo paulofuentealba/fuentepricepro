@@ -30,7 +30,7 @@ export function useRealizedIncomeSummary(currency: Currency = "BRL"): {
   events: RealizedIncomeEvent[];
   isLoading: boolean;
 } {
-  const { items, isAppLoading } = useValuedPortfolio();
+  const { items, isAppLoading, fx } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
 
   const effectiveTransactions = useMemo(
@@ -68,8 +68,8 @@ export function useRealizedIncomeSummary(currency: Currency = "BRL"): {
   }, [effectiveTransactions, dividendEventsMap, items]);
 
   const summary = useMemo(
-    () => computeRealizedIncomeSummary(realizedEvents, currency),
-    [realizedEvents, currency],
+    () => computeRealizedIncomeSummary(realizedEvents, currency, fx?.USDBRL),
+    [realizedEvents, currency, fx?.USDBRL],
   );
 
   return { summary, events: realizedEvents, isLoading: isAppLoading };
