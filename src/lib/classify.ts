@@ -65,42 +65,42 @@ export function getShareClassBadge(
   const clean = ticker.trim().toUpperCase().replace(/\.SA$/, "");
   if (!clean) return null;
 
-  // BDRs (34 or 35)
+  // BDRs (34 or 35) → chart-1 (orange/brown in light, purple/blue in dark)
   if (/^[A-Z]{4}(34|35)$/.test(clean)) {
     return {
       label: "BDR",
-      className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+      className: "bg-chart-1/15 text-chart-1 border-chart-1/30",
     };
   }
-  // Units (11 with Stock type or in B3_STOCK_UNIT_PREFIXES)
+  // Units (11 with Stock type or in B3_STOCK_UNIT_PREFIXES) → chart-2 (cyan in light, green in dark)
   if (
     clean.endsWith("11") &&
     (type === "STOCK_BR" || B3_STOCK_UNIT_PREFIXES.has(clean.slice(0, -2)))
   ) {
     return {
       label: "UNIT",
-      className: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+      className: "bg-chart-2/15 text-chart-2 border-chart-2/30",
     };
   }
-  // Fractional Lot (...F)
+  // Fractional Lot (...F) → chart-3 (blue/purple in light, yellow/orange in dark)
   if (/^[A-Z]{4}\d{1,2}F$/.test(clean)) {
     return {
       label: "Fracionário",
-      className: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+      className: "bg-chart-3/15 text-chart-3 border-chart-3/30",
     };
   }
-  // ON Stock (...3)
+  // ON Stock (...3) → chart-4 (yellow/green in light, purple/pink in dark)
   if (/^[A-Z]{4}3$/.test(clean)) {
     return {
       label: "ON",
-      className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      className: "bg-chart-4/15 text-chart-4 border-chart-4/30",
     };
   }
-  // PN Stock (...4, 5, 6, 7, 8)
+  // PN Stock (...4, 5, 6, 7, 8) → chart-5 (yellow/orange in light, red in dark)
   if (/^[A-Z]{4}[4-8]$/.test(clean)) {
     return {
       label: "PN",
-      className: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+      className: "bg-chart-5/15 text-chart-5 border-chart-5/30",
     };
   }
 

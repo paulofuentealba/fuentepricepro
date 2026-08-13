@@ -54,4 +54,31 @@ describe("getShareClassBadge", () => {
     expect(getShareClassBadge("AAPL34")?.label).toBe("BDR");
     expect(getShareClassBadge("VALE3F")?.label).toBe("Fracionário");
   });
+
+  it("uses distinct --chart-1..--chart-5 design tokens for each share class, never raw Tailwind palette colors", () => {
+    const cases: { ticker: string; type?: string; label: string; expectedToken: string }[] = [
+      { ticker: "AAPL34", label: "BDR", expectedToken: "chart-1" },
+      { ticker: "TAEE11", type: "STOCK_BR", label: "UNIT", expectedToken: "chart-2" },
+      { ticker: "VALE3F", label: "Fracionário", expectedToken: "chart-3" },
+      { ticker: "VALE3", label: "ON", expectedToken: "chart-4" },
+      { ticker: "PETR4", label: "PN", expectedToken: "chart-5" },
+    ];
+
+    const usedTokens = new Set<string>();
+
+    for (const { ticker, type, label, expectedToken } of cases) {
+      const badge = getShareClassBadge(ticker, type);
+      expect(badge?.label).toBe(label);
+      expect(badge?.className).toContain(`chart-${expectedToken.split("-")[1]}`);
+      // Must reference the semantic token, never a raw Tailwind palette color.
+      expect(badge?.className).not.toMatch(
+        /\b(bg|text|border)-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}\b/,
+      );
+      usedTokens.add(expectedToken);
+    }
+
+    // All 5 badges must map to 5 distinct chart tokens (chart-1..chart-5).
+    expect(usedTokens.size).toBe(5);
+    expect([...usedTokens].sort()).toEqual(["chart-1", "chart-2", "chart-3", "chart-4", "chart-5"]);
+  });
 });

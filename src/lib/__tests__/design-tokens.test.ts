@@ -45,6 +45,25 @@ describe("Design System Color Tokens SSOT Gate", () => {
     ...getAllTsxFiles(path.join(rootDir, "src/routes")),
   ];
 
+  // src/lib is scanned separately (rule 5 only) since it holds .ts (not .tsx) helpers
+  // like classify.ts that generate className strings consumed by UI components.
+  function getAllTsFiles(dir: string): string[] {
+    let results: string[] = [];
+    if (!fs.existsSync(dir)) return results;
+    const list = fs.readdirSync(dir);
+    for (const file of list) {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat && stat.isDirectory()) {
+        results = results.concat(getAllTsFiles(filePath));
+      } else if (filePath.endsWith(".ts") && !filePath.endsWith(".test.ts")) {
+        results.push(filePath);
+      }
+    }
+    return results;
+  }
+  const libFiles = getAllTsFiles(path.join(rootDir, "src/lib"));
+
   it("should maintain KNOWN_EXCEPTIONS list completely empty (0 exceptions)", () => {
     expect(KNOWN_EXCEPTIONS).toEqual([]);
   });
@@ -129,7 +148,7 @@ describe("Design System Color Tokens SSOT Gate", () => {
     const violations: string[] = [];
     const tailwindPaletteRegex = /\b(text|bg|border|fill|stroke)-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}(?:\/[0-9]{1,3})?\b/;
 
-    for (const filePath of componentFiles) {
+    for (const filePath of [...componentFiles, ...libFiles]) {
       const normalizedPath = filePath.replace(/\\/g, "/");
       // Exclude purely decorative public marketing and documentation pages
       if (normalizedPath.endsWith("src/routes/index.tsx") || normalizedPath.endsWith("src/routes/app/docs.tsx")) {
