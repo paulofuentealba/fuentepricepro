@@ -3,7 +3,6 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
-import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useSettings } from "@/lib/settings";
 import { useSubscription } from "@/lib/subscription";
@@ -11,7 +10,6 @@ import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
-import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
 
 import { AddAssetDropdown } from "./watchlist/AddAssetDropdown";
 import { WatchlistKpiSection } from "./watchlist/WatchlistKpiSection";
@@ -39,14 +37,11 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     quotes,
     meta,
     remove,
-    update,
-    upsert,
     isAppLoading: isPending,
   } = useValuedPortfolio();
-  const { transactions, upsert: upsertTransaction } = useTransactions();
 
-  const [editing, setEditing] = useState<ValuedWatchlistItem | null>(null);
   const [detail, setDetail] = useState<ValuedWatchlistItem | null>(null);
+  const [detailInitialTab, setDetailInitialTab] = useState<"myPosition" | undefined>(undefined);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const { isPro } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
@@ -135,8 +130,10 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     return { over, under, total };
   }, [activeValuedItems]);
 
-  const handleEdit = useCallback((it: ValuedWatchlistItem) => setEditing(it), []);
-  const handleOpenDetail = useCallback((it: ValuedWatchlistItem) => setDetail(it), []);
+  const handleOpenDetail = useCallback((it: ValuedWatchlistItem, initialTab?: "myPosition") => {
+    setDetail(it);
+    setDetailInitialTab(initialTab);
+  }, []);
   const handleCloseDetail = useCallback(() => setDetail(null), []);
   const handleRemove = useCallback(
     (id: string) => {
@@ -144,89 +141,6 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
       toast.success(t.toasts.assetRemoved);
     },
     [remove, t.toasts.assetRemoved],
-  );
-  const handleDialogClose = useCallback(() => setEditing(null), []);
-  const handleDialogSave = useCallback(
-    async (patch: Partial<WatchlistItem>) => {
-      if (!editing) return;
-
-      // Maintain fallback document patch on WatchlistItem
-      update(editing.id, patch);
-
-      const targetQty = patch.quantity ?? editing.quantity;
-      const targetAvgPrice = patch.averagePrice ?? editing.averagePrice;
-
-      if (targetQty != null && targetQty >= 0) {
-        const existingAssetTxs = transactions.filter((tx) => tx.ticker === editing.ticker);
-        const currentHolding = recalculateHoldingFromTransactions(existingAssetTxs);
-        const currentQty = currentHolding.quantity;
-        const currentAvgPrice = currentHolding.averagePrice;
-
-        const delta = targetQty - currentQty;
-        const txTimestamp = Date.now();
-        const noteText = t.transactions.manualAdjustment;
-
-        if (existingAssetTxs.length === 0 && targetQty > 0) {
-          const txDate = patch.investingSince ?? editing.investingSince ?? txTimestamp;
-          const firstTx: Transaction = {
-            id: `tx-manual-${editing.ticker}-${txTimestamp}`,
-            ticker: editing.ticker,
-            type: "buy",
-            date: txDate,
-            quantity: targetQty,
-            pricePerShare: targetAvgPrice && targetAvgPrice > 0 ? targetAvgPrice : editing.currentPrice,
-            fees: null,
-            notes: noteText,
-          };
-          await upsertTransaction(firstTx);
-        } else if (delta > 0) {
-          const targetTotalCost = targetQty * (targetAvgPrice && targetAvgPrice > 0 ? targetAvgPrice : currentAvgPrice);
-          const currentTotalCost = currentQty * currentAvgPrice;
-          const requiredCostForDelta = targetTotalCost - currentTotalCost;
-          const pricePerShare = requiredCostForDelta > 0 ? requiredCostForDelta / delta : (targetAvgPrice || currentAvgPrice);
-          const buyPrice = pricePerShare > 0 ? pricePerShare : (targetAvgPrice || currentAvgPrice);
-
-          const buyTx: Transaction = {
-            id: `tx-manual-${editing.ticker}-${txTimestamp}`,
-            ticker: editing.ticker,
-            type: "buy",
-            date: txTimestamp,
-            quantity: delta,
-            pricePerShare: buyPrice,
-            fees: null,
-            notes: noteText,
-          };
-          await upsertTransaction(buyTx);
-        } else if (delta < 0) {
-          const absDelta = Math.abs(delta);
-          const sellPrice = targetAvgPrice && targetAvgPrice > 0 ? targetAvgPrice : currentAvgPrice;
-          const sellTx: Transaction = {
-            id: `tx-manual-${editing.ticker}-${txTimestamp}`,
-            ticker: editing.ticker,
-            type: "sell",
-            date: txTimestamp,
-            quantity: absDelta,
-            pricePerShare: sellPrice,
-            fees: null,
-            notes: noteText,
-          };
-          await upsertTransaction(sellTx);
-        } else if (delta === 0 && targetAvgPrice != null && targetAvgPrice !== currentAvgPrice) {
-          if (existingAssetTxs.length === 1 && existingAssetTxs[0].type === "buy") {
-            const updatedTx: Transaction = {
-              ...existingAssetTxs[0],
-              pricePerShare: targetAvgPrice,
-              notes: noteText,
-            };
-            await upsertTransaction(updatedTx);
-          }
-        }
-      }
-
-      toast.success(t.toasts.assetUpdated);
-      setEditing(null);
-    },
-    [editing, update, transactions, upsertTransaction, t],
   );
 
   if (isPending) {
@@ -295,7 +209,6 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               value={{
                 quotes,
                 meta,
-                onEdit: handleEdit,
                 onRemove: handleRemove,
                 onOpenDetail: handleOpenDetail,
                 concentrationViolators,
@@ -307,7 +220,6 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
                 quotes={quotes}
                 meta={meta}
                 viewMode={viewMode}
-                onEdit={handleEdit}
                 onRemove={handleRemove}
                 onOpenDetail={handleOpenDetail}
                 onClearFilters={handleClearFilters}
@@ -318,14 +230,12 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
         )}
 
         <WatchlistDialogs
-          editing={editing}
           detail={detail}
+          detailInitialTab={detailInitialTab}
           showPaywall={showPaywall}
           showFIWizard={showFIWizard}
           showBrokerNoteUploader={showBrokerNoteUploader}
           showCsvImporter={showCsvImporter}
-          onCloseDialog={handleDialogClose}
-          onSave={handleDialogSave}
           onCloseDetail={handleCloseDetail}
           onPaywallOpenChange={setShowPaywall}
           onFIWizardOpenChange={setShowFIWizard}

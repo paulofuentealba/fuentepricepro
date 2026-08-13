@@ -8,10 +8,11 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar as CalendarIcon } from "lucide-react";
+import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors } from "lucide-react";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { DividendsHistoryPanel } from "./DividendsHistoryPanel";
 import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
@@ -27,6 +28,9 @@ import { FixedIncomePanel } from "./FixedIncomePanel";
 import { TransactionsPanel } from "./TransactionsPanel";
 import { InvestingSinceField } from "../shared/InvestingSinceField";
 import { useTransactions } from "@/lib/transactions";
+import { EditPositionFields } from "./EditPositionFields";
+import { CorporateEventFields } from "@/components/portfolio/CorporateEventFields";
+import { usePendingEvents } from "@/lib/corporateEvents";
 
 function WowInsights({
   item,
@@ -148,6 +152,39 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
   );
 }
 
+/* ── Collapsible section wrapper used by the "My Position" tab for the
+ * Update Holdings / Apply Corporate Event content. ── */
+function MyPositionSection({
+  title,
+  icon,
+  defaultOpen,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  defaultOpen: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="rounded-lg border border-border/60 bg-background/40">
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-2 p-4 text-left"
+        >
+          <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            {icon}
+            {title}
+          </span>
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-4 pb-4">{children}</CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 /* ── Scrollable Tabs wrapper (mobile: horizontal scroll, desktop: grid) ── */
 function ScrollableTabsList({
   children,
@@ -237,6 +274,10 @@ interface AssetDetailSheetProps {
    * opening the sheet for a hypothetical/comparison item that isn't a real
    * portfolio holding (e.g. from the Decision Desk / Comparator). */
   hidePositionTabs?: boolean;
+  /** When set, the sheet opens directly on the "My Position" tab instead of
+   * its usual default (e.g. triggered from the watchlist card's "pending
+   * corporate event" badge or from an inline edit affordance). */
+  initialTab?: "myPosition";
 }
 
 export function AssetDetailSheet({
@@ -245,10 +286,12 @@ export function AssetDetailSheet({
   hidePlayground,
   hideGoalPlanner,
   hidePositionTabs,
+  initialTab,
 }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const { pendingEvent } = usePendingEvents(item);
 
   const query = useQuery({
     ...assetQueryOptions(item?.ticker ?? ""),
@@ -300,7 +343,15 @@ export function AssetDetailSheet({
           )}
           {!loading && asset && item && valuation && (
             <ErrorBoundary label="asset_detail_sheet">
-              <Tabs defaultValue={item.type === "FIXED_INCOME" && !hidePositionTabs ? "myPosition" : "highlights"} className="w-full">
+              <Tabs
+                key={`${item.id}-${initialTab ?? ""}`}
+                defaultValue={
+                  !hidePositionTabs && (initialTab === "myPosition" || item.type === "FIXED_INCOME")
+                    ? "myPosition"
+                    : "highlights"
+                }
+                className="w-full"
+              >
                 <ScrollableTabsList cols={item.type === "FIXED_INCOME" || hidePositionTabs ? 2 : 4}>
                   <TabsTrigger value="highlights" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.highlights}</TabsTrigger>
                   {!hidePositionTabs && (
@@ -343,6 +394,24 @@ export function AssetDetailSheet({
                       {item.type === "FIXED_INCOME" && (
                         <FixedIncomePanel item={item} />
                       )}
+
+                      <div className="space-y-3">
+                        <MyPositionSection
+                          title={t.watchlist.updateTitle}
+                          icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
+                          defaultOpen={true}
+                        >
+                          <EditPositionFields item={item} />
+                        </MyPositionSection>
+
+                        <MyPositionSection
+                          title={t.corporateEvents.menuTitle}
+                          icon={<Scissors className="h-4 w-4 text-muted-foreground" />}
+                          defaultOpen={initialTab === "myPosition" && !!pendingEvent}
+                        >
+                          <CorporateEventFields item={item} pendingEvent={pendingEvent} />
+                        </MyPositionSection>
+                      </div>
                     </>
                   )}
                 </TabsContent>

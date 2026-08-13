@@ -5,9 +5,8 @@ import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 interface WatchlistActionsContextValue {
   quotes: Record<string, LiveQuote | null>;
   meta: Record<string, any>;
-  onEdit?: (item: ValuedWatchlistItem) => void;
   onRemove?: (id: string) => void;
-  onOpenDetail?: (item: ValuedWatchlistItem) => void;
+  onOpenDetail?: (item: ValuedWatchlistItem, initialTab?: "myPosition") => void;
   concentrationViolators?: Set<string>;
 }
 

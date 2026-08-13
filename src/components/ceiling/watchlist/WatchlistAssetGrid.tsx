@@ -11,9 +11,8 @@ interface WatchlistAssetGridProps {
   quotes: Record<string, any>;
   meta: Record<string, any>;
   viewMode: "grid" | "table";
-  onEdit: (it: ValuedWatchlistItem) => void;
   onRemove: (id: string) => void;
-  onOpenDetail: (it: ValuedWatchlistItem) => void;
+  onOpenDetail: (it: ValuedWatchlistItem, initialTab?: "myPosition") => void;
   onClearFilters: () => void;
   concentrationViolators?: Set<string>;
 }
@@ -24,7 +23,6 @@ export function WatchlistAssetGrid({
   quotes: propsQuotes,
   meta: propsMeta,
   viewMode,
-  onEdit: propsOnEdit,
   onRemove: propsOnRemove,
   onOpenDetail: propsOnOpenDetail,
   onClearFilters,
@@ -35,7 +33,6 @@ export function WatchlistAssetGrid({
 
   const quotes = propsQuotes ?? contextActions?.quotes ?? {};
   const meta = propsMeta ?? contextActions?.meta ?? {};
-  const onEdit = propsOnEdit ?? contextActions?.onEdit;
   const onRemove = propsOnRemove ?? contextActions?.onRemove;
   const onOpenDetail = propsOnOpenDetail ?? contextActions?.onOpenDetail;
   const concentrationViolators = propsConcentrationViolators ?? contextActions?.concentrationViolators;
@@ -62,7 +59,6 @@ export function WatchlistAssetGrid({
             item={it}
             quote={quotes[it.ticker]}
             meta={meta[it.ticker]}
-            onEdit={onEdit}
             onRemove={onRemove}
             onOpenDetail={onOpenDetail}
             isConcentrationViolated={concentrationViolators?.has(it.ticker)}

@@ -405,6 +405,7 @@ imediata via config, sem novo deploy.
 - **DEV nunca escreve no Firestore** — leitura permitida, escrita/exclusão não.
 - **Comandos git destrutivos exigem confirmação explícita** — já causou perda de trabalho de i18n não commitado uma vez.
 - **CNPJ de corretora só de fonte oficial** (CVM, ANBIMA, LEI) — Antigravity já errou 2x (BTG, Itaú).
+- **Update Holdings e Apply Corporate Event vivem dentro do `AssetDetailSheet`, aba "My Position"** (não mais modais próprios) — `EditItemDialog.tsx`/`CorporateEventModal.tsx` foram removidos; a lógica migrou intacta para `src/components/ceiling/watchlist/EditPositionFields.tsx` e `src/components/portfolio/CorporateEventFields.tsx`, componentes self-contained (chamam `useWatchlist`/`useTransactions` diretamente, sem depender de callback `onSave` do pai) renderizados como seções recolhíveis (`Collapsible`) logo após `AssetHoldings`. O menu ⋯ do card não tem mais "Editar"/"Evento Corporativo"; o badge de evento pendente abre o sheet direto na aba "My Position" (`onOpenDetail(item, "myPosition")`), com a seção de evento corporativo pré-expandida quando há evento pendente.
 
 ---
 

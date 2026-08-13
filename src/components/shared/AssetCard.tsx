@@ -47,7 +47,6 @@ import {
   buildAssetShareText,
   useAssetCardDerived,
 } from "../ceiling/watchlist/assetCard/useAssetCardDerived";
-import { CorporateEventModal } from "../portfolio/CorporateEventModal";
 import { usePendingEvents } from "@/lib/corporateEvents";
 import { cn } from "@/lib/utils";
 import { X, TrendingUp } from "lucide-react";
@@ -65,9 +64,8 @@ export interface AssetCardProps {
   item?: WatchlistItem | import("@/lib/useValuedPortfolio").ValuedWatchlistItem;
   quote?: LiveQuote;
   meta?: AssetMeta;
-  onEdit?: (item: any) => void;
   onRemove?: (id: string) => void;
-  onOpenDetail?: (item: any) => void;
+  onOpenDetail?: (item: any, initialTab?: "myPosition") => void;
   onClose?: (ticker: string) => void;
   hidePlayground?: boolean;
   hideGoalPlanner?: boolean;
@@ -199,16 +197,17 @@ function AllocationVariant({
 }
 
 function WatchlistVariant(props: AssetCardProps) {
-  const { item, quote, meta, onEdit, onRemove, onOpenDetail, onClose, isConcentrationViolated } = props;
+  const { item, quote, meta, onRemove, onOpenDetail, onClose, isConcentrationViolated } = props;
   const { t, locale } = useI18n();
   const derived = useAssetCardDerived(item as WatchlistItem);
   const cardRef = useRef<HTMLDivElement>(null);
   const { data: selic } = useSelic();
-  const [isCorpEventOpen, setIsCorpEventOpen] = useState(false);
   const { pendingEvent } = usePendingEvents(item as WatchlistItem);
 
-  const handleEdit = useCallback(() => item && onEdit?.(item), [item, onEdit]);
-  const handleCorpEvent = useCallback(() => setIsCorpEventOpen(true), []);
+  const handleCorpEvent = useCallback(
+    () => item && onOpenDetail?.(item, "myPosition"),
+    [item, onOpenDetail],
+  );
   const handleRemove = useCallback(() => {
     if (item) {
       onRemove?.(item.id);
@@ -315,7 +314,6 @@ function WatchlistVariant(props: AssetCardProps) {
           pendingEvent={pendingEvent}
           onShare={handleShare}
           onShareInsta={handleShareInsta}
-          onEdit={handleEdit}
           onCorporateEvent={handleCorpEvent}
           onRemove={handleRemove}
           isSimulation={props.isSimulation}
@@ -350,12 +348,6 @@ function WatchlistVariant(props: AssetCardProps) {
           className="w-full relative z-10"
         />
       </div>
-      <CorporateEventModal
-        item={item}
-        open={isCorpEventOpen}
-        onOpenChange={setIsCorpEventOpen}
-        pendingEvent={pendingEvent}
-      />
     </Card>
   );
 }

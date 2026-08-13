@@ -1,5 +1,5 @@
 import { useCallback, useMemo, type KeyboardEvent, type MouseEvent } from "react";
-import { Pencil, Share2, Trash2, Zap, MoreHorizontal, Instagram, Scissors } from "lucide-react";
+import { Share2, Trash2, Zap, MoreHorizontal, Instagram } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -29,7 +29,10 @@ interface Props {
   pendingEvent?: PendingCorporateEvent | null;
   onShare: () => void;
   onShareInsta: () => void;
-  onEdit: () => void;
+  /** Opens the asset detail sheet's "My Position" tab — used only by the
+   * "pending corporate event" badge below (informative + actionable). The
+   * Update Holdings / Apply Corporate Event flows now live inline in that
+   * tab; there is no longer a dedicated menu entry for them. */
   onCorporateEvent: () => void;
   onRemove: () => void;
   isSimulation?: boolean;
@@ -41,7 +44,6 @@ export function AssetCardHeader({
   pendingEvent,
   onShare,
   onShareInsta,
-  onEdit,
   onCorporateEvent,
   onRemove,
   isSimulation,
@@ -206,21 +208,6 @@ export function AssetCardHeader({
             <DropdownMenuItem onClick={onShareInsta} className="gap-2 cursor-pointer">
               <Instagram className="h-4 w-4" />
               <span>{t.global.shareImage}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onEdit} className="gap-2 cursor-pointer">
-              <Pencil className="h-4 w-4" />
-              <span>{t.watchlist.edit}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                onCorporateEvent();
-              }}
-              className="gap-2 cursor-pointer"
-            >
-              <Scissors className="h-4 w-4" />
-              <span>{t.corporateEvents.menuTitle}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

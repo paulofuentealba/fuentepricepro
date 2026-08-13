@@ -1,22 +1,18 @@
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
-import { EditItemDialog } from "./EditItemDialog";
 import { AssetDetailSheet } from "./AssetDetailSheet";
 import { PaywallDialog } from "../../ui/PaywallDialog";
 import { AddFixedIncomeDialog } from "./AddFixedIncomeDialog";
 import { BrokerNoteUploader } from "./BrokerNoteUploader";
 import { CsvImportUploader } from "./CsvImportUploader";
 import { useI18n } from "@/lib/i18n-provider";
-import type { WatchlistItem } from "@/lib/watchlist";
 
 interface WatchlistDialogsProps {
-  editing: ValuedWatchlistItem | null;
   detail: ValuedWatchlistItem | null;
+  detailInitialTab?: "myPosition";
   showPaywall: boolean;
   showFIWizard: boolean;
   showBrokerNoteUploader: boolean;
   showCsvImporter: boolean;
-  onCloseDialog: () => void;
-  onSave: (patch: Partial<WatchlistItem>) => void;
   onCloseDetail: () => void;
   onPaywallOpenChange: (open: boolean) => void;
   onFIWizardOpenChange: (open: boolean) => void;
@@ -25,14 +21,12 @@ interface WatchlistDialogsProps {
 }
 
 export function WatchlistDialogs({
-  editing,
   detail,
+  detailInitialTab,
   showPaywall,
   showFIWizard,
   showBrokerNoteUploader,
   showCsvImporter,
-  onCloseDialog,
-  onSave,
   onCloseDetail,
   onPaywallOpenChange,
   onFIWizardOpenChange,
@@ -43,8 +37,7 @@ export function WatchlistDialogs({
 
   return (
     <>
-      <EditItemDialog item={editing} onClose={onCloseDialog} onSave={onSave} />
-      <AssetDetailSheet item={detail} onClose={onCloseDetail} />
+      <AssetDetailSheet item={detail} onClose={onCloseDetail} initialTab={detailInitialTab} />
       <PaywallDialog
         open={showPaywall}
         onOpenChange={onPaywallOpenChange}
