@@ -10,6 +10,7 @@ import {
 import {
   parseWatchlistCsv,
   parseTransactionTemplateCsv,
+  decodeCsvBytes,
 } from "@/lib/csv";
 import { makeId, useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useI18n } from "@/lib/i18n-provider";
@@ -37,7 +38,8 @@ export function useWatchlistCsvImport(
     async (file: File) => {
       setImporting(true);
       try {
-        const text = await file.text();
+        const buffer = await file.arrayBuffer();
+        const text = decodeCsvBytes(buffer);
         const ipcaAvg = await queryClient
           .ensureQueryData(ipcaFiveYearAverageQueryOptions())
           .catch(() => null);
@@ -82,17 +84,32 @@ export function useWatchlistCsvImport(
               const margin = val.margin;
 
               const txTimestamp = row.date || Date.now();
-              const txPrice = row.pricePerShare > 0 ? row.pricePerShare : asset.currentPrice;
-              const tx: Transaction = {
-                id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${row.quantity}-${txPrice}`,
-                ticker: uppercaseTicker,
-                type: row.type, // "buy" or "sell" (from column Tipo in PT/EN/ES or fallback "buy")
-                date: txTimestamp,
-                quantity: row.quantity,
-                pricePerShare: txPrice,
-                fees: null,
-                notes: t.transactions.csvImportAdjustment,
-              };
+              let tx: Transaction;
+              if (row.type === "corporate_action") {
+                tx = {
+                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-split-${row.factor}`,
+                  ticker: uppercaseTicker,
+                  type: "corporate_action",
+                  date: txTimestamp,
+                  quantity: 0,
+                  pricePerShare: 0,
+                  factor: row.factor ?? 1,
+                  fees: null,
+                  notes: t.transactions.csvImportAdjustment,
+                };
+              } else {
+                const txPrice = row.pricePerShare > 0 ? row.pricePerShare : asset.currentPrice;
+                tx = {
+                  id: `tx-csv-${uppercaseTicker}-${txTimestamp}-${row.quantity}-${txPrice}`,
+                  ticker: uppercaseTicker,
+                  type: row.type, // "buy" or "sell" (from column Tipo in PT/EN/ES or fallback "buy")
+                  date: txTimestamp,
+                  quantity: row.quantity,
+                  pricePerShare: txPrice,
+                  fees: null,
+                  notes: t.transactions.csvImportAdjustment,
+                };
+              }
 
               await upsertTransaction(tx);
               workingTransactions.push(tx);

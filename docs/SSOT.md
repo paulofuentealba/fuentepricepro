@@ -273,6 +273,42 @@ no menu lateral. Gates: tsc ✅, 237 testes ✅, build ✅, Playwright DOM inspe
   `fuente-investidor-iniciante`, `fuente-advogado-lgpd-gdpr` — mais completo que a
   primeira versão do `check.py` gerada, que só valida 6. Ver pendência na Seção 7).
 
+**12/08** — Prompt 81 (correção de 5 bugs no import de CSV de transações,
+`parseTransactionTemplateCsv` em `src/lib/csv.ts`), disparado por importação
+real do Paulo que falhava silenciosamente. Corrigidos juntos, por serem
+interdependentes: **(1)** matching de cabeçalho por `includes()` de
+palavra-chave após normalização de acentos (`stripAccents` + lowercase + sem
+espaço), reconhecendo `Ativo`/`Data do lançamento`/`Preço unitário`/`Tipo de
+ordem`; **(2)** nova `parseCurrencyValue()` — remove prefixo de moeda
+(`R$`/`US$`/`$`), detecta separador decimal pela posição do último `,`/`.`
+(BR: `.` milhar + `,` decimal; US: `,` milhar + `.` decimal; só vírgula =
+decimal BR), aplicada a preço **e** quantidade (o CSV real também usa vírgula
+decimal em quantidade, ex. `"10,00"` — bug não previsto no prompt original,
+achado durante o teste de integração); **(3)** `parseCsvDate` ganhou case
+para `DD-MM-AA` (ano de 2 dígitos, assume 20XX) e `DD-MM-AAAA`; **(4)** linhas
+de evento corporativo (`Desdobramento`/`Grupamento`/`Split`/`Bonificação`
+na coluna tipo) desviadas para `type: "corporate_action"` com `factor`
+parseado via regex `de\s+(\d+)\s+para\s+(\d+)` sobre a coluna quantidade —
+reaproveita o `corporate_action`/`factor` já existente em
+`recalculateHoldingFromTransactions` (`transactions.ts`); linha que não bate
+o padrão é pulada com `console.warn`, sem travar a importação inteira;
+**(5)** encoding — CSVs de corretora vêm em Windows-1252, e `File.text()`
+decodifica como UTF-8, corrompendo acentos em `U+FFFD`; nova
+`decodeCsvBytes()` faz `TextDecoder("utf-8", {fatal:true})` e cai para
+`windows-1252` no `catch` (bytes acentuados fora do padrão UTF-8 disparam a
+exceção de forma confiável); `useWatchlistCsvImport.ts` trocou
+`file.text()` por `file.arrayBuffer()` + `decodeCsvBytes()`. Caller também
+ganhou o branch `row.type === "corporate_action"` (cria `Transaction` com
+`factor`, `quantity: 0`, `pricePerShare: 0`). 18 testes novos em
+`transactionTemplateCsv.test.ts` (moeda, data, header real, corporate
+action, encoding). Teste de integração com o CSV real completo do Paulo
+(602 linhas de dados): **602/602 parseadas com sucesso** (480 buy, 117
+sell, 5 corporate_action), zero falhas. Gates: `tsc --noEmit` ✅, 307 testes
+✅ (4 skipped), `npm run build` ✅. CSV real com dados pessoais **não**
+commitado — usado só localmente para o teste de integração e apagado do
+working tree ao final. Resultado:
+`docs/Prompts/RESULTADO - 81 — Corrigir Import CSV Bugs Multiplos.md`.
+
 ---
 
 ## 5. Entitlement canônico (F1+F2) — desenho e status
