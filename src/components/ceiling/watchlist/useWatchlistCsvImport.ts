@@ -11,6 +11,7 @@ import {
   parseWatchlistCsv,
   parseTransactionTemplateCsv,
   decodeCsvBytes,
+  detectCsvFormat,
 } from "@/lib/csv";
 import { makeId, useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useI18n } from "@/lib/i18n-provider";
@@ -46,7 +47,7 @@ export function useWatchlistCsvImport(
         const terminalGrowthRate = ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE;
 
         // Detect format: Phase 3 Advanced Transaction Template vs Phase 1 Simple Watchlist Format
-        const isAdvancedTemplate = /data\s*da\s*compra|date|valor\s*unit[áa]rio/i.test(text);
+        const isAdvancedTemplate = detectCsvFormat(text) === "advanced";
 
         if (isAdvancedTemplate) {
           const templateRows = parseTransactionTemplateCsv(text);

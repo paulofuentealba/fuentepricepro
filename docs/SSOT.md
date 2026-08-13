@@ -309,6 +309,41 @@ commitado — usado só localmente para o teste de integração e apagado do
 working tree ao final. Resultado:
 `docs/Prompts/RESULTADO - 81 — Corrigir Import CSV Bugs Multiplos.md`.
 
+**12/08** — Prompt 83: corrigida a **camada de detecção de formato** do
+import de CSV, que ficou desatualizada quando o prompt 81 tornou
+`parseTransactionTemplateCsv` tolerante a variações de header. Causa raiz:
+`useWatchlistCsvImport.ts` decidia "avançado vs. simples" via uma regex
+hardcoded (`/data\s*da\s*compra|date|valor\s*unit[áa]rio/i`) que duplicava
+— de forma divergente — a lógica de reconhecimento de coluna que já vivia
+dentro do parser. Um header real ("Data do lançamento"/"Preço unitário",
+que o parser já reconhecia) nunca era roteado pro parser certo porque a
+regex externa não continha esses termos; caía no parser Fase 1 (simples) e
+falhava com "No valid rows found in CSV.", mesmo o parser correto já
+funcionando. **Gap explícito do prompt 81**: o teste de integração de
+602/602 daquela sessão chamou `parseTransactionTemplateCsv` diretamente,
+nunca passou pelo fluxo real do hook — não testou a camada de detecção que
+roda antes do parser, por isso o bug passou despercebido.
+
+Correção (fonte única de verdade): nova função `detectCsvFormat()` exportada
+em `src/lib/csv.ts`, reaproveitando literalmente os mesmos critérios
+`includes()` de data/preço já usados dentro de `parseTransactionTemplateCsv`
+(nenhuma segunda lista de palavras-chave). `useWatchlistCsvImport.ts` trocou
+a regex hardcoded por `detectCsvFormat(text) === "advanced"`. 4 testes
+unitários novos (`csvDetectFormat.test.ts`) cobrindo o header real do bug, o
+header simples Fase 1, o header avançado do próprio template (regressão) e
+string vazia. Teste de integração novo
+(`useWatchlistCsvImport.integration.test.tsx`) que renderiza o **hook real**
+via `renderHook` (não só o parser) e chama `handleFile()` com um `File`
+sintético reproduzindo o header real do bug — confirma que as 3 linhas são
+roteadas, parseadas e importadas fim-a-fim; segundo teste cobre regressão do
+formato simples. Verificação extra ad-hoc (teste temporário, apagado após
+rodar) contra o CSV real de 602 linhas do Paulo: `detectCsvFormat` →
+`"advanced"`, **602/602 linhas parseadas** — confirma a correção no dado
+real que originou o bug. Gates: `tsc --noEmit` ✅, 326 testes ✅ (4 skipped,
+322 passando, incluindo os 6 novos), `npm run build` ✅. CSV real com dados
+pessoais **não** commitado — apagado do working tree ao final. Resultado:
+`docs/Prompts/RESULTADO - 83 — Corrigir Deteccao de Formato CSV.md`.
+
 ---
 
 ## 5. Entitlement canônico (F1+F2) — desenho e status

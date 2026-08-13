@@ -309,6 +309,32 @@ function parseCorporateActionFactor(raw: string): number | null {
   return to / from;
 }
 
+/**
+ * Detects whether a CSV's header matches the Phase 3 advanced transaction
+ * template (date + price columns recognizable) or falls back to the Phase 1
+ * simple watchlist format. Reuses the exact same tolerant column-matching
+ * criteria as `parseTransactionTemplateCsv` (single source of truth) so this
+ * detector never drifts out of sync with what the parser actually accepts.
+ */
+export function detectCsvFormat(text: string): "advanced" | "simple" {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return "simple";
+  const header = parseCsvLine(lines[0]).map(normalizeHeaderCell);
+  const hasDate = header.some((h) => h.includes("data") || h.includes("date") || h === "fecha");
+  const hasPrice = header.some(
+    (h) =>
+      h.includes("valorunitario") ||
+      h.includes("precounitario") ||
+      h === "preco" ||
+      h === "price" ||
+      h === "unitprice" ||
+      h.includes("precocota") ||
+      h === "valor" ||
+      h === "precio",
+  );
+  return hasDate && hasPrice ? "advanced" : "simple";
+}
+
 export function parseTransactionTemplateCsv(text: string): ParsedTransactionTemplateRow[] {
   try {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
