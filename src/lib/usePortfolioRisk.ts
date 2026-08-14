@@ -65,7 +65,7 @@ export function usePortfolioRisk() {
       if (qty <= 0) continue;
 
       let value = qty * item.currentPrice;
-      const itemCurrency = ["Stock", "REIT"].includes(item.type) ? "USD" : "BRL";
+      const itemCurrency = item.currency;
 
       // Convert to base currency
       if (baseCurrency === "BRL" && itemCurrency === "USD") {
