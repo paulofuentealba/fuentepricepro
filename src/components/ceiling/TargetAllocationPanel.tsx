@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PieChart, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { PieChart, ChevronDown, ChevronUp, AlertTriangle, AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -89,6 +89,11 @@ export function TargetAllocationPanel({
 
       {isOpen && (
         <div className="border-t border-border/60 p-4">
+          <div className="mb-4 flex items-start gap-2 text-xs text-muted-foreground bg-muted/20 p-2.5 rounded-lg border border-border/40">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/80" />
+            <p className="leading-snug">{t.smartAllocation.legalDisclaimer}</p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {ASSET_TYPES.map((type) => {
               const targetVal = targets[type] || 0;

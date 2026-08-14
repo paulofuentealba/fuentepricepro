@@ -63,15 +63,32 @@ export function SmartAllocation() {
   const { settings, updateSettings } = useUserSettings();
   const currency = settings.displayCurrency;
   const setCurrency = (c: Currency) => updateSettings({ displayCurrency: c });
-  const [strategies, setStrategies] = useState<StrategyKey[]>(["yield"]);
+  const [strategies, setStrategies] = useState<StrategyKey[]>([]);
   const [excludedTickers, setExcludedTickers] = useState<string[]>([]);
+  const [customTargets, setCustomTargets] = useState<Record<AssetType, number> | null>(null);
   const [generated, setGenerated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const exchangeRate = fx?.USDBRL ?? 5.5;
-  const targets = settings.smartAllocationTargets;
-  const setTargets = (t: Record<AssetType, number>) =>
-    updateSettings({ smartAllocationTargets: t });
+
+  const suggestedTargets = useMemo(() => {
+    if (!capital || Number(capital) <= 0 || strategies.length === 0) {
+      return {
+        STOCK_BR: 0,
+        STOCK_US: 0,
+        FII: 0,
+        REIT: 0,
+        ETF: 0,
+        FII_INFRA: 0,
+        FIAGRO: 0,
+        FIXED_INCOME: 0,
+      };
+    }
+    return computeSuggestedAllocation(profile, strategies, valuedItems);
+  }, [capital, strategies, profile, valuedItems]);
+
+  const targets = customTargets ?? suggestedTargets;
+
   const maxConcentration = settings.maxConcentrationPerAsset ?? null;
   const setMaxConcentration = (val: number | null) =>
     updateSettings({ maxConcentrationPerAsset: val });
@@ -103,7 +120,7 @@ export function SmartAllocation() {
   const [showPaywall, setShowPaywall] = useState(false);
 
   const handleTargetsChange = (newTargets: Record<AssetType, number>) => {
-    setTargets(newTargets);
+    setCustomTargets(newTargets);
   };
 
   const doGenerate = (effectiveTargets: Record<AssetType, number>) => {
@@ -121,15 +138,6 @@ export function SmartAllocation() {
     }, 600);
   };
 
-  const handleSuggestAllocation = () => {
-    const suggested = computeSuggestedAllocation(profile, activeStrategies, valuedItems);
-    handleTargetsChange(suggested);
-    toast.success(t.smartAllocation.suggestedAllocationBtn || "Alocação Sugerida");
-    if (capital && Number(capital) > 0 && hasCurrency[currency]) {
-      doGenerate(suggested);
-    }
-  };
-
   const hasCurrency = useMemo(
     () => ({
       USD: items.some((i) => i.currency === "USD"),
@@ -144,17 +152,17 @@ export function SmartAllocation() {
       return;
     }
 
+    setCustomTargets(null);
     setStrategies((prev) => {
       if (prev.includes(key)) {
-        const next = prev.filter((s) => s !== key);
-        return next.length === 0 ? prev : next;
+        return prev.filter((s) => s !== key);
       }
       if (prev.length >= 2) return [prev[1], key];
       return [...prev, key];
     });
   };
 
-  const activeStrategies = strategies.length > 0 ? strategies : (["yield"] as StrategyKey[]);
+  const activeStrategies = strategies;
 
   const result = useMemo(() => {
     if (!generated) return null;
@@ -250,12 +258,13 @@ export function SmartAllocation() {
   };
 
   const handleResetStrategies = () => {
-    setStrategies(["yield"]);
+    setStrategies([]);
     setExcludedTickers([]);
+    setCustomTargets(null);
   };
 
   const isDefaultStrategies =
-    strategies.length === 1 && strategies[0] === "yield" && excludedTickers.length === 0;
+    strategies.length === 0 && excludedTickers.length === 0;
 
   const strategyLabels = t.smartAllocation.strategies;
   const strategyHints = t.smartAllocation.strategyHints;
@@ -267,7 +276,7 @@ export function SmartAllocation() {
           <p className="text-xs text-muted-foreground">{t.smartAllocation.subtitle}</p>
 
           {/* 1. Capital Value & Currency Toggle */}
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end p-4 rounded-xl border border-border/60 bg-background/40">
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end p-4 rounded-xl border border-border/60 bg-background/40">
             <div className="space-y-2">
               <Label htmlFor="sa-capital" className="font-semibold text-foreground">
                 {t.smartAllocation.capital}
@@ -293,25 +302,13 @@ export function SmartAllocation() {
                 />
               </div>
             </div>
-
-            <Button
-              onClick={handleGenerate}
-              disabled={!capital || Number(capital) <= 0 || !hasCurrency[currency] || isGenerating}
-              variant={generated ? "secondary" : "default"}
-            >
-              {isGenerating
-                ? t.smartAllocation.calculating
-                : generated
-                  ? t.smartAllocation.recalculate
-                  : t.smartAllocation.generate}
-            </Button>
           </div>
 
           {!hasCurrency[currency] && (
             <p className="text-xs text-muted-foreground">{t.smartAllocation.noAssetsInCurrency}</p>
           )}
 
-          {/* 2. Strategy Selection & Suggested Allocation Button + Legal Disclaimer */}
+          {/* 2. Strategy Selection */}
           <div className="space-y-3 p-4 rounded-xl border border-border/60 bg-background/40">
             <div className="space-y-2">
               <Label htmlFor="sa-strategy" className="font-semibold text-foreground">{t.smartAllocation.strategyLabel}</Label>
@@ -363,22 +360,6 @@ export function SmartAllocation() {
                 </button>
               </div>
             </div>
-
-            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <Button
-                onClick={handleSuggestAllocation}
-                variant="outline"
-                className="border-warning/40 text-warning hover:bg-warning/10 hover:text-warning/80 font-semibold flex items-center justify-center gap-2 shrink-0"
-              >
-                <Sparkles className="h-4 w-4 text-warning" />
-                {t.smartAllocation.suggestedAllocationBtn}
-              </Button>
-
-              <div className="rounded-lg border border-warning/30 bg-warning/5 p-2.5 flex items-start gap-2 text-[11px] text-muted-foreground flex-1">
-                <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                <p className="leading-snug">{t.smartAllocation.legalDisclaimer}</p>
-              </div>
-            </div>
           </div>
 
           {/* 3. Target Allocation Panel (manual sliders prefilled with suggestion) */}
@@ -407,6 +388,23 @@ export function SmartAllocation() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Action Button: Generate Allocation */}
+          <div className="flex justify-end pt-1">
+            <Button
+              onClick={handleGenerate}
+              disabled={!capital || Number(capital) <= 0 || !hasCurrency[currency] || strategies.length === 0 || isGenerating}
+              variant={generated ? "secondary" : "default"}
+              size="lg"
+              className="w-full sm:w-auto font-semibold shadow-md"
+            >
+              {isGenerating
+                ? t.smartAllocation.calculating
+                : generated
+                  ? t.smartAllocation.recalculate
+                  : t.smartAllocation.generate}
+            </Button>
           </div>
 
           {result && (
