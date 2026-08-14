@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { CalendarClock } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { CalendarClock, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { netAfterTax } from "@/lib/calculations";
@@ -39,7 +39,7 @@ export function computeUpcomingPayments(
   meta: Record<string, AssetMeta>,
   dividendEventsMap: DividendEventsMap = {},
   nowMs: number = Date.now(),
-): { displayList: UpcomingPayment[]; totalCount: number } {
+): { sortedList: UpcomingPayment[]; totalCount: number } {
   const list: UpcomingPayment[] = [];
 
   for (const it of items) {
@@ -111,7 +111,7 @@ export function computeUpcomingPayments(
 
   list.sort((a, b) => a.date.getTime() - b.date.getTime());
   return {
-    displayList: list.slice(0, 4),
+    sortedList: list,
     totalCount: list.length,
   };
 }
@@ -119,29 +119,69 @@ export function computeUpcomingPayments(
 export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props) {
   const { t, locale } = useI18n();
 
-  const { displayList, totalCount } = useMemo(
+  const { sortedList, totalCount } = useMemo(
     () => computeUpcomingPayments(items, meta, dividendEventsMap),
     [items, meta, dividendEventsMap],
   );
 
-  if (displayList.length === 0) return null;
+  if (sortedList.length === 0) return null;
+
+  const ITEMS_PER_PAGE = 4;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const [page, setPage] = useState(0);
+
+  // Reset page when data changes
+  useEffect(() => {
+    setPage(0);
+  }, [items, meta, dividendEventsMap]);
+
+  const displayList = sortedList.slice(page * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE + ITEMS_PER_PAGE);
 
   const label =
-    totalCount > 4 && t.watchlist.upcomingPaymentsCount
+    totalCount > ITEMS_PER_PAGE && t.watchlist.upcomingPaymentsCount
       ? t.watchlist.upcomingPaymentsCount
-          .replace("{{x}}", displayList.length.toString())
+          .replace("{{x}}", `${page * ITEMS_PER_PAGE + 1}–${Math.min((page + 1) * ITEMS_PER_PAGE, totalCount)}`)
           .replace("{{total}}", totalCount.toString())
       : t.watchlist.upcomingPayments;
 
+  const showPagination = totalPages > 1;
+
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-success/30 bg-success/5 p-4 text-sm w-full">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-success/15 text-success ring-1 ring-success/30">
-          <CalendarClock className="h-3 w-3" />
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-success/15 text-success ring-1 ring-success/30">
+            <CalendarClock className="h-3 w-3" />
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {label}
+          </span>
         </div>
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </span>
+
+        {showPagination && (
+          <div className="flex items-center gap-1" role="navigation" aria-label={t.watchlist.paginationAriaLabel || "Navegação de pagamentos"}>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-background/50 text-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/50"
+              aria-label={t.watchlist.previousPayments || "Pagamentos anteriores"}
+              aria-disabled={page === 0}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page === totalPages - 1}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-background/50 text-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/50"
+              aria-label={t.watchlist.nextPayments || "Próximos pagamentos"}
+              aria-disabled={page === totalPages - 1}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -153,7 +193,7 @@ export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props
 
           return (
             <div
-              key={`${upcoming.item.ticker}-${idx}`}
+              key={`${upcoming.item.ticker}-${page}-${idx}`}
               className="flex items-center justify-between bg-background/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-success/10 shadow-sm"
             >
               <div className="flex items-center gap-2">
