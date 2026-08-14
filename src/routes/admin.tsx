@@ -1,5 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/integrations/firebase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FeatureGatesTab } from "@/components/admin/FeatureGatesTab";
+import { IngestionLogTab } from "@/components/admin/IngestionLogTab";
+import { UsersTab } from "@/components/admin/UsersTab";
+import { CloudCostsCard } from "@/components/admin/CloudCostsCard";
+import { useI18n } from "@/lib/i18n-provider";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
@@ -31,26 +37,35 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
+  const { t } = useI18n();
+
   return (
-    <div className="min-h-screen bg-background text-foreground p-4">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      <div className="space-y-4 max-w-4xl">
-        <div className="p-6 rounded-xl border border-border/50 bg-card">
-          <h2 className="text-xl font-semibold mb-2">Feature Gates</h2>
-          <p className="text-muted-foreground">Manage feature flags for the application.</p>
-        </div>
-        <div className="p-6 rounded-xl border border-border/50 bg-card">
-          <h2 className="text-xl font-semibold mb-2">Ingestion Log</h2>
-          <p className="text-muted-foreground">View data ingestion history and status.</p>
-        </div>
-        <div className="p-6 rounded-xl border border-border/50 bg-card">
-          <h2 className="text-xl font-semibold mb-2">Users</h2>
-          <p className="text-muted-foreground">Manage user accounts and permissions.</p>
-        </div>
-        <div className="p-6 rounded-xl border border-border/50 bg-card">
-          <h2 className="text-xl font-semibold mb-2">Cloud Costs (Minimal)</h2>
-          <p className="text-muted-foreground">Basic cloud cost overview (placeholder).</p>
-        </div>
+    <div className="min-h-screen bg-background p-4 text-foreground md:p-8">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-1 text-3xl font-bold">{t.admin.title}</h1>
+        <p className="mb-8 text-muted-foreground">{t.admin.subtitle}</p>
+
+        <Tabs defaultValue="featureGates">
+          <TabsList className="mb-6 flex h-auto w-full flex-wrap justify-start gap-1">
+            <TabsTrigger value="featureGates">{t.admin.tabs.featureGates}</TabsTrigger>
+            <TabsTrigger value="ingestionLog">{t.admin.tabs.ingestionLog}</TabsTrigger>
+            <TabsTrigger value="users">{t.admin.tabs.users}</TabsTrigger>
+            <TabsTrigger value="cloudCosts">{t.admin.tabs.cloudCosts}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="featureGates">
+            <FeatureGatesTab />
+          </TabsContent>
+          <TabsContent value="ingestionLog">
+            <IngestionLogTab />
+          </TabsContent>
+          <TabsContent value="users">
+            <UsersTab />
+          </TabsContent>
+          <TabsContent value="cloudCosts">
+            <CloudCostsCard />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

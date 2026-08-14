@@ -31,6 +31,15 @@ export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: numbe
 
 export type FeatureGateKey = keyof typeof DEFAULT_FEATURE_GATES | string;
 
+/** Known keys of `FeatureGatesConfig`, used to validate admin writes to `config/featureGates`. */
+export const KNOWN_FEATURE_GATE_KEYS = Object.keys(DEFAULT_FEATURE_GATES) as Array<
+  keyof typeof DEFAULT_FEATURE_GATES
+>;
+
+export const BOOLEAN_FEATURE_GATE_KEYS = KNOWN_FEATURE_GATE_KEYS.filter(
+  (key) => key !== "freeAssetLimit",
+);
+
 /**
  * Pure function to resolve a feature gate value given user tier and global gate configuration.
  * Extracted from I/O layer for isolated unit testing in Vitest.
