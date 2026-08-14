@@ -101,6 +101,8 @@
   --color-comparison-foreground: var(--comparison-foreground);
   --color-realized: var(--realized);
   --color-realized-foreground: var(--realized-foreground);
+  --color-projected: var(--projected);
+  --color-chart-grid: var(--chart-grid);
   --font-sans: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-serif: "Fraunces", Georgia, serif;
 }
@@ -149,6 +151,8 @@
   --comparison-foreground: oklch(0.98 0 0);
   --realized: oklch(0.523 0.082 156.3);
   --realized-foreground: oklch(0.98 0 0);
+  --projected: oklch(0.68 0.11 156.3);
+  --chart-grid: oklch(0.88 0.015 87);
 
   --asset-fii: 152 76% 36%;
   --asset-reit: 217 91% 60%;
@@ -201,6 +205,8 @@
   --comparison-foreground: oklch(0.15 0.02 264);
   --realized: oklch(0.68 0.09 156.3);
   --realized-foreground: oklch(0.98 0 0);
+  --projected: oklch(0.80 0.08 156.3);
+  --chart-grid: oklch(0.3 0.02 84);
 
   --asset-fii: 152 76% 36%;
   --asset-reit: 217 91% 60%;
