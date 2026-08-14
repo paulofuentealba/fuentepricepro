@@ -768,6 +768,7 @@ export const ptBR = {
       location: "Cidade/Estado (opcional)",
       saveBtn: "Salvar Alterações",
       saveSuccess: "Perfil atualizado com sucesso!",
+      nameGoogleLocked: "Nome gerenciado pelo Google. Altere nas configurações da sua conta Google.",
     },
     subscription: {
       title: "Assinatura",

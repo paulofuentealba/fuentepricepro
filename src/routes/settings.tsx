@@ -7,6 +7,7 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   reauthenticateWithPopup,
+  updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, writeBatch, doc, getDoc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -53,9 +54,13 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "privacy">("profile");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  // Determinar se a conta é Google (fonte da verdade para o nome)
+  const isGoogle = user?.providerData?.some((p: any) => p.providerId === "google.com") ?? false;
+
   // Profile Form State
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
+  const [name, setName] = useState("");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
@@ -69,6 +74,14 @@ function SettingsPage() {
             const data = userDoc.data();
             setPhone(data.phone || "");
             setLocation(data.location || "");
+            // Carregar nome do Firestore como fallback (pode ter sido salvo antes)
+            if (!isGoogle && data.name) {
+              setName(data.name);
+            }
+          }
+          // Inicializar nome do displayName do Firebase Auth se não veio do Firestore
+          if (!isGoogle && !name && user.displayName) {
+            setName(user.displayName);
           }
         } catch (error) {
           console.error("Error loading profile", error);
@@ -78,22 +91,44 @@ function SettingsPage() {
       };
       loadProfile();
     }
-  }, [user, activeTab, isProfileLoaded]);
+  }, [user, activeTab, isProfileLoaded, isGoogle, name]);
+
+  // Sincronizar nome quando user.displayName muda (ex: após reload)
+  useEffect(() => {
+    if (!isGoogle && user?.displayName && !name) {
+      setName(user.displayName);
+    }
+  }, [user?.displayName, isGoogle, name]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setIsSavingProfile(true);
     try {
+      // Salvar no Firestore (phone, location, e nome se não for Google)
+      const firestoreData: Record<string, any> = {
+        phone,
+        location,
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (!isGoogle) {
+        firestoreData.name = name;
+      }
+
       await setDoc(
         doc(db, "users", user.uid),
-        {
-          phone,
-          location,
-          updatedAt: new Date().toISOString(),
-        },
+        firestoreData,
         { merge: true },
       );
+
+      // Se não for conta Google, atualizar também no Firebase Auth
+      if (!isGoogle && name.trim() !== "") {
+        await updateProfile(auth.currentUser!, { displayName: name.trim() });
+        // Recarregar o usuário para refletir a mudança no contexto de autenticação
+        await auth.currentUser!.reload();
+      }
+
       toast.success(S.profile.saveSuccess);
     } catch (error) {
       console.error("Error saving profile", error);
@@ -205,7 +240,18 @@ function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label>{S.profile.name}</Label>
-                    <Input value={user.displayName || ""} disabled className="bg-muted/50" />
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={isGoogle}
+                      className={isGoogle ? "bg-muted/50" : ""}
+                      aria-disabled={isGoogle}
+                    />
+                    {isGoogle && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {S.profile.nameGoogleLocked || "Nome gerenciado pelo Google. Altere nas configurações da sua conta Google."}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">

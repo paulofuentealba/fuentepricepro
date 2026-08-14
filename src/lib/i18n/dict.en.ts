@@ -763,6 +763,7 @@ export const en = {
       location: "City/State (optional)",
       saveBtn: "Save Changes",
       saveSuccess: "Profile updated successfully!",
+      nameGoogleLocked: "Name is managed by Google. Change it in your Google Account settings.",
     },
     subscription: {
       title: "Subscription",

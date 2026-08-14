@@ -96,7 +96,7 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
     return (
       <div className="w-full flex flex-col gap-2 rounded-xl bg-card border border-border p-6">
         <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-          Horizonte FI
+          {t.tabs.financialIndependence}
         </span>
         <span className="text-2xl font-semibold font-serif text-foreground">
           {t.home.emptyTitle}
@@ -135,7 +135,7 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
           </thead>
           <tbody>
             {sorted.map((item) => (
-              <PortfolioRow key={item.id ?? item.ticker} item={item} changePct={quotes[item.ticker]?.changePct ?? null} locale={locale} />
+              <PortfolioRow key={item.id ?? item.ticker} item={item} changePct={quotes[item.ticker]?.changePct ?? null} locale={locale} t={t} />
             ))}
           </tbody>
         </table>
@@ -194,10 +194,12 @@ function PortfolioRow({
   item,
   changePct,
   locale,
+  t,
 }: {
   item: ValuedWatchlistItem;
   changePct: number | null;
   locale: Parameters<typeof formatCurrency>[2];
+  t: ReturnType<typeof useI18n>["t"];
 }) {
   const { pnlAbsolute, pnlPercent } = getAssetPnL(item);
   const dy = item.currentPrice > 0 ? (item.annualDividend / item.currentPrice) * 100 : 0;
@@ -219,7 +221,7 @@ function PortfolioRow({
             color: getColorForAsset(item.type),
           }}
         >
-          {item.type}
+          {t.types[item.type as keyof typeof t.types] ?? item.type}
         </span>
       </td>
       <td className="px-4 py-3 text-right tabular-nums">{item.quantity}</td>

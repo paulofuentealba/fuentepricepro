@@ -14,7 +14,8 @@ export function classifyYahoo(q: {
   const name = `${q.longname || ""} ${q.shortname || ""}`.toUpperCase();
   if (t === "ETF") return "ETF";
   if (t === "MUTUALFUND") return "ETF";
-  if (/REIT|REALTY|REAL ESTATE/.test(name)) return "REIT";
+  // Brazilian tickers end with .SA — check FIRST to avoid misclassifying Brazilian REITs (FIIs) as US REITs
   if (q.symbol.endsWith(".SA")) return classifyBr(q.symbol.replace(".SA", ""));
+  if (/REIT|REALTY|REAL ESTATE/.test(name)) return "REIT";
   return "STOCK_US";
 }

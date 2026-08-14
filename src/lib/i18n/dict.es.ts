@@ -773,6 +773,7 @@ export const es = {
       location: "Ciudad/Estado (opcional)",
       saveBtn: "Guardar Cambios",
       saveSuccess: "¡Perfil actualizado con éxito!",
+      nameGoogleLocked: "El nombre lo gestiona Google. Cámbialo en la configuración de tu cuenta de Google.",
     },
     subscription: {
       title: "Suscripción",
