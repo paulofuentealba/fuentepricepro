@@ -25,6 +25,14 @@ vi.mock("@/components/horizonte/NewContributionDialog", () => ({
   NewContributionDialog: () => null,
 }));
 
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, to, ...props }: any) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 function renderHero() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -67,6 +75,11 @@ describe("HorizonteHero", () => {
 
     // O milestone de R$100 mil deve continuar marcado como batido.
     expect(screen.getByText(/Primeiros R\$ 100 mil/)).toBeInTheDocument();
+
+    // Deve renderizar link para configurar meta apontando para /app/myportfolio
+    const goalLink = screen.getByRole("link", { name: /configure sua meta/i });
+    expect(goalLink).toBeInTheDocument();
+    expect(goalLink).toHaveAttribute("href", "/app/myportfolio");
   });
 
   it("exibe o coveragePercent normalmente quando a meta está configurada", () => {

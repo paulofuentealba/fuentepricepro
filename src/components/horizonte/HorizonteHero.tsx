@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { PlusCircle } from "lucide-react";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
@@ -348,13 +349,21 @@ export function HorizonteHero() {
                 ? capitalLabel
                 : `${coveragePercent.toFixed(1)}%`}
           </span>
-          <span className="text-sm text-muted-foreground">
-            {needsGoalSetup
-              ? t.home.accumulatedConfigure
-              : `${capitalLabel} ${t.home.accumulated}${
-                  !isReached && monthsLabel ? ` · ${t.home.remaining.replace("{{months}}", monthsLabel)}` : ""
-                }`}
-          </span>
+          {needsGoalSetup ? (
+            <Link
+              to="/app/myportfolio"
+              className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors cursor-pointer"
+              aria-label={t.home.ariaConfigureGoal.replace("{{capital}}", capitalLabel)}
+            >
+              {t.home.accumulatedConfigure}
+            </Link>
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              {`${capitalLabel} ${t.home.accumulated}${
+                !isReached && monthsLabel ? ` · ${t.home.remaining.replace("{{months}}", monthsLabel)}` : ""
+              }`}
+            </span>
+          )}
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end shrink-0">
           <div className="flex flex-col items-start gap-1 sm:items-end">
