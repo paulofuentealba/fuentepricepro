@@ -38,6 +38,18 @@ export const B3_STOCK_UNIT_PREFIXES = new Set([
   "BMGB", // Banco BMG (BMGB11 - IPO unit in 2019, converted to BMGB4)
 ]);
 
+/**
+ * B3 ticker suffix table (fallback heuristic, used only when `apiType` is absent):
+ *   11        -> FII (unless prefix is a known Stock Unit, see B3_STOCK_UNIT_PREFIXES)
+ *   34 / 35   -> NOT handled by this fallback today (relies on `apiType === "bdr"` from the
+ *                API instead) — verified as a known gap, not fixed in this round. A BDR of a
+ *                stock (e.g. AAPL34) without `apiType` falls through to STOCK_BR below.
+ *   39        -> ETF (BDR of a foreign ETF, e.g. BIVB39 = BDR of IVV). Checked BEFORE the
+ *                generic fallback so it never lands on STOCK_BR by default.
+ * Any ticker ending in "11" that is genuinely an ETF or fund (e.g. IVVB11, BOVA11) is also a
+ * known gap of this fallback when `apiType` is missing — it will read as FII. This is an
+ * accepted tradeoff of the heuristic (see doc comment above) and unchanged in this round.
+ */
 export function classifyBr(symbol: string, apiType?: string): AssetType {
   if (apiType) {
     const t = apiType.toLowerCase();
@@ -48,6 +60,11 @@ export function classifyBr(symbol: string, apiType?: string): AssetType {
   }
 
   const s = symbol.toUpperCase().replace(/\.SA$/, "");
+
+  if (s.endsWith("39")) {
+    return "ETF";
+  }
+
   if (s.endsWith("11")) {
     const prefix = s.slice(0, -2);
     if (!B3_STOCK_UNIT_PREFIXES.has(prefix)) {

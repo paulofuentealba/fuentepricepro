@@ -44,6 +44,32 @@ describe("classifyBr", () => {
     expect(classifyBr("BOVA11", "etf")).toBe("ETF");
     expect(classifyBr("AAPL34", "bdr")).toBe("STOCK_US");
   });
+
+  it("classifies BDR-of-ETF tickers (suffix 39) as ETF in fallback mode, without apiType — regression for Auditoria UX 1.3 / BIVB39", () => {
+    // Before the fix, classifyBr("BIVB39") with no apiType fell through to the generic
+    // STOCK_BR default (same bug family as the .SA-before-REIT ordering bug from Prompt 86).
+    expect(classifyBr("BIVB39")).toBe("ETF");
+    expect(classifyBr("BIVB39.SA")).toBe("ETF");
+  });
+
+  it("checks the '39' suffix BEFORE the '11' fallback, so the two never collide (order regression)", () => {
+    // No real B3 ticker is both, but this locks in that the suffix checks are independent
+    // ifs, not an if/else chain that could accidentally shadow one another later.
+    expect(classifyBr("BIVB39")).toBe("ETF");
+    expect(classifyBr("HGLG11")).toBe("FII");
+  });
+
+  it("documents known fallback gaps NOT fixed in this round (Prompt 93 scope: suffix 39 only)", () => {
+    // BDR-of-stock (34/35) without apiType still falls through to STOCK_BR — relies on
+    // apiType === "bdr" from the API, same as before this round. Verified, not fixed here.
+    expect(classifyBr("AAPL34")).toBe("STOCK_BR");
+    expect(classifyBr("AAPL35")).toBe("STOCK_BR");
+
+    // A genuine ETF ending in "11" without apiType still reads as FII — pre-existing,
+    // documented tradeoff of the "ends with 11" fallback heuristic, unchanged here.
+    expect(classifyBr("IVVB11")).toBe("FII");
+    expect(classifyBr("BOVA11")).toBe("FII");
+  });
 });
 
 describe("getShareClassBadge", () => {
