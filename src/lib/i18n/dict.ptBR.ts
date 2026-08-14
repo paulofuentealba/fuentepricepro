@@ -77,7 +77,7 @@ export const ptBR = {
     cagr: "Taxa de Crescimento Anual Composta dos dividendos em 5 anos.",
     payout: "Porcentagem do lucro paga como dividendos. Acima de 100% é arriscado.",
     yieldOnCost: "Seu yield efetivo com base no seu preço médio de compra.",
-    consensus: "Média dos modelos de valuation de Graham, Bazin e Gordon.",
+    consensus: "Mediana dos modelos de valuation de Graham, Bazin e Gordon.",
     ceilingPrice: "Preço máximo que você deve pagar para atingir seu yield alvo.",
     estimatedPaymentDate: "Data de pagamento estimada com base nas regras de distribuição do fundo.",
     peRatio: "Preço sobre Lucro. Indica em quantos anos o valor da ação se paga via lucros.",
@@ -827,6 +827,7 @@ export const ptBR = {
     breakdown: "Consenso Detalhado",
     pyramidTitle: "Modelo de Valuation Fuente",
     consensusBadge: "Consenso",
+    consensusUnavailableTooltip: "Bazin, Graham e Gordon não se aplicam a este tipo de ativo — não há preço-teto a calcular.",
   },
   paywall: {
     title: "Desbloqueie os Recursos Pro",
@@ -853,7 +854,7 @@ export const ptBR = {
     consensus: {
       title: "O Consenso Fuente",
       description:
-        "Uma síntese inteligente dos modelos de valuation mais confiáveis. Ao extrair a média de Bazin, Graham e Gordon, o consenso mitiga as fraquezas individuais de cada fórmula, entregando um preço teto robusto para uma carteira diversificada.",
+        "Uma síntese inteligente dos modelos de valuation mais confiáveis. Ao extrair a mediana de Bazin, Graham e Gordon, o consenso mitiga as fraquezas individuais de cada fórmula, entregando um preço teto robusto para uma carteira diversificada.",
     },
     bazin: {
       title: "O Modelo de Bazin",

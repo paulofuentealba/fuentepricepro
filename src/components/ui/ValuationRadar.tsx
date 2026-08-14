@@ -31,9 +31,29 @@ export function ValuationRadar({
   if (consensus === null) {
     return (
       <div className={cn("flex flex-col justify-center opacity-50", className)}>
-        <span className="text-xs uppercase font-semibold text-muted-foreground">
-          {t.valuation.consensus}
-        </span>
+        <HoverCard openDelay={200}>
+          <HoverCardTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-1 text-xs uppercase font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              aria-label={t.valuation.consensusUnavailableTooltip}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {t.valuation.consensus}
+              <Info className="h-3 w-3" />
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent
+            side="top"
+            align="start"
+            className="z-[999] w-56 p-3 bg-popover border-border shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-xs text-muted-foreground">
+              {t.valuation.consensusUnavailableTooltip}
+            </span>
+          </HoverCardContent>
+        </HoverCard>
         <span className="text-lg font-mono">--</span>
       </div>
     );

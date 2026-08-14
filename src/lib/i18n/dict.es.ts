@@ -77,7 +77,7 @@ export const es = {
     cagr: "Tasa de Crecimiento Anual Compuesto de dividendos a 5 años.",
     payout: "Porcentaje de ganancias pagado como dividendos. Mayor a 100% es riesgoso.",
     yieldOnCost: "Su yield efectivo basado en su precio promedio de compra.",
-    consensus: "Promedio de los modelos de valoración de Graham, Bazin y Gordon.",
+    consensus: "Mediana de los modelos de valoración de Graham, Bazin y Gordon.",
     ceilingPrice: "Precio máximo que debe pagar para alcanzar su yield objetivo.",
     estimatedPaymentDate: "Fecha de pago estimada según las reglas de distribución del fondo.",
     peRatio: "Precio sobre Ganancias. Indica en cuántos años la acción se paga vía ganancias.",
@@ -832,6 +832,7 @@ export const es = {
     breakdown: "Consenso Detallado",
     pyramidTitle: "Modelo de Valoración Fuente",
     consensusBadge: "Consenso",
+    consensusUnavailableTooltip: "Bazin, Graham y Gordon no se aplican a este tipo de activo — no hay precio techo que calcular.",
   },
   paywall: {
     title: "Desbloquear Características Pro",
@@ -858,7 +859,7 @@ export const es = {
     consensus: {
       title: "Consenso Fuente",
       description:
-        "Una síntesis inteligente de los modelos de valoración más confiables. Al promediar Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales, entregando un precio techo robusto para una cartera diversificada.",
+        "Una síntesis inteligente de los modelos de valoración más confiables. Al tomar la mediana de Bazin, Graham y Gordon, el consenso mitiga las debilidades individuales, entregando un precio techo robusto para una cartera diversificada.",
     },
     bazin: {
       title: "Modelo de Bazin",

@@ -75,7 +75,7 @@ export const en = {
     cagr: "Compound Annual Growth Rate of dividends over 5 years.",
     payout: "Percentage of earnings paid as dividends. Above 100% is risky.",
     yieldOnCost: "Your effective yield based on your average purchase price.",
-    consensus: "Average of Graham, Bazin and Gordon valuation models.",
+    consensus: "Median of Graham, Bazin and Gordon valuation models.",
     ceilingPrice: "Maximum price you should pay to achieve your target yield.",
     estimatedPaymentDate: "Estimated payment date based on the fund's distribution rules.",
     peRatio: "Price to Earnings ratio. Indicates how many years of profits equal the share price.",
@@ -820,6 +820,7 @@ export const en = {
     breakdown: "Consensus Breakdown",
     pyramidTitle: "Fuente Valuation Model",
     consensusBadge: "Consensus",
+    consensusUnavailableTooltip: "Bazin, Graham and Gordon don't apply to this asset type — there's no ceiling price to calculate.",
   },
   paywall: {
     title: "Unlock Pro Features",
@@ -846,7 +847,7 @@ export const en = {
     consensus: {
       title: "Fuente Consensus",
       description:
-        "An intelligent synthesis of the most reliable valuation models. By averaging Bazin, Graham, and Gordon, the consensus mitigates individual formula weaknesses, delivering a robust ceiling price for a diversified portfolio.",
+        "An intelligent synthesis of the most reliable valuation models. By taking the median of Bazin, Graham, and Gordon, the consensus mitigates individual formula weaknesses, delivering a robust ceiling price for a diversified portfolio.",
     },
     bazin: {
       title: "Bazin Model",
