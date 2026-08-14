@@ -22,7 +22,7 @@ import {
 } from "@firebase/rules-unit-testing";
 import fs from "node:fs";
 import path from "node:path";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 
 const PROJECT_ID = "fuente-price-pro-test";
 
@@ -146,6 +146,101 @@ describe.runIf(Boolean(process.env.FIRESTORE_EMULATOR_HOST))(
           });
         })
       );
+    });
+
+    it("5. DENIES non-admin authenticated client read access to config/featureGates", async () => {
+      const aliceUid = "alice123";
+
+      // Seed the featureGates document
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await setDoc(doc(db, "config", "featureGates"), {
+          someFeature: true,
+        });
+      });
+
+      const aliceDb = testEnv.authenticatedContext(aliceUid).firestore();
+      const featureGatesRef = doc(aliceDb, "config", "featureGates");
+
+      // Non-admin user trying to read -> DENIED
+      await assertFails(getDoc(featureGatesRef));
+    });
+
+    it("6. ALLOWS admin authenticated client (with isAdmin custom claim) read access to config/featureGates", async () => {
+      const adminUid = "admin123";
+
+      // Seed the featureGates document
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await setDoc(doc(db, "config", "featureGates"), {
+          someFeature: true,
+        });
+      });
+
+      // Create authenticated context with isAdmin custom claim
+      const adminDb = testEnv.authenticatedContext(adminUid, { isAdmin: true }).firestore();
+      const featureGatesRef = doc(adminDb, "config", "featureGates");
+
+      // Admin user with isAdmin claim -> ALLOWED
+      await assertSucceeds(getDoc(featureGatesRef));
+    });
+
+    it("7. DENIES non-admin authenticated client read access to ingestionLog", async () => {
+      const aliceUid = "alice123";
+
+      // Seed an ingestionLog document
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await setDoc(doc(db, "ingestionLog", "log1"), {
+          timestamp: Date.now(),
+          source: "test",
+        });
+      });
+
+      const aliceDb = testEnv.authenticatedContext(aliceUid).firestore();
+      const ingestionLogRef = doc(aliceDb, "ingestionLog", "log1");
+
+      // Non-admin user trying to read -> DENIED
+      await assertFails(getDoc(ingestionLogRef));
+    });
+
+    it("8. ALLOWS admin authenticated client (with isAdmin custom claim) read access to ingestionLog", async () => {
+      const adminUid = "admin123";
+
+      // Seed an ingestionLog document
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await setDoc(doc(db, "ingestionLog", "log1"), {
+          timestamp: Date.now(),
+          source: "test",
+        });
+      });
+
+      // Create authenticated context with isAdmin custom claim
+      const adminDb = testEnv.authenticatedContext(adminUid, { isAdmin: true }).firestore();
+      const ingestionLogRef = doc(adminDb, "ingestionLog", "log1");
+
+      // Admin user with isAdmin claim -> ALLOWED
+      await assertSucceeds(getDoc(ingestionLogRef));
+    });
+
+    it("9. DENIES admin authenticated client WITHOUT isAdmin claim read access to config/featureGates", async () => {
+      const adminUid = "admin-no-claim";
+
+      // Seed the featureGates document
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await setDoc(doc(db, "config", "featureGates"), {
+          someFeature: true,
+        });
+      });
+
+      // Create authenticated context WITHOUT isAdmin custom claim (explicitly false or missing)
+      const adminDb = testEnv.authenticatedContext(adminUid, { isAdmin: false }).firestore();
+      const featureGatesRef = doc(adminDb, "config", "featureGates");
+
+      // User with isAdmin: false -> DENIED
+      await assertFails(getDoc(featureGatesRef));
     });
   }
 );
