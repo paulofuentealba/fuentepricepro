@@ -7,6 +7,8 @@ import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
+import { cn } from "@/lib/utils";
 
 type SortKey = "asset" | "class" | "position" | "avgPrice" | "change" | "pnl" | "dy";
 type SortDirection = "asc" | "desc";
@@ -124,7 +126,7 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-border">
-              <SortableHeader label={t.home.columnAsset} sortKey="asset" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
+              <SortableHeader label={t.home.columnAsset} sortKey="asset" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" sticky />
               <SortableHeader label={t.home.columnClass} sortKey="class" active={sortKey} direction={sortDirection} onSort={toggleSort} align="left" />
               <SortableHeader label={t.home.columnPosition} sortKey="position" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
               <SortableHeader label={t.home.columnAvgPrice} sortKey="avgPrice" active={sortKey} direction={sortDirection} onSort={toggleSort} align="right" />
@@ -151,6 +153,7 @@ function SortableHeader({
   direction,
   onSort,
   align,
+  sticky,
 }: {
   label: string;
   sortKey: SortKey;
@@ -158,6 +161,7 @@ function SortableHeader({
   direction: SortDirection;
   onSort: (key: SortKey) => void;
   align: "left" | "right";
+  sticky?: boolean;
 }) {
   const isActive = active === sortKey;
   const ariaSort: "ascending" | "descending" | "none" = isActive
@@ -179,7 +183,10 @@ function SortableHeader({
       role="button"
       tabIndex={0}
       aria-sort={ariaSort}
-      className="px-4 py-3 font-medium uppercase tracking-wide text-xs cursor-pointer select-none whitespace-nowrap text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className={cn(
+        "px-4 py-3 font-medium uppercase tracking-wide text-xs cursor-pointer select-none whitespace-nowrap text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        sticky && STICKY_FIRST_COLUMN_CLASS,
+      )}
       style={{ textAlign: align }}
       onClick={() => onSort(sortKey)}
       onKeyDown={handleKeyDown}
@@ -207,7 +214,7 @@ function PortfolioRow({
 
   return (
     <tr className="border-b border-border">
-      <td className="px-4 py-3 whitespace-nowrap">
+      <td className={cn("px-4 py-3 whitespace-nowrap", STICKY_FIRST_COLUMN_CLASS)}>
         <div className="flex flex-col">
           <span className="font-medium text-foreground">{item.ticker}</span>
           <span className="text-xs text-muted-foreground">{item.name}</span>
