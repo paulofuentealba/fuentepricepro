@@ -259,7 +259,7 @@ export function HorizonteHero() {
     return () => window.removeEventListener("resize", handleResize);
   }, [coveragePercent, needsGoalSetup]);
 
-  const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0, locale);
+  const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0);
   const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", locale);
   const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", locale);
 

@@ -15,7 +15,7 @@ export function MobileBottomNav() {
   const location = useLocation();
 
   const tabs = [
-    { key: "screener", path: "/app/screener", label: t.tabs.calculator, icon: CalculatorIcon },
+    { key: "screener", path: "/app/screener", label: t.tabs.screener, icon: CalculatorIcon },
     { key: "myportfolio", path: "/app/myportfolio", label: t.tabs.portfolio, icon: FolderOpen },
     { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
     { key: "cashflow", path: "/app/cashflow", label: t.tabs.cashFlow, icon: BarChart3 },
