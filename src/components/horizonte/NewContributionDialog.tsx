@@ -53,17 +53,14 @@ export function NewContributionDialog({ open, onOpenChange }: Props) {
       setWorkingItem(existingItem);
       return;
     }
-    if (workingItem && workingItem.ticker === pickedHit.ticker) return;
-    // New ticker: create the watchlist item now (quantity starts at 0 — the
-    // transaction registered right after is what sets the real position),
-    // reusing the same builder AddToWatchlistDialog.tsx uses so the
-    // asset-creation logic isn't duplicated.
+    // New ticker: build the working draft in local state only (quantity starts at 0,
+    // the transaction registered upon save is what sets the real position and writes to Firestore),
+    // reusing the same builder AddToWatchlistDialog.tsx uses so the asset-creation logic isn't duplicated.
     const draft = buildWatchlistItem(assetResult.data, {
       targetYield: globalYield,
       quantity: 0,
       averagePrice: null,
     });
-    upsertWatchlistItem(draft);
     setWorkingItem(draft);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pickedHit, assetResult.data, existingItem]);
