@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useLocation } from "@tanstack/react-router";
 import {
   Calculator,
   Gauge,
@@ -7,11 +9,20 @@ import {
   User as UserIcon,
   Menu,
   BookOpen,
+  FolderOpen,
+  Scale,
+  ShieldAlert,
+  Sparkles,
+  BarChart3,
+  TrendingUp,
+  Compass,
+  Lock,
 } from "lucide-react";
 import { useAuthModal } from "@/lib/auth-modal";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { SuccessIconBox } from "@/components/shared/SuccessIconBox";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +50,39 @@ export function Header({ variant = "app" }: HeaderProps) {
   const { user, signOut, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const appTabs = [
+    { key: "home", path: "/app/", label: t.tabs.financialIndependence, icon: Compass },
+    { key: "myportfolio", path: "/app/myportfolio", label: t.tabs.portfolio, icon: FolderOpen },
+    { key: "screener", path: "/app/screener", label: t.tabs.screener, icon: Calculator },
+    { key: "comparator", path: "/app/comparator", label: t.tabs.comparator, icon: Scale },
+    { key: "riskradar", path: "/app/riskradar", label: t.tabs.riskRadar, icon: ShieldAlert },
+    { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
+    {
+      key: "cashflow",
+      path: "/app/cashflow",
+      label: t.tabs.cashFlow,
+      icon: BarChart3,
+      locked: !user,
+    },
+    {
+      key: "smartallocation",
+      path: "/app/smartallocation",
+      label: t.tabs.smartAllocation,
+      icon: Sparkles,
+      locked: !user,
+    },
+    {
+      key: "snowballeffectsimulator",
+      path: "/app/snowballeffectsimulator",
+      label: t.snowball?.title,
+      icon: TrendingUp,
+    },
+    { key: "wiki", path: "/app/docs", label: t.docs.navLink, icon: BookOpen },
+  ];
 
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
   const L = t.landing;
@@ -193,84 +237,127 @@ export function Header({ variant = "app" }: HeaderProps) {
 
           {/* Mobile Navigation */}
           <div className="flex md:hidden">
-            <Sheet>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label={t.header.openMenu}>
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="flex flex-col gap-6 pt-12">
+              <SheetContent side="right" className="flex flex-col gap-4 pt-8 overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle className="text-left">{t.appTitle}</SheetTitle>
                 </SheetHeader>
 
-                <div className="flex flex-col gap-4 flex-1">
+                <div className="flex flex-col gap-3 flex-1">
                   {variant === "landing" && (
                     <a
                       href="#features"
-                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-base font-medium hover:text-primary transition-colors py-1"
                     >
                       {L.navFeatures}
                     </a>
                   )}
+
+                  {variant === "landing" && user && (
+                    <Link
+                      to="/app"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-base font-medium hover:text-primary transition-colors py-1"
+                    >
+                      {L.goToTerminal}
+                    </Link>
+                  )}
+
+                  {variant === "app" && (
+                    <nav className="flex flex-col gap-1">
+                      {appTabs.map((item) => {
+                        const Icon = item.icon;
+                        const isActive =
+                          item.path === "/app/"
+                            ? pathname === "/app" || pathname === "/app/"
+                            : pathname.startsWith(item.path);
+
+                        return (
+                          <Link
+                            key={item.key}
+                            to={item.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                              isActive
+                                ? "bg-primary/10 text-primary font-semibold"
+                                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                            )}
+                            aria-label={item.label}
+                            aria-current={isActive ? "page" : undefined}
+                          >
+                            <Icon
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                isActive ? "text-primary" : "",
+                              )}
+                            />
+                            <span className="truncate flex-1 text-left">{item.label}</span>
+                            {item.locked && (
+                              <Lock
+                                className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 ml-auto"
+                                aria-hidden
+                              />
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                  )}
+
                   {loading ? (
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 py-2">
                       <div className="flex items-center gap-3 py-2 border-b border-border/30">
-                        <Skeleton className="h-11 w-11 rounded-full" />
+                        <Skeleton className="h-10 w-10 rounded-full" />
                         <Skeleton className="h-4 w-32" />
                       </div>
-                      <Skeleton className="h-6 w-24" />
-                      <Skeleton className="h-6 w-32" />
-                      <Skeleton className="h-6 w-28" />
                     </div>
                   ) : user ? (
-                    <>
-                      <div className="flex items-center gap-3 py-2 border-b border-white/10">
+                    <div className="pt-2 border-t border-border/30 flex flex-col gap-2">
+                      <div className="flex items-center gap-3 py-1">
                         {userAvatar}
                         <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-medium truncate">{user.email}</span>
+                          <span className="text-xs text-muted-foreground truncate">{user.email}</span>
                         </div>
                       </div>
-                      {variant === "landing" && (
-                        <Link
-                          to="/app"
-                          className="text-lg font-medium hover:text-primary transition-colors"
-                        >
-                          {L.goToTerminal}
-                        </Link>
-                      )}
-                      <Link
-                        to="/app/docs"
-                        className="text-lg font-medium flex items-center gap-2 hover:text-primary transition-colors"
-                      >
-                        <BookOpen className="h-5 w-5" />
-                        {t.docs.navLink}
-                      </Link>
                       <Link
                         to="/settings"
-                        className="text-lg font-medium flex items-center gap-2 hover:text-primary transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-sm font-medium flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                       >
-                        <Settings className="h-5 w-5" />
+                        <Settings className="h-4 w-4" />
                         {L.settings}
                       </Link>
-                    </>
+                    </div>
                   ) : null}
 
                   {!user && !loading && (
-                    <div className="flex flex-col gap-3 mt-4">
+                    <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border/30">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => openAuthModal()}
-                        className="w-full justify-center"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          openAuthModal();
+                        }}
+                        className="w-full justify-center text-xs"
                       >
                         {variant === "app" ? t.header.signIn : L.login}
                       </Button>
                       {variant === "landing" && (
                         <Button
                           type="button"
-                          onClick={() => openAuthModal()}
-                          className="w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            openAuthModal();
+                          }}
+                          className="w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90 text-xs"
                         >
                           {L.signUp}
                         </Button>
@@ -278,18 +365,22 @@ export function Header({ variant = "app" }: HeaderProps) {
                     </div>
                   )}
 
-                  <div className="mt-auto flex flex-col gap-4 pb-8">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t.header.language}</span>
+                  <div className="mt-auto flex flex-col gap-3 pt-4 border-t border-border/30">
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-xs text-muted-foreground">{t.header.language}</span>
                       <LanguageSwitcher className="inline-flex" />
                     </div>
                     {user && (
                       <Button
                         variant="ghost"
-                        onClick={() => signOut()}
-                        className="w-full justify-start text-danger hover:text-danger hover:bg-danger/10"
+                        size="sm"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          signOut();
+                        }}
+                        className="w-full justify-start text-xs text-danger hover:text-danger hover:bg-danger/10"
                       >
-                        <LogOut className="mr-2 h-5 w-5" />
+                        <LogOut className="mr-2 h-4 w-4" />
                         {L.signOut}
                       </Button>
                     )}

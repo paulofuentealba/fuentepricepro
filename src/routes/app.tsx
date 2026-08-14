@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/ceiling/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GuestWarningBanner } from "@/components/ceiling/GuestWarningBanner";
 import { FeedbackWidget } from "@/components/ceiling/FeedbackWidget";
 import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
@@ -58,7 +57,7 @@ function AppLayout() {
       <GuestWarningBanner />
       <div className="flex flex-1 overflow-hidden flex-row">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-6 md:pb-0">
           <div className="min-h-screen bg-background text-foreground">
             <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
               <Outlet />
@@ -67,7 +66,6 @@ function AppLayout() {
         </main>
       </div>
       <RegulatoryDisclaimerBanner />
-      <MobileBottomNav />
       <FeedbackWidget />
     </div>
   );
