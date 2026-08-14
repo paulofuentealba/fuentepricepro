@@ -124,10 +124,6 @@ export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props
     [items, meta, dividendEventsMap],
   );
 
-  if (sortedList.length === 0) return null;
-
-  const ITEMS_PER_PAGE = 4;
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   const [page, setPage] = useState(0);
 
   // Reset page when data changes
@@ -135,6 +131,10 @@ export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props
     setPage(0);
   }, [items, meta, dividendEventsMap]);
 
+  if (sortedList.length === 0) return null;
+
+  const ITEMS_PER_PAGE = 4;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   const displayList = sortedList.slice(page * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE + ITEMS_PER_PAGE);
 
   const label =
