@@ -33,8 +33,12 @@ service cloud.firestore {
     }
 
     match /config/featureGates {
-      allow read: if request.auth != null && request.auth.token.isAdmin == true;
-      allow write: if false; // só via Admin SDK (Firebase Functions/server), nunca client
+      // Leitura pública: é configuração de produto (flags/limites), não dado pessoal —
+      // useFeatureGates() é lido por TODO usuário, inclusive convidado (ver
+      // src/lib/featureGates.ts). Restringir a admin fazia todo mundo cair em
+      // permission-denied e nunca ler o valor real gravado pelo painel Admin.
+      allow read: if true;
+      allow write: if false; // só via Admin SDK (Firebase Functions/server), nunca client — nem admin
     }
 
     match /ingestionLog/{docId} {

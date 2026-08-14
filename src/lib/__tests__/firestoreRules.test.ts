@@ -148,7 +148,7 @@ describe.runIf(Boolean(process.env.FIRESTORE_EMULATOR_HOST))(
       );
     });
 
-    it("5. DENIES non-admin authenticated client read access to config/featureGates", async () => {
+    it("5. ALLOWS non-admin authenticated client read access to config/featureGates", async () => {
       const aliceUid = "alice123";
 
       // Seed the featureGates document
@@ -162,8 +162,40 @@ describe.runIf(Boolean(process.env.FIRESTORE_EMULATOR_HOST))(
       const aliceDb = testEnv.authenticatedContext(aliceUid).firestore();
       const featureGatesRef = doc(aliceDb, "config", "featureGates");
 
-      // Non-admin user trying to read -> DENIED
-      await assertFails(getDoc(featureGatesRef));
+      // Non-admin authenticated user reading -> ALLOWED (public product config, not personal data)
+      await assertSucceeds(getDoc(featureGatesRef));
+    });
+
+    it("5b. ALLOWS logged-out (unauthenticated) client read access to config/featureGates", async () => {
+      // Seed the featureGates document
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await setDoc(doc(db, "config", "featureGates"), {
+          someFeature: true,
+        });
+      });
+
+      const guestDb = testEnv.unauthenticatedContext().firestore();
+      const featureGatesRef = doc(guestDb, "config", "featureGates");
+
+      // Logged-out guest reading -> ALLOWED (guests use useFeatureGates() too)
+      await assertSucceeds(getDoc(featureGatesRef));
+    });
+
+    it("5c. DENIES non-admin authenticated client write access to config/featureGates", async () => {
+      const aliceUid = "alice123";
+      const aliceDb = testEnv.authenticatedContext(aliceUid).firestore();
+      const featureGatesRef = doc(aliceDb, "config", "featureGates");
+
+      await assertFails(setDoc(featureGatesRef, { someFeature: false }));
+    });
+
+    it("5d. DENIES admin authenticated client write access to config/featureGates via client SDK (write is Admin-SDK-only, even for admin)", async () => {
+      const adminUid = "admin123";
+      const adminDb = testEnv.authenticatedContext(adminUid, { isAdmin: true }).firestore();
+      const featureGatesRef = doc(adminDb, "config", "featureGates");
+
+      await assertFails(setDoc(featureGatesRef, { someFeature: false }));
     });
 
     it("6. ALLOWS admin authenticated client (with isAdmin custom claim) read access to config/featureGates", async () => {
@@ -224,7 +256,7 @@ describe.runIf(Boolean(process.env.FIRESTORE_EMULATOR_HOST))(
       await assertSucceeds(getDoc(ingestionLogRef));
     });
 
-    it("9. DENIES admin authenticated client WITHOUT isAdmin claim read access to config/featureGates", async () => {
+    it("9. ALLOWS authenticated client WITHOUT isAdmin claim read access to config/featureGates (public read, regardless of claim)", async () => {
       const adminUid = "admin-no-claim";
 
       // Seed the featureGates document
@@ -239,8 +271,8 @@ describe.runIf(Boolean(process.env.FIRESTORE_EMULATOR_HOST))(
       const adminDb = testEnv.authenticatedContext(adminUid, { isAdmin: false }).firestore();
       const featureGatesRef = doc(adminDb, "config", "featureGates");
 
-      // User with isAdmin: false -> DENIED
-      await assertFails(getDoc(featureGatesRef));
+      // User with isAdmin: false -> ALLOWED (read is now public for this doc)
+      await assertSucceeds(getDoc(featureGatesRef));
     });
   }
 );
