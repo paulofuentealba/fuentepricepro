@@ -17,7 +17,16 @@ const FORBIDDEN = [
 const EXTENSIONS = new Set([".tsx", ".ts", ".jsx", ".js", ".json", ".md", ".html", ".css"]);
 
 /** Directories that should never be scanned. */
-const EXCLUDED_DIRS = new Set(["node_modules", "dist", ".git", ".output", "build"]);
+const EXCLUDED_DIRS = new Set([
+  "node_modules",
+  "dist",
+  ".git",
+  ".output",
+  "build",
+  ".claude",
+  ".gemini",
+  ".firebase",
+]);
 
 async function walk(
   dir,
