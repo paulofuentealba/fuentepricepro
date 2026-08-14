@@ -697,7 +697,7 @@ export const ptBR = {
     heroHeadline2: "& Engenharia de Renda Passiva.",
     heroSub:
       "Pare de adivinhar. Calcule o preço teto exato para seus ativos, rastreie seu verdadeiro Net Yield e faça engenharia reversa da sua independência financeira.",
-    ctaTerminal: "Acessar o Terminal Pro",
+    ctaTerminal: "Minha Independência Financeira",
     navFeatures: "Funcionalidades",
     navAccess: "Acessar Terminal",
     footerLegal1: "Privacidade",
@@ -732,7 +732,7 @@ export const ptBR = {
     mockupRadarAsset2: "TAEE11",
     mockupMonth: "Agosto",
     signUp: "Criar Conta",
-    goToTerminal: "Ir para o Terminal",
+    goToTerminal: "Meu Painel",
     login: "Entrar",
     openApp: "Abrir App",
     swipeHint: "Deslize para ver mais →",

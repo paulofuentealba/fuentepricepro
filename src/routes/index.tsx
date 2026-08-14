@@ -115,19 +115,19 @@ function LandingPage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold px-8 py-6 rounded-full shadow-primary/30 transition-all hover:shadow-primary/50 hover:scale-105"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm sm:text-lg font-semibold px-5 py-4 sm:px-8 sm:py-6 rounded-full shadow-primary/30 transition-all hover:shadow-primary/50 hover:scale-105"
               >
                 <Link to="/app">
-                  {L.ctaTerminal} <ArrowRight className="ml-2 h-5 w-5" />
+                  {L.ctaTerminal} <ArrowRight className="ml-1.5 h-4 w-4 sm:ml-2 sm:h-5 sm:w-5" />
                 </Link>
               </Button>
             ) : (
               <Button
                 onClick={() => openAuthModal()}
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold px-8 py-6 rounded-full shadow-primary/30 transition-all hover:shadow-primary/50 hover:scale-105"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm sm:text-lg font-semibold px-5 py-4 sm:px-8 sm:py-6 rounded-full shadow-primary/30 transition-all hover:shadow-primary/50 hover:scale-105"
               >
-                {L.ctaTerminal} <ArrowRight className="ml-2 h-5 w-5" />
+                {L.ctaTerminal} <ArrowRight className="ml-1.5 h-4 w-4 sm:ml-2 sm:h-5 sm:w-5" />
               </Button>
             )}
           </motion.div>

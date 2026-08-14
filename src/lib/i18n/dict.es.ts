@@ -702,7 +702,7 @@ export const es = {
     heroHeadline2: "& Ingeniería de Ingresos Pasivos.",
     heroSub:
       "Deja de adivinar. Calcula el precio techo exacto para tus activos, rastrea tu verdadero Net Yield y haz ingeniería inversa de tu independencia financiera.",
-    ctaTerminal: "Acceder al Terminal Pro",
+    ctaTerminal: "Mi Independencia Financiera",
     navFeatures: "Funcionalidades",
     navAccess: "Acceder al Terminal",
     footerLegal1: "Privacidad",
@@ -737,7 +737,7 @@ export const es = {
     mockupRadarAsset2: "TAEE11",
     mockupMonth: "Agosto",
     signUp: "Regístrate",
-    goToTerminal: "Ir al Terminal",
+    goToTerminal: "Mi Panel",
     login: "Iniciar sesión",
     openApp: "Abrir App",
     swipeHint: "Desliza para ver más →",

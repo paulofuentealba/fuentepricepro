@@ -692,7 +692,7 @@ export const en = {
     heroHeadline2: "& Passive Income Engineering.",
     heroSub:
       "Stop guessing. Calculate the exact ceiling price for your assets, track your true Net Yield, and reverse-engineer your financial independence.",
-    ctaTerminal: "Access Pro Terminal",
+    ctaTerminal: "My Financial Independence",
     navFeatures: "Features",
     navAccess: "Access Terminal",
     footerLegal1: "Privacy",
@@ -727,7 +727,7 @@ export const en = {
     mockupRadarAsset2: "TAEE11",
     mockupMonth: "August",
     signUp: "Sign Up",
-    goToTerminal: "Go to Terminal",
+    goToTerminal: "My Dashboard",
     login: "Log In",
     openApp: "Open App",
     swipeHint: "Swipe to see more →",
