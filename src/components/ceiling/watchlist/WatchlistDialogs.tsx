@@ -4,6 +4,8 @@ import { PaywallDialog } from "../../ui/PaywallDialog";
 import { AddFixedIncomeDialog } from "./AddFixedIncomeDialog";
 import { BrokerNoteUploader } from "./BrokerNoteUploader";
 import { CsvImportUploader } from "./CsvImportUploader";
+import { DynamicImportModal } from "@/components/horizonte/DynamicImportModal";
+import type { ParseResult } from "@/lib/dynamicCsvParser";
 import { useI18n } from "@/lib/i18n-provider";
 
 interface WatchlistDialogsProps {
@@ -13,11 +15,14 @@ interface WatchlistDialogsProps {
   showFIWizard: boolean;
   showBrokerNoteUploader: boolean;
   showCsvImporter: boolean;
+  showDynamicImporter?: boolean;
   onCloseDetail: () => void;
   onPaywallOpenChange: (open: boolean) => void;
   onFIWizardOpenChange: (open: boolean) => void;
   onBrokerUploaderOpenChange: (open: boolean) => void;
   onCsvImporterOpenChange: (open: boolean) => void;
+  onDynamicImporterOpenChange?: (open: boolean) => void;
+  onConfirmDynamicImport?: (result: ParseResult) => Promise<void> | void;
 }
 
 export function WatchlistDialogs({
@@ -27,11 +32,14 @@ export function WatchlistDialogs({
   showFIWizard,
   showBrokerNoteUploader,
   showCsvImporter,
+  showDynamicImporter = false,
   onCloseDetail,
   onPaywallOpenChange,
   onFIWizardOpenChange,
   onBrokerUploaderOpenChange,
   onCsvImporterOpenChange,
+  onDynamicImporterOpenChange,
+  onConfirmDynamicImport,
 }: WatchlistDialogsProps) {
   const { t } = useI18n();
 
@@ -47,6 +55,13 @@ export function WatchlistDialogs({
       <AddFixedIncomeDialog open={showFIWizard} onOpenChange={onFIWizardOpenChange} />
       <BrokerNoteUploader open={showBrokerNoteUploader} onOpenChange={onBrokerUploaderOpenChange} />
       <CsvImportUploader open={showCsvImporter} onOpenChange={onCsvImporterOpenChange} />
+      {onDynamicImporterOpenChange && (
+        <DynamicImportModal
+          open={showDynamicImporter}
+          onOpenChange={onDynamicImporterOpenChange}
+          onConfirmImport={onConfirmDynamicImport}
+        />
+      )}
     </>
   );
 }

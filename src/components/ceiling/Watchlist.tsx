@@ -19,6 +19,12 @@ import { WatchlistDialogs } from "./watchlist/WatchlistDialogs";
 import { DataManagement } from "./watchlist/DataManagement";
 import { WatchlistActionsProvider } from "./watchlist/WatchlistActionsContext";
 import { NewContributionDialog } from "../horizonte/NewContributionDialog";
+import { persistTransactionsBatch } from "@/lib/transactionPersistence";
+import { useTransactions } from "@/lib/transactions";
+import { useWatchlist } from "@/lib/watchlist";
+import { useQueryClient } from "@tanstack/react-query";
+import { assetQueryOptions } from "@/lib/queryOptions";
+import type { ParseResult } from "@/lib/dynamicCsvParser";
 
 interface WatchlistProps {
   onNavigateToCalculator?: () => void;
@@ -29,7 +35,11 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const [showFIWizard, setShowFIWizard] = useState(false);
   const [showBrokerNoteUploader, setShowBrokerNoteUploader] = useState(false);
   const [showCsvImporter, setShowCsvImporter] = useState(false);
+  const [showDynamicImporter, setShowDynamicImporter] = useState(false);
   const { t, locale } = useI18n();
+  const queryClient = useQueryClient();
+  const { upsert: upsertWatchlistItem } = useWatchlist();
+  const { transactions, upsert: upsertTransaction } = useTransactions();
   const {
     items,
     valuedItems,
@@ -157,6 +167,34 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     setOppFilter(null);
   }, [setTypeFilter, setOppFilter]);
 
+  const handleConfirmDynamicImport = async (parseResult: ParseResult) => {
+    const res = await persistTransactionsBatch(
+      parseResult.transactions,
+      items,
+      transactions,
+      upsertTransaction,
+      upsertWatchlistItem,
+      async (ticker) => {
+        return queryClient.fetchQuery(assetQueryOptions(ticker));
+      },
+    );
+
+    if (res.failedTransactions.length === 0) {
+      toast.success(
+        t.dynamicImport.importSuccessToast.replace(
+          "{{count}}",
+          String(res.persistedCount),
+        ),
+      );
+    } else {
+      toast.warning(
+        t.dynamicImport.partialFailureWarning
+          .replace("{{succeeded}}", String(res.persistedCount))
+          .replace("{{failed}}", String(res.failedTransactions.length)),
+      );
+    }
+  };
+
   return (
     <TooltipProvider>
       <section>
@@ -168,7 +206,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
                 onOpenNewContribution={() => setShowNewContribution(true)}
                 onOpenFIWizard={() => setShowFIWizard(true)}
                 onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
-                onOpenCsvImporter={() => setShowCsvImporter(true)}
+                onOpenCsvImporter={() => setShowDynamicImporter(true)}
               />
               <div className="mt-4 flex justify-center w-full">
                 <DataManagement />
@@ -202,7 +240,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               onOpenNewContribution={() => setShowNewContribution(true)}
               onOpenFIWizard={() => setShowFIWizard(true)}
               onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
-              onOpenCsvImporter={() => setShowCsvImporter(true)}
+              onOpenCsvImporter={() => setShowDynamicImporter(true)}
             />
 
             <WatchlistActionsProvider
@@ -236,11 +274,14 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           showFIWizard={showFIWizard}
           showBrokerNoteUploader={showBrokerNoteUploader}
           showCsvImporter={showCsvImporter}
+          showDynamicImporter={showDynamicImporter}
           onCloseDetail={handleCloseDetail}
           onPaywallOpenChange={setShowPaywall}
           onFIWizardOpenChange={setShowFIWizard}
           onBrokerUploaderOpenChange={setShowBrokerNoteUploader}
           onCsvImporterOpenChange={setShowCsvImporter}
+          onDynamicImporterOpenChange={setShowDynamicImporter}
+          onConfirmDynamicImport={handleConfirmDynamicImport}
         />
 
         <NewContributionDialog open={showNewContribution} onOpenChange={setShowNewContribution} />

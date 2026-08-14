@@ -1,5 +1,6 @@
 import type { AssetType } from "./domain";
 import type { WatchlistItem } from "./watchlist";
+import type { Transaction } from "./transactions";
 
 const VALID_TYPES: AssetType[] = [
   "STOCK_US",
@@ -24,12 +25,80 @@ function csvEscape(v: string | number | null): string {
   return s;
 }
 
+/**
+ * Legacy 4-column quick CSV export format.
+ */
 export function buildWatchlistCsv(items: WatchlistItem[]): string {
   const header = ["Ticker", "Type", "Quantity", "AveragePrice"];
   const rows = items.map((it) =>
     [it.ticker, it.type, it.quantity, it.averagePrice ?? ""].map(csvEscape).join(","),
   );
   return [header.join(","), ...rows].join("\n");
+}
+
+/**
+ * Full Transactions CSV Export using canonical headers (Ticker, Tipo, Quantidade, Preço, Taxas, Data, Notas).
+ */
+export function buildTransactionsCsv(transactions: Transaction[]): string {
+  const header = ["Ticker", "Tipo", "Quantidade", "Preço", "Taxas", "Data", "Notas"];
+  const rows = transactions.map((t) => {
+    const typeLabel = t.type === "sell" ? "Venda" : t.type === "corporate_action" ? "Evento" : "Compra";
+    const dateStr = t.date ? new Date(t.date).toISOString().split("T")[0] : "";
+    return [
+      t.ticker,
+      typeLabel,
+      t.quantity,
+      t.pricePerShare,
+      t.fees || 0,
+      dateStr,
+      t.notes || "",
+    ]
+      .map(csvEscape)
+      .join(",");
+  });
+  return [header.map(csvEscape).join(","), ...rows].join("\n");
+}
+
+/**
+ * Full Watchlist Positions CSV Export with rich analytical columns.
+ */
+export function buildWatchlistFullCsv(items: WatchlistItem[]): string {
+  const header = [
+    "Ticker",
+    "Nome",
+    "Tipo",
+    "Quantidade",
+    "Preço Médio",
+    "Preço Teto",
+    "Margem de Segurança (%)",
+    "Yield Alvo (%)",
+    "Dividendo Anual",
+    "Setor",
+    "Moeda",
+    "Data Início",
+  ];
+  const rows = items.map((it) => {
+    const investingSinceStr = it.investingSince
+      ? new Date(it.investingSince).toISOString().split("T")[0]
+      : "";
+    return [
+      it.ticker,
+      it.name || "",
+      it.type,
+      it.quantity,
+      it.averagePrice ?? "",
+      it.ceilingPrice ?? "",
+      it.safetyMargin != null ? Number(it.safetyMargin).toFixed(2) : "",
+      it.targetYield ?? "",
+      it.annualDividend ?? "",
+      it.sector || "",
+      it.currency,
+      investingSinceStr,
+    ]
+      .map(csvEscape)
+      .join(",");
+  });
+  return [header.map(csvEscape).join(","), ...rows].join("\n");
 }
 
 export interface ComparatorExportRow {
