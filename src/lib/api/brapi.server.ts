@@ -76,10 +76,11 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
           : null;
     const type = classifyBr(clean);
 
-    // Next ex-dividend date: prefer future lastDatePrior (data com), else future paymentDate
+    // Next ex-dividend date: strictly future lastDatePrior (data com), never paymentDate
     const nowMs = Date.now();
     const futureDates = cash
-      .flatMap((d) => [d.lastDatePrior, d.paymentDate].filter(Boolean) as string[])
+      .map((d) => d.lastDatePrior)
+      .filter((iso): iso is string => typeof iso === "string" && iso.length > 0)
       .map((iso) => ({ iso, t: new Date(iso).getTime() }))
       .filter((x) => Number.isFinite(x.t) && x.t > nowMs)
       .sort((a, b) => a.t - b.t);
@@ -100,7 +101,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
     const dividendEvents: DividendEvent[] = cash
       .filter((d) => Number.isFinite(Number(d.rate)) && Number(d.rate) > 0)
       .map((d) => ({
-        exDate: d.lastDatePrior ?? d.paymentDate ?? "",
+        exDate: d.lastDatePrior ?? "",
         paymentDate: d.paymentDate ?? null,
         amountPerShare: Number(d.rate),
         isJCP: typeof d.label === "string" && d.label.toUpperCase().includes("JCP"),
