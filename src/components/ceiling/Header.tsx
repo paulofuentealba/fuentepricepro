@@ -28,6 +28,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useHasUSDAssets } from "@/lib/useHasUSDAssets";
 
 interface HeaderProps {
   variant?: "app" | "landing";
@@ -42,6 +43,7 @@ export function Header({ variant = "app" }: HeaderProps) {
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
   const L = t.landing;
   const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const { hasUSDAssets, loading: usdAssetsLoading } = useHasUSDAssets();
 
   const userAvatar = (
     <button
@@ -74,9 +76,8 @@ export function Header({ variant = "app" }: HeaderProps) {
         <div className="min-w-0 text-center md:text-left flex items-center justify-center md:justify-start">
           <h1 className="truncate text-base font-semibold leading-tight tracking-tight text-foreground sm:text-lg">
             {t.appTitle}
-            {variant !== "landing" && <span className="sr-only"> — {t.appTagline}</span>}
           </h1>
-          {variant !== "landing" && (
+          {variant === "landing" && (
             <p className="truncate text-xs text-muted-foreground sm:text-sm ml-2 hidden md:block">
               {t.appTagline}
             </p>
@@ -84,8 +85,11 @@ export function Header({ variant = "app" }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Desktop Only Exchange Rate */}
-          {variant === "app" && fx?.USDBRL && (
+          {/* Desktop Only Exchange Rate — only shown to users holding USD-denominated assets */}
+          {variant === "app" && usdAssetsLoading && (
+            <Skeleton className="hidden h-6 w-28 rounded-md md:block" />
+          )}
+          {variant === "app" && !usdAssetsLoading && hasUSDAssets && fx?.USDBRL && (
             <div className="hidden items-center justify-center rounded-md border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium tracking-tight text-primary shadow-primary/10 backdrop-blur-sm md:flex">
               USD/BRL R$ {fx.USDBRL.toFixed(2)}
             </div>
