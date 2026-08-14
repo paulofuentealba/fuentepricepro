@@ -86,8 +86,15 @@ export function DividendRadar() {
           name: asset.name,
           currentPrice: asset.currentPrice,
           annualDividend: canonicalDiv,
+          // safetyMargin/dy/ceiling stay always-number here (0 when unavailable) because
+          // useAssetFilterSort's counts/sort/filter logic below expects plain numbers —
+          // isValuationUnavailable is a parallel flag consumed only by the display layer
+          // (SafetyMarginBadge/YieldIndicator/PriceTag already render "—" for null/undefined,
+          // see src/components/ceiling/shared/AssetDataDisplay.tsx) so we don't show a
+          // literal 0 as if it were a real "at ceiling price"/"0% yield" result.
           safetyMargin: valuation.margin,
           ceiling: valuation.activeCeiling,
+          isValuationUnavailable: valuation.isUnavailable,
           type: asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US"),
           currency: market === "BR" ? "BRL" : "USD",
           dy: dy,
@@ -216,7 +223,9 @@ export function DividendRadar() {
                   </TableRow>
                 ) : (
                   filteredAndSorted.map((asset: any) => {
-                    const margin = asset.safetyMargin;
+                    const margin = asset.isValuationUnavailable ? null : asset.safetyMargin;
+                    const dyValue = asset.isValuationUnavailable ? null : asset.dy;
+                    const ceilingValue = asset.isValuationUnavailable ? null : asset.ceiling;
                     return (
                       <TableRow
                         key={asset.ticker}
@@ -246,14 +255,14 @@ export function DividendRadar() {
                         </TableCell>
                         <TableCell className="text-right">
                           <PriceTag
-                            value={asset.ceiling}
+                            value={ceilingValue}
                             currency={market === "BR" ? "BRL" : "USD"}
                             className="text-success"
                           />
                           <SafetyMarginBadge margin={margin} />
                         </TableCell>
                         <TableCell className="text-right">
-                          <YieldIndicator value={asset.dy} />
+                          <YieldIndicator value={dyValue} />
                         </TableCell>
                         <TableCell className="text-right">
                           {asset.exDate ? (
