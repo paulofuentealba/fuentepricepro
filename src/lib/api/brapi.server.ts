@@ -107,11 +107,20 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
       }))
       .filter((e) => e.exDate !== "");
 
+    const currency: Currency =
+      (res.currency as Currency) ||
+      (type === "STOCK_US" && !clean.endsWith("34") && !clean.endsWith("35") ? "USD" : "BRL");
+    if (!res.currency) {
+      console.warn(
+        `[brapi] missing currency in response for ${clean}, inferred ${currency} from type ${type}`,
+      );
+    }
+
     return {
       ticker: clean,
       name: res.longName || res.shortName || clean,
       type,
-      currency: (res.currency as Currency) || "BRL",
+      currency,
       currentPrice: Number(res.regularMarketPrice),
       dividends3y: pickLast3(yearMap),
       dividendHistory,

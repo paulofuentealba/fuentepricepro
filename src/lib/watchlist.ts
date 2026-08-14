@@ -85,42 +85,54 @@ function readLocal(): WatchlistItem[] {
 
     // Auto-heal NaNs that might have been saved as null during JSON.stringify
     // or loaded from corrupted state.
-    return parsed.map((item: any) => ({
-      ...item,
-      ticker: cleanTicker(item.ticker),
-      currentPrice:
-        typeof item.currentPrice === "number" && !isNaN(item.currentPrice) ? item.currentPrice : 0,
-      annualDividend:
-        typeof item.annualDividend === "number" && !isNaN(item.annualDividend)
-          ? item.annualDividend
-          : 0,
-      targetYield:
-        typeof item.targetYield === "number" && !isNaN(item.targetYield) ? item.targetYield : 6,
-      ceilingPrice:
-        typeof item.ceilingPrice === "number" && !isNaN(item.ceilingPrice) ? item.ceilingPrice : 0,
-      safetyMargin:
-        typeof item.safetyMargin === "number" && !isNaN(item.safetyMargin) ? item.safetyMargin : 0,
-      quantity: typeof item.quantity === "number" && !isNaN(item.quantity) ? item.quantity : 0,
-      averagePrice:
-        typeof item.averagePrice === "number" && !isNaN(item.averagePrice)
-          ? item.averagePrice
-          : null,
-      targetMonthlyIncome:
-        typeof item.targetMonthlyIncome === "number" && !isNaN(item.targetMonthlyIncome)
-          ? item.targetMonthlyIncome
-          : null,
-      payoutRatio:
-        typeof item.payoutRatio === "number" && !isNaN(item.payoutRatio) ? item.payoutRatio : null,
-      customTaxRate:
-        typeof item.customTaxRate === "number" && !isNaN(item.customTaxRate)
-          ? item.customTaxRate
-          : null,
-      indexer: item.indexer ?? null,
-      rate: typeof item.rate === "number" && !isNaN(item.rate) ? item.rate : null,
-      maturityDate: item.maturityDate ?? null,
-      startDate: item.startDate ?? null,
-      investingSince: typeof item.investingSince === "number" && !isNaN(item.investingSince) ? item.investingSince : item.addedAt,
-    })) as WatchlistItem[];
+    return parsed.map((item: any) => {
+      const clean = cleanTicker(item.ticker);
+      const isUsdType = item.type === "STOCK_US" || item.type === "REIT";
+      const isBdrOrB3 = clean.endsWith("34") || clean.endsWith("35") || clean.endsWith(".SA");
+      const currency: Currency =
+        item.currency || (isUsdType && !isBdrOrB3 ? "USD" : "BRL");
+
+      return {
+        ...item,
+        ticker: clean,
+        currency,
+        currentPrice:
+          typeof item.currentPrice === "number" && !isNaN(item.currentPrice) ? item.currentPrice : 0,
+        annualDividend:
+          typeof item.annualDividend === "number" && !isNaN(item.annualDividend)
+            ? item.annualDividend
+            : 0,
+        targetYield:
+          typeof item.targetYield === "number" && !isNaN(item.targetYield) ? item.targetYield : 6,
+        ceilingPrice:
+          typeof item.ceilingPrice === "number" && !isNaN(item.ceilingPrice) ? item.ceilingPrice : 0,
+        safetyMargin:
+          typeof item.safetyMargin === "number" && !isNaN(item.safetyMargin) ? item.safetyMargin : 0,
+        quantity: typeof item.quantity === "number" && !isNaN(item.quantity) ? item.quantity : 0,
+        averagePrice:
+          typeof item.averagePrice === "number" && !isNaN(item.averagePrice)
+            ? item.averagePrice
+            : null,
+        targetMonthlyIncome:
+          typeof item.targetMonthlyIncome === "number" && !isNaN(item.targetMonthlyIncome)
+            ? item.targetMonthlyIncome
+            : null,
+        payoutRatio:
+          typeof item.payoutRatio === "number" && !isNaN(item.payoutRatio) ? item.payoutRatio : null,
+        customTaxRate:
+          typeof item.customTaxRate === "number" && !isNaN(item.customTaxRate)
+            ? item.customTaxRate
+            : null,
+        indexer: item.indexer ?? null,
+        rate: typeof item.rate === "number" && !isNaN(item.rate) ? item.rate : null,
+        maturityDate: item.maturityDate ?? null,
+        startDate: item.startDate ?? null,
+        investingSince:
+          typeof item.investingSince === "number" && !isNaN(item.investingSince)
+            ? item.investingSince
+            : item.addedAt,
+      };
+    }) as WatchlistItem[];
   } catch {
     return [];
   }
@@ -143,18 +155,18 @@ interface Row {
   ticker: string;
   name: string;
   type: string;
-  currency: string;
-  current_price: number | string;
-  annual_dividend: number | string;
-  target_yield: number | string;
-  ceiling_price: number | string;
-  safety_margin: number | string;
-  quantity: number | string;
-  average_price: number | string | null;
-  payment_months: number[] | null;
-  target_monthly_income: number | string | null;
-  payout_ratio?: number | string | null;
-  custom_tax_rate?: number | string | null;
+  currency?: string;
+  current_price: number;
+  annual_dividend: number;
+  target_yield: number;
+  ceiling_price: number;
+  safety_margin: number;
+  quantity: number;
+  average_price: number | null;
+  payment_months: number[];
+  target_monthly_income?: number | null;
+  payout_ratio?: number | null;
+  custom_tax_rate?: number | null;
   sector?: string | null;
   applied_events?: any[] | null;
   indexer?: string | null;
@@ -177,12 +189,19 @@ function rowToItem(r: Row): WatchlistItem {
     return isNaN(num) ? null : num;
   };
 
+  const clean = cleanTicker(r.ticker);
+  const isUsdType = r.type === "STOCK_US" || r.type === "REIT";
+  const isBdrOrB3 = clean.endsWith("34") || clean.endsWith("35") || clean.endsWith(".SA");
+  const currency: Currency =
+    (r.currency as Currency) ||
+    (isUsdType && !isBdrOrB3 ? "USD" : "BRL");
+
   return {
     id: makeId(r.ticker, r.type as AssetType),
-    ticker: cleanTicker(r.ticker),
+    ticker: clean,
     name: r.name,
     type: r.type as AssetType,
-    currency: r.currency as Currency,
+    currency,
     currentPrice: safeNumber(r.current_price, 0),
     annualDividend: safeNumber(r.annual_dividend, 0),
     targetYield: safeNumber(r.target_yield, 6),

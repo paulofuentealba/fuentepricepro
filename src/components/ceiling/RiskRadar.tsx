@@ -135,7 +135,9 @@ export function RiskRadar() {
               {risk.types.map((tItem) => (
                 <div key={tItem.type} className="space-y-1.5">
                   <div className="flex justify-between text-sm">
-                    <span className="font-medium text-foreground">{tItem.type}</span>
+                    <span className="font-medium text-foreground">
+                      {t.types[tItem.type as keyof typeof t.types] ?? tItem.type}
+                    </span>
                     <span className="text-muted-foreground">
                       {formatPercent(tItem.weightPct, l)}
                     </span>
