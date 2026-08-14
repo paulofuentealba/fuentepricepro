@@ -74,6 +74,7 @@ function readSheetData(fileData: ArrayBuffer | string): {
     type: typeof fileData === "string" ? "string" : "array",
     raw: true,
     cellDates: false,
+    codepage: 65001,
   };
 
   const workbook = XLSX.read(fileData, readOptions);
@@ -87,6 +88,7 @@ function readSheetData(fileData: ArrayBuffer | string): {
     header: 1,
     blankrows: false,
     defval: "",
+    raw: true,
   });
 
   if (!rawData || rawData.length === 0) {
