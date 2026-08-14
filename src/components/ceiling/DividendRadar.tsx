@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
 import { Badge } from "@/components/ui/badge";
 import {
   AssetTicker,
@@ -158,7 +159,7 @@ export function DividendRadar() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t.radar.asset}</TableHead>
+                  <TableHead className={STICKY_FIRST_COLUMN_CLASS}>{t.radar.asset}</TableHead>
                   <TableHead>{t.global.type}</TableHead>
                   <TableHead>{t.radar.sector}</TableHead>
                   <TableHead className="text-right">{t.radar.currentPrice}</TableHead>
@@ -186,7 +187,7 @@ export function DividendRadar() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell>
+                      <TableCell className={STICKY_FIRST_COLUMN_CLASS}>
                         <Skeleton className="h-10 w-24" />
                       </TableCell>
                       <TableCell>
@@ -231,7 +232,7 @@ export function DividendRadar() {
                         key={asset.ticker}
                         className="hover:bg-muted/50 cursor-pointer transition-colors"
                       >
-                        <TableCell>
+                        <TableCell className={STICKY_FIRST_COLUMN_CLASS}>
                           <AssetTicker ticker={asset.ticker} name={asset.name} />
                         </TableCell>
                         <TableCell>

@@ -18,6 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
 
 interface Props {
   item: WatchlistItem;
@@ -147,7 +149,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t.watchlist.exDate}</TableHead>
+              <TableHead className={STICKY_FIRST_COLUMN_CLASS}>{t.watchlist.exDate}</TableHead>
               <TableHead>{t.watchlist.paymentDate}</TableHead>
               <TableHead>{t.watchlist.type}</TableHead>
               <TableHead className="text-right">{t.watchlist.amountPerShare}</TableHead>
@@ -156,7 +158,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
           <TableBody>
             {visibleEvents.map((ev, i) => (
               <TableRow key={i}>
-                <TableCell className="text-sm">
+                <TableCell className={cn("text-sm", STICKY_FIRST_COLUMN_CLASS)}>
                   {formatResultDate(ev.exDate, locale)}
                 </TableCell>
                 <TableCell className="text-sm">
