@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import type { RealizedIncomeEvent } from "@/lib/realizedIncome";
+import type { Currency } from "@/lib/domain";
 import { groupRealizedIncomeByMonth } from "@/lib/realizedIncome";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
@@ -8,7 +9,7 @@ import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 interface Props {
   events: RealizedIncomeEvent[];
-  currency: string;
+  currency: Currency;
 }
 
 export function AssetMonthlyDividendChart({ events, currency }: Props) {
@@ -29,7 +30,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
       <div className="rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur text-xs">
         <p className="font-semibold text-foreground mb-0.5">{data.monthLabel}</p>
         <p className="font-semibold text-success">
-          {formatCurrency(data.amountNet, currency as any, locale)}
+          {formatCurrency(data.amountNet, currency, locale)}
         </p>
       </div>
     );

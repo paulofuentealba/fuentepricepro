@@ -13,7 +13,7 @@ interface Props {
 export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
   const { t, locale } = useI18n();
   const exDateFormatted = meta?.exDividendDate
-    ? formatExDate(meta.exDividendDate, locale as import("@/lib/i18n").Locale)
+    ? formatExDate(meta.exDividendDate, locale)
     : null;
   const cagr = meta?.dividendCagr5y ?? null;
   const cagrNegative = cagr != null && cagr < 0;
@@ -55,7 +55,7 @@ export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
                 <TrendingUp className="h-3 w-3" />
               )}
               <span className="uppercase tracking-wider">{t.watchlist.cagr5y}</span>
-              <span className="tabular-nums">{formatPercent(cagr, locale as any, 2)}</span>
+              <span className="tabular-nums">{formatPercent(cagr, locale, 2)}</span>
             </span>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-[240px]">

@@ -89,7 +89,7 @@ export function ShowcaseCard({ card }: { card: MockCard }) {
             (card.marginTone === "success" ? "text-success" : "text-danger")
           }
         >
-          {card.status}
+          {t.showcase.status[card.statusKey]}
         </span>
         <span className="text-[10px] text-muted-foreground">Fuente Price Pro</span>
       </div>

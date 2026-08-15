@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 export function RiskRadar() {
   const { t, locale } = useI18n();
   const risk = usePortfolioRisk();
-  const l = locale as "ptBR" | "en" | "es";
+  const l = locale;
 
   if (risk.totalEquity === 0) {
     return (

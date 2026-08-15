@@ -176,11 +176,16 @@ export async function fetchFromYahoo(ticker: string): Promise<ApiAsset | null> {
         amountPerShare: Number(d.amount),
       }));
 
+    const currency: Currency = (res.meta.currency as Currency) || "USD";
+    if (!res.meta.currency) {
+      console.warn(`[yahoo] missing currency in response for ${t}, defaulted to USD`);
+    }
+
     return {
       ticker: t,
       name: res.meta.longName || res.meta.shortName || t,
       type,
-      currency: (res.meta.currency as Currency) || "USD",
+      currency,
       currentPrice: Number(res.meta.regularMarketPrice),
       dividends3y: pickLast3(yearMap),
       dividendHistory,

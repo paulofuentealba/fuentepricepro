@@ -43,6 +43,10 @@ export const ptBR = {
     globalOpportunity: "Oportunidade Global",
     scrollLeft: "Rolar para a esquerda",
     scrollRight: "Rolar para a direita",
+    status: {
+      undervalued: "Abaixo do Teto",
+      fairlyPriced: "Preço Justo",
+    },
   },
   header: {
     accountMenu: "Menu da conta",

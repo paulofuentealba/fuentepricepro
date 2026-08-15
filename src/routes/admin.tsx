@@ -1,11 +1,22 @@
+import { lazy, Suspense } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/integrations/firebase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FeatureGatesTab } from "@/components/admin/FeatureGatesTab";
-import { IngestionLogTab } from "@/components/admin/IngestionLogTab";
-import { UsersTab } from "@/components/admin/UsersTab";
-import { CloudCostsCard } from "@/components/admin/CloudCostsCard";
 import { useI18n } from "@/lib/i18n-provider";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const FeatureGatesTab = lazy(() =>
+  import("@/components/admin/FeatureGatesTab").then((m) => ({ default: m.FeatureGatesTab }))
+);
+const IngestionLogTab = lazy(() =>
+  import("@/components/admin/IngestionLogTab").then((m) => ({ default: m.IngestionLogTab }))
+);
+const UsersTab = lazy(() =>
+  import("@/components/admin/UsersTab").then((m) => ({ default: m.UsersTab }))
+);
+const CloudCostsCard = lazy(() =>
+  import("@/components/admin/CloudCostsCard").then((m) => ({ default: m.CloudCostsCard }))
+);
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
@@ -36,6 +47,10 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+function TabFallback() {
+  return <Skeleton className="h-64 w-full rounded-xl" />;
+}
+
 function AdminPage() {
   const { t } = useI18n();
 
@@ -54,16 +69,24 @@ function AdminPage() {
           </TabsList>
 
           <TabsContent value="featureGates">
-            <FeatureGatesTab />
+            <Suspense fallback={<TabFallback />}>
+              <FeatureGatesTab />
+            </Suspense>
           </TabsContent>
           <TabsContent value="ingestionLog">
-            <IngestionLogTab />
+            <Suspense fallback={<TabFallback />}>
+              <IngestionLogTab />
+            </Suspense>
           </TabsContent>
           <TabsContent value="users">
-            <UsersTab />
+            <Suspense fallback={<TabFallback />}>
+              <UsersTab />
+            </Suspense>
           </TabsContent>
           <TabsContent value="cloudCosts">
-            <CloudCostsCard />
+            <Suspense fallback={<TabFallback />}>
+              <CloudCostsCard />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>

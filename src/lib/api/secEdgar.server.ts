@@ -1,6 +1,36 @@
 import { fetchWithRetry } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 
+export interface SecFactUnit {
+  end: string;
+  val: number;
+  fy?: number;
+  fp?: string;
+  form?: string;
+  filed?: string;
+  frame?: string;
+}
+
+export interface SecFactConcept {
+  label?: string;
+  description?: string;
+  units?: {
+    USD?: SecFactUnit[];
+    shares?: SecFactUnit[];
+    [unit: string]: SecFactUnit[] | undefined;
+  };
+}
+
+export interface SecEdgarFactsResponse {
+  cik?: number;
+  entityName?: string;
+  facts?: {
+    "us-gaap"?: Record<string, SecFactConcept | undefined>;
+    dei?: Record<string, SecFactConcept | undefined>;
+    [taxonomy: string]: Record<string, SecFactConcept | undefined> | undefined;
+  };
+}
+
 export interface SecEdgarFactsResult {
   bvps: number | null;
 }
@@ -103,8 +133,8 @@ export async function fetchSecEdgarFacts(ticker: string): Promise<SecEdgarFactsR
       return { bvps: null };
     }
 
-    const factsData = await response.json() as any;
-    const usGaap = factsData?.facts?.['us-gaap'];
+    const factsData = (await response.json()) as SecEdgarFactsResponse;
+    const usGaap = factsData?.facts?.["us-gaap"];
     const dei = factsData?.facts?.dei;
 
     if (!usGaap) {
@@ -113,31 +143,31 @@ export async function fetchSecEdgarFacts(ticker: string): Promise<SecEdgarFactsR
     }
 
     // Extract StockholdersEquity
-    const equityUnits = usGaap['StockholdersEquity']?.units?.USD || [];
+    const equityUnits = usGaap["StockholdersEquity"]?.units?.USD || [];
     if (equityUnits.length === 0) {
       reportIngestionStatus("secEdgar", "INVALID", "missing StockholdersEquity", ticker);
       return { bvps: null };
     }
 
     // Sort by end date descending to get the most recent fact
-    equityUnits.sort((a: any, b: any) => new Date(b.end).getTime() - new Date(a.end).getTime());
+    equityUnits.sort((a, b) => new Date(b.end).getTime() - new Date(a.end).getTime());
     const mostRecentEquity = equityUnits[0].val;
 
     // Extract SharesOutstanding
     // Prefer EntityCommonStockSharesOutstanding from DEI if available, otherwise fallback to us-gaap CommonStockSharesOutstanding
-    let sharesUnits = dei?.['EntityCommonStockSharesOutstanding']?.units?.shares || [];
-    
+    let sharesUnits = dei?.["EntityCommonStockSharesOutstanding"]?.units?.shares || [];
+
     if (sharesUnits.length === 0) {
-      sharesUnits = usGaap['CommonStockSharesOutstanding']?.units?.shares || [];
+      sharesUnits = usGaap["CommonStockSharesOutstanding"]?.units?.shares || [];
     }
-    
+
     if (sharesUnits.length === 0) {
       reportIngestionStatus("secEdgar", "INVALID", "missing SharesOutstanding", ticker);
       return { bvps: null };
     }
 
     // Sort by end date descending
-    sharesUnits.sort((a: any, b: any) => new Date(b.end).getTime() - new Date(a.end).getTime());
+    sharesUnits.sort((a, b) => new Date(b.end).getTime() - new Date(a.end).getTime());
     const mostRecentShares = sharesUnits[0].val;
 
     if (!mostRecentShares || mostRecentShares === 0) {

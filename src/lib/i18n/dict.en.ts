@@ -41,6 +41,10 @@ export const en = {
     globalOpportunity: "Global Opportunity",
     scrollLeft: "Scroll left",
     scrollRight: "Scroll right",
+    status: {
+      undervalued: "Undervalued",
+      fairlyPriced: "Fairly Priced",
+    },
   },
   header: {
     accountMenu: "Account menu",

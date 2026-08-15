@@ -1,5 +1,7 @@
 export type Tone = "success" | "danger";
 
+export type StatusKey = "undervalued" | "fairlyPriced";
+
 export interface MockCard {
   kind?: "asset";
   ticker: string;
@@ -13,7 +15,7 @@ export interface MockCard {
   ceiling: string;
   margin: string;
   marginTone: Tone;
-  status: string;
+  statusKey: StatusKey;
 }
 
 export interface ProCard {
@@ -41,7 +43,7 @@ export const CARDS: Card[] = [
     ceiling: "$64.20",
     margin: "+18.7%",
     marginTone: "success",
-    status: "Undervalued",
+    statusKey: "undervalued",
   },
   {
     ticker: "BBSE3",
@@ -55,7 +57,7 @@ export const CARDS: Card[] = [
     ceiling: "R$ 46.90",
     margin: "+22.8%",
     marginTone: "success",
-    status: "Undervalued",
+    statusKey: "undervalued",
   },
   { kind: "pro", variant: "allocation" },
   {
@@ -70,7 +72,7 @@ export const CARDS: Card[] = [
     ceiling: "$49.10",
     margin: "-5.2%",
     marginTone: "danger",
-    status: "Fairly Priced",
+    statusKey: "fairlyPriced",
   },
   {
     ticker: "MXRF11",
@@ -84,7 +86,7 @@ export const CARDS: Card[] = [
     ceiling: "R$ 11.80",
     margin: "+15.2%",
     marginTone: "success",
-    status: "Undervalued",
+    statusKey: "undervalued",
   },
   { kind: "pro", variant: "forecast" },
   {
@@ -99,7 +101,7 @@ export const CARDS: Card[] = [
     ceiling: "R$ 78.40",
     margin: "+24.4%",
     marginTone: "success",
-    status: "Undervalued",
+    statusKey: "undervalued",
   },
   {
     ticker: "HGLG11.SA",
@@ -113,6 +115,6 @@ export const CARDS: Card[] = [
     ceiling: "R$ 172.10",
     margin: "+8.7%",
     marginTone: "success",
-    status: "Undervalued",
+    statusKey: "undervalued",
   },
 ];

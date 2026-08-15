@@ -175,7 +175,7 @@ function AllocationVariant({
                 {t.smartAllocation.currentAssetIncome}
               </div>
               <div className="text-foreground">
-                {formatCurrency(currentIncome, item.currency, locale as any)}
+                {formatCurrency(currentIncome, item.currency, locale)}
               </div>
             </div>
             <span aria-hidden className="text-success">
@@ -186,7 +186,7 @@ function AllocationVariant({
                 {t.smartAllocation.newAssetIncome}
               </div>
               <div className="font-semibold text-success">
-                {formatCurrency(currentIncome + addedIncome, item.currency, locale as any)}
+                {formatCurrency(currentIncome + addedIncome, item.currency, locale)}
               </div>
             </div>
           </div>

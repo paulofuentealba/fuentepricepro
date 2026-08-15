@@ -24,7 +24,7 @@ import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
 interface Props {
   item: WatchlistItem;
   events: DividendEvent[];
-  currency: string;
+  currency: Currency;
 }
 
 export function DividendsHistoryPanel({ item, events, currency }: Props) {
@@ -176,7 +176,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
                   )}
                 </TableCell>
                 <TableCell className="text-sm font-medium text-right text-success">
-                  {formatCurrency(ev.amountPerShare, currency as any, locale)}
+                  {formatCurrency(ev.amountPerShare, currency, locale)}
                 </TableCell>
               </TableRow>
             ))}

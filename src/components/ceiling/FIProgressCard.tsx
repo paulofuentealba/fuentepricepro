@@ -200,7 +200,7 @@ export function FIProgressCard() {
                     />
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    / {formatCurrency(monthlyCostGoal, currency, locale as "ptBR" | "en" | "es")}
+                    / {formatCurrency(monthlyCostGoal, currency, locale)}
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">

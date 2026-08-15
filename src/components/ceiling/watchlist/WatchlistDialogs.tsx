@@ -1,12 +1,18 @@
+import { lazy, Suspense } from "react";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { AssetDetailSheet } from "./AssetDetailSheet";
 import { PaywallDialog } from "../../ui/PaywallDialog";
 import { AddFixedIncomeDialog } from "./AddFixedIncomeDialog";
 import { BrokerNoteUploader } from "./BrokerNoteUploader";
 import { CsvImportUploader } from "./CsvImportUploader";
-import { DynamicImportModal } from "@/components/horizonte/DynamicImportModal";
 import type { ParseResult } from "@/lib/dynamicCsvParser";
 import { useI18n } from "@/lib/i18n-provider";
+
+const DynamicImportModal = lazy(() =>
+  import("@/components/horizonte/DynamicImportModal").then((m) => ({
+    default: m.DynamicImportModal,
+  }))
+);
 
 interface WatchlistDialogsProps {
   detail: ValuedWatchlistItem | null;
@@ -55,12 +61,14 @@ export function WatchlistDialogs({
       <AddFixedIncomeDialog open={showFIWizard} onOpenChange={onFIWizardOpenChange} />
       <BrokerNoteUploader open={showBrokerNoteUploader} onOpenChange={onBrokerUploaderOpenChange} />
       <CsvImportUploader open={showCsvImporter} onOpenChange={onCsvImporterOpenChange} />
-      {onDynamicImporterOpenChange && (
-        <DynamicImportModal
-          open={showDynamicImporter}
-          onOpenChange={onDynamicImporterOpenChange}
-          onConfirmImport={onConfirmDynamicImport}
-        />
+      {onDynamicImporterOpenChange && showDynamicImporter && (
+        <Suspense fallback={null}>
+          <DynamicImportModal
+            open={showDynamicImporter}
+            onOpenChange={onDynamicImporterOpenChange}
+            onConfirmImport={onConfirmDynamicImport}
+          />
+        </Suspense>
       )}
     </>
   );

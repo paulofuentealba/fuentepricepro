@@ -79,6 +79,19 @@ export interface PendingCorporateEvent {
   ratio: number;
 }
 
+export function isPendingCorporateEvent(ev: unknown): ev is PendingCorporateEvent {
+  if (typeof ev !== "object" || ev === null) return false;
+  const e = ev as Record<string, unknown>;
+  return (
+    typeof e.eventId === "string" &&
+    typeof e.date === "number" &&
+    (e.type === "split" || e.type === "grouping") &&
+    typeof e.ratio === "number" &&
+    Number.isFinite(e.ratio) &&
+    e.ratio > 0
+  );
+}
+
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { corporateEventsQueryOptions } from "./queryOptions";
@@ -99,9 +112,11 @@ export function usePendingEvents(item: WatchlistItem | null) {
   });
 
   const pendingEvents = useMemo(() => {
-    if (!rawEvents || !item) return [];
+    if (!Array.isArray(rawEvents) || !item) return [];
     const appliedIds = new Set(item.appliedEvents?.map((e) => e.eventId) ?? []);
-    return (rawEvents as any[]).filter((ev: any) => !appliedIds.has(ev.eventId)) as PendingCorporateEvent[];
+    return rawEvents
+      .filter(isPendingCorporateEvent)
+      .filter((ev) => !appliedIds.has(ev.eventId));
   }, [rawEvents, item]);
 
   return {

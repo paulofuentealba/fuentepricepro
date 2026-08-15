@@ -43,6 +43,10 @@ export const es = {
     globalOpportunity: "Oportunidad Global",
     scrollLeft: "Desplazar a la izquierda",
     scrollRight: "Desplazar a la derecha",
+    status: {
+      undervalued: "Bajo el Techo",
+      fairlyPriced: "Precio Justo",
+    },
   },
   header: {
     accountMenu: "Menú de la cuenta",
