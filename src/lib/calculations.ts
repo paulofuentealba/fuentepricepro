@@ -542,6 +542,177 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
 }
 
 /**
+ * Specialized Valuation for US Stocks (STOCK_US)
+ * Implements Total Shareholder Yield (dividends + buybacks from SEC EDGAR float variation),
+ * Modified Peter Lynch Model (PEG + Dividend Yield), 30% WHT, and Multi-Stage Gordon for Dividend Aristocrats.
+ */
+export function valuateStockUS(params: AssetValuationParams): ValuationResult {
+  const {
+    ticker = "STOCK_US",
+    targetYield,
+    currentPrice,
+    avgDividend,
+    eps,
+    dividendCagr,
+    dividendHistory,
+    currency = "USD",
+    historicalYieldAverage,
+    customTaxRate,
+    shareholderYield,
+    terminalGrowthRate = 0.025, // 2.5% US long-term inflation anchor
+  } = params;
+
+  if (currentPrice <= 0 || avgDividend <= 0) {
+    return {
+      ticker,
+      activeCeiling: currentPrice > 0 ? currentPrice : 0,
+      margin: 0,
+      fuenteConsensus: null,
+      methods: {
+        bazin: null,
+        graham: null,
+        gordon: null,
+        shareholderYield: null,
+      },
+      assumptions: [],
+      investorProfile: "moderate",
+      bazin: null,
+      graham: null,
+      gordon: null,
+      gordonConfidence: null,
+      consensus: null,
+      dividendYield: 0,
+      positive: true,
+      isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
+    };
+  }
+
+  // 1. Net Dividend after US Withholding Tax (30% or custom)
+  const netAvgDividend = netAfterTax(avgDividend, "STOCK_US", currency, customTaxRate);
+
+  // 2. Bazin Model (US Adapted)
+  const bazin = targetYield > 0 ? netAvgDividend / (targetYield / 100) : null;
+
+  // 3. Total Shareholder Yield Ceiling
+  // Combines dividend yield with SEC EDGAR buyback yield
+  let shareholderYieldPrice: number | null = null;
+  if (shareholderYield != null && shareholderYield > 0 && targetYield > 0) {
+    shareholderYieldPrice = currentPrice * (shareholderYield / targetYield);
+  }
+
+  // 4. Modified Peter Lynch Fair Value: EPS * (Growth Rate + Dividend Yield)
+  let lynchPrice: number | null = null;
+  if (eps != null && eps > 0 && currentPrice > 0) {
+    const rawDy = (netAvgDividend / currentPrice) * 100;
+    const effectiveGrowth = dividendCagr != null && dividendCagr > 0 ? dividendCagr : 6.0;
+    const lynchMultiplier = Math.min(25, Math.max(5, effectiveGrowth + rawDy));
+    lynchPrice = eps * lynchMultiplier;
+  }
+
+  // 5. Multi-Stage Gordon for Dividend Aristocrats
+  // US cost of equity ~8.5% (Treasury 10y ~4.25% + ERP ~4.25%)
+  const usDiscountRate = 0.085;
+  const gInitial = dividendCagr != null ? Math.min(0.15, dividendCagr / 100) : 0.06;
+  const gTerminal = terminalGrowthRate ?? 0.025;
+  const gordon = gordonPrice(netAvgDividend, usDiscountRate, gInitial, gTerminal);
+
+  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
+  let gordonConfidence: "high" | "low" | null = null;
+  if (gordon !== null) {
+    gordonConfidence =
+      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
+        ? "low"
+        : "high";
+  }
+
+  // 6. Fuente Consensus (Strict Median across valid STOCK_US methods)
+  const validModels = [bazin, shareholderYieldPrice, lynchPrice, gordon].filter(
+    (v): v is number => v !== null && v > 0,
+  );
+  let consensus: number | null = null;
+  if (validModels.length > 0) {
+    const sorted = [...validModels].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    consensus =
+      sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  const isUnavailable = consensus === null && bazin === null;
+  const activeCeiling = consensus !== null ? consensus : bazin || 0;
+  const margin = currentPrice > 0 && !isUnavailable ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
+  const yieldTrapWarning = isYieldTrap(dividendYield, historicalYieldAverage ?? null);
+
+  const assumptions: ValuationAssumption[] = [
+    {
+      key: "targetYield",
+      label: "Retorno anual em dividendos exigido (Bazin US)",
+      helperText: "Yield mínimo anual líquido exigido para ações americanas",
+      value: targetYield,
+      isCustomized: targetYield !== 4,
+      suggestedRange: { min: 2, max: 8 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "withholdingTax",
+      label: "Imposto retido na fonte EUA (Withholding Tax)",
+      helperText: "Alíquota de 30% retida na fonte na distribuição de proventos nos EUA",
+      value: customTaxRate ?? 30,
+      isCustomized: customTaxRate != null && customTaxRate !== 30,
+      suggestedRange: { min: 15, max: 30 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "shareholderYield",
+      label: "Retorno total ao acionista (Dividendos + Recompras)",
+      helperText: "Shareholder Yield apurado via variações de float no SEC EDGAR",
+      value: shareholderYield ?? Number(dividendYield.toFixed(2)),
+      isCustomized: false,
+      suggestedRange: { min: 2, max: 12 },
+      confidenceBadge: shareholderYield != null ? 4 : 2,
+    },
+    {
+      key: "peterLynchGrowth",
+      label: "Taxa de expansão ajustada (Peter Lynch Fair Value)",
+      helperText: "Combinação de crescimento de lucros/proventos e yield",
+      value: dividendCagr ?? 6,
+      isCustomized: false,
+      suggestedRange: { min: 3, max: 20 },
+      confidenceBadge: dividendCagr != null ? 4 : 3,
+    },
+  ];
+
+  return {
+    ticker,
+    activeCeiling,
+    margin,
+    fuenteConsensus: consensus,
+    methods: {
+      bazin,
+      graham: lynchPrice,
+      gordon,
+      shareholderYield: shareholderYieldPrice,
+    },
+    assumptions,
+    investorProfile: "moderate",
+    bazin,
+    graham: lynchPrice,
+    gordon,
+    gordonConfidence,
+    consensus,
+    dividendYield,
+    positive: margin >= 0,
+    isUnavailable,
+    yieldTrapWarning,
+    shareholderYield: shareholderYield ?? null,
+  };
+}
+
+/**
  * Universal valuation engine.
  * Acts as the centralized SSOT Dispatcher across all asset classes.
  */
@@ -577,6 +748,10 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
 
   if (type === "STOCK_BR") {
     return valuateStockBR(params);
+  }
+
+  if (type === "STOCK_US") {
+    return valuateStockUS(params);
   }
 
   // Default fallback for other asset classes (prior to their dedicated prompt specialization)
