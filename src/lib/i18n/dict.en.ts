@@ -1299,4 +1299,18 @@ export const en = {
     partialFailureWarning: "{{succeeded}} transactions saved successfully, but {{failed}} failed due to a network error.",
     retryFailed: "Retry Only Failed Items",
   },
+  valuationAssumptions: {
+    title: "Valuation Assumptions",
+    subtitle: "Institutional parameters, risk spreads, and cost of capital applied to this asset",
+    simpleMode: "Simple Mode",
+    advancedMode: "Advanced Mode",
+    viewAssumptions: "View Assumptions",
+    confidence: "Data Confidence",
+    confidenceLevel4: "Maximum (Audited CVM / SEC EDGAR / BACEN SGS)",
+    confidenceLevel3: "High (Historical market series)",
+    confidenceLevel2: "Moderate (Sector proxy estimate)",
+    confidenceLevel1: "Basic (Standard fallback default)",
+    resetDefaults: "Reset Defaults",
+    close: "Close",
+  },
 };

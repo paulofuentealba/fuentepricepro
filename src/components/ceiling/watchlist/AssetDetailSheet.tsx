@@ -8,7 +8,9 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors } from "lucide-react";
+import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ValuationAssumptionsModal } from "./assetCard/ValuationAssumptionsModal";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -289,6 +291,7 @@ export function AssetDetailSheet({
   initialTab,
 }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
+  const [isAssumptionsModalOpen, setIsAssumptionsModalOpen] = useState(false);
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { pendingEvent } = usePendingEvents(item);
@@ -368,6 +371,21 @@ export function AssetDetailSheet({
                 <TabsContent value="highlights" className="space-y-6 mt-0">
                   {item.type !== "FIXED_INCOME" ? (
                     <>
+                      <div className="flex items-center justify-between pb-1">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {t.watchlist.tabs.highlights}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs flex items-center gap-1.5 border-primary/30 hover:bg-primary/5"
+                          onClick={() => setIsAssumptionsModalOpen(true)}
+                        >
+                          <Sliders className="h-3.5 w-3.5 text-primary" />
+                          {t.valuationAssumptions.viewAssumptions}
+                        </Button>
+                      </div>
                       <WowInsights item={item} asset={asset} valuation={valuation} />
                       <ConsensusPyramid valuation={valuation} currency={asset.currency} />
                       <IndicatorGrid asset={asset} />
@@ -379,6 +397,12 @@ export function AssetDetailSheet({
                           title={t.result.dividendHistory}
                         />
                       )}
+                      <ValuationAssumptionsModal
+                        isOpen={isAssumptionsModalOpen}
+                        onClose={() => setIsAssumptionsModalOpen(false)}
+                        ticker={item.ticker}
+                        valuation={valuation}
+                      />
                     </>
                   ) : (
                     <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg border-border/50 bg-background/50">

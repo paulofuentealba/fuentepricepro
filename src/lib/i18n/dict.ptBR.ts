@@ -1309,4 +1309,18 @@ export const ptBR = {
     partialFailureWarning: "{{succeeded}} transações salvas com sucesso, mas {{failed}} falharam por erro de rede.",
     retryFailed: "Tentar Novamente Apenas as Falhas",
   },
+  valuationAssumptions: {
+    title: "Premissas de Valuation",
+    subtitle: "Parâmetros institucionais, prêmio de risco e custo de oportunidade do ativo",
+    simpleMode: "Modo Simples",
+    advancedMode: "Modo Avançado",
+    viewAssumptions: "Ver premissas",
+    confidence: "Confiabilidade dos dados",
+    confidenceLevel4: "Máxima (Auditado CVM / SEC EDGAR / BACEN SGS)",
+    confidenceLevel3: "Alta (Série histórica de mercado)",
+    confidenceLevel2: "Moderada (Estimativa baseada em proxy do setor)",
+    confidenceLevel1: "Básica (Premissa cadastral padrão)",
+    resetDefaults: "Restaurar padrões",
+    close: "Fechar",
+  },
 } satisfies typeof en;

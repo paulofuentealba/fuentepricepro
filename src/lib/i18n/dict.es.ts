@@ -1313,4 +1313,18 @@ export const es = {
     partialFailureWarning: "{{succeeded}} transacciones guardadas con éxito, pero {{failed}} fallaron por error de red.",
     retryFailed: "Reintentar Solo las Fallas",
   },
+  valuationAssumptions: {
+    title: "Premisas de Valoración",
+    subtitle: "Parámetros institucionales, prima de riesgo y costo de oportunidad del activo",
+    simpleMode: "Modo Simple",
+    advancedMode: "Modo Avanzado",
+    viewAssumptions: "Ver premisas",
+    confidence: "Confiabilidad de datos",
+    confidenceLevel4: "Máxima (Auditado CVM / SEC EDGAR / BACEN SGS)",
+    confidenceLevel3: "Alta (Serie histórica de mercado)",
+    confidenceLevel2: "Moderada (Estimación basada en proxy del sector)",
+    confidenceLevel1: "Básica (Premisa estándar por defecto)",
+    resetDefaults: "Restablecer valores",
+    close: "Cerrar",
+  },
 } satisfies typeof en;
