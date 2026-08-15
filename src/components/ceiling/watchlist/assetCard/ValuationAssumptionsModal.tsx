@@ -56,11 +56,11 @@ export function ValuationAssumptionsModal({
     const dots = "●".repeat(badge) + "○".repeat(4 - badge);
     const colorClass =
       badge === 4
-        ? "text-emerald-500"
+        ? "text-success"
         : badge === 3
-        ? "text-blue-500"
+        ? "text-primary"
         : badge === 2
-        ? "text-amber-500"
+        ? "text-warning"
         : "text-muted-foreground";
 
     return (
@@ -130,7 +130,7 @@ export function ValuationAssumptionsModal({
               </div>
               <div className="flex items-center justify-between border-t border-border/40 pt-2">
                 <span className="text-xs font-medium text-muted-foreground">Margem de Segurança:</span>
-                <span className={`text-sm font-bold ${valuation.positive ? "text-emerald-500" : "text-rose-500"}`}>
+                <span className={`text-sm font-bold ${valuation.positive ? "text-success" : "text-danger"}`}>
                   {valuation.margin != null ? `${valuation.margin > 0 ? "+" : ""}${valuation.margin.toFixed(1)}%` : "—"}
                 </span>
               </div>
@@ -138,7 +138,7 @@ export function ValuationAssumptionsModal({
               {/* Data Reliability Overview */}
               <div className="mt-4 rounded-md bg-muted/30 p-3 text-xs">
                 <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  <ShieldCheck className="h-4 w-4 text-success" />
                   {t.valuationAssumptions.confidence}
                 </div>
                 <p className="mt-1 text-muted-foreground">
