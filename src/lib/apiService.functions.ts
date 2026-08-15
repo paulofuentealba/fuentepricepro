@@ -9,6 +9,7 @@ import { calculatePiotroskiFScore, type PiotroskiResult } from "./calculations";
 import { fetchCvmEnrichedFacts } from "./api/cvm.server";
 import { fetchNasdaqDividends } from "./api/nasdaq.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
+import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 
 // Re-export public types so existing `@/lib/apiService.functions` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
@@ -130,6 +131,9 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
     const raw = data.ticker;
     if (!raw) throw new Error("NOT_FOUND");
 
+    const cached = await getCachedAsset(raw);
+    if (cached) return cached;
+
     if (process.env.NODE_ENV === "development" && raw === "TEST_IPO_RECENTE") {
       const currentYear = new Date().getUTCFullYear();
       return {
@@ -250,7 +254,9 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
       }
     }
 
-    return { ...asset, ticker: cleanTicker(asset.ticker) };
+    const cleanedAsset = { ...asset, ticker: cleanTicker(asset.ticker) };
+    await setCachedAsset(raw, cleanedAsset);
+    return cleanedAsset;
   });
 
 // -------- Lightweight live quote (price + daily change %) --------
