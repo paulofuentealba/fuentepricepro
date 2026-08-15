@@ -17,6 +17,7 @@ export interface FeatureGatesConfig {
   customTaxUnlocked?: boolean;
   sliderUnlocked?: boolean;
   strategiesUnlocked?: boolean;
+  USE_BFF_PORTFOLIO_VALUATION?: boolean;
   [key: string]: boolean | number | undefined;
 }
 
@@ -27,6 +28,7 @@ export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: numbe
   customTaxUnlocked: true,
   sliderUnlocked: true,
   strategiesUnlocked: true,
+  USE_BFF_PORTFOLIO_VALUATION: false,
 };
 
 export type FeatureGateKey = keyof typeof DEFAULT_FEATURE_GATES | string;

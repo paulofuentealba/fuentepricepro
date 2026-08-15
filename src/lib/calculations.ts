@@ -20,7 +20,7 @@ export function getCanonicalAnnualDividend(asset: Asset, timeframe: number = 3):
     selected = sorted.slice(0, timeframe).map((p) => p.amount);
   } else {
     // If not enough historical years, fallback to dividends3y which has been curated to only include existing data
-    selected = [...asset.dividends3y];
+    selected = [...(asset.dividends3y ?? [])];
   }
   return avgDividend(selected);
 }
