@@ -530,6 +530,7 @@ export const ptBR = {
     chart: {
       projected: "Projetado",
       confirmed: "Pago",
+      announced: "Declarado",
       provisioned: "Provisionado",
       concentratedIn: "Concentrado em",
       more: "mais",

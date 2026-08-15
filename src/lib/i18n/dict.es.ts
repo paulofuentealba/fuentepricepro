@@ -535,6 +535,7 @@ export const es = {
     chart: {
       projected: "Proyectado",
       confirmed: "Pagado",
+      announced: "Declarado",
       provisioned: "Provisionado",
       concentratedIn: "Concentrado en",
       more: "más",

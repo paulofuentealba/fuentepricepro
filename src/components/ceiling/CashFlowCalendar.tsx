@@ -154,7 +154,9 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     [calendarData],
   );
 
-  const hasData = chartData.some((d) => d.amount > 0 || d.realizedAmount > 0);
+  const hasData = chartData.some(
+    (d) => d.amount > 0 || d.realizedAmount > 0 || d.announcedAmount > 0
+  );
   const bestMonth = chartData.find((d) => d.isBest);
 
   if (items.length === 0 || !hasData) {

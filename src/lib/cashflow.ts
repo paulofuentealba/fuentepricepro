@@ -225,8 +225,6 @@ export function buildMonthlyBuckets(
 
     const effectiveAmount = effectiveAmounts[i];
     const paidAmount = isPast ? effectiveAmount : 0;
-    const announcedAmount = 0;
-    const projectedAmount = isPast ? 0 : b.amount;
 
     // Calculate SSOT Realized Income for this month/year bucket
     let bucketRealized = 0;
@@ -252,7 +250,12 @@ export function buildMonthlyBuckets(
         }
       }
     }
-    const realizedAmount = Math.round(bucketRealized * 100) / 100;
+    const roundedBucketRealized = Math.round(bucketRealized * 100) / 100;
+    const realizedAmount = isPast ? roundedBucketRealized : 0;
+    const announcedAmount = !isPast ? roundedBucketRealized : 0;
+    const projectedAmount = isPast
+      ? 0
+      : Math.max(0, Math.round((b.amount - announcedAmount) * 100) / 100);
 
     return {
       month: b.monthLabel,

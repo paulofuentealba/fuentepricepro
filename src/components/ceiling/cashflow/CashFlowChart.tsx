@@ -96,10 +96,11 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
     // (anunciado, não pago) e hoje é sempre 0.
     const realizedConfirmedSum =
       bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount || 0;
+    const announcedSum = bucket.announcedAmount || 0;
     const projectedSum = bucket.projectedAmount || 0;
     const effectiveTotal =
-      realizedConfirmedSum + projectedSum > 0
-        ? realizedConfirmedSum + projectedSum
+      realizedConfirmedSum + announcedSum + projectedSum > 0
+        ? realizedConfirmedSum + announcedSum + projectedSum
         : bucket.amount;
 
     if (effectiveTotal <= 0) return null;
@@ -135,6 +136,18 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
               </span>
               <span className="tabular-nums">
                 {formatCurrency(realizedConfirmedSum, activeCurrency, locale)}
+              </span>
+            </div>
+          )}
+
+          {announcedSum > 0 && (
+            <div className="flex items-center justify-between font-semibold text-foreground">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-foreground" />
+                {t.tabs.chart.announced}
+              </span>
+              <span className="tabular-nums">
+                {formatCurrency(announcedSum, activeCurrency, locale)}
               </span>
             </div>
           )}
@@ -258,6 +271,16 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
               <span className="inline-flex items-center gap-1 font-semibold" style={{ color: "var(--realized)" }}>
                 <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: "var(--realized)" }} />
                 {t.tabs.chart.confirmed}
+              </span>
+              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
+                <span
+                  className="inline-block h-2 w-3 rounded-sm border border-foreground/30"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(45deg, var(--realized), var(--realized) 2px, transparent 2px, transparent 4px)",
+                  }}
+                />
+                {t.tabs.chart.announced}
               </span>
               <span className="inline-flex items-center gap-1 font-semibold text-foreground">
                 <span
