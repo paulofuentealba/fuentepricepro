@@ -48,7 +48,6 @@
 
 | Arquivo (caminho + linha) | Descrição (+ Regra Violada) | Risco de Regressão | Solução Proposta |
 | :--- | :--- | :---: | :--- |
-| `src/components/ceiling/ComparatorPerformanceChart.tsx:45-75` | **Formatação de Datas em Loop Sem Memoização no Recharts (Regra 4 / Performance)**: O array `chartData` mapeia pontos históricos com chamadas `new Date(d.date).toLocaleDateString()` a cada render sem `useMemo`. | Baixo | Envolver o cálculo de `chartData` em `useMemo(() => ..., [data, activePeriod, locale])`. |
 | `src/lib/corporateEvents.ts:104` | **Type Cast Amplo em Eventos Corporativos Pendentes (Type Safety)**: `(rawEvents as any[]).filter(...) as PendingCorporateEvent[]`. | Baixo | Tipar `rawEvents` como `Array<Record<string, unknown>>` e criar guard `isPendingCorporateEvent(ev)` para filtragem type-safe. |
 
 ---
@@ -62,7 +61,6 @@
 | **Lazy Loading de `DynamicImportModal`** | Melhoria | 7 | 1.5 | 0.9 | 1 | **9.45** | P1 (Imediata) |
 | **Warning Estruturado em `yahoo.server.ts`** | Não-Crítico | 5 | 1.0 | 1.0 | 1 | **5.0** | P2 (Próximo Lote) |
 | **Lazy Loading das Abas do Admin** | Melhoria | 3 | 1.5 | 0.9 | 1 | **4.05** | P2 (Próximo Lote) |
-| **Memoização no `ComparatorPerformanceChart`** | Melhoria | 4 | 1.0 | 0.9 | 1 | **3.6** | P2 (Próximo Lote) |
 | **Tipagem `SecEdgarFactsResponse`** | Dívida Técnica | 3 | 0.5 | 1.0 | 1 | **1.5** | P3 (Manutenção) |
 
 ---
@@ -105,7 +103,7 @@ Test Files  59 passed | 1 skipped (60)
 | **Portabilidade de Dados (`dataExport.ts`)** | Financeiro / Carteira | Art. 18, V (Portabilidade) | ✅ **Conforme** | Exportação completa disponível em 3 formatos padronizados (`buildWatchlistCsv`, `buildWatchlistFullCsv`, `buildTransactionsCsv`). |
 | **Importação de Extratos (`DynamicImportModal.tsx`)** | Dados Financeiros de Terceiros | Art. 6º, III (Minimização) | ✅ **Conforme** | Processamento de PDF/CSV é 100% no cliente (Web Worker). O arquivo bruto nunca é persistido ou enviado a servidores externos. |
 | **Consulta de Cotações Externas (`brapi`, `yahoo`, `nasdaq`, `secEdgar`)** | Tráfego Internacional | Art. 33 (Transferência Internacional) | ✅ **Conforme** | Apenas símbolos públicos de mercado (tickers) trafegam para APIs estrangeiras. Zero PII ou identificadores de usuário enviados. |
-| **Gestão de Acessos Admin (`admin.server.ts:listUsersFn`)** | Identificação Direta + Status de Conta | Art. 6º, III (Minimização) | ✅ **Conforme** | Retorna estritamente 6 campos administrativos essenciais (`uid`, `email`, `displayName`, `createdAt`, `lastSignIn`, `isAdmin`, `isSubscriber`). |
+| **Gestão de Acessos Admin (`admin.server.ts:listUsersFn`)** | Identificação Direta + Status de Conta | Art. 6º, III (Minimização) | ✅ **Conforme** | Retorna estritamente 6 campos administrativos essenciais (`displayName`, `email`, `subscriptionStatus`, `createdAt`, `lastLoginAt`, `providerId`). Nota: `uid` é deliberadamente omitido por design (Prompt 88 §2.1). |
 | **Consentimento de Cookies (`CookieConsentBanner.tsx`)** | Comportamental / Preferências | Art. 18, IX (Revogação de Consentimento) | ✅ **Conforme** | Banner de consentimento com persistência local e opção de revogação/rejeição de telemetria analítica. |
 
 ---
@@ -119,3 +117,9 @@ Test Files  59 passed | 1 skipped (60)
 - **3.5 LGPD & Dado Pessoal**: **100% percorrido**. Conformidade plena com LGPD Art. 18 (acesso, eliminação ordenada, portabilidade e minimização).
 - **3.6 Duplicação de Sistema/Componente**: **100% percorrido**. Confirmado que `AddToWatchlistDialog` e `NewContributionDialog` convergem para as mesmas funções de domínio e que os 3 exportadores CSV atendem casos de uso distintos.
 - **3.7 Consistência de Dado Legado vs. Lógica Atual**: **100% percorrido**. Auto-healing em memória garante hidratação segura sem necessitar de escritas colaterais no Firestore.
+
+---
+
+## 6.7 Correções Pós-Publicação (Revisão Cruzada — 14/08/2026, Prompt 112)
+- **Item 1**: Removido falso positivo de `chartData` em `ComparatorPerformanceChart` das Tabelas 3 e 4 (já estava corretamente memoizado em `useMemo`, linha 109).
+- **Item 2**: Corrigida a listagem de campos retornados por `listUsersFn` na Tabela 5 para bater com `AdminUserRow` (`displayName`, `email`, `subscriptionStatus`, `createdAt`, `lastLoginAt`, `providerId`), confirmando que `uid` é deliberadamente omitido por design.
