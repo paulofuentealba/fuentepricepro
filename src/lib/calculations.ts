@@ -713,6 +713,171 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
 }
 
 /**
+ * Specialized Valuation for Brazilian Real Estate and Infrastructure Funds (FII, FII_INFRA, FIAGRO)
+ * Implements Bazin Spread over NTN-B, Inflation Passthrough Gordon, and P/VP Asset Ceiling.
+ * Explicitly forbids applying corporate LPA/VPA Graham formulas to fund structures.
+ */
+export function valuateFundoImobiliario(params: AssetValuationParams): ValuationResult {
+  const {
+    ticker = "FII",
+    type,
+    targetYield,
+    currentPrice,
+    avgDividend,
+    bvps,
+    dividendCagr,
+    dividendHistory,
+    currency = "BRL",
+    historicalYieldAverage,
+    selicPct = 10.5,
+    terminalGrowthRate = 0.045, // 4.5% IPCA 5y benchmark default
+  } = params;
+
+  if (currentPrice <= 0 || avgDividend <= 0) {
+    return {
+      ticker,
+      activeCeiling: currentPrice > 0 ? currentPrice : 0,
+      margin: 0,
+      fuenteConsensus: null,
+      methods: {
+        bazin: null,
+        graham: null,
+        gordon: null,
+      },
+      assumptions: [],
+      investorProfile: "moderate",
+      bazin: null,
+      graham: null,
+      gordon: null,
+      gordonConfidence: null,
+      consensus: null,
+      dividendYield: 0,
+      positive: true,
+      isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
+    };
+  }
+
+  // 1. NTN-B Benchmark Rate & Subtype Risk Spread Calibration
+  const ntnBBase = Math.max(5.5, Number((selicPct - terminalGrowthRate * 100).toFixed(2)));
+  let spread = 2.5; // default FII Tijolo
+  let spreadRange = { min: 1.5, max: 3.5 };
+
+  if (type === "FII_INFRA") {
+    spread = 2.0; // 1.5% - 2.5% for tax-exempt infrastructure debentures
+    spreadRange = { min: 1.5, max: 2.5 };
+  } else if (type === "FIAGRO") {
+    spread = 3.0; // 2.5% - 4.0% for agro-credit funds
+    spreadRange = { min: 2.5, max: 4.0 };
+  }
+
+  const effectiveRequiredYield = targetYield > 0 ? targetYield : ntnBBase + spread;
+
+  // 2. Bazin Model Anchored on NTN-B Spread
+  const bazin = effectiveRequiredYield > 0 ? avgDividend / (effectiveRequiredYield / 100) : null;
+
+  // 3. Gordon Model with Inflationary Passthrough & Singularity Guard
+  const k = selicPct / 100;
+  const gInitial = dividendCagr != null ? dividendCagr / 100 : null;
+  const gTerminal = terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE;
+  const gordon = gordonPrice(avgDividend, k, gInitial, gTerminal);
+
+  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
+  let gordonConfidence: "high" | "low" | null = null;
+  if (gordon !== null) {
+    gordonConfidence =
+      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
+        ? "low"
+        : "high";
+  }
+
+  // 4. Dynamic P/VP Asset Ceiling (Max 2% premium over Net Asset Value to guard against credit agio)
+  const pvpCeiling = bvps != null && bvps > 0 ? bvps * 1.02 : null;
+
+  // 5. Fuente Consensus (Median across fund-applicable methods; Graham is strictly null)
+  const validModels = [bazin, gordon, pvpCeiling].filter((v): v is number => v !== null && v > 0);
+  let consensus: number | null = null;
+  if (validModels.length > 0) {
+    const sorted = [...validModels].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    consensus =
+      sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  const isUnavailable = consensus === null && bazin === null;
+  const activeCeiling = consensus !== null ? consensus : bazin || 0;
+  const margin = currentPrice > 0 && !isUnavailable ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const dividendYield = currentPrice > 0 ? (avgDividend / currentPrice) * 100 : 0;
+  const yieldTrapWarning = isYieldTrap(dividendYield, historicalYieldAverage ?? null);
+
+  const assumptions: ValuationAssumption[] = [
+    {
+      key: "ntnBSpread",
+      label: "Spread de risco exigido sobre a NTN-B",
+      helperText: "Prêmio de risco acima do título soberano IPCA+ para o fundo",
+      value: spread,
+      isCustomized: false,
+      suggestedRange: spreadRange,
+      confidenceBadge: 4,
+    },
+    {
+      key: "ntnBBaseRate",
+      label: "Taxa real do título público NTN-B (IPCA+)",
+      helperText: "Taxa de juro real livre de risco da economia brasileira",
+      value: ntnBBase,
+      isCustomized: false,
+      suggestedRange: { min: 4.5, max: 7.5 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "inflationPassthrough",
+      label: "Repasse inflacionário dos contratos (IPCA/IGP-M)",
+      helperText: "Capacidade média de reajuste dos proventos e contratos do fundo",
+      value: Number((gTerminal * 100).toFixed(2)),
+      isCustomized: false,
+      suggestedRange: { min: 3, max: 6 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "pvpMaxFair",
+      label: "Teto de P/VP patrimonial (Sem ágio)",
+      helperText: "Limite de preço sobre valor patrimonial (P/VP até 1.02x)",
+      value: 1.02,
+      isCustomized: false,
+      suggestedRange: { min: 0.95, max: 1.05 },
+      confidenceBadge: bvps != null && bvps > 0 ? 4 : 2,
+    },
+  ];
+
+  return {
+    ticker,
+    activeCeiling,
+    margin,
+    fuenteConsensus: consensus,
+    methods: {
+      bazin,
+      graham: null, // Corporate Graham explicitly forbidden for funds
+      gordon,
+    },
+    assumptions,
+    investorProfile: "moderate",
+    bazin,
+    graham: null,
+    gordon,
+    gordonConfidence,
+    consensus,
+    dividendYield,
+    positive: margin >= 0,
+    isUnavailable,
+    yieldTrapWarning,
+    shareholderYield: null,
+  };
+}
+
+/**
  * Universal valuation engine.
  * Acts as the centralized SSOT Dispatcher across all asset classes.
  */
@@ -752,6 +917,10 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
 
   if (type === "STOCK_US") {
     return valuateStockUS(params);
+  }
+
+  if (type === "FII" || type === "FII_INFRA" || type === "FIAGRO") {
+    return valuateFundoImobiliario(params);
   }
 
   // Default fallback for other asset classes (prior to their dedicated prompt specialization)
