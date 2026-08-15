@@ -878,6 +878,166 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
 }
 
 /**
+ * Specialized Valuation for US Real Estate Investment Trusts (REIT)
+ * Implements Bazin Spread over US Treasury 10Y, REIT-adapted Gordon with 4% growth cap,
+ * and 30% withholding tax. Explicitly forbids Graham corporate formula and Selic discount rate.
+ */
+export function valuateREIT(params: AssetValuationParams): ValuationResult {
+  const {
+    ticker = "REIT",
+    targetYield,
+    currentPrice,
+    avgDividend,
+    dividendCagr,
+    dividendHistory,
+    currency = "USD",
+    historicalYieldAverage,
+    customTaxRate,
+    usTreasury10Y = 4.25,
+    affo,
+  } = params;
+
+  if (currentPrice <= 0 || avgDividend <= 0) {
+    return {
+      ticker,
+      activeCeiling: currentPrice > 0 ? currentPrice : 0,
+      margin: 0,
+      fuenteConsensus: null,
+      methods: {
+        bazin: null,
+        graham: null,
+        gordon: null,
+        affoYield: null,
+      },
+      assumptions: [],
+      investorProfile: "moderate",
+      bazin: null,
+      graham: null,
+      gordon: null,
+      gordonConfidence: null,
+      consensus: null,
+      dividendYield: 0,
+      positive: true,
+      isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
+    };
+  }
+
+  // 1. Net Dividend after 30% US Withholding Tax
+  const netAvgDividend = netAfterTax(avgDividend, "REIT", currency, customTaxRate);
+
+  // 2. Bazin Model Anchored on US Treasury 10Y Spread (2.0% - 3.5%, suggested 2.75%)
+  const spread = 2.75;
+  const effectiveRequiredYield = targetYield > 0 ? targetYield : usTreasury10Y + spread;
+  const bazin = effectiveRequiredYield > 0 ? netAvgDividend / (effectiveRequiredYield / 100) : null;
+
+  // 3. REIT-Adapted Gordon Growth Model (k = Treasury 10Y + 4% ERP; g capped at 4%)
+  const k = (usTreasury10Y + 4.0) / 100;
+  const g = dividendCagr != null ? Math.min(0.04, Math.max(0, dividendCagr / 100)) : 0.025;
+  const effectiveK = Math.max(k, g + GORDON_MIN_DISCOUNT_MARGIN);
+  const gordon = (netAvgDividend * (1 + g)) / (effectiveK - g);
+
+  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
+  let gordonConfidence: "high" | "low" | null = null;
+  if (gordon !== null) {
+    gordonConfidence =
+      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
+        ? "low"
+        : "high";
+  }
+
+  // 4. AFFO Yield Ceiling (when AFFO per share is provided)
+  let affoCeiling: number | null = null;
+  if (affo != null && affo > 0 && effectiveRequiredYield > 0) {
+    const netAffo = affo * (1 - (customTaxRate ?? 30) / 100);
+    affoCeiling = netAffo / (effectiveRequiredYield / 100);
+  }
+
+  // 5. Fuente Consensus (Strict Median of REIT-specific methods; Graham is strictly null)
+  const validModels = [bazin, gordon, affoCeiling].filter((v): v is number => v !== null && v > 0);
+  let consensus: number | null = null;
+  if (validModels.length > 0) {
+    const sorted = [...validModels].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    consensus =
+      sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  const isUnavailable = consensus === null && bazin === null;
+  const activeCeiling = consensus !== null ? consensus : bazin || 0;
+  const margin = currentPrice > 0 && !isUnavailable ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
+  const yieldTrapWarning = isYieldTrap(dividendYield, historicalYieldAverage ?? null);
+
+  const assumptions: ValuationAssumption[] = [
+    {
+      key: "treasury10YSpread",
+      label: "Spread de risco sobre a US Treasury 10Y",
+      helperText: "Prêmio de risco exigido sobre a renda fixa soberana americana",
+      value: spread,
+      isCustomized: false,
+      suggestedRange: { min: 2.0, max: 3.5 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "treasury10YRate",
+      label: "Taxa de juros US Treasury 10Y (FRED)",
+      helperText: "Taxa livre de risco da economia americana em USD",
+      value: usTreasury10Y,
+      isCustomized: usTreasury10Y !== 4.25,
+      suggestedRange: { min: 3.5, max: 5.5 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "withholdingTax",
+      label: "Imposto retido na fonte EUA (Withholding Tax)",
+      helperText: "Alíquota de 30% retida na fonte para REITs",
+      value: customTaxRate ?? 30,
+      isCustomized: customTaxRate != null && customTaxRate !== 30,
+      suggestedRange: { min: 15, max: 30 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "reitGrowthCap",
+      label: "Crescimento sustentável imobiliário (Cap 4%)",
+      helperText: "Taxa de expansão de proventos com trava prudencial para REITs",
+      value: Number((g * 100).toFixed(2)),
+      isCustomized: false,
+      suggestedRange: { min: 1.5, max: 4.0 },
+      confidenceBadge: 4,
+    },
+  ];
+
+  return {
+    ticker,
+    activeCeiling,
+    margin,
+    fuenteConsensus: consensus,
+    methods: {
+      bazin,
+      graham: null, // Corporate Graham explicitly forbidden for REITs
+      gordon,
+      affoYield: affoCeiling,
+    },
+    assumptions,
+    investorProfile: "moderate",
+    bazin,
+    graham: null,
+    gordon,
+    gordonConfidence,
+    consensus,
+    dividendYield,
+    positive: margin >= 0,
+    isUnavailable,
+    yieldTrapWarning,
+    shareholderYield: null,
+  };
+}
+
+/**
  * Universal valuation engine.
  * Acts as the centralized SSOT Dispatcher across all asset classes.
  */
@@ -921,6 +1081,10 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
 
   if (type === "FII" || type === "FII_INFRA" || type === "FIAGRO") {
     return valuateFundoImobiliario(params);
+  }
+
+  if (type === "REIT") {
+    return valuateREIT(params);
   }
 
   // Default fallback for other asset classes (prior to their dedicated prompt specialization)
