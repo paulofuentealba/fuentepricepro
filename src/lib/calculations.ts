@@ -313,22 +313,48 @@ export function gordonPrice(
  * Universal valuation engine.
  * Calculates all models and the consensus margin of safety in one place.
  */
-export function getAssetValuation({
-  targetYield,
-  currentPrice,
-  avgDividend,
-  eps,
-  bvps,
-  dividendCagr,
-  dividendHistory,
-  selicPct = 10.5,
-  terminalGrowthRate,
-  currency,
-  type,
-  exchangeRate,
-  historicalYieldAverage,
-  shareholderYield,
-}: {
+// --- ADR-002: Valuation Contracts & Specialized Dispatcher ---
+
+export interface ValuationAssumption {
+  key: string;
+  label: string;
+  helperText: string;
+  value: number;
+  isCustomized: boolean;
+  suggestedRange: { min: number; max: number };
+  confidenceBadge: 1 | 2 | 3 | 4;
+}
+
+export interface ValuationResult {
+  ticker: string;
+  activeCeiling: number | null;
+  margin: number | null;
+  fuenteConsensus: number | null;
+  methods: {
+    bazin: number | null;
+    graham: number | null;
+    gordon: number | null;
+    shareholderYield?: number | null;
+    affoYield?: number | null;
+    bogleModel?: number | null;
+  };
+  assumptions: ValuationAssumption[];
+  investorProfile: "conservative" | "moderate" | "aggressive" | "custom";
+  // Backward compatibility fields for existing UI consumers
+  bazin: number | null;
+  graham: number | null;
+  gordon: number | null;
+  gordonConfidence: "high" | "low" | null;
+  consensus: number | null;
+  dividendYield: number;
+  positive: boolean;
+  isUnavailable: boolean;
+  yieldTrapWarning: ReturnType<typeof isYieldTrap>;
+  shareholderYield: number | null;
+}
+
+export interface AssetValuationParams {
+  ticker?: string;
   targetYield: number;
   currentPrice: number;
   avgDividend: number;
@@ -337,51 +363,63 @@ export function getAssetValuation({
   dividendCagr?: number | null;
   dividendHistory?: readonly { year: number; amount: number }[];
   selicPct?: number;
-  /** Terminal growth rate for the Gordon 2-Stage model (e.g. IPCA médio de 5
-   * anos, resolved by the caller). Falls back to `GORDON_TERMINAL_GROWTH_RATE`
-   * when omitted — keeps this function pure, no I/O happens in here. */
   terminalGrowthRate?: number;
   currency: string;
   type: AssetType;
   exchangeRate?: number;
-  /** Asset's own 5-year historical yield average (already computed by the
-   * caller via `calculateHistoricalYieldAverage`, from `dividendHistory` +
-   * `fetchAssetPriceHistoryFn`'s series) — same pattern as `selicPct` /
-   * `terminalGrowthRate`: resolved outside, threaded through here, this
-   * function stays pure/sync. `null`/`undefined` when indeterminate. */
   historicalYieldAverage?: number | null;
-  /** Shareholder Yield, already computed by the caller (see
-   * `calculateShareholderYield`) — US-only (SEC EDGAR), `null` for BR
-   * assets or whenever data is insufficient. Just threaded through. */
   shareholderYield?: number | null;
-}) {
-  // Bypass complex math for Fixed Income
-  if (type === "FIXED_INCOME") {
-    return {
-      bazin: null,
-      graham: null,
-      gordon: null,
-      gordonConfidence: null,
-      consensus: null,
-      activeCeiling: currentPrice,
-      margin: 0,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
-      shareholderYield: null,
-    };
-  }
+  customTaxRate?: number | null;
+  isJCP?: boolean;
+  roe?: number | null;
+  payoutRatio?: number | null;
+  grahamMultiplier?: number;
+}
+
+/**
+ * Specialized Valuation for Brazilian Stocks (STOCK_BR)
+ * Implements net JCP deduction (15% WHT), configurable Graham safety margin,
+ * and 2-stage Gordon H-Model with ROE/Retention growth.
+ */
+export function valuateStockBR(params: AssetValuationParams): ValuationResult {
+  const {
+    ticker = "STOCK_BR",
+    targetYield,
+    currentPrice,
+    avgDividend,
+    eps,
+    bvps,
+    dividendCagr,
+    dividendHistory,
+    selicPct = 10.5,
+    terminalGrowthRate,
+    currency,
+    historicalYieldAverage,
+    customTaxRate,
+    isJCP,
+    roe,
+    payoutRatio,
+    grahamMultiplier = 22.5,
+  } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
     return {
+      ticker,
+      activeCeiling: currentPrice > 0 ? currentPrice : 0,
+      margin: 0,
+      fuenteConsensus: null,
+      methods: {
+        bazin: null,
+        graham: null,
+        gordon: null,
+      },
+      assumptions: [],
+      investorProfile: "moderate",
       bazin: null,
       graham: null,
       gordon: null,
       gordonConfidence: null,
       consensus: null,
-      activeCeiling: currentPrice > 0 ? currentPrice : 0,
-      margin: 0,
       dividendYield: 0,
       positive: true,
       isUnavailable: true,
@@ -390,24 +428,26 @@ export function getAssetValuation({
     };
   }
 
-  // Apply WHT (Withholding Tax) to dividends for US assets
-  const isUS = isUsAsset(type, currency);
-  const netAvgDividend = isUS ? avgDividend * (1 - US_DIVIDEND_TAX_RATE) : avgDividend;
-  // 1. Bazin Model
+  // 1. Bazin with Net JCP Withholding Tax Deduction (15%)
+  const netAvgDividend = netAfterTax(avgDividend, "STOCK_BR", currency, customTaxRate, isJCP);
   const bazin = targetYield > 0 ? netAvgDividend / (targetYield / 100) : null;
 
-  // 2. Graham Model: Math.sqrt(22.5 * EPS * BVPS)
-  const graham = eps && bvps && eps > 0 && bvps > 0 ? Math.sqrt(22.5 * eps * bvps) : null;
+  // 2. Graham Model with Configurable Safety Multiplier
+  const hasCvmAudit = eps != null && bvps != null && eps > 0 && bvps > 0;
+  const graham = hasCvmAudit ? Math.sqrt(grahamMultiplier * eps * bvps) : null;
 
-  // 3. Gordon Model (2-Stage H-Model with Fallback & Volatility Check)
+  // 3. Gordon Model (2-Stage H-Model with ROE Retention Growth)
   const k = selicPct / 100;
-  const gInitial = dividendCagr != null ? dividendCagr / 100 : null;
-  const gordon = gordonPrice(
-    netAvgDividend,
-    k,
-    gInitial,
-    terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE,
-  );
+  let gInitial: number | null = null;
+  if (dividendCagr != null) {
+    gInitial = dividendCagr / 100;
+  } else if (roe != null && roe > 0) {
+    const retention = 1 - (payoutRatio ?? 50) / 100;
+    gInitial = Math.max(0, Math.min(0.25, (roe / 100) * retention));
+  }
+
+  const gTerminal = terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE;
+  const gordon = gordonPrice(netAvgDividend, k, gInitial, gTerminal);
 
   const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
   let gordonConfidence: "high" | "low" | null = null;
@@ -418,7 +458,7 @@ export function getAssetValuation({
         : "high";
   }
 
-  // 4. Consensus & Margin (Robust Median across valid models)
+  // 4. Fuente Consensus (Strict Median of Applicable Methods for STOCK_BR)
   const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
   let consensus: number | null = null;
   if (validModels.length > 0) {
@@ -432,28 +472,176 @@ export function getAssetValuation({
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
-  const margin = (currentPrice > 0 && !isUnavailable) ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const margin = currentPrice > 0 && !isUnavailable ? (activeCeiling / currentPrice - 1) * 100 : 0;
   const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
+  const yieldTrapWarning = isYieldTrap(dividendYield, historicalYieldAverage ?? null);
 
-  // 5. Yield-Trap Check: current yield vs the asset's own 5y historical average.
-  const yieldTrapWarning = isYieldTrap(
-    dividendYield,
-    historicalYieldAverage ?? null,
-  );
+  // 5. Assumptions Array with Result-Oriented Copy & Confidence Badges
+  const assumptions: ValuationAssumption[] = [
+    {
+      key: "targetYield",
+      label: "Retorno anual em dividendos exigido (Bazin)",
+      helperText: "Yield mínimo anual líquido exigido sobre o preço pago pelo ativo",
+      value: targetYield,
+      isCustomized: targetYield !== 6,
+      suggestedRange: { min: 4, max: 12 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "grahamMultiplier",
+      label: "Multiplicador de segurança patrimonial (Graham)",
+      helperText: "Limite clássico de P/L (15x) × P/VP (1.5x) para empresas lucrativas",
+      value: grahamMultiplier,
+      isCustomized: grahamMultiplier !== 22.5,
+      suggestedRange: { min: 15, max: 30 },
+      confidenceBadge: hasCvmAudit ? 4 : 2,
+    },
+    {
+      key: "discountRate",
+      label: "Taxa de desconto da economia (Selic)",
+      helperText: "Custo de oportunidade soberano livre de risco ancorado na taxa Selic meta",
+      value: selicPct,
+      isCustomized: selicPct !== 10.5,
+      suggestedRange: { min: 8, max: 15 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "terminalGrowth",
+      label: "Crescimento perpétuo ancorado na inflação (IPCA 5a)",
+      helperText: "Taxa de crescimento terminal da economia brasileira no modelo H-Model",
+      value: Number((gTerminal * 100).toFixed(2)),
+      isCustomized: terminalGrowthRate != null && terminalGrowthRate !== GORDON_TERMINAL_GROWTH_RATE,
+      suggestedRange: { min: 2, max: 6 },
+      confidenceBadge: 4,
+    },
+  ];
 
   return {
+    ticker,
+    activeCeiling,
+    margin,
+    fuenteConsensus: consensus,
+    methods: {
+      bazin,
+      graham,
+      gordon,
+    },
+    assumptions,
+    investorProfile: "moderate",
     bazin,
     graham,
     gordon,
     gordonConfidence,
     consensus,
-    activeCeiling,
-    margin,
     dividendYield,
     positive: margin >= 0,
     isUnavailable,
     yieldTrapWarning,
-    shareholderYield: shareholderYield ?? null,
+    shareholderYield: null,
+  };
+}
+
+/**
+ * Universal valuation engine.
+ * Acts as the centralized SSOT Dispatcher across all asset classes.
+ */
+export function getAssetValuation(params: AssetValuationParams): ValuationResult {
+  const { type, currentPrice, avgDividend } = params;
+
+  // Bypass complex math for Fixed Income
+  if (type === "FIXED_INCOME") {
+    return {
+      ticker: params.ticker ?? "FIXED_INCOME",
+      activeCeiling: currentPrice,
+      margin: 0,
+      fuenteConsensus: null,
+      methods: {
+        bazin: null,
+        graham: null,
+        gordon: null,
+      },
+      assumptions: [],
+      investorProfile: "conservative",
+      bazin: null,
+      graham: null,
+      gordon: null,
+      gordonConfidence: null,
+      consensus: null,
+      dividendYield: 0,
+      positive: true,
+      isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
+    };
+  }
+
+  if (type === "STOCK_BR") {
+    return valuateStockBR(params);
+  }
+
+  // Default fallback for other asset classes (prior to their dedicated prompt specialization)
+  const isUS = isUsAsset(type, params.currency);
+  const netAvgDividend = isUS ? avgDividend * (1 - US_DIVIDEND_TAX_RATE) : avgDividend;
+  const bazin = params.targetYield > 0 ? netAvgDividend / (params.targetYield / 100) : null;
+  const graham = params.eps && params.bvps && params.eps > 0 && params.bvps > 0 ? Math.sqrt(22.5 * params.eps * params.bvps) : null;
+  const k = (params.selicPct ?? 10.5) / 100;
+  const gInitial = params.dividendCagr != null ? params.dividendCagr / 100 : null;
+  const gordon = gordonPrice(
+    netAvgDividend,
+    k,
+    gInitial,
+    params.terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE,
+  );
+
+  const growthVolatility = calculateDividendGrowthVolatility(params.dividendHistory);
+  let gordonConfidence: "high" | "low" | null = null;
+  if (gordon !== null) {
+    gordonConfidence =
+      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
+        ? "low"
+        : "high";
+  }
+
+  const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
+  let consensus: number | null = null;
+  if (validModels.length > 0) {
+    const sorted = [...validModels].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    consensus =
+      sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  const isUnavailable = consensus === null && bazin === null;
+  const activeCeiling = consensus !== null ? consensus : bazin || 0;
+  const margin = currentPrice > 0 && !isUnavailable ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
+  const yieldTrapWarning = isYieldTrap(dividendYield, params.historicalYieldAverage ?? null);
+
+  return {
+    ticker: params.ticker ?? type,
+    activeCeiling,
+    margin,
+    fuenteConsensus: consensus,
+    methods: {
+      bazin,
+      graham,
+      gordon,
+      shareholderYield: params.shareholderYield ?? null,
+    },
+    assumptions: [],
+    investorProfile: "moderate",
+    bazin,
+    graham,
+    gordon,
+    gordonConfidence,
+    consensus,
+    dividendYield,
+    positive: margin >= 0,
+    isUnavailable,
+    yieldTrapWarning,
+    shareholderYield: params.shareholderYield ?? null,
   };
 }
 
