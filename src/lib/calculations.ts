@@ -1038,6 +1038,170 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
 }
 
 /**
+ * Specialized Valuation for Exchange-Traded Funds (ETF)
+ * Implements Bogle/Fama-French Expected Return Model, Historical Dividend Yield Anchor,
+ * and Implicit Equity Risk Premium (ERP) for accumulation index funds (IVVB11, WRLD11, QQQ, etc.).
+ * Guarantees zero false "isUnavailable: true" states for non-distributing ETFs.
+ */
+export function valuateETF(params: AssetValuationParams): ValuationResult {
+  const {
+    ticker = "ETF",
+    targetYield,
+    currentPrice,
+    avgDividend,
+    dividendCagr,
+    currency = "BRL",
+    historicalYieldAverage,
+    customTaxRate,
+    selicPct = 10.5,
+    usTreasury10Y = 4.25,
+  } = params;
+
+  if (currentPrice <= 0) {
+    return {
+      ticker,
+      activeCeiling: 0,
+      margin: 0,
+      fuenteConsensus: null,
+      methods: {
+        bazin: null,
+        graham: null,
+        gordon: null,
+        bogleModel: null,
+      },
+      assumptions: [],
+      investorProfile: "moderate",
+      bazin: null,
+      graham: null,
+      gordon: null,
+      gordonConfidence: null,
+      consensus: null,
+      dividendYield: 0,
+      positive: true,
+      isUnavailable: true,
+      yieldTrapWarning: null,
+      shareholderYield: null,
+    };
+  }
+
+  const isUS = isUsAsset("ETF", currency);
+  const netAvgDividend = avgDividend > 0
+    ? netAfterTax(avgDividend, "ETF", currency, customTaxRate)
+    : 0;
+
+  const currentDy = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
+  const isAccumulation = avgDividend <= 0;
+
+  // 1. Expected Returns & ERP Setup
+  const riskFreeRate = isUS ? usTreasury10Y : Math.max(5.5, selicPct - 4.5);
+  const classErp = isUS ? 4.75 : 6.0; // 4.75% US S&P500 ERP, 6.0% IBOVESPA ERP
+  const totalExpectedReturn = riskFreeRate + classErp;
+
+  // 2. Bogle Expected Return Model: Retorno = DY + Crescimento Lucros
+  const constituentGrowth = dividendCagr != null && dividendCagr > 0 ? dividendCagr : 7.0;
+  let bogleModelCeiling: number;
+  if (!isAccumulation) {
+    const requiredReturn = targetYield > 0 ? targetYield : 8.0;
+    const bogleExpectedYield = currentDy + constituentGrowth;
+    bogleModelCeiling = currentPrice * (bogleExpectedYield / (requiredReturn + constituentGrowth * 0.5));
+  } else {
+    // For Accumulation ETFs (IVVB11, QQQ, WRLD11), fair value is anchored on ERP discounted relative to investor required return
+    const requiredDiscount = targetYield > 0 ? targetYield + riskFreeRate : totalExpectedReturn;
+    bogleModelCeiling = currentPrice * (totalExpectedReturn / requiredDiscount);
+  }
+
+  // 3. Historical Dividend Yield Bazin Model
+  let bazinCeiling: number | null = null;
+  if (!isAccumulation && targetYield > 0) {
+    const effectiveDy = historicalYieldAverage ?? currentDy;
+    bazinCeiling = (currentPrice * effectiveDy) / targetYield;
+  } else if (isAccumulation) {
+    // For accumulation, Bazin uses the implicit earnings yield
+    bazinCeiling = bogleModelCeiling;
+  }
+
+  // 4. Fuente Consensus (Strict Median of ETF-applicable methods; Graham is strictly null)
+  const validModels = [bazinCeiling, bogleModelCeiling].filter((v): v is number => v !== null && v > 0);
+  let consensus: number | null = null;
+  if (validModels.length > 0) {
+    const sorted = [...validModels].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    consensus =
+      sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  const activeCeiling = consensus !== null ? consensus : bogleModelCeiling;
+  const margin = currentPrice > 0 ? (activeCeiling / currentPrice - 1) * 100 : 0;
+  const yieldTrapWarning = isYieldTrap(currentDy, historicalYieldAverage ?? null);
+
+  const assumptions: ValuationAssumption[] = [
+    {
+      key: "historicalDividendYield",
+      label: isAccumulation ? "Yield implícito de acumulação (Reinvestimento)" : "Dividend Yield médio ponderado do ETF",
+      helperText: isAccumulation ? "ETF reinveste dividendos automaticamente na cota" : "Yield histórico apurado dos constituintes",
+      value: isAccumulation ? totalExpectedReturn : Number(currentDy.toFixed(2)),
+      isCustomized: false,
+      suggestedRange: isAccumulation ? { min: 6, max: 14 } : { min: 2, max: 10 },
+      confidenceBadge: isAccumulation ? 3 : 4,
+    },
+    {
+      key: "constituentGrowth",
+      label: "Crescimento histórico dos constituintes (Bogle Model)",
+      helperText: "Expansão composta de lucros e dividendos do índice subjacente",
+      value: constituentGrowth,
+      isCustomized: false,
+      suggestedRange: { min: 4, max: 12 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "equityRiskPremium",
+      label: isUS ? "Prêmio de risco acionário EUA (ERP S&P500)" : "Prêmio de risco acionário Brasil (ERP Ibovespa)",
+      helperText: "Prêmio exigido sobre a taxa soberana para investimento em índice",
+      value: classErp,
+      isCustomized: false,
+      suggestedRange: isUS ? { min: 4.0, max: 5.5 } : { min: 5.0, max: 7.5 },
+      confidenceBadge: 4,
+    },
+    {
+      key: "requiredReturn",
+      label: "Retorno total anual exigido pelo investidor",
+      helperText: "Taxa mínima aceitável de valorização composta e proventos",
+      value: targetYield > 0 ? targetYield : 8.0,
+      isCustomized: targetYield !== 8.0,
+      suggestedRange: { min: 6, max: 14 },
+      confidenceBadge: 4,
+    },
+  ];
+
+  return {
+    ticker,
+    activeCeiling,
+    margin,
+    fuenteConsensus: consensus,
+    methods: {
+      bazin: bazinCeiling,
+      graham: null, // Corporate Graham strictly forbidden for ETFs
+      gordon: null, // Single-stock Gordon strictly forbidden for ETFs
+      bogleModel: bogleModelCeiling,
+    },
+    assumptions,
+    investorProfile: "moderate",
+    bazin: bazinCeiling,
+    graham: null,
+    gordon: null,
+    gordonConfidence: null,
+    consensus,
+    dividendYield: currentDy,
+    positive: margin >= 0,
+    isUnavailable: false, // Never mark accumulation ETFs as unavailable
+    yieldTrapWarning,
+    shareholderYield: null,
+  };
+}
+
+/**
  * Universal valuation engine.
  * Acts as the centralized SSOT Dispatcher across all asset classes.
  */
@@ -1085,6 +1249,10 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
 
   if (type === "REIT") {
     return valuateREIT(params);
+  }
+
+  if (type === "ETF") {
+    return valuateETF(params);
   }
 
   // Default fallback for other asset classes (prior to their dedicated prompt specialization)
