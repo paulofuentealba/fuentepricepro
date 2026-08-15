@@ -327,8 +327,8 @@ export interface ValuationAssumption {
 
 export interface ValuationResult {
   ticker: string;
-  activeCeiling: number | null;
-  margin: number | null;
+  activeCeiling: number;
+  margin: number;
   fuenteConsensus: number | null;
   methods: {
     bazin: number | null;
@@ -374,6 +374,8 @@ export interface AssetValuationParams {
   roe?: number | null;
   payoutRatio?: number | null;
   grahamMultiplier?: number;
+  usTreasury10Y?: number | null;
+  affo?: number | null;
 }
 
 /**
@@ -927,13 +929,15 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   // 1. Net Dividend after 30% US Withholding Tax
   const netAvgDividend = netAfterTax(avgDividend, "REIT", currency, customTaxRate);
 
+  const effectiveTreasury10Y = usTreasury10Y ?? 4.25;
+
   // 2. Bazin Model Anchored on US Treasury 10Y Spread (2.0% - 3.5%, suggested 2.75%)
   const spread = 2.75;
-  const effectiveRequiredYield = targetYield > 0 ? targetYield : usTreasury10Y + spread;
+  const effectiveRequiredYield = targetYield > 0 ? targetYield : effectiveTreasury10Y + spread;
   const bazin = effectiveRequiredYield > 0 ? netAvgDividend / (effectiveRequiredYield / 100) : null;
 
   // 3. REIT-Adapted Gordon Growth Model (k = Treasury 10Y + 4% ERP; g capped at 4%)
-  const k = (usTreasury10Y + 4.0) / 100;
+  const k = (effectiveTreasury10Y + 4.0) / 100;
   const g = dividendCagr != null ? Math.min(0.04, Math.max(0, dividendCagr / 100)) : 0.025;
   const effectiveK = Math.max(k, g + GORDON_MIN_DISCOUNT_MARGIN);
   const gordon = (netAvgDividend * (1 + g)) / (effectiveK - g);
@@ -986,8 +990,8 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
       key: "treasury10YRate",
       label: "Taxa de juros US Treasury 10Y (FRED)",
       helperText: "Taxa livre de risco da economia americana em USD",
-      value: usTreasury10Y,
-      isCustomized: usTreasury10Y !== 4.25,
+      value: effectiveTreasury10Y,
+      isCustomized: effectiveTreasury10Y !== 4.25,
       suggestedRange: { min: 3.5, max: 5.5 },
       confidenceBadge: 4,
     },
@@ -1093,7 +1097,8 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
   const isAccumulation = avgDividend <= 0;
 
   // 1. Expected Returns & ERP Setup
-  const riskFreeRate = isUS ? usTreasury10Y : Math.max(5.5, selicPct - 4.5);
+  const effectiveTreasury10Y = usTreasury10Y ?? 4.25;
+  const riskFreeRate = isUS ? effectiveTreasury10Y : Math.max(5.5, selicPct - 4.5);
   const classErp = isUS ? 4.75 : 6.0; // 4.75% US S&P500 ERP, 6.0% IBOVESPA ERP
   const totalExpectedReturn = riskFreeRate + classErp;
 

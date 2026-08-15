@@ -1,483 +1,170 @@
 # Fuente Price Pro — SSOT (Single Source of Truth)
 
-> **Este é o único documento de status do projeto.** Substitui `BACKLOG_V2.md`,
-> `PROMPTS_LOG.md`, `RELATORIO_PUSH_DEV.md`, `CHAT_SUMMARY_2026-07-29.md`,
-> `CLAUDE_AUDIT_GERAL.md`, `api_enrichment_report*.md`, `api_enrichment_action_plan.md`
-> e `docs/arquitetura/*`. Esses arquivos foram movidos para `docs/_archive/` (não
-> apagados — ver nota no fim). `docs/AGENTS.md` continua vivendo separado, como
-> arquivo de governança ativo referenciado por `scripts/check.py`; o conteúdo dele
-> está reproduzido aqui na Seção 8 para não obrigar consulta cruzada.
+> **ESTE É O ÚNICO DOCUMENTO CANÔNICO DE VERDADE E STATUS DO PROJETO.**
 >
-> Consolidado em 10/08/2026 a partir de: `docs/` (leitura direta via Filesystem MCP)
-> + histórico completo dos chats `[ROADMAP]`, `[EXECUÇÃO]`, `[REVISÃO]`, `[BENCHMARK]`.
-> Gerado pelo `[ROADMAP]`, papel `fuente-product-manager`.
+> **Substitui e consolida definitivamente**: `PROMPTS.md`, `PROMPTS_LOG.md`, `BACKLOG_V2.md`, `RELATORIO_PUSH_DEV.md`, `CHAT_SUMMARY_2026-07-29.md`, `CLAUDE_AUDIT_GERAL.md`, `api_enrichment_report*.md`, `api_enrichment_action_plan.md` e `docs/arquitetura/*`.
+> A partir de **15/08/2026**, o arquivo [`SSOT.md`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/docs/SSOT.md) é a **ÚNICA fonte da verdade** do projeto — nenhum arquivo de prompt isolado deve ser considerado fonte canônica.
+>
+> `docs/AGENTS.md` vive como arquivo de governança referenciado por `scripts/check.py`, e seu conteúdo canônico está reproduzido integralmente na Seção 8 deste documento.
 
 ---
 
 ## 1. O que é o produto
 
-**Fuente Price Pro** (fuentepricepro.com) — SaaS fintech para investidores de
-dividendos, cobrindo mercados brasileiro (B3) e americano. Oferece consenso de
-valuation (Bazin, Graham, Gordon/H-Model), acompanhamento de carteira, projeção de
-renda de dividendos, importação de nota de corretagem, e tratamento fiscal
-cross-border (dividendos BR, JCP 15%, WHT US 30%).
+**Fuente Price Pro** ([fuentepricepro.com](https://fuentepricepro.com)) — Plataforma SaaS fintech voltada para investidores focados em dividendos e geração de renda passiva, cobrindo com precisão matemática os mercados brasileiro (B3) e norte-americano (NYSE/NASDAQ).
 
-**Paulo Fuentealba** é fundador solo e único desenvolvedor. Antigravity (agente de
-IA baseado em Gemini) executa o código; Claude atua como camada de verificação e
-gate arquitetural, nunca aceitando relato de sucesso do agente sem checar direto no
-filesystem real.
+### Principais Capacidades:
+- **Consenso de Valuation Multi-Classe**: Algoritmos puros e especializados por classe de ativo (Ações BR, Ações US, FIIs/Fi-Infra/Fi-Agro, REITs, ETFs e Renda Fixa) implementando Bazin, Graham, Gordon/H-Model, Peter Lynch e Modelo Bogle.
+- **Ledger de Carteira & Custo Médio Ponderado**: Acompanhamento de posição real reconciliada via transações idempotentes (`Transaction[]`).
+- **Importação Inteligente de Extratos & Notas**: Suporte a 14 corretoras SINACOR via PDF e importador dinâmico de planilhas/CSVs de qualquer corretora.
+- **Tratamento Fiscal Cross-Border**: Isenção de dividendos BR, dedução líquida de 15% de imposto retido na fonte em JCP (`JCP_TAX_RATE`) e 30% de withholding tax (WHT) para ativos norte-americanos.
+- **BFF & Arquitetura Cloud-First**: Server functions em TanStack Start executando consolidação de carteira e valuation em lote com cache em memória RAM de 5 minutos no servidor.
 
-**Stack**: React 19, TanStack Start/Router/Query, Firebase/Firestore, Tailwind CSS
-v4, Vite/SSR, Cloud Run (região `us-east1`), Vitest.
+**Fundador & Desenvolvedor Solo**: Paulo Fuentealba.  
+**Engenharia Assistida**: Antigravity (IA Gemini) para execução de código com governança estrita e 3 verification gates obrigatórios (`tsc`, `vitest`, `build`).
 
-**Moat competitivo**: tratamento fiscal BR+US combinado dentro de um ledger real de
-carteira com custo médio ponderado e importação de nota (14 corretoras) — combinação
-que nem Investidor10 nem Snowball Analytics oferecem hoje. Onde o mercado ainda lidera:
-alertas de preço, comunidade/social, rating de risco mais elaborado.
+**Stack Tecnológica**: React 19, TanStack Start / Router / Query, Firebase / Firestore, Tailwind CSS v4 (design system com tokens OKLCH), Vite / SSR, Cloud Run (`us-east1`), Vitest.
+
+---
 
 ## 2. A decisão estrutural vigente
 
-**Parar de construir o motor, começar a construir o negócio.** Diagnóstico: um motor
-90% completo com 0% de instrumentação e 0% de monetização não é um negócio.
-
-- **Épico 1 (Core)**: fechado, ~90-100%.
-- **Épico 2 (Inteligência)**: 0%.
-- **Épico 3 (Monetização)**: fundação técnica concluída, ativação em pausa por
-  decisão consciente de produto.
-- **Épico 4 (Experiência)**: parcial.
+**Parar de construir o motor, focar em valor e escala do negócio.**
+- **Épico 1 (Core)**: 100% concluído (Valuation Multi-Classe, Read Model `/positions`, BFF e Cache).
+- **Épico 2 (Inteligência)**: 0% — Próximos passos após monetização.
+- **Épico 3 (Monetização & Admin)**: Painel Admin concluído (`/admin`), Feature Gates consolidados no Firestore, integração Stripe pronta para ativação de webhook.
+- **Épico 4 (Experiência & Compliance)**: UI Simples/Avançado concluída, Termos/Privacidade publicados, Disclaimer CVM e Consentimento LGPD ativos.
+- **Épico 5 (Identidade Horizonte FI)**: 100% ativo em produção real (`src/styles.css`, paleta petróleo `#2C6B63`, tipografia Fraunces + Inter).
 
 ---
 
-## 3. Estado por Épico (o que já existe vs. o que falta)
+## 3. Estado Consolidado por Épico
 
-### Épico 1 — Core de Investimentos e Automação ✅ (~90-100%)
+### Épico 1 — Core de Investimentos, Valuation & Automação ✅ (100%)
 
-| Item | Status | Nota |
+| Item | Status | Detalhamento Técnico |
 |---|---|---|
-| 1.1 Importação de Notas (14 corretoras SINACOR) | ✅ | `b3Parser.ts`; gravação automática em `Transaction[]` com ID determinístico idempotente; resolução interativa de tickers não identificados via `issuerTickerMappings` |
-| 1.2 Registro de proventos e renda realizada | ✅ | SSOT em `calculateRealizedIncome` (`realizedIncome.ts`); WHT 30% US, JCP 15%, isenção FII/BR aplicadas |
-| 1.3 Eventos Corporativos (split/agrupamento) | ✅ | Detecção automatizada via Yahoo Finance, validado ao vivo em ativos BR e US |
-| 1.4 Multi-moeda e Renda Fixa (WHT/JCP) | ✅ | JCP identificado via campo `label` da Brapi; Renda Fixa BR (CDB/Tesouro) suportada |
-| 1.5 TWR/IRR vs. Benchmark | 🟡 | IRR (Newton-Raphson + Bisseção) concluído e segmentado por moeda (CDI/Selic para BRL, S&P 500 para USD); snapshots diários gravando; **TWR acumulado ⚪ aguarda massa histórica** |
-| 1.6 Rebalanceamento por Meta | ✅ | `TargetAllocationPanel`, `computeSuggestedAllocation` (por perfil + estratégia), `computeSmartAllocation` (aporte direcionado). Sugestão de venda ativa fica fora de escopo, documentada à parte |
-| 1.7 Import/Export CSV/Excel + Benchmark no Comparador | ✅ | 4 fases concluídas: import Watchlist com transações sintéticas, export do Comparador, template avançado com data de compra (3 idiomas), gráfico de desempenho com benchmark automático (IBOV/S&P 500) |
+| 1.1 Importação de Notas SINACOR | ✅ | `b3Parser.ts`; 14 corretoras homologadas; gravação determinística em `Transaction[]`; resolução de tickers via `issuerTickerMappings`. |
+| 1.2 Registro de proventos e renda realizada | ✅ | SSOT em `calculateRealizedIncome` (`realizedIncome.ts`); WHT 30% US, JCP líquido 15%, isenção FIIs/BR. |
+| 1.3 Eventos Corporativos | ✅ | Detecção automatizada via Yahoo Finance (splits, agrupamentos, bonificações) aplicada a holdings. |
+| 1.4 Multi-moeda e Renda Fixa | ✅ | Câmbio comercial via `exchangeRateQueryOptions`; CDB/Tesouro com projeção de vencimento (`projectFixedIncomeValueAtMaturity`). |
+| 1.5 TWR/IRR vs. Benchmark | 🟡 | IRR (Newton-Raphson + Bisseção) segmentado por moeda (CDI/Selic para BRL, S&P 500 para USD); snapshots diários gravando. |
+| 1.6 Rebalanceamento por Meta | ✅ | `TargetAllocationPanel`, `computeSuggestedAllocation`, `computeSmartAllocation` (aporte direcionado). |
+| 1.7 Import/Export CSV/Excel Dinâmico | ✅ | Importador inteligente client-side com auto-detecção de colunas, preview e deduplicação (`DynamicImportModal.tsx`). |
+| 1.8 Dispatcher Canônico de Valuation | ✅ | SSOT em [`src/lib/calculations.ts`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/src/lib/calculations.ts) (`getAssetValuation`): especializado para `STOCK_BR`, `STOCK_US`, `FII`/`FII_INFRA`/`FIAGRO`, `REIT`, `ETF`. |
+| 1.9 Read Model de Posições Consolidadas | ✅ | [`src/lib/api/positions.server.ts`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/src/lib/api/positions.server.ts) — Idempotência estrita, validado em 1.200 transações sintéticas. |
+| 1.10 BFF & Cache em Memória RAM | ✅ | [`src/lib/api/portfolioBff.server.ts`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/src/lib/api/portfolioBff.server.ts) e [`src/lib/api/assetCache.server.ts`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/src/lib/api/assetCache.server.ts) (TTL 5m). |
+| 1.11 SSOT Leak & Tagline Guards | ✅ | Scripts de pré-build `check-ssot-leaks.js` e `forbid-legacy-tagline.js` bloqueando regressões. |
 
 ### Épico 2 — Inteligência e Engajamento ⚪ (0%)
 
-| Item | Status |
-|---|---|
-| 2.1 Assistente de IA | ⚪ Não existe |
-| 2.2 Alertas/Notificações (push/email) | ⚪ Não existe. `RESEND_API_KEY` cogitada mas nunca ativada |
-| 2.3 Módulo de IRPF | ⚪ Não existe. Depende de 1.2 (pronto). **Bloqueado por disclaimer CVM obrigatório (ver Seção 6)** |
+| Item | Status | Nota |
+|---|---|---|
+| 2.1 Assistente de IA | ⚪ Backlog | Análise contextual de carteira |
+| 2.2 Alertas & Notificações | ⚪ Backlog | Push/Email via Resend |
+| 2.3 Módulo de IRPF | ⚪ Backlog | Desbloqueado pelo disclaimer CVM (Seção 6) |
 
 ### Épico 3 — Monetização e Administração 🔒
 
-| Item | Status |
-|---|---|
-| 3.1 Fundação de Entitlement (Free/Pro) | ✅ **Concluído** — ver Seção 5 |
-| Integração Stripe (webhook) | 🔴 **Não iniciado** — próximo passo real |
-| 3.2 Painel Admin (`/admin`) | ⚪ Não existe. Aguarda decisão de monetização madura |
+| Item | Status | Detalhamento Técnico |
+|---|---|---|
+| 3.1 Entitlement & Feature Gates | ✅ | `SubscriptionProvider` reativo via `onSnapshot` lendo `config/featureGates` no Firestore. |
+| 3.2 Painéis Administrativos (`/admin`) | ✅ | Abas de Feature Gates, Ingestion Log e Gestão de Usuários com proteção de rota `adminAccess`. |
+| 3.3 Integração Stripe Webhook | 🟡 Discovery Pronto | Documentado em `RESULTADO - 76 — Discovery Webhook Stripe.md` (idempotência, segredos, vinculação). |
 
-### Épico 4 — Experiência, Design e Privacidade
+### Épico 4 — Experiência, Design e Privacidade ✅
 
-| Item | Status |
-|---|---|
-| 4.1 Onboarding/Conversão | 🟡 Questionário de perfil (6 telas) concluído; falta banner de fonte de dados e personalização profunda de UI |
-| 4.2 Compliance CVM/KYC | 🟡 Perfilamento é UX, não Suitability formal. Disclaimer CVM ⚪ pendente, obrigatório antes da Fase 4 |
-| 4.3 LGPD/GDPR | 🟡 Export e exclusão de conta ✅ concluídos e verificados. Banner de cookies/consentimento 🟡 pendente |
-| 4.4 UI/UX "Pro Terminal" | ✅ Essencialmente concluído |
+| Item | Status | Detalhamento Técnico |
+|---|---|---|
+| 4.1 Onboarding & Perfil | ✅ | Fluxo de questionário de perfil do investidor (`useInvestorProfile.ts`) e consentimento. |
+| 4.2 Compliance CVM | ✅ | Banner regulatório persistente em todas as telas de análise (`RegulatoryDisclaimerBanner.tsx`). |
+| 4.3 LGPD / GDPR | ✅ | Exportação completa de dados em JSON, exclusão de conta e banner de cookies (`CookieConsentBanner.tsx`). |
+| 4.4 Páginas Jurídicas Públicas | ✅ | `/privacy` e `/terms` publicadas sem autenticação, nos 3 idiomas (PT-BR, EN, ES). |
+| 4.5 Modal de Premissas (Simples / Avançado) | ✅ | [`ValuationAssumptionsModal.tsx`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/src/components/ceiling/watchlist/assetCard/ValuationAssumptionsModal.tsx) — Dumb frontend orientado a DTO com sliders e badges de confiança (1 a 4). |
 
-### Épico 5 — Horizonte FI (Nova Identidade Visual) 🟢 Em produção real, não é mais v2 paralela
+### Épico 5 — Identidade Visual Horizonte FI ✅ (100% Produção)
 
-**Mudança de decisão registrada (11/08, chat `[EXECUÇÃO]` com Claude)**: a
-abordagem de v2 paralela (`/app-v2`, tokens escopados em
-`[data-app-version="horizonte"]`) foi **abandonada por decisão explícita de
-Paulo** — não "expandida para todas as rotas" como uma versão anterior deste
-documento registrava. A identidade Horizonte FI (paleta petróleo `#2C6B63`,
-tipografia Fraunces+Inter) **substituiu a identidade em produção diretamente**:
-
-- Os valores dos tokens já existentes (`--primary`, `--background`,
-  `--foreground`, `--card`, `--border`, `--muted-foreground`, `--success`,
-  `--danger`) foram trocados **direto em `src/styles.css`** (sem escopo), e
-  `--font-serif` (Fraunces) foi adicionado ao catálogo. `horizonte-tokens.css`
-  (a versão escopada) foi **deletado** — não existe mais.
-- `src/routes/app-v2/` foi **deletado por completo**. Não existe rota v2
-  paralela hoje.
-- `src/routes/app/index.tsx` (antes só um redirect pra `/app/myportfolio`)
-  agora é o **dashboard real de produção**: hero "Horizonte FI" (canvas
-  animado com `useFIProgress()`), 3 cards de resumo (Patrimônio Total,
-  Proventos do Ano via `useRealizedIncomeSummary()` extraído, Maior Posição),
-  "Aporte deste mês" e "Renda Passiva Atual" no próprio hero, snapshot leve de
-  "desde a última visita" (campo único em `users/{uid}`, sem histórico), e
-  prévia de 4 linhas da carteira com link para a tela completa.
-- Modal "Registrar Aporte" (`NewContributionDialog.tsx`) unificado num único
-  `<Dialog>` persistente (não fecha/reabre entre buscar ticker e preencher a
-  transação) e, em 12/08, o passo intermediário foi removido por completo —
-  busca de ticker e formulário ficam visíveis juntos desde a abertura do
-  modal (ver item 5.5).
-- Os 2 achados de acessibilidade da QA anterior (contraste `--h-ink-faint`
-  abaixo de AA; cabeçalhos de tabela não navegáveis por teclado) **resolveram-
-  se como efeito colateral** da migração — o token de baixo contraste não
-  existe mais (remapeado pro catálogo real) e `SortableHeader` já tem
-  `tabIndex`/`onKeyDown`.
-- Os prompts numerados 55-64 (`docs/Prompts/`) que propunham continuar a
-  abordagem de v2 paralela para as demais rotas (Screener, Comparador, Global
-  Radar, Risk Radar, Smart Allocation, Snowball, Cash Flow, Docs, Settings)
-  **existem só como arquivo de especificação, nunca foram executados** —
-  ficam como candidato de backlog caso Paulo decida estender a identidade
-  Horizonte pras demais telas, mas precisam ser reescritos pro padrão "direto
-  em produção" antes de rodar, não pro padrão `/app-v2` original.
-
-| Item | Status |
-|---|---|
-| 5.1 Design tokens (Fraunces+Inter, paleta petróleo) em produção | ✅ `src/styles.css`, fontes locais `public/fonts/*.woff2` |
-| 5.2 Elemento de assinatura "Horizonte FI" (hero canvas) | ✅ `HorizonteHero.tsx`, tokens reais (não mais `--h-*`) |
-| 5.3 Home/dashboard real em `/app` | ✅ `src/routes/app/index.tsx` |
-| 5.4 Tabela de carteira com P&L, ordenação acessível | ✅ `PortfolioTableV2.tsx` (nome do arquivo mantido por histórico, não é mais "v2" no sentido de rota paralela) |
-| 5.5 Modal "Registrar Aporte" — 1 tela única, sem passo intermediário | ✅ Concluído — busca e formulário visíveis juntos desde a abertura, campos desabilitados até escolher o ticker |
-| 5.6 Persistência de trajetória histórica completa (gráfico ao longo do tempo) | ✅ `useHorizonteTrajectory` (`src/lib/horizonteTrajectory.ts`) lê `portfolioSnapshots/*` e alimenta uma sparkline em `HorizonteHero.tsx` (só aparece com ≥7 dias de dado). Backfill retroativo (`useHorizonteBackfill`, `src/lib/portfolioSnapshotBackfill.ts`) reconstrói só `totalInvestedBRL` a partir de `Transaction[]` — `totalValueBRL` fica `null` nesses dias (nunca inventado/interpolado); valor de mercado real só existe a partir de quando `usePortfolioSnapshot` (não alterado) gravou o dia em produção. Backfill de valor de mercado real via `fetchAssetPriceHistoryFn` foi avaliado e descartado por ora (custo de API + cobertura incerta pra ativos BR de baixa liquidez) — ver `docs/Prompts/RESULTADO - 78 — Trajetoria Historica Horizonte.md` |
-| 5.7 Estender identidade Horizonte pras demais rotas (Screener, Comparador, Radars, etc.) | ⚪ Backlog — specs existem (docs/Prompts 55-64) mas precisam reescrita pro padrão de produção direta antes de rodar |
+- Tokens centralizados em `src/styles.css` (OKLCH, cores semânticas `--primary`, `--success`, `--warning`, `--danger`).
+- Hero dinâmico em `/app` com canvas e cálculo de progresso de independência financeira (`HorizonteHero.tsx`).
+- Tipografia oficial Fraunces (serif) + Inter (sans), servidas localmente em WOFF2.
 
 ---
 
-## 4. Linha do tempo recente (mais relevante — não histórico completo)
+## 4. Linha do Tempo e Marcos de Engenharia
 
-**29/07** — Sessão que gerou `BACKLOG_V2.md`/`PROMPTS_LOG.md` como fontes únicas
-(agora substituídos por este SSOT). Causa raiz do bug de fidelidade do Fuente
-Consensus resolvida (6 pontos divergentes unificados em `useValuedPortfolio`).
-
-**31/07–02/08** — Pipeline de deploy corrigido (região `us-east1`, Dockerfile,
-Cloud Build logging). Ledger de transações completo (Camada 3). `AssetDetailSheet`
-reorganizado em 4 abas. Rodada de benchmark competitivo formal (Investidor10,
-StatusInvest, Snowball) e mapeamento de arquitetura corporativa (TOGAF/Gartner/BIAN).
-
-**07-08/08** — 25 commits pushados para `dev` (ver lista completa arquivada em
-`RELATORIO_PUSH_DEV.md`), incluindo: correção de divergência Ceiling Price vs.
-Consensus, Global Radar zerado, melhorias de UX no Screener, análise de opções de
-preview Pro, **desativação global de paywalls (decisão consciente, arquitetura
-intacta)**, correção de ETFs/STOCK_US ausentes no Cash Flow, e diagnóstico do
-timing `as_of` no SSOT de valuation.
-
-**08-09/08** — Sessão grande de `[EXECUÇÃO]`: consolidação do sistema de feature
-gates (fim do switch `DISABLE_PAYWALLS`, fonte única `config/featureGates`),
-evolução do Gordon para H-Model de 2 estágios com confiança por ativo, Item 6C
-Fase 2 (transações sintéticas nos 3 pontos de escrita manual), design system com
-token `--comparison` e lint automático contra cor hardcoded.
-
-**12/08** — Política de Privacidade e Termos de Uso publicados nas novas
-rotas públicas `/privacy` e `/terms` (sem autenticação), nos 3 idiomas.
-Conteúdo aprovado por Paulo (`docs/Prompts/politica_privacidade_rascunho.md`
-+ `termos_de_uso_rascunho.md`) — só traduzido, não alterado em substância;
-3 placeholders `[preencher]` do rascunho preenchidos mecanicamente (data
-de publicação, e-mail de contato reaproveitado). Conteúdo estruturado em
-`src/lib/legal-content.ts`, fora dos dicts `i18n/dict.*.ts` (decisão:
-tamanho do texto jurídico tornaria os dicts, já com ~1000 linhas, difíceis
-de navegar). Layout reaproveitado de `guides.dividend-valuation.tsx`
-(único padrão existente de página pública de texto longo, sem auth) em vez
-de `settings.tsx`/`app/docs.tsx` (ambos exigem sessão, vivem sob `/app/`).
-Rodapé da landing conectado: "Legais" virou 2 links reais — "Privacidade"
-(`/privacy`) e novo "Termos de Uso" (`/terms`); "Termos de subscrição"
-identificado como documento distinto (termos de assinatura Pro, nunca
-redigido) e **não** apontado pra `/terms` — gap registrado como pendência
-nova (item 17), não inventado. Link cruzado real entre os dois documentos
-via `<Link>` do TanStack Router. Gates: `tsc --noEmit` ✅ (após regenerar
-`routeTree.gen.ts`), 241 testes ✅ (4 skipped, incluindo
-`design-tokens.test.ts` 6/6), `npm run build` ✅. Resultado:
-`docs/Prompts/RESULTADO - Publicar Privacidade e Termos.md`.
-
-**12/08** — Proteção contra duplicata em lançamento manual de transação
-(`TransactionFormFields.tsx`, compartilhado pelos 3 pontos de entrada:
-Registrar Aporte, Adicionar Renda Variável, edição via `TransactionsPanel`).
-Causa raiz real do duplo-clique não era falta de ID determinístico (decisão
-de produto: **não** adotar sobrescrita silenciosa aqui, ao contrário do
-CSV/PDF — um lançamento manual idêntico pode ser uma segunda compra real) —
-era o botão Save não travar durante o `await onSave`. Corrigido com
-`isSaving`/`savingRef` (guard duplo: estado pra UI, ref pra fechar a janela
-de duplo-clique síncrono que `setState` sozinho não cobre) + spinner
-"Salvando..." (mesmo padrão do `BrokerNoteUploader.tsx`). Adicionado aviso
-client-side (`AlertDialog` do shadcn/ui, existia mas nunca tinha sido usado)
-quando detecta ticker+tipo+mesmo dia+quantidade+preço já existentes —
-avisa, não bloqueia, usuário decide. Chaves i18n novas nos 3 idiomas
-(`common.saving`, `transactions.duplicateWarning*`). Suíte de teste nova
-(`TransactionFormFields.test.tsx`, 4 testes) cobrindo os 5 cenários
-obrigatórios do prompt. Gates: `tsc --noEmit` ✅, 241 testes ✅ (4 skipped),
-`npm run build` ✅. Resultado:
-`docs/Prompts/RESULTADO - Idempotencia Lancamento Manual.md`. Item 15 da
-Seção 6 fechado.
-
-**12/08** — Dropdown "+ Adicionar Ativo" da Watchlist unificado no padrão de
-tela única. "Adicionar Renda Variável" deixou de **navegar** pra
-`/app/screener` e agora abre `NewContributionDialog.tsx` reaproveitado sem
-alteração (instância própria em `Watchlist.tsx`, `showNewContribution`,
-separada da do dashboard); prop `onNavigateToScreener` renomeada pra
-`onOpenNewContribution` em `AddAssetDropdown.tsx`/`WatchlistToolbar.tsx`.
-"Adicionar Renda Fixa" reescrita de `FixedIncomeWizardSheet.tsx` (`Sheet`, 3
-passos sequenciais) pra `AddFixedIncomeDialog.tsx` (`Dialog`, 1 tela única) —
-Indexador/Nome/Valor/Taxa/Datas todos visíveis juntos, prévia do valor
-projetado reativa (antes só aparecia no passo 3), botão desabilitado até
-campos obrigatórios preenchidos. Lógica de cálculo
-(`projectFixedIncomeValueAtMaturity`) e persistência (item + transação
-inicial com ID determinístico) reaproveitadas sem alteração — só a
-apresentação mudou. `TransactionFormFields.tsx`/`TickerSearchField.tsx`/
-`AddToWatchlistDialog.tsx`/`AssetCard.tsx` não tocados. Gates: `tsc --noEmit`
-✅, 237 testes ✅ (4 skipped), `npm run build` ✅. Resultado:
-`docs/Prompts/RESULTADO - Unificar Adicionar Ativo.md`.
-
-**12/08** — Modal "Registrar Aporte" (`NewContributionDialog.tsx`) passou a
-ser **1 tela única sem passos**: busca de ticker e campos da transação
-(Tipo/Data/Quantidade/Preço/Taxas) ficam visíveis juntos desde a abertura,
-começando desabilitados e habilitando no lugar quando um ticker é escolhido
-(sem swap condicional, sem `animate-in`). `TransactionFormFields.tsx` ganhou
-prop `disabled?: boolean` e passou a aceitar `item: WatchlistItem | null`;
-`TransactionForm.tsx`/`TransactionsPanel.tsx` mantidos idênticos (sempre
-passam `item` real, nunca `disabled`). Bloco de "ticker travado + botão
-Trocar" removido — a própria `TickerSearchField` já permite reeditar o
-ticker escolhido. Título do modal mantido estático (decisão: sem concatenar
-ticker, já que não há mais "passo 2"). Gates: `tsc --noEmit` ✅, 237 testes ✅
-(4 skipped), `npm run build` ✅. Resultado:
-`docs/Prompts/RESULTADO - Modal Registrar Aporte em 1 Tela Unica.md`. Item 12
-da Seção 6 (pendências) fechado.
-
-**12/08** — Corrigido bug do tab "Home" (`/app/`) do `Sidebar.tsx` ficando
-destacado em **todas** as rotas autenticadas (`startsWith(path)` casava
-qualquer path com prefixo `/app/`). `isActive` agora trata `path === "/app/"`
-como comparação exata (`location.pathname === "/app/" || "/app"`), preservando
-`startsWith` para os demais tabs. Confirmado via `routeTree.gen.ts` que o
-TanStack Router normaliza a rota index como `/app/` (com barra final).
-`MobileBottomNav.tsx` audita o mesmo padrão `startsWith(path)`, mas não tem tab
-"home"/`/app/` — bug não se manifesta lá, nenhuma mudança necessária. Gates:
-`tsc --noEmit` ✅, 237 testes ✅ (4 skipped), `npm run build` ✅.
-
-**11-12/08** — Prompt 4 (correções UI i18n Home) executado: `formatMonthsAsYearsMonths`
-agora consulta dicionários i18n (não mais hardcoded em PT-BR); tabs do sidebar
-renomeadas (`calculator` → `screener`, novo `financialIndependence`); novo tab
-"Independência Financeira" adicionado como primeiro item do sidebar (ícone Compass);
-todas as 3 ocorrências de "Horizonte FI" hardcoded substituídas por
-`t.tabs.financialIndependence`. Investigação do "R$ 0,00" no sidebar confirmou que
-não é reprodutível — os cards de resumo estão na coluna de conteúdo (com labels), não
-no menu lateral. Gates: tsc ✅, 237 testes ✅, build ✅, Playwright DOM inspection
-3 idiomas ✅. Resultado: `docs/Prompts/Resultado - 4 — Correções UI i18n Home.md`.
-
-**09-10/08** (`[REVISÃO]` + `[ROADMAP]`) — Auditoria encontrou 4 achados (F1-F4):
-- **F1** (`isPro` hardcoded `true`) + **F2** (`FEATURE_GATES` real inexistente) →
-  unificados num único item de arquitetura, **resolvidos**: `SubscriptionProvider`
-  real via `onSnapshot`, `useFeatureGate(key)` como ponto único de decisão, e
-  correção de bônus — `firestore.rules` permitia auto-promoção a Pro pelo client,
-  corrigido e testado no Firebase Emulator.
-- **F3** (cor de CTA inconsistente, `--primary` vs. `emerald` hardcoded) → 🟢
-  aberto, P2, sem prazo.
-- **F4** (drift de governança — `skills/` nunca commitada, Regra 9 fora do
-  `AGENTS.md`) → **resolvido**: `skills/` versionada (6 `SKILL.md` + `MANIFEST.json`
-  + `scripts/check.py`), `AGENTS.md` atualizado com Regra 9 (**nota**: o `AGENTS.md`
-  real hoje cobre **9 papéis**, incluindo `fuente-investidor-profissional`,
-  `fuente-investidor-iniciante`, `fuente-advogado-lgpd-gdpr` — mais completo que a
-  primeira versão do `check.py` gerada, que só valida 6. Ver pendência na Seção 7).
-
-**12/08** — Prompt 81 (correção de 5 bugs no import de CSV de transações,
-`parseTransactionTemplateCsv` em `src/lib/csv.ts`), disparado por importação
-real do Paulo que falhava silenciosamente. Corrigidos juntos, por serem
-interdependentes: **(1)** matching de cabeçalho por `includes()` de
-palavra-chave após normalização de acentos (`stripAccents` + lowercase + sem
-espaço), reconhecendo `Ativo`/`Data do lançamento`/`Preço unitário`/`Tipo de
-ordem`; **(2)** nova `parseCurrencyValue()` — remove prefixo de moeda
-(`R$`/`US$`/`$`), detecta separador decimal pela posição do último `,`/`.`
-(BR: `.` milhar + `,` decimal; US: `,` milhar + `.` decimal; só vírgula =
-decimal BR), aplicada a preço **e** quantidade (o CSV real também usa vírgula
-decimal em quantidade, ex. `"10,00"` — bug não previsto no prompt original,
-achado durante o teste de integração); **(3)** `parseCsvDate` ganhou case
-para `DD-MM-AA` (ano de 2 dígitos, assume 20XX) e `DD-MM-AAAA`; **(4)** linhas
-de evento corporativo (`Desdobramento`/`Grupamento`/`Split`/`Bonificação`
-na coluna tipo) desviadas para `type: "corporate_action"` com `factor`
-parseado via regex `de\s+(\d+)\s+para\s+(\d+)` sobre a coluna quantidade —
-reaproveita o `corporate_action`/`factor` já existente em
-`recalculateHoldingFromTransactions` (`transactions.ts`); linha que não bate
-o padrão é pulada com `console.warn`, sem travar a importação inteira;
-**(5)** encoding — CSVs de corretora vêm em Windows-1252, e `File.text()`
-decodifica como UTF-8, corrompendo acentos em `U+FFFD`; nova
-`decodeCsvBytes()` faz `TextDecoder("utf-8", {fatal:true})` e cai para
-`windows-1252` no `catch` (bytes acentuados fora do padrão UTF-8 disparam a
-exceção de forma confiável); `useWatchlistCsvImport.ts` trocou
-`file.text()` por `file.arrayBuffer()` + `decodeCsvBytes()`. Caller também
-ganhou o branch `row.type === "corporate_action"` (cria `Transaction` com
-`factor`, `quantity: 0`, `pricePerShare: 0`). 18 testes novos em
-`transactionTemplateCsv.test.ts` (moeda, data, header real, corporate
-action, encoding). Teste de integração com o CSV real completo do Paulo
-(602 linhas de dados): **602/602 parseadas com sucesso** (480 buy, 117
-sell, 5 corporate_action), zero falhas. Gates: `tsc --noEmit` ✅, 307 testes
-✅ (4 skipped), `npm run build` ✅. CSV real com dados pessoais **não**
-commitado — usado só localmente para o teste de integração e apagado do
-working tree ao final. Resultado:
-`docs/Prompts/RESULTADO - 81 — Corrigir Import CSV Bugs Multiplos.md`.
-
-**12/08** — Prompt 83: corrigida a **camada de detecção de formato** do
-import de CSV, que ficou desatualizada quando o prompt 81 tornou
-`parseTransactionTemplateCsv` tolerante a variações de header. Causa raiz:
-`useWatchlistCsvImport.ts` decidia "avançado vs. simples" via uma regex
-hardcoded (`/data\s*da\s*compra|date|valor\s*unit[áa]rio/i`) que duplicava
-— de forma divergente — a lógica de reconhecimento de coluna que já vivia
-dentro do parser. Um header real ("Data do lançamento"/"Preço unitário",
-que o parser já reconhecia) nunca era roteado pro parser certo porque a
-regex externa não continha esses termos; caía no parser Fase 1 (simples) e
-falhava com "No valid rows found in CSV.", mesmo o parser correto já
-funcionando. **Gap explícito do prompt 81**: o teste de integração de
-602/602 daquela sessão chamou `parseTransactionTemplateCsv` diretamente,
-nunca passou pelo fluxo real do hook — não testou a camada de detecção que
-roda antes do parser, por isso o bug passou despercebido.
-
-Correção (fonte única de verdade): nova função `detectCsvFormat()` exportada
-em `src/lib/csv.ts`, reaproveitando literalmente os mesmos critérios
-`includes()` de data/preço já usados dentro de `parseTransactionTemplateCsv`
-(nenhuma segunda lista de palavras-chave). `useWatchlistCsvImport.ts` trocou
-a regex hardcoded por `detectCsvFormat(text) === "advanced"`. 4 testes
-unitários novos (`csvDetectFormat.test.ts`) cobrindo o header real do bug, o
-header simples Fase 1, o header avançado do próprio template (regressão) e
-string vazia. Teste de integração novo
-(`useWatchlistCsvImport.integration.test.tsx`) que renderiza o **hook real**
-via `renderHook` (não só o parser) e chama `handleFile()` com um `File`
-sintético reproduzindo o header real do bug — confirma que as 3 linhas são
-roteadas, parseadas e importadas fim-a-fim; segundo teste cobre regressão do
-formato simples. Verificação extra ad-hoc (teste temporário, apagado após
-rodar) contra o CSV real de 602 linhas do Paulo: `detectCsvFormat` →
-`"advanced"`, **602/602 linhas parseadas** — confirma a correção no dado
-real que originou o bug. Gates: `tsc --noEmit` ✅, 326 testes ✅ (4 skipped,
-322 passando, incluindo os 6 novos), `npm run build` ✅. CSV real com dados
-pessoais **não** commitado — apagado do working tree ao final. Resultado:
-`docs/Prompts/RESULTADO - 83 — Corrigir Deteccao de Formato CSV.md`.
+- **29/07/2026**: Causa raiz de divergência do Fuente Consensus solucionada; unificação em `useValuedPortfolio`.
+- **31/07–02/08/2026**: Pipeline Cloud Build / Cloud Run corrigido para região `us-east1`; ledger Camada 3 concluído.
+- **07–09/08/2026**: Desativação global de paywalls como decisão consciente de produto; Gordon H-Model de 2 estágios; criação de design tokens e linter contra cores hardcoded.
+- **12/08/2026**: Páginas `/privacy` e `/terms` no ar; proteção contra duplo-clique em transações manuais; formulário unificado de aporte em tela única; correção de encoding Windows-1252 em CSVs de corretoras.
+- **13–14/08/2026**: Prompts 88 a 111: Painel `/admin` completo (Feature Gates, Ingestion Log, Usuários), classificação aprimorada de ETF/BDR, diferenciação visual entre Zero e Indisponível, tabela mobile responsiva e guards de SSOT no build.
+- **15/08/2026**: **Ciclo de Modernização Arquitetural & Valuation Multi-Classe (Prompts 115 a 125)**:
+  - Criação dos ADR-001 e ADR-002.
+  - Implementação do Cache Server-Side (`/assets/{ticker}`) e Read Model (`/users/{uid}/positions`).
+  - Especialização de modelos financeiros por classe: `STOCK_BR` (JCP 15%, Graham, H-Model), `STOCK_US` (Shareholder Yield, Peter Lynch), `FII`/`FII_INFRA`/`FIAGRO` (NTN-B spread, Gordon inflacionário, teto P/VP 1.02x), `REIT` (FRED API Treasury 10Y, 30% WHT), `ETF` (Modelo Bogle, DY Histórico, ERP implícito).
+  - Endpoint BFF `fetchValuedPortfolioFn` no TanStack Start com feature gate `USE_BFF_PORTFOLIO_VALUATION`.
+  - Interface Simples/Avançado e Modal de Premissas DTO-driven com 100% de cobertura i18n nos 3 idiomas.
+  - Procedimento operacional de Rollback documentado e validado em 3 gates (`tsc`, 419 testes, build).
 
 ---
 
-## 5. Entitlement canônico (F1+F2) — desenho e status
+## 5. Histórico Consolidado de Execução de Prompts (1 a 125)
 
-Implementado seguindo os 3 contratos não-negociáveis definidos pelo
-`fuente-solution-architect`:
+### Ciclo Recente de Modernização Arquitetural (Prompts 115 a 125)
 
-- **Leitura de tier**: `SubscriptionProvider` global via `onSnapshot` em `users/{uid}`.
-- **Config de gate**: `useFeatureGates()` lendo `config/featureGates` no Firestore.
-- **Decisão por feature**: `useFeatureGate(key)` — ponto único, nunca duplicado em JSX.
-- **Escrita de tier**: reservada para rota server-side (webhook Stripe), nunca client SDK.
-- **Padrão de mercado seguido**: Firestore + `onSnapshot` reativo (não custom claims,
-  por UX de propagação instantânea); webhook idempotente por Stripe event ID.
-- **Risco mitigado**: path `users/{uid}.subscriptionStatus` nasceu já escopado (evita
-  o mesmo padrão de bug 2x já visto com paths hardcoded espalhados).
-
-Limite de 8 ativos do tier Free já migrado para o hook. Todos os gates estão hoje
-**abertos por padrão em produção** (`freeAssetLimit: 999999` no Firestore) — decisão
-consciente de produto, não bug; a infraestrutura está pronta para reativação
-imediata via config, sem novo deploy.
-
----
-
-## 6. Pendências ativas (ordem de prioridade)
-
-| # | Item | Status | Prioridade | Por quê |
-|---|---|---|---|---|
-| 1 | **PostHog + instrumentação de funil** (Fase 0, itens 0.2/0.3) | 🟡 Discovery produzido (12/08), aguardando decisão de Paulo — não implementado | **P0** | Bloqueia validação de dado real do item 1.3 (limite de 8 ativos, pricing R$19,90/R$179). Ver `docs/Prompts/RESULTADO - 75 — Discovery PostHog Instrumentacao.md` para lista de eventos, comparação PostHog Cloud vs. self-hosted, e desenho de integração com o consentimento |
-| 2 | **Webhook Stripe** (idempotente, dedupe por event ID, server-side) | 🟡 Discovery produzido (12/08), aguardando revisão de Paulo — não implementado | **P0** | Entitlement já pronto para recebê-lo; é o próximo passo real da Fase 1. Ver `docs/Prompts/RESULTADO - 76 — Discovery Webhook Stripe.md` para desenho completo (endpoint, idempotência, máquina de estados, segredos, vínculo uid↔stripeCustomerId) |
-| 3 | **Banner de consentimento LGPD** (Fase 0, item 0.4) | ✅ Resolvido (12/08) | P1 | Unificado com o item 9 (Banner de Cookies) em um único `CookieConsentBanner.tsx` (`src/components/shared/CookieConsentBanner.tsx`) — banner fixo, não bloqueante, com opções "Aceitar"/"Rejeitar" de mesmo peso visual, link para `/privacy`, persistência em `localStorage` (`cookieConsent.v1`) e helper `hasAnalyticsConsent()` (`src/lib/cookieConsent.ts`) pronto para futura ativação do PostHog (não instalado nesta rodada). Ver relatório `docs/Prompts/RESULTADO - 73 — Banner de Consentimento LGPD Cookies.md` |
-| 4 | **Disclaimer regulatório CVM** | ✅ Resolvido (12/08) | P1 | Banner persistente `RegulatoryDisclaimerBanner.tsx` (`src/components/shared/RegulatoryDisclaimerBanner.tsx`), centralizado no layout `src/routes/app.tsx`, visível em `/app/screener`, `/app/myportfolio`, `/app/comparator`, `/app/cashflow`, `/app/smartallocation`, `/app/snowballeffectsimulator` (gate por allow-list de rotas via `useLocation`), ausente em Configurações/`/privacy`/`/terms`. Texto aprovado idêntico nos 3 idiomas (`regulatoryDisclaimer.message` em `src/lib/i18n/dict.{en,ptBR,es}.ts`), não fechável, coexiste com a cláusula completa já existente em `/terms`. **Desbloqueia o início da Fase 4 (Módulo de IRPF)**. Ver relatório `docs/Prompts/RESULTADO - 74 — Disclaimer Regulatorio CVM.md` |
-| 5 | **F3 — cor de CTA inconsistente** (`--primary` vs. `emerald` hardcoded, ~22 arquivos) | ✅ Resolvido (12/08) | P2 | F1/F2 (commit `aa83d3b`) já haviam migrado 19 arquivos; auditoria F3 confirmou que os únicos `emerald-*` restantes em `src/` eram `src/routes/index.tsx` (mockup decorativo da landing, já excluído do gate por `design-tokens.test.ts`, representa ganho/resultado) e `src/lib/classify.ts` (paleta categórica de badges de tipo de ativo ON/PN/UNIT/BDR/Fracionário — fora de `src/components`/`src/routes`, não coberto pelo gate, e ambiguamente nem marca nem resultado; ver relatório 72 para decisão original do Paulo). **`classify.ts:96` resolvido no Prompt 80**: as 5 cores cruas migradas para `--chart-1`..`--chart-5`; `design-tokens.test.ts` (Regra 5) expandido para também varrer `src/lib`, fechando a lacuna de cobertura. Ver `docs/Prompts/RESULTADO - 80 — Migrar Paleta Classe de Acao.md` |
-| 6 | **Guard de singularidade no Gordon (causa raiz matemática)** | ✅ Resolvido | P2 | Causa raiz matemática já corrigida (`GORDON_MIN_DISCOUNT_MARGIN` no motor, `calculations.ts`); Prompt 69 resolveu a última pendência — taxa terminal (`GORDON_TERMINAL_GROWTH_RATE`) deixou de ser valor fixo pendente de validação e passou a ser dinâmica (IPCA médio dos últimos 5 anos via `fetchIpcaFiveYearAverage`, `benchmark.server.ts`), com fallback pra constante quando indisponível |
-| 7 | **`check.py` desatualizado vs. `AGENTS.md` real** (6 papéis vs. 9) | ✅ Resolvido (12/08) | P1 | Verificado: `REQUIRED_ROLES` em `scripts/check.py` já cobria os 9 papéis da Regra 9 (fix aplicado em commit anterior à auditoria); `python scripts/check.py` roda limpo (`9 skills válidos, 0 aviso(s)`), confirmando os 9 `SKILL.md` presentes em `skills/*/` |
-| 8 | **TWR acumulado** (Time-Weighted Return) | ⚪ Aguardando dado | P2 | Depende de acúmulo de snapshots periódicos já sendo gravados |
-| 9 | **Banner de Cookies** (Fase 4.3) | ✅ Resolvido (12/08) | P2 | Não é distinto do item 3 — na prática são o mesmo banner (não haveria justificativa legal para dois banners separados); unificados no mesmo `CookieConsentBanner.tsx`, ver item 3 e relatório `docs/Prompts/RESULTADO - 73 — Banner de Consentimento LGPD Cookies.md` |
-| 10 | **Scripts órfãos na raiz** (`clean.cjs`, `merge.cjs`, etc.) | ✅ Resolvido (12/08) | P3 | Auditoria (Prompt 71) não encontrou `clean.cjs`/`merge.cjs`/`.sh` na raiz — já não existiam. Únicos `.js` na raiz são `eslint.config.js` (carregado automaticamente pelo ESLint) e `server.production.js` (usado em `Dockerfile`, copiado e executado em produção); ambos legítimos, nada removido |
-| 11 | **`nitro: beta`** | 🟡 Débito técnico | P3 | Migrar quando houver versão estável |
-| 12 | **Modal "Registrar Aporte" em 1 tela única** | ✅ Resolvido (12/08) | — | Busca de ticker e formulário agora ficam visíveis juntos desde a abertura; campos começam desabilitados e habilitam no lugar ao escolher o ticker |
-| 13 | **Taxonomia de status de ingestão (PASSED/FAILED/ERROR)** | 🔍 Não verificado — `src/lib/api/ingestionLog.server.ts` existe no repositório, mas nunca foi auditado por Claude | P1 | Verificar antes de considerar concluído — não aceitar arquivo existir como prova de que está correto |
-| 14 | **Piotroski F-Score (US-only)** | 🔍 Não verificado — `src/lib/__tests__/piotroski.test.ts` existe no repositório, mas nunca foi auditado por Claude | P2 | Idem — verificar antes de fechar |
-| 15 | **Idempotência de lançamento manual de transação** (`TransactionForm.tsx`, ID via `crypto.randomUUID()`) | ✅ Resolvido (12/08) | — | Botão trava durante o save (causa raiz do duplo-clique) + aviso client-side de possível duplicata (sem sobrescrever, decisão de produto) |
-| 16 | **Painel `/admin` + controle de acesso** | ⚪ Discovery gerado, não executado | P2 | Ver `docs/Prompts/RESULTADO - 77 — Discovery Admin Controle de Acesso.md` — recomenda Custom Claims (não UID fixo) e identificou que `firestore.rules` hoje libera leitura de `config/featureGates`/`ingestionLog` a qualquer usuário autenticado. Aguarda decisão/revisão de Paulo antes de qualquer prompt de execução de UI |
-| 17 | **Termos de Assinatura Pro** (`footerLegal3`, "Termos de subscrição") | ⚪ Pendente — nunca redigido | P2 | Distinto dos Termos de Uso gerais (já publicados em `/terms`); link do rodapé continua `href="#"` até esse conteúdo ser redigido e aprovado |
-
-### Backlog paralelo (achados Vibe-Trading / pesquisa de repositórios externos)
-
-- **`as_of` diagnostic** — sprint atual, diagnóstico concluído em 09/08, aguardando decisão de correção
-- ~~**Yield-trap check + shareholder yield**~~ — **resolvido (12/08, prompt 79)**: `calculateHistoricalYieldAverage`/`isYieldTrap`/`calculateShareholderYield` em `calculations.ts`, `yieldTrapWarning`/`shareholderYield` expostos no retorno de `getAssetValuation`, badge discreto em `AssetCard.tsx` (SearchVariant com fetch real via `assetPriceHistoryQueryOptions`; WatchlistVariant lê o campo se presente). **Limitação de cobertura**: `shareholderYield` fica sem wiring de fetch real neste round — `fetchSecEdgarCompanyFacts` (US-only, SEC EDGAR) não busca hoje `PaymentsOfDividends`/valor de recompra, só `sharesOutstanding` (2 anos); a função pura está pronta e testada, mas nenhum call site popula os inputs reais ainda (BR fica de fora por falta de fonte de dado, como já documentado pro Piotroski).
-- **Greenblatt Magic Formula** (candidato a 4º modelo) — P3, validado por 2 repos BR independentes
-- **Shadow Account behavioral diagnostics** — parqueado, aguardando catalogação de corretoras + decisão de produto
-- **Correlation regime visualization** — backlog
-- **NextPaymentBanner** (migração ex-date → payment-date) — fila, após quantidade derivada de transações estar completa
-
-### Gaps de dado conhecidos (sem solução gratuita disponível)
-- `paymentDate` de proventos de Ações BR (fora do escopo CVM, exige assinatura paga)
-- `paymentDate` de Ações/REITs NYSE US (Nasdaq API só cobre papéis Nasdaq-listed)
+| Prompt | Commit | Mensagem do Commit | Escopo e Arquivos Principais |
+| :---: | :---: | :--- | :--- |
+| **115** | `664ea3d` | `docs(architecture): add ADR-001 (BFF & normalizacao) and ADR-002 (valuation dispatcher)` | Criação de `docs/architecture/adrs/ADR-001-bff-e-normalizacao-firestore.md` e `ADR-002-dispatcher-valuation-por-classe.md`. |
+| **116** | `9993ac9` | `feat(cache): implement server-side asset cache with TTL and sync fallback` | Implementação de `src/lib/api/assetCache.server.ts` (TTL 5m) e testes unitários. |
+| **117** | `db1a907` | `feat(valuation): specialize Brazilian stock valuation with net JCP and H-Model` | `valuateStockBR` em `calculations.ts` com JCP 15% líquido, Graham, Gordon H-Model e `assumptions[]`. |
+| **118** | `ff92a95` | `feat(positions): add idempotent position consolidation read model` | `src/lib/api/positions.server.ts` e reconciliação idempotente com 1.200 txs de teste. |
+| **119** | `63e4139` | `feat(valuation): implement specialized US stock valuation with shareholder yield` | `valuateStockUS` com Total Shareholder Yield (SEC EDGAR float), Peter Lynch e 30% WHT. |
+| **120** | `cd78d9c` | `feat(valuation): specialize Brazilian FII, Fi-Infra and Fi-Agro valuation` | `valuateFundoImobiliario` com Bazin ancorado em NTN-B do BACEN, Gordon inflacionário e teto P/VP de 1.02x. |
+| **121** | `b8c3fd1` | `feat(bff): add portfolio valuation server function and feature gate` | `fetchValuedPortfolioFn` no TanStack Start (`portfolioBff.server.ts`) e gate `USE_BFF_PORTFOLIO_VALUATION`. |
+| **122** | `c0f12f0` | `feat(valuation): specialize US REIT valuation with Treasury 10Y spread` | `src/lib/api/fred.server.ts` (Treasury 10Y com cache de 24h e fallback 4.25%), `valuateREIT` com spread e 30% WHT. |
+| **123** | `4712f23` | `feat(valuation): specialize ETF valuation with Bogle model and implicit ERP` | `valuateETF` com Modelo Bogle, DY histórico e ERP implícito para ETFs de acumulação (zero falsos indisponíveis). |
+| **124** | `f1dce5c` | `feat(ui): add Simple/Advanced mode and DTO-driven valuation assumptions modal` | `ValuationAssumptionsModal.tsx` integrado no `AssetDetailSheet.tsx` com sliders e dicionários i18n (`ptBR`, `en`, `es`). |
+| **125** | `7c2a00e` | `feat(valuation): complete BFF migration with documented rollback protocol` | `docs/ROLLBACK.md` com protocolo de contingência e reversão instantânea via Feature Gate. |
 
 ---
 
-## 7. Débitos técnicos e itens de governança
+## 6. Governança e Regras Inegociáveis (AGENTS.md)
 
-- `pdf-parser.test.ts` com 3 testes falhando — divergência entre comportamento real e expectativa do teste, precisa decidir qual está desatualizado
-- `Watchlist.tsx` — já decomposto em 24 arquivos (concluído)
-- ~~`check.py` (linter de skills) desatualizado~~ — **resolvido (12/08)**, `REQUIRED_ROLES` já cobre os 9 papéis da Regra 9 (ver item 7 da tabela acima)
-
----
-
-## 8. Governança — AGENTS.md (9 regras, reproduzido aqui)
-
-> Fonte canônica continua sendo `docs/AGENTS.md` — reproduzido aqui só para consulta
-> sem precisar abrir dois arquivos.
-
-1. **Reusabilidade primeiro** — buscar equivalente existente antes de criar componente novo; consolidar duplicatas antes de adicionar funcionalidade.
-2. **Zero hardcode de texto (i18n)** — toda string visível ao usuário passa pelo sistema de i18n; string solta é falha crítica.
-3. **Isolamento de dados dev/mock** — proibido commitar massa de dados local ou sincronizar dev com Firebase de produção; arquivos de dado sem import ativo devem ser removidos.
-4. **SSOT financeiro** — `getAssetValuation` é única fonte para Bazin/Graham/Gordon; telas salvas usam `useValuedPortfolio` exclusivamente; telas de simulação podem chamar direto mas com dividendo-base da mesma função canônica e rótulo visual de "cenário".
-5. **Mobile-first sustentável** — Tailwind base define mobile, desktop é expansão (`md:`, `lg:`); layout nunca "esmaga", usa scroll horizontal ou colunas empilhadas.
-6. **Qualidade visual premium** — "WOW effect" imediato, não MVP simplificado; glassmorphism, microinterações, confiança financeira.
-7. **AGENTS.md tem precedência** — todo agente lê este arquivo antes de propor mudança; conflito com prompt específico → parar e sinalizar, nunca decidir sozinho.
-8. **Plano de implementação obrigatório** — Antigravity apresenta plano escrito antes de executar, com (a) arquivos afetados, (b) lógica central, (c) seção "Pontos de Atenção & Decisões de Arquitetura" no formato risco → decisão. Todo relatório de conclusão deve comprovar os 3 gates: `tsc --noEmit` (0 erros), `npm run test` (sem falhas), `npm run build` (limpo).
-9. **Governança de roles (Regra 9)** — em toda atividade substantiva, considerar explicitamente os 9 papéis instalados (`fuente-architecture-review`, `fuente-solution-architect`, `fuente-business-architect`, `fuente-product-manager`, `fuente-product-marketing`, `fuente-ux-designer`, `fuente-investidor-profissional`, `fuente-investidor-iniciante`, `fuente-advogado-lgpd-gdpr`); papel não aplicável deve ser declarado com motivo, nunca omitido.
+1. **Reusabilidade Primeiro**: Antes de criar qualquer componente, verificar se já existe equivalente. Consolidar duplicatas.
+2. **Zero Hardcode de Texto (i18n)**: Toda string visível deve passar pelos dicionários `src/lib/i18n/dict.{ptBR,en,es}.ts`.
+3. **Isolamento de Dados Dev/Mock**: Proibido commitar massas de dados locais ou conectar ambientes locais em bancos de produção.
+4. **SSOT Financeiro**: Todas as fórmulas de valuation vivem exclusivamente em [`src/lib/calculations.ts`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/src/lib/calculations.ts).
+5. **Mobile-First Sustentável**: Tailwind base define o layout mobile; telas nunca esmagam elementos.
+6. **Design System Consistente**: Utilização rigorosa dos tokens semânticos (`text-primary`, `text-success`, `text-warning`, `text-danger`, `bg-muted`).
+7. **Precedência do AGENTS.md**: Regras de governança têm prioridade absoluta sobre instruções parciais.
+8. **Os 3 Verification Gates Obrigatórios**: Nenhuma entrega é aceita sem validar:
+   - `npx tsc --noEmit` (0 erros)
+   - `npm run test` (100% de aprovação na suíte de testes)
+   - `npm run build` (build limpo sem vazamentos de SSOT)
+9. **Governança de Roles**: Considerar explicitamente os 9 papéis instalados no ecossistema ao revisar arquitetura.
 
 ---
 
-## 9. Aprendizados-chave (não repetir os mesmos erros)
+## 7. Procedimento Operacional de Rollback
 
-- **Nunca aceitar sucesso relatado por agente sem verificar.** Antigravity já fabricou contagem de testes, relatou falso sucesso, inventou APIs inexistentes. Verificação sempre contra arquivo real (Filesystem MCP, GitHub clone, ou bash sandbox).
-- **SSOT não é negociável** — vale para valuation (`useValuedPortfolio`), feature gates (Firestore único), quantidade (derivada de transações, nunca persistida), locale (`toIntlLocale()`).
-- **Fail-open > fail-closed** para feature gates — bloquear por padrão em erro já causou retrabalho.
-- **`tsc --noEmit` não é coberto pelo build** — Vite/esbuild não faz type-check; gate obrigatório separado.
-- **Buscar histórico antes de aprovar mudança em componente já tocado** — um agente já reintroduziu um date picker que Paulo tinha decidido remover.
-- **Guard de margem no Gordon é decisão de produto**, não só técnica — parâmetros numéricos (margem mínima, rejeição de outlier) são do Paulo.
-- **DEV nunca escreve no Firestore** — leitura permitida, escrita/exclusão não.
-- **Comandos git destrutivos exigem confirmação explícita** — já causou perda de trabalho de i18n não commitado uma vez.
-- **CNPJ de corretora só de fonte oficial** (CVM, ANBIMA, LEI) — Antigravity já errou 2x (BTG, Itaú).
-- **Update Holdings e Apply Corporate Event vivem dentro do `AssetDetailSheet`, aba "My Position"** (não mais modais próprios) — `EditItemDialog.tsx`/`CorporateEventModal.tsx` foram removidos; a lógica migrou intacta para `src/components/ceiling/watchlist/EditPositionFields.tsx` e `src/components/portfolio/CorporateEventFields.tsx`, componentes self-contained (chamam `useWatchlist`/`useTransactions` diretamente, sem depender de callback `onSave` do pai) renderizados como seções recolhíveis (`Collapsible`) logo após `AssetHoldings`. O menu ⋯ do card não tem mais "Editar"/"Evento Corporativo"; o badge de evento pendente abre o sheet direto na aba "My Position" (`onOpenDetail(item, "myPosition")`), com a seção de evento corporativo pré-expandida quando há evento pendente.
+Em caso de necessidade de contingência após deploys:
 
----
-
-## 10. Ferramentas e ambiente
-
-- **Filesystem MCP** (`C:\Users\paulo\OneDrive\Fuente Price Pro`) — não suporta busca de conteúdo por padrão glob; usar `list_directory` + `read_text_file`. Conexão cai intermitentemente.
-- **GitHub** (`github.com/paulofuentealba/fuentepricepro`, branch `dev`) — fallback via clone + grep quando MCP cai.
-- **bash_tool sandbox** — validação (`tsc`, `vitest`); brace expansion falha silenciosamente, usar `mkdir` sequencial.
-- **Antigravity** — agente Gemini-based, opera em `[EXECUÇÃO]`.
-- **Skills** — 9 `SKILL.md` em `skills/*/` (canônico versionado), validados por `scripts/check.py` (`REQUIRED_ROLES` atualizado, ver Seção 7).
-- **Firebase Emulator** — validação de regras de segurança (`test:rules`).
-- **Deploy** — Cloud Build → Cloud Run, região `us-east1` (não `us-south1`, erro já corrigido).
-- **APIs externas**: Brapi, Yahoo Finance, SEC EDGAR, Nasdaq, BCB SGS, CVM (batch script). Bolsai e HG Brasil bloqueados por tier pago.
+1. **Reversão Instantânea (Sem Deploy)**:
+   - Acessar o Firebase Console → Firestore Database → Coleção `config` → Documento `featureGates`.
+   - Alterar `USE_BFF_PORTFOLIO_VALUATION` para `false`.
+   - Os clientes web voltam automaticamente ao processamento local em runtime.
+2. **Reversão de Código (Git)**:
+   ```bash
+   git log -n 5 --oneline
+   git revert <commit-hash> --no-edit
+   npx tsc --noEmit && npm run test && npm run build
+   git push origin dev
+   ```
 
 ---
 
-## 11. Estrutura de chats do Project
+## 8. Status Atual do Repositório
 
-- `[ROADMAP]` — priorização e sequenciamento (este documento vive aqui)
-- `[EXECUÇÃO]` — implementação com Antigravity, verificação de arquivo real
-- `[REVISÃO]` — auditorias de arquitetura sob demanda
-- `[BENCHMARK]` — análise competitiva
-- `[SKILLS]` — governança de skills
-
----
-
-## Nota sobre arquivamento
-
-Os seguintes arquivos/pastas foram movidos para `docs/_archive/` nesta consolidação
-(preservados, não apagados — sem ferramenta de exclusão permanente disponível):
-`api_enrichment_action_plan.md`, `api_enrichment_report.md`, `api_enrichment_report_v1.md`,
-`api_enrichment_report_v2.md`, `api_enrichment_report_v3.md`, `arquitetura/` (incl. imagens),
-`BACKLOG_V2.md`, `CHAT_SUMMARY_2026-07-29.md`, `CLAUDE_AUDIT_GERAL.md`, `PROMPTS_LOG.md`,
-`RELATORIO_PUSH_DEV.md`.
-
-**Exceções mantidas fora do arquivamento** (por instrução explícita de Paulo):
-`docs/Prompts/*`, `docs/Implementation Plans/*`.
-
-**Exceção adicional aplicada por precaução** (não apagar sem confirmação): `docs/AGENTS.md`
-— mantido no lugar original por ser referenciado ativamente por `scripts/check.py`.
+- **Branch Ativa**: `dev`
+- **Sincronização com GitHub**: 100% atualizado via `git push origin dev`.
+- **Suíte de Testes**: **70 arquivos de teste passando (419 testes unitários e de integração aprovados)**.
+- **SSOT Status**: Este arquivo [`docs/SSOT.md`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/docs/SSOT.md) passa a reger como a **Fonte Única da Verdade** de toda a engenharia e produto do Fuente Price Pro.

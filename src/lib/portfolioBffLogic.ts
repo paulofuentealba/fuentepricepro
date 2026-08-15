@@ -59,13 +59,13 @@ export async function computeValuedPortfolioInternal(
 
   for (const item of items) {
     const ticker = item.ticker.trim().toUpperCase();
-    let asset: Asset | null = getCachedAsset(ticker);
+    let asset: Asset | null = (await getCachedAsset(ticker)) as unknown as Asset | null;
 
     if (!asset && fetchAssetFn) {
       try {
         asset = await fetchAssetFn(ticker);
         if (asset) {
-          setCachedAsset(ticker, asset);
+          await setCachedAsset(ticker, asset as any);
         }
       } catch {
         asset = null;
@@ -80,7 +80,7 @@ export async function computeValuedPortfolioInternal(
     const annualDividend = asset
       ? ((asset.dividendHistory && asset.dividendHistory.length > 0) || (asset.dividends3y && asset.dividends3y.length > 0)
           ? getCanonicalAnnualDividend(asset, 3)
-          : (asset.annualDividend ?? item.annualDividend ?? 0))
+          : ((asset as any).annualDividend ?? item.annualDividend ?? 0))
       : item.annualDividend ?? 0;
 
     const eps = asset?.epsCurrent ?? asset?.metrics?.eps ?? null;

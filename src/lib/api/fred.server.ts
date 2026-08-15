@@ -27,7 +27,7 @@ export async function fetchUsTreasury10Y(apiKey?: string): Promise<number> {
 
   try {
     const url = `https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&api_key=${key}&file_type=json&sort_order=desc&limit=5`;
-    const res = await fetchWithTimeout(url, { timeout: 3000 });
+    const res = await fetchWithTimeout(url, {}, 3000);
     if (!res.ok) {
       return DEFAULT_US_TREASURY_10Y;
     }

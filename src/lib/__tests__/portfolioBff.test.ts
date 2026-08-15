@@ -14,6 +14,7 @@ describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
       {
         id: "1",
         ticker: "BBSE3",
+        name: "BB Seguridade",
         type: "STOCK_BR",
         currency: "BRL",
         currentPrice: 34.0,
@@ -21,10 +22,17 @@ describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
         quantity: 100,
         targetYield: 6.0,
         annualDividend: 3.2,
+        ceilingPrice: 53.33,
+        safetyMargin: 56.85,
+        paymentMonths: [4, 8],
+        payoutRatio: 80,
+        addedAt: 1700000000000,
+        investingSince: 1700000000000,
       },
       {
         id: "2",
         ticker: "HGLG11",
+        name: "CSHG Logística",
         type: "FII",
         currency: "BRL",
         currentPrice: 160.0,
@@ -32,6 +40,12 @@ describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
         quantity: 10,
         targetYield: 8.0,
         annualDividend: 13.2,
+        ceilingPrice: 165.0,
+        safetyMargin: 3.12,
+        paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        payoutRatio: 95,
+        addedAt: 1700000000000,
+        investingSince: 1700000000000,
       },
     ];
 
