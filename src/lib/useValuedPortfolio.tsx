@@ -1,35 +1,103 @@
-import { createContext, useContext, useMemo, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWatchlist, type WatchlistItem } from "./watchlist";
 import { useSettings } from "./settings";
 import { useLiveQuotesAndMeta } from "@/components/ceiling/watchlist/useLiveQuotesAndMeta";
-import { getAssetValuation, netAfterTax, calculateFixedIncomeBalance, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "./calculations";
+import {
+  getAssetValuation,
+  netAfterTax,
+  calculateFixedIncomeBalance,
+  calculateBvps,
+  GORDON_TERMINAL_GROWTH_RATE,
+  type ValuationResult,
+} from "./calculations";
 import { useSelic } from "./useSelic";
 import { exchangeRateQueryOptions, macroRatesQueryOptions, ipcaFiveYearAverageQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
-
 import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "./transactions";
+import { useFeatureGate } from "./useFeatureGate";
+import { fetchValuedPortfolioFn } from "./api/portfolioBff.functions";
 
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields
   livePrice: number; // Actual current price used (quote or fallback)
   // Overrides item.sector with meta.sector if available
   sector: string;
-  valuation: ReturnType<typeof getAssetValuation>;
+  valuation: ValuationResult;
   isClosedPosition: boolean;
+  /**
+   * True when valuedItems originated from the BFF server function (ADR-001).
+   * Optional — defaults to false. Existing mocks in tests need not add this field.
+   */
+  isBffMode?: boolean;
 }
 
-function useValuedPortfolioComputation() {
+// ---------------------------------------------------------------------------
+// Shared totals computation
+// ---------------------------------------------------------------------------
+
+function computeTotals(
+  valuedItems: ValuedWatchlistItem[],
+  fx: { USDBRL: number } | undefined,
+  macroRates: Parameters<typeof calculateFixedIncomeBalance>[1] | undefined,
+) {
+  let usd = 0;
+  let brl = 0;
+  let usdWorth = 0;
+  let brlWorth = 0;
+  let countUsd = 0;
+  let countBrl = 0;
+
+  for (const it of valuedItems) {
+    if (it.isClosedPosition) continue;
+
+    const income = netAfterTax(
+      it.annualDividend * it.quantity,
+      it.type,
+      it.currency,
+      it.customTaxRate,
+    );
+
+    let worth = it.currentPrice * it.quantity;
+    if (it.type === "FIXED_INCOME" && macroRates) {
+      const accrual = calculateFixedIncomeBalance(it, macroRates);
+      if (accrual) {
+        worth = accrual.accruedBalance;
+      }
+    }
+
+    if (it.currency === "USD") {
+      usd += income;
+      usdWorth += worth;
+      countUsd++;
+    } else if (it.currency === "BRL") {
+      brl += income;
+      brlWorth += worth;
+      countBrl++;
+    }
+  }
+
+  const rate = fx?.USDBRL ?? 1;
+  const consolidatedNetWorth = brlWorth + usdWorth * rate;
+  const consolidatedIncome = brl + usd * rate;
+
+  return { usd, brl, usdWorth, brlWorth, countUsd, countBrl, consolidatedNetWorth, consolidatedIncome };
+}
+
+// ---------------------------------------------------------------------------
+// Client-side computation (legacy path, gate = false)
+// ---------------------------------------------------------------------------
+
+function useValuedPortfolioClientSide(
+  items: WatchlistItem[],
+  transactions: Transaction[],
+  globalYield: number,
+  isAppLoading: boolean,
+  watchlistRest: ReturnType<typeof useWatchlist>,
+) {
   const { t } = useI18n();
-  const { items, isPending: isWatchlistPending, ...rest } = useWatchlist();
-  const { transactions = [], isLoading: isTxLoading } = useTransactions();
-  const { loading: isAuthLoading } = useAuth();
-  const { targetYield: globalYield } = useSettings();
 
-  const isAppLoading = isAuthLoading || isWatchlistPending || isTxLoading;
-
-  // Group transactions by ticker
   const txByTicker = useMemo(() => {
     const map: Record<string, Transaction[]> = {};
     for (const tx of transactions) {
@@ -39,7 +107,6 @@ function useValuedPortfolioComputation() {
     return map;
   }, [transactions]);
 
-  // Base items with quantity & averagePrice derived from transactions (fallback to item DB if no transactions)
   const baseItems = useMemo(() => {
     return (items || []).map((it) => {
       const txs = txByTicker[it.ticker];
@@ -65,7 +132,6 @@ function useValuedPortfolioComputation() {
     });
   }, [items, globalYield, txByTicker]);
 
-  // Live quotes and metadata
   const { quotes, meta, dataUpdatedAt: lastUpdatedAt } = useLiveQuotesAndMeta(baseItems);
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
@@ -93,72 +159,25 @@ function useValuedPortfolioComputation() {
       return {
         ...it,
         annualDividend: m?.canonicalDividend3y ?? it.annualDividend,
-        currentPrice: livePrice, // keep the property compatible with WatchlistItem
+        currentPrice: livePrice,
         livePrice,
         ceilingPrice: valuation.activeCeiling ?? 0,
         safetyMargin: valuation.margin ?? 0,
-        // Single Source of Truth for Sector: live meta > item DB > default
         sector: m?.sector || it.sector || t.common.other,
         valuation,
         isClosedPosition: it.isClosedPosition,
+        isBffMode: false,
       };
     });
   }, [baseItems, quotes, meta, selic, ipcaAvg, t]);
 
-  const totals = useMemo(() => {
-    let usd = 0;
-    let brl = 0;
-    let usdWorth = 0;
-    let brlWorth = 0;
-    let countUsd = 0;
-    let countBrl = 0;
-    for (const it of valuedItems) {
-      if (it.isClosedPosition) continue;
-
-      const income = netAfterTax(
-        it.annualDividend * it.quantity,
-        it.type,
-        it.currency,
-        it.customTaxRate,
-      );
-
-      let worth = it.currentPrice * it.quantity;
-      if (it.type === "FIXED_INCOME" && macroRates) {
-        const accrual = calculateFixedIncomeBalance(it, macroRates);
-        if (accrual) {
-          worth = accrual.accruedBalance;
-        }
-      }
-
-      if (it.currency === "USD") {
-        usd += income;
-        usdWorth += worth;
-        countUsd++;
-      } else if (it.currency === "BRL") {
-        brl += income;
-        brlWorth += worth;
-        countBrl++;
-      }
-    }
-
-    const rate = fx?.USDBRL ?? 1; // Default to 1 if missing so it doesn't break
-    const consolidatedNetWorth = brlWorth + usdWorth * rate;
-    const consolidatedIncome = brl + usd * rate;
-
-    return {
-      usd,
-      brl,
-      usdWorth,
-      brlWorth,
-      countUsd,
-      countBrl,
-      consolidatedNetWorth,
-      consolidatedIncome,
-    };
-  }, [valuedItems, fx, macroRates]);
+  const totals = useMemo(
+    () => computeTotals(valuedItems, fx, macroRates),
+    [valuedItems, fx, macroRates],
+  );
 
   return {
-    ...rest,
+    ...watchlistRest,
     items,
     valuedItems,
     totals,
@@ -169,7 +188,139 @@ function useValuedPortfolioComputation() {
     macroRates,
     fx,
     selic,
+    isBffMode: false,
   };
+}
+
+// ---------------------------------------------------------------------------
+// BFF computation (ADR-001 path, gate = true)
+// ---------------------------------------------------------------------------
+
+function useValuedPortfolioBff(
+  items: WatchlistItem[],
+  transactions: Transaction[],
+  globalYield: number,
+  isAppLoading: boolean,
+  watchlistRest: ReturnType<typeof useWatchlist>,
+) {
+  const { t } = useI18n();
+  const { data: selic } = useSelic();
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const { data: macroRates } = useQuery(macroRatesQueryOptions());
+  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
+  const { loading: isAuthLoading } = useAuth();
+
+  const itemsWithYield = useMemo(
+    () => items.map((it) => ({ ...it, targetYield: it.targetYield ?? globalYield })),
+    [items, globalYield],
+  );
+
+  const bffQuery = useQuery({
+    queryKey: ["bffPortfolio", itemsWithYield.map((i) => i.ticker).join(","), transactions.length],
+    queryFn: () =>
+      fetchValuedPortfolioFn({
+        data: {
+          uid: "",
+          items: itemsWithYield,
+          transactions,
+          selicPct: selic ?? 10.5,
+          terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
+          exchangeRate: fx?.USDBRL ?? 5.75,
+        },
+      }),
+    enabled: !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
+    staleTime: 60_000,
+  });
+
+  const valuedItems = useMemo<ValuedWatchlistItem[]>(() => {
+    if (!bffQuery.data) return [];
+    return bffQuery.data.items.map((bffItem) => {
+      const bffAny = bffItem as unknown as Record<string, unknown>;
+      const valuation: ValuationResult = {
+        ticker: bffItem.ticker,
+        activeCeiling: bffItem.activeCeiling,
+        margin: bffItem.margin,
+        fuenteConsensus: (bffAny["fuenteConsensus"] as number | null | undefined) ?? null,
+        methods: (bffAny["methods"] as ValuationResult["methods"] | undefined) ?? {
+          bazin: null, graham: null, gordon: null,
+        },
+        assumptions: (bffAny["assumptions"] as ValuationResult["assumptions"] | undefined) ?? [],
+        investorProfile: (bffAny["investorProfile"] as ValuationResult["investorProfile"] | undefined) ?? "moderate",
+        bazin: (bffAny["bazin"] as number | null | undefined) ?? null,
+        graham: (bffAny["graham"] as number | null | undefined) ?? null,
+        gordon: (bffAny["gordon"] as number | null | undefined) ?? null,
+        gordonConfidence: (bffAny["gordonConfidence"] as "high" | "low" | null | undefined) ?? null,
+        consensus: (bffAny["consensus"] as number | null | undefined) ?? null,
+        dividendYield: (bffAny["dividendYield"] as number | undefined) ?? 0,
+        positive: (bffAny["positive"] as boolean | undefined) ?? (bffItem.activeCeiling > bffItem.currentPrice),
+        isUnavailable: (bffAny["isUnavailable"] as boolean | undefined) ?? false,
+        yieldTrapWarning: (bffAny["yieldTrapWarning"] as ValuationResult["yieldTrapWarning"] | undefined) ?? false,
+        shareholderYield: (bffAny["shareholderYield"] as number | null | undefined) ?? null,
+      };
+
+      return {
+        ...bffItem,
+        livePrice: bffItem.currentPrice,
+        sector: bffItem.sector ?? t.common.other,
+        valuation,
+        isClosedPosition: bffItem.quantity === 0,
+        isBffMode: true,
+      };
+    });
+  }, [bffQuery.data, t]);
+
+  const totals = useMemo(
+    () => computeTotals(valuedItems, fx, macroRates),
+    [valuedItems, fx, macroRates],
+  );
+
+  return {
+    ...watchlistRest,
+    items,
+    valuedItems,
+    totals,
+    quotes: {} as ReturnType<typeof useLiveQuotesAndMeta>["quotes"],
+    meta: {} as ReturnType<typeof useLiveQuotesAndMeta>["meta"],
+    isAppLoading: isAppLoading || bffQuery.isLoading,
+    lastUpdatedAt: bffQuery.dataUpdatedAt ?? 0,
+    macroRates,
+    fx,
+    selic,
+    isBffMode: true,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Gate dispatcher — both hooks always run (Rules of Hooks compliance)
+// ---------------------------------------------------------------------------
+
+function useValuedPortfolioComputation() {
+  const watchlistResult = useWatchlist();
+  const { items, isPending: isWatchlistPending } = watchlistResult;
+  const { transactions = [], isLoading: isTxLoading } = useTransactions();
+  const { loading: isAuthLoading } = useAuth();
+  const { targetYield: globalYield } = useSettings();
+  const useBff = useFeatureGate("USE_BFF_PORTFOLIO_VALUATION");
+
+  const isAppLoading = isAuthLoading || isWatchlistPending || isTxLoading;
+
+  const clientResult = useValuedPortfolioClientSide(
+    items ?? [],
+    transactions,
+    globalYield,
+    isAppLoading,
+    watchlistResult,
+  );
+
+  const bffResult = useValuedPortfolioBff(
+    items ?? [],
+    transactions,
+    globalYield,
+    isAppLoading,
+    watchlistResult,
+  );
+
+  return useBff ? bffResult : clientResult;
 }
 
 type ValuedPortfolioValue = ReturnType<typeof useValuedPortfolioComputation>;
@@ -185,6 +336,10 @@ const ValuedPortfolioContext = createContext<ValuedPortfolioValue | null>(null);
  *
  * O fallback para computação direta mantém o hook utilizável fora do
  * provider (testes, rotas isoladas) sem quebrar o comportamento atual.
+ *
+ * BFF mode (ADR-001): quando USE_BFF_PORTFOLIO_VALUATION = true no Firestore,
+ * o hook usa fetchValuedPortfolioFn (TanStack Start server function) em vez
+ * do merge client-side. O gate é false por default → zero regressão.
  */
 export function ValuedPortfolioProvider({ children }: { children: ReactNode }) {
   const value = useValuedPortfolioComputation();
