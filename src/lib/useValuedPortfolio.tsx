@@ -17,7 +17,7 @@ import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
 import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "./transactions";
 import { useFeatureGate } from "./useFeatureGate";
-import { fetchValuedPortfolioFn } from "./api/portfolioBff.server";
+import { fetchValuedPortfolioFn } from "./api/portfolioBff.functions";
 
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields

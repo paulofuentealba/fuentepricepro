@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { fetchAssetFn } from "../apiService.server";
+import { fetchAssetFn } from "../apiService.functions";
 import {
   computeValuedPortfolioInternal,
   type FetchValuedPortfolioInput,
