@@ -16,7 +16,7 @@ import {
   type BenchmarkPoint,
   type BenchmarkType,
   type PiotroskiScoreResponse,
-} from "./apiService.functions";
+} from "./apiService.server";
 import type { Asset } from "./domain";
 
 /**

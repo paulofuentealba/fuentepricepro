@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n-provider";
-import type { LiveQuote } from "@/lib/apiService.functions";
+import type { LiveQuote } from "@/lib/apiService.server";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { AssetCardHeader } from "../ceiling/watchlist/assetCard/AssetCardHeader";
 import { AssetCardTags } from "../ceiling/watchlist/assetCard/AssetCardTags";

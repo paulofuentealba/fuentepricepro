@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { TransactionFormFields } from "@/components/ceiling/watchlist/TransactionFormFields";
-import type { SearchHit } from "@/lib/apiService.functions";
+import type { SearchHit } from "@/lib/apiService.server";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";

@@ -11,7 +11,7 @@ import { fetchNasdaqDividends } from "./api/nasdaq.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
 import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 
-// Re-export public types so existing `@/lib/apiService.functions` imports keep working.
+// Re-export public types so existing `@/lib/apiService.server` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
 import { cleanTicker } from "../lib/formatters";
 

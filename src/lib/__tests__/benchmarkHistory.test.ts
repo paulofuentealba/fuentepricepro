@@ -10,7 +10,7 @@ import {
   fetchBcbBenchmarkSeries,
   fetchYahooBenchmarkSeries,
 } from "../benchmark.server";
-import { fetchBenchmarkHistoryFn } from "../apiService.functions";
+import { fetchBenchmarkHistoryFn } from "../apiService.server";
 
 describe("Benchmark History Calculations (Shared Layer SSOT)", () => {
   it("should annualize cumulative returns correctly over a period of days", () => {

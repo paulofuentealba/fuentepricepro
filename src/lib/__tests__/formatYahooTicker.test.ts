@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatYahooTicker } from "../apiService.functions";
+import { formatYahooTicker } from "../apiService.server";
 
 describe("formatYahooTicker (Item 1.7 Phase 4)", () => {
   it("1. appends .SA suffix to Brazilian stock tickers missing .SA", () => {

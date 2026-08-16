@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
-import type { LiveQuote } from "@/lib/apiService.functions";
+import type { LiveQuote } from "@/lib/apiService.server";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { AssetMeta } from "./utils";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
