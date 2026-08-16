@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { buildMonthlyBuckets } from "../cashflow";
 import type { WatchlistItem } from "../watchlist";
 import type { DividendEvent } from "../domain";
-import type { Transaction } from "../transactions";
+import type { Transaction } from "../transactionsLogic";
 
 function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
   return {

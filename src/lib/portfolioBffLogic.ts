@@ -6,7 +6,7 @@ import {
   type ValuationResult,
 } from "./calculations";
 import type { WatchlistItem } from "./watchlist";
-import type { Transaction } from "./transactions";
+import type { Transaction } from "./transactionsLogic";
 import type { Asset } from "./domain";
 
 export interface ValuedPortfolioResponse {

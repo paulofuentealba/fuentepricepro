@@ -6,7 +6,7 @@ import {
   type ValuedPortfolioResponse,
 } from "../portfolioBffLogic";
 
-export { computeValuedPortfolioInternal, type FetchValuedPortfolioInput, type ValuedPortfolioResponse };
+export type { FetchValuedPortfolioInput, ValuedPortfolioResponse };
 
 /**
  * TanStack Start Server Function for single-round-trip portfolio valuation.

@@ -4,7 +4,7 @@ import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
 } from "@/components/ceiling/watchlist/BrokerNoteUploader";
-import type { Transaction } from "@/lib/transactions";
+import type { Transaction } from "@/lib/transactionsLogic";
 
 describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
   describe("normalizeIssuerSpecification", () => {

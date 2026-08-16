@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseWatchlistCsv } from "../csv";
-import { recalculateHoldingFromTransactions, type Transaction } from "../transactions";
+import { recalculateHoldingFromTransactions, type Transaction } from "../transactionsLogic";
 
 describe("Watchlist CSV Import Synthetic Transactions (Item 1.7 Phase 1)", () => {
   it("Scenario 1: CSV import for existing asset creates a delta synthetic transaction and updates holding", () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeBackfillSnapshots } from "../portfolioSnapshotBackfill";
-import type { Transaction } from "../transactions";
+import type { Transaction } from "../transactionsLogic";
 
 function tx(overrides: Partial<Transaction> & { date: number }): Transaction {
   return {

@@ -7,7 +7,7 @@ import {
 } from "../csv";
 import { parseFile } from "../dynamicCsvParser";
 import { persistTransactionsBatch } from "../transactionPersistence";
-import type { Transaction } from "../transactions";
+import type { Transaction } from "../transactionsLogic";
 import type { WatchlistItem } from "../watchlist";
 
 describe("csvRoundTrip & Persistence Resilience (Prompt 105)", () => {

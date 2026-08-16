@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 // Test safeToISOString behavior indirectly or directly if exported
 // We can test itemToRow serialization resilience
 import { WatchlistItem } from "../watchlist";
-import { recalculateHoldingFromTransactions } from "../transactions";
+import { recalculateHoldingFromTransactions } from "../transactionsLogic";
 
 describe("watchlist itemToRow date resilience", () => {
   it("should safely convert item with undefined investingSince without throwing Invalid time value", () => {

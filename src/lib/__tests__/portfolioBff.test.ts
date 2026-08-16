@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { computeValuedPortfolioInternal } from "../portfolioBffLogic";
 import { DEFAULT_FEATURE_GATES } from "../featureGates";
 import type { WatchlistItem } from "../watchlist";
-import type { Transaction } from "../transactions";
+import type { Transaction } from "../transactionsLogic";
 
 describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
   it("should have USE_BFF_PORTFOLIO_VALUATION feature gate defined and defaulted to false", () => {

@@ -1,4 +1,4 @@
-import { type Transaction } from "./transactions";
+import { type Transaction, getQuantityAtDate } from "./transactionsLogic";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
 import { toIntlLocale } from "./formatters";

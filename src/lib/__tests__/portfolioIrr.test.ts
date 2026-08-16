@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateIrr, buildCashFlowsFromPortfolio, getEffectiveTransactions, isUsdAsset, type CashFlow } from "../portfolioIrr";
-import { type Transaction } from "../transactions";
+import { type Transaction } from "../transactionsLogic";
 import { type RealizedIncomeEvent } from "../realizedIncome";
 
 describe("portfolioIrr", () => {

@@ -3,7 +3,7 @@ import {
   calculateConsolidatedPosition,
   reconcileAllPositions,
 } from "../api/positions.server";
-import { recalculateHoldingFromTransactions, type Transaction } from "../transactions";
+import { recalculateHoldingFromTransactions, type Transaction } from "../transactionsLogic";
 
 describe("positions.server - Read Model Consolidation & Reconciliation", () => {
   it("should be strictly idempotent (running multiple times produces bit-identical results)", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { recalculateHoldingFromTransactions, getQuantityAtDate, Transaction } from "../transactions";
+import { recalculateHoldingFromTransactions, getQuantityAtDate, Transaction } from "../transactionsLogic";
 
 describe("recalculateHoldingFromTransactions", () => {
   it("should calculate average price for only buys (including fees)", () => {

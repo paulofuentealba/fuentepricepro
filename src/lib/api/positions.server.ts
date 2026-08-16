@@ -1,4 +1,4 @@
-import { recalculateHoldingFromTransactions, type Transaction } from "../transactions";
+import { recalculateHoldingFromTransactions, type Transaction } from "../transactionsLogic";
 
 export interface ConsolidatedPosition {
   ticker: string;

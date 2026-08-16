@@ -5,7 +5,7 @@ import {
   normalizeDateStr,
   groupRealizedIncomeByMonth,
 } from "../realizedIncome";
-import { type Transaction } from "../transactions";
+import { type Transaction } from "../transactionsLogic";
 import { type DividendEvent } from "../domain";
 
 describe("realizedIncome", () => {
