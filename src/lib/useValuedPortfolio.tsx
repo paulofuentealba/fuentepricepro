@@ -202,6 +202,7 @@ function useValuedPortfolioBff(
   globalYield: number,
   isAppLoading: boolean,
   watchlistRest: ReturnType<typeof useWatchlist>,
+  useBff: boolean,
 ) {
   const { t } = useI18n();
   const { data: selic } = useSelic();
@@ -228,7 +229,7 @@ function useValuedPortfolioBff(
           exchangeRate: fx?.USDBRL ?? 5.75,
         },
       }),
-    enabled: !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
+    enabled: useBff && !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
     staleTime: 60_000,
   });
 
@@ -300,7 +301,7 @@ function useValuedPortfolioComputation() {
   const { transactions = [], isLoading: isTxLoading } = useTransactions();
   const { loading: isAuthLoading } = useAuth();
   const { targetYield: globalYield } = useSettings();
-  const useBff = useFeatureGate("USE_BFF_PORTFOLIO_VALUATION");
+  const useBff = Boolean(useFeatureGate("USE_BFF_PORTFOLIO_VALUATION"));
 
   const isAppLoading = isAuthLoading || isWatchlistPending || isTxLoading;
 
@@ -318,6 +319,7 @@ function useValuedPortfolioComputation() {
     globalYield,
     isAppLoading,
     watchlistResult,
+    useBff,
   );
 
   return useBff ? bffResult : clientResult;
