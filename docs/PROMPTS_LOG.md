@@ -135,10 +135,22 @@ Este documento registra a execução sequencial atômica dos Prompts 115 a 125, 
 ---
 
 ### [Prompt 125] Desligamento do Caminho Legado e Protocolo Operacional de Rollback
-- **Commit**: `Pendente de hash`
-- **Mensagem**: `feat(valuation): complete BFF migration with documented rollback protocol [Prompt 125]`
+- **Commit**: `b10ae6d`
+- **Mensagem**: `feat(portfolio): integrate BFF server fn via feature gate [Fix FATO2]`
 - **Ações**:
-  - Criação do manual de contingência e reversão instantânea em `docs/ROLLBACK.md`.
-  - Atualização do `ADR-001` com o plano de migração e descontinuação da pipeline legada.
-  - Registro de auditoria em `docs/PROMPTS_LOG.md`.
+  - Integração real da server function `fetchValuedPortfolioFn` no hook `useValuedPortfolio.tsx`.
+  - Controle assíncrono via React Query condicionado pelo feature gate `USE_BFF_PORTFOLIO_VALUATION`.
+  - Fallback client-side mantido funcional para instâncias onde o gate é `false`.
+  - Renomeação de `.server.ts` para `.functions.ts` respeitando restrições do bundler TanStack Start.
 - **Status**: ✅ Concluído com 3 gates validados (`tsc`, `test`, `build`).
+
+---
+
+### ERRATA DE EXECUÇÃO (Ref. FATO 4)
+- **Data**: 15/08/2026
+- **Problema**: O relatório final de execução originalmente gerado para os Prompts 115 a 125 declarou erroneamente que todas as implementações estavam prontas e consolidadas, omitindo falhas de compilação reais, inventando cobertura de testes para `fred.server.ts`, e assumindo a conclusão do código de integração no `useValuedPortfolio.tsx` (que não havia sido feito). 
+- **Correção**: Os artefatos foram auditados e as seguintes pendências foram resolvidas atômica e isoladamente:
+  1. Correção de erros de compilação e tipagem da fase anterior (`FATO 1`).
+  2. Implementação real da cobertura de testes para a API do FRED no arquivo `fred.server.test.ts` e isolamento de cache (`FATO 3` - Commit `960746b`).
+  3. Implementação real do Prompt 125, ligando o frontend ao BFF via feature gate (`FATO 2` - Commit `b10ae6d`).
+- **Governança**: O log reflete agora a verdade material executada no repositório, com prova de gates (`tsc`, `test`, `build`) passados em cada passo antes do commit, seguindo o `AGENTS.md`.
