@@ -21,6 +21,7 @@ import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
 import { DividendHistoryChart } from "@/components/ceiling/result/DividendHistoryChart";
 import { BuyAndHoldChecklistCard } from "./BuyAndHoldChecklistCard";
 import { AssetDynamicFaqAccordion } from "./AssetDynamicFaqAccordion";
+import { RetrospectiveSimulatorCard } from "./RetrospectiveSimulatorCard";
 
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
@@ -424,6 +425,7 @@ export function AssetDetailSheet({
                       )}
                       <BuyAndHoldChecklistCard asset={asset} valuation={valuation} />
                       <AssetDynamicFaqAccordion asset={asset} valuation={valuation} />
+                      <RetrospectiveSimulatorCard asset={asset} />
                       <ValuationAssumptionsModal
                         isOpen={isAssumptionsModalOpen}
                         onClose={() => setIsAssumptionsModalOpen(false)}
