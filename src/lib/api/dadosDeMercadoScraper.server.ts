@@ -1,6 +1,6 @@
 import { UA, fetchWithRetry } from "./http.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
-import type { DividendEvent } from "./types";
+import type { DividendEvent } from "../domain";
 import { reportIngestionStatus } from "./ingestionLog.server";
 
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -64,14 +64,14 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
   } catch (err) {
     console.error(`[DadosDeMercado] HTTP error for ${cleanTicker}`, err);
     if (adminDb) {
-      await reportIngestionStatus("dadosdemercado", cleanTicker, "FAILED", `Fetch failed: ${(err as Error).message}`);
+      await reportIngestionStatus("dadosdemercado", "FAILED", `Fetch failed: ${(err as Error).message}`, cleanTicker);
     }
     return null;
   }
 
   if (!htmlMain || !htmlDiv) {
     if (adminDb) {
-      await reportIngestionStatus("dadosdemercado", cleanTicker, "FAILED", `Missing HTML for main or dividends`);
+      await reportIngestionStatus("dadosdemercado", "FAILED", `Missing HTML for main or dividends`, cleanTicker);
     }
     return null;
   }
@@ -149,12 +149,10 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
 
             if (amount > 0 && exDate) {
               result.dividendEvents.push({
-                eventId: `dm_${exDate}_${amount}`,
                 exDate,
                 paymentDate,
-                amount,
-                type: type.toLowerCase().includes('jcp') ? 'jcp' : 'dividendo',
-                currency: 'BRL',
+                amountPerShare: amount,
+                isJCP: type.toLowerCase().includes('jcp'),
                 paymentDateEstimated: false
               });
             }
@@ -170,7 +168,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
   if (adminDb) {
     try {
       await adminDb.collection("dadosDeMercadoCache").doc(cleanTicker).set(result, { merge: true });
-      await reportIngestionStatus("dadosdemercado", cleanTicker, "PASSED", "Scraped successfully");
+      await reportIngestionStatus("dadosdemercado", "PASSED", "Scraped successfully", cleanTicker);
     } catch (err) {
       console.error(`[DadosDeMercado] DB write error for ${cleanTicker}`, err);
     }
