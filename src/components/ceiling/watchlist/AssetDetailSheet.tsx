@@ -18,6 +18,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { cn } from "@/lib/utils";
 import { DividendsHistoryPanel } from "./DividendsHistoryPanel";
 import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
+import { FundamentalIndicatorsPanel } from "./FundamentalIndicatorsPanel";
 import { DividendHistoryChart } from "@/components/ceiling/result/DividendHistoryChart";
 import { BuyAndHoldChecklistCard } from "./BuyAndHoldChecklistCard";
 import { AssetDynamicFaqAccordion } from "./AssetDynamicFaqAccordion";
@@ -414,7 +415,7 @@ export function AssetDetailSheet({
                         </div>
                       )}
                       <ConsensusPyramid valuation={valuation} currency={asset.currency} />
-                      <IndicatorGrid asset={asset} />
+                      <FundamentalIndicatorsPanel asset={asset} valuation={valuation} />
                       {(asset.dividendHistory ?? []).filter((p: any) => p.amount > 0).length > 1 && (
                         <DividendHistoryChart
                           data={asset.dividendHistory}
