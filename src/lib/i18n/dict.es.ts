@@ -1416,4 +1416,14 @@ export const es = {
     fromToShares: "{{initial}} → {{final}} títulos",
     disclaimer: "La rentabilidad pasada no garantiza rendimientos futuros. Simulación ilustrativa asumiendo reinversión íntegra al precio de la fecha de pago.",
   },
+  dividendHeatmap: {
+    title: "Mapa de Calor de Dividendos",
+    subtitle: "Distribución mensual histórica y frecuencia de recurrencia",
+    recurrenceHeader: "Recurrencia",
+    recurrenceTip: "Porcentaje de los años analizados en los que este mes registró pagos de dividendos",
+    payoutTitle: "Payout Histórico",
+    payoutSubtitle: "Porcentaje del beneficio neto distribuido a los accionistas",
+    payoutFiiNote: "Los fondos inmobiliarios distribuyen por regulación el ~95% del flujo de caja.",
+    monthsShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+  },
 } satisfies typeof en;

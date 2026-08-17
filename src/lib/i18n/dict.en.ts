@@ -1402,4 +1402,14 @@ export const en = {
     fromToShares: "{{initial}} → {{final}} shares",
     disclaimer: "Past performance does not guarantee future results. Illustrative simulation assuming complete dividend reinvestment at execution date prices.",
   },
+  dividendHeatmap: {
+    title: "Dividend Payment Heatmap",
+    subtitle: "Historical monthly distribution and recurrence frequency",
+    recurrenceHeader: "Recurrence",
+    recurrenceTip: "Percentage of analyzed years in which this month registered dividend payments",
+    payoutTitle: "Historical Payout Ratio",
+    payoutSubtitle: "Percentage of net income distributed to shareholders",
+    payoutFiiNote: "Real estate and credit funds distribute ~95% of cash flow by regulation.",
+    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  },
 };

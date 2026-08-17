@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { useTransactions } from "@/lib/transactions";
 import type { WatchlistItem } from "@/lib/watchlist";
-import type { DividendEvent, Currency } from "@/lib/domain";
+import type { DividendEvent, Currency, Asset } from "@/lib/domain";
 import { calculateRealizedIncome } from "@/lib/realizedIncome";
 import { AssetMonthlyDividendChart } from "./AssetMonthlyDividendChart";
+import { DividendHeatmapCard } from "./DividendHeatmapCard";
 import { formatCurrency } from "@/lib/i18n";
 import { formatResultDate } from "@/lib/resultCard";
 import { useI18n } from "@/lib/i18n-provider";
@@ -27,9 +28,10 @@ interface Props {
   item: WatchlistItem;
   events: DividendEvent[];
   currency: Currency;
+  asset?: Asset;
 }
 
-export function DividendsHistoryPanel({ item, events, currency }: Props) {
+export function DividendsHistoryPanel({ item, events, currency, asset }: Props) {
   const { t, locale } = useI18n();
   const { transactions } = useTransactions();
   const [page, setPage] = useState(0);
@@ -146,6 +148,40 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
           <AssetMonthlyDividendChart events={realizedEvents} currency={currency} />
         </CardContent>
       </Card>
+
+      <DividendHeatmapCard
+        asset={
+          asset || {
+            ticker: item.ticker,
+            name: item.name || item.ticker,
+            type: item.type,
+            currency: item.currency as Currency,
+            currentPrice: item.currentPrice,
+            dividends3y: [],
+            dividendHistory: [],
+            exDividendDate: null,
+            epsCurrent: null,
+            epsNext: null,
+            paymentMonths: [],
+            sector: item.sector ?? null,
+            dividendEvents: events,
+            metrics: {
+              eps: null,
+              roe: null,
+              payoutRatio: null,
+              pbRatio: null,
+              peRatio: null,
+              currentDy: null,
+              dividendCagr5y: null,
+              capRate: null,
+              vacancy: null,
+              expenseRatio: null,
+              aum: null,
+              trackingError: null,
+            },
+          }
+        }
+      />
 
       <div className="rounded-lg border border-border/50 bg-background/60 backdrop-blur-sm overflow-hidden">
         <Table>

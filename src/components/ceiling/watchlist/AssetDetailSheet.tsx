@@ -481,6 +481,7 @@ export function AssetDetailSheet({
                       item={item}
                       events={asset.dividendEvents ?? []}
                       currency={asset.currency}
+                      asset={asset}
                     />
                   </TabsContent>
                 )}

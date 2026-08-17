@@ -1412,4 +1412,14 @@ export const ptBR = {
     fromToShares: "{{initial}} → {{final}} cotas",
     disclaimer: "Rentabilidade passada não é garantia de rentabilidade futura. Simulação puramente ilustrativa assumindo reinvestimento integral no preço da data de pagamento.",
   },
+  dividendHeatmap: {
+    title: "Mapa de Calor de Proventos",
+    subtitle: "Distribuição mensal histórica e frequência de recorrência",
+    recurrenceHeader: "Recorrência",
+    recurrenceTip: "Percentual dos anos analisados em que este mês teve pagamento de proventos",
+    payoutTitle: "Payout Histórico",
+    payoutSubtitle: "Percentual do lucro líquido distribuído aos acionistas",
+    payoutFiiNote: "Fundos imobiliários e de crédito distribuem obrigatoriamente ~95% do resultado de caixa por regulação.",
+    monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+  },
 } satisfies typeof en;
