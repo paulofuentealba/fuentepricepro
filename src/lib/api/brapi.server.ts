@@ -62,14 +62,14 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         : typeof res.defaultKeyStatistics?.trailingEps === "number"
           ? res.defaultKeyStatistics.trailingEps
           : null;
-    const pe: number | null = typeof res.priceEarnings === "number" ? res.priceEarnings : null;
+    let pe: number | null = typeof res.priceEarnings === "number" ? res.priceEarnings : null;
     // Prefer the direct Book Value per Share when available (defaultKeyStatistics.bookValue) —
     // more precise than deriving it downstream from currentPrice / pbRatio.
     const bvps: number | null =
       typeof res.defaultKeyStatistics?.bookValue === "number"
         ? res.defaultKeyStatistics.bookValue
         : null;
-    const pb: number | null =
+    let pb: number | null =
       typeof res.priceToBookRatio === "number"
         ? res.priceToBookRatio
         : typeof res.defaultKeyStatistics?.priceToBook === "number"
@@ -111,6 +111,9 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
 
     // HG Brasil primary source for dividendEvents (fallback to Brapi if empty/null)
     const hgRes = await fetchHgBrasilDividends(clean);
+    let roe: number | null = null;
+    let currentDy: number | null = null;
+
     if (hgRes && hgRes.dividends && hgRes.dividends.length > 0) {
       dividendEvents = hgRes.dividends.map((d) => ({
         exDate: d.approvedDate ?? "",
@@ -118,6 +121,21 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         amountPerShare: d.amount,
         isJCP: typeof d.type === "string" && d.type.toUpperCase().includes("JCP"),
       })).filter((e) => e.exDate !== "");
+    }
+    
+    // Dados de Mercado fallback for dividendEvents and supplementary indicators
+    const { fetchDadosDeMercado } = await import("./dadosDeMercadoScraper.server");
+    const dmRes = await fetchDadosDeMercado(clean);
+    if (dmRes) {
+      if (dividendEvents.length === 0 && dmRes.dividendEvents.length > 0) {
+        dividendEvents = dmRes.dividendEvents;
+      }
+      roe = dmRes.fundamentals.roe ?? null;
+      currentDy = dmRes.fundamentals.dy ?? null;
+      
+      // We only fallback PE/PB if Brapi completely lacked them, protecting valuation logic
+      if (pe === null && dmRes.fundamentals.pl) pe = dmRes.fundamentals.pl;
+      if (pb === null && dmRes.fundamentals.pvp) pb = dmRes.fundamentals.pvp;
     }
 
     const currency: Currency =
@@ -148,8 +166,8 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         pbRatio: pb,
         eps,
         bvps,
-        roe: null,
-        currentDy: null,
+        roe,
+        currentDy,
         capRate: null,
         vacancy: null,
         expenseRatio: null,

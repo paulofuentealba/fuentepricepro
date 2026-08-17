@@ -184,3 +184,14 @@ chave em texto puro em arquivos dentro de `docs/`.
 Em 2026-08-17, foi confirmado que o plano pago da API do HG Brasil habilita o endpoint `finance/dividends` retornando corretamente as datas de pagamento (`payment_date`), histórico e eventos projetados. 
 
 **Decisão de Escopo Restrito**: O HG Brasil agora é a fonte primária de dividendos para ativos BR (com fallback na Brapi), **porém estritamente para o campo `dividendEvents`** (os eventos exibidos na UI do aplicativo). A Brapi foi mantida intocada como fonte para `dividendHistory`, `cagr`, `payoutRatio`, `paymentMonths` e `dividends3y`, pois a Brapi retorna 5 anos de dados, enquanto o HG Brasil retorna um histórico mais curto (~12 a 24 meses). Tentar substituir toda a fonte (inclusive valuation) por HG Brasil reduziria a precisão do Consenso e do CAGR de 5 anos. A política escolhida foi a substituição total all-or-nothing (sem merge intrincado de campos) apenas no nível de `dividendEvents`.
+
+---
+
+## ATUALIZAÇÃO — Dados de Mercado Scraper (Frente 3, 2026-08-17)
+
+Conforme Prompt 13, implementamos o **Scraping da Dados de Mercado**.
+- **Autenticação**: Scraping HTML livre no servidor, sem chave (já que não usamos conta Pro/CPF).
+- **Indicadores**: Coletados do bloco `marketratios`. Expostos via `ApiAsset.metrics` (P/L, P/VP, ROE, DY) de forma complementar. **Não** alteram o motor de valuation (`getAssetValuation`), obedecendo a regra de segurança.
+- **LGPD**: O bloco `id="admins"` é estritamente limpo da string HTML via `replace` antes de qualquer processamento, para evitar retenção de dado pessoal sensível.
+- **Dividendos**: Extraídos via Scraping HTML usando como âncora a string `"Histórico de dividendos de {ticker}"` e injetados na cadeia de fallback: `HG Brasil -> Dados de Mercado -> Brapi`. Apenas o array de eventos (`dividendEvents`) é afetado.
+- **Agendamento**: Script CLI `scripts/scrape-dados-de-mercado.ts` adicionado para rodar via cron, similar ao CVM. Não roda de forma síncrona em chamadas do usuário.
