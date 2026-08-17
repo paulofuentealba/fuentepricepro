@@ -141,7 +141,11 @@ export function computeSmartAllocation(
   }
 
   const candidates = sameCurrency.filter(
-    (i) => !excludedTickers.includes(i.ticker) && i.currentPrice > 0 && i.annualDividend > 0,
+    (i) =>
+      !excludedTickers.includes(i.ticker) &&
+      i.currentPrice > 0 &&
+      i.annualDividend > 0 &&
+      i.quantity > 0,
   );
 
   if (candidates.length === 0) {

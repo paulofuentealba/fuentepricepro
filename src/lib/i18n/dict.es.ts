@@ -618,7 +618,7 @@ export const es = {
     title: "Asignación Inteligente",
     paywallTitle: "Estrategias Avanzadas Bloqueadas",
     paywallDesc: "Los usuarios del plan gratuito solo pueden usar la estrategia predeterminada de 'Rendimiento'. ¡Actualiza a Pro para combinar múltiples estrategias como Penalización por Concentración Sectorial, Subvaluación y Paridad de Riesgo!",
-    subtitle: "Asigna tu capital disponible entre los activos más subvalorados en tu watchlist.",
+    subtitle: "Asigna tu capital disponible entre los activos más subvalorados en tu cartera.",
     capital: "Capital disponible para invertir",
     currency: "Moneda",
     generate: "Generar asignación",

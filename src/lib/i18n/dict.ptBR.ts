@@ -613,7 +613,7 @@ export const ptBR = {
     title: "Alocação Inteligente",
     paywallTitle: "Estratégias Avançadas Bloqueadas",
     paywallDesc: "Usuários do plano gratuito podem usar apenas a estratégia padrão de 'Dividend Yield'. Assine o Pro para combinar múltiplas estratégias como Penalidade de Concentração Setorial, Subavaliação e Paridade de Risco!",
-    subtitle: "Distribua seu capital disponível entre os ativos mais descontados da sua watchlist.",
+    subtitle: "Distribua seu capital disponível entre os ativos mais descontados da sua carteira.",
     capital: "Capital disponível para investir",
     currency: "Moeda",
     generate: "Gerar recomendação",

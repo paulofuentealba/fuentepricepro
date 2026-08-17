@@ -610,7 +610,7 @@ export const en = {
     title: "Smart Allocation",
     paywallTitle: "Advanced Strategies Locked",
     paywallDesc: "Free users can only use the default 'Yield' strategy. Upgrade to Pro to combine multiple strategies like Sector Concentration Penalty, Undervaluation, and Risk Parity!",
-    subtitle: "Allocate your available cash across the most undervalued assets in your watchlist.",
+    subtitle: "Allocate your available cash across the most undervalued assets in your portfolio.",
     capital: "Available capital to invest",
     currency: "Currency",
     generate: "Generate allocation",
