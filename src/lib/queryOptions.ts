@@ -87,8 +87,8 @@ export function ipcaFiveYearAverageQueryOptions() {
   return queryOptions({
     queryKey: ["ipcaFiveYearAverage"] as const,
     queryFn: (): Promise<number | null> => fetchIpcaFiveYearAverageFn(),
-    staleTime: 30 * 24 * 60 * 60_000, // 30 days
-    gcTime: 60 * 24 * 60 * 60_000, // 60 days
+    staleTime: 7 * 24 * 60 * 60_000, // 7 days (safe 32-bit integer duration)
+    gcTime: 14 * 24 * 60 * 60_000, // 14 days
   });
 }
 
