@@ -26,7 +26,7 @@ interface WatchlistTableProps {
 
 export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
   const { t } = useI18n();
-  const { update } = useWatchlist();
+  const { updateAsync } = useWatchlist();
 
   const [edits, setEdits] = useState<Record<string, { qty: string; avg: string }>>({});
   const [isEditing, setIsEditing] = useState(false);
@@ -44,27 +44,37 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
     }
   }, [isEditing, items]);
 
-  const handleSave = () => {
-    let updatedCount = 0;
-    for (const [id, vals] of Object.entries(edits)) {
-      const it = items.find((x) => x.id === id);
-      if (!it) continue;
-
-      const newQty = parseInt(vals.qty, 10);
-      const qty = isNaN(newQty) || newQty < 0 ? 0 : newQty;
-
-      const newAvg = parseFloat(vals.avg);
-      const avg = isNaN(newAvg) || newAvg <= 0 ? null : newAvg;
-
-      if (it.quantity !== qty || it.averagePrice !== avg) {
-        update(id, { quantity: qty, averagePrice: avg });
-        updatedCount++;
-      }
-    }
+  const handleSave = async () => {
+    const results = await Promise.allSettled(
+      Object.entries(edits)
+        .filter(([id, vals]) => {
+          const it = items.find((x) => x.id === id);
+          if (!it) return false;
+          const newQty = parseInt(vals.qty, 10);
+          const qty = isNaN(newQty) || newQty < 0 ? 0 : newQty;
+          const newAvg = parseFloat(vals.avg);
+          const avg = isNaN(newAvg) || newAvg <= 0 ? null : newAvg;
+          return it.quantity !== qty || it.averagePrice !== avg;
+        })
+        .map(([id, vals]) => {
+          const newQty = parseInt(vals.qty, 10);
+          const qty = isNaN(newQty) || newQty < 0 ? 0 : newQty;
+          const newAvg = parseFloat(vals.avg);
+          const avg = isNaN(newAvg) || newAvg <= 0 ? null : newAvg;
+          return updateAsync(id, { quantity: qty, averagePrice: avg });
+        })
+    );
 
     setIsEditing(false);
-    if (updatedCount > 0) {
-      toast.success(t.toasts.assetsUpdatedCount.replace("{{count}}", String(updatedCount)));
+
+    const succeeded = results.filter(r => r.status === "fulfilled").length;
+    const failed = results.filter(r => r.status === "rejected").length;
+
+    if (succeeded > 0) {
+      toast.success(t.toasts.assetsUpdatedCount.replace("{{count}}", String(succeeded)));
+    }
+    if (failed > 0) {
+      toast.error(t.toasts.assetsUpdateFailed.replace("{{count}}", String(failed)));
     }
   };
 

@@ -118,6 +118,7 @@ export const es = {
     importFailedCount: "{{count}} fallido(s)",
     noChanges: "sin cambios",
     assetsUpdatedCount: "{{count}} activo(s) actualizado(s).",
+    assetsUpdateFailed: "{{count}} activo(s) fallaron al guardar — revise antes de confiar en los números.",
     adjustAllocationTarget100: "Ajusta tus metas de asignación al 100% antes de generar recomendaciones.",
     settingsSaved: "Configuraciones guardadas.",
   },

@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EditPositionFields } from "../EditPositionFields";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 
-const mockUpdate = vi.fn();
+const mockUpdateAsync = vi.fn().mockResolvedValue(undefined);
 const mockUpsertTransaction = vi.fn().mockResolvedValue(undefined);
 let mockTransactions: any[] = [];
 
@@ -14,7 +14,7 @@ vi.mock("@/lib/watchlist", async () => {
   const actual = await vi.importActual<any>("@/lib/watchlist");
   return {
     ...actual,
-    useWatchlist: () => ({ update: mockUpdate }),
+    useWatchlist: () => ({ updateAsync: mockUpdateAsync }),
   };
 });
 
@@ -102,8 +102,8 @@ describe("EditPositionFields — Editar Posição (inline, migrado de EditItemDi
 
     fireEvent.click(screen.getByRole("button", { name: /salvar/i }));
 
-    await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-    const [id, patch] = mockUpdate.mock.calls[0];
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalledTimes(1));
+    const [id, patch] = mockUpdateAsync.mock.calls[0];
     expect(id).toBe("1");
     expect(patch.quantity).toBe(100);
     expect(patch.averagePrice).toBe(30);
@@ -136,7 +136,7 @@ describe("EditPositionFields — Editar Posição (inline, migrado de EditItemDi
 
     fireEvent.click(screen.getByRole("button", { name: /salvar/i }));
 
-    await waitFor(() => expect(mockUpdate).not.toHaveBeenCalled());
+    await waitFor(() => expect(mockUpdateAsync).not.toHaveBeenCalled());
     expect(mockUpsertTransaction).not.toHaveBeenCalled();
   });
 });

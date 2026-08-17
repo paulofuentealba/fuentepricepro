@@ -15,7 +15,7 @@ const FILTER_THRESHOLD = 15;
 export function TransactionsPanel({ item }: { item: WatchlistItem }) {
   const { t, locale } = useI18n();
   const { transactions, upsert, remove } = useTransactions();
-  const { update } = useWatchlist();
+  const { updateAsync } = useWatchlist();
   
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -81,7 +81,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
     await upsert(tx);
     const newTxs = [...transactions.filter(t => t.id !== tx.id), tx].filter(t => t.ticker === item.ticker);
     const { quantity, averagePrice } = recalculateHoldingFromTransactions(newTxs.sort((a, b) => b.date - a.date));
-    await update(item.id, { quantity, averagePrice });
+    await updateAsync(item.id, { quantity, averagePrice });
   };
 
   const handleDelete = async (id: string) => {
@@ -89,7 +89,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
       await remove(id);
       const newTxs = transactions.filter(t => t.id !== id && t.ticker === item.ticker);
       const { quantity, averagePrice } = recalculateHoldingFromTransactions(newTxs.sort((a, b) => b.date - a.date));
-      await update(item.id, { quantity, averagePrice });
+      await updateAsync(item.id, { quantity, averagePrice });
     }
   };
 

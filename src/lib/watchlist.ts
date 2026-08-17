@@ -682,6 +682,10 @@ export function useWatchlist() {
     (id: string, patch: Partial<WatchlistItem>) => updateMutation.mutate({ id, patch }),
     [updateMutation],
   );
+  const updateAsync = useCallback(
+    (id: string, patch: Partial<WatchlistItem>) => updateMutation.mutateAsync({ id, patch }),
+    [updateMutation],
+  );
 
-  return { items: items || [], isPending, upsert, upsertAsync, upsertManyAsync, remove, update };
+  return { items: items || [], isPending, upsert, upsertAsync, upsertManyAsync, remove, update, updateAsync };
 }

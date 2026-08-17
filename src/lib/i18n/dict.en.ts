@@ -116,6 +116,7 @@ export const en = {
     importFailedCount: "{{count}} failed",
     noChanges: "no changes",
     assetsUpdatedCount: "{{count}} asset(s) updated.",
+    assetsUpdateFailed: "{{count}} asset(s) failed to save — please review before trusting the numbers.",
     adjustAllocationTarget100: "Adjust your allocation targets to 100% before generating recommendations.",
     settingsSaved: "Settings saved.",
   },

@@ -30,7 +30,7 @@ interface EditPositionFieldsProps {
  */
 export function EditPositionFields({ item }: EditPositionFieldsProps) {
   const { t, locale } = useI18n();
-  const { update } = useWatchlist();
+  const { updateAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
@@ -157,7 +157,7 @@ export function EditPositionFields({ item }: EditPositionFieldsProps) {
       }
 
       // Maintain fallback document patch on WatchlistItem
-      update(item.id, patch);
+      await updateAsync(item.id, patch);
 
       const targetQty = patch.quantity ?? item.quantity;
       const targetAvgPrice = patch.averagePrice ?? item.averagePrice;

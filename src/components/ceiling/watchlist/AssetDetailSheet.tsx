@@ -10,6 +10,7 @@ import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
 import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { ValuationAssumptionsModal } from "./assetCard/ValuationAssumptionsModal";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
@@ -121,7 +122,7 @@ function WowInsights({
 
 function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMargin: number }) {
   const { t } = useI18n();
-  const { update } = useWatchlist();
+  const { updateAsync } = useWatchlist();
   const { transactions } = useTransactions();
   const derived = useAssetCardDerived(item);
 
@@ -143,7 +144,9 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
             value={item.investingSince ?? item.addedAt}
             onChange={(newDate) => {
               if (firstTransactionDate == null) {
-                update(item.id, { investingSince: newDate.getTime() });
+                updateAsync(item.id, { investingSince: newDate.getTime() }).catch(() => {
+                  toast.error(t.errors.updateAssetFailedPrefix + " / " + t.toasts.assetsUpdateFailed.replace("{{count}}", "1"));
+                });
               }
             }}
             firstTransactionDate={firstTransactionDate}

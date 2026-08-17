@@ -118,6 +118,7 @@ export const ptBR = {
     importFailedCount: "{{count}} com falha",
     noChanges: "sem alterações",
     assetsUpdatedCount: "{{count}} ativo(s) atualizado(s).",
+    assetsUpdateFailed: "{{count}} ativo(s) falharam ao salvar — revise antes de confiar nos números.",
     adjustAllocationTarget100: "Ajuste suas metas de alocação para 100% antes de gerar a recomendação.",
     settingsSaved: "Configurações salvas.",
   },
