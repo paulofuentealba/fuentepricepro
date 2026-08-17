@@ -18,6 +18,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import {
   useTransactions,
   recalculateHoldingFromTransactions,
+  recalculateInvestingSinceFromTransactions,
   type Transaction,
 } from "@/lib/transactions";
 
@@ -136,7 +137,10 @@ export function useWatchlistCsvImport(
                 sector: existing?.sector ?? null,
                 paymentMonths: Array.isArray(asset.paymentMonths) ? asset.paymentMonths : [],
                 addedAt: existing?.addedAt ?? Date.now(),
-                investingSince: existing?.investingSince ?? txTimestamp,
+                investingSince: Math.min(
+                  existing?.investingSince && !isNaN(existing.investingSince) ? existing.investingSince : Infinity,
+                  txTimestamp
+                ),
               };
               onImport(item);
               if (existing) updated++;
@@ -296,7 +300,11 @@ export function useWatchlistCsvImport(
                 sector: existing?.sector ?? null,
                 paymentMonths: Array.isArray(asset.paymentMonths) ? asset.paymentMonths : [],
                 addedAt: existing?.addedAt ?? Date.now(),
-                investingSince: existing?.investingSince ?? Date.now(),
+                investingSince:
+                  recalculateInvestingSinceFromTransactions(finalTxs) ??
+                  (existing?.investingSince && !isNaN(existing.investingSince)
+                    ? existing.investingSince
+                    : Date.now()),
               };
               onImport(item);
               if (existing) updated++;

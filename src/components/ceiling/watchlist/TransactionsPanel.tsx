@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
-import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
+import { useTransactions, recalculateHoldingFromTransactions, recalculateInvestingSinceFromTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { TransactionForm } from "./TransactionForm";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
@@ -81,7 +81,8 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
     await upsert(tx);
     const newTxs = [...transactions.filter(t => t.id !== tx.id), tx].filter(t => t.ticker === item.ticker);
     const { quantity, averagePrice } = recalculateHoldingFromTransactions(newTxs.sort((a, b) => b.date - a.date));
-    await updateAsync(item.id, { quantity, averagePrice });
+    const newInvestingSince = recalculateInvestingSinceFromTransactions(newTxs) ?? item.investingSince;
+    await updateAsync(item.id, { quantity, averagePrice, investingSince: newInvestingSince });
   };
 
   const handleDelete = async (id: string) => {
@@ -89,7 +90,8 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
       await remove(id);
       const newTxs = transactions.filter(t => t.id !== id && t.ticker === item.ticker);
       const { quantity, averagePrice } = recalculateHoldingFromTransactions(newTxs.sort((a, b) => b.date - a.date));
-      await updateAsync(item.id, { quantity, averagePrice });
+      const newInvestingSince = recalculateInvestingSinceFromTransactions(newTxs) ?? item.investingSince;
+      await updateAsync(item.id, { quantity, averagePrice, investingSince: newInvestingSince });
     }
   };
 

@@ -84,3 +84,13 @@ export function getQuantityAtDate(transactions: Transaction[], date: number): nu
 
   return quantity;
 }
+
+/**
+ * Calculates the earliest buy transaction date for an asset (investingSince).
+ * Returns null if no buy transactions exist.
+ */
+export function recalculateInvestingSinceFromTransactions(transactions: Transaction[]): number | null {
+  const buyTxs = transactions.filter((tx) => tx.type === "buy" && typeof tx.date === "number" && Number.isFinite(tx.date) && tx.date > 0);
+  if (buyTxs.length === 0) return null;
+  return Math.min(...buyTxs.map((tx) => tx.date));
+}

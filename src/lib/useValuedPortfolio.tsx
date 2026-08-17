@@ -15,7 +15,7 @@ import { useSelic } from "./useSelic";
 import { exchangeRateQueryOptions, macroRatesQueryOptions, ipcaFiveYearAverageQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
-import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "./transactions";
+import { useTransactions, recalculateHoldingFromTransactions, recalculateInvestingSinceFromTransactions, type Transaction } from "./transactions";
 import { useFeatureGate } from "./useFeatureGate";
 import { fetchValuedPortfolioFn } from "./api/portfolioBff.functions";
 
@@ -112,12 +112,22 @@ function useValuedPortfolioClientSide(
       const txs = txByTicker[it.ticker];
       let quantity = it.quantity;
       let averagePrice = it.averagePrice;
+      let investingSince = it.investingSince;
       const hasTransactions = Boolean(txs && txs.length > 0);
 
       if (hasTransactions && txs) {
         const computed = recalculateHoldingFromTransactions(txs);
         quantity = computed.quantity;
         averagePrice = computed.averagePrice;
+        const computedInvestingSince = recalculateInvestingSinceFromTransactions(txs);
+        if (computedInvestingSince != null) {
+          investingSince = Math.min(
+            typeof it.investingSince === "number" && !isNaN(it.investingSince) && it.investingSince > 0
+              ? it.investingSince
+              : Infinity,
+            computedInvestingSince
+          );
+        }
       }
 
       const isClosedPosition = hasTransactions && quantity === 0;
@@ -126,6 +136,7 @@ function useValuedPortfolioClientSide(
         ...it,
         quantity,
         averagePrice,
+        investingSince,
         isClosedPosition,
         targetYield: it.targetYield ?? globalYield,
       };

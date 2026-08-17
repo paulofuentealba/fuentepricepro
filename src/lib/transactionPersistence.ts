@@ -2,6 +2,7 @@ import { makeId, type WatchlistItem } from "./watchlist";
 import {
   type Transaction,
   recalculateHoldingFromTransactions,
+  recalculateInvestingSinceFromTransactions,
 } from "./transactions";
 import type { ParsedTransaction } from "./dynamicCsvParser";
 import { classifyBr } from "./classify";
@@ -170,7 +171,10 @@ export async function persistTransactionsBatch(
         customTaxRate: existingItem?.customTaxRate ?? null,
         sector: existingItem?.sector || assetData?.sector || null,
         addedAt: existingItem?.addedAt || Date.now(),
-        investingSince: existingItem?.investingSince || Date.now(),
+        investingSince:
+          recalculateInvestingSinceFromTransactions(allTickerTxs) ??
+          existingItem?.investingSince ??
+          Date.now(),
       };
 
       try {
