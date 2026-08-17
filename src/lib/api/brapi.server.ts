@@ -11,6 +11,7 @@ import {
   pickLast3,
   sumByYear,
 } from "./dividendAgg.server";
+import { fetchHgBrasilDividends } from "./hgBrasil.server";
 
 export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
   const clean = ticker.toUpperCase().replace(".SA", "");
@@ -98,7 +99,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
     );
 
     // Expose raw dividend events in parallel (does NOT affect valuation)
-    const dividendEvents: DividendEvent[] = cash
+    let dividendEvents: DividendEvent[] = cash
       .filter((d) => Number.isFinite(Number(d.rate)) && Number(d.rate) > 0)
       .map((d) => ({
         exDate: d.lastDatePrior ?? "",
@@ -107,6 +108,17 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         isJCP: typeof d.label === "string" && d.label.toUpperCase().includes("JCP"),
       }))
       .filter((e) => e.exDate !== "");
+
+    // HG Brasil primary source for dividendEvents (fallback to Brapi if empty/null)
+    const hgRes = await fetchHgBrasilDividends(clean);
+    if (hgRes && hgRes.dividends && hgRes.dividends.length > 0) {
+      dividendEvents = hgRes.dividends.map((d) => ({
+        exDate: d.approvedDate ?? "",
+        paymentDate: d.paymentDate ?? null,
+        amountPerShare: d.amount,
+        isJCP: typeof d.type === "string" && d.type.toUpperCase().includes("JCP"),
+      })).filter((e) => e.exDate !== "");
+    }
 
     const currency: Currency =
       (res.currency as Currency) ||
