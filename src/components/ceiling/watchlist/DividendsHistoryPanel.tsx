@@ -9,7 +9,9 @@ import { formatResultDate } from "@/lib/resultCard";
 import { useI18n } from "@/lib/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, History } from "lucide-react";
+import { ChevronLeft, ChevronRight, History, ShieldCheck, Clock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getDividendTypeLabel } from "@/lib/dividendLabel";
 import {
   Table,
   TableBody,
@@ -141,7 +143,7 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
             </div>
           </div>
 
-          <AssetMonthlyDividendChart events={pastRealizedEvents} currency={currency} />
+          <AssetMonthlyDividendChart events={realizedEvents} currency={currency} />
         </CardContent>
       </Card>
 
@@ -156,30 +158,59 @@ export function DividendsHistoryPanel({ item, events, currency }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleEvents.map((ev, i) => (
-              <TableRow key={i}>
-                <TableCell className={cn("text-sm", STICKY_FIRST_COLUMN_CLASS)}>
-                  {formatResultDate(ev.exDate, locale)}
-                </TableCell>
-                <TableCell className="text-sm">
-                  {ev.paymentDate ? formatResultDate(ev.paymentDate, locale) : "-"}
-                </TableCell>
-                <TableCell className="text-sm">
-                  {ev.isJCP ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/20">
-                      {t.watchlist.jcp}
+            {visibleEvents.map((ev, i) => {
+              const label = getDividendTypeLabel(item.type, ev.isJCP, t);
+              const chipColor = ev.isJCP
+                ? "bg-warning/10 text-warning border-warning/20"
+                : item.type === "FII" || item.type === "FII_INFRA" || item.type === "FIAGRO"
+                  ? "bg-primary/10 text-primary border-primary/20"
+                  : "bg-success/10 text-success border-success/20";
+
+              return (
+                <TableRow key={i}>
+                  <TableCell className={cn("text-sm", STICKY_FIRST_COLUMN_CLASS)}>
+                    {formatResultDate(ev.exDate, locale)}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <span>{ev.paymentDate ? formatResultDate(ev.paymentDate, locale) : "-"}</span>
+                      {ev.paymentDate && ev.paymentDateSource === "hgBrasil" && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center text-primary cursor-help">
+                              <ShieldCheck className="h-3.5 w-3.5" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="text-xs">{t.watchlist.confirmedByHgBrasil}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {ev.paymentDate && !ev.paymentDateSource && ev.paymentDateEstimated && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center text-muted-foreground/70 cursor-help">
+                              <Clock className="h-3.5 w-3.5" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="text-xs">{t.watchlist.estimatedPaymentDate}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border", chipColor)}>
+                      {label}
                     </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-success/10 text-success border border-success/20">
-                      {t.watchlist.dividend}
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell className="text-sm font-medium text-right text-success">
-                  {formatCurrency(ev.amountPerShare, currency, locale)}
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                  <TableCell className="text-sm font-medium text-right text-success">
+                    {formatCurrency(ev.amountPerShare, currency, locale)}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
         {totalPages > 1 && (

@@ -167,7 +167,7 @@ export async function fetchHgBrasilDividends(
  * Enriches a list of existing dividend items (e.g. from Brapi/B3) with confirmed payment dates from HG Brasil.
  * Pure non-destructive enrichment: never overwrites or alters existing valuation data.
  */
-export function enrichDividendPaymentDates<T extends { paymentDate?: string | null; approvedDate?: string | null; amount?: number }>(
+export function enrichDividendPaymentDates<T extends { paymentDate?: string | null; approvedDate?: string | null; amount?: number; paymentDateSource?: "hgBrasil" | "provider" | "estimated" | null }>(
   existingDividends: T[],
   hgDividends: HgBrasilDividendItem[],
 ): T[] {
@@ -182,14 +182,20 @@ export function enrichDividendPaymentDates<T extends { paymentDate?: string | nu
   }
 
   return existingDividends.map((item) => {
-    // If already has a valid paymentDate, preserve it
-    if (item.paymentDate) return item;
+    // If already has a valid paymentDate, preserve it and mark source if not already marked
+    if (item.paymentDate) {
+      return {
+        ...item,
+        paymentDateSource: item.paymentDateSource ?? "provider",
+      };
+    }
 
     // Try match by approvedDate ("data com")
     if (item.approvedDate && hgByApproved.has(item.approvedDate)) {
       return {
         ...item,
         paymentDate: hgByApproved.get(item.approvedDate)!,
+        paymentDateSource: "hgBrasil",
       };
     }
 

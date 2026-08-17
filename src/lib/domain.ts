@@ -36,6 +36,8 @@ export interface DividendEvent {
   paymentDate: string | null;
   /** True if paymentDate is estimated via fund distribution rules. Defaults to false. */
   paymentDateEstimated?: boolean;
+  /** Source of the confirmed or estimated payment date. */
+  paymentDateSource?: "hgBrasil" | "provider" | "estimated" | null;
   /** Dividend amount per share / quota. */
   amountPerShare: number;
   /** True if dividend is JCP (Juros sobre Capital Próprio - subject to 15% WHT). */

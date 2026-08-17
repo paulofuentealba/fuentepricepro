@@ -263,23 +263,27 @@ export interface MonthlyDividendBucket {
   monthKey: string; // "YYYY-MM"
   monthLabel: string; // Formatted label (e.g. "nov/25")
   amountNet: number;
+  isFuture?: boolean;
 }
 
 /**
  * Groups realized income events by month (YYYY-MM), summing amountNet.
- * Filters out future events where paymentDate (or exDate) > referenceDateStr (defaults to today ISO).
+ * Optionally filters out events where paymentDate (or exDate) > referenceDateStr.
  * Returns at most the 12 most recent months with dividends (no artificial zero-filling).
  */
 export function groupRealizedIncomeByMonth(
   events: RealizedIncomeEvent[],
-  referenceDateStr: string = new Date().toISOString().split("T")[0],
+  referenceDateStr?: string,
   locale: Locale = "ptBR"
 ): MonthlyDividendBucket[] {
+  const todayISO = new Date().toISOString().split("T")[0];
+  const currentMonthKey = todayISO.slice(0, 7);
   const monthMap: Record<string, number> = {};
 
   for (const ev of events) {
     const eventDate = ev.paymentDate || ev.exDate;
-    if (!eventDate || eventDate > referenceDateStr) continue;
+    if (!eventDate) continue;
+    if (referenceDateStr && eventDate > referenceDateStr) continue;
 
     const monthKey = eventDate.slice(0, 7); // "YYYY-MM"
     monthMap[monthKey] = (monthMap[monthKey] || 0) + ev.amountNet;
@@ -304,6 +308,7 @@ export function groupRealizedIncomeByMonth(
       monthKey,
       monthLabel,
       amountNet: Math.round(monthMap[monthKey] * 100) / 100,
+      isFuture: monthKey > currentMonthKey,
     };
   });
 }
