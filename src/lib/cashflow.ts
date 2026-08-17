@@ -3,6 +3,7 @@ import type { DividendEvent } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { type Transaction, getQuantityAtDate } from "@/lib/transactions";
 import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
+import { getEffectiveTransactions } from "@/lib/portfolioIrr";
 
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
 export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAGRO", "ETF", "REIT"];
@@ -314,7 +315,7 @@ export function computeCashFlowSummary(data: MonthBucket[]): CashFlowSummary {
 /**
  * Computes invested vs. received amounts per asset, for the third chart.
  * Limited to top 10 by invested value.
- * NOTE: "received" assumes current quantity is held throughout (no transaction history).
+ * Uses SSOT calculateRealizedIncome with effective transaction history and tax deductions.
  */
 export function computeInvestedVsReceived(
   items: WatchlistItem[],
@@ -323,29 +324,49 @@ export function computeInvestedVsReceived(
   transactions: Transaction[] = [],
   fxRate: number = 5.5
 ): InvestedVsReceivedItem[] {
+  if (!items || items.length === 0) return [];
+
+  const effectiveTxs = getEffectiveTransactions(transactions, items);
+  const assetMetaMap: Record<string, AssetTaxMeta> = {};
+  for (const it of items) {
+    assetMetaMap[it.ticker] = {
+      ticker: it.ticker,
+      type: it.type,
+      currency: it.currency,
+      customTaxRate: it.customTaxRate,
+    };
+  }
+
+  const realizedEvents = calculateRealizedIncome(effectiveTxs, dividendEventsMap, assetMetaMap);
+
+  const receivedByTicker = new Map<string, number>();
+  for (const ev of realizedEvents) {
+    const norm = ev.ticker.toUpperCase();
+    const item = items.find(
+      (it) =>
+        it.ticker.toUpperCase() === norm ||
+        it.ticker.toUpperCase() === `${norm}.SA` ||
+        `${it.ticker.toUpperCase()}.SA` === norm
+    );
+    const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
+    receivedByTicker.set(norm, (receivedByTicker.get(norm) ?? 0) + ev.amountNet * fx);
+  }
+
   return items
     .filter((it) => it.quantity > 0)
     .map((it) => {
       const fx = getFxMultiplier(it.currency, currency, fxRate);
-      const events = dividendEventsMap[it.ticker] ?? [];
-      const tickerTxs = transactions.filter(t => t.ticker === it.ticker);
-      
-      const totalReceived = events
-        .filter((ev) => {
-          const dateStr = ev.paymentDate ?? ev.exDate;
-          return new Date(dateStr).getTime() >= it.investingSince;
-        })
-        .reduce((s, ev) => {
-          const dateStr = ev.paymentDate ?? ev.exDate;
-          const dateNum = new Date(dateStr).getTime();
-          const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, dateNum) : it.quantity;
-          return s + ev.amountPerShare * q * fx;
-        }, 0);
-        
+      const normTicker = it.ticker.toUpperCase();
+      const received =
+        receivedByTicker.get(normTicker) ??
+        receivedByTicker.get(normTicker.replace(/\.SA$/, "")) ??
+        0;
+      const invested = (it.averagePrice ?? 0) * it.quantity * fx;
+
       return {
         ticker: it.ticker,
-        invested: (it.averagePrice ?? 0) * it.quantity * fx,
-        received: totalReceived,
+        invested: Math.round(invested * 100) / 100,
+        received: Math.round(received * 100) / 100,
       };
     })
     .filter((r) => r.invested > 0 || r.received > 0)
