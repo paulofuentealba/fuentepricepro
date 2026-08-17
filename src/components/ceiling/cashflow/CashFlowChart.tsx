@@ -288,7 +288,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     patternTransform="rotate(45)"
                   >
                     <rect width="6" height="6" fill="var(--card)" fillOpacity={0.4} />
-                    <line x1="0" y1="0" x2="0" y2="6" stroke="var(--projected)" strokeWidth="2.5" strokeOpacity={0.85} />
+                    <line x1="0" y1="0" x2="0" y2="6" stroke="var(--projected)" strokeWidth="2.5" strokeOpacity={0.7} />
                   </pattern>
                   <ChartGlowDef />
                 </defs>
