@@ -4,11 +4,13 @@ import { formatCompactCurrency, formatNumber, formatPercent, toIntlLocale } from
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useQuery } from "@tanstack/react-query";
 import { assetQueryOptions } from "@/lib/queryOptions";
+import { cn } from "@/lib/utils";
 
 interface Tile {
   label: string;
   value: string | null;
   tooltip?: string;
+  isWarning?: boolean;
 }
 
 const n = (v: number | null, fmt: (x: number) => string): string | null =>
@@ -55,6 +57,7 @@ export function IndicatorGrid({ asset }: { asset: Asset }) {
         label: t.metrics.dividendCagr5y,
         value: n(m.dividendCagr5y, (x) => formatPercent(x, locale, 2)),
         tooltip: t.tooltips?.cagr,
+        isWarning: m.dividendCagr5y != null && m.dividendCagr5y < 0,
       },
     ];
   } else if (isFund(asset.type)) {
@@ -78,6 +81,7 @@ export function IndicatorGrid({ asset }: { asset: Asset }) {
         label: t.metrics.dividendCagr5y,
         value: n(m.dividendCagr5y, (x) => formatPercent(x, locale, 2)),
         tooltip: t.tooltips?.cagr,
+        isWarning: m.dividendCagr5y != null && m.dividendCagr5y < 0,
       },
     ];
   } else {
@@ -101,6 +105,7 @@ export function IndicatorGrid({ asset }: { asset: Asset }) {
         label: t.metrics.dividendCagr5y,
         value: n(m.dividendCagr5y, (x) => formatPercent(x, locale, 2)),
         tooltip: t.tooltips?.cagr,
+        isWarning: m.dividendCagr5y != null && m.dividendCagr5y < 0,
       },
     ];
   }
@@ -127,7 +132,14 @@ export function IndicatorGrid({ asset }: { asset: Asset }) {
               <span>{tile.label}</span>
               {tile.tooltip && <InfoTooltip content={tile.tooltip} />}
             </div>
-            <div className="mt-1 text-sm font-semibold text-foreground">{tile.value}</div>
+            <div
+              className={cn(
+                "mt-1 text-sm font-semibold",
+                tile.isWarning ? "text-warning" : "text-foreground",
+              )}
+            >
+              {tile.value}
+            </div>
           </div>
         ))}
       </div>

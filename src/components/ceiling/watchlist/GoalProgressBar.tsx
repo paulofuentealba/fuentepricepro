@@ -24,11 +24,14 @@ function GoalProgressBarImpl({ goal, quantity, annualDividend, currency }: GoalP
   const progress = useMemo(() => {
     if (!(goal > 0) || !(annualDividend > 0)) return null;
     const sharesNeeded = Math.ceil((goal * 12) / annualDividend);
-    const progressPct = sharesNeeded > 0 ? Math.min(100, (quantity / sharesNeeded) * 100) : 0;
+    const rawPct = sharesNeeded > 0 ? (quantity / sharesNeeded) * 100 : 0;
+    const progressPct = Math.min(100, rawPct);
+    const excessShares = Math.max(0, quantity - sharesNeeded);
     return {
       sharesNeeded,
       progressPct,
-      reached: progressPct >= 100,
+      excessShares,
+      reached: rawPct >= 100,
     };
   }, [goal, quantity, annualDividend]);
 
@@ -36,17 +39,26 @@ function GoalProgressBarImpl({ goal, quantity, annualDividend, currency }: GoalP
 
   if (!progress) return null;
 
-  const { sharesNeeded, progressPct, reached } = progress;
+  const { sharesNeeded, progressPct, excessShares, reached } = progress;
 
   return (
     <div className={cn(CONTAINER_BASE, reached ? TONE_REACHED : TONE_ACTIVE)}>
       <div className="flex items-center justify-between gap-2 text-[10px] font-medium uppercase tracking-wide">
         <span className={reached ? "text-warning" : "text-primary"}>
-          {reached
-            ? t.watchlist.goalReached
-            : t.watchlist.goalProgress
-                .replace("{{amount}}", formatCurrency(goal, currency, locale))
-                .replace("{{pct}}", progressPct.toFixed(1))}
+          {reached ? (
+            <span className="flex items-center gap-1 flex-wrap">
+              <span>{t.watchlist.goalReached}</span>
+              {excessShares > 0 && (
+                <span className="text-[9px] lowercase opacity-85 font-normal">
+                  ({t.watchlist.targetOverAchieved?.replace("{{excess}}", fmt.format(excessShares)) ?? `+${excessShares} cotas`})
+                </span>
+              )}
+            </span>
+          ) : (
+            t.watchlist.goalProgress
+              .replace("{{amount}}", formatCurrency(goal, currency, locale))
+              .replace("{{pct}}", progressPct.toFixed(1))
+          )}
         </span>
         <span className="tabular-nums text-muted-foreground">
           {fmt.format(quantity)}

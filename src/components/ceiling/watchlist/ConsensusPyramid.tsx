@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 
 interface ValuationData {
   bazin: number | null;
@@ -17,15 +18,23 @@ interface ConsensusPyramidProps {
 export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps) {
   const { locale, t } = useI18n();
 
-  const renderVertex = (label: string, value: number | null, positionClass: string) => {
+  const renderVertex = (
+    label: string,
+    value: number | null,
+    positionClass: string,
+    notApplicableTooltip?: string,
+  ) => {
     const isNull = value === null || value <= 0;
     return (
       <div
-        className={`absolute flex flex-col items-center justify-center ${positionClass} ${isNull ? "opacity-40 grayscale" : ""}`}
+        className={`absolute flex flex-col items-center justify-center ${positionClass} ${isNull ? "opacity-60" : ""}`}
       >
         <div className="rounded-md border border-white/10 bg-black/60 px-3 py-1.5 backdrop-blur-md shadow-lg flex flex-col items-center">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5 flex items-center gap-1">
             {label}
+            {isNull && notApplicableTooltip && (
+              <InfoTooltip content={notApplicableTooltip} />
+            )}
           </span>
           <span className="text-sm font-bold text-white">
             {isNull ? "N/A" : formatCurrency(value, currency, locale)}
@@ -91,9 +100,24 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
         </svg>
 
         {/* Vertices */}
-        {renderVertex("Gordon", valuation.gordon, "top-0 left-1/2 -translate-x-1/2")}
-        {renderVertex("Bazin", valuation.bazin, "bottom-0 left-4")}
-        {renderVertex("Graham", valuation.graham, "bottom-0 right-4")}
+        {renderVertex(
+          "Gordon",
+          valuation.gordon,
+          "top-0 left-1/2 -translate-x-1/2",
+          t.tooltips?.gordonNotApplicable,
+        )}
+        {renderVertex(
+          "Bazin",
+          valuation.bazin,
+          "bottom-0 left-4",
+          t.tooltips?.bazinNotApplicable,
+        )}
+        {renderVertex(
+          "Graham",
+          valuation.graham,
+          "bottom-0 right-4",
+          t.tooltips?.grahamNotApplicable,
+        )}
 
         {/* Center Consensus */}
         <div className="absolute top-[150px] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10">

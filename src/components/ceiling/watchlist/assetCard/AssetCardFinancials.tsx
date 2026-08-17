@@ -49,6 +49,7 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
       <div className="grid grid-cols-2 gap-2 text-xs">
         <MetricBox
           label={t.watchlist.qtyShort}
+          tooltip={<InfoTooltip content={t.tooltips?.computedQty || ""} />}
           value={quantityLabel}
           subValue={
             hasAvg && item.averagePrice != null ? (
@@ -61,6 +62,7 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
 
         <MetricBox
           label={t.result.safetyMargin}
+          tooltip={<InfoTooltip content={t.tooltips?.safetyMargin || ""} />}
           value={
             <div className="flex items-center gap-1">
               {formatPercent(activeMargin, locale, 2)}

@@ -8,7 +8,7 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders } from "lucide-react";
+import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ValuationAssumptionsModal } from "./assetCard/ValuationAssumptionsModal";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
@@ -401,6 +401,15 @@ export function AssetDetailSheet({
                         </Button>
                       </div>
                       <WowInsights item={item} asset={asset} valuation={valuation} />
+                      {valuation.yieldTrapWarning && (
+                        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs text-warning flex items-start gap-2.5">
+                          <AlertTriangle className="h-4 w-4 shrink-0 text-warning mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-semibold">{t.result.yieldTrapWarning}</p>
+                            <p className="text-[11px] text-warning/80 mt-0.5">{t.result.yieldTrapWarningTip}</p>
+                          </div>
+                        </div>
+                      )}
                       <ConsensusPyramid valuation={valuation} currency={asset.currency} />
                       <IndicatorGrid asset={asset} />
                       {(asset.dividendHistory ?? []).filter((p: any) => p.amount > 0).length > 1 && (
