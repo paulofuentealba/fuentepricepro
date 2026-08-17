@@ -324,18 +324,32 @@ export function AssetDetailSheet({
         className="w-full overflow-y-auto border-border/50 bg-background/95 backdrop-blur-xl p-0 sm:max-w-2xl"
       >
         <SheetHeader className="border-b border-border/60 px-6 py-4">
-          <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>
-          {item?.currency === "USD" && fx?.USDBRL && (
-            <p className="text-sm text-muted-foreground mt-1">
-              ~{" "}
-              {formatCurrency(
-                (asset?.currentPrice ?? item.currentPrice) * fx.USDBRL,
-                "BRL",
-                locale,
-              )}{" "}
-              (converted)
-            </p>
-          )}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                {asset?.name ?? item?.name}
+              </p>
+            </div>
+            {item && (
+              <div className="text-right">
+                <p className="text-sm font-semibold text-foreground">
+                  {formatCurrency(asset?.currentPrice ?? item.currentPrice, item.currency, locale)}
+                </p>
+                {item.currency === "USD" && fx?.USDBRL && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    ~{" "}
+                    {formatCurrency(
+                      (asset?.currentPrice ?? item.currentPrice) * fx.USDBRL,
+                      "BRL",
+                      locale,
+                    )}{" "}
+                    ({t.common.converted})
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </SheetHeader>
         <div className="p-4 sm:p-6">
           {loading && <ResultSkeleton />}

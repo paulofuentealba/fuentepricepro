@@ -24,6 +24,7 @@ export const es = {
     months: "meses",
     lessThanOneMonth: "menos de 1 mes",
     durationSeparator: "y",
+    converted: "convertido",
   },
   showcase: {
     title: "Escaparate",

@@ -24,6 +24,7 @@ export const ptBR = {
     months: "meses",
     lessThanOneMonth: "menos de 1 mês",
     durationSeparator: "e",
+    converted: "convertido",
   },
   showcase: {
     title: "Vitrine",

@@ -22,6 +22,7 @@ export const en = {
     months: "months",
     lessThanOneMonth: "less than 1 month",
     durationSeparator: "and",
+    converted: "converted",
   },
   showcase: {
     title: "Showcase",
