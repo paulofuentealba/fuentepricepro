@@ -32,6 +32,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /assets/{ticker} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /config/featureGates {
       // Leitura pública: é configuração de produto (flags/limites), não dado pessoal —
       // useFeatureGates() é lido por TODO usuário, inclusive convidado (ver

@@ -205,11 +205,9 @@ Registrado aqui só pra contexto — não precisa de ação:
   - **Fase 0 - Item 0.1 (Exportação de Dados LGPD + Expurgo de portfolioSnapshots)**: ✅ **CONCLUÍDO E VALIDADO** (detalhado na Seção 4.3).
 - *Nota*: Se novos FIIs forem mapeados no futuro, a metodologia oficial de mapeamento via regulamento primário está documentada nos Prompts 24-27 em `PROMPTS_LOG.md`.
 
-
-
-
-
-
+### Bug Secundário (Diagnóstico Pendente) — Inconsistência de Casing em tx.type
+- **Contexto:** Identificado durante a auditoria do Prompt 12 (Invested vs. Received). Existe uma dupla convenção de casing coexistindo: `csv.ts` e `transactionsLogic.ts` usam minúsculo (`"buy" | "sell" | "corporate_action"`), enquanto `dynamicCsvParser.ts` usa maiúsculo (`"BUY" | "SELL"`).
+- **Ação Necessária:** Unificar a tipagem e os parsers para garantir que todas as transações persistidas no Firestore sigam uma única convenção (minúsculo sugerido para alinhar com o schema principal), aplicando uma rotina de backfill ou normalização sob demanda se necessário.
 
 ---
 
