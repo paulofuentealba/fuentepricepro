@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SubscriptionTermsRouteImport } from './routes/subscription-terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -32,6 +33,11 @@ import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionTermsRoute = SubscriptionTermsRouteImport.update({
+  id: '/subscription-terms',
+  path: '/subscription-terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/settings'
     | '/sitemap.xml'
+    | '/subscription-terms'
     | '/terms'
     | '/app/cashflow'
     | '/app/comparator'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/settings'
     | '/sitemap.xml'
+    | '/subscription-terms'
     | '/terms'
     | '/app/cashflow'
     | '/app/comparator'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/settings'
     | '/sitemap.xml'
+    | '/subscription-terms'
     | '/terms'
     | '/app/cashflow'
     | '/app/comparator'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SubscriptionTermsRoute: typeof SubscriptionTermsRoute
   TermsRoute: typeof TermsRoute
   GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
 }
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscription-terms': {
+      id: '/subscription-terms'
+      path: '/subscription-terms'
+      fullPath: '/subscription-terms'
+      preLoaderRoute: typeof SubscriptionTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -440,6 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SubscriptionTermsRoute: SubscriptionTermsRoute,
   TermsRoute: TermsRoute,
   GuidesDividendValuationRoute: GuidesDividendValuationRoute,
 }

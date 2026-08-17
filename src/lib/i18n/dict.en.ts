@@ -616,7 +616,7 @@ export const en = {
     generate: "Generate allocation",
     calculating: "Calculating...",
     recalculate: "Recalculate / Reset",
-    noAssetsInCurrency: "You don't have any watchlist assets in this currency yet.",
+    noAssetsInCurrency: "You don't have any portfolio assets in this currency yet.",
     emptyResult:
       "No matching assets in this currency for the chosen strategy. Adjust strategy or add new assets.",
     buyShares: "Buy {{qty}} shares at {{price}}",

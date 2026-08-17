@@ -619,7 +619,7 @@ export const ptBR = {
     generate: "Gerar recomendação",
     calculating: "Calculando...",
     recalculate: "Recalcular / Redefinir",
-    noAssetsInCurrency: "Você ainda não tem ativos nesta moeda na sua watchlist.",
+    noAssetsInCurrency: "Você ainda não tem ativos nesta moeda no seu portfólio.",
     emptyResult:
       "Nenhum ativo compatível com a estratégia nesta moeda. Ajuste a estratégia ou adicione novos ativos.",
     buyShares: "Comprar {{qty}} cotas a {{price}}",

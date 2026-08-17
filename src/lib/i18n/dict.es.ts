@@ -624,7 +624,7 @@ export const es = {
     generate: "Generar asignación",
     calculating: "Calculando...",
     recalculate: "Recalcular / Restablecer",
-    noAssetsInCurrency: "Aún no tienes activos en la watchlist en esta moneda.",
+    noAssetsInCurrency: "Aún no tienes activos en esa moneda en tu portafolio.",
     emptyResult:
       "No hay activos que coincidan en esta moneda para la estrategia elegida. Ajusta la estrategia o añade nuevos activos.",
     buyShares: "Comprar {{qty}} acciones a {{price}}",
