@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AlertTriangle, Award, TrendingUp, CheckCircle, Clock, ChevronLeft } from "lucide-react";
+import { AlertTriangle, Award, TrendingUp, CheckCircle, ChevronLeft } from "lucide-react";
 import type { Currency } from "@/lib/domain";
 import { formatCurrency } from "@/lib/i18n";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -90,28 +90,21 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
     if (!active || !payload || !payload.length) return null;
     const bucket = payload[0].payload;
     const { month, contributors, concentratedTicker, isBest, isWorst } = bucket;
-    
-    // Base única por mês (mesmo critério do gráfico): líquido realizado quando
-    // disponível, senão bruto pago. `announcedAmount` é um terceiro conceito
-    // (anunciado, não pago) e hoje é sempre 0.
-    const realizedConfirmedSum =
-      bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount || 0;
-    const announcedSum = bucket.announcedAmount || 0;
+
+    // Base única por mês: 2 estados estritos (Recebidos vs. A receber)
+    const confirmedSum = bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount || 0;
     const projectedSum = bucket.projectedAmount || 0;
-    const effectiveTotal =
-      realizedConfirmedSum + announcedSum + projectedSum > 0
-        ? realizedConfirmedSum + announcedSum + projectedSum
-        : bucket.amount;
+    const effectiveTotal = confirmedSum + projectedSum > 0 ? confirmedSum + projectedSum : bucket.amount;
 
     if (effectiveTotal <= 0) return null;
     const topN = 4;
     const shown = contributors.slice(0, contributors.length > 5 ? topN : 5);
     const remaining = contributors.length - shown.length;
     return (
-      <div className="min-w-[210px] rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur">
-        <div className="flex items-baseline justify-between gap-3 border-b border-border/40 pb-1.5 mb-1.5">
-          <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
-            {isBest && <Award className="h-3 w-3 text-warning" />}
+      <div className="min-w-[220px] rounded-lg border border-border/60 bg-background/95 p-3 shadow-xl backdrop-blur">
+        <div className="flex items-baseline justify-between gap-3 border-b border-border/40 pb-2 mb-2">
+          <span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+            {isBest && <Award className="h-3.5 w-3.5 text-warning" />}
             {month}
           </span>
           <span
@@ -121,61 +114,56 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 ? "var(--warning)"
                 : isWorst
                   ? "var(--muted-foreground)"
-                  : "var(--success)",
+                  : "var(--foreground)",
             }}
           >
             {formatCurrency(effectiveTotal, activeCurrency, locale)}
           </span>
         </div>
-        <div className="flex flex-col gap-1 text-[10px]">
-          {realizedConfirmedSum > 0 && (
-            <div className="flex items-center justify-between font-semibold text-success">
-              <span className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-success" />
-                {t.tabs.chart.confirmed}
+        <div className="flex flex-col gap-1.5 text-[11px]">
+          {confirmedSum > 0 && (
+            <div className="flex items-center justify-between font-medium text-foreground">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle className="h-3.5 w-3.5" style={{ color: "var(--realized)" }} />
+                <span>{t.tabs.chart.receivedDividends}</span>
               </span>
-              <span className="tabular-nums">
-                {formatCurrency(realizedConfirmedSum, activeCurrency, locale)}
-              </span>
-            </div>
-          )}
-
-          {announcedSum > 0 && (
-            <div className="flex items-center justify-between font-semibold text-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-foreground" />
-                {t.tabs.chart.announced}
-              </span>
-              <span className="tabular-nums">
-                {formatCurrency(announcedSum, activeCurrency, locale)}
+              <span className="tabular-nums font-semibold" style={{ color: "var(--realized)" }}>
+                {formatCurrency(confirmedSum, activeCurrency, locale)}
               </span>
             </div>
           )}
 
           {projectedSum > 0 && (
-            <div className="flex items-center justify-between font-semibold text-comparison">
-              <span className="flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-comparison" />
-                {t.tabs.chart.projected}
+            <div className="flex items-center justify-between font-medium text-foreground">
+              <span className="flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                <span>{t.tabs.chart.receivableDividends}</span>
               </span>
-              <span className="tabular-nums">
+              <span className="tabular-nums font-semibold text-muted-foreground">
                 {formatCurrency(projectedSum, activeCurrency, locale)}
               </span>
             </div>
           )}
+
+          <div className="mt-1 flex items-center justify-between border-t border-border/40 pt-1.5 text-xs font-bold text-foreground">
+            <span>{t.tabs.chart.totalMonth}</span>
+            <span className="tabular-nums">
+              {formatCurrency(effectiveTotal, activeCurrency, locale)}
+            </span>
+          </div>
         </div>
         {concentratedTicker && (
-          <div className="mt-1.5 flex items-center gap-1 rounded-md border border-warning/40 bg-warning/10 px-1.5 py-1 text-[10px] text-warning">
-            <AlertTriangle className="h-3 w-3" />
+          <div className="mt-2 flex items-center gap-1.5 rounded-md border border-warning/40 bg-warning/10 px-2 py-1 text-[10px] text-warning">
+            <AlertTriangle className="h-3 w-3 shrink-0" />
             <span>
               {t.tabs.chart.concentratedIn}{" "}
-              <span className="font-semibold">{concentratedTicker}</span>
+              <span className="font-bold">{concentratedTicker}</span>
             </span>
           </div>
         )}
         {shown.length > 0 && (
           <>
-            <div className="my-1.5 h-px bg-border/60" />
+            <div className="my-2 h-px bg-border/40" />
             <ul className="space-y-1">
               {shown.map((c) => (
                 <li
@@ -191,14 +179,14 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                 </li>
               ))}
               {remaining > 0 && (
-                <li className="pt-0.5 text-[11px] italic text-muted-foreground">
+                <li className="pt-0.5 text-[10px] italic text-muted-foreground">
                   + {remaining} {t.tabs.chart.more}
                 </li>
               )}
             </ul>
           </>
         )}
-        <div className="mt-2 text-[9px] text-center text-muted-foreground/50 uppercase tracking-widest">
+        <div className="mt-2 text-[9px] text-center text-muted-foreground/60 uppercase tracking-wider">
           {t.tabs.chart.clickToDrillDown}
         </div>
       </div>
@@ -266,35 +254,25 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* LEFT: Monthly Bar Chart */}
         <div className="flex flex-col">
-          <div className="mb-2 flex items-center justify-between gap-2 px-1 text-[11px] text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 font-semibold" style={{ color: "var(--realized)" }}>
-                <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: "var(--realized)" }} />
-                {t.tabs.chart.confirmed}
-              </span>
-              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
-                <span
-                  className="inline-block h-2 w-3 rounded-sm border border-foreground/30"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(45deg, var(--realized), var(--realized) 2px, transparent 2px, transparent 4px)",
-                  }}
-                />
-                {t.tabs.chart.announced}
-              </span>
-              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
-                <span
-                  className="inline-block h-2 w-3 rounded-sm"
-                  style={{ backgroundColor: COLOR_INVESTED }}
-                />
-                {t.tabs.chart.projected}
-              </span>
+          {/* Top Legend Bar — 2-State Visual Architecture */}
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Estado 1: Recebido / Confirmado */}
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/60 px-2.5 py-1 text-[11px] font-medium text-foreground backdrop-blur-sm shadow-xs">
+                <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "var(--realized)" }} />
+                <span>{t.tabs.chart.receivedDividends}</span>
+              </div>
+              {/* Estado 2: A receber / Projetado */}
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground backdrop-blur-sm shadow-xs">
+                <span className="inline-block h-2.5 w-2.5 rounded-full border border-primary/50" style={{ backgroundColor: "var(--projected)" }} />
+                <span>{t.tabs.chart.receivableDividends}</span>
+              </div>
             </div>
             {bestMonth && (
-              <span className="inline-flex items-center gap-1 text-warning">
-                <Award className="h-3 w-3" />
-                {t.tabs.chart.bestMonth}
-              </span>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1 text-[11px] font-semibold text-warning">
+                <Award className="h-3.5 w-3.5 shrink-0" />
+                <span>{t.tabs.chart.bestMonth}: <span className="underline decoration-warning/40">{bestMonth.month}</span></span>
+              </div>
             )}
           </div>
 
@@ -303,13 +281,14 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
               <BarChart data={chartData} margin={CASHFLOW_MAIN_BAR_MARGIN}>
                 <defs>
                   <pattern
-                    id="striped"
+                    id="projectedHatch"
                     width="6"
                     height="6"
                     patternUnits="userSpaceOnUse"
+                    patternTransform="rotate(45)"
                   >
-                    <rect width="3" height="6" fill="var(--realized)" />
-                    <rect x="3" width="3" height="6" fill="transparent" />
+                    <rect width="6" height="6" fill="var(--card)" fillOpacity={0.4} />
+                    <line x1="0" y1="0" x2="0" y2="6" stroke="var(--projected)" strokeWidth="2.5" strokeOpacity={0.85} />
                   </pattern>
                   <ChartGlowDef />
                 </defs>
@@ -352,11 +331,12 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   content={<CustomTooltip />}
                 />
 
+                {/* 1. Proventos Recebidos (Sólido / Petroleum) */}
                 <Bar
                   dataKey="confirmedAmount"
                   stackId="a"
                   fill="var(--realized)"
-                  maxBarSize={40}
+                  maxBarSize={36}
                   onClick={handleBarClick}
                   cursor="pointer"
                 >
@@ -369,28 +349,13 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     />
                   ))}
                 </Bar>
-                <Bar
-                  dataKey="announcedAmount"
-                  stackId="a"
-                  fill="url(#striped)"
-                  maxBarSize={40}
-                  onClick={handleBarClick}
-                  cursor="pointer"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-ann-${index}`}
-                      fillOpacity={
-                        selectedMonthIndex === null || selectedMonthIndex === index ? 1 : 0.3
-                      }
-                    />
-                  ))}
-                </Bar>
+
+                {/* 2. Proventos a Receber (Projetado / Hatch + Esmeralda) */}
                 <Bar
                   dataKey="projectedAmount"
                   stackId="a"
-                  fill={COLOR_INVESTED}
-                  maxBarSize={40}
+                  fill="var(--projected)"
+                  maxBarSize={36}
                   radius={[4, 4, 0, 0]}
                   onClick={handleBarClick}
                   cursor="pointer"
@@ -399,7 +364,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                     <Cell
                       key={`cell-proj-${index}`}
                       fillOpacity={
-                        selectedMonthIndex === null || selectedMonthIndex === index ? 0.85 : 0.3
+                        selectedMonthIndex === null || selectedMonthIndex === index ? 0.9 : 0.3
                       }
                     />
                   ))}
