@@ -595,13 +595,9 @@ function LandingPage() {
               {L.footerLegal4}
             </Link>
             <span>|</span>
-            <a href="#" className="hover:text-slate-300 transition-colors">
-              {L.footerLegal2}
-            </a>
-            <span>|</span>
-            <a href="#" className="hover:text-slate-300 transition-colors">
+            <Link to="/terms" className="hover:text-slate-300 transition-colors">
               {L.footerLegal3}
-            </a>
+            </Link>
           </div>
         </div>
       </footer>
