@@ -62,7 +62,11 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
   // não usa o ledger de transações).
   const chartData = data.map((bucket) => ({
     ...bucket,
-    confirmedAmount: bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount,
+    confirmedAmount: bucket.realizedAmount > 0 
+      ? bucket.realizedAmount 
+      : bucket.announcedAmount > 0
+        ? bucket.announcedAmount
+        : bucket.paidAmount,
   }));
 
   // Take top 8 contributors to fit in a small horizontal bar chart without scrolling
@@ -92,7 +96,11 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
     const { month, contributors, concentratedTicker, isBest, isWorst } = bucket;
 
     // Base única por mês: 2 estados estritos (Recebidos vs. A receber)
-    const confirmedSum = bucket.realizedAmount > 0 ? bucket.realizedAmount : bucket.paidAmount || 0;
+    const confirmedSum = bucket.realizedAmount > 0 
+      ? bucket.realizedAmount 
+      : bucket.announcedAmount > 0
+        ? bucket.announcedAmount
+        : bucket.paidAmount || 0;
     const projectedSum = bucket.projectedAmount || 0;
     const effectiveTotal = confirmedSum + projectedSum > 0 ? confirmedSum + projectedSum : bucket.amount;
 
