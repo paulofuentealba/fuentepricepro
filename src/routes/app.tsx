@@ -49,7 +49,18 @@ export const Route = createFileRoute("/app")({
 });
 
 function AppLayout() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="dark flex h-screen flex-col overflow-hidden bg-background text-foreground">
+        <Header />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark flex h-screen flex-col overflow-hidden bg-background text-foreground">

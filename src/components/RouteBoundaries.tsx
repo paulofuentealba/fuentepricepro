@@ -6,6 +6,21 @@ export function RouteErrorComponent({ error, reset }: { error: Error; reset: () 
   const router = useRouter();
   useEffect(() => {
     console.error(error);
+    
+    const isChunkError = 
+      error.message.includes("Failed to fetch dynamically imported module") || 
+      error.message.includes("Importing a module script failed");
+      
+    if (isChunkError) {
+      if (!sessionStorage.getItem("chunk_reload")) {
+        sessionStorage.setItem("chunk_reload", "true");
+        window.location.reload();
+        return;
+      }
+    } else {
+      sessionStorage.removeItem("chunk_reload");
+    }
+
     reportGoogleError(error, { boundary: "tanstack_route_error_component" });
   }, [error]);
 
