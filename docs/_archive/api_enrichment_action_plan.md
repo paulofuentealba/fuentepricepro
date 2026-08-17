@@ -176,3 +176,11 @@ As chaves de API usadas nos testes do relatório original (`api_enrichment_repor
 são de uso pessoal do Paulo para validação. Recomendação: mover para `.env.local`
 (fora do controle de versão) antes de qualquer commit desse diretório, e nunca deixar
 chave em texto puro em arquivos dentro de `docs/`.
+
+---
+
+## ATUALIZAÇÃO — HG Brasil reativado para dividendEvents (plano pago confirmado, 2026-08-17)
+
+Em 2026-08-17, foi confirmado que o plano pago da API do HG Brasil habilita o endpoint `finance/dividends` retornando corretamente as datas de pagamento (`payment_date`), histórico e eventos projetados. 
+
+**Decisão de Escopo Restrito**: O HG Brasil agora é a fonte primária de dividendos para ativos BR (com fallback na Brapi), **porém estritamente para o campo `dividendEvents`** (os eventos exibidos na UI do aplicativo). A Brapi foi mantida intocada como fonte para `dividendHistory`, `cagr`, `payoutRatio`, `paymentMonths` e `dividends3y`, pois a Brapi retorna 5 anos de dados, enquanto o HG Brasil retorna um histórico mais curto (~12 a 24 meses). Tentar substituir toda a fonte (inclusive valuation) por HG Brasil reduziria a precisão do Consenso e do CAGR de 5 anos. A política escolhida foi a substituição total all-or-nothing (sem merge intrincado de campos) apenas no nível de `dividendEvents`.
