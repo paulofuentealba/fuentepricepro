@@ -1,5 +1,5 @@
 import { UA, fetchWithRetry } from "./http.server";
-import { adminDb } from "../../integrations/firebase/admin";
+import { getAdminFirestore } from "../../integrations/firebase/admin";
 import type { DividendEvent } from "./types";
 import { reportIngestionStatus } from "./ingestionLog.server";
 
@@ -32,6 +32,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
   }
 
   // 2. Try Firestore
+  const adminDb = getAdminFirestore();
   if (adminDb) {
     try {
       const doc = await adminDb.collection("dadosDeMercadoCache").doc(cleanTicker).get();
