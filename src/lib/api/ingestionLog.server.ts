@@ -3,7 +3,7 @@ import { getAdminFirestore } from "../../integrations/firebase/admin";
 
 export type IngestionStatus = "PASSED" | "FAILED" | "ERROR" | "SKIPPED" | "INVALID" | "WARNING";
 
-export type IngestionSource = "brapi" | "yahoo" | "cvm" | "secEdgar" | "nasdaq" | "benchmark";
+export type IngestionSource = "brapi" | "yahoo" | "cvm" | "secEdgar" | "nasdaq" | "benchmark" | "hgBrasil";
 
 const MAX_DETAIL_LENGTH = 500;
 
