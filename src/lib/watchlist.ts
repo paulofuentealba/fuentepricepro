@@ -74,14 +74,26 @@ async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
   });
 }
 
+import { DEV_MOCK_DATA } from "@/__fixtures__/devMockData";
+
 // ---------- Local storage helpers (guest mode) ----------
 function readLocal(): WatchlistItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    if (!raw) {
+      if (import.meta.env.DEV) {
+        writeLocal(DEV_MOCK_DATA);
+        return DEV_MOCK_DATA;
+      }
+      return [];
+    }
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
+    if (parsed.length === 0 && import.meta.env.DEV) {
+      writeLocal(DEV_MOCK_DATA);
+      return DEV_MOCK_DATA;
+    }
 
     // Auto-heal NaNs that might have been saved as null during JSON.stringify
     // or loaded from corrupted state.
