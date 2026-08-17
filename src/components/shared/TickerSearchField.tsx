@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { AssetType } from "@/lib/domain";
-import type { SearchHit } from "@/lib/apiService.server";
+import type { SearchHit } from "@/lib/apiService.functions";
 import { searchQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
 import { displayTicker } from "@/lib/i18n";

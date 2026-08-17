@@ -14,7 +14,7 @@ import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { displayTicker } from "@/lib/i18n";
 import { getShareClassBadge } from "@/lib/classify";
 import { useI18n } from "@/lib/i18n-provider";
-import type { SearchHit } from "@/lib/apiService.server";
+import type { SearchHit } from "@/lib/apiService.functions";
 import type { AssetType, Asset } from "@/lib/domain";
 import { AssetCard } from "@/components/shared/AssetCard";
 import { TooltipProvider } from "@/components/ui/tooltip";

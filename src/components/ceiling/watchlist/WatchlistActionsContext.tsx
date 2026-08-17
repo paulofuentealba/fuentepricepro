@@ -1,5 +1,5 @@
 import { createContext, useContext, ReactNode } from "react";
-import type { LiveQuote, SearchHit } from "@/lib/apiService.server";
+import type { LiveQuote, SearchHit } from "@/lib/apiService.functions";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 
 interface WatchlistActionsContextValue {

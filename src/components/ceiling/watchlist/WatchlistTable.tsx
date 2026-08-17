@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { WatchlistItem } from "@/lib/watchlist";
-import type { LiveQuote } from "@/lib/apiService.server";
+import type { LiveQuote } from "@/lib/apiService.functions";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency } from "@/lib/i18n";
 import { AssetTicker, PriceTag } from "../shared/AssetDataDisplay";

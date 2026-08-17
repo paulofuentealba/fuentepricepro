@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { formatCurrency, displayTicker, formatPercent } from "@/lib/i18n";
 import { PriceTag } from "../../shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
-import type { LiveQuote } from "@/lib/apiService.server";
+import type { LiveQuote } from "@/lib/apiService.functions";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { cn } from "@/lib/utils";
 import { flagFor } from "../utils";
