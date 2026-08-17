@@ -25,11 +25,12 @@ function CashFlowSkeleton() {
 function CashFlow() {
   const cashflowUnlocked = useFeatureGate("cashflowUnlocked") as boolean;
   const { items } = useWatchlist();
+  const validItems = items.filter((i) => i.quantity > 0 && i.averagePrice && i.averagePrice > 0);
 
   const calendarContent = (
     <Suspense fallback={<CashFlowSkeleton />}>
       <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-4xl">
-        <CashFlowCalendar items={items} />
+        <CashFlowCalendar items={validItems} />
       </div>
     </Suspense>
   );
