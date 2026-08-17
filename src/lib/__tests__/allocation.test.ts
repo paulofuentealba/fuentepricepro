@@ -91,9 +91,9 @@ describe("scoreFor", () => {
 describe("computeSmartAllocation multi-strategy weighted scoring", () => {
   const covered = new Set<number>();
   const items = [
-    mkItem({ ticker: "A", annualDividend: 2, currentPrice: 10, safetyMargin: 5 }), // yield 0.2
-    mkItem({ ticker: "B", annualDividend: 1, currentPrice: 10, safetyMargin: 50 }), // yield 0.1
-    mkItem({ ticker: "C", annualDividend: 0.5, currentPrice: 10, safetyMargin: 1 }), // yield 0.05
+    mkItem({ ticker: "A", annualDividend: 2, currentPrice: 10, safetyMargin: 5, quantity: 1 }), // yield 0.2
+    mkItem({ ticker: "B", annualDividend: 1, currentPrice: 10, safetyMargin: 50, quantity: 1 }), // yield 0.1
+    mkItem({ ticker: "C", annualDividend: 0.5, currentPrice: 10, safetyMargin: 1, quantity: 1 }), // yield 0.05
   ];
 
   it("allocates all capital proportionally to top scorers (single strategy)", () => {
