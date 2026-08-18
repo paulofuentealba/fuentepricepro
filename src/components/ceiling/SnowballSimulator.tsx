@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { useWatchlist } from "@/lib/watchlist";
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
@@ -31,7 +31,7 @@ function flagFor(currency: Currency): string {
 }
 
 export function SnowballSimulator() {
-  const { items } = useWatchlist();
+  const { valuedItems: items } = useValuedPortfolio();
   const { t, locale } = useI18n();
 
   const chartConfig = {
@@ -56,7 +56,7 @@ export function SnowballSimulator() {
     let totalAnnualDividend = 0;
 
     for (const item of items) {
-      if (item.currency !== currency) continue;
+      if (item.isClosedPosition || item.currency !== currency) continue;
       const value = item.currentPrice * item.quantity;
       const dividend = item.annualDividend * item.quantity;
 

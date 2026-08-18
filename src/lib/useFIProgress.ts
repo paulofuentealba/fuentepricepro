@@ -2,7 +2,9 @@ import { useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
-import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOptions";
+import { getPositionValue } from "@/lib/calculations";
+import { convertCurrency } from "@/lib/currency";
 
 export interface FIProgressResult {
   coveragePercent: number;
@@ -72,13 +74,11 @@ export function useFIProgress(): FIProgressResult {
   const { settings } = useUserSettings();
   const { valuedItems: items } = useValuedPortfolio();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const { data: macroRates } = useQuery(macroRatesQueryOptions());
   const usdRate = fx?.USDBRL ?? 5.5;
 
   const convertToBRL = useCallback(
-    (value: number, curr: string) => {
-      if (curr === "USD") return value * usdRate;
-      return value;
-    },
+    (value: number, curr: "USD" | "BRL") => convertCurrency(value, curr, "BRL", usdRate),
     [usdRate],
   );
 
@@ -88,7 +88,7 @@ export function useFIProgress(): FIProgressResult {
 
     for (const item of items) {
       if (item.quantity && item.quantity > 0) {
-        const itemCapital = item.quantity * (item.currentPrice || 0);
+        const itemCapital = getPositionValue(item, macroRates);
         const itemIncome = item.quantity * (item.annualDividend || 0);
 
         capital += convertToBRL(itemCapital, item.currency);
@@ -97,7 +97,7 @@ export function useFIProgress(): FIProgressResult {
     }
 
     return { totalCapitalBRL: capital, monthlyIncomeBRL: annualIncome / 12 };
-  }, [items, convertToBRL]);
+  }, [items, convertToBRL, macroRates]);
 
   const currency = settings.displayCurrency;
 

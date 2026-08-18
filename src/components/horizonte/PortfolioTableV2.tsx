@@ -48,8 +48,7 @@ export function PortfolioTableV2({ limit }: { limit?: number } = {}) {
 
   const sorted = useMemo(() => {
     const dir = sortDirection === "asc" ? 1 : -1;
-    const dyOf = (it: ValuedWatchlistItem) =>
-      it.currentPrice > 0 ? it.annualDividend / it.currentPrice : 0;
+    const dyOf = (it: ValuedWatchlistItem) => it.valuation?.dividendYield ?? 0;
 
     const result = [...filtered].sort((a, b) => {
       switch (sortKey) {
@@ -209,7 +208,7 @@ function PortfolioRow({
   t: ReturnType<typeof useI18n>["t"];
 }) {
   const { pnlAbsolute, pnlPercent } = getAssetPnL(item);
-  const dy = item.currentPrice > 0 ? (item.annualDividend / item.currentPrice) * 100 : 0;
+  const dy = item.valuation?.dividendYield ?? 0;
   const pnlPositive = pnlAbsolute >= 0;
 
   return (

@@ -117,19 +117,25 @@ export function ValuationAssumptionsModal({
             /* Simple Mode: Executive Consensus Summary */
             <div className="space-y-3 rounded-lg border border-border/50 bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">Fuente Consensus:</span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t.valuationAssumptions.consensusLabel}
+                </span>
                 <span className="text-base font-bold text-foreground">
                   {valuation.fuenteConsensus != null ? `R$ ${valuation.fuenteConsensus.toFixed(2)}` : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-border/40 pt-2">
-                <span className="text-xs font-medium text-muted-foreground">Preço Teto Ativo:</span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t.valuationAssumptions.activeCeilingLabel}
+                </span>
                 <span className="text-sm font-semibold text-primary">
                   {valuation.activeCeiling != null ? `R$ ${valuation.activeCeiling.toFixed(2)}` : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-border/40 pt-2">
-                <span className="text-xs font-medium text-muted-foreground">Margem de Segurança:</span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t.valuationAssumptions.safetyMarginLabel}
+                </span>
                 <span className={`text-sm font-bold ${valuation.positive ? "text-success" : "text-danger"}`}>
                   {valuation.margin != null ? `${valuation.margin > 0 ? "+" : ""}${valuation.margin.toFixed(1)}%` : "—"}
                 </span>

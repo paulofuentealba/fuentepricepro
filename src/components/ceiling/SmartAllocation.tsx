@@ -29,6 +29,7 @@ import { STRATEGY_ORDER, computeSmartAllocation, type StrategyKey } from "@/lib/
 import { TargetAllocationPanel } from "./TargetAllocationPanel";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { convertCurrency } from "@/lib/currency";
 import type { AssetType } from "@/lib/domain";
 import { PaywallDialog } from "../ui/PaywallDialog";
 import { useSubscription } from "@/lib/subscription";
@@ -101,7 +102,7 @@ export function SmartAllocation() {
     for (const it of valuedItems) {
       const val = it.currentPrice * it.quantity;
       if (val > 0) {
-        const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+        const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
         allocMap[it.type] = (allocMap[it.type] || 0) + inBrl;
         totalBRL += inBrl;
       }
@@ -216,7 +217,7 @@ export function SmartAllocation() {
     for (const it of items) {
       const val = it.currentPrice * it.quantity;
       if (val > 0) {
-        const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+        const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
         beforeMap[it.type] = (beforeMap[it.type] || 0) + inBrl;
         afterMap[it.type] = (afterMap[it.type] || 0) + inBrl;
         hasAny = true;
@@ -226,7 +227,7 @@ export function SmartAllocation() {
     for (const r of result.recs) {
       const cost = r.shares * r.item.currentPrice;
       if (cost > 0) {
-        const inBrl = r.item.currency === "USD" ? cost * exchangeRate : cost;
+        const inBrl = convertCurrency(cost, r.item.currency, "BRL", exchangeRate);
         afterMap[r.item.type] = (afterMap[r.item.type] || 0) + inBrl;
       }
     }

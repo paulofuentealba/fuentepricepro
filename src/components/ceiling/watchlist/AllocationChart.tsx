@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { getColorForAsset } from "../shared/chartColors";
+import { convertCurrency } from "@/lib/currency";
 
 interface Props {
   items: WatchlistItem[];
@@ -45,7 +46,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
       const value = it.currentPrice * it.quantity;
       if (value <= 0) continue;
 
-      const valueInBrl = it.currency === "USD" ? value * exchangeRate : value;
+      const valueInBrl = convertCurrency(value, it.currency, "BRL", exchangeRate);
       const typeLabel = t.types[it.type] || it.type;
 
       if (!totals.has(typeLabel)) {

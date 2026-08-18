@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isUsAsset, netAfterTax } from "@/lib/calculations";
+import { isUsAsset, netAfterTax, yieldOnCost } from "@/lib/calculations";
 import { formatCurrency, formatPercent, type Locale } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 
@@ -29,11 +29,7 @@ export function useAssetCardDerived(item: WatchlistItem): AssetDerived {
     const totalReturn = hasAvg ? currentValue - totalCost : 0;
     const returnPct = hasAvg && totalCost > 0 ? (totalReturn / totalCost) * 100 : 0;
     const returnPositive = totalReturn >= 0;
-    const annualPerShare = item.quantity > 0 ? grossIncome / item.quantity : 0;
-    const yoc =
-      hasAvg && (item.averagePrice as number) > 0
-        ? (annualPerShare / (item.averagePrice as number)) * 100
-        : null;
+    const yoc = yieldOnCost(item.annualDividend, item.averagePrice);
     return {
       grossIncome,
       isUs,

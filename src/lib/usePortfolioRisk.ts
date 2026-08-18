@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { useValuedPortfolio } from "./useValuedPortfolio";
 import { useAuth } from "./auth-provider";
 import { useQuery } from "@tanstack/react-query";
-import { exchangeRateQueryOptions } from "./queryOptions";
+import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
+import { getPositionValue } from "./calculations";
 import { useI18n } from "./i18n-provider";
 
 export type RiskWarning = {
@@ -47,6 +48,8 @@ export function usePortfolioRisk() {
   const { user } = useAuth();
   const fxQuery = useQuery(exchangeRateQueryOptions());
   const fx = fxQuery.data?.USDBRL || 5.0;
+  const macroRatesQuery = useQuery(macroRatesQueryOptions());
+  const macroRates = macroRatesQuery.data;
 
   const baseCurrency = "BRL" as string; // Hardcoded default for now since smartAllocationCurrency isn't on User
 
@@ -64,7 +67,7 @@ export function usePortfolioRisk() {
       const qty = item.quantity || 0;
       if (qty <= 0) continue;
 
-      let value = qty * item.currentPrice;
+      let value = getPositionValue(item, macroRates);
       const itemCurrency = item.currency;
 
       // Convert to base currency
@@ -195,5 +198,5 @@ export function usePortfolioRisk() {
       types,
       warnings,
     };
-  }, [items, baseCurrency, fx, t]);
+  }, [items, baseCurrency, fx, t, macroRates]);
 }

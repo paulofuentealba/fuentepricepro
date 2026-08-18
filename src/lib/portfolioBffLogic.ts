@@ -3,6 +3,7 @@ import { reconcileAllPositions } from "./api/positions.server";
 import {
   getAssetValuation,
   getCanonicalAnnualDividend,
+  yieldOnCost,
   type ValuationResult,
 } from "./calculations";
 import type { WatchlistItem } from "./watchlist";
@@ -77,11 +78,7 @@ export async function computeValuedPortfolioInternal(
     const averagePrice = pos && pos.quantity > 0 ? pos.averageCost : item.averagePrice || 0;
 
     const currentPrice = asset?.currentPrice ?? item.currentPrice ?? averagePrice;
-    const annualDividend = asset
-      ? ((asset.dividendHistory && asset.dividendHistory.length > 0) || (asset.dividends3y && asset.dividends3y.length > 0)
-          ? getCanonicalAnnualDividend(asset, 3)
-          : ((asset as any).annualDividend ?? item.annualDividend ?? 0))
-      : item.annualDividend ?? 0;
+    const annualDividend = asset ? getCanonicalAnnualDividend(asset, 3) : item.annualDividend ?? 0;
 
     const eps = asset?.epsCurrent ?? asset?.metrics?.eps ?? null;
     const bvps = asset?.metrics?.bvps ?? null;
@@ -107,7 +104,6 @@ export async function computeValuedPortfolioInternal(
     const totalValue = quantity * currentPrice;
     const totalCost = quantity * averagePrice;
     const totalDividends = quantity * annualDividend;
-    const yieldOnCost = averagePrice > 0 ? (annualDividend / averagePrice) * 100 : 0;
 
     valuedItems.push({
       ...item,
@@ -119,7 +115,7 @@ export async function computeValuedPortfolioInternal(
       totalValue,
       totalCost,
       totalDividends,
-      yieldOnCost,
+      yieldOnCost: yieldOnCost(annualDividend, averagePrice) ?? 0,
     });
   }
 

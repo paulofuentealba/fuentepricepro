@@ -55,8 +55,8 @@ export function WatchlistFilterBar({
         )}
       </div>
 
-      <div className="shrink-0 pl-2 ml-auto flex items-center gap-2 hidden lg:flex">
-        <div className="flex items-center gap-2 border-r border-border/60 pr-4">
+      <div className="shrink-0 w-full lg:w-auto lg:pl-2 lg:ml-auto flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+        <div className="flex items-center gap-2 border-r border-border/60 pr-4 shrink-0">
           <FilterPill
             active={oppFilter === "under"}
             tone="success"
@@ -75,7 +75,7 @@ export function WatchlistFilterBar({
           </FilterPill>
         </div>
         <Select value={sortOption} onValueChange={(v) => onSetSortOption(v as SortOption)}>
-          <SelectTrigger className="h-8 text-xs font-medium bg-background/40 w-[180px]">
+          <SelectTrigger className="h-8 text-xs font-medium bg-background/40 w-[180px] shrink-0">
             <SelectValue placeholder={t.watchlist.sort.label} />
           </SelectTrigger>
           <SelectContent>

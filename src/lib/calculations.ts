@@ -35,6 +35,15 @@ export function safetyMargin(ceiling: number, current: number): number {
   return ((ceiling - current) / current) * 100;
 }
 
+/** Yield on Cost: gross annual dividend per share as a percentage of average purchase price. */
+export function yieldOnCost(
+  annualDividend: number,
+  averagePrice: number | null | undefined,
+): number | null {
+  if (averagePrice == null || averagePrice <= 0) return null;
+  return (annualDividend / averagePrice) * 100;
+}
+
 /** US withholding tax applied to dividends paid to non-US foreign investors. */
 export const US_DIVIDEND_TAX_RATE = 0.3;
 /** Brazilian withholding tax applied to JCP (Juros sobre Capital Próprio). */
@@ -1379,6 +1388,24 @@ export function calculateFixedIncomeBalance(
     accruedBalance,
     profit: accruedBalance - principal,
   };
+}
+
+/**
+ * Current market value of a position: `quantity * currentPrice`, except for
+ * FIXED_INCOME positions, which use the accrued balance (compounded from
+ * principal + rate) instead of a live quote. SSOT for position value — reused
+ * by every aggregator that sums portfolio worth (net worth, FI progress,
+ * risk/concentration) so FIXED_INCOME accrual is applied consistently.
+ */
+export function getPositionValue(
+  item: WatchlistItem,
+  macroRates?: { cdi: number; ipca: number },
+): number {
+  if (item.type === "FIXED_INCOME") {
+    const accrual = calculateFixedIncomeBalance(item, macroRates);
+    if (accrual) return accrual.accruedBalance;
+  }
+  return item.quantity * item.currentPrice;
 }
 
 export function projectFixedIncomeValueAtMaturity(

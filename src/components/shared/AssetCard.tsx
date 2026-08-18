@@ -1,6 +1,6 @@
 import { Bell, Share2 } from "lucide-react";
 import type { Asset } from "@/lib/domain";
-import { ceilingPrice, isUsAsset, netAfterTax, safetyMargin } from "@/lib/calculations";
+import { ceilingPrice, isUsAsset, netAfterTax, safetyMargin, yieldOnCost } from "@/lib/calculations";
 import {
   buildResultShareText,
   computeAvgDividend,
@@ -448,9 +448,8 @@ function SearchVariant({
   const activeCeiling = valuation.activeCeiling;
   const margin = valuation.margin;
   const positive = margin >= 0;
-  const avgYieldPct = (avg / asset.currentPrice) * 100;
-  const yocPct =
-    localAveragePrice && localAveragePrice > 0 ? (avg / localAveragePrice) * 100 : null;
+  const avgYieldPct = valuation.dividendYield;
+  const yocPct = yieldOnCost(avg, localAveragePrice);
   const isUs = isUsAsset(asset.type, asset.currency);
   const netAvg = netAfterTax(avg, asset.type, asset.currency, localCustomTaxRate ?? undefined);
 

@@ -94,7 +94,7 @@ export function WatchlistIO({ items }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 bg-popover border-border">
         <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Exportar Dados
+          {t.watchlist.exportMenuTitle}
         </DropdownMenuLabel>
         <DropdownMenuItem
           className="cursor-pointer gap-2 py-2 text-xs"
@@ -102,8 +102,8 @@ export function WatchlistIO({ items }: Props) {
         >
           <FileSpreadsheet className="h-4 w-4 text-primary" />
           <div className="flex flex-col">
-            <span className="font-medium text-foreground">Posições Detalhadas</span>
-            <span className="text-[10px] text-muted-foreground">Foto analítica rica com preços teto e DY</span>
+            <span className="font-medium text-foreground">{t.watchlist.exportFullTitle}</span>
+            <span className="text-[10px] text-muted-foreground">{t.watchlist.exportFullSubtitle}</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -112,8 +112,8 @@ export function WatchlistIO({ items }: Props) {
         >
           <History className="h-4 w-4 text-primary" />
           <div className="flex flex-col">
-            <span className="font-medium text-foreground">Histórico de Transações</span>
-            <span className="text-[10px] text-muted-foreground">Todas as compras, vendas e taxas</span>
+            <span className="font-medium text-foreground">{t.watchlist.exportTransactionsTitle}</span>
+            <span className="text-[10px] text-muted-foreground">{t.watchlist.exportTransactionsSubtitle}</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -122,7 +122,7 @@ export function WatchlistIO({ items }: Props) {
           onClick={handleExportQuick}
         >
           <List className="h-3.5 w-3.5" />
-          <span>Formato Rápido (4 colunas legadas)</span>
+          <span>{t.watchlist.exportQuickTitle}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

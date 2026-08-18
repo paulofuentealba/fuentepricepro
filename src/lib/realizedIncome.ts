@@ -1,6 +1,7 @@
 import { type Transaction, getQuantityAtDate } from "./transactionsLogic";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
+import { convertCurrency } from "./currency";
 import { toIntlLocale } from "./formatters";
 import { type Locale } from "./i18n";
 
@@ -196,24 +197,7 @@ export interface RealizedIncomeSummary {
   jcpTotal: number;
 }
 
-/**
- * Converts an amount from one currency to another using the given USD/BRL rate.
- * Falls back to 5.5 when no valid rate is provided (same default the app uses
- * elsewhere), and is an identity for same-currency conversions.
- */
-export function convertCurrency(
-  amount: number,
-  from: Currency,
-  to: Currency,
-  fxRate?: number,
-): number {
-  if (from === to || amount === 0) return amount;
-  const rate =
-    typeof fxRate === "number" && Number.isFinite(fxRate) && fxRate > 0 ? fxRate : 5.5;
-  if (from === "USD" && to === "BRL") return amount * rate;
-  if (from === "BRL" && to === "USD") return amount / rate;
-  return amount;
-}
+export { convertCurrency };
 
 export function computeRealizedIncomeSummary(
   events: RealizedIncomeEvent[],

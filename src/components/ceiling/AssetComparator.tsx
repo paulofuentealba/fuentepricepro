@@ -243,11 +243,7 @@ function ComparatorCards({
           safetyMargin: val.isUnavailable ? null : val.margin,
           dividendYield: dy,
           cagr5y: data.metrics?.dividendCagr5y ?? null,
-          peRatio:
-            data.metrics?.peRatio ??
-            (data.metrics?.eps && data.metrics.eps > 0 && data.currentPrice > 0
-              ? data.currentPrice / data.metrics.eps
-              : null),
+          peRatio: data.metrics?.peRatio ?? null,
           pbRatio: data.metrics?.pbRatio ?? null,
           bazin: val.bazin,
           graham: val.graham,

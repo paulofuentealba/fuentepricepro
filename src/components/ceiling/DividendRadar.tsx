@@ -65,7 +65,6 @@ export function DividendRadar() {
     () =>
       rawData?.map((asset: any) => {
         const canonicalDiv = getCanonicalAnnualDividend(asset, 3);
-        const dy = asset.currentPrice > 0 ? (canonicalDiv / asset.currentPrice) * 100 : 0;
         const assetType = asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US");
         const currency = market === "BR" ? "BRL" : "USD";
 
@@ -98,7 +97,7 @@ export function DividendRadar() {
           isValuationUnavailable: valuation.isUnavailable,
           type: asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US"),
           currency: market === "BR" ? "BRL" : "USD",
-          dy: dy,
+          dy: valuation.dividendYield,
           sector: asset.sector || "N/A",
           exDate: asset.exDividendDate
             ? new Date(asset.exDividendDate).toISOString().split("T")[0]

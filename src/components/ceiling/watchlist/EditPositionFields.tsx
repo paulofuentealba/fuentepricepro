@@ -8,7 +8,7 @@ import type { WatchlistItem } from "@/lib/watchlist";
 import { useWatchlist } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { MaskedInput } from "../shared/MaskedInput";
-import { ceilingPrice, getAssetValuation, netAfterTax, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
+import { ceilingPrice, getAssetValuation, netAfterTax, yieldOnCost, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
 import { ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import { formatPercent } from "@/lib/i18n";
 import { TrendingUp, Target, Wallet } from "lucide-react";
@@ -83,7 +83,7 @@ export function EditPositionFields({ item }: EditPositionFieldsProps) {
       item.currency,
       item.customTaxRate,
     );
-    const newYieldOnCost = a != null && a > 0 ? (item.annualDividend / a) * 100 : null;
+    const newYieldOnCost = yieldOnCost(item.annualDividend, a);
 
     // Goal Projections
     const g = Number.isFinite(parseFloat(goal)) && parseFloat(goal) > 0 ? parseFloat(goal) : null;

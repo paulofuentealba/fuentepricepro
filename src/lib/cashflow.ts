@@ -4,6 +4,9 @@ import type { WatchlistItem } from "@/lib/watchlist";
 import { type Transaction, getQuantityAtDate } from "@/lib/transactions";
 import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { getEffectiveTransactions } from "@/lib/portfolioIrr";
+import { getFxMultiplier } from "@/lib/currency";
+
+export { getFxMultiplier };
 
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
 export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAGRO", "ETF", "REIT"];
@@ -56,16 +59,6 @@ function fallbackMonthsForType(type: WatchlistItem["type"]): number[] {
   return MONTHLY_TYPES.includes(type) ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : QUARTERLY_MONTHS;
 }
 
-export function getFxMultiplier(
-  assetCurrency: Currency,
-  targetCurrency: Currency,
-  fxRate: number = 5.5
-): number {
-  if (assetCurrency === targetCurrency) return 1;
-  if (assetCurrency === "USD" && targetCurrency === "BRL") return fxRate > 0 ? fxRate : 5.5;
-  if (assetCurrency === "BRL" && targetCurrency === "USD") return fxRate > 0 ? 1 / fxRate : 1 / 5.5;
-  return 1;
-}
 
 export function buildMonthlyBuckets(
   items: WatchlistItem[],

@@ -341,16 +341,12 @@ export function AssetDetailSheet({
             {item && (
               <div className="text-right">
                 <p className="text-sm font-semibold text-foreground">
-                  {formatCurrency(asset?.currentPrice ?? item.currentPrice, item.currency, locale)}
+                  {formatCurrency(item.currentPrice, item.currency, locale)}
                 </p>
                 {item.currency === "USD" && fx?.USDBRL && (
                   <p className="text-xs text-muted-foreground mt-0.5">
                     ~{" "}
-                    {formatCurrency(
-                      (asset?.currentPrice ?? item.currentPrice) * fx.USDBRL,
-                      "BRL",
-                      locale,
-                    )}{" "}
+                    {formatCurrency(item.currentPrice * fx.USDBRL, "BRL", locale)}{" "}
                     ({t.common.converted})
                   </p>
                 )}

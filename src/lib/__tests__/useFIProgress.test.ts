@@ -21,6 +21,12 @@ vi.mock("@tanstack/react-query", () => ({
 
 vi.mock("@/lib/queryOptions", () => ({
   exchangeRateQueryOptions: () => ({}),
+  macroRatesQueryOptions: () => ({}),
+}));
+
+vi.mock("@/lib/calculations", () => ({
+  getPositionValue: (item: { quantity: number; currentPrice: number }) =>
+    item.quantity * item.currentPrice,
 }));
 
 function makeItem(overrides: Partial<Record<string, any>> = {}) {

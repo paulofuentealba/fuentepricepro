@@ -7,6 +7,7 @@ import {
   getAssetValuation,
   netAfterTax,
   calculateFixedIncomeBalance,
+  getPositionValue,
   calculateBvps,
   GORDON_TERMINAL_GROWTH_RATE,
   type ValuationResult,
@@ -59,13 +60,7 @@ function computeTotals(
       it.customTaxRate,
     );
 
-    let worth = it.currentPrice * it.quantity;
-    if (it.type === "FIXED_INCOME" && macroRates) {
-      const accrual = calculateFixedIncomeBalance(it, macroRates);
-      if (accrual) {
-        worth = accrual.accruedBalance;
-      }
-    }
+    const worth = getPositionValue(it, macroRates);
 
     if (it.currency === "USD") {
       usd += income;

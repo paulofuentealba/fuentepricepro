@@ -17,6 +17,7 @@ import type { WatchlistItem } from "@/lib/watchlist";
 import { cn } from "@/lib/utils";
 import { flagFor } from "../utils";
 import type { PendingCorporateEvent } from "@/lib/corporateEvents";
+import { netAfterTax } from "@/lib/calculations";
 
 const ICON_BUTTON =
   "inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground";
@@ -93,7 +94,13 @@ export function AssetCardHeader({
     return { level: "low", color: "text-success", icon: "🟢", label: t.watchlist.risk.low };
   }, [item.safetyMargin, item.payoutRatio, t]);
 
-  const currentYield = livePrice > 0 ? (item.annualDividend / livePrice) * 100 : 0;
+  const netAnnualDividend = netAfterTax(
+    item.annualDividend,
+    item.type,
+    item.currency,
+    item.customTaxRate,
+  );
+  const currentYield = livePrice > 0 ? (netAnnualDividend / livePrice) * 100 : 0;
   const priceAlert = item.ceilingPrice > 0 && livePrice <= item.ceilingPrice;
   const yieldAlert = item.targetYield > 0 && currentYield >= item.targetYield;
 

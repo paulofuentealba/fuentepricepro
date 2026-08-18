@@ -10,6 +10,7 @@ import { useAssetFilterSort } from "@/lib/useAssetFilterSort";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { convertCurrency } from "@/lib/currency";
 
 import { AddAssetDropdown } from "./watchlist/AddAssetDropdown";
 import { WatchlistKpiSection } from "./watchlist/WatchlistKpiSection";
@@ -79,7 +80,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     for (const it of activeValuedItems) {
       const val = it.currentPrice * it.quantity;
       if (val <= 0) continue;
-      const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+      const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
       valueByTicker[it.ticker] = (valueByTicker[it.ticker] || 0) + inBrl;
       totalBRL += inBrl;
     }

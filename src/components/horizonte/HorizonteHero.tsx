@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { convertCurrency } from "@/lib/currency";
 import { useI18n } from "@/lib/i18n-provider";
 import { NewContributionDialog } from "./NewContributionDialog";
 
@@ -274,7 +275,8 @@ export function HorizonteHero() {
     for (const item of valuedItems) map[item.ticker] = item.currency;
     return map;
   }, [valuedItems]);
-  const convertToBRL = (value: number, curr: string) => (curr === "USD" ? value * usdRate : value);
+  const convertToBRL = (value: number, curr: "USD" | "BRL") =>
+    convertCurrency(value, curr, "BRL", usdRate);
   const monthlyContribution = useMemo(
     () => getMonthlyNetContribution(transactions, Date.now(), convertToBRL, currencyByTicker),
     [transactions, usdRate, currencyByTicker],

@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { useFIProgress } from "@/lib/useFIProgress";
+import { convertCurrency } from "@/lib/currency";
 
 function formatDuration(months: number, t: any): string {
   if (!isFinite(months) || months > 1200) return t.fiMode.moreThan100;
@@ -46,10 +47,10 @@ export function FIProgressCard() {
   const usdRate = fx?.USDBRL ?? 5.5;
   const { locale, t } = useI18n();
 
-  const convertToBRL = useCallback((value: number, curr: string) => {
-    if (curr === "USD") return value * usdRate;
-    return value;
-  }, [usdRate]);
+  const convertToBRL = useCallback(
+    (value: number, curr: "USD" | "BRL") => convertCurrency(value, curr, "BRL", usdRate),
+    [usdRate],
+  );
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCost, setTempCost] = useState(settings.monthlyLivingCostGoal?.toString() || "");

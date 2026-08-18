@@ -168,7 +168,7 @@ export function TransactionFormFields({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>{t.transactions.type}</Label>
           <Select value={type} onValueChange={(v: "buy"|"sell") => setType(v)} disabled={disabled}>
