@@ -1,7 +1,7 @@
 import type { Currency } from "@/lib/domain";
 import type { DividendEvent } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
-import { type Transaction, getQuantityAtDate } from "@/lib/transactions";
+import { type Transaction, getQuantityAtDate, recalculateInvestingSinceFromTransactions } from "@/lib/transactions";
 import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { getEffectiveTransactions } from "@/lib/portfolioIrr";
 import { getFxMultiplier } from "@/lib/currency";
@@ -80,7 +80,12 @@ export function buildMonthlyBuckets(
 
   let earliestInvestingSince = Date.now();
   if (items.length > 0) {
-    earliestInvestingSince = Math.min(...items.map((it) => it.investingSince));
+    const itemEarliestDates = items.map((it) => {
+      const tickerTxs = transactions.filter((t) => t.ticker === it.ticker);
+      const computed = tickerTxs.length > 0 ? recalculateInvestingSinceFromTransactions(tickerTxs) : null;
+      return computed ?? it.investingSince ?? Date.now();
+    });
+    earliestInvestingSince = Math.min(...itemEarliestDates);
   }
   const earliestDate = new Date(earliestInvestingSince);
 
@@ -167,11 +172,11 @@ export function buildMonthlyBuckets(
       let realPaid = 0;
       for (const contrib of b.contributors) {
         const events = dividendEventsMap[contrib.ticker] ?? [];
+        const tickerTxs = transactions.filter((t) => t.ticker === contrib.ticker);
         const item = items.find((it) => it.ticker === contrib.ticker);
-        const itemInvestingSince = item ? item.investingSince : Date.now();
+        const computedSince = tickerTxs.length > 0 ? recalculateInvestingSinceFromTransactions(tickerTxs) : null;
+        const itemInvestingSince = computedSince ?? (item ? item.investingSince : Date.now());
         const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
-
-        const tickerTxs = transactions.filter(t => t.ticker === contrib.ticker);
 
         const monthPaid = events
           .filter((ev) => {

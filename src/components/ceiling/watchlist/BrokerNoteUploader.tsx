@@ -20,7 +20,7 @@ import {
   type TradeRecord,
   type UnresolvedTradeRecord,
 } from "@/lib/dataIngestion/b3Parser";
-import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
+import { useTransactions, recalculateHoldingFromTransactions, recalculateInvestingSinceFromTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist, makeId, WatchlistItem } from "@/lib/watchlist";
 import { useIssuerTickerMappings } from "@/lib/useIssuerTickerMappings";
 import { useQueryClient } from "@tanstack/react-query";
@@ -111,6 +111,7 @@ export function consolidateTradesToWatchlistItems(
       customTaxRate: null,
       sector: assetData?.sector || null,
       addedAt: Date.now(),
+      investingSince: recalculateInvestingSinceFromTransactions(allTickerTransactions) ?? Date.now(),
     } as WatchlistItem);
   }
 
