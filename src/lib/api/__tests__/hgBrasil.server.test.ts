@@ -110,6 +110,43 @@ describe("HG Brasil API Integration (hgBrasil.server.ts)", () => {
       const result = await fetchHgBrasilDividends("TAEE11", "test_key");
       expect(result).toBeNull();
     });
+
+    it("parses the new series format correctly and prioritizes com_date over approval_date", async () => {
+      const mockResponse = {
+        results: [
+          {
+            symbol: "B3:BBSE3",
+            series: [
+              {
+                type: "dividend",
+                category: "cash",
+                amount: 1.3672,
+                approval_date: "2026-08-05", // Wrong date to test priority
+                com_date: "2026-08-16",      // Correct data-com
+                payment_date: "2026-08-28",
+                status: "paid"
+              }
+            ],
+          },
+        ],
+      };
+
+      vi.spyOn(httpModule, "fetchWithTimeout").mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockResponse,
+      } as any);
+
+      const result = await fetchHgBrasilDividends("BBSE3", "test_key_123");
+      expect(result).not.toBeNull();
+      expect(result?.dividends.length).toBe(1);
+      
+      const div = result?.dividends[0];
+      expect(div?.type).toBe("dividend"); // Not normalized
+      expect(div?.amount).toBe(1.3672);
+      expect(div?.paymentDate).toBe("2026-08-28");
+      expect(div?.approvedDate).toBe("2026-08-16"); // MUST equal com_date, not approval_date
+    });
   });
 
   describe("enrichDividendPaymentDates", () => {

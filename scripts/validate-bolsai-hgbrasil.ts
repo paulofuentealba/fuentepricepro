@@ -167,7 +167,7 @@ async function runHgBrasilTest(ticker: string): Promise<TestResult> {
       notes = `Error ${errObj.code}: ${errObj.message}`;
     } else if (rawResponse.results && Array.isArray(rawResponse.results) && rawResponse.results.length > 0) {
       const item = rawResponse.results[0];
-      const divs = item.dividends || item.dividends_history || [];
+      const divs = item.series || item.dividends || item.dividends_history || [];
       const withPaymentDate = divs.filter((d: any) => d.payment_date || d.paymentDate || d.date_payment);
       hasPaymentDate = withPaymentDate.length > 0;
       paymentDateFillRate = `${((withPaymentDate.length / Math.max(divs.length, 1)) * 100).toFixed(1)}%`;

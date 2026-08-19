@@ -125,6 +125,7 @@ export async function fetchHgBrasilDividends(
 
     const firstResult = results[0];
     const rawDividends: any[] =
+      firstResult.series ||
       firstResult.dividends ||
       firstResult.dividends_history ||
       firstResult.items ||
@@ -136,7 +137,9 @@ export async function fetchHgBrasilDividends(
       const rawAmount = typeof raw.amount === "number" ? raw.amount : parseFloat(String(raw.amount || raw.value || 0));
       const amount = Number.isFinite(rawAmount) && rawAmount > 0 ? rawAmount : 0;
       const paymentDate = normalizeHgDate(raw.payment_date || raw.paymentDate || raw.date_payment || raw.data_pagamento);
-      const approvedDate = normalizeHgDate(raw.approved_date || raw.approvedDate || raw.last_date_prior || raw.data_com);
+      const approvedDate = normalizeHgDate(
+        raw.com_date || raw.approval_date || raw.approved_date || raw.approvedDate || raw.last_date_prior || raw.data_com
+      );
 
       dividends.push({
         type: raw.type || raw.dividend_type || "Dividendo",
