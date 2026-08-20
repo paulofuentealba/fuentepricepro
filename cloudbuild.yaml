@@ -39,7 +39,7 @@ steps:
       - '--platform'
       - '$_PLATFORM'
       - '--set-env-vars'
-      - 'BRAPI_TOKEN=$_BRAPI_TOKEN'
+      - 'BRAPI_TOKEN=$_BRAPI_TOKEN,HGBRASIL_API_KEY=$_HGBRASIL_API_KEY'
       # RESEND_API_KEY removido por enquanto: e-mails transacionais ainda nao
       # foram ativados no projeto. Quando forem, criar o secret no Secret
       # Manager e adicionar de volta:
@@ -58,6 +58,7 @@ substitutions:
   _VITE_FIREBASE_APP_ID: ''
   _VITE_FIREBASE_MEASUREMENT_ID: ''
   _BRAPI_TOKEN: ''
+  _HGBRASIL_API_KEY: ''
   # As variáveis abaixo (_AR_HOSTNAME, _AR_PROJECT_ID, _AR_REPOSITORY,
   # _DEPLOY_REGION, _PLATFORM, _SERVICE_NAME) já vêm preenchidas
   # automaticamente pelo Cloud Run quando o gatilho usa "Repository" como
