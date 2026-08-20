@@ -8,6 +8,7 @@ import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker } from "
 import { calculatePiotroskiFScore, type PiotroskiResult } from "./calculations";
 import { fetchCvmEnrichedFacts } from "./api/cvm.server";
 import { fetchNasdaqDividends } from "./api/nasdaq.server";
+import { fetchHgBrasilDividends } from "./api/hgBrasil.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
 import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 
@@ -197,6 +198,40 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
 
     if (!asset) throw new Error("NOT_FOUND");
     
+    // Deep enough clone to allow mutation of metrics and events without polluting dedupeInFlight cache
+    asset = {
+      ...asset,
+      metrics: { ...asset.metrics },
+      dividendEvents: asset.dividendEvents.map((e) => ({ ...e }))
+    };
+
+    // Enrich BR dividends & financials via HG Brasil + Dados de Mercado
+    if (looksBr) {
+      const hgRes = await fetchHgBrasilDividends(raw).catch(() => null);
+      const { fetchDadosDeMercado } = await import("./api/dadosDeMercadoScraper.server");
+      const dmRes = await fetchDadosDeMercado(raw).catch(() => null);
+
+      if (hgRes && hgRes.dividends && hgRes.dividends.length > 0) {
+        asset.dividendEvents = hgRes.dividends
+          .map((d) => ({
+            exDate: d.approvedDate ?? "",
+            paymentDate: d.paymentDate ?? null,
+            amountPerShare: d.amount,
+            isJCP: typeof d.type === "string" && d.type.toUpperCase().includes("JCP"),
+          }))
+          .filter((e) => e.exDate !== "");
+      } else if (dmRes && dmRes.dividendEvents.length > 0) {
+        asset.dividendEvents = dmRes.dividendEvents.map((e) => ({ ...e }));
+      }
+
+      if (dmRes) {
+        if (asset.metrics.roe === null) asset.metrics.roe = dmRes.fundamentals.roe ?? null;
+        if (asset.metrics.currentDy === null) asset.metrics.currentDy = dmRes.fundamentals.dy ?? null;
+        if (asset.metrics.peRatio === null && dmRes.fundamentals.pl) asset.metrics.peRatio = dmRes.fundamentals.pl;
+        if (asset.metrics.pbRatio === null && dmRes.fundamentals.pvp) asset.metrics.pbRatio = dmRes.fundamentals.pvp;
+      }
+    }
+
     // Enrich with SEC EDGAR for US stocks/REITs when Yahoo doesn't have BVPS
     if (!looksBr && (asset.metrics.bvps == null || asset.metrics.bvps === undefined)) {
       const secData = await fetchSecEdgarFacts(raw).catch(() => null);
@@ -238,10 +273,12 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
       }
     }
 
-    // Enrich paymentDate for BR FIIs/FIAGROs when paymentDate is null using business day rules
+    // Fallback de último recurso: Estimativa de data de pagamento para FIIs/FIAGROs
+    // Executa APENAS se o paymentDate continuar genuinamente nulo após consultar HG Brasil / Dados de Mercado.
+    // NUNCA sobrescreve uma data de pagamento real confirmada.
     if (looksBr && asset.dividendEvents && asset.dividendEvents.length > 0) {
       for (const ev of asset.dividendEvents) {
-        if (ev.paymentDate == null && ev.exDate) {
+        if (ev.paymentDate === null && ev.exDate) {
           const exDateObj = new Date(ev.exDate);
           if (Number.isFinite(exDateObj.getTime())) {
             const estimated = estimatePaymentDate(raw, exDateObj);

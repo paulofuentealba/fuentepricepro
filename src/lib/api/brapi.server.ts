@@ -11,7 +11,7 @@ import {
   pickLast3,
   sumByYear,
 } from "./dividendAgg.server";
-import { fetchHgBrasilDividends } from "./hgBrasil.server";
+
 
 export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
   const clean = ticker.toUpperCase().replace(".SA", "");
@@ -109,34 +109,8 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
       }))
       .filter((e) => e.exDate !== "");
 
-    // HG Brasil primary source for dividendEvents (fallback to Brapi if empty/null)
-    const hgRes = await fetchHgBrasilDividends(clean);
     let roe: number | null = null;
     let currentDy: number | null = null;
-
-    if (hgRes && hgRes.dividends && hgRes.dividends.length > 0) {
-      dividendEvents = hgRes.dividends.map((d) => ({
-        exDate: d.approvedDate ?? "",
-        paymentDate: d.paymentDate ?? null,
-        amountPerShare: d.amount,
-        isJCP: typeof d.type === "string" && d.type.toUpperCase().includes("JCP"),
-      })).filter((e) => e.exDate !== "");
-    }
-    
-    // Dados de Mercado fallback for dividendEvents and supplementary indicators
-    const { fetchDadosDeMercado } = await import("./dadosDeMercadoScraper.server");
-    const dmRes = await fetchDadosDeMercado(clean);
-    if (dmRes) {
-      if (dividendEvents.length === 0 && dmRes.dividendEvents.length > 0) {
-        dividendEvents = dmRes.dividendEvents;
-      }
-      roe = dmRes.fundamentals.roe ?? null;
-      currentDy = dmRes.fundamentals.dy ?? null;
-      
-      // We only fallback PE/PB if Brapi completely lacked them, protecting valuation logic
-      if (pe === null && dmRes.fundamentals.pl) pe = dmRes.fundamentals.pl;
-      if (pb === null && dmRes.fundamentals.pvp) pb = dmRes.fundamentals.pvp;
-    }
 
     const currency: Currency =
       (res.currency as Currency) ||
