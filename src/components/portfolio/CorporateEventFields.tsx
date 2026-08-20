@@ -3,6 +3,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
@@ -27,7 +35,7 @@ interface CorporateEventFieldsProps {
  * Presentational + self-contained "Apply Corporate Event" form. Same
  * factor/idempotent-transaction logic that used to live in
  * CorporateEventModal's Dialog, now usable as inline content inside a
- * collapsible section.
+ * collapsible section with 2-step confirmation.
  */
 export function CorporateEventFields({ item, pendingEvent, onApplied }: CorporateEventFieldsProps) {
   const { t, locale } = useI18n();
@@ -35,6 +43,7 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const [eventType, setEventType] = useState<CorporateEventType>(pendingEvent?.type ?? "split");
   const [ratio, setRatio] = useState<string>(pendingEvent ? String(pendingEvent.ratio) : "4");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -104,6 +113,7 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
 
       await upsertAsync(updatedItem);
       toast.success(`${item.ticker} ${t.corporateEvents.successMessage}`);
+      setIsConfirmOpen(false);
       onApplied?.();
     } catch (e: any) {
       toast.error(e.message);
@@ -142,7 +152,7 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
         </RadioGroup>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label>{t.corporateEvents.ratio}</Label>
         <Input
           type="number"
@@ -151,6 +161,11 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
           value={ratio}
           onChange={(e) => setRatio(e.target.value)}
         />
+        <p className="text-xs text-muted-foreground font-medium">
+          {eventType === "split"
+            ? t.corporateEvents.splitHelper.replace("{{ratio}}", String(numericRatio))
+            : t.corporateEvents.groupingHelper.replace("{{ratio}}", String(numericRatio))}
+        </p>
       </div>
 
       <div className="rounded-xl border border-border/60 bg-muted/30 p-5 space-y-4">
@@ -180,14 +195,80 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
               .replace("{{qty}}", String(newPosition.quantity))
               .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
           </span>
+          {item.ceilingPrice > 0 && (
+            <div className="flex items-center justify-between gap-2 pt-2 mt-2 border-t border-success/20 text-xs">
+              <span className="text-muted-foreground font-medium">
+                {t.corporateEvents.ceilingImpactLabel}:
+              </span>
+              <span className="font-semibold text-foreground">
+                {formatCurrency(item.ceilingPrice)} →{" "}
+                {formatCurrency(
+                  eventType === "split"
+                    ? item.ceilingPrice / numericRatio
+                    : item.ceilingPrice * numericRatio,
+                )}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button onClick={handleSubmit} disabled={isSaving} className="w-full sm:w-auto">
+        <Button onClick={() => setIsConfirmOpen(true)} disabled={isSaving} className="w-full sm:w-auto">
           {t.corporateEvents.applyButton}
         </Button>
       </div>
+
+      {/* 2-Step Confirmation Dialog */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t.corporateEvents.confirmModalTitle}</DialogTitle>
+            <DialogDescription>{t.corporateEvents.confirmModalDesc}</DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-3 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t.corporateEvents.eventType}:</span>
+              <span className="font-semibold text-foreground">
+                {eventType === "split" ? t.corporateEvents.split : t.corporateEvents.grouping}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{t.corporateEvents.ratio}:</span>
+              <span className="font-semibold text-foreground">
+                {eventType === "split" ? `1 : ${numericRatio}` : `${numericRatio} : 1`}
+              </span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-border/40">
+              <span className="text-muted-foreground">{t.corporateEvents.previewNew}:</span>
+              <span className="font-bold text-success">
+                {t.corporateEvents.sharesAt
+                  .replace("{{qty}}", String(newPosition.quantity))
+                  .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-2 sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsConfirmOpen(false)}
+              disabled={isSaving}
+            >
+              {t.common?.cancel || "Cancelar"}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSaving}
+            >
+              {t.corporateEvents.confirmModalButton}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

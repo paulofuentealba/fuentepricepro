@@ -60,7 +60,11 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /aplicar/i }));
+    // Passo 1: Clicar em Aplicar Evento para abrir o modal de confirmação
+    fireEvent.click(screen.getByRole("button", { name: /^aplicar evento$/i }));
+
+    // Passo 2: Confirmar no modal de 2 passos
+    fireEvent.click(screen.getByRole("button", { name: /confirmar e aplicar/i }));
 
     await waitFor(() => expect(mockUpsertAsync).toHaveBeenCalledTimes(1));
     const updatedItem = mockUpsertAsync.mock.calls[0][0];
@@ -84,7 +88,8 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /aplicar/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^aplicar evento$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /confirmar e aplicar/i }));
 
     await waitFor(() => expect(mockUpsertTransaction).toHaveBeenCalledTimes(1));
     const tx = mockUpsertTransaction.mock.calls[0][0];
@@ -104,12 +109,53 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /aplicar/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^aplicar evento$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /confirmar e aplicar/i }));
 
     await waitFor(() => expect(mockUpsertAsync).toHaveBeenCalledTimes(1));
     const updatedItem = mockUpsertAsync.mock.calls[0][0];
     // Grouping 10:1 → quantity /10, averagePrice *10
     expect(updatedItem.quantity).toBe(10);
     expect(updatedItem.averagePrice).toBeCloseTo(500, 2);
+  });
+
+  it("não executa o submit sem passar pela confirmação do modal de 2 passos", async () => {
+    mockTransactions = [];
+    render(
+      <CorporateEventFields
+        item={item}
+        pendingEvent={{ eventId: "ev4", date: 111, type: "split", ratio: 2 }}
+      />,
+    );
+
+    // Clica apenas no botão principal de abrir o modal
+    fireEvent.click(screen.getByRole("button", { name: /^aplicar evento$/i }));
+
+    // O modal deve estar aberto exibindo o botão de confirmação
+    expect(screen.getByRole("button", { name: /confirmar e aplicar/i })).toBeInTheDocument();
+
+    // Nada deve ter sido persistido ainda
+    expect(mockUpsertAsync).not.toHaveBeenCalled();
+    expect(mockUpsertTransaction).not.toHaveBeenCalled();
+  });
+
+  it("cancela a operação e não grava nada quando o usuário clica em Cancelar no modal", async () => {
+    mockTransactions = [];
+    render(
+      <CorporateEventFields
+        item={item}
+        pendingEvent={{ eventId: "ev5", date: 222, type: "split", ratio: 2 }}
+      />,
+    );
+
+    // Passo 1: Abrir modal
+    fireEvent.click(screen.getByRole("button", { name: /^aplicar evento$/i }));
+
+    // Passo 2: Clicar em Cancelar
+    fireEvent.click(screen.getByRole("button", { name: /cancelar/i }));
+
+    // Persistência não pode ter sido chamada
+    expect(mockUpsertAsync).not.toHaveBeenCalled();
+    expect(mockUpsertTransaction).not.toHaveBeenCalled();
   });
 });

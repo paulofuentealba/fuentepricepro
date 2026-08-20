@@ -44,6 +44,14 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
     [item.quantity, locale],
   );
 
+  const priceChangePct = useMemo(() => {
+    if (item.averagePrice != null && item.averagePrice > 0) {
+      return ((item.currentPrice - item.averagePrice) / item.averagePrice) * 100;
+    }
+    return null;
+  }, [item.averagePrice, item.currentPrice]);
+  const priceChangeUp = priceChangePct != null && priceChangePct >= 0;
+
   return (
     <>
       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -146,38 +154,72 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
         />
       </div>
 
-      <MetricBox
-        label={
-          <span className="flex items-center">
-            {t.watchlist.yieldOnCost}
-            <InfoTooltip
-              content={t.tooltips?.yieldOnCost || ""}
-              link="/app/docs#yield-on-cost"
-              className="ml-1"
-            />
-          </span>
-        }
-        value={yoc != null ? formatPercent(yoc, locale, 2) : "---"}
-        subValue={yoc == null ? t.watchlist.yocPrompt : undefined}
-        variant="success"
-        tooltip={
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={stopBubble}
-                onKeyDown={stopKeyBubble}
-                className="inline-flex items-center justify-center rounded-full text-success/70 hover:text-success"
-              >
-                <Info className="h-3 w-3" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[240px]">
-              <p>{t.watchlist.yocTip}</p>
-            </TooltipContent>
-          </Tooltip>
-        }
-      />
+      <div className="grid grid-cols-2 gap-2">
+        <MetricBox
+          label={
+            <span className="flex items-center">
+              {t.watchlist.yieldOnCost}
+              <InfoTooltip
+                content={t.tooltips?.yieldOnCost || ""}
+                link="/app/docs#yield-on-cost"
+                className="ml-1"
+              />
+            </span>
+          }
+          value={yoc != null ? formatPercent(yoc, locale, 2) : "---"}
+          subValue={yoc == null ? t.watchlist.yocPrompt : undefined}
+          variant="success"
+          tooltip={
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={stopBubble}
+                  onKeyDown={stopKeyBubble}
+                  className="inline-flex items-center justify-center rounded-full text-success/70 hover:text-success"
+                >
+                  <Info className="h-3 w-3" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[240px]">
+                <p>{t.watchlist.yocTip}</p>
+              </TooltipContent>
+            </Tooltip>
+          }
+        />
+
+        <MetricBox
+          label={
+            <span className="flex items-center">
+              {t.watchlist.priceChangeSinceBuy}
+              <InfoTooltip
+                content={t.watchlist.priceChangeSinceBuyTip}
+                className="ml-1"
+              />
+            </span>
+          }
+          value={
+            priceChangePct != null ? (
+              <span className={cn("font-bold", priceChangeUp ? "text-success" : "text-danger")}>
+                {priceChangeUp ? "+" : ""}{formatPercent(priceChangePct, locale, 2)}
+              </span>
+            ) : (
+              "---"
+            )
+          }
+          subValue={
+            hasAvg && item.averagePrice != null ? (
+              <span>
+                <PriceTag value={item.averagePrice} currency={item.currency} /> →{" "}
+                <PriceTag value={item.currentPrice} currency={item.currency} />
+              </span>
+            ) : (
+              t.watchlist.addAvgToTrack
+            )
+          }
+          variant={priceChangePct != null ? (priceChangeUp ? "success" : "danger") : undefined}
+        />
+      </div>
 
       {item.targetMonthlyIncome != null && item.targetMonthlyIncome > 0 && (
         <GoalProgressBar

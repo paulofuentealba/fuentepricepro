@@ -22,11 +22,11 @@ interface IndicatorItemProps {
 function IndicatorItem({ label, tooltip, value, valueClassName }: IndicatorItemProps) {
   return (
     <div className="flex flex-col p-3 rounded-lg bg-background/50 border border-border/30 hover:border-border/60 transition-colors">
-      <div className="flex items-center justify-between gap-1 mb-1">
-        <span className="text-xs text-muted-foreground truncate">{label}</span>
+      <div className="flex items-start justify-between gap-1 mb-1">
+        <span className="text-xs text-muted-foreground leading-snug">{label}</span>
         <InfoTooltip content={tooltip} />
       </div>
-      <div className={cn("text-sm font-semibold text-foreground truncate", valueClassName)}>
+      <div className={cn("text-sm font-semibold text-foreground truncate mt-auto", valueClassName)}>
         {value ?? "—"}
       </div>
     </div>
@@ -67,7 +67,7 @@ export function FundamentalIndicatorsPanel({ asset, valuation }: Props) {
             <TrendingUp className="h-3.5 w-3.5 text-primary" />
             <span>{t.fundamentalIndicators.categoryValuation}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 pt-1">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2 pt-1">
             {isStock && (
               <IndicatorItem
                 label={t.fundamentalIndicators.peRatio}
@@ -130,7 +130,7 @@ export function FundamentalIndicatorsPanel({ asset, valuation }: Props) {
             <PieChart className="h-3.5 w-3.5 text-primary" />
             <span>{t.fundamentalIndicators.categoryDividends}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 pt-1">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2 pt-1">
             <IndicatorItem
               label={t.fundamentalIndicators.currentDy}
               tooltip={t.fundamentalIndicators.currentDyTip}
@@ -176,7 +176,7 @@ export function FundamentalIndicatorsPanel({ asset, valuation }: Props) {
               <Layers className="h-3.5 w-3.5 text-primary" />
               <span>{t.fundamentalIndicators.categoryProfitability}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2 pt-1">
               <IndicatorItem
                 label={t.fundamentalIndicators.roe}
                 tooltip={t.fundamentalIndicators.roeTip}
@@ -215,7 +215,7 @@ export function FundamentalIndicatorsPanel({ asset, valuation }: Props) {
               <Building2 className="h-3.5 w-3.5 text-primary" />
               <span>{t.fundamentalIndicators.categoryRealEstate}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2 pt-1">
               <IndicatorItem
                 label={t.fundamentalIndicators.capRate}
                 tooltip={t.fundamentalIndicators.capRateTip}
@@ -245,7 +245,7 @@ export function FundamentalIndicatorsPanel({ asset, valuation }: Props) {
               <Layers className="h-3.5 w-3.5 text-primary" />
               <span>{t.fundamentalIndicators.categoryEtf}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2 pt-1">
               <IndicatorItem
                 label={t.fundamentalIndicators.expenseRatio}
                 tooltip={t.fundamentalIndicators.expenseRatioTip}
