@@ -202,8 +202,19 @@ Registrado aqui só pra contexto — não precisa de ação:
   - ✅ **FIIs/FIAGRO/FI-Infra BR (Estimado)**: `paymentDate` calculado via regra de dias úteis e feriados brasileiros (`src/lib/br-business-calendar.ts` + `src/lib/fiiPaymentRules.ts`), com flag `paymentDateEstimated: true` e tooltip i18n nos 3 idiomas (10 fundos mapeados: `HGLG11`, `MXRF11`, `KNRI11`, `XPLG11`, `VISC11`, `BTLG11`, `KNCR11`, `AFHI11`, `CPTS11`, `ALZR11`).
   - 🔴 **Gap Conhecido (Ações BR)**: Proventos de Ações BR permanecem sem `paymentDate` em APIs gratuitas (administrado por B3/CBLC, fora do escopo CVM; Bolsai e HG Brasil exigem assinaturas pagas).
   - 🔴 **Gap Conhecido (Ações/REITs NYSE US)**: Ações e REITs negociados na NYSE (`O`, `JNJ`, `KO`) permanecem sem `paymentDate` em APIs gratuitas sem chave (a Nasdaq API restringe o cadastro a papéis Nasdaq-listed e a Yahoo Finance só possui ex-date).
-  - **Fase 0 - Item 0.1 (Exportação de Dados LGPD + Expurgo de portfolioSnapshots)**: ✅ **CONCLUÍDO E VALIDADO** (detalhado na Seção 4.3).
-- *Nota*: Se novos FIIs forem mapeados no futuro, a metodologia oficial de mapeamento via regulamento primário está documentada nos Prompts 24-27 em `PROMPTS_LOG.md`.
+- **Redesign da Aba "My Position" em `AssetDetailSheet.tsx` (Proposta 1 — Metas & Extrato)**: ✅ **CONCLUÍDO (Agosto/2026)**.
+  - Eliminação completa da coluna lateral `PREVIEW` e dos campos duplicados (`Investing Since`, `Quantity owned`, `Average price`).
+  - Formulário simplificado para **"Metas & Premissas"** (`targetYield` e `targetMonthlyIncome`), com touch targets mobile-first ≥44px (`h-11 sm:h-9`).
+  - Gestão de saldo centralizada no extrato de transações (`TransactionsPanel`) com botão canônico `+ Nova Transação` / `+ Ajustar saldo inicial`.
+  - SSOT blindado: remoção da persistência de snapshots estáticos de `ceilingPrice`, `safetyMargin` e `annualDividend` no form (calculados ao vivo pelo `useValuedPortfolio.tsx`).
+- **Nova Aba "Projeção" e Reposicionamento de Transações**: ✅ **CONCLUÍDO (Agosto/2026)**.
+  - Motor determinístico puro `dividendProjection.ts` com reinvestimento integral de proventos e aportes mensais opcionais para horizontes de 1A, 3A e 5A.
+  - Aba "Projeção" criada após "Dividendos" em `AssetDetailSheet.tsx` com `AssetProjectionPanel.tsx`.
+- **5 Melhorias de UX na Watchlist & AssetDetailSheet**: ✅ **CONCLUÍDO (Agosto/2026)**.
+  - Grid auto-fit sem `truncate` em indicadores fundamentalistas.
+  - Modal de confirmação em 2 passos para eventos societários em `CorporateEventFields.tsx`.
+  - Card "Cota desde a compra" em `AssetCardFinancials.tsx`.
+  - Variação percentual do dia alinhada à cotação no cabeçalho do `AssetDetailSheet.tsx`.
 
 ### Bug Secundário (Diagnóstico Pendente) — Inconsistência de Casing em tx.type
 - **Contexto:** Identificado durante a auditoria do Prompt 12 (Invested vs. Received). Existe uma dupla convenção de casing coexistindo: `csv.ts` e `transactionsLogic.ts` usam minúsculo (`"buy" | "sell" | "corporate_action"`), enquanto `dynamicCsvParser.ts` usa maiúsculo (`"BUY" | "SELL"`).
