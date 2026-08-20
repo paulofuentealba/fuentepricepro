@@ -3870,10 +3870,21 @@ i  firestore: uploading rules firestore.rules...
 
 - **Resumo**: Unificados os 4 campos de seleção de data do sistema (`TransactionForm`, `InvestingSinceField`, `startDate` e `maturityDate` no `FixedIncomeWizardSheet`) para utilizarem o padrão `Popover` + `Calendar` com `captionLayout="dropdown"`.
 - **Decisão Arquitetural**: Criado o componente compartilhado `DatePicker` em `src/components/ui/date-picker.tsx` para evitar a duplicação de estrutura por campo, padronizar o parsing/formatação de datas de/para formato local ISO `"YYYY-MM-DD"`, tratar fuso horário sem inconsistências e aceitar intervalos predefinidos de navegação (`rangeMode="past"` para até 15 anos atrás ou `rangeMode="future"` para até 40 anos no futuro para vencimento de títulos de Renda Fixa).
+
+---
+
+### Redesign My Position — Metas & Premissas (Proposta 1) ✅ CONCLUÍDO E VERIFICADO
+
+- **Resumo**: Reorganizada a aba **My Position** em `AssetDetailSheet.tsx`. O formulário colapsável foi renomeado para **"Metas & Premissas"** (`goalsAndAssumptions`), simplificado para apenas 2 campos de entrada (`targetYield` e `targetMonthlyIncome`), eliminando 100% da coluna lateral de `PREVIEW`, o campo duplicado de `Investing Since` e os inputs desabilitados de quantidade/preço médio. A gestão de posição passa a ser administrada pelo extrato de transações (`TransactionsPanel`) com o botão canônico `+ Nova Transação` / `+ Ajustar saldo inicial`.
+- **SSOT Garantido**: O formulário grava exclusivamente `targetYield` e `targetMonthlyIncome`, sem persistir snapshots estáticos de `ceilingPrice`, `safetyMargin` ou `annualDividend` (calculados ao vivo pelo `useValuedPortfolio.tsx`).
+- **Mobile-First**: Touch targets ≥44px (`h-11 sm:h-9`), grid empilhado em coluna única em telas ≤375px e botões `w-full sm:w-auto`.
+- **Dicionários i18n**: Adicionadas as novas chaves (`goalsAndAssumptions`, `saveGoals`, `manualBalanceAdjustment`, `manualBalanceNote`) com paridade nos 3 idiomas (`dict.ptBR.ts`, `dict.en.ts`, `dict.es.ts`).
+- **Suíte de Testes Unitários**: `EditPositionFields.test.tsx` atualizado para testar a persistência isolada de metas.
 - **Evidências Literais de Validação**:
   1. **`npx tsc --noEmit`**: **0 erros** (Exit code 0).
-  2. **`npm run test`**: **184 passed** | 4 skipped (31 suítes de teste aprovadas).
-  3. **`npm run build`**: Client e SSR compilados com sucesso.
+  2. **`npm run test`**: **464 passed** | 12 skipped (81 suítes de teste aprovadas).
+  3. **`npm run build`**: Client e SSR compilados com sucesso em 1.37s.
+
 
 
 

@@ -133,7 +133,11 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
             )}
           </div>
         </div>
-        <Button size="sm" onClick={() => { setEditingTx(null); setIsFormOpen(true); }}>
+        <Button
+          size="sm"
+          className="w-full sm:w-auto h-11 sm:h-9 text-xs font-semibold"
+          onClick={() => { setEditingTx(null); setIsFormOpen(true); }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           {t.transactions.add}
         </Button>
@@ -180,8 +184,20 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
 
       <div className="space-y-2 mt-3">
         {filteredTxs.length === 0 ? (
-          <div className="text-sm text-muted-foreground text-center py-6 border rounded-lg border-dashed">
-            {t.transactions.empty}
+          <div className="flex flex-col items-center justify-center text-sm text-muted-foreground text-center py-8 px-4 border rounded-lg border-dashed space-y-3">
+            <p>{t.transactions.empty}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 sm:h-9 text-xs font-semibold"
+              onClick={() => {
+                setEditingTx(null);
+                setIsFormOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t.watchlist.manualBalanceAdjustment}
+            </Button>
           </div>
         ) : (
           filteredTxs.map((tx) => (

@@ -4,11 +4,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { AssetCard } from "@/components/shared/AssetCard";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle } from "lucide-react";
+import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ValuationAssumptionsModal } from "./assetCard/ValuationAssumptionsModal";
@@ -25,14 +24,15 @@ import { BuyAndHoldChecklistCard } from "./BuyAndHoldChecklistCard";
 import { AssetDynamicFaqAccordion } from "./AssetDynamicFaqAccordion";
 import { RetrospectiveSimulatorCard } from "./RetrospectiveSimulatorCard";
 
-import { exchangeRateQueryOptions } from "@/lib/queryOptions";
-import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
+import { exchangeRateQueryOptions, assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
+import { formatCurrency, displayTicker, toIntlLocale, formatPercent } from "@/lib/i18n";
 
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { ConsensusPyramid } from "./ConsensusPyramid";
 import { FixedIncomePanel } from "./FixedIncomePanel";
 import { TransactionsPanel } from "./TransactionsPanel";
+import { AssetProjectionPanel } from "./AssetProjectionPanel";
 import { InvestingSinceField } from "../shared/InvestingSinceField";
 import { useTransactions } from "@/lib/transactions";
 import { EditPositionFields } from "./EditPositionFields";
@@ -323,6 +323,14 @@ export function AssetDetailSheet({
 
   const displayTickerStr = displayTicker(item?.ticker ?? "");
 
+  const { data: quote } = useQuery({
+    ...quoteQueryOptions(item?.ticker ?? ""),
+    enabled: !!item && item.type !== "FIXED_INCOME",
+  });
+  const livePrice = quote?.price ?? item?.currentPrice ?? 0;
+  const changePct = quote?.changePct ?? null;
+  const changeUp = changePct != null && changePct >= 0;
+
   return (
     <Sheet open={item != null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
@@ -333,23 +341,34 @@ export function AssetDetailSheet({
         <SheetHeader className="border-b border-border/60 px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>
+              <div className="flex items-baseline gap-2.5 flex-wrap">
+                <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>
+                {item && (
+                  <span className="text-sm font-semibold text-foreground/90 tabular-nums">
+                    {formatCurrency(livePrice, item.currency, locale)}
+                  </span>
+                )}
+                {changePct != null && (
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-0.5 text-xs font-semibold tabular-nums",
+                      changeUp ? "text-success" : "text-danger",
+                    )}
+                  >
+                    {changeUp ? "▲ +" : "▼ "}
+                    {formatPercent(Math.abs(changePct), locale, 2)}
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                 {asset?.name ?? item?.name}
               </p>
             </div>
-            {item && (
+            {item && item.currency === "USD" && fx?.USDBRL && (
               <div className="text-right">
-                <p className="text-sm font-semibold text-foreground">
-                  {formatCurrency(item.currentPrice, item.currency, locale)}
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  ~ {formatCurrency(livePrice * fx.USDBRL, "BRL", locale)} ({t.common.converted})
                 </p>
-                {item.currency === "USD" && fx?.USDBRL && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    ~{" "}
-                    {formatCurrency(item.currentPrice * fx.USDBRL, "BRL", locale)}{" "}
-                    ({t.common.converted})
-                  </p>
-                )}
               </div>
             )}
           </div>
@@ -377,11 +396,11 @@ export function AssetDetailSheet({
                   {!hidePositionTabs && (
                     <TabsTrigger value="myPosition" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.myPosition}</TabsTrigger>
                   )}
-                  {item.type !== "FIXED_INCOME" && !hidePositionTabs && (
-                    <TabsTrigger value="transactions" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.transactions}</TabsTrigger>
-                  )}
                   {item.type !== "FIXED_INCOME" && (
                     <TabsTrigger value="dividends" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.dividends}</TabsTrigger>
+                  )}
+                  {item.type !== "FIXED_INCOME" && (
+                    <TabsTrigger value="projection" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.projection}</TabsTrigger>
                   )}
                 </ScrollableTabsList>
 
@@ -450,8 +469,8 @@ export function AssetDetailSheet({
 
                       <div className="space-y-3">
                         <MyPositionSection
-                          title={t.watchlist.updateTitle}
-                          icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
+                          title={t.watchlist.goalsAndAssumptions}
+                          icon={<Target className="h-4 w-4 text-muted-foreground" />}
                           defaultOpen={true}
                         >
                           <EditPositionFields item={item} />
@@ -465,15 +484,15 @@ export function AssetDetailSheet({
                           <CorporateEventFields item={item} pendingEvent={pendingEvent} />
                         </MyPositionSection>
                       </div>
+
+                      {item.type !== "FIXED_INCOME" && (
+                        <div className="pt-2">
+                          <TransactionsPanel item={item} />
+                        </div>
+                      )}
                     </>
                   )}
                 </TabsContent>
-
-                {item.type !== "FIXED_INCOME" && !hidePositionTabs && (
-                  <TabsContent value="transactions" className="space-y-6 mt-0">
-                    <TransactionsPanel item={item} />
-                  </TabsContent>
-                )}
 
                 {item.type !== "FIXED_INCOME" && (
                   <TabsContent value="dividends" className="space-y-6 mt-0">
@@ -482,6 +501,16 @@ export function AssetDetailSheet({
                       events={asset.dividendEvents ?? []}
                       currency={asset.currency}
                       asset={asset}
+                    />
+                  </TabsContent>
+                )}
+
+                {item.type !== "FIXED_INCOME" && (
+                  <TabsContent value="projection" className="space-y-6 mt-0">
+                    <AssetProjectionPanel
+                      item={item}
+                      asset={asset}
+                      currency={asset.currency}
                     />
                   </TabsContent>
                 )}
