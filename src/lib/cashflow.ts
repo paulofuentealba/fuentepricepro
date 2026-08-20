@@ -1,7 +1,7 @@
 import type { Currency } from "@/lib/domain";
 import type { DividendEvent } from "@/lib/domain";
 import type { WatchlistItem } from "@/lib/watchlist";
-import { type Transaction, getQuantityAtDate, recalculateInvestingSinceFromTransactions } from "@/lib/transactions";
+import { type Transaction, getQuantityAtDate, recalculateInvestingSinceFromTransactions } from "@/lib/transactionsLogic";
 import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { getEffectiveTransactions } from "@/lib/portfolioIrr";
 import { getFxMultiplier } from "@/lib/currency";
@@ -15,6 +15,8 @@ export interface MonthContributor {
   ticker: string;
   amount: number;
   paidAmount?: number;
+  announcedAmount?: number;
+  paymentDate?: string | null;
   type: WatchlistItem["type"];
 }
 
@@ -69,8 +71,9 @@ export function buildMonthlyBuckets(
   transactions: Transaction[] = [],
   fxRate: number = 5.5
 ): MonthBucket[] {
-  const currentYear = new Date().getFullYear();
-  const currentMonthIndex = new Date().getMonth();
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const currentMonthIndex = now.getUTCMonth();
 
   // 1. Determine window
   let startYear = currentYear;
@@ -91,16 +94,16 @@ export function buildMonthlyBuckets(
 
   if (mode === "journey") {
     const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(currentYear - 1);
-    oneYearAgo.setMonth(currentMonthIndex + 1); // Rolling 12 months
+    oneYearAgo.setUTCFullYear(currentYear - 1);
+    oneYearAgo.setUTCMonth(currentMonthIndex + 1); // Rolling 12 months
 
     let startDate = earliestDate;
     if (startDate < oneYearAgo) {
       startDate = oneYearAgo;
     }
 
-    startYear = startDate.getFullYear();
-    startMonth = startDate.getMonth();
+    startYear = startDate.getUTCFullYear();
+    startMonth = startDate.getUTCMonth();
     endYear = currentYear;
     endMonth = currentMonthIndex;
   }
@@ -132,7 +135,7 @@ export function buildMonthlyBuckets(
       calendarMonth: m,
       calendarYear: y,
       monthLabel: label,
-      isStartMonth: mode === "journey" && m === earliestDate.getMonth() && y === earliestDate.getFullYear(),
+      isStartMonth: mode === "journey" && m === earliestDate.getUTCMonth() && y === earliestDate.getUTCFullYear(),
       amount: 0,
       contributors: [],
     });
@@ -164,42 +167,67 @@ export function buildMonthlyBuckets(
     }
   }
 
+  // Calculate SSOT Realized & Announced events once for all buckets
+  const assetMetaMap: Record<string, AssetTaxMeta> = {};
+  for (const item of items) {
+    assetMetaMap[item.ticker] = {
+      ticker: item.ticker,
+      type: item.type,
+      currency: item.currency,
+      customTaxRate: item.customTaxRate,
+    };
+  }
+  const allRealizedEvents = transactions.length > 0
+    ? calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap)
+    : [];
+
   // 4. --- PASS 1: compute the effective displayed value per month ---
   const effectiveAmounts: number[] = bucketTemplates.map((b) => {
     const isPast = b.calendarYear < currentYear || (b.calendarYear === currentYear && b.calendarMonth < currentMonthIndex);
 
+    // Calculate events for this month bucket
+    let monthRealized = 0;
+    let monthAnnounced = 0;
+
+    for (const ev of allRealizedEvents) {
+      const dateStr = ev.paymentDate || ev.exDate;
+      const d = new Date(dateStr);
+      if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
+        const item = items.find((it) => it.ticker === ev.ticker);
+        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
+        if (ev.isPaid) {
+          monthRealized += ev.amountNet * fx;
+        } else {
+          monthAnnounced += ev.amountNet * fx;
+        }
+      }
+    }
+
     if (isPast) {
-      let realPaid = 0;
+      if (allRealizedEvents.length > 0) {
+        return monthRealized;
+      }
+      // Fallback calculation for guest mode without transaction ledger
+      let rawFallbackPaid = 0;
       for (const contrib of b.contributors) {
         const events = dividendEventsMap[contrib.ticker] ?? [];
-        const tickerTxs = transactions.filter((t) => t.ticker === contrib.ticker);
         const item = items.find((it) => it.ticker === contrib.ticker);
-        const computedSince = tickerTxs.length > 0 ? recalculateInvestingSinceFromTransactions(tickerTxs) : null;
-        const itemInvestingSince = computedSince ?? (item ? item.investingSince : Date.now());
+        const itemInvestingSince = item?.investingSince ?? 0;
         const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
-
         const monthPaid = events
           .filter((ev) => {
             const dateStr = ev.paymentDate ?? ev.exDate;
             const d = new Date(dateStr);
-            // GHOST DIVIDEND FIX: Skip events before the asset was added
-            if (d.getTime() < itemInvestingSince) return false;
-            
+            if (itemInvestingSince > 0 && d.getTime() < itemInvestingSince) return false;
             return d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear;
           })
-          .reduce((sum, ev) => {
-            const dateStr = ev.paymentDate ?? ev.exDate;
-            const dateNum = new Date(dateStr).getTime();
-            const q = tickerTxs.length > 0 ? getQuantityAtDate(tickerTxs, dateNum) : (item?.quantity ?? 0);
-            return sum + ev.amountPerShare * q * fx;
-          }, 0);
-
-        contrib.paidAmount = monthPaid;
-        realPaid += monthPaid;
+          .reduce((sum, ev) => sum + ev.amountPerShare * (item?.quantity ?? 0) * fx, 0);
+        rawFallbackPaid += monthPaid;
       }
-      return realPaid;
+      return rawFallbackPaid;
     }
-    return b.amount; // current month and future: projected
+
+    return b.amount; // current month and future: projected amount
   });
 
   const positiveEffective = effectiveAmounts.filter((a) => a > 0);
@@ -212,49 +240,68 @@ export function buildMonthlyBuckets(
     running += b.amount;
     const isPast = b.calendarYear < currentYear || (b.calendarYear === currentYear && b.calendarMonth < currentMonthIndex);
 
-    // Sort contributors based on effective paid amount for past months
+    // Filter events for this month bucket
+    let monthRealized = 0;
+    let monthAnnounced = 0;
+    const tickerEventsMap: Record<string, { paid: number; announced: number; payDate: string | null }> = {};
+
+    for (const ev of allRealizedEvents) {
+      const dateStr = ev.paymentDate || ev.exDate;
+      const d = new Date(dateStr);
+      if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
+        const item = items.find((it) => it.ticker === ev.ticker);
+        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
+        const netConverted = ev.amountNet * fx;
+
+        if (!tickerEventsMap[ev.ticker]) {
+          tickerEventsMap[ev.ticker] = { paid: 0, announced: 0, payDate: ev.paymentDate };
+        }
+
+        if (ev.isPaid) {
+          monthRealized += netConverted;
+          tickerEventsMap[ev.ticker].paid += netConverted;
+        } else {
+          monthAnnounced += netConverted;
+          tickerEventsMap[ev.ticker].announced += netConverted;
+          if (ev.paymentDate) {
+            tickerEventsMap[ev.ticker].payDate = ev.paymentDate;
+          }
+        }
+      }
+    }
+
+    // Populate contributor paidAmount, announcedAmount, and paymentDate
+    for (const contrib of b.contributors) {
+      const evData = tickerEventsMap[contrib.ticker];
+      if (evData) {
+        contrib.paidAmount = Math.round(evData.paid * 100) / 100;
+        contrib.announcedAmount = Math.round(evData.announced * 100) / 100;
+        contrib.paymentDate = evData.payDate;
+      }
+    }
+
+    // Sort contributors based on confirmed amounts (paid or announced), fallback to projected
     const sortedContribs = [...b.contributors].sort((x, y) => {
-      const valX = isPast ? (x.paidAmount ?? 0) : x.amount;
-      const valY = isPast ? (y.paidAmount ?? 0) : y.amount;
+      const valX = (x.paidAmount ?? 0) + (x.announcedAmount ?? 0) > 0
+        ? (x.paidAmount ?? 0) + (x.announcedAmount ?? 0)
+        : x.amount;
+      const valY = (y.paidAmount ?? 0) + (y.announcedAmount ?? 0) > 0
+        ? (y.paidAmount ?? 0) + (y.announcedAmount ?? 0)
+        : y.amount;
       return valY - valX;
     });
 
     const topShare =
       b.amount > 0 && sortedContribs.length > 0 ? sortedContribs[0].amount / b.amount : 0;
 
-    const effectiveAmount = effectiveAmounts[i];
-    const paidAmount = isPast ? effectiveAmount : 0;
-
-    // Calculate SSOT Realized Income for this month/year bucket
-    let bucketRealized = 0;
-    if (transactions.length > 0) {
-      const assetMetaMap: Record<string, AssetTaxMeta> = {};
-      for (const item of items) {
-        assetMetaMap[item.ticker] = {
-          ticker: item.ticker,
-          type: item.type,
-          currency: item.currency,
-          customTaxRate: item.customTaxRate,
-        };
-      }
-      const realizedEvents = calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap);
-      for (const ev of realizedEvents) {
-        const item = items.find((it) => it.ticker === ev.ticker);
-        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
-
-        const dateStr = ev.paymentDate || ev.exDate;
-        const d = new Date(dateStr);
-        if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
-          bucketRealized += ev.amountNet * fx;
-        }
-      }
-    }
-    const roundedBucketRealized = Math.round(bucketRealized * 100) / 100;
-    const realizedAmount = isPast ? roundedBucketRealized : 0;
-    const announcedAmount = !isPast ? roundedBucketRealized : 0;
+    const roundedRealized = Math.round(monthRealized * 100) / 100;
+    const roundedAnnounced = Math.round(monthAnnounced * 100) / 100;
+    const realizedAmount = isPast ? (roundedRealized > 0 ? roundedRealized : effectiveAmounts[i]) : roundedRealized;
+    const announcedAmount = roundedAnnounced;
     const projectedAmount = isPast
       ? 0
-      : Math.max(0, Math.round((b.amount - announcedAmount) * 100) / 100);
+      : Math.max(0, Math.round((b.amount - announcedAmount - realizedAmount) * 100) / 100);
+    const paidAmount = isPast ? realizedAmount : 0;
 
     return {
       month: b.monthLabel,
@@ -269,12 +316,12 @@ export function buildMonthlyBuckets(
       projectedAmount,
       cumulativeTotal: running,
       contributors: sortedContribs,
-      isBest: effectiveAmount > 0 && effectiveAmount === maxEffective && positiveEffective.length > 1,
+      isBest: effectiveAmounts[i] > 0 && effectiveAmounts[i] === maxEffective && positiveEffective.length > 1,
       isWorst:
-        effectiveAmount > 0 &&
-        effectiveAmount === minEffective &&
+        effectiveAmounts[i] > 0 &&
+        effectiveAmounts[i] === minEffective &&
         positiveEffective.length > 1 &&
-        effectiveAmount !== maxEffective,
+        effectiveAmounts[i] !== maxEffective,
       concentratedTicker:
         topShare >= 0.3 && sortedContribs.length > 1 ? sortedContribs[0].ticker : null,
     };

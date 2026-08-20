@@ -160,4 +160,70 @@ describe("Cash Flow: Announced vs Realized vs Projected (Prompt 113b)", () => {
       expect(janBucket.projectedAmount).toBe(0);
     }
   });
+
+  it("handles current month with unpaid event correctly, populating contributor details", () => {
+    const currentYear = new Date().getUTCFullYear();
+    const currentMonth = new Date().getUTCMonth();
+    const currentMonthStr = String(currentMonth + 1).padStart(2, "0");
+
+    const items = [
+      mkItem({
+        ticker: "BBSE3",
+        type: "STOCK_BR",
+        currency: "BRL",
+        quantity: 300,
+        annualDividend: 120, // 300 * 10 = 3000 total -> 250 / month projected
+      }),
+    ];
+
+    const transactions: Transaction[] = [
+      {
+        id: "tx-curr",
+        ticker: "BBSE3",
+        type: "buy",
+        quantity: 300,
+        pricePerShare: 35,
+        date: new Date(Date.UTC(currentYear - 1, 0, 1)).getTime(),
+      },
+    ];
+
+    // Event in current month with paymentDate on day 28 (assumed in the future)
+    const exDateStr = `${currentYear}-${currentMonthStr}-05`;
+    const payDateStr = `${currentYear}-${currentMonthStr}-28`;
+
+    const dividendEventsMap: Record<string, DividendEvent[]> = {
+      BBSE3: [
+        {
+          exDate: exDateStr,
+          paymentDate: payDateStr,
+          amountPerShare: 1.9833,
+        },
+      ],
+    };
+
+    const buckets = buildMonthlyBuckets(
+      items,
+      "BRL",
+      months,
+      dividendEventsMap,
+      "calendar",
+      transactions
+    );
+
+    const currBucket = buckets.find(
+      (b) => b.calendarMonth === currentMonth && b.calendarYear === currentYear
+    );
+
+    expect(currBucket).toBeDefined();
+    if (currBucket) {
+      const isPayDatePast = payDateStr <= new Date().toISOString().slice(0, 10);
+      if (!isPayDatePast) {
+        expect(currBucket.realizedAmount).toBe(0);
+        expect(currBucket.announcedAmount).toBe(594.99); // 300 * 1.9833 = 594.99
+      }
+      expect(currBucket.contributors).toHaveLength(1);
+      expect(currBucket.contributors[0].ticker).toBe("BBSE3");
+      expect(currBucket.contributors[0].paymentDate).toBe(payDateStr);
+    }
+  });
 });

@@ -4,6 +4,7 @@ import {
   getTaxType,
   normalizeDateStr,
   groupRealizedIncomeByMonth,
+  computeRealizedIncomeSummary,
 } from "../realizedIncome";
 import { type Transaction } from "../transactionsLogic";
 import { type DividendEvent } from "../domain";
@@ -48,7 +49,7 @@ describe("realizedIncome", () => {
       ],
     };
 
-    it("scenario 1: buy BEFORE ex-date -> receives dividend", () => {
+    it("scenario 1: buy BEFORE ex-date -> receives dividend with isPaid true for past date", () => {
       const txs: Transaction[] = [
         {
           id: "t1",
@@ -71,12 +72,99 @@ describe("realizedIncome", () => {
         exDate: "2024-04-16",
         paymentDate: "2024-04-30",
         paymentDateEstimated: false,
+        isPaid: true,
         quantityHeld: 100,
         amountPerShareGross: 1.5,
         amountGross: 150,
         amountNet: 150,
         taxType: "dividend",
       });
+    });
+
+    it("scenario 1b: future paymentDate -> isPaid is false", () => {
+      const futureYear = new Date().getUTCFullYear() + 1;
+      const txs: Transaction[] = [
+        {
+          id: "t1",
+          ticker: "BBSE3",
+          type: "buy",
+          date: new Date("2024-04-10").getTime(),
+          quantity: 100,
+          pricePerShare: 30,
+        },
+      ];
+
+      const futureEvents: Record<string, DividendEvent[]> = {
+        BBSE3: [
+          {
+            exDate: `${futureYear}-01-10`,
+            paymentDate: `${futureYear}-02-15`,
+            amountPerShare: 2.0,
+          },
+        ],
+      };
+
+      const res = calculateRealizedIncome(txs, futureEvents, {
+        BBSE3: { ticker: "BBSE3", type: "STOCK_BR", currency: "BRL" },
+      });
+
+      expect(res).toHaveLength(1);
+      expect(res[0].isPaid).toBe(false);
+      expect(res[0].paymentDate).toBe(`${futureYear}-02-15`);
+    });
+
+    it("scenario 1c: paymentDateEstimated true -> isPaid is false even if date is in the past", () => {
+      const txs: Transaction[] = [
+        {
+          id: "t1",
+          ticker: "HGLG11",
+          type: "buy",
+          date: new Date("2024-04-10").getTime(),
+          quantity: 100,
+          pricePerShare: 160,
+        },
+      ];
+
+      const res = calculateRealizedIncome(txs, mockDividendEvents, {
+        HGLG11: { ticker: "HGLG11", type: "FII", currency: "BRL" },
+      });
+
+      expect(res).toHaveLength(1);
+      expect(res[0].paymentDateEstimated).toBe(true);
+      expect(res[0].isPaid).toBe(false);
+    });
+
+    it("scenario 1d: paymentDate null and paymentDateEstimated false/undefined -> isPaid is false even if exDate is in the past", () => {
+      const txs: Transaction[] = [
+        {
+          id: "t1",
+          ticker: "PETR4",
+          type: "buy",
+          date: new Date("2024-01-10").getTime(),
+          quantity: 100,
+          pricePerShare: 30,
+        },
+      ];
+
+      const eventsWithNullPayDate: Record<string, DividendEvent[]> = {
+        PETR4: [
+          {
+            exDate: "2024-04-16",
+            paymentDate: null,
+            paymentDateEstimated: false,
+            amountPerShare: 1.5,
+          },
+        ],
+      };
+
+      const res = calculateRealizedIncome(txs, eventsWithNullPayDate, {
+        PETR4: { ticker: "PETR4", type: "STOCK_BR", currency: "BRL" },
+      });
+
+      expect(res).toHaveLength(1);
+      expect(res[0].paymentDate).toBeNull();
+      expect(res[0].paymentDateEstimated).toBe(false);
+      expect(res[0].isPaid).toBe(false); // Absence of payment date must ALWAYS result in isPaid: false
     });
 
     it("scenario 2: buy AFTER ex-date -> does NOT receive dividend", () => {
@@ -264,6 +352,7 @@ describe("realizedIncome", () => {
         exDate: "2024-01-15",
         paymentDate: "2024-02-01",
         paymentDateEstimated: false,
+        isPaid: true,
         quantityHeld: 100,
         amountPerShareGross: 1.0,
         amountGross: 100,
@@ -273,14 +362,85 @@ describe("realizedIncome", () => {
     });
   });
 
+  describe("computeRealizedIncomeSummary", () => {
+    it("segregates paid amounts from announced amounts", () => {
+      const currentYear = new Date().getUTCFullYear();
+      const events = [
+        {
+          ticker: "BBSE3",
+          currency: "BRL" as const,
+          exDate: `${currentYear}-01-10`,
+          paymentDate: `${currentYear}-01-20`,
+          isPaid: true,
+          quantityHeld: 100,
+          amountPerShareGross: 1.0,
+          amountGross: 100,
+          amountNet: 100,
+          taxType: "dividend" as const,
+        },
+        {
+          ticker: "VALE3",
+          currency: "BRL" as const,
+          exDate: `${currentYear}-08-10`,
+          paymentDate: `${currentYear}-09-02`,
+          isPaid: false, // Announced / not yet paid
+          quantityHeld: 100,
+          amountPerShareGross: 1.5,
+          amountGross: 150,
+          amountNet: 150,
+          taxType: "dividend" as const,
+        },
+      ];
+
+      const summary = computeRealizedIncomeSummary(events, "BRL");
+
+      expect(summary.allTimeTotal).toBe(100);
+      expect(summary.currentYear).toBe(100);
+      expect(summary.eventsCount).toBe(1);
+      expect(summary.announcedTotal).toBe(150);
+      expect(summary.announcedCount).toBe(1);
+    });
+  });
+
   describe("groupRealizedIncomeByMonth", () => {
-    it("groups events by YYYY-MM and sums amountNet, skipping future events", () => {
+    it("accurately reports paidAmount vs announcedAmount for current month with unpaid event", () => {
+      const currentYear = new Date().getUTCFullYear();
+      const currentMonth = String(new Date().getUTCMonth() + 1).padStart(2, "0");
+      const currentMonthKey = `${currentYear}-${currentMonth}`;
+
+      const events = [
+        {
+          ticker: "BBSE3",
+          currency: "BRL" as const,
+          exDate: `${currentMonthKey}-05`,
+          paymentDate: `${currentMonthKey}-28`,
+          isPaid: false, // Unpaid event in current month
+          quantityHeld: 100,
+          amountPerShareGross: 2.0,
+          amountGross: 200,
+          amountNet: 200,
+          taxType: "dividend" as const,
+        },
+      ];
+
+      const result = groupRealizedIncomeByMonth(events, undefined, "ptBR");
+
+      expect(result).toHaveLength(1);
+      expect(result[0].monthKey).toBe(currentMonthKey);
+      expect(result[0].amountNet).toBe(200);
+      expect(result[0].paidAmount).toBe(0);
+      expect(result[0].announcedAmount).toBe(200);
+      expect(result[0].isFuture).toBe(true); // Should be treated as unsettled/future
+    });
+
+    it("groups events by YYYY-MM and sums amountNet, skipping filtered events", () => {
       const events = [
         {
           ticker: "WEGE3",
           currency: "BRL" as const,
           exDate: "2024-01-10",
           paymentDate: "2024-01-25",
+          isPaid: true,
           quantityHeld: 100,
           amountPerShareGross: 0.5,
           amountGross: 50,
@@ -292,6 +452,7 @@ describe("realizedIncome", () => {
           currency: "BRL" as const,
           exDate: "2024-01-20",
           paymentDate: "2024-01-30",
+          isPaid: true,
           quantityHeld: 100,
           amountPerShareGross: 0.3,
           amountGross: 30,
@@ -303,6 +464,7 @@ describe("realizedIncome", () => {
           currency: "BRL" as const,
           exDate: "2024-02-10",
           paymentDate: "2024-02-25",
+          isPaid: true,
           quantityHeld: 100,
           amountPerShareGross: 0.6,
           amountGross: 60,
@@ -316,6 +478,7 @@ describe("realizedIncome", () => {
           exDate: "2024-03-15",
           paymentDate: "2024-03-25",
           paymentDateEstimated: true,
+          isPaid: false,
           quantityHeld: 100,
           amountPerShareGross: 1.0,
           amountGross: 100,
@@ -332,10 +495,14 @@ describe("realizedIncome", () => {
       expect(result[0]).toMatchObject({
         monthKey: "2024-01",
         amountNet: 80, // 50 + 30
+        paidAmount: 80,
+        announcedAmount: 0,
       });
       expect(result[1]).toMatchObject({
         monthKey: "2024-02",
         amountNet: 60,
+        paidAmount: 60,
+        announcedAmount: 0,
       });
     });
 
@@ -346,6 +513,7 @@ describe("realizedIncome", () => {
           currency: "BRL" as const,
           exDate: "2024-01-10",
           paymentDate: "2024-01-15",
+          isPaid: true,
           quantityHeld: 50,
           amountPerShareGross: 1.0,
           amountGross: 50,
@@ -357,6 +525,7 @@ describe("realizedIncome", () => {
           currency: "BRL" as const,
           exDate: "2024-04-10",
           paymentDate: "2024-04-15",
+          isPaid: true,
           quantityHeld: 50,
           amountPerShareGross: 1.0,
           amountGross: 50,
@@ -383,6 +552,7 @@ describe("realizedIncome", () => {
           currency: "BRL" as const,
           exDate: dateStr,
           paymentDate: dateStr,
+          isPaid: true,
           quantityHeld: 100,
           amountPerShareGross: 1.0,
           amountGross: 100,
@@ -400,4 +570,5 @@ describe("realizedIncome", () => {
     });
   });
 });
+
 

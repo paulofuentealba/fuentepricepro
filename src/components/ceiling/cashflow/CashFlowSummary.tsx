@@ -17,6 +17,8 @@ interface RealizedSummaryData {
   eventsCount: number;
   dividendTotal?: number;
   jcpTotal?: number;
+  announcedTotal?: number;
+  announcedCount?: number;
 }
 
 interface Props {
@@ -35,9 +37,11 @@ export function CashFlowSummaryCards({
   cumulativePath,
 }: Props) {
   const { t, locale } = useI18n();
+  const hasRealizedData = realizedSummary && (realizedSummary.eventsCount > 0 || (realizedSummary.announcedCount ?? 0) > 0);
+
   return (
     <div className="space-y-4 mb-6">
-      {realizedSummary && realizedSummary.eventsCount > 0 && (
+      {hasRealizedData && (
         <RealizedIncomeSummaryCards
           realizedSummary={realizedSummary}
           activeCurrency={activeCurrency}
@@ -51,17 +55,20 @@ export function CashFlowSummaryCards({
           sparkline={sparklinePath}
           sparkColor={COLOR_BAR}
         />
+
         <SummaryStatCard
           label={t.tabs.cashflow.monthlyAverage}
           value={formatCurrency(summary.avg, activeCurrency, locale)}
           sparkline={cumulativePath}
           sparkColor={COLOR_LINE}
         />
+
         <SummaryStatCard
           label={t.tabs.cashflow.next30Days}
           value={formatCurrency(summary.next30, activeCurrency, locale)}
           icon={<CalendarClock className="h-3.5 w-3.5 text-success/70" />}
         />
+
         <SummaryStatCard
           label={t.tabs.cashflow.topPayer}
           value={
@@ -101,9 +108,17 @@ export function RealizedIncomeSummaryCards({
             </p>
           </div>
         </div>
-        <span className="text-[11px] font-semibold text-success/90 bg-success/20 border border-success/30 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
-          {realizedSummary.eventsCount} {t.tabs.chart.confirmed}
-        </span>
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+          {realizedSummary.announcedCount && realizedSummary.announcedCount > 0 ? (
+            <span className="text-[11px] font-semibold text-warning bg-warning/10 border border-warning/30 px-2.5 py-0.5 rounded-full">
+              {realizedSummary.announcedCount} {t.tabs.chart.receivableAnnounced} (
+              {formatCurrency(realizedSummary.announcedTotal || 0, activeCurrency, locale)})
+            </span>
+          ) : null}
+          <span className="text-[11px] font-semibold text-success/90 bg-success/20 border border-success/30 px-2.5 py-0.5 rounded-full">
+            {realizedSummary.eventsCount} {t.tabs.chart.confirmed}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">

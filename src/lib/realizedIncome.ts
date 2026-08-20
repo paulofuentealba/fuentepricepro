@@ -14,6 +14,7 @@ export interface RealizedIncomeEvent {
   exDate: string; // ISO format "YYYY-MM-DD"
   paymentDate: string | null; // ISO format "YYYY-MM-DD" or null
   paymentDateEstimated?: boolean;
+  isPaid: boolean;
   quantityHeld: number;
   amountPerShareGross: number;
   amountGross: number;
@@ -67,7 +68,8 @@ export function normalizeDateStr(dateInput: number | string): string {
  * For each dividend event of a ticker:
  * 1. Replays transactions for that ticker in chronological order up to exDate.
  * 2. If quantityHeld > 0 on exDate, user is entitled to the dividend.
- * 3. Applies tax logic via SSOT netAfterTax.
+ * 3. Calculates isPaid based on whether paymentDate is confirmed (not estimated) and <= today.
+ * 4. Applies tax logic via SSOT netAfterTax.
  */
 export function calculateRealizedIncome(
   transactions: Transaction[],
@@ -75,6 +77,7 @@ export function calculateRealizedIncome(
   assetMetaByTicker?: Record<string, AssetTaxMeta | undefined> | Map<string, AssetTaxMeta>,
 ): RealizedIncomeEvent[] {
   const result: RealizedIncomeEvent[] = [];
+  const todayISO = new Date().toISOString().split("T")[0];
 
   // Group transactions by ticker
   const txByTicker: Record<string, Transaction[]> = {};
@@ -163,13 +166,18 @@ export function calculateRealizedIncome(
         );
         const amountNet = Math.round(rawNet * 10000) / 10000;
         const taxType = getTaxType(meta.type, meta.currency, event.isJCP);
+        const payDateStr = event.paymentDate ? normalizeDateStr(event.paymentDate) : null;
+        const isEstimated = event.paymentDateEstimated ?? false;
+        // Settlement decision: strict isPaid requires confirmed paymentDate <= todayISO (no fallback to exDate)
+        const isPaid = payDateStr !== null && !isEstimated && payDateStr <= todayISO;
 
         result.push({
           ticker,
           currency: eventCurrency,
           exDate: eventExDateStr,
-          paymentDate: event.paymentDate ? normalizeDateStr(event.paymentDate) : null,
-          paymentDateEstimated: event.paymentDateEstimated ?? false,
+          paymentDate: payDateStr,
+          paymentDateEstimated: isEstimated,
+          isPaid,
           quantityHeld,
           amountPerShareGross: event.amountPerShare,
           amountGross,
@@ -195,6 +203,8 @@ export interface RealizedIncomeSummary {
   eventsCount: number;
   dividendTotal: number;
   jcpTotal: number;
+  announcedTotal: number;
+  announcedCount: number;
 }
 
 export { convertCurrency };
@@ -205,31 +215,39 @@ export function computeRealizedIncomeSummary(
   fxRate?: number,
 ): RealizedIncomeSummary {
   const now = new Date();
-  const currentYearStr = String(now.getFullYear());
-  const currentMonthStr = `${currentYearStr}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const currentYearStr = String(now.getUTCFullYear());
+  const currentMonthStr = `${currentYearStr}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 
   let currentMonth = 0;
   let currentYear = 0;
   let allTimeTotal = 0;
   let dividendTotal = 0;
   let jcpTotal = 0;
+  let announcedTotal = 0;
+  let announcedCount = 0;
 
   for (const ev of events) {
     const payDate = ev.paymentDate || ev.exDate;
     const amountNet = convertCurrency(ev.amountNet, ev.currency, currency, fxRate);
-    allTimeTotal += amountNet;
 
-    if (ev.taxType === "jcp") {
-      jcpTotal += amountNet;
+    if (ev.isPaid) {
+      allTimeTotal += amountNet;
+
+      if (ev.taxType === "jcp") {
+        jcpTotal += amountNet;
+      } else {
+        dividendTotal += amountNet;
+      }
+
+      if (payDate.startsWith(currentYearStr)) {
+        currentYear += amountNet;
+      }
+      if (payDate.startsWith(currentMonthStr)) {
+        currentMonth += amountNet;
+      }
     } else {
-      dividendTotal += amountNet;
-    }
-
-    if (payDate.startsWith(currentYearStr)) {
-      currentYear += amountNet;
-    }
-    if (payDate.startsWith(currentMonthStr)) {
-      currentMonth += amountNet;
+      announcedTotal += amountNet;
+      announcedCount += 1;
     }
   }
 
@@ -237,9 +255,11 @@ export function computeRealizedIncomeSummary(
     currentMonth: Math.round(currentMonth * 100) / 100,
     currentYear: Math.round(currentYear * 100) / 100,
     allTimeTotal: Math.round(allTimeTotal * 100) / 100,
-    eventsCount: events.length,
+    eventsCount: events.filter((e) => e.isPaid).length,
     dividendTotal: Math.round(dividendTotal * 100) / 100,
     jcpTotal: Math.round(jcpTotal * 100) / 100,
+    announcedTotal: Math.round(announcedTotal * 100) / 100,
+    announcedCount,
   };
 }
 
@@ -247,12 +267,14 @@ export interface MonthlyDividendBucket {
   monthKey: string; // "YYYY-MM"
   monthLabel: string; // Formatted label (e.g. "nov/25")
   amountNet: number;
+  paidAmount: number;
+  announcedAmount: number;
   isFuture?: boolean;
 }
 
 /**
  * Groups realized income events by month (YYYY-MM), summing amountNet.
- * Optionally filters out events where paymentDate (or exDate) > referenceDateStr.
+ * Uses event.isPaid to accurately populate paidAmount and announcedAmount.
  * Returns at most the 12 most recent months with dividends (no artificial zero-filling).
  */
 export function groupRealizedIncomeByMonth(
@@ -260,9 +282,7 @@ export function groupRealizedIncomeByMonth(
   referenceDateStr?: string,
   locale: Locale = "ptBR"
 ): MonthlyDividendBucket[] {
-  const todayISO = new Date().toISOString().split("T")[0];
-  const currentMonthKey = todayISO.slice(0, 7);
-  const monthMap: Record<string, number> = {};
+  const monthMap: Record<string, { total: number; paid: number; announced: number }> = {};
 
   for (const ev of events) {
     const eventDate = ev.paymentDate || ev.exDate;
@@ -270,7 +290,15 @@ export function groupRealizedIncomeByMonth(
     if (referenceDateStr && eventDate > referenceDateStr) continue;
 
     const monthKey = eventDate.slice(0, 7); // "YYYY-MM"
-    monthMap[monthKey] = (monthMap[monthKey] || 0) + ev.amountNet;
+    if (!monthMap[monthKey]) {
+      monthMap[monthKey] = { total: 0, paid: 0, announced: 0 };
+    }
+    monthMap[monthKey].total += ev.amountNet;
+    if (ev.isPaid) {
+      monthMap[monthKey].paid += ev.amountNet;
+    } else {
+      monthMap[monthKey].announced += ev.amountNet;
+    }
   }
 
   const sortedMonthKeys = Object.keys(monthMap).sort();
@@ -287,13 +315,20 @@ export function groupRealizedIncomeByMonth(
     const monthName = rawMonthName.replace(".", "").toLowerCase();
     const yearShort = yearStr.slice(-2);
     const monthLabel = `${monthName}/${yearShort}`;
+    const data = monthMap[monthKey];
+    const paidAmount = Math.round(data.paid * 100) / 100;
+    const announcedAmount = Math.round(data.announced * 100) / 100;
+    const totalNet = Math.round(data.total * 100) / 100;
 
     return {
       monthKey,
       monthLabel,
-      amountNet: Math.round(monthMap[monthKey] * 100) / 100,
-      isFuture: monthKey > currentMonthKey,
+      amountNet: totalNet,
+      paidAmount,
+      announcedAmount,
+      isFuture: paidAmount === 0 && announcedAmount > 0,
     };
   });
 }
+
 

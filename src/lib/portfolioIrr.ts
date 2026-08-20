@@ -1,4 +1,4 @@
-import { type Transaction } from "./transactions";
+import { type Transaction } from "./transactionsLogic";
 import { type RealizedIncomeEvent } from "./realizedIncome";
 import { type Currency } from "./domain";
 import { isBrTicker } from "./classify";

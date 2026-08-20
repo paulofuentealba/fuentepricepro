@@ -84,6 +84,7 @@ describe("portfolioIrr", () => {
           currency: "BRL",
           exDate: "2025-04-01",
           paymentDate: "2025-05-15", // Payment date is 1.5 months after exDate!
+          isPaid: true,
           quantityHeld: 100,
           amountPerShareGross: 1.0,
           amountGross: 100,
@@ -95,6 +96,7 @@ describe("portfolioIrr", () => {
           currency: "USD",
           exDate: "2025-06-01",
           paymentDate: null, // Fallback to exDate!
+          isPaid: true,
           quantityHeld: 10,
           amountPerShareGross: 0.5,
           amountGross: 5,
@@ -174,6 +176,7 @@ describe("portfolioIrr", () => {
           currency: "BRL",
           exDate: "2025-04-01",
           paymentDate: "2025-05-15",
+          isPaid: true,
           quantityHeld: 100,
           amountPerShareGross: 1.0,
           amountGross: 100,
@@ -185,6 +188,7 @@ describe("portfolioIrr", () => {
           currency: "USD",
           exDate: "2025-06-01",
           paymentDate: "2025-06-15",
+          isPaid: true,
           quantityHeld: 10,
           amountPerShareGross: 0.5,
           amountGross: 5,

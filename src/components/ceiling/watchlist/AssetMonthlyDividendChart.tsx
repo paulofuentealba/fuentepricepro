@@ -26,21 +26,40 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
     return null;
   }
 
-  const hasProjected = chartData.some((d) => d.isFuture);
-  const hasRealized = chartData.some((d) => !d.isFuture);
+  const hasProjected = chartData.some((d) => d.isFuture || d.announcedAmount > 0);
+  const hasRealized = chartData.some((d) => !d.isFuture && d.paidAmount > 0);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
-    const isFuture = Boolean(data.isFuture);
+    const isFutureOrAnnounced = Boolean(data.isFuture) || (data.paidAmount === 0 && data.announcedAmount > 0);
+    const isMixed = data.paidAmount > 0 && data.announcedAmount > 0;
+    const receivableLabel = t.tabs.chart.receivableAnnounced || t.watchlist.receivableIncome;
 
     return (
       <div className="rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur text-xs">
         <p className="font-semibold text-foreground mb-0.5">{data.monthLabel}</p>
-        <p className="text-[11px] text-muted-foreground mb-1">
-          {isFuture ? t.watchlist.receivableIncome : t.watchlist.receivedIncome}
-        </p>
-        <p className="font-semibold" style={{ color: isFuture ? COLOR_PROJECTED : COLOR_REALIZED }}>
+        {isMixed ? (
+          <div className="space-y-1 my-1">
+            <div className="flex items-center justify-between gap-3 text-[11px]">
+              <span className="text-muted-foreground">{t.watchlist.receivedIncome}:</span>
+              <span className="font-semibold" style={{ color: COLOR_REALIZED }}>
+                {formatCurrency(data.paidAmount, currency, locale)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 text-[11px]">
+              <span className="text-muted-foreground">{receivableLabel}:</span>
+              <span className="font-semibold" style={{ color: COLOR_PROJECTED }}>
+                {formatCurrency(data.announcedAmount, currency, locale)}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground mb-1">
+            {isFutureOrAnnounced ? receivableLabel : t.watchlist.receivedIncome}
+          </p>
+        )}
+        <p className="font-semibold" style={{ color: isFutureOrAnnounced ? COLOR_PROJECTED : COLOR_REALIZED }}>
           {formatCurrency(data.amountNet, currency, locale)}
         </p>
       </div>
@@ -65,7 +84,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
                 background: `repeating-linear-gradient(45deg, ${COLOR_PROJECTED}, ${COLOR_PROJECTED} 2px, transparent 2px, transparent 4px)`,
               }}
             />
-            <span>{t.watchlist.receivableIncome}</span>
+            <span>{t.tabs.chart.receivableAnnounced || t.watchlist.receivableIncome}</span>
           </div>
         )}
       </div>
@@ -83,7 +102,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
               >
                 <line
                   x1="0"
-                  y="0"
+                  y1="0"
                   x2="0"
                   y2="6"
                   stroke={COLOR_PROJECTED}
@@ -110,14 +129,17 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
             />
             <ChartTooltip content={<CustomTooltip />} />
             <Bar dataKey="amountNet" radius={[4, 4, 0, 0]} maxBarSize={32}>
-              {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.isFuture ? "url(#asset-projected-hatch)" : COLOR_REALIZED}
-                  stroke={entry.isFuture ? COLOR_PROJECTED : undefined}
-                  strokeWidth={entry.isFuture ? 1 : 0}
-                />
-              ))}
+              {chartData.map((entry, index) => {
+                const isUnsettled = entry.isFuture || (entry.paidAmount === 0 && entry.announcedAmount > 0);
+                return (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={isUnsettled ? "url(#asset-projected-hatch)" : COLOR_REALIZED}
+                    stroke={isUnsettled ? COLOR_PROJECTED : undefined}
+                    strokeWidth={isUnsettled ? 1 : 0}
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ChartContainer>

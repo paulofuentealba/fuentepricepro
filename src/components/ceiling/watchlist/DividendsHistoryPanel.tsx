@@ -55,11 +55,7 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
   }, [transactions, dividendEventsMap, assetMetaMap]);
 
   const pastRealizedEvents = useMemo(() => {
-    const todayISO = new Date().toISOString().split("T")[0];
-    return realizedEvents.filter((ev) => {
-      const dateStr = ev.paymentDate || ev.exDate;
-      return dateStr && dateStr <= todayISO;
-    });
+    return realizedEvents.filter((ev) => ev.isPaid);
   }, [realizedEvents]);
 
   const summary = useMemo(() => {

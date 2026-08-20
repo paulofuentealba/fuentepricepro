@@ -181,6 +181,8 @@ describe("Cashflow logic", () => {
     const items = [
       mkItem({
         ticker: "DYNAMIC",
+        type: "STOCK_BR",
+        currency: "BRL",
         quantity: 100, // current quantity is 100, but historical is different
         investingSince: Date.UTC(currentYear, 0, 1),
       }),
@@ -190,12 +192,12 @@ describe("Cashflow logic", () => {
       DYNAMIC: [
         {
           exDate: new Date(Date.UTC(currentYear, 0, 15)).toISOString(), // Jan event
-          paymentDate: null,
+          paymentDate: new Date(Date.UTC(currentYear, 0, 25)).toISOString(),
           amountPerShare: 2,
         },
         {
           exDate: new Date(Date.UTC(currentYear, 1, 15)).toISOString(), // Feb event
-          paymentDate: null,
+          paymentDate: new Date(Date.UTC(currentYear, 1, 25)).toISOString(),
           amountPerShare: 2,
         },
       ],
@@ -207,10 +209,10 @@ describe("Cashflow logic", () => {
     ];
 
     const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const buckets = buildMonthlyBuckets(items, "USD", months, dividendEventsMap, "calendar", transactions);
+    const buckets = buildMonthlyBuckets(items, "BRL", months, dividendEventsMap, "calendar", transactions);
 
-    // Jan event should multiply by 10 (quantity at Jan 15) -> 2 * 10 = 20
-    // Feb event should multiply by 100 (quantity at Feb 15) -> 2 * 100 = 200
+    // Jan event should multiply by 10 (quantity at Jan 15) -> 2 * 10 = 20 Net (STOCK_BR)
+    // Feb event should multiply by 100 (quantity at Feb 15) -> 2 * 100 = 200 Net (STOCK_BR)
 
     if (currentMonth >= 1 || currentYear > new Date().getFullYear()) {
       expect(buckets[0].paidAmount).toBe(20);
