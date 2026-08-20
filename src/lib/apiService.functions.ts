@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
 import { UA, fetchWithRetry } from "./api/http.server";
-import { classifyBr, classifyYahoo } from "./api/classify.server";
+import { classifyBr, classifyBrAsync, classifyYahoo } from "./api/classify.server";
 import { fetchFromBrapi } from "./api/brapi.server";
 import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
 import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker } from "./api/secEdgar.server";
@@ -207,6 +207,11 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
 
     // Enrich BR dividends & financials via HG Brasil + Dados de Mercado
     if (looksBr) {
+      const canonicalType = await classifyBrAsync(raw).catch(() => null);
+      if (canonicalType) {
+        asset.type = canonicalType;
+      }
+
       const hgRes = await fetchHgBrasilDividends(raw).catch(() => null);
       const { fetchDadosDeMercado } = await import("./api/dadosDeMercadoScraper.server");
       const dmRes = await fetchDadosDeMercado(raw).catch(() => null);

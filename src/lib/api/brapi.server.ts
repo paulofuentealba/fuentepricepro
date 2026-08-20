@@ -3,7 +3,7 @@ import type { DividendEvent } from "../domain";
 import type { ApiAsset } from "./types";
 import { dedupeInFlight, fetchWithRetry } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
-import { classifyBr } from "./classify.server";
+import { classifyBrAsync } from "./classify.server";
 import {
   dividendCagrPct,
   historyFromMap,
@@ -75,7 +75,7 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         : typeof res.defaultKeyStatistics?.priceToBook === "number"
           ? res.defaultKeyStatistics.priceToBook
           : null;
-    const type = classifyBr(clean);
+    const type = await classifyBrAsync(clean);
 
     // Next ex-dividend date: strictly future lastDatePrior (data com), never paymentDate
     const nowMs = Date.now();
