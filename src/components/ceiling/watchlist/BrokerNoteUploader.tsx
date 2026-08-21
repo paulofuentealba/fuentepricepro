@@ -216,7 +216,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
         date: txTimestamp,
         quantity: trade.quantity,
         pricePerShare: trade.price,
-        fees: null,
+        fees: trade.fees != null ? trade.fees : null,
       };
 
       try {
@@ -256,7 +256,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
     );
 
     await upsertManyAsync(itemsToImport);
-    toast.success(`${itemsToImport.length} ${t.brokerNote.successImport}`);
+    toast.success(t.brokerNote.successImport.replace("{{count}}", String(itemsToImport.length)));
     onOpenChange(false);
   };
 

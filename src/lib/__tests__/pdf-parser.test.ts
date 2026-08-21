@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { parseB3Float, parseB3BrokerNote, normalizeIssuerSpecification } from "../dataIngestion/b3Parser";
+import {
+  parseB3Float,
+  parseB3BrokerNote,
+  normalizeIssuerSpecification,
+  extractSinacorTotalFees,
+} from "../dataIngestion/b3Parser";
+import { ptBR } from "@/lib/i18n/dict.ptBR";
+import { en } from "@/lib/i18n/dict.en";
+import { es } from "@/lib/i18n/dict.es";
 import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
@@ -363,5 +371,89 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(result.unresolvedTrades).toHaveLength(0);
     });
   });
+
+  describe("BrokerNote i18n Interpolação (Tier 0 / Lote 5 Item 2)", () => {
+    it("interpola {{count}} corretamente nos 3 idiomas suportados", () => {
+      const count = 5;
+      expect(ptBR.brokerNote.successImport.replace("{{count}}", String(count))).toBe(
+        "5 ordem(ns) importada(s) com sucesso."
+      );
+      expect(en.brokerNote.successImport.replace("{{count}}", String(count))).toBe(
+        "5 order(s) successfully imported."
+      );
+      expect(es.brokerNote.successImport.replace("{{count}}", String(count))).toBe(
+        "5 orden(es) importada(s) con éxito."
+      );
+    });
+  });
+
+  describe("SINACOR Fee Extraction & Pro-rating (Tier 0 / Lote 5 Item 3)", () => {
+    it("extrai taxas do resumo financeiro e rateia proporcionalmente ao volume negociado", () => {
+      const rawText = `
+        02.332.886/0001-04 XP INVESTIMENTOS
+        Data pregão 15/07/2026
+        1-BOVESPA C VISTA PETR4 100 40,00 4.000,00 D
+        1-BOVESPA C VISTA VALE3 100 60,00 6.000,00 D
+        Resumo Financeiro
+        Taxa de liquidação 2,50
+        Emolumentos 0,50
+        Total corretagem / Despesas 3,00
+      `;
+
+      // Total Volume = 4.000 + 6.000 = 10.000
+      // Total Fees = 2,50 + 0,50 + 3,00 = 6,00 (0,06% do volume <= 2% sanity cap)
+      // PETR4 fee = (4.000 / 10.000) * 6,00 = 2,40
+      // VALE3 fee = (6.000 / 10.000) * 6,00 = 3,60
+      const result = parseB3BrokerNote(rawText);
+
+      expect(result.success).toBe(true);
+      expect(result.trades).toHaveLength(2);
+      expect(result.trades?.[0]).toMatchObject({
+        ticker: "PETR4",
+        quantity: 100,
+        price: 40,
+        fees: 2.4,
+      });
+      expect(result.trades?.[1]).toMatchObject({
+        ticker: "VALE3",
+        quantity: 100,
+        price: 60,
+        fees: 3.6,
+      });
+    });
+
+    it("mantém fallback seguro (fees undefined) quando o rodapé financeiro não está presente", () => {
+      const rawText = `
+        02.332.886/0001-04 XP INVESTIMENTOS
+        Data pregão 15/07/2026
+        1-BOVESPA C VISTA PETR4 100 40,00 4.000,00 D
+      `;
+
+      const result = parseB3BrokerNote(rawText);
+
+      expect(result.success).toBe(true);
+      expect(result.trades).toHaveLength(1);
+      expect(result.trades?.[0].fees).toBeUndefined();
+    });
+
+    it("rejeita taxas que excedem a trava de sanidade de 2% do volume financeiro total", () => {
+      const rawText = `
+        02.332.886/0001-04 XP INVESTIMENTOS
+        Data pregão 15/07/2026
+        1-BOVESPA C VISTA PETR4 100 40,00 4.000,00 D
+        Resumo Financeiro
+        Total corretagem / Despesas 150,00
+      `;
+
+      // Volume = 4.000. 2% de 4.000 = 80. Taxa de 150 > 80 -> deve ser rejeitada pela trava de sanidade.
+      const fees = extractSinacorTotalFees(rawText, 4000);
+      expect(fees).toBeNull();
+
+      const result = parseB3BrokerNote(rawText);
+      expect(result.success).toBe(true);
+      expect(result.trades?.[0].fees).toBeUndefined();
+    });
+  });
 });
+
 

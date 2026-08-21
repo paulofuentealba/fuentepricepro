@@ -4,6 +4,7 @@ export interface TradeRecord {
   price: number;
   date: string;
   type?: "buy" | "sell";
+  fees?: number;
 }
 
 export interface UnresolvedTradeRecord {
@@ -302,7 +303,70 @@ export function parseSinacorLayout(
     }
   }
 
+  const totalVolume = trades.reduce((acc, t) => acc + t.quantity * t.price, 0);
+  const totalFees = extractSinacorTotalFees(rawText, totalVolume);
+
+  if (totalFees != null && totalFees > 0 && totalVolume > 0) {
+    for (const trade of trades) {
+      const tradeVolume = trade.quantity * trade.price;
+      trade.fees = Number(((tradeVolume / totalVolume) * totalFees).toFixed(2));
+    }
+  }
+
   return { trades, unresolvedTrades };
+}
+
+/**
+ * Attempts to extract total fees from the financial summary ("Resumo Financeiro")
+ * of a B3 SINACOR broker note.
+ *
+ * Implements a strict sanity check: total fees must be positive and <= 2% of the total
+ * trading volume. If no fees are found, or if the extracted fees exceed 2% of total volume,
+ * returns null to prevent erroneous fee attribution (safe fallback).
+ */
+export function extractSinacorTotalFees(rawText: string, totalVolume: number): number | null {
+  if (!rawText || totalVolume <= 0) return null;
+
+  let totalFees = 0;
+  let foundFee = false;
+
+  const feeRegexes = [
+    /Taxa\s+de\s+liquida[cç][aã]o\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /Taxa\s+de\s+Registro\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /Emolumentos\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /Taxa\s+de\s+termo(?:\/op[cç][oõ]es)?\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /Taxa\s+A\.?N\.?A\.?\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /Taxa\s+de\s+Cust[oó]dia\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /(?:Total\s+)?Corretagem(?:\s*\/\s*Despesas)?\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /I\.?S\.?S\.?\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+    /Outros\s+Custos\s*[:]?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i,
+  ];
+
+  for (const regex of feeRegexes) {
+    const match = rawText.match(regex);
+    if (match && match[1]) {
+      try {
+        const val = parseB3Float(match[1]);
+        if (Number.isFinite(val) && val > 0) {
+          totalFees += val;
+          foundFee = true;
+        }
+      } catch {
+        // ignore malformed float
+      }
+    }
+  }
+
+  if (!foundFee || totalFees <= 0) return null;
+
+  // Sanity check: B3 retail fees are typically < 0.1% - 0.5% of total volume.
+  // A 2% ceiling ensures that any erroneously captured trading amount line is rejected.
+  const MAX_SANITY_FEE_RATIO = 0.02;
+  if (totalFees > totalVolume * MAX_SANITY_FEE_RATIO) {
+    return null;
+  }
+
+  return Number(totalFees.toFixed(2));
 }
 
 /**

@@ -225,14 +225,6 @@ Registrado aqui só pra contexto — não precisa de ação:
 - **Impacto:** Inofensivo em runtime porque `rowToItem` (`src/lib/watchlist.ts:212`) ignora esse campo e sempre deriva o ID canônico em tempo de execução via `makeId(r.ticker, r.type)`.
 - **Ação Futura Sugerida:** Avaliar remoção do campo `id` de `Row` / `itemToRow` em refactor futuro de schema de dados para eliminar dados redundantes.
 
-### Fragilidade de Interpolação i18n em `BrokerNoteUploader.tsx`
-- **Contexto:** Identificado no Item 1 (Tier 0 / Lote 2). Chamadas de `toast.success` com concatenação direta de string em torno de `t.brokerNote.successImport` em vez de utilizar o padrão de interpolação canônico `{{count}}` como já feito em `brokerNoteInvalidDatesSkipped` e `importFailedCount`.
-- **Ação Futura Sugerida:** Refatorar a chave no dicionário i18n (`dict.ptBR.ts`, `dict.en.ts`, `dict.es.ts`) para suportar interpolação `{{count}}`.
-
-### Rateio de Taxas do Resumo Financeiro em Notas de Corretagem SINACOR (`b3Parser.ts`)
-- **Contexto:** Identificado no Item 5 (Tier 0 / Lote 3). O parser de PDF de notas SINACOR B3 extrai negócios individuais da tabela de ordens (`TradeRecord`), enquanto as taxas (emolumentos, liquidação, corretagem) ficam consolidadas no rodapé da nota (*Resumo Financeiro*).
-- **Ação Futura Sugerida:** Estender `b3Parser.ts` para extrair o total de taxas do resumo financeiro e ratear proporcionalmente ao volume de cada ativo, preenchendo `fees` em cada transação gerada.
-
 ---
 
 _Consolidado a partir do backlog original de Produto + achados da auditoria técnica/UX (Prompts 1-13) + acesso direto ao repositório. Documento único a partir de agora — `epic3_task4.3_diagnostic.md` e `CLAUDE_AUDIT_GERAL.md` foram incorporados aqui e podem ser apagados._
