@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { SELIC_FALLBACK } from "./macroDefaults";
 
-export const SELIC_FALLBACK = 10.5;
+export { SELIC_FALLBACK };
 
 /**
  * Fetches the current annualized target Selic rate (Meta Selic) from the Central Bank of Brazil (BCB).

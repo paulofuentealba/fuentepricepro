@@ -13,6 +13,7 @@ import {
   type ValuationResult,
 } from "./calculations";
 import { useSelic } from "./useSelic";
+import { SELIC_FALLBACK } from "./macroDefaults";
 import { exchangeRateQueryOptions, macroRatesQueryOptions, ipcaFiveYearAverageQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
@@ -156,7 +157,7 @@ function useValuedPortfolioClientSide(
         eps: m?.eps,
         bvps: calculateBvps(m?.bvps, m?.pbRatio, livePrice),
         dividendCagr: m?.dividendCagr5y,
-        selicPct: selic ?? 10.5,
+        selicPct: selic ?? SELIC_FALLBACK,
         terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
         currency: it.currency,
         type: it.type,
@@ -230,7 +231,7 @@ function useValuedPortfolioBff(
           uid: "",
           items: itemsWithYield,
           transactions,
-          selicPct: selic ?? 10.5,
+          selicPct: selic ?? SELIC_FALLBACK,
           terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
           exchangeRate: fx?.USDBRL ?? 5.75,
         },

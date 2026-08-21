@@ -1,6 +1,7 @@
 import type { Asset, AssetType } from "./domain";
 import type { WatchlistItem } from "./watchlist";
 import type { BenchmarkPoint } from "./benchmark";
+import { SELIC_FALLBACK, SELIC_DECIMAL, MACRO_RATES_FALLBACK } from "./macroDefaults";
 
 export function avgDividend(divs: readonly number[]): number {
   if (!divs.length) return 0;
@@ -85,7 +86,7 @@ export function grahamPrice(lpa: number, vpa: number): number | null {
   return Math.sqrt(22.5 * lpa * vpa);
 }
 
-export const DEFAULT_SELIC = 0.105; // 10.5% as Selic Anchor
+export const DEFAULT_SELIC = SELIC_DECIMAL; // 10.5% as Selic Anchor
 
 export function consensusPrice(prices: (number | null | undefined)[]): number | null {
   const validPrices = prices.filter(
@@ -402,7 +403,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
     bvps,
     dividendCagr,
     dividendHistory,
-    selicPct = 10.5,
+    selicPct = SELIC_FALLBACK,
     terminalGrowthRate,
     currency,
     historicalYieldAverage,
@@ -512,7 +513,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
       label: "Taxa de desconto da economia (Selic)",
       helperText: "Custo de oportunidade soberano livre de risco ancorado na taxa Selic meta",
       value: selicPct,
-      isCustomized: selicPct !== 10.5,
+      isCustomized: selicPct !== SELIC_FALLBACK,
       suggestedRange: { min: 8, max: 15 },
       confidenceBadge: 4,
     },
@@ -740,7 +741,7 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
     dividendHistory,
     currency = "BRL",
     historicalYieldAverage,
-    selicPct = 10.5,
+    selicPct = SELIC_FALLBACK,
     terminalGrowthRate = 0.045, // 4.5% IPCA 5y benchmark default
   } = params;
 
@@ -1066,7 +1067,7 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
     currency = "BRL",
     historicalYieldAverage,
     customTaxRate,
-    selicPct = 10.5,
+    selicPct = SELIC_FALLBACK,
     usTreasury10Y = 4.25,
   } = params;
 
@@ -1274,7 +1275,7 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
   const netAvgDividend = isUS ? avgDividend * (1 - US_DIVIDEND_TAX_RATE) : avgDividend;
   const bazin = params.targetYield > 0 ? netAvgDividend / (params.targetYield / 100) : null;
   const graham = params.eps && params.bvps && params.eps > 0 && params.bvps > 0 ? Math.sqrt(22.5 * params.eps * params.bvps) : null;
-  const k = (params.selicPct ?? 10.5) / 100;
+  const k = (params.selicPct ?? SELIC_FALLBACK) / 100;
   const gInitial = params.dividendCagr != null ? params.dividendCagr / 100 : null;
   const gordon = gordonPrice(
     netAvgDividend,
@@ -1360,7 +1361,7 @@ export function calculateFixedIncomeBalance(
     return null;
   }
 
-  const rates = macroRates || { cdi: 10.5, ipca: 4.5 };
+  const rates = macroRates || MACRO_RATES_FALLBACK;
   const principal = item.averagePrice * item.quantity;
   const start = new Date(item.startDate).getTime();
   const now = Date.now();
@@ -1416,7 +1417,7 @@ export function projectFixedIncomeValueAtMaturity(
   maturityDateStr: string,
   macroRates?: { cdi: number; ipca: number },
 ): { projectedBalance: number; projectedProfit: number } {
-  const rates = macroRates || { cdi: 10.5, ipca: 4.5 };
+  const rates = macroRates || MACRO_RATES_FALLBACK;
 
   const start = new Date(startDateStr).getTime();
   const maturity = new Date(maturityDateStr).getTime();

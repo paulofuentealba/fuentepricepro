@@ -10,6 +10,7 @@ import { searchQueryOptions, assetQueryOptions, ipcaFiveYearAverageQueryOptions 
 import { useQueries } from "@tanstack/react-query";
 import { getAssetValuation, avgDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
+import { SELIC_FALLBACK } from "@/lib/macroDefaults";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { displayTicker } from "@/lib/i18n";
 import { getShareClassBadge } from "@/lib/classify";
@@ -226,7 +227,7 @@ function ComparatorCards({
           eps: data.metrics?.eps || null,
           bvps: calculateBvps(data.metrics?.bvps, data.metrics?.pbRatio, data.currentPrice),
           dividendCagr: data.metrics?.dividendCagr5y || null,
-          selicPct: selic ?? 10.5,
+          selicPct: selic ?? SELIC_FALLBACK,
           terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
           currency: data.currency,
           type: data.type,
@@ -308,7 +309,7 @@ function ComparatorCards({
             eps: data.metrics?.eps || null,
             bvps: calculateBvps(data.metrics?.bvps, data.metrics?.pbRatio, data.currentPrice),
             dividendCagr: data.metrics?.dividendCagr5y || null,
-            selicPct: selic ?? 10.5,
+            selicPct: selic ?? SELIC_FALLBACK,
             terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
             currency: data.currency,
             type: data.type,

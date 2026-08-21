@@ -19,6 +19,7 @@ import { useState, useMemo } from "react";
 import { memo, useCallback, type KeyboardEvent, useRef } from "react";
 import { ValuationRadar } from "@/components/ui/ValuationRadar";
 import { useSelic } from "@/lib/useSelic";
+import { SELIC_FALLBACK } from "@/lib/macroDefaults";
 import {
   getAssetValuation,
   calculateBvps,
@@ -438,7 +439,7 @@ function SearchVariant({
     eps: asset.epsCurrent ?? asset.metrics?.eps ?? null,
     bvps: calculateBvps(asset.metrics?.bvps, asset.metrics?.pbRatio, asset.currentPrice),
     dividendCagr: asset.metrics?.dividendCagr5y ?? null,
-    selicPct: selic ?? 10.5,
+    selicPct: selic ?? SELIC_FALLBACK,
     terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
     currency: asset.currency,
     type: asset.type,

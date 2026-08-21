@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
 import { useSelic } from "@/lib/useSelic";
+import { SELIC_FALLBACK } from "@/lib/macroDefaults";
 import { benchmarkHistoryQueryOptions } from "@/lib/queryOptions";
 import { type Transaction } from "@/lib/transactions";
 import { type RealizedIncomeEvent } from "@/lib/realizedIncome";
@@ -31,7 +32,7 @@ export function PortfolioIrrCard({
   const { t } = useI18n();
   const { items } = useWatchlist();
   const { data: selicRaw } = useSelic();
-  const fallbackSelic = selicRaw ?? 10.5;
+  const fallbackSelic = selicRaw ?? SELIC_FALLBACK;
 
   const effectiveTransactions = useMemo(() => {
     return getEffectiveTransactions(transactions, items);

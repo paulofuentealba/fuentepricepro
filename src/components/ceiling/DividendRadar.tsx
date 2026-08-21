@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
+import { SELIC_FALLBACK } from "@/lib/macroDefaults";
 import { formatCurrency, formatPercent } from "@/lib/i18n";
 
 import {
@@ -75,7 +76,7 @@ export function DividendRadar() {
           eps: asset.metrics?.eps ?? null,
           bvps: calculateBvps(asset.metrics?.bvps, asset.metrics?.pbRatio, asset.currentPrice),
           dividendCagr: asset.metrics?.dividendCagr5y ?? null,
-          selicPct: selic ?? 10.5,
+          selicPct: selic ?? SELIC_FALLBACK,
           terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
           currency: currency,
           type: assetType,

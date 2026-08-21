@@ -6,6 +6,7 @@ import {
   yieldOnCost,
   type ValuationResult,
 } from "./calculations";
+import { SELIC_FALLBACK } from "./macroDefaults";
 import type { WatchlistItem } from "./watchlist";
 import type { Transaction } from "./transactionsLogic";
 import type { Asset } from "./domain";
@@ -49,7 +50,7 @@ export async function computeValuedPortfolioInternal(
   const {
     items = [],
     transactions = [],
-    selicPct = 10.5,
+    selicPct = SELIC_FALLBACK,
     terminalGrowthRate = 0.045,
     exchangeRate = 5.75,
   } = input;

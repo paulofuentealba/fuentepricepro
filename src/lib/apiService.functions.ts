@@ -15,6 +15,7 @@ import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 // Re-export public types so existing `@/lib/apiService.server` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
 import { cleanTicker } from "../lib/formatters";
+import { MACRO_RATES_FALLBACK } from "./macroDefaults";
 
 // -------- Input caps (public, unauthenticated endpoints) --------
 // Keep these tight — anything past normal user input is abuse, not a real query.
@@ -481,7 +482,7 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
 
 export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ cdi: number; ipca: number }> => {
-    const fallback = { cdi: 10.5, ipca: 4.5 };
+    const fallback = MACRO_RATES_FALLBACK;
 
     try {
       const fetchWithTimeout = (url: string) => {
