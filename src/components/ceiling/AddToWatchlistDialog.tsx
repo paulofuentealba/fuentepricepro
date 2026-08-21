@@ -78,7 +78,16 @@ export function AddToWatchlistDialog({
       return;
     }
     const avgNum = avg.trim() === "" ? null : Number(avg);
+    if (avgNum !== null && (!Number.isFinite(avgNum) || avgNum < 0)) {
+      toast.error(t.watchlist.invalidAveragePrice);
+      return;
+    }
+
     const goalNum = goal.trim() === "" ? null : Number(goal);
+    if (goalNum !== null && (!Number.isFinite(goalNum) || goalNum < 0)) {
+      toast.error(t.watchlist.invalidTargetIncome);
+      return;
+    }
 
     const item: WatchlistItem = buildWatchlistItem(asset, {
       targetYield,

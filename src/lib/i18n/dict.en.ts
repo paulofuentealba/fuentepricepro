@@ -424,6 +424,8 @@ export const en = {
     updated: "Watchlist updated",
     removed: "Removed from watchlist",
     invalidQuantity: "Enter a valid quantity greater than zero.",
+    invalidAveragePrice: "Enter a valid average price (zero or positive).",
+    invalidTargetIncome: "Enter a valid target monthly income (zero or positive).",
     title: "My Watchlist",
     empty: "Your watchlist is empty. Add an asset after calculating to track projected income.",
     addAssetDropdown: "Add Asset",

@@ -426,6 +426,8 @@ export const ptBR = {
     updated: "Watchlist atualizada",
     removed: "Removido da watchlist",
     invalidQuantity: "Insira uma quantidade válida maior que zero.",
+    invalidAveragePrice: "Insira um preço médio válido (zero ou positivo).",
+    invalidTargetIncome: "Insira uma meta de renda mensal válida (zero ou positiva).",
     title: "Minha Watchlist",
     empty: "Sua watchlist está vazia. Adicione um ativo após o cálculo para projetar sua renda.",
     addAssetDropdown: "Adicionar Ativo",

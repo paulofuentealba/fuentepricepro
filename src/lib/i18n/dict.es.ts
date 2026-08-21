@@ -428,6 +428,8 @@ export const es = {
     updated: "Watchlist actualizada",
     removed: "Eliminado de la watchlist",
     invalidQuantity: "Introduzca una cantidad válida mayor que cero.",
+    invalidAveragePrice: "Introduzca un precio medio válido (cero o positivo).",
+    invalidTargetIncome: "Introduzca un objetivo de renta mensual válido (cero o positivo).",
     title: "Mi Lista",
     empty: "Tu lista está vacía. Añade un activo después del cálculo para rastrear los ingresos.",
     addAssetDropdown: "Añadir Activo",
