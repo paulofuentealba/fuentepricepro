@@ -9,12 +9,16 @@ const mockUpsertWatchlistItem = vi.fn();
 const mockUpsertTransaction = vi.fn();
 let mockAssetData: any = null;
 
-vi.mock("@/lib/watchlist", () => ({
-  useWatchlist: () => ({
-    items: [],
-    upsert: mockUpsertWatchlistItem,
-  }),
-}));
+vi.mock("@/lib/watchlist", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/watchlist")>("@/lib/watchlist");
+  return {
+    ...actual,
+    useWatchlist: () => ({
+      items: [],
+      upsert: mockUpsertWatchlistItem,
+    }),
+  };
+});
 
 vi.mock("@/lib/transactions", () => ({
   useTransactions: () => ({

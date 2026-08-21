@@ -1,6 +1,6 @@
 import type { Asset } from "@/lib/domain";
 import { getCanonicalAnnualDividend, getAssetValuation } from "@/lib/calculations";
-import type { WatchlistItem } from "@/lib/watchlist";
+import { makeId, type WatchlistItem } from "@/lib/watchlist";
 
 export interface BuildWatchlistItemOptions {
   targetYield: number;
@@ -21,7 +21,7 @@ export interface BuildWatchlistItemOptions {
  */
 export function buildWatchlistItem(asset: Asset, opts: BuildWatchlistItemOptions): WatchlistItem {
   const { targetYield, quantity, averagePrice = null, targetMonthlyIncome = null, existing = null } = opts;
-  const id = `${asset.type.toLowerCase()}:${asset.ticker}`;
+  const id = makeId(asset.ticker, asset.type);
   const annual = getCanonicalAnnualDividend(asset, 3);
   const val = getAssetValuation({
     targetYield,

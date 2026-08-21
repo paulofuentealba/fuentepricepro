@@ -220,6 +220,11 @@ Registrado aqui só pra contexto — não precisa de ação:
 - **Contexto:** Identificado durante a auditoria do Prompt 12 (Invested vs. Received). Existe uma dupla convenção de casing coexistindo: `csv.ts` e `transactionsLogic.ts` usam minúsculo (`"buy" | "sell" | "corporate_action"`), enquanto `dynamicCsvParser.ts` usa maiúsculo (`"BUY" | "SELL"`).
 - **Ação Necessária:** Unificar a tipagem e os parsers para garantir que todas as transações persistidas no Firestore sigam uma única convenção (minúsculo sugerido para alinhar com o schema principal), aplicando uma rotina de backfill ou normalização sob demanda se necessário.
 
+### Débito Técnico / Limpeza Futura — Campo Interno `id` no Payload do Firestore
+- **Contexto:** Identificado durante a resolução do Item 17. A função `itemToRow` (`src/lib/watchlist.ts:264`) inclui `id: item.id` no payload gravado no Firestore. Documentos antigos criados via `buildWatchlistItem` podem conter esse campo interno em minúsculas (ex: `"stock_br:PETR4"`) salvo no documento.
+- **Impacto:** Inofensivo em runtime porque `rowToItem` (`src/lib/watchlist.ts:212`) ignora esse campo e sempre deriva o ID canônico em tempo de execução via `makeId(r.ticker, r.type)`.
+- **Ação Futura Sugerida:** Avaliar remoção do campo `id` de `Row` / `itemToRow` em refactor futuro de schema de dados para eliminar dados redundantes.
+
 ---
 
 _Consolidado a partir do backlog original de Produto + achados da auditoria técnica/UX (Prompts 1-13) + acesso direto ao repositório. Documento único a partir de agora — `epic3_task4.3_diagnostic.md` e `CLAUDE_AUDIT_GERAL.md` foram incorporados aqui e podem ser apagados._
