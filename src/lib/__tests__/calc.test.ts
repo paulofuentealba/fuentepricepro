@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { WatchlistItem } from "../watchlist";
 import {
   avgDividend,
   ceilingPrice,
@@ -12,6 +13,9 @@ import {
   calculateHistoricalYieldAverage,
   isYieldTrap,
   calculateShareholderYield,
+  calculateFixedIncomeBalance,
+  getPositionValue,
+  projectFixedIncomeValueAtMaturity,
   GORDON_MIN_DISCOUNT_MARGIN,
   GORDON_TERMINAL_GROWTH_RATE,
 } from "../calculations";
@@ -459,6 +463,149 @@ describe("Yield-Trap Check + Shareholder Yield (prompt 79)", () => {
     });
     expect(unavailable.yieldTrapWarning).toBeNull();
     expect(unavailable.shareholderYield).toBeNull();
+  });
+});
+
+describe("Fixed Income calculation resilience & NaN immunity (Item 1)", () => {
+  const mockMacroRates = { cdi: 10.5, ipca: 4.5 };
+
+  function makeMockItem(overrides: Partial<WatchlistItem>): WatchlistItem {
+    return {
+      id: "test-id",
+      ticker: "TEST",
+      name: "Test Asset",
+      type: "FIXED_INCOME",
+      currency: "BRL",
+      currentPrice: 100,
+      averagePrice: 100,
+      quantity: 10,
+      targetYield: 6,
+      ceilingPrice: 100,
+      safetyMargin: 0,
+      annualDividend: 0,
+      paymentMonths: [],
+      payoutRatio: null,
+      addedAt: Date.now(),
+      investingSince: Date.now(),
+      ...overrides,
+    };
+  }
+
+  it("calculates accurate accrued balance and profit for a valid CDI fixed income asset", () => {
+    // 100 days ago, 100% CDI (= 10.5% a.a.), principal = 1000 * 10 = 10000
+    const hundredDaysAgo = new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString();
+    const item = makeMockItem({
+      ticker: "CDB_TEST",
+      name: "CDB 100% CDI",
+      type: "FIXED_INCOME",
+      currency: "BRL",
+      currentPrice: 10,
+      averagePrice: 10,
+      quantity: 1000,
+      startDate: hundredDaysAgo,
+      indexer: "CDI",
+      rate: 100, // 100% of CDI
+    });
+
+    const result = calculateFixedIncomeBalance(item, mockMacroRates);
+    expect(result).not.toBeNull();
+    expect(result!.accruedBalance).toBeGreaterThan(10000);
+    expect(result!.profit).toBeCloseTo(result!.accruedBalance - 10000, 4);
+    expect(Number.isFinite(result!.accruedBalance)).toBe(true);
+  });
+
+  it("never propagates NaN when startDate is invalid or unparseable, returning principal and 0 profit", () => {
+    const item = makeMockItem({
+      ticker: "CDB_MALFORMED",
+      name: "CDB Malformed Date",
+      type: "FIXED_INCOME",
+      currency: "BRL",
+      currentPrice: 100,
+      averagePrice: 100,
+      quantity: 50, // principal = 5000
+      startDate: "invalid-date-format",
+      indexer: "CDI",
+      rate: 100,
+    });
+
+    const result = calculateFixedIncomeBalance(item, mockMacroRates);
+    expect(result).not.toBeNull();
+    expect(result!.accruedBalance).toBe(5000);
+    expect(result!.profit).toBe(0);
+    expect(Number.isFinite(result!.accruedBalance)).toBe(true);
+  });
+
+  it("returns principal when startDate is in the future", () => {
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const item = makeMockItem({
+      ticker: "CDB_FUTURE",
+      name: "CDB Future Start",
+      type: "FIXED_INCOME",
+      currency: "BRL",
+      currentPrice: 50,
+      averagePrice: 50,
+      quantity: 20, // principal = 1000
+      startDate: futureDate,
+      indexer: "PRE",
+      rate: 12,
+    });
+
+    const result = calculateFixedIncomeBalance(item, mockMacroRates);
+    expect(result).not.toBeNull();
+    expect(result!.accruedBalance).toBe(1000);
+    expect(result!.profit).toBe(0);
+  });
+
+  it("getPositionValue never returns NaN for FIXED_INCOME with malformed startDate or missing rate", () => {
+    const item = makeMockItem({
+      ticker: "LCI_CORRUPT",
+      name: "LCI Corrupt",
+      type: "FIXED_INCOME",
+      currency: "BRL",
+      currentPrice: 1000,
+      averagePrice: 1000,
+      quantity: 10, // principal = 10000
+      startDate: "not-a-date",
+      indexer: "IPCA",
+      rate: 6.0,
+    });
+
+    const value = getPositionValue(item, mockMacroRates);
+    expect(value).toBe(10000);
+    expect(Number.isFinite(value)).toBe(true);
+    expect(isNaN(value)).toBe(false);
+  });
+
+  it("getPositionValue never returns NaN for non-FIXED_INCOME with null/undefined/NaN prices", () => {
+    const item = makeMockItem({
+      ticker: "PETR4",
+      name: "Petrobras",
+      type: "STOCK_BR",
+      currency: "BRL",
+      currentPrice: NaN,
+      averagePrice: 30,
+      quantity: 100,
+      annualDividend: 3,
+    });
+
+    const value = getPositionValue(item);
+    expect(value).toBe(0);
+    expect(Number.isFinite(value)).toBe(true);
+  });
+
+  it("projectFixedIncomeValueAtMaturity returns principal safely on invalid or reversed dates without NaN", () => {
+    const invalidStart = projectFixedIncomeValueAtMaturity(5000, "CDI", 100, "invalid-start", "2026-12-31", mockMacroRates);
+    expect(invalidStart.projectedBalance).toBe(5000);
+    expect(invalidStart.projectedProfit).toBe(0);
+    expect(Number.isFinite(invalidStart.projectedBalance)).toBe(true);
+
+    const reversedDates = projectFixedIncomeValueAtMaturity(5000, "PRE", 10, "2026-12-31", "2025-01-01", mockMacroRates);
+    expect(reversedDates.projectedBalance).toBe(5000);
+    expect(reversedDates.projectedProfit).toBe(0);
+
+    const invalidPrincipal = projectFixedIncomeValueAtMaturity(NaN as any, "PRE", 10, "2024-01-01", "2026-01-01", mockMacroRates);
+    expect(invalidPrincipal.projectedBalance).toBe(0);
+    expect(invalidPrincipal.projectedProfit).toBe(0);
   });
 });
 

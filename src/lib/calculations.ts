@@ -1356,7 +1356,10 @@ export function calculateFixedIncomeBalance(
     item.type !== "FIXED_INCOME" ||
     !item.startDate ||
     item.averagePrice == null ||
-    item.quantity <= 0
+    !Number.isFinite(item.averagePrice) ||
+    item.averagePrice <= 0 ||
+    item.quantity <= 0 ||
+    !Number.isFinite(item.quantity)
   ) {
     return null;
   }
@@ -1366,12 +1369,17 @@ export function calculateFixedIncomeBalance(
   const start = new Date(item.startDate).getTime();
   const now = Date.now();
 
-  if (start > now) return { accruedBalance: principal, profit: 0 };
+  if (!Number.isFinite(start) || start > now) {
+    return { accruedBalance: principal, profit: 0 };
+  }
 
   const elapsedDays = (now - start) / (1000 * 60 * 60 * 24);
+  if (!Number.isFinite(elapsedDays) || elapsedDays < 0) {
+    return { accruedBalance: principal, profit: 0 };
+  }
 
   let effectiveRate = 0;
-  const itemRate = item.rate || 0;
+  const itemRate = typeof item.rate === "number" && Number.isFinite(item.rate) ? item.rate : 0;
   const indexer = item.indexer?.toUpperCase();
 
   if (indexer === "CDI") {
@@ -1383,7 +1391,12 @@ export function calculateFixedIncomeBalance(
     effectiveRate = itemRate / 100;
   }
 
-  const accruedBalance = principal * Math.pow(1 + effectiveRate, elapsedDays / 365);
+  if (!Number.isFinite(effectiveRate) || effectiveRate < 0) {
+    return { accruedBalance: principal, profit: 0 };
+  }
+
+  const factor = Math.pow(1 + effectiveRate, elapsedDays / 365);
+  const accruedBalance = Number.isFinite(factor) ? principal * factor : principal;
 
   return {
     accruedBalance,
@@ -1404,9 +1417,26 @@ export function getPositionValue(
 ): number {
   if (item.type === "FIXED_INCOME") {
     const accrual = calculateFixedIncomeBalance(item, macroRates);
-    if (accrual) return accrual.accruedBalance;
+    if (accrual && Number.isFinite(accrual.accruedBalance)) return accrual.accruedBalance;
+    const avgPrice =
+      typeof item.averagePrice === "number" && Number.isFinite(item.averagePrice) && item.averagePrice > 0
+        ? item.averagePrice
+        : 0;
+    const qty =
+      typeof item.quantity === "number" && Number.isFinite(item.quantity) && item.quantity > 0
+        ? item.quantity
+        : 0;
+    return avgPrice * qty;
   }
-  return item.quantity * item.currentPrice;
+  const qty =
+    typeof item.quantity === "number" && Number.isFinite(item.quantity) && item.quantity > 0
+      ? item.quantity
+      : 0;
+  const price =
+    typeof item.currentPrice === "number" && Number.isFinite(item.currentPrice) && item.currentPrice > 0
+      ? item.currentPrice
+      : 0;
+  return qty * price;
 }
 
 export function projectFixedIncomeValueAtMaturity(
@@ -1417,32 +1447,47 @@ export function projectFixedIncomeValueAtMaturity(
   maturityDateStr: string,
   macroRates?: { cdi: number; ipca: number },
 ): { projectedBalance: number; projectedProfit: number } {
+  const safePrincipal =
+    typeof principal === "number" && Number.isFinite(principal) && principal > 0 ? principal : 0;
+  if (safePrincipal <= 0) return { projectedBalance: 0, projectedProfit: 0 };
+
   const rates = macroRates || MACRO_RATES_FALLBACK;
 
   const start = new Date(startDateStr).getTime();
   const maturity = new Date(maturityDateStr).getTime();
 
-  if (maturity <= start) return { projectedBalance: principal, projectedProfit: 0 };
-
-  const totalDays = (maturity - start) / (1000 * 60 * 60 * 24);
-
-  let effectiveRate = 0;
-  const idx = indexer.toUpperCase();
-
-  if (idx === "CDI") {
-    effectiveRate = (rates.cdi / 100) * (rate / 100);
-  } else if (idx === "IPCA") {
-    effectiveRate = rates.ipca / 100 + rate / 100;
-  } else {
-    // PRE
-    effectiveRate = rate / 100;
+  if (!Number.isFinite(start) || !Number.isFinite(maturity) || maturity <= start) {
+    return { projectedBalance: safePrincipal, projectedProfit: 0 };
   }
 
-  const projectedBalance = principal * Math.pow(1 + effectiveRate, totalDays / 365);
+  const totalDays = (maturity - start) / (1000 * 60 * 60 * 24);
+  if (!Number.isFinite(totalDays) || totalDays <= 0) {
+    return { projectedBalance: safePrincipal, projectedProfit: 0 };
+  }
+
+  let effectiveRate = 0;
+  const safeRate = typeof rate === "number" && Number.isFinite(rate) ? rate : 0;
+  const idx = (indexer || "").toUpperCase();
+
+  if (idx === "CDI") {
+    effectiveRate = (rates.cdi / 100) * (safeRate / 100);
+  } else if (idx === "IPCA") {
+    effectiveRate = rates.ipca / 100 + safeRate / 100;
+  } else {
+    // PRE
+    effectiveRate = safeRate / 100;
+  }
+
+  if (!Number.isFinite(effectiveRate) || effectiveRate < 0) {
+    return { projectedBalance: safePrincipal, projectedProfit: 0 };
+  }
+
+  const factor = Math.pow(1 + effectiveRate, totalDays / 365);
+  const projectedBalance = Number.isFinite(factor) ? safePrincipal * factor : safePrincipal;
 
   return {
     projectedBalance,
-    projectedProfit: projectedBalance - principal,
+    projectedProfit: projectedBalance - safePrincipal,
   };
 }
 
