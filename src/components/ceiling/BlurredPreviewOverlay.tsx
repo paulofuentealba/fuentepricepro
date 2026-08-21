@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Sparkles, CheckCircle2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 import { useAuth } from "@/lib/auth-provider";
+import { useAuthModal } from "@/lib/auth-modal";
+import { PaywallDialog } from "@/components/ui/PaywallDialog";
 
 interface BlurredPreviewOverlayProps {
   children: React.ReactNode;
@@ -12,6 +14,8 @@ interface BlurredPreviewOverlayProps {
 export function BlurredPreviewOverlay({ children, feature }: BlurredPreviewOverlayProps) {
   const { t } = useI18n();
   const { user } = useAuth();
+  const { openAuthModal } = useAuthModal();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const isCashFlow = feature === "cashflow";
   const title = isCashFlow ? t.previewOverlay.cashflowTitle : t.previewOverlay.smartAllocationTitle;
@@ -31,9 +35,9 @@ export function BlurredPreviewOverlay({ children, feature }: BlurredPreviewOverl
 
   const handleUnlock = () => {
     if (!user) {
-      window.dispatchEvent(new CustomEvent("open-auth-modal"));
+      openAuthModal();
     } else {
-      window.dispatchEvent(new CustomEvent("open-subscription-modal"));
+      setShowPaywall(true);
     }
   };
 
@@ -86,6 +90,8 @@ export function BlurredPreviewOverlay({ children, feature }: BlurredPreviewOverl
           </div>
         </div>
       </div>
+
+      <PaywallDialog open={showPaywall} onOpenChange={setShowPaywall} />
     </div>
   );
 }
