@@ -37,7 +37,7 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
       items.forEach((it) => {
         initialEdits[it.id] = {
           qty: String(it.quantity),
-          avg: it.averagePrice ? String(it.averagePrice) : "",
+          avg: it.averagePrice != null ? String(it.averagePrice) : "",
         };
       });
       setEdits(initialEdits);
@@ -45,30 +45,60 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
   }, [isEditing, items]);
 
   const handleSave = async () => {
+    let invalidCount = 0;
+    const validUpdates: Array<{ id: string; quantity: number; averagePrice: number | null }> = [];
+
+    for (const [id, vals] of Object.entries(edits)) {
+      const it = items.find((x) => x.id === id);
+      if (!it) continue;
+
+      const qtyTrim = vals.qty.trim();
+      const newQty = qtyTrim === "" ? NaN : Number(qtyTrim);
+      if (!Number.isFinite(newQty) || newQty < 0) {
+        invalidCount++;
+        continue;
+      }
+
+      const avgTrim = vals.avg.trim();
+      let avg: number | null = null;
+      if (avgTrim !== "") {
+        const newAvg = Number(avgTrim);
+        if (!Number.isFinite(newAvg) || newAvg < 0) {
+          invalidCount++;
+          continue;
+        }
+        avg = newAvg;
+      }
+
+      if (it.quantity !== newQty || it.averagePrice !== avg) {
+        validUpdates.push({ id, quantity: newQty, averagePrice: avg });
+      }
+    }
+
+    if (invalidCount > 0) {
+      toast.error(
+        t.toasts.batchEditInvalidSkipped.replace("{{count}}", String(invalidCount))
+      );
+    }
+
+    if (validUpdates.length === 0) {
+      if (invalidCount === 0) {
+        toast.info(t.toasts.noChanges);
+      }
+      setIsEditing(false);
+      return;
+    }
+
     const results = await Promise.allSettled(
-      Object.entries(edits)
-        .filter(([id, vals]) => {
-          const it = items.find((x) => x.id === id);
-          if (!it) return false;
-          const newQty = parseInt(vals.qty, 10);
-          const qty = isNaN(newQty) || newQty < 0 ? 0 : newQty;
-          const newAvg = parseFloat(vals.avg);
-          const avg = isNaN(newAvg) || newAvg <= 0 ? null : newAvg;
-          return it.quantity !== qty || it.averagePrice !== avg;
-        })
-        .map(([id, vals]) => {
-          const newQty = parseInt(vals.qty, 10);
-          const qty = isNaN(newQty) || newQty < 0 ? 0 : newQty;
-          const newAvg = parseFloat(vals.avg);
-          const avg = isNaN(newAvg) || newAvg <= 0 ? null : newAvg;
-          return updateAsync(id, { quantity: qty, averagePrice: avg });
-        })
+      validUpdates.map((u) =>
+        updateAsync(u.id, { quantity: u.quantity, averagePrice: u.averagePrice })
+      )
     );
 
     setIsEditing(false);
 
-    const succeeded = results.filter(r => r.status === "fulfilled").length;
-    const failed = results.filter(r => r.status === "rejected").length;
+    const succeeded = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
 
     if (succeeded > 0) {
       toast.success(t.toasts.assetsUpdatedCount.replace("{{count}}", String(succeeded)));
@@ -150,7 +180,7 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
                       <Input
                         className="h-8 w-20 text-sm"
                         type="number"
-                        step="1"
+                        step="any"
                         min="0"
                         value={edits[it.id]?.qty ?? ""}
                         onChange={(e) =>

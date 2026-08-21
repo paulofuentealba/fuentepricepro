@@ -120,6 +120,8 @@ export const en = {
     adjustAllocationTarget100: "Adjust your allocation targets to 100% before generating recommendations.",
     settingsSaved: "Settings saved.",
     brokerNoteInvalidDatesSkipped: "{{count}} transaction(s) skipped due to invalid date in the note.",
+    batchEditInvalidSkipped:
+      "{{count}} asset(s) with invalid values were skipped and left unchanged.",
   },
   emptyStates: {
     clearFilters: "Clear Filters",

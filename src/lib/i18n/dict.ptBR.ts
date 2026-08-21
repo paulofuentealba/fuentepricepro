@@ -122,6 +122,8 @@ export const ptBR = {
     adjustAllocationTarget100: "Ajuste suas metas de alocação para 100% antes de gerar a recomendação.",
     settingsSaved: "Configurações salvas.",
     brokerNoteInvalidDatesSkipped: "{{count}} transação(ões) ignorada(s) por data inválida na nota.",
+    batchEditInvalidSkipped:
+      "{{count}} ativo(s) com valores inválidos foram ignorados e não foram alterados.",
   },
   emptyStates: {
     clearFilters: "Limpar Filtros",

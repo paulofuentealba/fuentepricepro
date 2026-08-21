@@ -122,6 +122,8 @@ export const es = {
     adjustAllocationTarget100: "Ajusta tus metas de asignación al 100% antes de generar recomendaciones.",
     settingsSaved: "Configuraciones guardadas.",
     brokerNoteInvalidDatesSkipped: "{{count}} transacción(es) ignorada(s) por fecha inválida en la nota.",
+    batchEditInvalidSkipped:
+      "{{count}} activo(s) con valores no válidos fueron ignorados y no se modificaron.",
   },
   emptyStates: {
     clearFilters: "Borrar Filtros",
