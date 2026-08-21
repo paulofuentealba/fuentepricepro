@@ -92,6 +92,20 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
 
   const activeType: AssetType | null = manualType ?? selected?.type ?? null;
 
+  const handleDone = useCallback(() => {
+    setEditingType(false);
+    if (selected && activeType) {
+      onSubmit({
+        ticker: selected.ticker,
+        type: activeType,
+        targetYield: globalYield,
+        averagePrice: null,
+        customTaxRate: null,
+        investingSince: Date.now(),
+      });
+    }
+  }, [selected, activeType, globalYield, onSubmit]);
+
   return (
     <div className="space-y-5">
       <TickerSearchField
@@ -140,7 +154,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
                 size="sm"
                 variant="ghost"
                 className="h-8 text-xs"
-                onClick={() => setEditingType(false)}
+                onClick={handleDone}
               >
                 {t.form.done}
               </Button>
