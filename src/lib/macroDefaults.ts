@@ -12,6 +12,9 @@ export const SELIC_DECIMAL = 0.105;
 /** Taxa de inflação corrente IPCA padrão em pontos percentuais (4.5 para 4,5% a.a.) */
 export const IPCA_FALLBACK = 4.5;
 
+/** Taxa de câmbio USD/BRL padrão/fallback quando feed de cotação em tempo real não responde */
+export const EXCHANGE_RATE_FALLBACK = 5.5;
+
 export interface MacroRates {
   cdi: number;
   ipca: number;

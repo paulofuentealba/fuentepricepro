@@ -545,6 +545,9 @@ export const ptBR = {
       "Usuários gratuitos podem adicionar até {{limit}} ativos à sua watchlist. Faça o upgrade para Pro para ter ativos ilimitados e recursos avançados do portfólio!",
     addFirstAsset: "Adicione seu primeiro ativo",
     allocationByType: "Alocação por Tipo",
+    estimatedFxBadge: "Câmbio estimado",
+    estimatedFxTooltip:
+      "Cotação USD/BRL em tempo real indisponível. Alocação calculada com taxa de contingência ({{rate}}).",
     assets: "ativos",
     contextOvervalued: "{{over}} de {{total}} ativos acima do teto — indica um mercado aquecido.",
     contextUndervalued:

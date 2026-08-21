@@ -549,6 +549,9 @@ export const es = {
       "Los usuarios gratuitos pueden añadir hasta {{limit}} activos a su watchlist. ¡Actualiza a Pro para activos ilimitados y funciones avanzadas!",
     addFirstAsset: "Añade tu primer activo",
     allocationByType: "Asignación por Tipo",
+    estimatedFxBadge: "Cambio estimado",
+    estimatedFxTooltip:
+      "Tipo de cambio USD/BRL en tiempo real no disponible. Asignación calculada con tasa de contingencia ({{rate}}).",
     assets: "activos",
     contextOvervalued:
       "{{over}} de {{total}} activos por encima del techo — indica un mercado sobrecalentado.",

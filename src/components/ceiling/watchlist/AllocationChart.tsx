@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import { Cell, Pie, PieChart, Tooltip, Sector } from "recharts";
+import { Cell, Pie, PieChart, Sector } from "recharts";
+import { AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { formatCurrency } from "@/lib/i18n";
@@ -9,6 +11,7 @@ import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { getColorForAsset } from "../shared/chartColors";
 import { convertCurrency } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 
 interface Props {
   items: WatchlistItem[];
@@ -36,8 +39,14 @@ const renderActiveShape = (props: any) => {
 export function AllocationChart({ items, selectedType, onSelectType }: Props) {
   const { t, locale } = useI18n();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
-  const exchangeRate = fx?.USDBRL ?? 5.5;
+  const exchangeRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+
+  const hasUsdAssets = useMemo(
+    () => items.some((it) => it.currency === "USD" && it.quantity > 0),
+    [items]
+  );
+  const isEstimatedFx = !fx?.USDBRL && hasUsdAssets;
 
   const data = useMemo(() => {
     const totals = new Map<string, { name: string; value: number; type: string }>();
@@ -112,8 +121,31 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
           </ChartContainer>
         </div>
         <div className="w-full md:w-1/2 flex flex-col space-y-1.5">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-            {t.watchlist.allocationByType}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {t.watchlist.allocationByType}
+            </span>
+            {isEstimatedFx && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    data-testid="estimated-fx-badge"
+                    className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning ring-1 ring-warning/30 cursor-help"
+                  >
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    <span>{t.watchlist.estimatedFxBadge}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px]">
+                  <p>
+                    {t.watchlist.estimatedFxTooltip.replace(
+                      "{{rate}}",
+                      formatCurrency(EXCHANGE_RATE_FALLBACK, "BRL", locale)
+                    )}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
           {(data || []).map((d, i) => {
             const isSelected = selectedType === d.type;

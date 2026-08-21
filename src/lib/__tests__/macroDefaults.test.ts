@@ -3,6 +3,7 @@ import {
   SELIC_FALLBACK,
   SELIC_DECIMAL,
   IPCA_FALLBACK,
+  EXCHANGE_RATE_FALLBACK,
   MACRO_RATES_FALLBACK,
 } from "../macroDefaults";
 import {
@@ -15,6 +16,7 @@ describe("macroDefaults SSOT", () => {
     expect(SELIC_FALLBACK).toBe(10.5);
     expect(SELIC_DECIMAL).toBe(0.105);
     expect(IPCA_FALLBACK).toBe(4.5);
+    expect(EXCHANGE_RATE_FALLBACK).toBe(5.5);
     expect(MACRO_RATES_FALLBACK).toEqual({ cdi: 10.5, ipca: 4.5, selic: 10.5 });
   });
 

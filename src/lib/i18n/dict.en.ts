@@ -544,6 +544,9 @@ export const en = {
       "Free users can add up to {{limit}} assets to their watchlist. Upgrade to Pro for unlimited assets and advanced portfolio features!",
     addFirstAsset: "Add your first asset",
     allocationByType: "Allocation by Type",
+    estimatedFxBadge: "Estimated FX",
+    estimatedFxTooltip:
+      "Real-time USD/BRL rate unavailable. Allocation calculated using fallback rate ({{rate}}).",
     assets: "assets",
     contextOvervalued: "{{over}} of {{total}} assets above ceiling — indicates a heated market.",
     contextUndervalued: "{{under}} of {{total}} assets below ceiling — good entry opportunities.",
