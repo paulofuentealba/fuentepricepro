@@ -17,6 +17,12 @@ describe("detectCsvFormat (prompt 83 — SSOT format detection)", () => {
     expect(detectCsvFormat(header)).toBe("advanced");
   });
 
+  it("detects the full 14-column watchlist header as simple", () => {
+    const header =
+      "Ticker,Nome,Tipo,Quantidade,Preço Médio,Preço Teto,Margem de Segurança (%),Yield Alvo (%),Dividendo Anual,Setor,Moeda,Meta Renda Mensal,Alíquota IR (%),Data Início";
+    expect(detectCsvFormat(header)).toBe("simple");
+  });
+
   it("returns simple for an empty string", () => {
     expect(detectCsvFormat("")).toBe("simple");
   });

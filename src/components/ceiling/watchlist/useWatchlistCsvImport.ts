@@ -14,6 +14,7 @@ import {
   detectCsvFormat,
 } from "@/lib/csv";
 import { makeId, useWatchlist, type WatchlistItem } from "@/lib/watchlist";
+import type { Currency } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
 import {
   useTransactions,
@@ -175,8 +176,9 @@ export function useWatchlistCsvImport(
               const type = row.type ?? asset.type;
               const id = makeId(uppercaseTicker, type);
               const existing = existingById.get(id);
-              const annual = getCanonicalAnnualDividend(asset, 3);
-              const target = existing?.targetYield ?? 6;
+              const annual = row.annualDividend ?? getCanonicalAnnualDividend(asset, 3);
+              const target = row.targetYield ?? existing?.targetYield ?? 6;
+              const currency = (row.currency ?? existing?.currency ?? asset.currency) as Currency;
               const val = getAssetValuation({
                 targetYield: target,
                 currentPrice: asset.currentPrice,
@@ -185,11 +187,11 @@ export function useWatchlistCsvImport(
                 bvps: asset.metrics?.bvps ?? null,
                 dividendCagr: asset.metrics?.dividendCagr5y ?? null,
                 terminalGrowthRate,
-                currency: asset.currency,
+                currency,
                 type,
               });
-              const ceiling = val.activeCeiling;
-              const margin = val.margin;
+              const ceiling = row.ceilingPrice ?? val.activeCeiling;
+              const margin = row.safetyMargin ?? val.margin;
 
               const existingAssetTxs = workingTransactions.filter((tx) => tx.ticker === uppercaseTicker);
               const currentHolding = recalculateHoldingFromTransactions(existingAssetTxs);
@@ -220,7 +222,7 @@ export function useWatchlistCsvImport(
               const noteText = t.transactions.csvImportAdjustment;
 
               if (existingAssetTxs.length === 0) {
-                const txDate = existing?.investingSince ?? txTimestamp;
+                const txDate = row.investingSince ?? existing?.investingSince ?? txTimestamp;
                 const firstTx: Transaction = {
                   id: `tx-csv-${uppercaseTicker}-${txDate}-${importedQty}-${importedAvgPrice}`,
                   ticker: uppercaseTicker,
@@ -285,9 +287,9 @@ export function useWatchlistCsvImport(
               const item: WatchlistItem = {
                 id,
                 ticker: asset.ticker,
-                name: asset.name,
+                name: row.name || existing?.name || asset.name,
                 type,
-                currency: asset.currency,
+                currency,
                 currentPrice: asset.currentPrice,
                 annualDividend: annual,
                 targetYield: target,
@@ -296,12 +298,14 @@ export function useWatchlistCsvImport(
                 quantity: finalHolding.quantity > 0 ? finalHolding.quantity : importedQty,
                 averagePrice: finalHolding.averagePrice > 0 ? finalHolding.averagePrice : importedAvgPrice,
                 payoutRatio: existing?.payoutRatio ?? null,
-                customTaxRate: existing?.customTaxRate ?? null,
-                sector: existing?.sector ?? null,
+                customTaxRate: row.customTaxRate ?? existing?.customTaxRate ?? null,
+                sector: row.sector ?? existing?.sector ?? null,
+                targetMonthlyIncome: row.targetMonthlyIncome ?? existing?.targetMonthlyIncome ?? null,
                 paymentMonths: Array.isArray(asset.paymentMonths) ? asset.paymentMonths : [],
                 addedAt: existing?.addedAt ?? Date.now(),
                 investingSince:
                   recalculateInvestingSinceFromTransactions(finalTxs) ??
+                  row.investingSince ??
                   (existing?.investingSince && !isNaN(existing.investingSince)
                     ? existing.investingSince
                     : Date.now()),

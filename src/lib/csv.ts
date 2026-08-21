@@ -1,4 +1,4 @@
-import type { AssetType } from "./domain";
+import type { AssetType, Currency } from "./domain";
 import type { WatchlistItem } from "./watchlist";
 import type { Transaction } from "./transactions";
 
@@ -15,8 +15,18 @@ const VALID_TYPES: AssetType[] = [
 export interface ParsedCsvRow {
   ticker: string;
   type: AssetType | null;
+  name?: string | null;
   quantity: number;
   averagePrice: number | null;
+  targetYield?: number | null;
+  ceilingPrice?: number | null;
+  safetyMargin?: number | null;
+  annualDividend?: number | null;
+  sector?: string | null;
+  currency?: Currency | null;
+  targetMonthlyIncome?: number | null;
+  customTaxRate?: number | null;
+  investingSince?: number | null;
 }
 
 function csvEscape(v: string | number | null): string {
@@ -60,7 +70,7 @@ export function buildTransactionsCsv(transactions: Transaction[]): string {
 }
 
 /**
- * Full Watchlist Positions CSV Export with rich analytical columns.
+ * Full Watchlist Positions CSV Export with rich analytical columns (Symmetric with Import).
  */
 export function buildWatchlistFullCsv(items: WatchlistItem[]): string {
   const header = [
@@ -75,6 +85,8 @@ export function buildWatchlistFullCsv(items: WatchlistItem[]): string {
     "Dividendo Anual",
     "Setor",
     "Moeda",
+    "Meta Renda Mensal",
+    "Alíquota IR (%)",
     "Data Início",
   ];
   const rows = items.map((it) => {
@@ -93,6 +105,8 @@ export function buildWatchlistFullCsv(items: WatchlistItem[]): string {
       it.annualDividend ?? "",
       it.sector || "",
       it.currency,
+      it.targetMonthlyIncome ?? "",
+      it.customTaxRate ?? "",
       investingSinceStr,
     ]
       .map(csvEscape)
@@ -181,22 +195,53 @@ function parseCsvLine(line: string): string[] {
   return out.map((s) => s.trim());
 }
 
+function parseAssetType(raw: string): AssetType | null {
+  if (!raw) return null;
+  const s = stripAccents(raw.toUpperCase().trim()).replace(/[-\s]/g, "_");
+  if (VALID_TYPES.includes(s as AssetType)) return s as AssetType;
+  if (s === "ACAO" || s === "ACOES" || s === "ACAO_BR" || s === "ACOES_BR" || s === "STOCK" || s === "BRAZILIAN_STOCK") return "STOCK_BR";
+  if (s === "ACAO_EUA" || s === "ACOES_EUA" || s === "ACAO_US" || s === "ACOES_US" || s === "US_STOCK" || s === "STOCK_US" || s === "STOCK_EUA") return "STOCK_US";
+  if (s === "FUNDO_IMOBILIARIO" || s === "FUNDOS_IMOBILIARIOS" || s === "FII") return "FII";
+  if (s === "INFRA" || s === "FII_INFRA" || s === "FUNDO_INFRA" || s === "FII_INFRAESTRUTURA" || s === "FII-INFRA") return "FII_INFRA";
+  if (s === "AGRO" || s === "FIAGRO" || s === "FUNDO_AGRO") return "FIAGRO";
+  if (s === "REIT" || s === "REITS") return "REIT";
+  if (s === "ETF") return "ETF";
+  return null;
+}
+
+function parseCurrency(raw: string): Currency | null {
+  if (!raw) return null;
+  const s = raw.toUpperCase().trim();
+  if (s === "BRL" || s === "R$" || s === "REAL") return "BRL";
+  if (s === "USD" || s === "US$" || s === "$" || s === "DOLAR" || s === "DOLLAR") return "USD";
+  return null;
+}
+
 /**
- * Robust CSV parser for watchlist imports. Never throws — malformed
- * input returns an empty array so callers can show a friendly toast.
+ * Robust CSV parser for watchlist imports. Supports both 4-column quick format
+ * and full 14-column symmetric round-trip format with Portuguese/English aliases.
+ * Never throws — malformed input returns an empty array so callers can show a friendly toast.
  */
 export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
   try {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) return [];
-    const header = parseCsvLine(lines[0]).map((h) => h.toLowerCase());
+    const header = parseCsvLine(lines[0]).map(normalizeHeaderCell);
     const idx = {
-      ticker: header.findIndex((h) => h === "ticker" || h === "symbol"),
-      type: header.findIndex((h) => h === "type" || h === "assettype"),
-      qty: header.findIndex((h) => h === "quantity" || h === "qty" || h === "shares"),
-      avg: header.findIndex(
-        (h) => h === "averageprice" || h === "avgprice" || h === "avg" || h === "cost",
-      ),
+      ticker: header.findIndex((h) => h === "ticker" || h === "symbol" || h === "ativo" || h === "papel" || h === "codigo"),
+      name: header.findIndex((h) => h === "nome" || h === "name" || h === "empresa" || h === "company" || h === "descricao"),
+      type: header.findIndex((h) => h === "tipo" || h === "type" || h === "assettype" || h === "classe"),
+      qty: header.findIndex((h) => h === "quantidade" || h === "quantity" || h === "qtd" || h === "qtde" || h === "shares" || h === "volume" || h === "posicao" || h === "cantidad" || h === "cant"),
+      avg: header.findIndex((h) => h === "precomedio" || h === "averageprice" || h === "avgprice" || h === "avg" || h === "cost" || h === "preco" || h === "price" || h === "pu"),
+      ceiling: header.findIndex((h) => h === "precoteto" || h === "ceilingprice" || h === "teto" || h === "preciotecho"),
+      margin: header.findIndex((h) => h === "margemdeseguranca" || h === "safetymargin" || h === "margem" || h === "margin"),
+      targetYield: header.findIndex((h) => h === "yieldalvo" || h === "targetyield" || h === "yieldmeta" || h === "dyalvo"),
+      annualDividend: header.findIndex((h) => h === "dividendoanual" || h === "annualdividend" || h === "dividendo" || h === "dividend"),
+      sector: header.findIndex((h) => h === "setor" || h === "sector" || h === "segmento"),
+      currency: header.findIndex((h) => h === "moeda" || h === "currency" || h === "curr"),
+      targetMonthlyIncome: header.findIndex((h) => h === "metarendamensal" || h === "rendamensalalvo" || h === "targetmonthlyincome" || h === "metaderendamensal"),
+      customTaxRate: header.findIndex((h) => h === "aliquotair" || h === "customtaxrate" || h === "taxrate" || h === "imposto" || h === "aliquotadeir"),
+      investingSince: header.findIndex((h) => h === "datainicio" || h === "investingsince" || h === "dataprimeiroaporte" || h === "since" || h === "iniciodoinvestimento"),
     };
     if (idx.ticker < 0) return [];
     const rows: ParsedCsvRow[] = [];
@@ -204,15 +249,33 @@ export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
       const cols = parseCsvLine(lines[i]);
       const ticker = (cols[idx.ticker] || "").toUpperCase().trim();
       if (!ticker) continue;
-      const rawType = idx.type >= 0 ? (cols[idx.type] || "").toUpperCase().trim() : "";
-      const type = (VALID_TYPES as string[]).includes(rawType) ? (rawType as AssetType) : null;
-      const qty = idx.qty >= 0 ? Number(cols[idx.qty]) : NaN;
-      const avg = idx.avg >= 0 && cols[idx.avg] !== "" ? Number(cols[idx.avg]) : null;
+      const rawType = idx.type >= 0 ? (cols[idx.type] || "") : "";
+      const type = parseAssetType(rawType);
+      const qtyRaw = idx.qty >= 0 ? parseCurrencyValue(cols[idx.qty]) : NaN;
+      const avgRaw = idx.avg >= 0 && cols[idx.avg] !== "" ? parseCurrencyValue(cols[idx.avg]) : NaN;
+      const targetYieldRaw = idx.targetYield >= 0 && cols[idx.targetYield] !== "" ? parseCurrencyValue(cols[idx.targetYield]) : NaN;
+      const ceilingRaw = idx.ceiling >= 0 && cols[idx.ceiling] !== "" ? parseCurrencyValue(cols[idx.ceiling]) : NaN;
+      const marginRaw = idx.margin >= 0 && cols[idx.margin] !== "" ? parseCurrencyValue(cols[idx.margin]) : NaN;
+      const annualDivRaw = idx.annualDividend >= 0 && cols[idx.annualDividend] !== "" ? parseCurrencyValue(cols[idx.annualDividend]) : NaN;
+      const monthlyIncomeRaw = idx.targetMonthlyIncome >= 0 && cols[idx.targetMonthlyIncome] !== "" ? parseCurrencyValue(cols[idx.targetMonthlyIncome]) : NaN;
+      const taxRateRaw = idx.customTaxRate >= 0 && cols[idx.customTaxRate] !== "" ? parseCurrencyValue(cols[idx.customTaxRate]) : NaN;
+      const investingSinceRaw = idx.investingSince >= 0 && cols[idx.investingSince] !== "" ? parseCsvDate(cols[idx.investingSince]) : null;
+
       rows.push({
         ticker,
+        name: idx.name >= 0 && cols[idx.name] ? cols[idx.name].trim() : null,
         type,
-        quantity: Number.isFinite(qty) && qty > 0 ? qty : 0,
-        averagePrice: avg != null && Number.isFinite(avg) ? avg : null,
+        quantity: Number.isFinite(qtyRaw) && qtyRaw > 0 ? qtyRaw : 0,
+        averagePrice: Number.isFinite(avgRaw) && avgRaw > 0 ? avgRaw : null,
+        targetYield: Number.isFinite(targetYieldRaw) ? targetYieldRaw : null,
+        ceilingPrice: Number.isFinite(ceilingRaw) ? ceilingRaw : null,
+        safetyMargin: Number.isFinite(marginRaw) ? marginRaw : null,
+        annualDividend: Number.isFinite(annualDivRaw) ? annualDivRaw : null,
+        sector: idx.sector >= 0 && cols[idx.sector] ? cols[idx.sector].trim() : null,
+        currency: idx.currency >= 0 && cols[idx.currency] ? parseCurrency(cols[idx.currency]) : null,
+        targetMonthlyIncome: Number.isFinite(monthlyIncomeRaw) ? monthlyIncomeRaw : null,
+        customTaxRate: Number.isFinite(taxRateRaw) ? taxRateRaw : null,
+        investingSince: investingSinceRaw,
       });
     }
     return rows;
@@ -278,7 +341,7 @@ function stripAccents(s: string): string {
 }
 
 function normalizeHeaderCell(s: string): string {
-  return stripAccents(s.toLowerCase()).replace(/\s+/g, "");
+  return stripAccents(s.toLowerCase()).replace(/[^a-z0-9]/g, "");
 }
 
 /**

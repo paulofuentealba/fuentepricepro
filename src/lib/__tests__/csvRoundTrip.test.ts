@@ -4,6 +4,7 @@ import {
   buildTransactionsCsv,
   buildWatchlistFullCsv,
   buildWatchlistCsv,
+  parseWatchlistCsv,
 } from "../csv";
 import { parseFile } from "../dynamicCsvParser";
 import { persistTransactionsBatch } from "../transactionPersistence";
@@ -106,11 +107,11 @@ describe("csvRoundTrip & Persistence Resilience (Prompt 105)", () => {
     });
   });
 
-  describe("Watchlist Full Positions CSV Export", () => {
-    it("generates detailed positions CSV without affecting legacy buildWatchlistCsv", () => {
+  describe("Watchlist Full Positions CSV Export & Import Round-Trip (Item 18 Opção A)", () => {
+    it("generates detailed positions CSV and re-imports with 100% round-trip fidelity", () => {
       const items: WatchlistItem[] = [
         {
-          id: "item-1",
+          id: "stock_br:WEGE3",
           ticker: "WEGE3",
           name: "WEG S.A.",
           type: "STOCK_BR",
@@ -124,20 +125,79 @@ describe("csvRoundTrip & Persistence Resilience (Prompt 105)", () => {
           averagePrice: 35.0,
           paymentMonths: [3, 8],
           payoutRatio: 55,
-          customTaxRate: null,
+          customTaxRate: 15,
+          targetMonthlyIncome: 500,
           sector: "Industrial",
-          addedAt: Date.now(),
-          investingSince: new Date("2023-01-10").getTime(),
+          addedAt: 1700000000000,
+          investingSince: new Date("2023-01-10T00:00:00Z").getTime(),
+        },
+        {
+          id: "fii:HGLG11",
+          ticker: "HGLG11",
+          name: "CSHG Logística",
+          type: "FII",
+          currency: "BRL",
+          currentPrice: 160.0,
+          annualDividend: 13.2,
+          targetYield: 8.5,
+          ceilingPrice: 155.29,
+          safetyMargin: -2.94,
+          quantity: 50,
+          averagePrice: 152.0,
+          paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          payoutRatio: 95,
+          customTaxRate: null,
+          targetMonthlyIncome: null,
+          sector: "Imobiliário",
+          addedAt: 1700000000000,
+          investingSince: new Date("2022-05-15T00:00:00Z").getTime(),
         },
       ];
 
+      // 1. Export full 14-column CSV
       const fullCsv = buildWatchlistFullCsv(items);
-      expect(fullCsv).toContain("Ticker,Nome,Tipo,Quantidade,Preço Médio,Preço Teto");
-      expect(fullCsv).toContain("WEGE3,WEG S.A.,STOCK_BR,200,35,20");
+      expect(fullCsv).toContain("Ticker,Nome,Tipo,Quantidade,Preço Médio,Preço Teto,Margem de Segurança (%),Yield Alvo (%),Dividendo Anual,Setor,Moeda,Meta Renda Mensal,Alíquota IR (%),Data Início");
+      expect(fullCsv).toContain("WEGE3,WEG S.A.,STOCK_BR,200,35,20,-50.00,6,1.2,Industrial,BRL,500,15,2023-01-10");
 
+      // 2. Parse back with parseWatchlistCsv
+      const parsedRows = parseWatchlistCsv(fullCsv);
+      expect(parsedRows).toHaveLength(2);
+
+      // Item 1: WEGE3
+      expect(parsedRows[0].ticker).toBe("WEGE3");
+      expect(parsedRows[0].name).toBe("WEG S.A.");
+      expect(parsedRows[0].type).toBe("STOCK_BR");
+      expect(parsedRows[0].quantity).toBe(200);
+      expect(parsedRows[0].averagePrice).toBe(35);
+      expect(parsedRows[0].ceilingPrice).toBe(20);
+      expect(parsedRows[0].safetyMargin).toBe(-50);
+      expect(parsedRows[0].targetYield).toBe(6);
+      expect(parsedRows[0].annualDividend).toBe(1.2);
+      expect(parsedRows[0].sector).toBe("Industrial");
+      expect(parsedRows[0].currency).toBe("BRL");
+      expect(parsedRows[0].targetMonthlyIncome).toBe(500);
+      expect(parsedRows[0].customTaxRate).toBe(15);
+      expect(new Date(parsedRows[0].investingSince!).toISOString().slice(0, 10)).toBe("2023-01-10");
+
+      // Item 2: HGLG11
+      expect(parsedRows[1].ticker).toBe("HGLG11");
+      expect(parsedRows[1].name).toBe("CSHG Logística");
+      expect(parsedRows[1].type).toBe("FII");
+      expect(parsedRows[1].quantity).toBe(50);
+      expect(parsedRows[1].averagePrice).toBe(152);
+      expect(parsedRows[1].targetYield).toBe(8.5);
+      expect(parsedRows[1].annualDividend).toBe(13.2);
+      expect(parsedRows[1].currency).toBe("BRL");
+
+      // 3. Backward compatibility: legacy 4-column format still parsed seamlessly
       const legacyCsv = buildWatchlistCsv(items);
       expect(legacyCsv).toContain("Ticker,Type,Quantity,AveragePrice");
-      expect(legacyCsv).toContain("WEGE3,STOCK_BR,200,35");
+      const parsedLegacy = parseWatchlistCsv(legacyCsv);
+      expect(parsedLegacy).toHaveLength(2);
+      expect(parsedLegacy[0].ticker).toBe("WEGE3");
+      expect(parsedLegacy[0].type).toBe("STOCK_BR");
+      expect(parsedLegacy[0].quantity).toBe(200);
+      expect(parsedLegacy[0].averagePrice).toBe(35);
     });
   });
 
