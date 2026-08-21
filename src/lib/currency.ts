@@ -1,7 +1,8 @@
 import type { Currency } from "@/lib/domain";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 
-/** Fallback USD/BRL rate used whenever a live quote isn't available. */
-export const DEFAULT_USD_BRL_RATE = 5.5;
+/** Fallback USD/BRL rate used whenever a live quote isn't available (SSOT: macroDefaults.ts). */
+export const DEFAULT_USD_BRL_RATE = EXCHANGE_RATE_FALLBACK;
 
 /**
  * SSOT for BRL/USD currency conversion. Every aggregator that mixes
