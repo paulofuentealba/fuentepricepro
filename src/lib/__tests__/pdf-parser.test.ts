@@ -22,6 +22,15 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(ts).toBe(expected);
     });
 
+    it("should return null for empty, whitespace, null, undefined, or malformed date strings without falling back to Date.now()", () => {
+      expect(parseDdMmYyyyToTimestamp("")).toBeNull();
+      expect(parseDdMmYyyyToTimestamp("   ")).toBeNull();
+      expect(parseDdMmYyyyToTimestamp(null)).toBeNull();
+      expect(parseDdMmYyyyToTimestamp(undefined)).toBeNull();
+      expect(parseDdMmYyyyToTimestamp("invalid-date")).toBeNull();
+      expect(parseDdMmYyyyToTimestamp("99/99/2026")).toBeNull();
+    });
+
     it("should generate deterministic Transaction payloads from parsed trades", () => {
       const trade = {
         ticker: "WEGE3",
@@ -37,7 +46,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         id: expectedId,
         ticker: trade.ticker.toUpperCase(),
         type: "buy",
-        date: txTimestamp,
+        date: txTimestamp!,
         quantity: trade.quantity,
         pricePerShare: trade.price,
         fees: null,
@@ -63,7 +72,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         id: `tx-${idx}`,
         ticker: t.ticker,
         type: "buy",
-        date: parseDdMmYyyyToTimestamp(t.date),
+        date: parseDdMmYyyyToTimestamp(t.date)!,
         quantity: t.quantity,
         pricePerShare: t.price,
       }));
@@ -84,7 +93,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
           id: "tx-old-1",
           ticker: "WEGE3",
           type: "buy",
-          date: parseDdMmYyyyToTimestamp("01/01/2026"),
+          date: parseDdMmYyyyToTimestamp("01/01/2026")!,
           quantity: 100,
           pricePerShare: 30.0,
         },
@@ -97,7 +106,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
           id: "tx-new-1",
           ticker: "WEGE3",
           type: "buy",
-          date: parseDdMmYyyyToTimestamp("15/07/2026"),
+          date: parseDdMmYyyyToTimestamp("15/07/2026")!,
           quantity: 100,
           pricePerShare: 40.0,
         },
@@ -122,7 +131,7 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
         id: `tx-${idx}`,
         ticker: t.ticker,
         type: "buy",
-        date: parseDdMmYyyyToTimestamp(t.date),
+        date: parseDdMmYyyyToTimestamp(t.date)!,
         quantity: t.quantity,
         pricePerShare: t.price,
       }));

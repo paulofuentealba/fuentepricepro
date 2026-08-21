@@ -121,6 +121,7 @@ export const es = {
     assetsUpdateFailed: "{{count}} activo(s) fallaron al guardar — revise antes de confiar en los números.",
     adjustAllocationTarget100: "Ajusta tus metas de asignación al 100% antes de generar recomendaciones.",
     settingsSaved: "Configuraciones guardadas.",
+    brokerNoteInvalidDatesSkipped: "{{count}} transacción(es) ignorada(s) por fecha inválida en la nota.",
   },
   emptyStates: {
     clearFilters: "Borrar Filtros",

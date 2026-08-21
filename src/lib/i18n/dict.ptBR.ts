@@ -121,6 +121,7 @@ export const ptBR = {
     assetsUpdateFailed: "{{count}} ativo(s) falharam ao salvar — revise antes de confiar nos números.",
     adjustAllocationTarget100: "Ajuste suas metas de alocação para 100% antes de gerar a recomendação.",
     settingsSaved: "Configurações salvas.",
+    brokerNoteInvalidDatesSkipped: "{{count}} transação(ões) ignorada(s) por data inválida na nota.",
   },
   emptyStates: {
     clearFilters: "Limpar Filtros",

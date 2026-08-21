@@ -119,6 +119,7 @@ export const en = {
     assetsUpdateFailed: "{{count}} asset(s) failed to save — please review before trusting the numbers.",
     adjustAllocationTarget100: "Adjust your allocation targets to 100% before generating recommendations.",
     settingsSaved: "Settings saved.",
+    brokerNoteInvalidDatesSkipped: "{{count}} transaction(s) skipped due to invalid date in the note.",
   },
   emptyStates: {
     clearFilters: "Clear Filters",

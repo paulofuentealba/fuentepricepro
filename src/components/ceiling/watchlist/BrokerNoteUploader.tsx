@@ -31,18 +31,33 @@ import { toast } from "sonner";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
-export function parseDdMmYyyyToTimestamp(dateStr: string): number {
-  if (!dateStr) return Date.now();
-  const parts = dateStr.split("/");
+export function parseDdMmYyyyToTimestamp(dateStr?: string | null): number | null {
+  if (!dateStr || typeof dateStr !== "string") return null;
+  const trimmed = dateStr.trim();
+  if (!trimmed) return null;
+
+  const parts = trimmed.split("/");
   if (parts.length === 3) {
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1;
     const year = parseInt(parts[2], 10);
-    const d = new Date(Date.UTC(year, month, day, 12, 0, 0));
-    if (!isNaN(d.getTime())) return d.getTime();
+    if (
+      !isNaN(day) &&
+      !isNaN(month) &&
+      !isNaN(year) &&
+      year >= 1900 &&
+      month >= 0 &&
+      month <= 11 &&
+      day >= 1 &&
+      day <= 31
+    ) {
+      const d = new Date(Date.UTC(year, month, day, 12, 0, 0));
+      if (!isNaN(d.getTime())) return d.getTime();
+    }
   }
-  const fallback = new Date(dateStr).getTime();
-  return isNaN(fallback) ? Date.now() : fallback;
+
+  const fallback = new Date(trimmed).getTime();
+  return isNaN(fallback) ? null : fallback;
 }
 
 export function consolidateTradesToWatchlistItems(
@@ -181,9 +196,19 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
   const importTrades = async (allTrades: TradeRecord[]) => {
     const newlyCreatedTransactions: Transaction[] = [];
+    const validTrades: TradeRecord[] = [];
+    let invalidDatesCount = 0;
 
     for (const trade of allTrades) {
       const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
+      if (txTimestamp === null) {
+        invalidDatesCount++;
+        console.warn(`[BrokerNoteUploader] Skipping trade ${trade.ticker} due to invalid date: "${trade.date}"`);
+        continue;
+      }
+
+      validTrades.push(trade);
+
       const transaction: Transaction = {
         id: `tx-pdf-${trade.ticker.toUpperCase()}-${txTimestamp}-${trade.quantity}-${trade.price}`,
         ticker: trade.ticker.toUpperCase(),
@@ -202,7 +227,17 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
       }
     }
 
-    const uniqueTickers = Array.from(new Set(allTrades.map((t) => t.ticker.toUpperCase())));
+    if (invalidDatesCount > 0) {
+      toast.error(
+        t.toasts.brokerNoteInvalidDatesSkipped.replace("{{count}}", String(invalidDatesCount))
+      );
+    }
+
+    if (validTrades.length === 0) {
+      return;
+    }
+
+    const uniqueTickers = Array.from(new Set(validTrades.map((t) => t.ticker.toUpperCase())));
     const assetDataMap: Record<string, any> = {};
 
     for (const ticker of uniqueTickers) {
@@ -214,7 +249,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
     }
 
     const itemsToImport = consolidateTradesToWatchlistItems(
-      allTrades,
+      validTrades,
       transactions,
       newlyCreatedTransactions,
       assetDataMap
