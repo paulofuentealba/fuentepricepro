@@ -190,7 +190,7 @@ export const ptBR = {
     orClick: "ou clique para selecionar o arquivo",
     uploadPdf: "Fazer upload do PDF",
     importing: "Extraindo ordens...",
-    successImport: "ordens importadas com sucesso",
+    successImport: "{{count}} ordem(ns) importada(s) com sucesso.",
     errorImport: "Falha ao ler formato do PDF",
     malformedPdf: "PDF malformado ou ilegível",
     unknownBroker: "Corretora não identificada ou formato inválido.",

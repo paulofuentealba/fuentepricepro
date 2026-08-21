@@ -188,7 +188,7 @@ export const en = {
     orClick: "or click to select the file",
     uploadPdf: "Upload PDF",
     importing: "Extracting orders...",
-    successImport: "orders successfully imported",
+    successImport: "{{count}} order(s) successfully imported.",
     errorImport: "Failed to read PDF format",
     malformedPdf: "Malformed or unreadable PDF",
     unknownBroker: "Unidentified broker or invalid format.",

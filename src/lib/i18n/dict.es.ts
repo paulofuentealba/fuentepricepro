@@ -190,7 +190,7 @@ export const es = {
     orClick: "o haga clic para seleccionar el archivo",
     uploadPdf: "Subir PDF",
     importing: "Extrayendo órdenes...",
-    successImport: "órdenes importadas con éxito",
+    successImport: "{{count}} orden(es) importada(s) con éxito.",
     errorImport: "Error al leer el formato del PDF",
     malformedPdf: "PDF malformado o ilegible",
     unknownBroker: "Corredora no identificada o formato no válido.",
