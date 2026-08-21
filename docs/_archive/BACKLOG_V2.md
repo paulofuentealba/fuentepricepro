@@ -225,10 +225,6 @@ Registrado aqui só pra contexto — não precisa de ação:
 - **Impacto:** Inofensivo em runtime porque `rowToItem` (`src/lib/watchlist.ts:212`) ignora esse campo e sempre deriva o ID canônico em tempo de execução via `makeId(r.ticker, r.type)`.
 - **Ação Futura Sugerida:** Avaliar remoção do campo `id` de `Row` / `itemToRow` em refactor futuro de schema de dados para eliminar dados redundantes.
 
-### Assimetria Export/Import no CSV de Transações (Round-Trip de Taxas)
-- **Contexto:** Identificado na investigação do Item 5 (Tier 0 / Lote 3). A função `buildTransactionsCsv` (`src/lib/csv.ts:52-70`) exporta a coluna `"Taxas"` com o valor real de `t.fees || 0`. Porém, `parseTransactionTemplateCsv` (`src/lib/csv.ts:470-520`) não procura por coluna de taxas no mapeamento `idx`, e `ParsedTransactionTemplateRow` não possui o campo `fees`. Ao exportar transações e reimportar pelo template avançado (`useWatchlistCsvImport.ts`), o valor das taxas é descartado silenciosamente no round-trip.
-- **Ação Futura Sugerida:** Adicionar detecção e parsing da coluna `"Taxas"` / `"Fees"` / `"Tarifas"` em `parseTransactionTemplateCsv`, incluir `fees?: number | null` em `ParsedTransactionTemplateRow` e propagar para `tx.fees` em `useWatchlistCsvImport.ts:112`.
-
 ### Fragilidade de Interpolação i18n em `BrokerNoteUploader.tsx`
 - **Contexto:** Identificado no Item 1 (Tier 0 / Lote 2). Chamadas de `toast.success` com concatenação direta de string em torno de `t.brokerNote.successImport` em vez de utilizar o padrão de interpolação canônico `{{count}}` como já feito em `brokerNoteInvalidDatesSkipped` e `importFailedCount`.
 - **Ação Futura Sugerida:** Refatorar a chave no dicionário i18n (`dict.ptBR.ts`, `dict.en.ts`, `dict.es.ts`) para suportar interpolação `{{count}}`.
