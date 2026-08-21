@@ -379,8 +379,8 @@ describe("Yield-Trap Check + Shareholder Yield (prompt 79)", () => {
       marketCap: 19_000_000,
     });
     // netBuyback = (1,000,000 - 950,000) * 20 = 1,000,000
-    // shareholderYield = (1,000,000 + 1,000,000) / 19,000,000
-    expect(result).toBeCloseTo(2_000_000 / 19_000_000, 6);
+    // shareholderYield (%) = ((1,000,000 + 1,000,000) / 19,000,000) * 100 = 10.526316%
+    expect(result).toBeCloseTo((2_000_000 / 19_000_000) * 100, 4);
     expect(result).toBeGreaterThan(0);
   });
 
@@ -393,8 +393,8 @@ describe("Yield-Trap Check + Shareholder Yield (prompt 79)", () => {
       marketCap: 22_000_000,
     });
     // netBuyback = (1,000,000 - 1,100,000) * 20 = -2,000,000
-    // shareholderYield = (1,000,000 - 2,000,000) / 22,000,000 = negative
-    expect(result).toBeCloseTo(-1_000_000 / 22_000_000, 6);
+    // shareholderYield (%) = ((1,000,000 - 2,000,000) / 22,000,000) * 100 = -4.545455%
+    expect(result).toBeCloseTo((-1_000_000 / 22_000_000) * 100, 4);
     expect(result).toBeLessThan(0);
   });
 

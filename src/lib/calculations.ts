@@ -259,6 +259,8 @@ export function isYieldTrap(
  *
  * Returns `null` (not `0`) whenever any required input is missing/invalid —
  * never asserts a shareholder yield without real data behind it.
+ *
+ * @returns Shareholder yield in percentage (e.g. 5.2 for 5.2%), matching targetYield and dividendYield scale, or null if data is insufficient.
  */
 export function calculateShareholderYield({
   dividendsPaidTotal,
@@ -291,7 +293,7 @@ export function calculateShareholderYield({
   }
 
   const netBuybackValue = (sharesOutstandingPrior - sharesOutstandingCurrent) * pricePerShare;
-  return (dividendsPaidTotal + netBuybackValue) / marketCap;
+  return ((dividendsPaidTotal + netBuybackValue) / marketCap) * 100;
 }
 
 export function gordonPrice(

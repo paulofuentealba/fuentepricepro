@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { valuateStockUS, getAssetValuation } from "../calculations";
+import { valuateStockUS, getAssetValuation, calculateShareholderYield } from "../calculations";
 
 describe("valuateStockUS - Ações Norte-Americanas Especializadas", () => {
   it("should calculate Bazin, Shareholder Yield, and Peter Lynch for AAPL", () => {
@@ -76,5 +76,54 @@ describe("valuateStockUS - Ações Norte-Americanas Especializadas", () => {
 
     expect(result.ticker).toBe("MSFT");
     expect(result.assumptions).toHaveLength(4);
+  });
+
+  it("should integrate calculateShareholderYield with valuateStockUS and getAssetValuation in identical scale (Item 2)", () => {
+    // 1. Calculate Shareholder Yield from synthetic buyback + dividend metrics:
+    // Dividends: $15B, Net Buybacks: (15.5B - 15.0B) * $200 = $100B, Market Cap: $3,000B
+    // Total Return (%) = ((15B + 100B) / 3,000B) * 100 = (115 / 3,000) * 100 = 3.833333%
+    const computedSy = calculateShareholderYield({
+      dividendsPaidTotal: 15_000_000_000,
+      sharesOutstandingPrior: 15_500_000_000,
+      sharesOutstandingCurrent: 15_000_000_000,
+      pricePerShare: 200,
+      marketCap: 3_000_000_000_000,
+    });
+
+    expect(computedSy).not.toBeNull();
+    expect(computedSy!).toBeCloseTo(3.8333, 3); // 3.833%
+
+    // 2. Feed into valuateStockUS directly
+    const directValuation = valuateStockUS({
+      ticker: "AAPL",
+      targetYield: 3.5,
+      currentPrice: 200,
+      avgDividend: 1.0,
+      shareholderYield: computedSy,
+      currency: "USD",
+      type: "STOCK_US",
+    });
+
+    // Ceiling calculation: currentPrice * (shareholderYield / targetYield) = 200 * (3.833333 / 3.5) = 219.0476
+    expect(directValuation.methods.shareholderYield).toBeCloseTo(219.05, 1);
+    expect(directValuation.shareholderYield).toBeCloseTo(3.8333, 3);
+    const assumption = directValuation.assumptions.find((a) => a.key === "shareholderYield");
+    expect(assumption?.value).toBeCloseTo(3.8333, 3);
+    expect(assumption?.confidenceBadge).toBe(4);
+
+    // 3. Feed via universal dispatcher getAssetValuation
+    const dispatcherValuation = getAssetValuation({
+      ticker: "AAPL",
+      targetYield: 3.5,
+      currentPrice: 200,
+      avgDividend: 1.0,
+      shareholderYield: computedSy,
+      currency: "USD",
+      type: "STOCK_US",
+    });
+
+    expect(dispatcherValuation.methods.shareholderYield).toBeCloseTo(219.05, 1);
+    expect(dispatcherValuation.shareholderYield).toBeCloseTo(3.8333, 3);
+    expect(dispatcherValuation.activeCeiling).toBeGreaterThan(0);
   });
 });
