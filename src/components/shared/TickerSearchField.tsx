@@ -27,10 +27,9 @@ export interface TickerSearchFieldProps {
   /** Controlled initial value for the search input (e.g. deep-link prefill). */
   initialQuery?: string;
   /**
-   * When set, auto-picks the matching suggestion (or the first suggestion,
-   * as a fallback) once it becomes available for this ticker — mirrors the
-   * old AssetForm.tsx behavior of auto-submitting a prefilled ticker. Fires
-   * only once per mount.
+   * When set, auto-picks the exact matching suggestion once it becomes
+   * available for this ticker — mirrors the prefilled ticker auto-submit.
+   * Fires only once per mount.
    */
   autoPickTicker?: string | null;
   placeholder?: string;
@@ -105,7 +104,7 @@ export function TickerSearchField({
     if (!autoPickTicker) return;
     const target = autoPickTicker.toUpperCase();
     if (query !== target) return;
-    const hit = suggestions.find((s) => s.ticker === target) ?? suggestions[0];
+    const hit = suggestions.find((s) => s.ticker === target);
     if (!hit) return;
     autoPickedRef.current = true;
     pick(hit);
