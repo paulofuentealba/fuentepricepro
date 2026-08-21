@@ -75,8 +75,8 @@ export function PortfolioIrrCard({
         0,
       );
     }
-    return currentPortfolioValue > 0 ? currentPortfolioValue : 0;
-  }, [items, assetCurrencies, activeCurrency, currentPortfolioValue]);
+    return 0;
+  }, [items, assetCurrencies, activeCurrency]);
 
   // Fetch benchmark historical series
   const cdiQuery = useQuery({
