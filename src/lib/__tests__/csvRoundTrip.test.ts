@@ -5,6 +5,7 @@ import {
   buildWatchlistFullCsv,
   buildWatchlistCsv,
   parseWatchlistCsv,
+  parseTransactionTemplateCsv,
 } from "../csv";
 import { parseFile } from "../dynamicCsvParser";
 import { persistTransactionsBatch } from "../transactionPersistence";
@@ -104,6 +105,14 @@ describe("csvRoundTrip & Persistence Resilience (Prompt 105)", () => {
       expect(parsedResult.transactions[3].type).toBe("BUY");
       expect(parsedResult.transactions[3].quantity).toBe(15);
       expect(parsedResult.transactions[3].price).toBe(182.5);
+
+      // 4. Verify parseTransactionTemplateCsv also preserves fees on the same export
+      const templateParsed = parseTransactionTemplateCsv(csvString);
+      expect(templateParsed.length).toBe(4);
+      expect(templateParsed[0].fees).toBe(2.15);
+      expect(templateParsed[1].fees).toBe(1.5);
+      expect(templateParsed[2].fees).toBe(3.4);
+      expect(templateParsed[3].fees).toBe(0);
     });
   });
 

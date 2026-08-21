@@ -305,6 +305,7 @@ export interface ParsedTransactionTemplateRow {
   type: "buy" | "sell" | "corporate_action";
   /** Only set when type === "corporate_action". */
   factor?: number;
+  fees?: number | null;
 }
 
 export function buildTransactionTemplateCsv(): string {
@@ -495,6 +496,15 @@ export function parseTransactionTemplateCsv(text: string): ParsedTransactionTemp
           h === "valor" ||
           h === "precio",
       ),
+      fees: header.findIndex(
+        (h) =>
+          h.includes("taxa") ||
+          h.includes("fee") ||
+          h.includes("corretagem") ||
+          h.includes("tarifa") ||
+          h.includes("custo") ||
+          h.includes("cost"),
+      ),
       type: header.findIndex(
         (h) => h.includes("tipo") || h === "type" || h.includes("operacao") || h.includes("ordem"),
       ),
@@ -530,12 +540,15 @@ export function parseTransactionTemplateCsv(text: string): ParsedTransactionTemp
           pricePerShare: 0,
           type: "corporate_action",
           factor,
+          fees: null,
         });
         continue;
       }
 
       const qty = idx.qty >= 0 ? parseCurrencyValue(cols[idx.qty]) : NaN;
       const price = idx.price >= 0 && cols[idx.price] !== "" ? parseCurrencyValue(cols[idx.price]) : NaN;
+      const rawFees = idx.fees >= 0 && cols[idx.fees] !== "" ? parseCurrencyValue(cols[idx.fees]) : NaN;
+      const parsedFees = Number.isFinite(rawFees) && rawFees >= 0 ? rawFees : null;
 
       let type: "buy" | "sell" = "buy";
       if (normalizedType === "venda" || normalizedType === "sell" || normalizedType === "venta") {
@@ -550,6 +563,7 @@ export function parseTransactionTemplateCsv(text: string): ParsedTransactionTemp
         quantity: Number.isFinite(qty) && qty > 0 ? qty : 0,
         pricePerShare: Number.isFinite(price) && price > 0 ? price : 0,
         type,
+        fees: parsedFees,
       });
     }
     return rows;

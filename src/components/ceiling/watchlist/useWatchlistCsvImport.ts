@@ -109,7 +109,7 @@ export function useWatchlistCsvImport(
                   date: txTimestamp,
                   quantity: row.quantity,
                   pricePerShare: txPrice,
-                  fees: null,
+                  fees: row.fees ?? null,
                   notes: t.transactions.csvImportAdjustment,
                 };
               }

@@ -197,3 +197,36 @@ describe("decodeCsvBytes (Prompt 81)", () => {
     expect(decodeCsvBytes(bytes.buffer)).toBe("Preço");
   });
 });
+
+describe("parseTransactionTemplateCsv fees support (Tier 0 / Item 1)", () => {
+  it("parses Taxas column correctly with currency formats and floats", () => {
+    const csv = `Ticker,Data da Compra,Quantidade,Valor Unitário,Taxas,Tipo
+PETR4,2024-01-15,100,34.50,"R$ 2,15",Compra
+VALE3,2024-03-10,50,68.20,3.40,Venda
+HGLG11,2024-02-20,10,165.80,0,Compra`;
+
+    const rows = parseTransactionTemplateCsv(csv);
+    expect(rows).toHaveLength(3);
+    expect(rows[0].fees).toBe(2.15);
+    expect(rows[1].fees).toBe(3.4);
+    expect(rows[2].fees).toBe(0);
+  });
+
+  it("parses English Fees header", () => {
+    const csv = `Symbol,Date,Quantity,Price,Fees,Type
+AAPL,2024-04-05,15,182.50,1.25,Buy`;
+
+    const rows = parseTransactionTemplateCsv(csv);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].fees).toBe(1.25);
+  });
+
+  it("maintains backward compatibility returning fees null when column is omitted", () => {
+    const csv = `Ticker,Data da Compra,Quantidade,Valor Unitário,Tipo
+VALE3,2024-03-15,100,62.50,Compra`;
+
+    const rows = parseTransactionTemplateCsv(csv);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].fees).toBeNull();
+  });
+});
