@@ -247,12 +247,13 @@ export function buildCashFlowsFromPortfolio(
     const rate = targetCurrency ? 1 : isUsd ? fxRateUsdToBrl : 1;
     const sharePrice = tx.pricePerShare || 0;
     const fees = tx.fees || 0;
-    const totalCost = (tx.quantity * sharePrice + fees) * rate;
 
     if (tx.type === "buy") {
+      const totalCost = (tx.quantity * sharePrice + fees) * rate;
       cashFlows.push({ date: tx.date, amount: -totalCost });
     } else if (tx.type === "sell") {
-      cashFlows.push({ date: tx.date, amount: +totalCost });
+      const netProceeds = (tx.quantity * sharePrice - fees) * rate;
+      cashFlows.push({ date: tx.date, amount: +netProceeds });
     }
   }
 

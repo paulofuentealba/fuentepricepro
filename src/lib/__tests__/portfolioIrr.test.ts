@@ -282,5 +282,67 @@ describe("portfolioIrr", () => {
       expect(isUsdAsset("msft", assetCurrencies)).toBe(true);
       expect(isUsdAsset("PETR4", assetCurrencies)).toBe(false);
     });
+
+    it("correctly subtracts fees on sell transactions and adds fees on buy transactions", () => {
+      const t0 = new Date("2025-01-01").getTime();
+      const t1 = new Date("2025-06-01").getTime();
+
+      const txs: Transaction[] = [
+        {
+          id: "tx-buy",
+          ticker: "PETR4.SA",
+          type: "buy",
+          date: t0,
+          quantity: 100,
+          pricePerShare: 20, // Gross: 2000
+          fees: 10,          // Total outflow: 2000 + 10 = 2010
+        },
+        {
+          id: "tx-sell",
+          ticker: "PETR4.SA",
+          type: "sell",
+          date: t1,
+          quantity: 100,
+          pricePerShare: 30, // Gross: 3000
+          fees: 15,          // Total inflow: 3000 - 15 = 2985
+        },
+      ];
+
+      const flows = buildCashFlowsFromPortfolio(txs, [], 0, t1 + 1000, 1.0, { "PETR4.SA": "BRL" }, "BRL");
+
+      const buyFlow = flows.find((f) => f.date === t0);
+      const sellFlow = flows.find((f) => f.date === t1);
+
+      expect(buyFlow).toBeDefined();
+      expect(buyFlow?.amount).toBe(-2010); // Buy adds fees to cost basis (more cash out)
+
+      expect(sellFlow).toBeDefined();
+      expect(sellFlow?.amount).toBe(+2985); // Sell subtracts fees from proceeds (less cash in)
+    });
+
+    it("yields a strictly lower IRR when sell transaction has fees compared to zero fees", () => {
+      const t0 = new Date("2025-01-01").getTime();
+      const t1 = new Date("2025-12-31").getTime();
+
+      const txsNoFee: Transaction[] = [
+        { id: "b", ticker: "VALE3.SA", type: "buy", date: t0, quantity: 100, pricePerShare: 50, fees: 0 },
+        { id: "s", ticker: "VALE3.SA", type: "sell", date: t1, quantity: 100, pricePerShare: 60, fees: 0 },
+      ];
+
+      const txsWithFee: Transaction[] = [
+        { id: "b", ticker: "VALE3.SA", type: "buy", date: t0, quantity: 100, pricePerShare: 50, fees: 0 },
+        { id: "s", ticker: "VALE3.SA", type: "sell", date: t1, quantity: 100, pricePerShare: 60, fees: 500 }, // 500 in fees
+      ];
+
+      const flowsNoFee = buildCashFlowsFromPortfolio(txsNoFee, [], 0, t1 + 1000, 1.0, { "VALE3.SA": "BRL" }, "BRL");
+      const flowsWithFee = buildCashFlowsFromPortfolio(txsWithFee, [], 0, t1 + 1000, 1.0, { "VALE3.SA": "BRL" }, "BRL");
+
+      const irrNoFee = calculateIrr(flowsNoFee);
+      const irrWithFee = calculateIrr(flowsWithFee);
+
+      expect(irrNoFee).not.toBeNull();
+      expect(irrWithFee).not.toBeNull();
+      expect(irrWithFee!).toBeLessThan(irrNoFee!);
+    });
   });
 });
