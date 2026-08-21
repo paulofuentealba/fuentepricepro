@@ -112,6 +112,13 @@ export function getLocalDateISOString(input?: Date | number | string | null): st
     return `${year}-${month}-${day}`;
   }
 
+  if (typeof input === "string") {
+    const trimmed = input.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+
   const d = input instanceof Date ? input : new Date(input);
   if (isNaN(d.getTime())) return "";
 
