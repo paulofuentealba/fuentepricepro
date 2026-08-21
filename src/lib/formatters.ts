@@ -94,3 +94,30 @@ export function formatMonthsAsYearsMonths(months: number): string {
   if (parts.length === 0) return "menos de 1 mês";
   return parts.join(" e ");
 }
+
+/**
+ * Converte uma data para string no formato ISO 'YYYY-MM-DD' usando os componentes
+ * de calendário LOCAL (ano, mês, dia), prevenindo o desvio/skew de UTC de toISOString().
+ *
+ * Exemplo: às 22h00 em GMT-3 do dia 2026-08-21:
+ * - new Date().toISOString().split("T")[0] -> "2026-08-22" (ERRADO / UTC)
+ * - getLocalDateISOString(new Date())      -> "2026-08-21" (CORRETO / Local)
+ */
+export function getLocalDateISOString(input?: Date | number | string | null): string {
+  if (input === null || input === undefined || input === "") {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  const d = input instanceof Date ? input : new Date(input);
+  if (isNaN(d.getTime())) return "";
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+

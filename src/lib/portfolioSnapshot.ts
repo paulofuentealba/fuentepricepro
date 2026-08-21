@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { db } from "@/integrations/firebase/client";
 import { doc, setDoc } from "firebase/firestore";
 import { useAuth } from "./auth-provider";
+import { getLocalDateISOString } from "./formatters";
 
 export interface PortfolioSnapshot {
   date: string; // ISO format YYYY-MM-DD
@@ -30,7 +31,7 @@ export function usePortfolioSnapshot(totalValueBRL: number, totalInvestedBRL: nu
       return;
     }
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getLocalDateISOString();
     const localStorageKey = `${STORAGE_KEY_PREFIX}${todayStr}`;
 
     // Layer 1 network optimization: skip if already recorded in this browser today

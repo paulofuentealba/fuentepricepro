@@ -5,7 +5,7 @@ import type { DividendEvent, Currency, Asset } from "@/lib/domain";
 import { calculateRealizedIncome } from "@/lib/realizedIncome";
 import { AssetMonthlyDividendChart } from "./AssetMonthlyDividendChart";
 import { DividendHeatmapCard } from "./DividendHeatmapCard";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, getLocalDateISOString } from "@/lib/formatters";
 import { formatResultDate } from "@/lib/resultCard";
 import { useI18n } from "@/lib/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,10 +59,10 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
   }, [realizedEvents]);
 
   const summary = useMemo(() => {
-    const todayISO = new Date().toISOString().split("T")[0];
+    const todayISO = getLocalDateISOString();
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const oneYearAgoISO = oneYearAgo.toISOString().split("T")[0];
+    const oneYearAgoISO = getLocalDateISOString(oneYearAgo);
 
     const lastReceivedEvent =
       pastRealizedEvents.length > 0 ? pastRealizedEvents[pastRealizedEvents.length - 1] : null;

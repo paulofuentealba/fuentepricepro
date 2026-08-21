@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { macroRatesQueryOptions } from "@/lib/queryOptions";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { getLocalDateISOString } from "@/lib/formatters";
 
 interface Props {
   open: boolean;
@@ -46,8 +47,8 @@ export function AddFixedIncomeDialog({ open, onOpenChange }: Props) {
   const [investedAmount, setInvestedAmount] = useState<number | "">("");
   const [rate, setRate] = useState<number | "">("");
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const nextYearStr = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const todayStr = getLocalDateISOString();
+  const nextYearStr = getLocalDateISOString(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000));
 
   const [startDate, setStartDate] = useState(todayStr);
   const [maturityDate, setMaturityDate] = useState(nextYearStr);

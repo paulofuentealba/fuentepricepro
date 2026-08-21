@@ -2,7 +2,7 @@ import { type Transaction, getQuantityAtDate } from "./transactionsLogic";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
 import { convertCurrency } from "./currency";
-import { toIntlLocale } from "./formatters";
+import { toIntlLocale, getLocalDateISOString } from "./formatters";
 import { type Locale } from "./i18n";
 
 export type TaxType = "dividend" | "jcp" | "rendimento_fii" | "us_dividend";
@@ -77,7 +77,7 @@ export function calculateRealizedIncome(
   assetMetaByTicker?: Record<string, AssetTaxMeta | undefined> | Map<string, AssetTaxMeta>,
 ): RealizedIncomeEvent[] {
   const result: RealizedIncomeEvent[] = [];
-  const todayISO = new Date().toISOString().split("T")[0];
+  const todayISO = getLocalDateISOString();
 
   // Group transactions by ticker
   const txByTicker: Record<string, Transaction[]> = {};

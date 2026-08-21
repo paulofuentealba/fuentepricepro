@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { toIntlLocale, formatPercent, formatNumber, formatMonthsAsYearsMonths } from "../formatters";
+import {
+  toIntlLocale,
+  formatPercent,
+  formatNumber,
+  formatMonthsAsYearsMonths,
+  getLocalDateISOString,
+} from "../formatters";
 
 describe("toIntlLocale & formatters", () => {
   it("should convert internal app locale codes to valid BCP 47 language tags", () => {
@@ -46,3 +52,42 @@ describe("formatMonthsAsYearsMonths", () => {
     expect(formatMonthsAsYearsMonths(0.4)).toBe("menos de 1 mês");
   });
 });
+
+describe("getLocalDateISOString", () => {
+  it("returns current local date formatted as YYYY-MM-DD when called without arguments or with null/empty", () => {
+    const res = getLocalDateISOString();
+    expect(res).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+    const now = new Date();
+    const expectedYear = now.getFullYear();
+    const expectedMonth = String(now.getMonth() + 1).padStart(2, "0");
+    const expectedDay = String(now.getDate()).padStart(2, "0");
+    expect(res).toBe(`${expectedYear}-${expectedMonth}-${expectedDay}`);
+
+    expect(getLocalDateISOString(null)).toBe(res);
+    expect(getLocalDateISOString(undefined)).toBe(res);
+    expect(getLocalDateISOString("")).toBe(res);
+  });
+
+  it("formats a specific Date instance accurately using its local calendar components", () => {
+    // Construct local date: 2026-03-05 at 23:45:00
+    const localDate = new Date(2026, 2, 5, 23, 45, 0); // Month is 0-indexed (2 = March)
+    expect(getLocalDateISOString(localDate)).toBe("2026-03-05");
+  });
+
+  it("formats numeric timestamp correctly", () => {
+    const localDate = new Date(2026, 7, 21, 14, 30, 0);
+    expect(getLocalDateISOString(localDate.getTime())).toBe("2026-08-21");
+  });
+
+  it("handles valid ISO string inputs and returns local YYYY-MM-DD", () => {
+    const localDate = new Date(2026, 11, 31, 10, 0, 0);
+    expect(getLocalDateISOString(localDate.toString())).toBe("2026-12-31");
+  });
+
+  it("returns empty string for invalid date inputs", () => {
+    expect(getLocalDateISOString("invalid-date-string")).toBe("");
+    expect(getLocalDateISOString(NaN)).toBe("");
+  });
+});
+

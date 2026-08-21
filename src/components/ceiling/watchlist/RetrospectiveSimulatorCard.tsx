@@ -5,7 +5,7 @@ import type { Asset } from "@/lib/domain";
 import { assetPriceHistoryQueryOptions } from "@/lib/queryOptions";
 import { simulateRetrospectiveInvestment } from "@/lib/retrospectiveSimulator";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency, formatPercent } from "@/lib/i18n";
+import { formatCurrency, formatPercent, getLocalDateISOString } from "@/lib/formatters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -21,9 +21,9 @@ export function RetrospectiveSimulatorCard({ asset }: Props) {
 
   const { fromDate, toDate } = useMemo(() => {
     const now = new Date();
-    const toDateStr = now.toISOString().split("T")[0];
+    const toDateStr = getLocalDateISOString(now);
     const start = new Date(now.getTime() - periodYears * 365.25 * 24 * 60 * 60 * 1000);
-    const fromDateStr = start.toISOString().split("T")[0];
+    const fromDateStr = getLocalDateISOString(start);
     return { fromDate: fromDateStr, toDate: toDateStr };
   }, [periodYears]);
 

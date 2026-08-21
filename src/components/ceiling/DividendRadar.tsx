@@ -7,7 +7,7 @@ import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps, GORDON_TE
 import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
 import { SELIC_FALLBACK } from "@/lib/macroDefaults";
-import { formatCurrency, formatPercent } from "@/lib/i18n";
+import { formatCurrency, formatPercent, getLocalDateISOString } from "@/lib/formatters";
 
 import {
   Table,
@@ -100,9 +100,7 @@ export function DividendRadar() {
           currency: market === "BR" ? "BRL" : "USD",
           dy: valuation.dividendYield,
           sector: asset.sector || "N/A",
-          exDate: asset.exDividendDate
-            ? new Date(asset.exDividendDate).toISOString().split("T")[0]
-            : null,
+          exDate: asset.exDividendDate ? getLocalDateISOString(asset.exDividendDate) || null : null,
         };
       }) || [],
     [rawData, market, targetYield, selic, ipcaAvg],
