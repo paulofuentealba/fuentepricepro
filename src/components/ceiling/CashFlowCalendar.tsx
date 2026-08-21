@@ -132,12 +132,9 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
     [items, activeCurrency, dividendEventsMap, transactions, fxRate],
   );
 
-  const { totals, valuedItems } = useValuedPortfolio();
+  const { totals } = useValuedPortfolio();
   const currentPortfolioValue = totals.consolidatedNetWorth;
-  const totalInvestedBRL = valuedItems.reduce((acc, it) => {
-    const value = it.quantity * it.currentPrice;
-    return acc + (it.currency === "USD" ? value * fxRate : value);
-  }, 0);
+  const totalInvestedBRL = totals.consolidatedInvested;
 
   // Periodic daily snapshot recorded in Firestore (idempotent YYYY-MM-DD doc ID)
   usePortfolioSnapshot(currentPortfolioValue, totalInvestedBRL);

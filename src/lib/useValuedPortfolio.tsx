@@ -39,7 +39,7 @@ export interface ValuedWatchlistItem extends WatchlistItem {
 // Shared totals computation
 // ---------------------------------------------------------------------------
 
-function computeTotals(
+export function computeTotals(
   valuedItems: ValuedWatchlistItem[],
   fx: { USDBRL: number } | undefined,
   macroRates: Parameters<typeof calculateFixedIncomeBalance>[1] | undefined,
@@ -48,6 +48,8 @@ function computeTotals(
   let brl = 0;
   let usdWorth = 0;
   let brlWorth = 0;
+  let usdInvested = 0;
+  let brlInvested = 0;
   let countUsd = 0;
   let countBrl = 0;
 
@@ -62,23 +64,47 @@ function computeTotals(
     );
 
     const worth = getPositionValue(it, macroRates);
+    const avgPrice =
+      typeof it.averagePrice === "number" && Number.isFinite(it.averagePrice) && it.averagePrice > 0
+        ? it.averagePrice
+        : 0;
+    const qty =
+      typeof it.quantity === "number" && Number.isFinite(it.quantity) && it.quantity > 0
+        ? it.quantity
+        : 0;
+    const invested = avgPrice * qty;
 
     if (it.currency === "USD") {
       usd += income;
       usdWorth += worth;
+      usdInvested += invested;
       countUsd++;
     } else if (it.currency === "BRL") {
       brl += income;
       brlWorth += worth;
+      brlInvested += invested;
       countBrl++;
     }
   }
 
   const rate = fx?.USDBRL ?? 1;
   const consolidatedNetWorth = brlWorth + usdWorth * rate;
+  const consolidatedInvested = brlInvested + usdInvested * rate;
   const consolidatedIncome = brl + usd * rate;
 
-  return { usd, brl, usdWorth, brlWorth, countUsd, countBrl, consolidatedNetWorth, consolidatedIncome };
+  return {
+    usd,
+    brl,
+    usdWorth,
+    brlWorth,
+    usdInvested,
+    brlInvested,
+    countUsd,
+    countBrl,
+    consolidatedNetWorth,
+    consolidatedInvested,
+    consolidatedIncome,
+  };
 }
 
 // ---------------------------------------------------------------------------
