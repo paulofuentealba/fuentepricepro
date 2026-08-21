@@ -21,17 +21,21 @@ import {
 import type { ChartConfig } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOptions";
+import { getPositionValue } from "@/lib/calculations";
+import { convertCurrency } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 
 const SNOWBALL_CHART_MARGIN = { top: 20, right: 10, left: -20, bottom: 0 };
 
 // chartConfig moved inside component to support translations
 
-function flagFor(currency: Currency): string {
-  return currency === "USD" ? "🇺🇸" : "🇧🇷";
-}
-
 export function SnowballSimulator() {
   const { valuedItems: items } = useValuedPortfolio();
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const { data: macroRates } = useQuery(macroRatesQueryOptions());
+  const usdRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const { t, locale } = useI18n();
 
   const chartConfig = {
@@ -56,17 +60,19 @@ export function SnowballSimulator() {
     let totalAnnualDividend = 0;
 
     for (const item of items) {
-      if (item.isClosedPosition || item.currency !== currency) continue;
-      const value = item.currentPrice * item.quantity;
-      const dividend = item.annualDividend * item.quantity;
+      if (item.isClosedPosition || !item.quantity || item.quantity <= 0) continue;
+      const itemValue = getPositionValue(item, macroRates);
+      const convertedValue = convertCurrency(itemValue, item.currency, currency, usdRate);
+      const itemDividend = (item.annualDividend || 0) * item.quantity;
+      const convertedDividend = convertCurrency(itemDividend, item.currency, currency, usdRate);
 
-      totalValue += value;
-      totalAnnualDividend += dividend;
+      totalValue += convertedValue;
+      totalAnnualDividend += convertedDividend;
     }
 
     const yieldPct = totalValue > 0 ? totalAnnualDividend / totalValue : 0.08; // Default to 8% if empty
     return { currentTotal: totalValue, blendedYield: yieldPct };
-  }, [items, currency]);
+  }, [items, currency, macroRates, usdRate]);
 
   const projection = useMemo(() => {
     let balance = currentTotal;
