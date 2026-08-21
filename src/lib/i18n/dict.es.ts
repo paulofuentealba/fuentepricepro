@@ -1116,6 +1116,8 @@ export const es = {
     cancel: "Cancelar",
     success: "¡Gracias! Tu comentario ha sido registrado.",
     empty: "Por favor escribe un mensaje antes de enviar.",
+    error: "Error al enviar comentarios. Inténtelo de nuevo.",
+    tooLong: "El mensaje no puede exceder los 2000 caracteres.",
   },
   transactions: {
     title: "Historial de Transacciones",

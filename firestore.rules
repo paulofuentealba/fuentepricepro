@@ -25,6 +25,9 @@ service cloud.firestore {
       match /portfolioSnapshots/{date} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      match /feedbacks/{feedbackId} {
+        allow create, read, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     match /enrichedFundamentals/{ticker} {

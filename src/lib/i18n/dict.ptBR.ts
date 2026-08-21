@@ -1112,6 +1112,8 @@ export const ptBR = {
     cancel: "Cancelar",
     success: "Obrigado! Seu feedback foi registrado.",
     empty: "Escreva uma mensagem antes de enviar.",
+    error: "Falha ao enviar feedback. Tente novamente.",
+    tooLong: "A mensagem não pode exceder 2000 caracteres.",
   },
   transactions: {
     title: "Histórico de Transações",

@@ -492,12 +492,17 @@ function DeleteAccountWizard({
       const snapshotsRef = collection(db, "users", user.uid, "portfolioSnapshots");
       const snapshotsSnap = await getDocs(snapshotsRef);
 
-      // 2d. Montar lista de referências usando a função pura (subcoleções primeiro, documento raiz por último)
+      // 2d. Buscar todos os feedbacks do usuário (users/{uid}/feedbacks)
+      const feedbacksRef = collection(db, "users", user.uid, "feedbacks");
+      const feedbacksSnap = await getDocs(feedbacksRef);
+
+      // 2e. Montar lista de referências usando a função pura (subcoleções primeiro, documento raiz por último)
       const deletionPaths = buildAccountDeletionPaths({
         userId: user.uid,
         assetIds: assetsSnap.docs.map((d) => d.id),
         transactionIds: txSnap.docs.map((d) => d.id),
         portfolioSnapshotIds: snapshotsSnap.docs.map((d) => d.id),
+        feedbackIds: feedbacksSnap.docs.map((d) => d.id),
       });
 
       const allRefs = deletionPaths.map((path) => doc(db, path));

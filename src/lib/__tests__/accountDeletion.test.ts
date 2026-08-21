@@ -2,12 +2,13 @@ import { describe, it, expect } from "vitest";
 import { buildAccountDeletionPaths } from "../accountDeletion";
 
 describe("buildAccountDeletionPaths", () => {
-  it("should build ordered deletion paths for all 3 subcollections and root user document last", () => {
+  it("should build ordered deletion paths for all 4 subcollections and root user document last", () => {
     const input = {
       userId: "user-123",
       assetIds: ["asset-1", "asset-2"],
       transactionIds: ["tx-1"],
       portfolioSnapshotIds: ["2026-08-01", "2026-08-02"],
+      feedbackIds: ["fb-1", "fb-2"],
     };
 
     const paths = buildAccountDeletionPaths(input);
@@ -18,6 +19,8 @@ describe("buildAccountDeletionPaths", () => {
       "users/user-123/transactions/tx-1",
       "users/user-123/portfolioSnapshots/2026-08-01",
       "users/user-123/portfolioSnapshots/2026-08-02",
+      "users/user-123/feedbacks/fb-1",
+      "users/user-123/feedbacks/fb-2",
       "users/user-123",
     ]);
 

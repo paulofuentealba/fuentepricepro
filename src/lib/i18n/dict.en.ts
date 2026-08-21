@@ -1102,6 +1102,8 @@ export const en = {
     cancel: "Cancel",
     success: "Thank you! Your feedback has been recorded.",
     empty: "Please write a message before sending.",
+    error: "Failed to send feedback. Please try again.",
+    tooLong: "Message cannot exceed 2000 characters.",
   },
   transactions: {
     title: "Transaction History",
