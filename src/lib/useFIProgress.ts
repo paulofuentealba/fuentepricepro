@@ -5,6 +5,7 @@ import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOptions";
 import { getPositionValue } from "@/lib/calculations";
 import { convertCurrency } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 
 export interface FIProgressResult {
   coveragePercent: number;
@@ -12,6 +13,8 @@ export interface FIProgressResult {
   targetCapital: number;
   totalCapitalBRL: number;
   monthlyIncomeBRL: number;
+  currentMonthlyIncome: number;
+  monthlyCostGoal: number;
   monthsToFI: number | null;
   /**
    * Indica se o usuário já configurou uma meta de gastos mensais
@@ -75,7 +78,7 @@ export function useFIProgress(): FIProgressResult {
   const { valuedItems: items } = useValuedPortfolio();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
-  const usdRate = fx?.USDBRL ?? 5.5;
+  const usdRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
 
   const convertToBRL = useCallback(
     (value: number, curr: "USD" | "BRL") => convertCurrency(value, curr, "BRL", usdRate),
@@ -114,12 +117,20 @@ export function useFIProgress(): FIProgressResult {
 
   const totalCapital = toUserCurrency(totalCapitalBRL);
   const currentMonthlyIncome = toUserCurrency(monthlyIncomeBRL);
-  const monthlyCostGoal = settings.monthlyLivingCostGoal || 0;
-  const monthlyContribution = settings.estimatedMonthlyContribution || 0;
+
+  const rawGoal = settings.monthlyLivingCostGoal || 0;
+  const storedGoalCurrency = settings.monthlyLivingCostGoalCurrency ?? currency;
+  const monthlyCostGoal =
+    rawGoal > 0 ? convertCurrency(rawGoal, storedGoalCurrency, currency, usdRate) : 0;
+
+  const rawContrib = settings.estimatedMonthlyContribution || 0;
+  const storedContribCurrency = settings.monthlyLivingCostGoalCurrency ?? currency;
+  const monthlyContribution =
+    rawContrib > 0 ? convertCurrency(rawContrib, storedContribCurrency, currency, usdRate) : 0;
 
   const isSetup = monthlyCostGoal > 0;
 
-  const ratio = isSetup && monthlyCostGoal > 0 ? currentMonthlyIncome / monthlyCostGoal : 0;
+  const ratio = isSetup ? currentMonthlyIncome / monthlyCostGoal : 0;
   const coveragePercent = Math.min(100, Math.max(0, ratio * 100));
   const isReached = isSetup && ratio >= 1;
 
@@ -138,6 +149,8 @@ export function useFIProgress(): FIProgressResult {
     targetCapital,
     totalCapitalBRL,
     monthlyIncomeBRL,
+    currentMonthlyIncome,
+    monthlyCostGoal,
     monthsToFI,
     isSetup,
   };

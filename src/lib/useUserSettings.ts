@@ -13,6 +13,7 @@ export interface UserSettings {
   smartAllocationTargets: Record<AssetType, number>;
   maxConcentrationPerAsset?: number | null;
   monthlyLivingCostGoal?: number;
+  monthlyLivingCostGoalCurrency?: Currency;
   estimatedMonthlyContribution?: number;
 }
 

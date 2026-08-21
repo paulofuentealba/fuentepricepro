@@ -159,4 +159,50 @@ describe("useFIProgress", () => {
     expect(result.current.coveragePercent).toBe(0);
     expect(result.current.isReached).toBe(false);
   });
+
+  it("converte meta e aporte para a moeda ativa quando monthlyLivingCostGoalCurrency difere de displayCurrency", () => {
+    mockUseUserSettings.mockReturnValue({
+      settings: {
+        displayCurrency: "USD",
+        monthlyLivingCostGoal: 5000,
+        monthlyLivingCostGoalCurrency: "BRL",
+        estimatedMonthlyContribution: 1000,
+        targetYield: 6,
+      },
+    });
+    // Carteira gerando R$ 6.000/ano = R$ 500/mês. Com USDBRL = 5, isso dá US$ 100/mês.
+    mockUseValuedPortfolio.mockReturnValue({
+      valuedItems: [makeItem({ quantity: 2000, currentPrice: 50, annualDividend: 3, currency: "BRL" })],
+    });
+
+    const { result } = renderHook(() => useFIProgress());
+
+    // Meta R$ 5.000 convertida para USD com cotação 5 => US$ 1.000
+    expect(result.current.monthlyCostGoal).toBe(1000);
+    // Renda R$ 500 convertida para USD com cotação 5 => US$ 100
+    expect(result.current.currentMonthlyIncome).toBe(100);
+    // Cobertura: 100 / 1000 = 10% (sem distorção de 5.5x)
+    expect(result.current.coveragePercent).toBeCloseTo(10, 5);
+  });
+
+  it("trata meta legada sem currency como se já estivesse na displayCurrency ativa sem distorção", () => {
+    mockUseUserSettings.mockReturnValue({
+      settings: {
+        displayCurrency: "BRL",
+        monthlyLivingCostGoal: 2000,
+        monthlyLivingCostGoalCurrency: undefined,
+        estimatedMonthlyContribution: 500,
+        targetYield: 6,
+      },
+    });
+    mockUseValuedPortfolio.mockReturnValue({
+      valuedItems: [makeItem({ quantity: 1000, currentPrice: 50, annualDividend: 2.4, currency: "BRL" })],
+    });
+
+    const { result } = renderHook(() => useFIProgress());
+
+    expect(result.current.monthlyCostGoal).toBe(2000);
+    // 2400/ano => 200/mês => 200 / 2000 = 10%
+    expect(result.current.coveragePercent).toBeCloseTo(10, 5);
+  });
 });

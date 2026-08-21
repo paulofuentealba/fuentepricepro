@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Trophy, Target, Info } from "lucide-react";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
-import { useQuery } from "@tanstack/react-query";
-import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -22,7 +20,6 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { useFIProgress } from "@/lib/useFIProgress";
-import { convertCurrency } from "@/lib/currency";
 
 function formatDuration(months: number, t: any): string {
   if (!isFinite(months) || months > 1200) return t.fiMode.moreThan100;
@@ -43,14 +40,7 @@ function formatDuration(months: number, t: any): string {
 export function FIProgressCard() {
   const { settings, updateSettings } = useUserSettings();
   const { isAppLoading } = useValuedPortfolio();
-  const { data: fx } = useQuery(exchangeRateQueryOptions());
-  const usdRate = fx?.USDBRL ?? 5.5;
   const { locale, t } = useI18n();
-
-  const convertToBRL = useCallback(
-    (value: number, curr: "USD" | "BRL") => convertCurrency(value, curr, "BRL", usdRate),
-    [usdRate],
-  );
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempCost, setTempCost] = useState(settings.monthlyLivingCostGoal?.toString() || "");
@@ -60,25 +50,14 @@ export function FIProgressCard() {
 
   const currency = settings.displayCurrency;
 
-  const { coveragePercent, isReached, monthsToFI, monthlyIncomeBRL } = useFIProgress();
-
-  // We need to work in the user's selected currency
-  // Inverse convert if needed: BRL to USD
-  const toUserCurrency = useCallback((valueBRL: number) => {
-    if (currency === "USD") {
-      // We can use a simple inverse. Assuming exchangeRate is BRL/USD
-      // But wait, convertToBRL(1, "USD") returns 1 * exchangeRate.
-      // So we divide by convertToBRL(1, "USD").
-      const rate = convertToBRL(1, "USD") || 1;
-      return valueBRL / rate;
-    }
-    return valueBRL;
-  }, [currency, convertToBRL]);
-
-  const currentMonthlyIncome = toUserCurrency(monthlyIncomeBRL);
-  const monthlyCostGoal = settings.monthlyLivingCostGoal || 0;
-
-  const isSetup = monthlyCostGoal > 0;
+  const {
+    coveragePercent,
+    isReached,
+    monthsToFI,
+    currentMonthlyIncome,
+    monthlyCostGoal,
+    isSetup,
+  } = useFIProgress();
 
   const handleSaveSettings = () => {
     const cost = parseFloat(tempCost);
@@ -86,6 +65,7 @@ export function FIProgressCard() {
 
     updateSettings({
       monthlyLivingCostGoal: isNaN(cost) ? undefined : cost,
+      monthlyLivingCostGoalCurrency: currency,
       estimatedMonthlyContribution: isNaN(contrib) ? undefined : contrib,
     });
     toast.success(t.fiMode.settingsSaved);
