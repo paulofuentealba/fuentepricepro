@@ -91,21 +91,18 @@ describe("useWatchlistCsvImport — end-to-end handleFile (prompt 83 regression)
 
     const { result } = renderHook(() => useWatchlistCsvImport([], onImport), { wrapper });
 
+    let importSuccess: boolean | undefined;
     await act(async () => {
-      await result.current.handleFile(makeCsvFile(csv));
+      importSuccess = await result.current.handleFile(makeCsvFile(csv));
     });
 
-    // All 3 rows must have been recognized and imported — this is exactly
-    // the scenario that silently failed before the fix: the old hardcoded
-    // regex in useWatchlistCsvImport.ts did not recognize "Data do
-    // lançamento" / "Preço unitário" and routed this file to the Phase 1
-    // simple parser, which found no valid rows.
+    expect(importSuccess).toBe(true);
     expect(upsertTransactionMock).toHaveBeenCalledTimes(3);
     expect(onImport).toHaveBeenCalledTimes(3);
     expect(items.map((i) => i.ticker).sort()).toEqual(["ITUB4", "PETR4", "VALE3"]);
   });
 
-  it("still imports the Phase 1 simple watchlist format through the full hook flow (regression)", async () => {
+  it("still imports the Phase 1 simple watchlist format through the full hook flow and returns true", async () => {
     const csv = ["Ticker,Type,Quantity,AveragePrice", "PETR4,STOCK_BR,10,30.5"].join("\n");
 
     const items: WatchlistItem[] = [];
@@ -117,11 +114,34 @@ describe("useWatchlistCsvImport — end-to-end handleFile (prompt 83 regression)
 
     const { result } = renderHook(() => useWatchlistCsvImport([], onImport), { wrapper });
 
+    let importSuccess: boolean | undefined;
     await act(async () => {
-      await result.current.handleFile(makeCsvFile(csv));
+      importSuccess = await result.current.handleFile(makeCsvFile(csv));
     });
 
+    expect(importSuccess).toBe(true);
     expect(onImport).toHaveBeenCalledTimes(1);
     expect(items[0].ticker).toBe("PETR4");
+  });
+
+  it("returns false when the CSV has no valid rows", async () => {
+    const csv = "ColA,ColB\n1,2";
+
+    const items: WatchlistItem[] = [];
+    const onImport = vi.fn((item: WatchlistItem) => items.push(item));
+    const qc = buildQueryClient([]);
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useWatchlistCsvImport([], onImport), { wrapper });
+
+    let importSuccess: boolean | undefined;
+    await act(async () => {
+      importSuccess = await result.current.handleFile(makeCsvFile(csv));
+    });
+
+    expect(importSuccess).toBe(false);
+    expect(onImport).not.toHaveBeenCalled();
   });
 });

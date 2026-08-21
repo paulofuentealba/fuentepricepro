@@ -55,7 +55,7 @@ export function useWatchlistCsvImport(
           const templateRows = parseTransactionTemplateCsv(text);
           if (templateRows.length === 0) {
             toast.error(t.toasts.noValidRowsCsv);
-            return;
+            return false;
           }
           let added = 0;
           let updated = 0;
@@ -156,6 +156,7 @@ export function useWatchlistCsvImport(
           if (failed) parts.push(t.toasts.importFailedCount.replace("{{count}}", String(failed)));
           const summary = parts.join(", ") || t.toasts.noChanges;
           toast.success(t.toasts.importComplete.replace("{{summary}}", summary));
+          return true;
         } else {
           // Phase 1 Simple Watchlist Format
           const rows = parseWatchlistCsv(text);
