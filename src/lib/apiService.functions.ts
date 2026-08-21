@@ -15,7 +15,7 @@ import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 // Re-export public types so existing `@/lib/apiService.server` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
 import { cleanTicker } from "../lib/formatters";
-import { MACRO_RATES_FALLBACK } from "./macroDefaults";
+import { type MacroRates, MACRO_RATES_FALLBACK } from "./macroDefaults";
 
 // -------- Input caps (public, unauthenticated endpoints) --------
 // Keep these tight — anything past normal user input is abuse, not a real query.
@@ -481,7 +481,7 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
 // -------- Macro Rates Oracle --------
 
 export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ cdi: number; ipca: number }> => {
+  async (): Promise<MacroRates> => {
     const fallback = MACRO_RATES_FALLBACK;
 
     try {
@@ -491,7 +491,10 @@ export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
         return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
       };
 
-      const [cdiRes, ipcaRes] = await Promise.all([
+      const [selicRes, cdiRes, ipcaRes] = await Promise.all([
+        fetchWithTimeout(
+          "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json",
+        ),
         fetchWithTimeout(
           "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json",
         ),
@@ -500,26 +503,32 @@ export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
         ),
       ]);
 
-      if (cdiRes.ok && ipcaRes.ok) {
-        const cdiData = await cdiRes.json();
-        const ipcaData = await ipcaRes.json();
+      let selic = fallback.selic;
+      let cdi = fallback.cdi;
+      let ipca = fallback.ipca;
 
-        let cdi = fallback.cdi;
-        let ipca = fallback.ipca;
-
-        if (cdiData && cdiData.length > 0) {
-          cdi = parseFloat(cdiData[0].valor);
+      if (selicRes.ok) {
+        const selicData = await selicRes.json();
+        if (selicData && selicData.length > 0 && selicData[0].valor) {
+          selic = parseFloat(selicData[0].valor);
         }
-
-        if (ipcaData && ipcaData.length > 0) {
-          ipca = parseFloat(ipcaData[0].valor);
-        }
-
-        return { cdi, ipca };
       }
 
-      console.warn("[MacroRates] BACEN SGS failed, using fallback.");
-      return fallback;
+      if (cdiRes.ok) {
+        const cdiData = await cdiRes.json();
+        if (cdiData && cdiData.length > 0 && cdiData[0].valor) {
+          cdi = parseFloat(cdiData[0].valor);
+        }
+      }
+
+      if (ipcaRes.ok) {
+        const ipcaData = await ipcaRes.json();
+        if (ipcaData && ipcaData.length > 0 && ipcaData[0].valor) {
+          ipca = parseFloat(ipcaData[0].valor);
+        }
+      }
+
+      return { selic, cdi, ipca };
     } catch (err) {
       console.warn("[MacroRates] BACEN SGS error:", err);
       return fallback;

@@ -18,6 +18,7 @@ import {
   type PiotroskiScoreResponse,
 } from "./apiService.functions";
 import type { Asset } from "./domain";
+import type { MacroRates } from "./macroDefaults";
 
 /**
  * Central TanStack Query options for every remote read in the app.
@@ -71,7 +72,7 @@ export function exchangeRateQueryOptions() {
 export function macroRatesQueryOptions() {
   return queryOptions({
     queryKey: ["macroRates"] as const,
-    queryFn: ({ signal }): Promise<{ cdi: number; ipca: number }> => fetchMacroRatesFn({ signal }),
+    queryFn: ({ signal }): Promise<MacroRates> => fetchMacroRatesFn({ signal }),
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
   });

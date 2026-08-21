@@ -15,10 +15,12 @@ export const IPCA_FALLBACK = 4.5;
 export interface MacroRates {
   cdi: number;
   ipca: number;
+  selic: number;
 }
 
 /** Objeto com as taxas macroeconômicas padrão para renda fixa e oráculo */
 export const MACRO_RATES_FALLBACK: MacroRates = {
   cdi: SELIC_FALLBACK,
   ipca: IPCA_FALLBACK,
+  selic: SELIC_FALLBACK,
 };

@@ -15,7 +15,7 @@ describe("macroDefaults SSOT", () => {
     expect(SELIC_FALLBACK).toBe(10.5);
     expect(SELIC_DECIMAL).toBe(0.105);
     expect(IPCA_FALLBACK).toBe(4.5);
-    expect(MACRO_RATES_FALLBACK).toEqual({ cdi: 10.5, ipca: 4.5 });
+    expect(MACRO_RATES_FALLBACK).toEqual({ cdi: 10.5, ipca: 4.5, selic: 10.5 });
   });
 
   it("maintains strict mathematical parity between percentage and decimal Selic", () => {
