@@ -1275,17 +1275,19 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
   }
 
   // Default fallback for other asset classes (prior to their dedicated prompt specialization)
-  const isUS = isUsAsset(type, params.currency);
-  const netAvgDividend = isUS ? avgDividend * (1 - US_DIVIDEND_TAX_RATE) : avgDividend;
+  const isUS = isUsAsset(type, params.currency) || params.currency === "USD";
+  const netAvgDividend = netAfterTax(avgDividend, type, params.currency, params.customTaxRate);
   const bazin = params.targetYield > 0 ? netAvgDividend / (params.targetYield / 100) : null;
   const graham = params.eps && params.bvps && params.eps > 0 && params.bvps > 0 ? Math.sqrt(22.5 * params.eps * params.bvps) : null;
-  const k = (params.selicPct ?? SELIC_FALLBACK) / 100;
+  const usDiscountRate = 0.085;
+  const k = isUS ? usDiscountRate : (params.selicPct ?? SELIC_FALLBACK) / 100;
   const gInitial = params.dividendCagr != null ? params.dividendCagr / 100 : null;
+  const gTerminal = params.terminalGrowthRate ?? (isUS ? 0.025 : GORDON_TERMINAL_GROWTH_RATE);
   const gordon = gordonPrice(
     netAvgDividend,
     k,
     gInitial,
-    params.terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE,
+    gTerminal,
   );
 
   const growthVolatility = calculateDividendGrowthVolatility(params.dividendHistory);

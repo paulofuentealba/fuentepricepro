@@ -281,6 +281,31 @@ describe("terminalGrowthRate threading (IPCA médio de 5 anos dinâmico)", () =>
     expect(valuation.methods.gordon).toBeNull();
     expect(valuation.gordon).toBeNull();
   });
+
+  it("getAssetValuation generic fallback respects customTaxRate and currency-appropriate discount rate for USD (Item 3)", () => {
+    // Unknown asset type with USD currency
+    const genericUsValuation = getAssetValuation({
+      type: "MUTUAL_FUND" as any,
+      ticker: "GLOBAL11",
+      currentPrice: 100,
+      avgDividend: 10,
+      targetYield: 6,
+      currency: "USD",
+      customTaxRate: 15, // 15% custom tax
+      dividendCagr: 5,
+    });
+
+    // Net dividend = 10 * (1 - 0.15) = 8.5
+    // Bazin = 8.5 / 0.06 = 141.6666...
+    expect(genericUsValuation.methods.bazin).toBeCloseTo(141.67, 2);
+
+    // Gordon should use US discount rate 8.5% (k=0.085) and gTerminal=0.025
+    // d0=8.5, k=0.085, gInitial=0.05, gTerminal=0.025, years=5, h=2.5
+    // terminalValue = (8.5 * 1.025) / (0.085 - 0.025) = 8.7125 / 0.06 = 145.2083
+    // transitionValue = (8.5 * 2.5 * (0.05 - 0.025)) / (0.085 - 0.025) = 0.53125 / 0.06 = 8.85416
+    // total = 145.2083 + 8.85416 = 154.0625
+    expect(genericUsValuation.methods.gordon).toBeCloseTo(154.06, 2);
+  });
 });
 
 describe("calculateBvps SSOT & convergence", () => {
