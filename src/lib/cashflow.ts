@@ -204,7 +204,7 @@ export function buildMonthlyBuckets(
     }
 
     if (isPast) {
-      if (allRealizedEvents.length > 0) {
+      if (transactions.length > 0) {
         return monthRealized;
       }
       // Fallback calculation for guest mode without transaction ledger

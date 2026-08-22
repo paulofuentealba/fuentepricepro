@@ -279,4 +279,66 @@ describe("Cashflow logic", () => {
     expect(emptySummary.next30).toBe(0);
     expect(Number.isFinite(emptySummary.next30)).toBe(true);
   });
+
+  it("does not fall back to guest mode when user has ledger but zero realized events in past months (Item 4)", () => {
+    // Set time to August 2026 so Jan and Jul are past months
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-15T12:00:00Z"));
+
+    try {
+      const items = [
+        mkItem({
+          ticker: "PETR4",
+          type: "STOCK_BR",
+          currency: "BRL",
+          annualDividend: 240,
+          quantity: 100,
+          averagePrice: 30,
+          paymentMonths: [1, 7],
+        }),
+      ];
+
+      // Bought on June 1st, 2026
+      const transactions: any[] = [
+        {
+          id: "tx1",
+          ticker: "PETR4",
+          type: "buy",
+          quantity: 100,
+          pricePerShare: 30,
+          date: Date.UTC(2026, 5, 1), // June 1st, 2026
+        },
+      ];
+
+      // Event 1: Jan 10 (before buy) -> user owned 0 shares
+      // Event 2: Jul 10 (after buy) -> user owned 100 shares
+      const dividendEventsMap = {
+        PETR4: [
+          {
+            exDate: "2026-01-10T00:00:00Z",
+            paymentDate: "2026-01-20T00:00:00Z",
+            amountPerShare: 2.0,
+          },
+          {
+            exDate: "2026-07-10T00:00:00Z",
+            paymentDate: "2026-07-20T00:00:00Z",
+            amountPerShare: 3.0,
+          },
+        ],
+      };
+
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const buckets = buildMonthlyBuckets(items, "BRL", months, dividendEventsMap, "calendar", transactions);
+
+      // January (idx 0): user owned 0 shares -> realizedAmount and paidAmount MUST be 0 (no guest-mode fallback of 200!)
+      expect(buckets[0].realizedAmount).toBe(0);
+      expect(buckets[0].paidAmount).toBe(0);
+
+      // July (idx 6): user owned 100 shares -> 100 * 3.0 = 300 Net (STOCK_BR has 0% tax)
+      expect(buckets[6].realizedAmount).toBe(300);
+      expect(buckets[6].paidAmount).toBe(300);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
