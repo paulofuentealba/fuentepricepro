@@ -21,6 +21,10 @@ export interface DadosDeMercadoResult {
 // Memory cache
 const memoryCache = new Map<string, DadosDeMercadoResult>();
 
+export function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercadoResult | null> {
   const cleanTicker = ticker.trim().toUpperCase();
   if (!cleanTicker) return null;
@@ -93,7 +97,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
     // We only need P/VP, P/L, ROE, DY for display
     const extractMetric = (label: string): number | undefined => {
       // Look for the row containing the label, grab the first numeric value
-      const rowRegex = new RegExp(`<tr>\\s*<td>\\s*${label}\\s*</td>[\\s\\S]*?<td[^>]*>([\\s\\S]*?)</td>`, 'i');
+      const rowRegex = new RegExp(`<tr>\\s*<td>\\s*${escapeRegExp(label)}\\s*</td>[\\s\\S]*?<td[^>]*>([\\s\\S]*?)</td>`, 'i');
       const rowMatch = tableHtml.match(rowRegex);
       if (rowMatch) {
         const text = rowMatch[1].replace(/<[^>]+>/g, '').trim();
@@ -115,7 +119,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
   // Parse Dividends
   // According to rule: Select table preceded by "Histórico de dividendos de"
   // Anchor on that exact text
-  const anchorRegex = new RegExp(`Histórico de dividendos de ${cleanTicker}[\\s\\S]*?(<table class="normal-table">[\\s\\S]*?</table>)`, 'i');
+  const anchorRegex = new RegExp(`Histórico de dividendos de ${escapeRegExp(cleanTicker)}[\\s\\S]*?(<table class="normal-table">[\\s\\S]*?</table>)`, 'i');
   const divMatch = htmlDiv.match(anchorRegex);
   
   if (divMatch) {
