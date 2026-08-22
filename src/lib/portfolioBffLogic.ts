@@ -99,7 +99,6 @@ export async function computeValuedPortfolioInternal(
       terminalGrowthRate,
       currency: item.currency || asset?.currency || "BRL",
       type: item.type || asset?.type || "STOCK_BR",
-      exchangeRate,
     });
 
     const totalValue = quantity * currentPrice;

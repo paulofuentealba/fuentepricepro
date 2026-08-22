@@ -390,7 +390,6 @@ export interface AssetValuationParams {
   terminalGrowthRate?: number;
   currency: string;
   type: AssetType;
-  exchangeRate?: number;
   historicalYieldAverage?: number | null;
   shareholderYield?: number | null;
   customTaxRate?: number | null;
