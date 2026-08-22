@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { buildMonthlyBuckets, computeCashFlowSummary } from "../cashflow";
 import type { WatchlistItem } from "../watchlist";
 
@@ -241,5 +241,42 @@ describe("Cashflow logic", () => {
     expect(buckets[0].amount).toBe(50);
     expect(buckets[0].contributors[0].ticker).toBe("VOO");
     expect(buckets[0].contributors[0].amount).toBe(50);
+  });
+
+  it("computeCashFlowSummary aligns UTC month index with buildMonthlyBuckets near midnight (Item 2)", () => {
+    // Simulate 2026-08-31 23:30:00 GMT-3 -> 2026-09-01 02:30:00 UTC
+    // Local month is August (7), but UTC month is September (8).
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-01T02:30:00Z"));
+
+    try {
+      const items = [
+        mkItem({
+          ticker: "KO",
+          annualDividend: 120,
+          quantity: 10, // $100/month
+          paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        }),
+      ];
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const buckets = buildMonthlyBuckets(items, "USD", months, {}, "calendar", []);
+
+      const summary = computeCashFlowSummary(buckets);
+      expect(summary.total).toBe(1200);
+      expect(summary.avg).toBe(100);
+      // On Sep 1 (day 1 of 30 in Sep), 29/30 remaining in Sep ($96.67) + 1/31 consumed in Oct ($3.23) = $99.89
+      expect(summary.next30).toBeCloseTo(99.89, 1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("computeCashFlowSummary returns zero-safe summary for empty array without NaN", () => {
+    const emptySummary = computeCashFlowSummary([]);
+    expect(emptySummary.total).toBe(0);
+    expect(emptySummary.avg).toBe(0);
+    expect(emptySummary.top).toBeNull();
+    expect(emptySummary.next30).toBe(0);
+    expect(Number.isFinite(emptySummary.next30)).toBe(true);
   });
 });

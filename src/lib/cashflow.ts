@@ -330,7 +330,7 @@ export function buildMonthlyBuckets(
 
 export function computeCashFlowSummary(data: MonthBucket[]): CashFlowSummary {
   const total = data.reduce((sum, d) => sum + d.amount, 0);
-  const avg = total / 12;
+  const avg = data.length > 0 ? total / data.length : 0;
   const tickerTotals = new Map<string, number>();
   for (const d of data) {
     for (const c of d.contributors) {
@@ -341,19 +341,27 @@ export function computeCashFlowSummary(data: MonthBucket[]): CashFlowSummary {
   for (const [ticker, amount] of tickerTotals) {
     if (!top || amount > top.amount) top = { ticker, amount };
   }
+
+  if (data.length === 0) {
+    return { total, avg, top, next30: 0 };
+  }
+
   const now = new Date();
-  const currentMonthIdx = now.getMonth();
-  const daysInCurrent = new Date(now.getFullYear(), currentMonthIdx + 1, 0).getDate();
-  const dayOfMonth = now.getDate();
+  const currentMonthIdx = now.getUTCMonth();
+  const currentYear = now.getUTCFullYear();
+  const daysInCurrent = new Date(Date.UTC(currentYear, currentMonthIdx + 1, 0)).getUTCDate();
+  const dayOfMonth = now.getUTCDate();
   const remainingCurrent = (daysInCurrent - dayOfMonth) / daysInCurrent;
 
-  const nextIdx = (currentMonthIdx + 1) % 12;
-  const nextYear = nextIdx === 0 ? now.getFullYear() + 1 : now.getFullYear();
-  const daysInNext = new Date(nextYear, nextIdx + 1, 0).getDate();
+  const nextIdx = (currentMonthIdx + 1) % data.length;
+  const nextYear = nextIdx === 0 ? currentYear + 1 : currentYear;
+  const daysInNext = new Date(Date.UTC(nextYear, nextIdx + 1, 0)).getUTCDate();
   const nextConsumed = Math.min(dayOfMonth / daysInNext, 1);
 
-  const next30 =
-    data[currentMonthIdx].amount * remainingCurrent + data[nextIdx].amount * nextConsumed;
+  const currentAmount = data[currentMonthIdx % data.length]?.amount ?? 0;
+  const nextAmount = data[nextIdx]?.amount ?? 0;
+
+  const next30 = currentAmount * remainingCurrent + nextAmount * nextConsumed;
   return { total, avg, top, next30 };
 }
 
