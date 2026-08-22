@@ -308,7 +308,8 @@ export function gordonPrice(
   // Single-stage fallback if gInitial is null or undefined
   if (gInitial == null) {
     if (k - 0 < GORDON_MIN_DISCOUNT_MARGIN) return null;
-    return d0 / k;
+    const price = d0 / k;
+    return price > 0 ? price : null;
   }
 
   // Singularity guard applies to gTerminal
@@ -318,7 +319,8 @@ export function gordonPrice(
   const h = years / 2; // Half-life (2.5 years for 5-year horizon)
   const terminalValue = (d0 * (1 + gTerminal)) / (k - gTerminal);
   const transitionValue = (d0 * h * (gInitial - gTerminal)) / (k - gTerminal);
-  return terminalValue + transitionValue;
+  const total = terminalValue + transitionValue;
+  return total > 0 ? total : null;
 }
 
 /**

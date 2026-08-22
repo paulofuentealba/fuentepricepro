@@ -265,6 +265,22 @@ describe("terminalGrowthRate threading (IPCA médio de 5 anos dinâmico)", () =>
 
     expect(omitted.gordon).toBeCloseTo(explicitConstant.gordon!, 8);
   });
+
+  it("gordonPrice returns null when deeply negative growth produces a non-positive valuation (Item 1)", () => {
+    const k = 0.105;
+    // -40% growth CAGR (-0.40) makes transitionValue strongly negative
+    const negativeGordon = gordonPrice(10, k, -0.40, 0.045);
+    expect(negativeGordon).toBeNull();
+  });
+
+  it("getAssetValuation sets methods.gordon to null when dividendCagr is deeply negative (Item 1)", () => {
+    const valuation = getAssetValuation({
+      ...base,
+      dividendCagr: -40, // -40% CAGR
+    });
+    expect(valuation.methods.gordon).toBeNull();
+    expect(valuation.gordon).toBeNull();
+  });
 });
 
 describe("calculateBvps SSOT & convergence", () => {
