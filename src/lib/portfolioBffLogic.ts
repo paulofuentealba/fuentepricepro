@@ -6,7 +6,7 @@ import {
   yieldOnCost,
   type ValuationResult,
 } from "./calculations";
-import { SELIC_FALLBACK } from "./macroDefaults";
+import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
 import type { WatchlistItem } from "./watchlist";
 import type { Transaction } from "./transactionsLogic";
 import type { Asset } from "./domain";
@@ -52,7 +52,7 @@ export async function computeValuedPortfolioInternal(
     transactions = [],
     selicPct = SELIC_FALLBACK,
     terminalGrowthRate = 0.045,
-    exchangeRate = 5.75,
+    exchangeRate = EXCHANGE_RATE_FALLBACK,
   } = input;
 
   const positionsMap = reconcileAllPositions(transactions, now);

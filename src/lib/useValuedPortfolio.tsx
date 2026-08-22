@@ -13,7 +13,7 @@ import {
   type ValuationResult,
 } from "./calculations";
 import { useSelic } from "./useSelic";
-import { SELIC_FALLBACK } from "./macroDefaults";
+import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
 import { exchangeRateQueryOptions, macroRatesQueryOptions, ipcaFiveYearAverageQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
@@ -259,7 +259,7 @@ function useValuedPortfolioBff(
           transactions,
           selicPct: selic ?? SELIC_FALLBACK,
           terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
-          exchangeRate: fx?.USDBRL ?? 5.75,
+          exchangeRate: fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK,
         },
       }),
     enabled: useBff && !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
