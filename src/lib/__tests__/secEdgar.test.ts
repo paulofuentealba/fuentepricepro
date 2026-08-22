@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts } from "../api/secEdgar.server";
+import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker, _resetCikCacheForTesting } from "../api/secEdgar.server";
 
 // Trimmed real fixture: values pulled directly from SEC EDGAR's live
 // https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json (Apple Inc.)
@@ -501,5 +501,70 @@ describe("fetchSecEdgarCompanyFacts", () => {
 
     const result = await fetchSecEdgarCompanyFacts("0000000001");
     expect(result).toBeNull();
+  });
+
+  describe("getCikForTicker - Failure TTL & Backoff (Item 5)", () => {
+    beforeEach(() => {
+      _resetCikCacheForTesting();
+    });
+
+    afterEach(() => {
+      _resetCikCacheForTesting();
+      vi.useRealTimers();
+    });
+
+    it("does not flood network with N requests during outage within 5-minute failure backoff window", async () => {
+      const fetchSpy = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+      });
+      global.fetch = fetchSpy as any;
+
+      // 1st attempt: fails with 404 (non-retryable, 1 network attempt)
+      const res1 = await getCikForTicker("AAPL");
+      expect(res1).toBeNull();
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+      // 2nd, 3rd, 4th attempts immediately after: must back off without making network calls
+      const res2 = await getCikForTicker("MSFT");
+      const res3 = await getCikForTicker("GOOGL");
+      expect(res2).toBeNull();
+      expect(res3).toBeNull();
+      expect(fetchSpy).toHaveBeenCalledTimes(1); // Still exactly 1 network call!
+    });
+
+    it("retries network request after failure backoff TTL expires", async () => {
+      let now = 1000000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+
+      let callCount = 0;
+      global.fetch = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.resolve({ ok: false, status: 404 });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ "0": { cik_str: 320193, ticker: "AAPL" } }),
+        });
+      }) as any;
+
+      // 1st call fails
+      const res1 = await getCikForTicker("AAPL");
+      expect(res1).toBeNull();
+      expect(callCount).toBe(1);
+
+      // Advance by 4 minutes (< 5 min TTL): backoff active
+      now += 4 * 60 * 1000;
+      const res2 = await getCikForTicker("AAPL");
+      expect(res2).toBeNull();
+      expect(callCount).toBe(1);
+
+      // Advance past 5 minutes TTL: retry succeeds
+      now += 2 * 60 * 1000;
+      const res3 = await getCikForTicker("AAPL");
+      expect(res3).toBe("0000320193");
+      expect(callCount).toBe(2);
+    });
   });
 });

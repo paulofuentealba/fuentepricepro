@@ -64,12 +64,30 @@ const SEC_USER_AGENT = 'FuentePricePro contato@fuentepricepro.com';
 let cikCache: Record<string, string> | null = null;
 let cikCacheTimestamp = 0;
 const CIK_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+let lastFailureTimestamp = 0;
+const CIK_FAILURE_TTL_MS = 5 * 60 * 1000; // 5 minutes failure backoff TTL
+
+export function _resetCikCacheForTesting(): void {
+  cikCache = null;
+  cikCacheTimestamp = 0;
+  lastFailureTimestamp = 0;
+}
 
 export async function getCikForTicker(ticker: string): Promise<string | null> {
   const now = Date.now();
 
-  // Refresh cache if it's empty or expired
+  // If a recent failure occurred within CIK_FAILURE_TTL_MS and we have no cache, back off
+  if (!cikCache && now - lastFailureTimestamp < CIK_FAILURE_TTL_MS) {
+    return null;
+  }
+
+  // Refresh cache if it's empty or expired (and not in failure backoff)
   if (!cikCache || now - cikCacheTimestamp > CIK_CACHE_TTL_MS) {
+    // If we already have stale cache, but a failure happened within CIK_FAILURE_TTL_MS, return stale cache
+    if (cikCache && now - lastFailureTimestamp < CIK_FAILURE_TTL_MS) {
+      return cikCache[ticker.toUpperCase()] || null;
+    }
+
     try {
       const response = await fetchWithRetry(
         'https://www.sec.gov/files/company_tickers.json',
@@ -80,7 +98,8 @@ export async function getCikForTicker(ticker: string): Promise<string | null> {
 
       if (!response.ok) {
         console.warn(`[SEC EDGAR] Failed to fetch company tickers. Status: ${response.status}`);
-        return null;
+        lastFailureTimestamp = now;
+        return cikCache ? (cikCache[ticker.toUpperCase()] || null) : null;
       }
 
       const data = await response.json() as Record<string, { cik_str: number, ticker: string }>;
@@ -93,13 +112,15 @@ export async function getCikForTicker(ticker: string): Promise<string | null> {
 
       cikCache = newCache;
       cikCacheTimestamp = now;
+      lastFailureTimestamp = 0;
     } catch (error) {
       console.error('[SEC EDGAR] Error fetching company tickers:', error);
-      return null;
+      lastFailureTimestamp = now;
+      return cikCache ? (cikCache[ticker.toUpperCase()] || null) : null;
     }
   }
 
-  return cikCache[ticker.toUpperCase()] || null;
+  return cikCache ? (cikCache[ticker.toUpperCase()] || null) : null;
 }
 
 /** Returns null and reports FAILED when a US ticker (no .SA suffix) has no SEC CIK.
