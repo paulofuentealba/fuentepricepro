@@ -50,6 +50,15 @@ describe("calculatePiotroskiFScore", () => {
     });
   });
 
+  it("awards leverageDecreasing point when company maintains zero long-term debt across both years (Item 4)", () => {
+    const zeroDebtCurrent: PiotroskiYearInput = { ...PASSING_CURRENT, longTermDebt: 0 };
+    const zeroDebtPrior: PiotroskiYearInput = { ...PASSING_PRIOR, longTermDebt: 0 };
+
+    const result = calculatePiotroskiFScore(zeroDebtCurrent, zeroDebtPrior);
+    expect(result.criteria.leverageDecreasing).toBe(true);
+    expect(result.score).toBe(9);
+  });
+
   it("scores 0/9 when every criterion fails/worsens", () => {
     // Mirror image of the passing fixture: current is worse than prior on every axis.
     const failingCurrent: PiotroskiYearInput = {

@@ -1587,7 +1587,7 @@ export function calculatePiotroskiFScore(
       current.totalAssets,
       prior.longTermDebt,
       prior.totalAssets,
-      (curr, prev) => curr < prev,
+      (curr, prev) => curr < prev || (curr === 0 && prev === 0),
     ),
     currentRatioImproving: ratioImproved(
       current.currentAssets,
