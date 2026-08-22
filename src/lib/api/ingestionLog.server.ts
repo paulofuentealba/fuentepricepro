@@ -1,5 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
+import { sanitizeLogMessage } from "./http.server";
 
 export type IngestionStatus = "PASSED" | "FAILED" | "ERROR" | "SKIPPED" | "INVALID" | "WARNING";
 
@@ -19,8 +20,12 @@ export function reportIngestionStatus(
   detail?: string,
   ticker?: string,
 ): void {
-  void writeIngestionStatus(source, status, detail, ticker).catch((error) => {
-    console.warn(`[ingestionLog] failed to report ${source}/${status}:`, error);
+  const cleanDetail = detail ? sanitizeLogMessage(detail) : undefined;
+  void writeIngestionStatus(source, status, cleanDetail, ticker).catch((error) => {
+    console.warn(
+      `[ingestionLog] failed to report ${source}/${status}:`,
+      error instanceof Error ? sanitizeLogMessage(error.message) : error,
+    );
   });
 }
 
@@ -47,7 +52,7 @@ async function writeIngestionStatus(
   if (status !== "PASSED") {
     update.lastError = {
       status,
-      detail: detail ? detail.slice(0, MAX_DETAIL_LENGTH) : null,
+      detail: detail ? sanitizeLogMessage(detail).slice(0, MAX_DETAIL_LENGTH) : null,
       ticker: ticker ?? null,
       timestamp: FieldValue.serverTimestamp(),
     };

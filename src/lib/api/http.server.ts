@@ -67,6 +67,15 @@ export async function minInterval(key: string, ms: number): Promise<void> {
 }
 
 /**
+ * Sanitizes sensitive query parameters (e.g. key, api_key, token, secret, auth)
+ * from URLs or error messages to prevent credential leaks in logs/telemetry.
+ */
+export function sanitizeLogMessage(message: string): string {
+  if (!message || typeof message !== "string") return message;
+  return message.replace(/([?&](?:api_?key|key|token|secret|auth)=)[^&\s"']+/gi, '$1[REDACTED]');
+}
+
+/**
  * fetchWithTimeout + exponential backoff on 429/5xx/timeout. Retries at most
  * `retries` times with jittered backoff. Non-retryable responses (4xx other
  * than 429) return immediately.
@@ -98,7 +107,8 @@ export async function fetchWithRetry(
       }
     } catch (err) {
       if (attempt >= retries) {
-        reportIngestionStatus(source, "ERROR", err instanceof Error ? err.message : String(err));
+        const rawMsg = err instanceof Error ? err.message : String(err);
+        reportIngestionStatus(source, "ERROR", sanitizeLogMessage(rawMsg));
         throw err;
       }
     }
