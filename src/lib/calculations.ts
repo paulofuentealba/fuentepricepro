@@ -1391,7 +1391,7 @@ export function calculateFixedIncomeBalance(
   if (indexer === "CDI") {
     effectiveRate = (rates.cdi / 100) * (itemRate / 100);
   } else if (indexer === "IPCA") {
-    effectiveRate = rates.ipca / 100 + itemRate / 100;
+    effectiveRate = (1 + rates.ipca / 100) * (1 + itemRate / 100) - 1;
   } else {
     // PRE or default
     effectiveRate = itemRate / 100;
@@ -1478,7 +1478,7 @@ export function projectFixedIncomeValueAtMaturity(
   if (idx === "CDI") {
     effectiveRate = (rates.cdi / 100) * (safeRate / 100);
   } else if (idx === "IPCA") {
-    effectiveRate = rates.ipca / 100 + safeRate / 100;
+    effectiveRate = (1 + rates.ipca / 100) * (1 + safeRate / 100) - 1;
   } else {
     // PRE
     effectiveRate = safeRate / 100;

@@ -648,5 +648,44 @@ describe("Fixed Income calculation resilience & NaN immunity (Item 1)", () => {
     expect(invalidPrincipal.projectedBalance).toBe(0);
     expect(invalidPrincipal.projectedProfit).toBe(0);
   });
+
+  it("calculateFixedIncomeBalance applies ANBIMA/B3 geometric compounding for IPCA+ (Item 5)", () => {
+    // 365 days ago, rate = 6.0% (IPCA + 6.0%), mockMacroRates.ipca = 5.0%
+    // Geometric effectiveRate = (1 + 0.05) * (1 + 0.06) - 1 = 1.1130 - 1 = 0.1130 (11.30%)
+    // Linear sum would have been 11.00% (profit 1100). Geometric profit must be 1130.
+    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+    const item = makeMockItem({
+      ticker: "NTNB_TEST",
+      name: "Tesouro IPCA+ 2035",
+      type: "FIXED_INCOME",
+      currency: "BRL",
+      currentPrice: 10,
+      averagePrice: 10,
+      quantity: 1000, // principal = 10000
+      startDate: oneYearAgo,
+      indexer: "IPCA",
+      rate: 6.0,
+    });
+
+    const result = calculateFixedIncomeBalance(item, { cdi: 10.5, ipca: 5.0 });
+    expect(result).not.toBeNull();
+    expect(result!.accruedBalance).toBeCloseTo(11130, 0);
+    expect(result!.profit).toBeCloseTo(1130, 0);
+  });
+
+  it("projectFixedIncomeValueAtMaturity applies ANBIMA/B3 geometric compounding for IPCA+ (Item 5)", () => {
+    // Principal = 10000, 365 days, IPCA + 6.0%, macro ipca = 5.0%
+    // Projected balance = 10000 * 1.1130 = 11130 (profit = 1130)
+    const result = projectFixedIncomeValueAtMaturity(
+      10000,
+      "IPCA",
+      6.0,
+      "2025-01-01",
+      "2026-01-01", // 365 days
+      { cdi: 10.5, ipca: 5.0 },
+    );
+    expect(result.projectedBalance).toBeCloseTo(11130, 0);
+    expect(result.projectedProfit).toBeCloseTo(1130, 0);
+  });
 });
 
