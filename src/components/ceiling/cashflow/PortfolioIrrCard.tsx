@@ -38,12 +38,13 @@ export function PortfolioIrrCard({
     return getEffectiveTransactions(transactions, items);
   }, [transactions, items]);
 
-  // Filter transactions for active currency
+  // Filter transactions for active currency that have known cost basis (> 0)
   const filteredTransactions = useMemo(() => {
     return effectiveTransactions.filter((tx) => {
       const isUsd = isUsdAsset(tx.ticker, assetCurrencies);
       const txCurrency: Currency = isUsd ? "USD" : "BRL";
-      return txCurrency === activeCurrency;
+      if (txCurrency !== activeCurrency) return false;
+      return (tx.pricePerShare || 0) > 0 || (tx.fees || 0) > 0;
     });
   }, [effectiveTransactions, assetCurrencies, activeCurrency]);
 
@@ -59,15 +60,29 @@ export function PortfolioIrrCard({
     return { fromDate: fDate, toDate: tDate, daysInPeriod: days, hasTransactions: true };
   }, [filteredTransactions]);
 
-  // Calculate native current market value of assets in activeCurrency
+  // Calculate native current market value of assets in activeCurrency that have a known cost basis
   const nativeCurrentValue = useMemo(() => {
+    const existingTickers = new Set<string>();
+    for (const tx of transactions || []) {
+      const norm = (tx.ticker || "").trim().toUpperCase();
+      existingTickers.add(norm);
+      existingTickers.add(norm.replace(/\.SA$/, ""));
+    }
+
     const matchingItems = (items || []).filter((it) => {
       const isUsd =
         assetCurrencies[it.ticker.toUpperCase()] !== undefined
           ? assetCurrencies[it.ticker.toUpperCase()] === "USD"
           : it.currency === "USD";
       const itemCurrency: Currency = isUsd ? "USD" : "BRL";
-      return itemCurrency === activeCurrency;
+      if (itemCurrency !== activeCurrency) return false;
+
+      const norm = (it.ticker || "").trim().toUpperCase();
+      const normClean = norm.replace(/\.SA$/, "");
+      const hasExplicit = existingTickers.has(norm) || existingTickers.has(normClean);
+      const hasKnownAveragePrice = typeof it.averagePrice === "number" && it.averagePrice > 0;
+
+      return hasExplicit || hasKnownAveragePrice;
     });
     if (matchingItems.length > 0) {
       return matchingItems.reduce(
@@ -76,7 +91,7 @@ export function PortfolioIrrCard({
       );
     }
     return 0;
-  }, [items, assetCurrencies, activeCurrency]);
+  }, [items, transactions, assetCurrencies, activeCurrency]);
 
   // Fetch benchmark historical series
   const cdiQuery = useQuery({

@@ -344,5 +344,34 @@ describe("portfolioIrr", () => {
       expect(irrWithFee).not.toBeNull();
       expect(irrWithFee!).toBeLessThan(irrNoFee!);
     });
+
+    it("synthesizes transaction with pricePerShare 0 (not currentPrice) when averagePrice is missing (Item 3)", () => {
+      const now = Date.now();
+      const mockItems: any[] = [
+        {
+          id: "item-no-cost",
+          ticker: "VALE3",
+          name: "Vale S.A.",
+          type: "STOCK_BR",
+          currency: "BRL",
+          quantity: 100,
+          averagePrice: null, // Unknown cost basis
+          currentPrice: 65.0, // Live quote today
+          investingSince: now - 180 * 24 * 60 * 60 * 1000,
+        },
+      ];
+
+      const effectiveTxs = getEffectiveTransactions([], mockItems);
+      expect(effectiveTxs).toHaveLength(1);
+      expect(effectiveTxs[0].ticker).toBe("VALE3");
+      expect(effectiveTxs[0].quantity).toBe(100);
+      // Critical check: Never uses currentPrice (65.0) as cost basis!
+      expect(effectiveTxs[0].pricePerShare).toBe(0);
+
+      // Verify that buildCashFlowsFromPortfolio does not create a cash outflow for pricePerShare 0
+      const cashFlows = buildCashFlowsFromPortfolio(effectiveTxs, [], 6500, now, 1.0, { VALE3: "BRL" }, "BRL");
+      const buyFlow = cashFlows.find((f) => f.amount < 0);
+      expect(buyFlow).toBeUndefined(); // Zero cost = no fake cash outflow
+    });
   });
 });

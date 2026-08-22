@@ -193,7 +193,7 @@ export function getEffectiveTransactions(
       const price =
         item.averagePrice && item.averagePrice > 0
           ? item.averagePrice
-          : item.currentPrice || 0;
+          : 0;
 
       effective.push({
         id: `synthetic-${normItemTicker}`,
