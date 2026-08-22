@@ -1,6 +1,7 @@
 import { fetchWithTimeout } from "./http.server";
+import { US_TREASURY_10Y_FALLBACK } from "../macroDefaults";
 
-export const DEFAULT_US_TREASURY_10Y = 4.25; // 4.25% safe fallback
+export const DEFAULT_US_TREASURY_10Y = US_TREASURY_10Y_FALLBACK; // 4.25% safe fallback
 
 interface FredCacheEntry {
   value: number;

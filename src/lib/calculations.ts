@@ -1,7 +1,17 @@
 import type { Asset, AssetType } from "./domain";
 import type { WatchlistItem } from "./watchlist";
 import type { BenchmarkPoint } from "./benchmark";
-import { SELIC_FALLBACK, SELIC_DECIMAL, MACRO_RATES_FALLBACK } from "./macroDefaults";
+import {
+  SELIC_FALLBACK,
+  SELIC_DECIMAL,
+  IPCA_FALLBACK,
+  MACRO_RATES_FALLBACK,
+  US_TREASURY_10Y_FALLBACK,
+  US_COST_OF_EQUITY_FALLBACK,
+  US_TERMINAL_GROWTH_FALLBACK,
+  NTN_B_FLOOR_FALLBACK,
+  REIT_TREASURY_SPREAD_FALLBACK,
+} from "./macroDefaults";
 
 export function avgDividend(divs: readonly number[]): number {
   if (!divs.length) return 0;
@@ -575,7 +585,7 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     historicalYieldAverage,
     customTaxRate,
     shareholderYield,
-    terminalGrowthRate = 0.025, // 2.5% US long-term inflation anchor
+    terminalGrowthRate = US_TERMINAL_GROWTH_FALLBACK, // 2.5% US long-term inflation anchor
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
@@ -629,9 +639,9 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
 
   // 5. Multi-Stage Gordon for Dividend Aristocrats
   // US cost of equity ~8.5% (Treasury 10y ~4.25% + ERP ~4.25%)
-  const usDiscountRate = 0.085;
+  const usDiscountRate = US_COST_OF_EQUITY_FALLBACK;
   const gInitial = dividendCagr != null ? Math.min(0.15, dividendCagr / 100) : 0.06;
-  const gTerminal = terminalGrowthRate ?? 0.025;
+  const gTerminal = terminalGrowthRate ?? US_TERMINAL_GROWTH_FALLBACK;
   const gordon = gordonPrice(netAvgDividend, usDiscountRate, gInitial, gTerminal);
 
   const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
@@ -776,7 +786,7 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
   }
 
   // 1. NTN-B Benchmark Rate & Subtype Risk Spread Calibration
-  const ntnBBase = Math.max(5.5, Number((selicPct - terminalGrowthRate * 100).toFixed(2)));
+  const ntnBBase = Math.max(NTN_B_FLOOR_FALLBACK, Number((selicPct - terminalGrowthRate * 100).toFixed(2)));
   let spread = 2.5; // default FII Tijolo
   let spreadRange = { min: 1.5, max: 3.5 };
 
@@ -909,7 +919,7 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
     currency = "USD",
     historicalYieldAverage,
     customTaxRate,
-    usTreasury10Y = 4.25,
+    usTreasury10Y = US_TREASURY_10Y_FALLBACK,
     affo,
   } = params;
 
@@ -943,16 +953,16 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   // 1. Net Dividend after 30% US Withholding Tax
   const netAvgDividend = netAfterTax(avgDividend, "REIT", currency, customTaxRate);
 
-  const effectiveTreasury10Y = usTreasury10Y ?? 4.25;
+  const effectiveTreasury10Y = usTreasury10Y ?? US_TREASURY_10Y_FALLBACK;
 
   // 2. Bazin Model Anchored on US Treasury 10Y Spread (2.0% - 3.5%, suggested 2.75%)
-  const spread = 2.75;
+  const spread = REIT_TREASURY_SPREAD_FALLBACK;
   const effectiveRequiredYield = targetYield > 0 ? targetYield : effectiveTreasury10Y + spread;
   const bazin = effectiveRequiredYield > 0 ? netAvgDividend / (effectiveRequiredYield / 100) : null;
 
   // 3. REIT-Adapted Gordon Growth Model (k = Treasury 10Y + 4% ERP; g capped at 4%)
   const k = (effectiveTreasury10Y + 4.0) / 100;
-  const g = dividendCagr != null ? Math.min(0.04, Math.max(0, dividendCagr / 100)) : 0.025;
+  const g = dividendCagr != null ? Math.min(0.04, Math.max(0, dividendCagr / 100)) : US_TERMINAL_GROWTH_FALLBACK;
   const effectiveK = Math.max(k, g + GORDON_MIN_DISCOUNT_MARGIN);
   const gordon = (netAvgDividend * (1 + g)) / (effectiveK - g);
 
@@ -992,9 +1002,9 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
 
   const assumptions: ValuationAssumption[] = [
     {
-      key: "treasury10YSpread",
-      label: "Spread de risco sobre a US Treasury 10Y",
-      helperText: "Prêmio de risco exigido sobre a renda fixa soberana americana",
+      key: "spreadOverTreasury",
+      label: "Spread de Risco sobre US Treasury 10Y (REITs)",
+      helperText: "Prêmio de risco exigido pelo mercado para REITs em relação aos títulos soberanos americanos",
       value: spread,
       isCustomized: false,
       suggestedRange: { min: 2.0, max: 3.5 },
@@ -1005,7 +1015,7 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
       label: "Taxa de juros US Treasury 10Y (FRED)",
       helperText: "Taxa livre de risco da economia americana em USD",
       value: effectiveTreasury10Y,
-      isCustomized: effectiveTreasury10Y !== 4.25,
+      isCustomized: effectiveTreasury10Y !== US_TREASURY_10Y_FALLBACK,
       suggestedRange: { min: 3.5, max: 5.5 },
       confidenceBadge: 4,
     },
@@ -1072,7 +1082,7 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
     historicalYieldAverage,
     customTaxRate,
     selicPct = SELIC_FALLBACK,
-    usTreasury10Y = 4.25,
+    usTreasury10Y = US_TREASURY_10Y_FALLBACK,
   } = params;
 
   if (currentPrice <= 0) {
@@ -1111,8 +1121,9 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
   const isAccumulation = avgDividend <= 0;
 
   // 1. Expected Returns & ERP Setup
-  const effectiveTreasury10Y = usTreasury10Y ?? 4.25;
-  const riskFreeRate = isUS ? effectiveTreasury10Y : Math.max(5.5, selicPct - 4.5);
+  const effectiveTreasury10Y = usTreasury10Y ?? US_TREASURY_10Y_FALLBACK;
+  // For Brazilian ETFs, the risk-free rate approximation uses the real interest rate (Selic minus inflation/IPCA_FALLBACK), bounded below by NTN_B_FLOOR_FALLBACK
+  const riskFreeRate = isUS ? effectiveTreasury10Y : Math.max(NTN_B_FLOOR_FALLBACK, selicPct - IPCA_FALLBACK);
   const classErp = isUS ? 4.75 : 6.0; // 4.75% US S&P500 ERP, 6.0% IBOVESPA ERP
   const totalExpectedReturn = riskFreeRate + classErp;
 
@@ -1279,10 +1290,10 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
   const netAvgDividend = netAfterTax(avgDividend, type, params.currency, params.customTaxRate);
   const bazin = params.targetYield > 0 ? netAvgDividend / (params.targetYield / 100) : null;
   const graham = params.eps && params.bvps && params.eps > 0 && params.bvps > 0 ? Math.sqrt(22.5 * params.eps * params.bvps) : null;
-  const usDiscountRate = 0.085;
+  const usDiscountRate = US_COST_OF_EQUITY_FALLBACK;
   const k = isUS ? usDiscountRate : (params.selicPct ?? SELIC_FALLBACK) / 100;
   const gInitial = params.dividendCagr != null ? params.dividendCagr / 100 : null;
-  const gTerminal = params.terminalGrowthRate ?? (isUS ? 0.025 : GORDON_TERMINAL_GROWTH_RATE);
+  const gTerminal = params.terminalGrowthRate ?? (isUS ? US_TERMINAL_GROWTH_FALLBACK : GORDON_TERMINAL_GROWTH_RATE);
   const gordon = gordonPrice(
     netAvgDividend,
     k,
