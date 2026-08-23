@@ -71,4 +71,28 @@ describe("simulateDividendProjection", () => {
     expect(result.totalOutOfPocket).toBe(12000);
     expect(result.totalReinvested).toBeGreaterThan(0);
   });
+
+  it("Case 5: Contrato estrito decimal preserva yields baixos e normais sem distorção", () => {
+    // 0.8% a.a. passado como 0.008 não deve sofrer normalização indevida
+    const lowYieldResult = simulateDividendProjection({
+      initialShares: 1000,
+      currentPrice: 10,
+      annualYield: 0.008, // 0.8% a.a.
+      monthlyContribution: 0,
+      periodYears: 1,
+    });
+    // Renda inicial mensal = 1000 * (0.008 / 12) * 10 = 6.666...
+    expect(lowYieldResult.initialMonthlyIncome).toBeCloseTo(1000 * (0.008 / 12) * 10, 4);
+
+    // 8% a.a. passado como 0.08
+    const normalYieldResult = simulateDividendProjection({
+      initialShares: 100,
+      currentPrice: 100,
+      annualYield: 0.08,
+      monthlyContribution: 0,
+      periodYears: 1,
+    });
+    // Renda inicial mensal = 100 * (0.08 / 12) * 100 = 66.666...
+    expect(normalYieldResult.initialMonthlyIncome).toBeCloseTo(100 * (0.08 / 12) * 100, 4);
+  });
 });

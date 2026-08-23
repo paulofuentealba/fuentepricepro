@@ -31,7 +31,7 @@ export function AssetProjectionPanel({ item, asset, currency }: Props) {
       return item.annualDividend / currentPrice;
     }
     if (asset?.metrics?.currentDy != null) {
-      return asset.metrics.currentDy;
+      return asset.metrics.currentDy / 100;
     }
     return 0;
   }, [item.annualDividend, currentPrice, asset?.metrics?.currentDy]);

@@ -9,7 +9,7 @@ export interface ProjectionPoint {
 export interface ProjectionParams {
   initialShares: number;
   currentPrice: number;
-  /** Annual yield as a decimal (e.g. 0.08 for 8%) or percentage (e.g. 8 for 8%). */
+  /** Annual yield in decimal format (e.g. 0.08 for 8% a.a.). */
   annualYield: number;
   monthlyContribution?: number;
   periodYears: 1 | 3 | 5;
@@ -40,14 +40,10 @@ export function simulateDividendProjection({
   const safeInitialShares = Number.isFinite(initialShares) && initialShares >= 0 ? initialShares : 0;
   const safePrice = Number.isFinite(currentPrice) && currentPrice > 0 ? currentPrice : 0;
   const safeContribution = Number.isFinite(monthlyContribution) && monthlyContribution >= 0 ? monthlyContribution : 0;
-  
-  let normalizedYield = Number.isFinite(annualYield) && annualYield >= 0 ? annualYield : 0;
-  if (normalizedYield > 1) {
-    normalizedYield = normalizedYield / 100;
-  }
+  const safeYield = Number.isFinite(annualYield) && annualYield >= 0 ? annualYield : 0;
 
   const months = periodYears * 12;
-  const monthlyYieldRate = normalizedYield / 12;
+  const monthlyYieldRate = safeYield / 12;
 
   let accumulatedShares = safeInitialShares;
   let totalReinvested = 0;
