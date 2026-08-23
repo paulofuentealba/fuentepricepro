@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { AssetCard } from "@/components/shared/AssetCard";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
+import { type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
 import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle, Target } from "lucide-react";
@@ -120,9 +120,16 @@ function WowInsights({
   );
 }
 
-function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMargin: number }) {
+function AssetHoldings({
+  item,
+  activeMargin,
+  onUpdateInvestingSince,
+}: {
+  item: WatchlistItem;
+  activeMargin: number;
+  onUpdateInvestingSince?: (id: string, timestamp: number) => Promise<void>;
+}) {
   const { t } = useI18n();
-  const { updateAsync } = useWatchlist();
   const { transactions } = useTransactions();
   const derived = useAssetCardDerived(item);
 
@@ -143,8 +150,8 @@ function AssetHoldings({ item, activeMargin }: { item: WatchlistItem; activeMarg
           <InvestingSinceField
             value={item.investingSince ?? item.addedAt}
             onChange={(newDate) => {
-              if (firstTransactionDate == null) {
-                updateAsync(item.id, { investingSince: newDate.getTime() }).catch(() => {
+              if (firstTransactionDate == null && onUpdateInvestingSince) {
+                onUpdateInvestingSince(item.id, newDate.getTime()).catch(() => {
                   toast.error(t.errors.updateAssetFailedPrefix + " / " + t.toasts.assetsUpdateFailed.replace("{{count}}", "1"));
                 });
               }
@@ -287,6 +294,7 @@ interface AssetDetailSheetProps {
    * its usual default (e.g. triggered from the watchlist card's "pending
    * corporate event" badge or from an inline edit affordance). */
   initialTab?: "myPosition";
+  onUpdateInvestingSince?: (id: string, timestamp: number) => Promise<void>;
 }
 
 export function AssetDetailSheet({
@@ -296,6 +304,7 @@ export function AssetDetailSheet({
   hideGoalPlanner,
   hidePositionTabs,
   initialTab,
+  onUpdateInvestingSince,
 }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
   const [isAssumptionsModalOpen, setIsAssumptionsModalOpen] = useState(false);
@@ -462,7 +471,11 @@ export function AssetDetailSheet({
                 <TabsContent value="myPosition" className="space-y-6 mt-0">
                   {!hidePositionTabs && (
                     <>
-                      <AssetHoldings item={item} activeMargin={valuation.margin} />
+                       <AssetHoldings
+                         item={item}
+                         activeMargin={valuation.margin}
+                         onUpdateInvestingSince={onUpdateInvestingSince}
+                       />
                       {item.type === "FIXED_INCOME" && (
                         <FixedIncomePanel item={item} />
                       )}

@@ -39,7 +39,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   const [showDynamicImporter, setShowDynamicImporter] = useState(false);
   const { t, locale } = useI18n();
   const queryClient = useQueryClient();
-  const { upsert: upsertWatchlistItem } = useWatchlist();
+  const { upsert: upsertWatchlistItem, updateAsync: updateWatchlistItemAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const {
     items,
@@ -152,6 +152,12 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
       toast.success(t.toasts.assetRemoved);
     },
     [remove, t.toasts.assetRemoved],
+  );
+  const handleUpdateInvestingSince = useCallback(
+    async (id: string, timestamp: number) => {
+      await updateWatchlistItemAsync(id, { investingSince: timestamp });
+    },
+    [updateWatchlistItemAsync],
   );
 
   if (isPending) {
@@ -283,6 +289,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           onCsvImporterOpenChange={setShowCsvImporter}
           onDynamicImporterOpenChange={setShowDynamicImporter}
           onConfirmDynamicImport={handleConfirmDynamicImport}
+          onUpdateInvestingSince={handleUpdateInvestingSince}
         />
 
         <NewContributionDialog open={showNewContribution} onOpenChange={setShowNewContribution} />

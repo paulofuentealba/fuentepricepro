@@ -29,6 +29,7 @@ interface WatchlistDialogsProps {
   onCsvImporterOpenChange: (open: boolean) => void;
   onDynamicImporterOpenChange?: (open: boolean) => void;
   onConfirmDynamicImport?: (result: ParseResult) => Promise<void> | void;
+  onUpdateInvestingSince?: (id: string, timestamp: number) => Promise<void>;
 }
 
 export function WatchlistDialogs({
@@ -46,12 +47,18 @@ export function WatchlistDialogs({
   onCsvImporterOpenChange,
   onDynamicImporterOpenChange,
   onConfirmDynamicImport,
+  onUpdateInvestingSince,
 }: WatchlistDialogsProps) {
   const { t } = useI18n();
 
   return (
     <>
-      <AssetDetailSheet item={detail} onClose={onCloseDetail} initialTab={detailInitialTab} />
+      <AssetDetailSheet
+        item={detail}
+        onClose={onCloseDetail}
+        initialTab={detailInitialTab}
+        onUpdateInvestingSince={onUpdateInvestingSince}
+      />
       <PaywallDialog
         open={showPaywall}
         onOpenChange={onPaywallOpenChange}
