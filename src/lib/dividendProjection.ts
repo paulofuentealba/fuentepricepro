@@ -43,7 +43,8 @@ export function simulateDividendProjection({
   const safeYield = Number.isFinite(annualYield) && annualYield >= 0 ? annualYield : 0;
 
   const months = periodYears * 12;
-  const monthlyYieldRate = safeYield / 12;
+  // Geometric compounding equivalence: (1 + r_annual)^(1/12) - 1
+  const monthlyYieldRate = safeYield > 0 ? Math.pow(1 + safeYield, 1 / 12) - 1 : 0;
 
   let accumulatedShares = safeInitialShares;
   let totalReinvested = 0;
