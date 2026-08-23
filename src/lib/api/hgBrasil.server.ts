@@ -1,5 +1,6 @@
 import { fetchWithTimeout, UA } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
+import { HG_BRASIL_QUOTA_CACHE_TTL_MS } from "./cacheConfig.server";
 
 export interface HgBrasilDividendItem {
   type: "Dividendo" | "JCP" | "Rendimento" | string;
@@ -22,7 +23,7 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours in-memory cache to preserve quota
+const CACHE_TTL_MS = HG_BRASIL_QUOTA_CACHE_TTL_MS; // In-memory cache to preserve quota
 
 /**
  * Normalizes date strings from HG Brasil (e.g., "2024-05-15", "15/05/2024") into ISO "YYYY-MM-DD".

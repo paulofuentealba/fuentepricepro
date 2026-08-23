@@ -1,10 +1,7 @@
 import type { ApiAsset } from "./types";
+import { ASSET_CACHE_TTL_MS } from "./cacheConfig.server";
 
-/**
- * Named constant for server-side asset cache TTL.
- * Default: 5 minutes (300,000 ms), balancing market freshness with API rate limit conservation.
- */
-export const ASSET_CACHE_TTL_MS = 5 * 60 * 1000;
+export { ASSET_CACHE_TTL_MS };
 
 interface CacheEntry {
   asset: ApiAsset;

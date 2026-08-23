@@ -11,6 +11,7 @@ import {
   pickLast3,
   sumByYear,
 } from "./dividendAgg.server";
+import { YAHOO_AUTH_TTL_MS } from "./cacheConfig.server";
 
 // Cache Yahoo crumb + cookie on globalThis so HMR / module re-eval preserves
 // it, and so concurrent callers share one in-flight fetch instead of each
@@ -18,7 +19,7 @@ import {
 // across isolates without KV) — but this eliminates the intra-isolate storm.
 type YahooAuth = { crumb: string; cookie: string; expiresAt: number };
 const g = globalThis as unknown as { __yahooAuth?: YahooAuth | null };
-const AUTH_TTL_MS = 30 * 60_000;
+const AUTH_TTL_MS = YAHOO_AUTH_TTL_MS;
 
 export async function getYahooAuth(): Promise<{ crumb: string; cookie: string } | null> {
   const cached = g.__yahooAuth;

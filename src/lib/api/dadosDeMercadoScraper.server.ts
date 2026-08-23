@@ -2,8 +2,9 @@ import { UA, fetchWithRetry } from "./http.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import type { DividendEvent } from "../domain";
 import { reportIngestionStatus } from "./ingestionLog.server";
+import { DADOS_DE_MERCADO_CACHE_TTL_MS } from "./cacheConfig.server";
 
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const CACHE_TTL_MS = DADOS_DE_MERCADO_CACHE_TTL_MS;
 
 export interface DadosDeMercadoFundamentals {
   pvp?: number;

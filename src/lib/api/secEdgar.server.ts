@@ -1,5 +1,6 @@
 import { fetchWithRetry } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
+import { SEC_EDGAR_CIK_CACHE_TTL_MS, SEC_EDGAR_FAILURE_TTL_MS } from "./cacheConfig.server";
 
 export interface SecFactUnit {
   end: string;
@@ -63,9 +64,9 @@ const SEC_USER_AGENT = 'FuentePricePro contato@fuentepricepro.com';
 // In a highly scaled environment, move this to Firestore/Redis.
 let cikCache: Record<string, string> | null = null;
 let cikCacheTimestamp = 0;
-const CIK_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CIK_CACHE_TTL_MS = SEC_EDGAR_CIK_CACHE_TTL_MS;
 let lastFailureTimestamp = 0;
-const CIK_FAILURE_TTL_MS = 5 * 60 * 1000; // 5 minutes failure backoff TTL
+const CIK_FAILURE_TTL_MS = SEC_EDGAR_FAILURE_TTL_MS;
 
 export function _resetCikCacheForTesting(): void {
   cikCache = null;

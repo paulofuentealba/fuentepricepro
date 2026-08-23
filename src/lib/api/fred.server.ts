@@ -1,5 +1,6 @@
 import { fetchWithTimeout } from "./http.server";
 import { US_TREASURY_10Y_FALLBACK } from "../macroDefaults";
+import { FRED_CACHE_TTL_MS } from "./cacheConfig.server";
 
 export const DEFAULT_US_TREASURY_10Y = US_TREASURY_10Y_FALLBACK; // 4.25% safe fallback
 
@@ -9,7 +10,6 @@ interface FredCacheEntry {
 }
 
 let cachedTreasury10Y: FredCacheEntry | null = null;
-const FRED_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Fetches the US 10-Year Treasury Yield (DGS10) from the FRED API.

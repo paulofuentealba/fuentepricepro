@@ -2,8 +2,9 @@ import type { AssetType } from "../domain";
 import { dedupeInFlight, fetchWithTimeout, UA } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
+import { ASSET_CLASSIFICATION_CACHE_TTL_MS } from "./cacheConfig.server";
 
-export const ASSET_CLASSIFICATION_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+export { ASSET_CLASSIFICATION_CACHE_TTL_MS };
 
 export interface HgBrasilTickerItem {
   ticker: string;
