@@ -1,6 +1,9 @@
 import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
-import { assetQueryOptions } from "@/lib/queryOptions";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { assetQueryOptions, exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { convertCurrency } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { useUserSettings } from "@/lib/useUserSettings";
 import type { DividendEventsMap } from "@/lib/cashflow";
 import { Globe, TrendingDown, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/i18n";
@@ -62,6 +65,24 @@ export function WatchlistKpiSection({
     return map;
   }, [assetQueries, valuedItems]);
 
+  const { settings } = useUserSettings();
+  const displayCurrency = settings.displayCurrency;
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const exchangeRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
+
+  const displayNetWorth = convertCurrency(
+    totals.consolidatedNetWorth,
+    "BRL",
+    displayCurrency,
+    exchangeRate,
+  );
+  const displayIncome = convertCurrency(
+    totals.consolidatedIncome,
+    "BRL",
+    displayCurrency,
+    exchangeRate,
+  );
+
   return (
     <>
       <div className="mb-4 grid gap-3 lg:grid-cols-2">
@@ -86,7 +107,7 @@ export function WatchlistKpiSection({
             <div className="flex items-center gap-2 text-4xl lg:text-5xl font-bold tabular-nums">
               <Globe className="h-8 w-8 text-primary" />
               <span className="bg-gradient-to-r from-white via-primary to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
-                {formatCurrency(totals.consolidatedNetWorth, "BRL", locale)}
+                {formatCurrency(displayNetWorth, displayCurrency, locale)}
               </span>
             </div>
             <div className="mt-1 text-xs text-muted-foreground/80">
@@ -99,7 +120,7 @@ export function WatchlistKpiSection({
             value={
               <div className="flex items-center gap-2 text-2xl font-bold">
                 <Globe className="h-5 w-5 text-primary" />
-                {formatCurrency(totals.consolidatedIncome, "BRL", locale)}
+                {formatCurrency(displayIncome, displayCurrency, locale)}
               </div>
             }
             subValue={t.watchlist.consolidatedIncomeSub}
