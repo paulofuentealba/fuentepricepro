@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeTotals, type ValuedWatchlistItem } from "../useValuedPortfolio";
+import { computeTotals, transformBffItemToValuedItem, type ValuedWatchlistItem } from "../useValuedPortfolio";
 import type { ValuationResult } from "../calculations";
 
 const dummyValuation: ValuationResult = {
@@ -18,7 +18,7 @@ const dummyValuation: ValuationResult = {
   dividendYield: 0.08,
   positive: false,
   isUnavailable: false,
-  yieldTrapWarning: false,
+  yieldTrapWarning: null,
   shareholderYield: null,
 };
 
@@ -149,5 +149,63 @@ describe("computeTotals - consolidatedInvested vs consolidatedNetWorth", () => {
 
     expect(totals.consolidatedInvested).toBe(2500);
     expect(totals.consolidatedNetWorth).toBe(3500);
+  });
+});
+
+describe("transformBffItemToValuedItem — yieldTrapWarning propagation (Item 8)", () => {
+  it("propagates null when yieldTrapWarning is undefined or missing from BFF response (never false)", () => {
+    const rawBffItem = {
+      ticker: "TAEE11",
+      activeCeiling: 40,
+      margin: 15,
+      currentPrice: 35,
+      quantity: 100,
+    };
+
+    const transformed = transformBffItemToValuedItem(rawBffItem);
+    expect(transformed.valuation.yieldTrapWarning).toBeNull();
+    expect(transformed.valuation.yieldTrapWarning).not.toBe(false);
+  });
+
+  it("propagates null when yieldTrapWarning is explicitly null in BFF response (indeterminate)", () => {
+    const rawBffItem = {
+      ticker: "NEW3",
+      activeCeiling: 20,
+      margin: 5,
+      currentPrice: 19,
+      quantity: 50,
+      yieldTrapWarning: null,
+    };
+
+    const transformed = transformBffItemToValuedItem(rawBffItem);
+    expect(transformed.valuation.yieldTrapWarning).toBeNull();
+  });
+
+  it("propagates true when yieldTrapWarning is true in BFF response", () => {
+    const rawBffItem = {
+      ticker: "TRAP3",
+      activeCeiling: 10,
+      margin: -20,
+      currentPrice: 12,
+      quantity: 50,
+      yieldTrapWarning: true,
+    };
+
+    const transformed = transformBffItemToValuedItem(rawBffItem);
+    expect(transformed.valuation.yieldTrapWarning).toBe(true);
+  });
+
+  it("propagates false when yieldTrapWarning is explicitly false in BFF response", () => {
+    const rawBffItem = {
+      ticker: "SAFE3",
+      activeCeiling: 30,
+      margin: 20,
+      currentPrice: 25,
+      quantity: 50,
+      yieldTrapWarning: false,
+    };
+
+    const transformed = transformBffItemToValuedItem(rawBffItem);
+    expect(transformed.valuation.yieldTrapWarning).toBe(false);
   });
 });

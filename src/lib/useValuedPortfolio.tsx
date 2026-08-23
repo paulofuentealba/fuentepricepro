@@ -228,6 +228,42 @@ function useValuedPortfolioClientSide(
 // ---------------------------------------------------------------------------
 // BFF computation (ADR-001 path, gate = true)
 // ---------------------------------------------------------------------------
+export function transformBffItemToValuedItem(
+  bffItem: any,
+  fallbackSector: string = "Outros",
+): ValuedWatchlistItem {
+  const bffAny = bffItem as unknown as Record<string, unknown>;
+  const valuation: ValuationResult = {
+    ticker: bffItem.ticker,
+    activeCeiling: bffItem.activeCeiling,
+    margin: bffItem.margin,
+    fuenteConsensus: (bffAny["fuenteConsensus"] as number | null | undefined) ?? null,
+    methods: (bffAny["methods"] as ValuationResult["methods"] | undefined) ?? {
+      bazin: null, graham: null, gordon: null,
+    },
+    assumptions: (bffAny["assumptions"] as ValuationResult["assumptions"] | undefined) ?? [],
+    investorProfile: (bffAny["investorProfile"] as ValuationResult["investorProfile"] | undefined) ?? "moderate",
+    bazin: (bffAny["bazin"] as number | null | undefined) ?? null,
+    graham: (bffAny["graham"] as number | null | undefined) ?? null,
+    gordon: (bffAny["gordon"] as number | null | undefined) ?? null,
+    gordonConfidence: (bffAny["gordonConfidence"] as "high" | "low" | null | undefined) ?? null,
+    consensus: (bffAny["consensus"] as number | null | undefined) ?? null,
+    dividendYield: (bffAny["dividendYield"] as number | undefined) ?? 0,
+    positive: (bffAny["positive"] as boolean | undefined) ?? (bffItem.activeCeiling > bffItem.currentPrice),
+    isUnavailable: (bffAny["isUnavailable"] as boolean | undefined) ?? false,
+    yieldTrapWarning: (bffAny["yieldTrapWarning"] as ValuationResult["yieldTrapWarning"] | undefined) ?? null,
+    shareholderYield: (bffAny["shareholderYield"] as number | null | undefined) ?? null,
+  };
+
+  return {
+    ...bffItem,
+    livePrice: bffItem.currentPrice,
+    sector: bffItem.sector ?? fallbackSector,
+    valuation,
+    isClosedPosition: bffItem.quantity === 0,
+    isBffMode: true,
+  };
+}
 
 function useValuedPortfolioBff(
   items: WatchlistItem[],
@@ -268,39 +304,7 @@ function useValuedPortfolioBff(
 
   const valuedItems = useMemo<ValuedWatchlistItem[]>(() => {
     if (!bffQuery.data) return [];
-    return bffQuery.data.items.map((bffItem) => {
-      const bffAny = bffItem as unknown as Record<string, unknown>;
-      const valuation: ValuationResult = {
-        ticker: bffItem.ticker,
-        activeCeiling: bffItem.activeCeiling,
-        margin: bffItem.margin,
-        fuenteConsensus: (bffAny["fuenteConsensus"] as number | null | undefined) ?? null,
-        methods: (bffAny["methods"] as ValuationResult["methods"] | undefined) ?? {
-          bazin: null, graham: null, gordon: null,
-        },
-        assumptions: (bffAny["assumptions"] as ValuationResult["assumptions"] | undefined) ?? [],
-        investorProfile: (bffAny["investorProfile"] as ValuationResult["investorProfile"] | undefined) ?? "moderate",
-        bazin: (bffAny["bazin"] as number | null | undefined) ?? null,
-        graham: (bffAny["graham"] as number | null | undefined) ?? null,
-        gordon: (bffAny["gordon"] as number | null | undefined) ?? null,
-        gordonConfidence: (bffAny["gordonConfidence"] as "high" | "low" | null | undefined) ?? null,
-        consensus: (bffAny["consensus"] as number | null | undefined) ?? null,
-        dividendYield: (bffAny["dividendYield"] as number | undefined) ?? 0,
-        positive: (bffAny["positive"] as boolean | undefined) ?? (bffItem.activeCeiling > bffItem.currentPrice),
-        isUnavailable: (bffAny["isUnavailable"] as boolean | undefined) ?? false,
-        yieldTrapWarning: (bffAny["yieldTrapWarning"] as ValuationResult["yieldTrapWarning"] | undefined) ?? false,
-        shareholderYield: (bffAny["shareholderYield"] as number | null | undefined) ?? null,
-      };
-
-      return {
-        ...bffItem,
-        livePrice: bffItem.currentPrice,
-        sector: bffItem.sector ?? t.common.other,
-        valuation,
-        isClosedPosition: bffItem.quantity === 0,
-        isBffMode: true,
-      };
-    });
+    return bffQuery.data.items.map((bffItem) => transformBffItemToValuedItem(bffItem, t.common.other));
   }, [bffQuery.data, t]);
 
   const totals = useMemo(
