@@ -160,13 +160,17 @@ export async function fetchHgBrasilClassification(
       }
 
       // Match exact ticker symbol
-      const matched =
-        items.find(
-          (i) =>
-            i.symbol?.toUpperCase() === clean ||
-            i.ticker?.toUpperCase() === `B3:${clean}` ||
-            i.ticker?.toUpperCase() === clean,
-        ) || items[0];
+      const matched = items.find(
+        (i) =>
+          i.symbol?.toUpperCase() === clean ||
+          i.ticker?.toUpperCase() === `B3:${clean}` ||
+          i.ticker?.toUpperCase() === clean,
+      );
+
+      if (!matched) {
+        reportIngestionStatus("hgBrasil", "INVALID", `No exact ticker match found in ${items.length} HG Brasil results`, clean);
+        return null;
+      }
 
       const mappedType = mapHgItemToAssetType(matched, clean);
       if (!mappedType) {

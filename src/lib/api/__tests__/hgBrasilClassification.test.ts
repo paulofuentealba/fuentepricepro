@@ -312,5 +312,42 @@ describe("HG Brasil Asset Classification & Mapping", () => {
       const fiiFallback = await classifyBrAsync("HGLG11");
       expect(fiiFallback).toBe("FII");
     });
+
+    it("rejects inexact fuzzy search results and returns null instead of misclassifying via items[0]", async () => {
+      const reportSpy = vi.spyOn(ingestionLogModule, "reportIngestionStatus");
+      vi.spyOn(adminModule, "getAdminFirestore").mockReturnValue(null as any);
+
+      // Searching for "XPML11", but HG Brasil returns related/fuzzy tickers without exact match
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          results: [
+            {
+              ticker: "B3:XPIN11",
+              kind: "fii",
+              symbol: "XPIN11",
+              name: "FII XP Indust",
+              full_name: "Fundo de Investimento Imobiliário XP Industrial",
+            },
+            {
+              ticker: "B3:XPCM11",
+              kind: "fii",
+              symbol: "XPCM11",
+              name: "FII XP Corp",
+              full_name: "XP Corporate Macaé Fundo de Investimento Imobiliário",
+            },
+          ],
+        }),
+      } as any);
+
+      const result = await fetchHgBrasilClassification("XPML11", "test_key");
+      expect(result).toBeNull();
+      expect(reportSpy).toHaveBeenCalledWith(
+        "hgBrasil",
+        "INVALID",
+        expect.stringContaining("No exact ticker match found"),
+        "XPML11",
+      );
+    });
   });
 });
