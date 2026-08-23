@@ -5,6 +5,7 @@ import { type Transaction, getQuantityAtDate, recalculateInvestingSinceFromTrans
 import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { getEffectiveTransactions } from "@/lib/portfolioIrr";
 import { getFxMultiplier } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 
 export { getFxMultiplier };
 
@@ -69,7 +70,7 @@ export function buildMonthlyBuckets(
   dividendEventsMap: DividendEventsMap = {},
   mode: "calendar" | "journey" = "calendar",
   transactions: Transaction[] = [],
-  fxRate: number = 5.5
+  fxRate: number = EXCHANGE_RATE_FALLBACK
 ): MonthBucket[] {
   const now = new Date();
   const currentYear = now.getUTCFullYear();
@@ -375,7 +376,7 @@ export function computeInvestedVsReceived(
   currency: Currency,
   dividendEventsMap: DividendEventsMap,
   transactions: Transaction[] = [],
-  fxRate: number = 5.5
+  fxRate: number = EXCHANGE_RATE_FALLBACK
 ): InvestedVsReceivedItem[] {
   if (!items || items.length === 0) return [];
 

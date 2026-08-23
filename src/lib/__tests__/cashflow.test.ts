@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { buildMonthlyBuckets, computeCashFlowSummary } from "../cashflow";
+import { buildMonthlyBuckets, computeCashFlowSummary, computeInvestedVsReceived } from "../cashflow";
+import { EXCHANGE_RATE_FALLBACK } from "../macroDefaults";
 import type { WatchlistItem } from "../watchlist";
 
 function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
@@ -340,5 +341,32 @@ describe("Cashflow logic", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  describe("EXCHANGE_RATE_FALLBACK parameter default (Item 2)", () => {
+    it("buildMonthlyBuckets defaults to EXCHANGE_RATE_FALLBACK (5.5) when fxRate parameter is omitted", () => {
+      const items = [
+        mkItem({ ticker: "O", currency: "USD", annualDividend: 120, quantity: 1, paymentMonths: [1] }),
+      ];
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+      // Omit fxRate parameter (default = EXCHANGE_RATE_FALLBACK)
+      const buckets = buildMonthlyBuckets(items, "BRL", months);
+      // 120 USD * 5.5 = 660 BRL in January (idx 0)
+      expect(buckets[0].amount).toBe(120 * EXCHANGE_RATE_FALLBACK);
+      expect(buckets[0].amount).toBe(660);
+    });
+
+    it("computeInvestedVsReceived defaults to EXCHANGE_RATE_FALLBACK (5.5) when fxRate parameter is omitted", () => {
+      const items = [
+        mkItem({ ticker: "AAPL", currency: "USD", averagePrice: 150, quantity: 10 }),
+      ];
+      // Omit fxRate parameter (default = EXCHANGE_RATE_FALLBACK)
+      const result = computeInvestedVsReceived(items, "BRL", {});
+      expect(result).toHaveLength(1);
+      // 150 USD * 10 * 5.5 = 8250 BRL
+      expect(result[0].invested).toBe(150 * 10 * EXCHANGE_RATE_FALLBACK);
+      expect(result[0].invested).toBe(8250);
+    });
   });
 });
