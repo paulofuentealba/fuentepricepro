@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   calculateRealizedIncome,
   getTaxType,
@@ -12,10 +12,31 @@ import { type DividendEvent } from "../domain";
 describe("realizedIncome", () => {
   describe("normalizeDateStr", () => {
     it("converts timestamps and ISO strings to YYYY-MM-DD", () => {
-      const ts = new Date("2024-04-10T12:00:00Z").getTime();
+      const ts = new Date(2024, 3, 10, 12, 0, 0).getTime();
       expect(normalizeDateStr(ts)).toBe("2024-04-10");
       expect(normalizeDateStr("2024-04-16T15:30:00Z")).toBe("2024-04-16");
       expect(normalizeDateStr("2024-04-16")).toBe("2024-04-16");
+    });
+
+    it("uses local calendar components rather than UTC to prevent timezone skew on timestamps", () => {
+      // Simulate local calendar (e.g. GMT-3): April 15 at 23:00 (which is April 16 02:00 UTC)
+      const yearSpy = vi.spyOn(Date.prototype, "getFullYear").mockReturnValue(2024);
+      const monthSpy = vi.spyOn(Date.prototype, "getMonth").mockReturnValue(3); // April (0-indexed)
+      const dateSpy = vi.spyOn(Date.prototype, "getDate").mockReturnValue(15);
+
+      // ts corresponding to 2024-04-16T02:00:00.000Z in UTC
+      const ts = new Date("2024-04-16T02:00:00.000Z").getTime();
+
+      try {
+        const result = normalizeDateStr(ts);
+        // With getLocalDateISOString (new code): uses getFullYear/getMonth/getDate -> "2024-04-15"
+        // With toISOString().split("T")[0] (old code): returns "2024-04-16" and FAILS this assertion
+        expect(result).toBe("2024-04-15");
+      } finally {
+        yearSpy.mockRestore();
+        monthSpy.mockRestore();
+        dateSpy.mockRestore();
+      }
     });
   });
 

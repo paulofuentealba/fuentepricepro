@@ -50,7 +50,7 @@ export function getTaxType(type: AssetType, currency?: Currency, isJCP?: boolean
  */
 export function normalizeDateStr(dateInput: number | string): string {
   if (typeof dateInput === "number") {
-    return new Date(dateInput).toISOString().split("T")[0];
+    return getLocalDateISOString(dateInput);
   }
   if (typeof dateInput === "string") {
     if (dateInput.includes("T")) {
