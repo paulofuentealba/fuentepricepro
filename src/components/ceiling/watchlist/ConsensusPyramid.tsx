@@ -22,9 +22,11 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
     label: string,
     value: number | null,
     positionClass: string,
+    conceptTooltip?: string,
     notApplicableTooltip?: string,
   ) => {
     const isNull = value === null || value <= 0;
+    const tooltipContent = isNull ? notApplicableTooltip : conceptTooltip;
     return (
       <div
         className={`absolute flex flex-col items-center justify-center ${positionClass} ${isNull ? "opacity-60" : ""}`}
@@ -32,8 +34,8 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
         <div className="rounded-md border border-white/10 bg-black/60 px-3 py-1.5 backdrop-blur-md shadow-lg flex flex-col items-center">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5 flex items-center gap-1">
             {label}
-            {isNull && notApplicableTooltip && (
-              <InfoTooltip content={notApplicableTooltip} />
+            {tooltipContent && (
+              <InfoTooltip content={tooltipContent} link="/app/docs" />
             )}
           </span>
           <span className="text-sm font-bold text-white">
@@ -104,18 +106,21 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
           "Gordon",
           valuation.gordon,
           "top-0 left-1/2 -translate-x-1/2",
+          t.tooltips?.gordon,
           t.tooltips?.gordonNotApplicable,
         )}
         {renderVertex(
           "Bazin",
           valuation.bazin,
           "bottom-0 left-4",
+          t.tooltips?.bazin,
           t.tooltips?.bazinNotApplicable,
         )}
         {renderVertex(
           "Graham",
           valuation.graham,
           "bottom-0 right-4",
+          t.tooltips?.graham,
           t.tooltips?.grahamNotApplicable,
         )}
 
@@ -123,8 +128,12 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
         <div className="absolute top-[150px] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10">
           <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
           <div className="relative rounded-full border border-primary/50 bg-black px-5 py-2.5 shadow-primary/20 backdrop-blur-xl">
-            <span className="block text-[10px] font-bold text-primary uppercase tracking-widest text-center mb-0.5 drop-shadow-md">
+            <span className="flex items-center justify-center gap-1 text-[10px] font-bold text-primary uppercase tracking-widest text-center mb-0.5 drop-shadow-md">
               {t.valuation.consensusBadge}
+              <InfoTooltip
+                content={t.tooltips?.consensus}
+                link="/app/docs"
+              />
             </span>
             <span className="block text-xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
               {valuation.consensus !== null && valuation.consensus > 0
