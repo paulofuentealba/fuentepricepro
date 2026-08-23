@@ -227,10 +227,15 @@ export function ResultStats({
           <summary className="flex cursor-pointer items-center justify-between font-medium">
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               {t.form.taxExceptions}{" "}
-              <InfoTooltip
-                content={t.tooltips?.taxExceptions || t.form.taxExceptionsBody.replace(/<[^>]*>/g, "")}
-                link="/app/docs#tax-exceptions"
-              />
+              <span
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center"
+              >
+                <InfoTooltip
+                  content={t.tooltips?.taxExceptions || t.form.taxExceptionsBody.replace(/<[^>]*>/g, "")}
+                  link="/app/docs#tax-exceptions"
+                />
+              </span>
               {!customTaxUnlocked && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning uppercase tracking-wider">
                   {t.form.taxExceptionsPro}
