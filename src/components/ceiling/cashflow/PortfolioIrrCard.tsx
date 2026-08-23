@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Percent, TrendingUp, Info, ShieldCheck, BarChart2 } from "lucide-react";
+import { Percent, TrendingUp, Info, ShieldCheck, BarChart2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
@@ -117,10 +117,10 @@ export function PortfolioIrrCard({
   }, [cdiQuery.data, daysInPeriod]);
 
   const annualizedSelic = useMemo(() => {
-    if (!selicQuery.data || selicQuery.data.length === 0 || daysInPeriod <= 0) return fallbackSelic;
+    if (!selicQuery.data || selicQuery.data.length === 0 || daysInPeriod <= 0) return null;
     const lastCum = selicQuery.data[selicQuery.data.length - 1].cumulativeReturnPct;
     return annualizeReturn(lastCum, daysInPeriod);
-  }, [selicQuery.data, daysInPeriod, fallbackSelic]);
+  }, [selicQuery.data, daysInPeriod]);
 
   const annualizedSpx = useMemo(() => {
     if (!spxQuery.data || spxQuery.data.length === 0 || daysInPeriod <= 0) return null;
@@ -176,16 +176,16 @@ export function PortfolioIrrCard({
   return (
     <Card className="border border-success/30 bg-success/10 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.15)]">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-success/20 flex items-center justify-center border border-success/30 shrink-0">
-              <Percent className="h-4 w-4 text-success" />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <h4 className="text-xs font-semibold text-success uppercase tracking-wider">
-                {t.tabs.chart.irrTitle} ({activeCurrency})
-              </h4>
-              <TooltipProvider>
+        <TooltipProvider delayDuration={150}>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-success/20 flex items-center justify-center border border-success/30 shrink-0">
+                <Percent className="h-4 w-4 text-success" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold text-success uppercase tracking-wider">
+                  {t.tabs.chart.irrTitle} ({activeCurrency})
+                </h4>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="h-3.5 w-3.5 text-success/70 hover:text-success cursor-pointer" />
@@ -194,9 +194,8 @@ export function PortfolioIrrCard({
                     {t.tabs.chart.irrTooltip}
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
+              </div>
             </div>
-          </div>
 
           {activeCurrency === "BRL" && diffVsCdi !== null && (
             <span
@@ -238,9 +237,27 @@ export function PortfolioIrrCard({
             </div>
 
             <div className="rounded-lg bg-background/60 border border-success/25 p-3">
-              <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                <BarChart2 className="h-3.5 w-3.5 text-success/80" />
-                {t.tabs.chart.cdiBenchmark}
+              <span className="text-[11px] text-muted-foreground flex items-center justify-between gap-1.5 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <BarChart2 className="h-3.5 w-3.5 text-success/80" />
+                  {t.tabs.chart.cdiBenchmark}
+                </span>
+                {annualizedCdi === null && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        data-testid="cdi-fallback-badge"
+                        className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[9px] font-medium text-warning ring-1 ring-warning/30 cursor-help"
+                      >
+                        <AlertCircle className="h-2.5 w-2.5 shrink-0" />
+                        <span>{t.tabs.chart.fallbackBenchmarkBadge}</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-xs">
+                      <p>{t.tabs.chart.cdiFallbackTooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </span>
               <p className="text-xl font-extrabold text-foreground mt-1">
                 {annualizedCdi !== null ? `${annualizedCdi.toFixed(1)}% a.a.` : `${fallbackSelic.toFixed(1)}% a.a.`}
@@ -248,9 +265,27 @@ export function PortfolioIrrCard({
             </div>
 
             <div className="rounded-lg bg-background/60 border border-success/25 p-3">
-              <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                <ShieldCheck className="h-3.5 w-3.5 text-success/80" />
-                {t.tabs.chart.selicBenchmark}
+              <span className="text-[11px] text-muted-foreground flex items-center justify-between gap-1.5 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-success/80" />
+                  {t.tabs.chart.selicBenchmark}
+                </span>
+                {annualizedSelic === null && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        data-testid="selic-fallback-badge"
+                        className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[9px] font-medium text-warning ring-1 ring-warning/30 cursor-help"
+                      >
+                        <AlertCircle className="h-2.5 w-2.5 shrink-0" />
+                        <span>{t.tabs.chart.fallbackBenchmarkBadge}</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-xs">
+                      <p>{t.tabs.chart.selicFallbackTooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </span>
               <p className="text-xl font-extrabold text-foreground mt-1">
                 {annualizedSelic !== null ? `${annualizedSelic.toFixed(1)}% a.a.` : `${fallbackSelic.toFixed(1)}% a.a.`}
@@ -280,6 +315,7 @@ export function PortfolioIrrCard({
             </div>
           </div>
         )}
+        </TooltipProvider>
       </CardContent>
     </Card>
   );

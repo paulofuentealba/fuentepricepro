@@ -614,6 +614,9 @@ export const ptBR = {
       irrEmptyStateDesc: "Adicione transações de ativos denominados em {{currency}} para calcular o IRR nesta moeda.",
       irrTooltip: "Taxa Interna de Retorno (IRR) ponderada por dinheiro. Considera o momento exato de cada aporte, resgate e provento recebido.",
       irrInsufficientData: "Dados insuficientes",
+      fallbackBenchmarkBadge: "Estimado",
+      cdiFallbackTooltip: "Série histórica do CDI indisponível; exibindo taxa de referência estática.",
+      selicFallbackTooltip: "Série histórica da Selic indisponível; exibindo taxa de referência estática.",
     },
     cashflow: {
       annualTotal: "Total Anual (Realizado + Projetado)",

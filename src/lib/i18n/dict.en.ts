@@ -612,6 +612,9 @@ export const en = {
       irrEmptyStateDesc: "Add transactions for {{currency}} assets to calculate the IRR in this currency.",
       irrTooltip: "Money-Weighted Internal Rate of Return (IRR). Accounts for exact timing of buys, sells, and dividends received.",
       irrInsufficientData: "Insufficient data",
+      fallbackBenchmarkBadge: "Estimated",
+      cdiFallbackTooltip: "CDI historical benchmark series unavailable; displaying static reference rate.",
+      selicFallbackTooltip: "Selic historical benchmark series unavailable; displaying static reference rate.",
     },
     cashflow: {
       annualTotal: "Annual Total (Realized + Projected)",

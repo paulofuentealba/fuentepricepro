@@ -1,4 +1,4 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { PortfolioIrrCard } from "../PortfolioIrrCard";
@@ -7,6 +7,7 @@ import type { Transaction } from "@/lib/transactions";
 import React from "react";
 
 let mockWatchlistItems: WatchlistItem[] = [];
+let mockBenchmarkData: any[] = [];
 
 vi.mock("@/lib/watchlist", () => ({
   useWatchlist: () => ({
@@ -25,16 +26,17 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   return {
     ...actual,
     useQuery: () => ({
-      data: [],
+      data: mockBenchmarkData,
       isLoading: false,
     }),
   };
 });
 
-describe("PortfolioIrrCard (Tier 0 / Item 4)", () => {
+describe("PortfolioIrrCard (Tier 0 / Item 4 & Tier 1 / Item 2)", () => {
   beforeEach(() => {
     cleanup();
     mockWatchlistItems = [];
+    mockBenchmarkData = [];
   });
 
   it("não contamina a TIR de USD com currentPortfolioValue em BRL quando não há ativos USD em custódia", () => {
@@ -151,5 +153,73 @@ describe("PortfolioIrrCard (Tier 0 / Item 4)", () => {
     );
 
     expect(screen.getByText(/Retorno da Carteira/i)).toBeDefined();
+  });
+
+  it("exibe badges de fallback 'Estimado' para CDI e Selic quando as séries históricas não estão disponíveis", () => {
+    mockBenchmarkData = []; // Sem dados de benchmark
+
+    const t0 = new Date("2024-01-01T00:00:00Z").getTime();
+    const brlTransactions: Transaction[] = [
+      {
+        id: "tx-brl-1",
+        ticker: "PETR4",
+        type: "buy",
+        date: t0,
+        quantity: 100,
+        pricePerShare: 30,
+        fees: 0,
+        notes: null,
+      },
+    ];
+
+    render(
+      <PortfolioIrrCard
+        transactions={brlTransactions}
+        realizedEvents={[]}
+        currentPortfolioValue={3500}
+        activeCurrency="BRL"
+        assetCurrencies={{ PETR4: "BRL" }}
+      />
+    );
+
+    // Badges de fallback devem estar visíveis
+    expect(screen.getByTestId("cdi-fallback-badge")).toBeDefined();
+    expect(screen.getByTestId("selic-fallback-badge")).toBeDefined();
+  });
+
+  it("não exibe badges de fallback quando as séries históricas de CDI e Selic estão disponíveis", () => {
+    // Série mockada cobrindo de 2024-01-01 a 2025-01-01
+    mockBenchmarkData = [
+      { date: "2024-01-01", cdi: 100, selic: 100, spx: 100, ipca: 100 },
+      { date: "2025-01-01", cdi: 110, selic: 110.5, spx: 120, ipca: 104 },
+    ];
+
+    const t0 = new Date("2024-01-01T00:00:00Z").getTime();
+    const brlTransactions: Transaction[] = [
+      {
+        id: "tx-brl-2",
+        ticker: "PETR4",
+        type: "buy",
+        date: t0,
+        quantity: 100,
+        pricePerShare: 30,
+        fees: 0,
+        notes: null,
+      },
+    ];
+
+    render(
+      <PortfolioIrrCard
+        transactions={brlTransactions}
+        realizedEvents={[]}
+        currentPortfolioValue={3500}
+        activeCurrency="BRL"
+        assetCurrencies={{ PETR4: "BRL" }}
+      />
+    );
+
+    // Badges de fallback NÃO devem existir quando dados reais de CDI e Selic foram calculados
+    expect(screen.queryByTestId("cdi-fallback-badge")).toBeNull();
+    expect(screen.queryByTestId("selic-fallback-badge")).toBeNull();
   });
 });

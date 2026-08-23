@@ -619,6 +619,9 @@ export const es = {
       irrEmptyStateDesc: "Añada transacciones de activos en {{currency}} para calcular la TIR en esta moneda.",
       irrTooltip: "Tasa Interna de Retorno (TIR) ponderada por dinero. Considera el momento exacto de cada compra, venta y dividendo.",
       irrInsufficientData: "Datos insuficientes",
+      fallbackBenchmarkBadge: "Estimado",
+      cdiFallbackTooltip: "Serie histórica de CDI no disponible; mostrando tasa de referencia estática.",
+      selicFallbackTooltip: "Serie histórica de Selic no disponible; mostrando tasa de referencia estática.",
     },
     cashflow: {
       annualTotal: "Total Anual (Realizado + Proyectado)",
