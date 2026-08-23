@@ -265,24 +265,34 @@ export function computeSuggestedAllocation(
     FIXED_INCOME: 0,
   };
 
-  let sumRounded = 0;
-  let maxType: AssetType = ASSET_TYPES_ORDER[0];
-  let maxVal = -1;
+  // Largest Remainder Method (Hare-Niemeyer Algorithm)
+  // Guarantees exact sum of 100% while strictly minimizing rounding distortion across buckets.
+  let sumFloors = 0;
+  const remainders: { type: AssetType; remainder: number; orderIndex: number }[] = [];
 
-  for (const type of ASSET_TYPES_ORDER) {
-    const pct = Math.round((weighted[type] / totalWeight) * 100);
-    rounded[type] = pct;
-    sumRounded += pct;
-    if (pct > maxVal) {
-      maxVal = pct;
-      maxType = type;
+  ASSET_TYPES_ORDER.forEach((type, orderIndex) => {
+    const exact = (weighted[type] / totalWeight) * 100;
+    const floor = Math.floor(exact);
+    rounded[type] = floor;
+    sumFloors += floor;
+    remainders.push({
+      type,
+      remainder: exact - floor,
+      orderIndex,
+    });
+  });
+
+  const remainderCount = 100 - sumFloors;
+  if (remainderCount > 0) {
+    remainders.sort((a, b) => {
+      const diff = b.remainder - a.remainder;
+      if (Math.abs(diff) > 1e-9) return diff;
+      return a.orderIndex - b.orderIndex;
+    });
+
+    for (let i = 0; i < remainderCount && i < remainders.length; i++) {
+      rounded[remainders[i].type] += 1;
     }
-  }
-
-  // Adjust exact sum to 100 by tweaking the largest asset type bucket
-  const diff = 100 - sumRounded;
-  if (diff !== 0) {
-    rounded[maxType] = Math.max(0, rounded[maxType] + diff);
   }
 
   return rounded;

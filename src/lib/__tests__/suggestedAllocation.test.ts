@@ -7,7 +7,8 @@ import {
   ASSET_TYPES_ORDER,
 } from "../suggestedAllocation";
 import type { WatchlistItem } from "../watchlist";
-import type { InvestorProfile } from "../investor-profile";
+import type { InvestorProfile, ProfileGoal, ProfileReaction } from "../investor-profile";
+import type { StrategyKey } from "../allocation";
 
 function mkItem(type: WatchlistItem["type"], safetyMargin: number): WatchlistItem {
   return {
@@ -140,5 +141,55 @@ describe("suggestedAllocation", () => {
       expect(sum).toBe(100);
       expect(result.STOCK_BR).toBeGreaterThan(0);
     });
+  });
+
+  describe("Hare-Niemeyer Rounding Parity across all 36 Profile & Strategy Permutations", () => {
+    const reactions: ProfileReaction[] = ["sell", "hold", "buy"];
+    const goals: ProfileGoal[] = ["income", "growth", "both"];
+    const strategiesCombinations: StrategyKey[][] = [
+      [],
+      ["yield"],
+      ["defensive"],
+      ["yield", "snowball"],
+    ];
+
+    const testMatrix: {
+      reaction: ProfileReaction;
+      goal: ProfileGoal;
+      strategies: StrategyKey[];
+    }[] = [];
+
+    for (const reaction of reactions) {
+      for (const goal of goals) {
+        for (const strats of strategiesCombinations) {
+          testMatrix.push({ reaction, goal, strategies: strats });
+        }
+      }
+    }
+
+    it.each(testMatrix)(
+      "Reaction: $reaction | Goal: $goal | Strategies: $strategies -> sums to exactly 100 with non-negative integers",
+      ({ reaction, goal, strategies }) => {
+        const profile: Partial<InvestorProfile> = {
+          reaction,
+          goal,
+          completedAt: Date.now(),
+        };
+
+        const allocation = computeSuggestedAllocation(profile, strategies);
+
+        // 1. Verify all 8 asset types are non-negative integers
+        for (const type of ASSET_TYPES_ORDER) {
+          const val = allocation[type];
+          expect(Number.isInteger(val), `Bucket ${type} must be an integer (got ${val})`).toBe(true);
+          expect(val, `Bucket ${type} must be non-negative`).toBeGreaterThanOrEqual(0);
+          expect(val, `Bucket ${type} cannot exceed 100`).toBeLessThanOrEqual(100);
+        }
+
+        // 2. Verify exact 100% sum
+        const total = Object.values(allocation).reduce((acc, curr) => acc + curr, 0);
+        expect(total).toBe(100);
+      }
+    );
   });
 });
