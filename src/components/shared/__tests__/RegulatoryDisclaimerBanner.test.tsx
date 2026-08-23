@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
+import { RegulatoryDisclaimerBanner, EXCLUDED_APP_ROUTES } from "@/components/shared/RegulatoryDisclaimerBanner";
 import { dict } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
 
@@ -22,20 +22,32 @@ afterEach(() => {
   cleanup();
 });
 
-describe("RegulatoryDisclaimerBanner", () => {
-  const calculationRoutes = [
+describe("RegulatoryDisclaimerBanner (Tier 1 / Item 6)", () => {
+  const analyticalAppRoutes = [
+    "/app",
     "/app/screener",
     "/app/myportfolio",
     "/app/comparator",
     "/app/cashflow",
     "/app/smartallocation",
     "/app/snowballeffectsimulator",
+    "/app/riskradar",
+    "/app/globalradar",
   ];
 
-  const nonDisclaimerRoutes = ["/settings", "/privacy", "/terms", "/app"];
+  const excludedOrExternalRoutes = [
+    "/app/docs",
+    "/app/docs/methodology",
+    "/settings",
+    "/privacy",
+    "/terms",
+    "/subscription-terms",
+    "/admin",
+    "/",
+  ];
 
-  for (const route of calculationRoutes) {
-    it(`renders on calculation route ${route}`, () => {
+  for (const route of analyticalAppRoutes) {
+    it(`renders on analytical app route ${route}`, () => {
       mockPathname = route;
       mockLocale = "ptBR";
       render(<RegulatoryDisclaimerBanner />);
@@ -43,14 +55,28 @@ describe("RegulatoryDisclaimerBanner", () => {
     });
   }
 
-  for (const route of nonDisclaimerRoutes) {
-    it(`does not render on non-calculation route ${route}`, () => {
+  for (const route of excludedOrExternalRoutes) {
+    it(`does not render on excluded or non-app route ${route}`, () => {
       mockPathname = route;
       mockLocale = "ptBR";
       const { container } = render(<RegulatoryDisclaimerBanner />);
       expect(container).toBeEmptyDOMElement();
     });
   }
+
+  it("handles path-matching edge cases correctly (e.g. /app/docsomething renders, /app/docs does not)", () => {
+    // /app/docsomething não é /app/docs nem sub-rota /app/docs/*, logo herda a proteção
+    mockPathname = "/app/docsomething";
+    mockLocale = "ptBR";
+    const { container: renderedContainer } = render(<RegulatoryDisclaimerBanner />);
+    expect(screen.getByText(dict.ptBR.regulatoryDisclaimer.message)).toBeInTheDocument();
+    cleanup();
+
+    // /app/docs é explicitamente excluído
+    mockPathname = "/app/docs";
+    const { container: emptyContainer } = render(<RegulatoryDisclaimerBanner />);
+    expect(emptyContainer).toBeEmptyDOMElement();
+  });
 
   (["ptBR", "en", "es"] as const).forEach((locale) => {
     it(`renders the approved text for locale "${locale}"`, () => {

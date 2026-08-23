@@ -13,29 +13,29 @@ import { useI18n } from "@/lib/i18n-provider";
  * compact, persistent form. Unlike the cookie consent banner (item 73),
  * this is not opt-in/closeable: it is a standing regulatory notice.
  *
- * Centralized here (rendered once from the `/app` layout) rather than
- * duplicated across the 6 calculation screens, gated by an explicit
- * allow-list of route pathnames so it never leaks into administrative
- * routes (Settings, /privacy, /terms) where the full clause already lives.
+ * Centralized here (rendered once from the `/app` layout) with a
+ * secure-by-default policy: all authenticated application routes under `/app`
+ * render the disclaimer by default, while strictly informational routes
+ * (e.g. `/app/docs`) or administrative routes outside `/app` are excluded.
  */
-const DISCLAIMER_ROUTES = [
-  "/app/screener",
-  "/app/myportfolio",
-  "/app/comparator",
-  "/app/cashflow",
-  "/app/smartallocation",
-  "/app/snowballeffectsimulator",
+export const EXCLUDED_APP_ROUTES = [
+  "/app/docs",
 ];
 
 export function RegulatoryDisclaimerBanner() {
   const { t } = useI18n();
   const location = useLocation();
 
-  const isDisclaimerRoute = DISCLAIMER_ROUTES.some(
-    (route) => location.pathname === route || location.pathname.startsWith(`${route}/`),
-  );
+  const isAppRoute =
+    location.pathname === "/app" || location.pathname.startsWith("/app/");
 
-  if (!isDisclaimerRoute) return null;
+  const isExcluded =
+    !isAppRoute ||
+    EXCLUDED_APP_ROUTES.some(
+      (route) => location.pathname === route || location.pathname.startsWith(`${route}/`),
+    );
+
+  if (isExcluded) return null;
 
   return (
     <div
