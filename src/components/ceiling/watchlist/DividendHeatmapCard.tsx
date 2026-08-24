@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { Flame, PieChart, Info } from "lucide-react";
-import type { Asset } from "@/lib/domain";
+import type { Asset, Currency } from "@/lib/domain";
 import { computeDividendHeatmap } from "@/lib/dividendHeatmap";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatNumber, formatPercent } from "@/lib/i18n";
+import { formatCurrency, formatNumber, formatPercent, toIntlLocale } from "@/lib/i18n";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
 
@@ -20,21 +20,16 @@ export function DividendHeatmapCard({ asset }: Props) {
 
   const { years, cellsByYear, maxMonthlyAmount, recurrenceByMonth, payoutRatio } = data;
 
-  const monthsShort =
-    t.dividendHeatmap?.monthsShort || [
-      "Jan",
-      "Fev",
-      "Mar",
-      "Abr",
-      "Mai",
-      "Jun",
-      "Jul",
-      "Ago",
-      "Set",
-      "Out",
-      "Nov",
-      "Dez",
-    ];
+  const monthsShort = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(toIntlLocale(locale), { month: "short" });
+    return Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(2024, i, 1);
+      const str = formatter.format(d);
+      return str.charAt(0).toUpperCase() + str.slice(1).replace(/\.$/, "");
+    });
+  }, [locale]);
+
+  const currency: Currency = (asset.currency as Currency) || "BRL";
 
   if (years.length === 0) return null;
 
@@ -67,7 +62,7 @@ export function DividendHeatmapCard({ asset }: Props) {
         <table className="w-full text-xs text-center border-collapse">
           <thead>
             <tr className="border-b border-border/40 bg-muted/30 text-[11px] font-semibold text-muted-foreground">
-              <th className="py-2 px-2 text-left pl-3 font-medium">Ano</th>
+              <th className="py-2 px-2 text-left pl-3 font-medium">{t.dividendHeatmap.yearHeader}</th>
               {monthsShort.map((m: string, idx: number) => (
                 <th key={idx} className="py-2 px-1 min-w-[36px] font-medium">
                   {m}
@@ -98,9 +93,9 @@ export function DividendHeatmapCard({ asset }: Props) {
                                 ? "bg-success/30 text-success border border-success/40"
                                 : "bg-success/15 text-success border border-success/20",
                           )}
-                          title={`${year}/${month}: R$ ${amount.toFixed(2)}`}
+                          title={`${monthsShort[month - 1]} ${year}: ${formatCurrency(amount, currency, locale)}`}
                         >
-                          {amount.toFixed(2)}
+                          {formatNumber(amount, locale, 2)}
                         </div>
                       ) : (
                         <span className="text-muted-foreground/30 text-[10px]">—</span>
@@ -134,7 +129,7 @@ export function DividendHeatmapCard({ asset }: Props) {
                             : "text-muted-foreground/40",
                       )}
                     >
-                      {pct > 0 ? `${pct.toFixed(0)}%` : "0%"}
+                      {formatPercent(pct, locale, 0)}
                     </span>
                   </td>
                 );

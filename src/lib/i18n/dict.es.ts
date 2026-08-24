@@ -1487,6 +1487,7 @@ export const es = {
     payoutTitle: "Payout Histórico",
     payoutSubtitle: "Porcentaje del beneficio neto distribuido a los accionistas",
     payoutFiiNote: "Los fondos inmobiliarios distribuyen por regulación el ~95% del flujo de caja.",
+    yearHeader: "Año",
     monthsShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
   },
   fundamentalIndicators: {
