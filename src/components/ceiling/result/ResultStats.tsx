@@ -54,7 +54,6 @@ interface Props {
   onTargetYieldChange: (y: number) => void;
   onAveragePriceChange: (a: number | null) => void;
   onCustomTaxRateChange: (r: number | null) => void;
-  isPro: boolean;
   onShowPaywall: () => void;
 }
 
@@ -79,7 +78,6 @@ export function ResultStats({
   onTargetYieldChange,
   onAveragePriceChange,
   onCustomTaxRateChange,
-  isPro,
   onShowPaywall,
 }: Props) {
   const { t, locale } = useI18n();

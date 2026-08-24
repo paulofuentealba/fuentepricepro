@@ -122,7 +122,6 @@ describe("ResultStats — Paywall & InfoTooltip decoupling", () => {
         onTargetYieldChange={onTargetYieldChange}
         onAveragePriceChange={onAveragePriceChange}
         onCustomTaxRateChange={onCustomTaxRateChange}
-        isPro={false}
         onShowPaywall={onShowPaywall}
         {...props}
       />
