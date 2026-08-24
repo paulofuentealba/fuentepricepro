@@ -335,7 +335,7 @@ function ComparatorCards({
                     valuation: val,
                   } as unknown as import("@/lib/useValuedPortfolio").ValuedWatchlistItem // Justification: synthetic WatchlistItem constructed for comparison card display
                 }
-                isSimulation={activeYield !== savedItem?.targetYield}
+                isSimulation={Boolean(savedItem && activeYield !== savedItem.targetYield)}
                 meta={
                   {
                     eps: data.metrics?.eps || null,
