@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { assetQueryOptions, exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -18,6 +18,7 @@ import type { Locale } from "@/lib/i18n";
 interface WatchlistKpiSectionProps {
   valuedItems: ValuedWatchlistItem[];
   meta: Record<string, any>;
+  dividendEventsMap?: DividendEventsMap;
   totals: {
     consolidatedNetWorth: number;
     consolidatedIncome: number;
@@ -39,6 +40,7 @@ interface WatchlistKpiSectionProps {
 export function WatchlistKpiSection({
   valuedItems,
   meta,
+  dividendEventsMap,
   totals,
   locale,
   typeFilter,
@@ -47,23 +49,6 @@ export function WatchlistKpiSection({
   contextStats,
 }: WatchlistKpiSectionProps) {
   const { t } = useI18n();
-
-  // Fetch fresh Asset data (with dividendEvents) for each watchlist item in parallel.
-  // Cached by TanStack Query (staleTime=5min), cheap after first load.
-  const assetQueries = useQueries({
-    queries: valuedItems.map((it) => assetQueryOptions(it.ticker)),
-  });
-
-  const dividendEventsMap = useMemo<DividendEventsMap>(() => {
-    const map: DividendEventsMap = {};
-    assetQueries.forEach((q, i) => {
-      const ticker = valuedItems[i]?.ticker;
-      if (ticker && q.data?.dividendEvents) {
-        map[ticker] = q.data.dividendEvents;
-      }
-    });
-    return map;
-  }, [assetQueries, valuedItems]);
 
   const { settings } = useUserSettings();
   const displayCurrency = settings.displayCurrency;

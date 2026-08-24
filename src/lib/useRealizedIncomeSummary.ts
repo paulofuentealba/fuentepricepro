@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useTransactions } from "@/lib/transactions";
 import { getEffectiveTransactions } from "@/lib/portfolioIrr";
@@ -11,7 +10,6 @@ import {
   type RealizedIncomeSummary,
 } from "@/lib/realizedIncome";
 import type { DividendEventsMap } from "@/lib/cashflow";
-import { assetQueryOptions } from "@/lib/queryOptions";
 import type { Currency } from "@/lib/domain";
 
 /**
@@ -28,30 +26,16 @@ import type { Currency } from "@/lib/domain";
 export function useRealizedIncomeSummary(currency: Currency = "BRL"): {
   summary: RealizedIncomeSummary;
   events: RealizedIncomeEvent[];
+  dividendEventsMap: DividendEventsMap;
   isLoading: boolean;
 } {
-  const { items, isAppLoading, fx } = useValuedPortfolio();
+  const { items, isAppLoading, fx, dividendEventsMap = {} } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
 
   const effectiveTransactions = useMemo(
     () => getEffectiveTransactions(transactions, items),
     [transactions, items],
   );
-
-  const assetQueries = useQueries({
-    queries: items.map((it) => assetQueryOptions(it.ticker)),
-  });
-
-  const dividendEventsMap = useMemo<DividendEventsMap>(() => {
-    const map: DividendEventsMap = {};
-    assetQueries.forEach((q, i) => {
-      const ticker = items[i]?.ticker;
-      if (ticker && q.data?.dividendEvents) {
-        map[ticker] = q.data.dividendEvents;
-      }
-    });
-    return map;
-  }, [assetQueries, items]);
 
   const realizedEvents = useMemo(() => {
     if (effectiveTransactions.length === 0) return [];
@@ -72,5 +56,5 @@ export function useRealizedIncomeSummary(currency: Currency = "BRL"): {
     [realizedEvents, currency, fx?.USDBRL],
   );
 
-  return { summary, events: realizedEvents, isLoading: isAppLoading };
+  return { summary, events: realizedEvents, dividendEventsMap, isLoading: isAppLoading };
 }

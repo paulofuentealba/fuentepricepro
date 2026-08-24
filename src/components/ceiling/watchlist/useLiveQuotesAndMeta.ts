@@ -4,6 +4,7 @@ import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import type { LiveQuote } from "@/lib/apiService.functions";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { AssetMeta } from "./utils";
+import type { DividendEventsMap } from "@/lib/cashflow";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
 
 /**
@@ -51,6 +52,17 @@ export function useLiveQuotesAndMeta(items: WatchlistItem[]) {
     return out;
   }, [tickers, assetResults]);
 
+  const dividendEventsMap = useMemo<DividendEventsMap>(() => {
+    const out: DividendEventsMap = {};
+    tickers.forEach((ticker, i) => {
+      const asset = assetResults[i]?.data;
+      if (asset?.dividendEvents) {
+        out[ticker] = asset.dividendEvents;
+      }
+    });
+    return out;
+  }, [tickers, assetResults]);
+
   const dataUpdatedAt = useMemo(() => {
     let max = 0;
     for (const q of quoteResults) {
@@ -59,5 +71,5 @@ export function useLiveQuotesAndMeta(items: WatchlistItem[]) {
     return max;
   }, [quoteResults]);
 
-  return { quotes, meta, dataUpdatedAt };
+  return { quotes, meta, dividendEventsMap, dataUpdatedAt };
 }

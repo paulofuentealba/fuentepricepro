@@ -47,6 +47,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     totals,
     quotes,
     meta,
+    dividendEventsMap,
     remove,
     isAppLoading: isPending,
   } = useValuedPortfolio();
@@ -225,6 +226,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
             <WatchlistKpiSection
               valuedItems={activeValuedItems}
               meta={meta}
+              dividendEventsMap={dividendEventsMap}
               totals={totals}
               locale={locale}
               typeFilter={typeFilter}

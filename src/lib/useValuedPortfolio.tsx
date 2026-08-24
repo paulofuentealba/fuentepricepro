@@ -165,7 +165,7 @@ function useValuedPortfolioClientSide(
     });
   }, [items, globalYield, txByTicker]);
 
-  const { quotes, meta, dataUpdatedAt: lastUpdatedAt } = useLiveQuotesAndMeta(baseItems);
+  const { quotes, meta, dividendEventsMap, dataUpdatedAt: lastUpdatedAt } = useLiveQuotesAndMeta(baseItems);
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
@@ -216,6 +216,7 @@ function useValuedPortfolioClientSide(
     totals,
     quotes,
     meta,
+    dividendEventsMap,
     isAppLoading,
     lastUpdatedAt,
     macroRates,
@@ -319,6 +320,7 @@ function useValuedPortfolioBff(
     totals,
     quotes: {} as ReturnType<typeof useLiveQuotesAndMeta>["quotes"],
     meta: {} as ReturnType<typeof useLiveQuotesAndMeta>["meta"],
+    dividendEventsMap: {} as ReturnType<typeof useLiveQuotesAndMeta>["dividendEventsMap"],
     isAppLoading: isAppLoading || bffQuery.isLoading,
     lastUpdatedAt: bffQuery.dataUpdatedAt ?? 0,
     macroRates,

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Currency } from "@/lib/domain";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -13,7 +13,7 @@ import {
   type DividendEventsMap,
 } from "@/lib/cashflow";
 import { useTransactions } from "@/lib/transactions";
-import { assetQueryOptions, exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { CashFlowHeader } from "./cashflow/CashFlowHeader";
 import { CashFlowSummaryCards } from "./cashflow/CashFlowSummary";
 import { CashFlowChart } from "./cashflow/CashFlowChart";
@@ -84,34 +84,12 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
 
   const [mode, setMode] = useState<"calendar" | "journey">(defaultMode);
 
-  const queryOptions = useMemo(
-    () => items.map((it) => assetQueryOptions(it.ticker)),
-    [items],
-  );
-  const assetQueries = useQueries({
-    queries: queryOptions,
-  });
-
-  const dividendEventsMap = useMemo<DividendEventsMap>(() => {
-    const map: DividendEventsMap = {};
-    assetQueries.forEach((q, i) => {
-      const ticker = items[i]?.ticker;
-      if (ticker && q.data?.dividendEvents) {
-        map[ticker] = q.data.dividendEvents;
-      }
-    });
-    return map;
-  }, [assetQueries, items]);
-
   const { transactions } = useTransactions();
 
-  // SSOT: dividendEventsMap/effectiveTransactions -> realizedEvents/summary
-  // vem de `useRealizedIncomeSummary` (extraído desta duplicação — ver
-  // `src/lib/useRealizedIncomeSummary.ts`). `dividendEventsMap` continua
-  // calculado localmente logo abaixo porque também alimenta
-  // `buildMonthlyBuckets`/`computeInvestedVsReceived`, que não fazem parte
-  // do escopo do hook.
-  const { events: realizedEvents, summary: realizedSummary } =
+  // SSOT: dividendEventsMap, realizedEvents e realizedSummary consumidos
+  // diretamente de `useRealizedIncomeSummary` (SSOT), eliminando observers
+  // duplicados de useQueries neste componente.
+  const { events: realizedEvents, summary: realizedSummary, dividendEventsMap = {} } =
     useRealizedIncomeSummary(activeCurrency);
 
   const { data: fxData } = useQuery(exchangeRateQueryOptions());
