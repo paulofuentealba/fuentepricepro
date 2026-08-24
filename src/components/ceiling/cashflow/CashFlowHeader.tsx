@@ -4,8 +4,6 @@ import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Calendar, Route } from "lucide-react";
 
-export type ViewMode = "combo" | "bars" | "line"; // Keeping type just in case, but unused in header.
-
 interface Props {
   title: string;
   availableCurrencies: Currency[];
