@@ -1473,7 +1473,6 @@ export const en = {
     payoutSubtitle: "Percentage of net income distributed to shareholders",
     payoutFiiNote: "Real estate and credit funds distribute ~95% of cash flow by regulation.",
     yearHeader: "Year",
-    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   },
   fundamentalIndicators: {
     title: "Fundamental Indicators",

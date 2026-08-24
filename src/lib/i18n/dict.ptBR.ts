@@ -1483,7 +1483,6 @@ export const ptBR = {
     payoutSubtitle: "Percentual do lucro líquido distribuído aos acionistas",
     payoutFiiNote: "Fundos imobiliários e de crédito distribuem obrigatoriamente ~95% do resultado de caixa por regulação.",
     yearHeader: "Ano",
-    monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
   },
   fundamentalIndicators: {
     title: "Indicadores Fundamentalistas",
