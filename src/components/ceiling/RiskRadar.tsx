@@ -24,7 +24,7 @@ export function RiskRadar() {
         <h3 className="text-lg font-bold text-foreground mb-2">{t.riskRadar.emptyTitle}</h3>
         <p className="text-sm text-muted-foreground max-w-sm mb-6">{t.riskRadar.emptySubtitle}</p>
         <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Link to="/app">{t.emptyStates?.goToPortfolio || "Ir para a Carteira"}</Link>
+          <Link to="/app">{t.emptyStates.goToPortfolio}</Link>
         </Button>
       </div>
     );
@@ -190,7 +190,7 @@ export function RiskRadar() {
                     return (
                       <tr key={a.id} className="hover:bg-muted/50 transition-colors">
                         <td className="px-4 py-3 font-medium text-foreground">
-                          {a.ticker}
+                          {displayTicker(a.ticker)}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums">
                           {formatPercent(a.weightPct, l)}
