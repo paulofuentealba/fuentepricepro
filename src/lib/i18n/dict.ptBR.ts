@@ -292,6 +292,8 @@ export const ptBR = {
 
     share: "Compartilhar",
     shareCopied: "Análise copiada para a área de transferência",
+    shareTemplate:
+      "Acabei de analisar {{ticker}} no Fuente Price Pro! 🚀\nPreço Teto: {{ceiling}} | YoC Projetado: {{yoc}}.\nConfira sua estratégia de carteira em https://fuentepricepro.com",
     setPriceAlert: "Criar Alerta de Preço",
     priceAlertToast:
       "Alerta de preço em breve! Iremos avisá-lo quando cair abaixo do seu Preço Teto.",

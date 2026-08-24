@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { isUsAsset, netAfterTax, yieldOnCost } from "@/lib/calculations";
-import { formatCurrency, formatPercent, type Locale } from "@/lib/i18n";
+import { formatCurrency, formatPercent, type Locale, dict } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 
 export interface AssetDerived {
@@ -51,6 +51,12 @@ export function buildAssetShareText(
   yoc: number | null,
   locale: Locale,
 ): string {
+  const d = dict[locale] ?? dict.ptBR;
   const yocValue = yoc ?? item.targetYield;
-  return `Just analyzed ${item.ticker} on Fuente Price Pro! 🚀\nCeiling Price: ${formatCurrency(item.ceilingPrice, item.currency, locale)} | Projected YoC: ${formatPercent(yocValue, locale, 2)}.\nCheck your portfolio strategy at https://fuentepricepro.com`;
+  const ceilingStr = formatCurrency(item.ceilingPrice, item.currency, locale);
+  const yocStr = formatPercent(yocValue, locale, 2);
+  return d.result.shareTemplate
+    .replace("{{ticker}}", item.ticker)
+    .replace("{{ceiling}}", ceilingStr)
+    .replace("{{yoc}}", yocStr);
 }

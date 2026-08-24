@@ -293,6 +293,8 @@ export const es = {
 
     share: "Compartir",
     shareCopied: "Análisis copiado al portapapeles",
+    shareTemplate:
+      "¡Acabo de analizar {{ticker}} en Fuente Price Pro! 🚀\nPrecio Techo: {{ceiling}} | YoC Proyectado: {{yoc}}.\nConsulta tu estrategia de cartera en https://fuentepricepro.com",
     setPriceAlert: "Establecer alerta de precio",
     priceAlertToast:
       "¡Función de alerta de precio próximamente! Te notificaremos cuando caiga por debajo de tu Precio Techo.",

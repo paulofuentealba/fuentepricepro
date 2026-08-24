@@ -1,6 +1,6 @@
 import type { Asset } from "@/lib/domain";
 import { getCanonicalAnnualDividend } from "@/lib/calculations";
-import { formatCurrency, formatPercent, toIntlLocale, type Locale } from "@/lib/i18n";
+import { formatCurrency, formatPercent, toIntlLocale, type Locale, dict } from "@/lib/i18n";
 
 export type Timeframe = 1 | 3 | 5;
 export const TIMEFRAMES: Timeframe[] = [1, 3, 5];
@@ -35,9 +35,11 @@ export function buildResultShareText(
   yocPct: number | null,
   locale: Locale,
 ): string {
-  return `Just analyzed ${displayTicker} on Fuente Price Pro! 🚀 \nCeiling Price: ${formatCurrency(
-    ceiling,
-    currency,
-    locale,
-  )} | Projected YoC: ${yocPct ? formatPercent(yocPct, locale, 2) : "—"}. \nCheck your portfolio strategy at https://fuentepricepro.com`;
+  const d = dict[locale] ?? dict.ptBR;
+  const ceilingStr = formatCurrency(ceiling, currency, locale);
+  const yocStr = yocPct != null ? formatPercent(yocPct, locale, 2) : "—";
+  return d.result.shareTemplate
+    .replace("{{ticker}}", displayTicker)
+    .replace("{{ceiling}}", ceilingStr)
+    .replace("{{yoc}}", yocStr);
 }

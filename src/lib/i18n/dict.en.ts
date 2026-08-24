@@ -290,6 +290,8 @@ export const en = {
 
     share: "Share",
     shareCopied: "Analysis copied to clipboard",
+    shareTemplate:
+      "Just analyzed {{ticker}} on Fuente Price Pro! 🚀\nCeiling Price: {{ceiling}} | Projected YoC: {{yoc}}.\nCheck your portfolio strategy at https://fuentepricepro.com",
     setPriceAlert: "Set Price Alert",
     priceAlertToast:
       "Price alert feature coming soon! We will notify you when it drops below your Ceiling Price.",
