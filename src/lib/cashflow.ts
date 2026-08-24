@@ -442,18 +442,57 @@ export function buildSparklinePath(values: number[]): string {
     .join(" ");
 }
 
-export function exportCashFlowCsv(data: MonthBucket[], currency: Currency): void {
-  const header = ["Month", "Amount", "Cumulative", "Currency", "Contributors"];
+export interface CashFlowCsvHeaders {
+  month: string;
+  amount: string;
+  paid: string;
+  realized: string;
+  announced: string;
+  projected: string;
+  cumulative: string;
+  currency: string;
+  contributors: string;
+}
+
+export function buildCashFlowCsv(
+  data: MonthBucket[],
+  currency: Currency,
+  headers: CashFlowCsvHeaders,
+): string {
+  const headerRow = [
+    headers.month,
+    headers.amount,
+    headers.paid,
+    headers.realized,
+    headers.announced,
+    headers.projected,
+    headers.cumulative,
+    headers.currency,
+    headers.contributors,
+  ];
   const rows = data.map((d) => [
     d.month,
     d.amount.toFixed(2),
+    (d.paidAmount ?? 0).toFixed(2),
+    (d.realizedAmount ?? 0).toFixed(2),
+    (d.announcedAmount ?? 0).toFixed(2),
+    (d.projectedAmount ?? 0).toFixed(2),
     d.cumulativeTotal.toFixed(2),
     currency,
     d.contributors.map((c) => `${c.ticker}:${c.amount.toFixed(2)}`).join("|"),
   ]);
-  const csv = [header, ...rows]
+  return [headerRow, ...rows]
     .map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
     .join("\n");
+}
+
+export function exportCashFlowCsv(
+  data: MonthBucket[],
+  currency: Currency,
+  headers: CashFlowCsvHeaders,
+): void {
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+  const csv = buildCashFlowCsv(data, currency, headers);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

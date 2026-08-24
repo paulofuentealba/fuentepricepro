@@ -266,7 +266,7 @@ export function buildCashFlowsFromPortfolio(
     const eventDate = new Date(payDateStr).getTime();
     if (isNaN(eventDate) || eventDate > asOfDate) continue;
 
-    const isUsd = ev.taxType === "us_dividend" || isUsdAsset(ev.ticker, assetCurrencies);
+    const isUsd = ev.currency ? ev.currency === "USD" : isUsdAsset(ev.ticker, assetCurrencies);
     const evCurrency: Currency = isUsd ? "USD" : "BRL";
 
     if (targetCurrency && evCurrency !== targetCurrency) {

@@ -275,12 +275,15 @@ export interface MonthlyDividendBucket {
 /**
  * Groups realized income events by month (YYYY-MM), summing amountNet.
  * Uses event.isPaid to accurately populate paidAmount and announcedAmount.
+ * Supports multi-currency conversion when `currency` is passed (defaulting to native currency if omitted).
  * Returns at most the 12 most recent months with dividends (no artificial zero-filling).
  */
 export function groupRealizedIncomeByMonth(
   events: RealizedIncomeEvent[],
   referenceDateStr?: string,
-  locale: Locale = "ptBR"
+  locale: Locale = "ptBR",
+  currency?: Currency,
+  fxRate?: number,
 ): MonthlyDividendBucket[] {
   const monthMap: Record<string, { total: number; paid: number; announced: number }> = {};
 
@@ -293,11 +296,15 @@ export function groupRealizedIncomeByMonth(
     if (!monthMap[monthKey]) {
       monthMap[monthKey] = { total: 0, paid: 0, announced: 0 };
     }
-    monthMap[monthKey].total += ev.amountNet;
+    const amount = currency
+      ? convertCurrency(ev.amountNet, ev.currency, currency, fxRate)
+      : ev.amountNet;
+
+    monthMap[monthKey].total += amount;
     if (ev.isPaid) {
-      monthMap[monthKey].paid += ev.amountNet;
+      monthMap[monthKey].paid += amount;
     } else {
-      monthMap[monthKey].announced += ev.amountNet;
+      monthMap[monthKey].announced += amount;
     }
   }
 

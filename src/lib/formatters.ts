@@ -70,15 +70,25 @@ export function displayTicker(ticker: string): string {
   return cleanTicker(ticker);
 }
 
+export interface DurationLabels {
+  year: string;
+  years: string;
+  month: string;
+  months: string;
+  separator: string;
+  lessThanOneMonth: string;
+}
+
 /**
- * Formata uma duração em meses como "X anos e Y meses" (pt-BR).
+ * Formata uma duração em meses como "X anos e Y meses" recebendo os rótulos
+ * traduzidos via parâmetro (ex.: a partir de `t.common`), mantendo conformidade com a Regra 2 (Zero Hardcode).
  *
  * - `months <= 0` -> "" (nada a formatar; caller decide o texto de "atingido").
  * - `!Number.isFinite(months)` -> "" (nunca imprime "Infinity anos").
  * - Singular/plural tratado ("1 ano" vs "2 anos", "1 mês" vs "2 meses").
  * - Quando só há anos (ou só meses), omite a parte zerada em vez de "0 meses".
  */
-export function formatMonthsAsYearsMonths(months: number): string {
+export function formatMonthsAsYearsMonths(months: number, labels: DurationLabels): string {
   if (!Number.isFinite(months) || months <= 0) return "";
 
   const totalMonths = Math.round(months);
@@ -86,13 +96,14 @@ export function formatMonthsAsYearsMonths(months: number): string {
   const remainingMonths = totalMonths % 12;
 
   const parts: string[] = [];
-  if (years > 0) parts.push(`${years} ${years === 1 ? "ano" : "anos"}`);
+  if (years > 0) parts.push(`${years} ${years === 1 ? labels.year : labels.years}`);
   if (remainingMonths > 0) {
-    parts.push(`${remainingMonths} ${remainingMonths === 1 ? "mês" : "meses"}`);
+    parts.push(`${remainingMonths} ${remainingMonths === 1 ? labels.month : labels.months}`);
   }
 
-  if (parts.length === 0) return "menos de 1 mês";
-  return parts.join(" e ");
+  if (parts.length === 0) return labels.lessThanOneMonth;
+  const separator = labels.separator.includes(" ") ? labels.separator : ` ${labels.separator} `;
+  return parts.join(separator);
 }
 
 /**

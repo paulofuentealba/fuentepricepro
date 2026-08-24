@@ -1,7 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
-import { buildMonthlyBuckets, computeCashFlowSummary, computeInvestedVsReceived } from "../cashflow";
+import {
+  buildMonthlyBuckets,
+  computeCashFlowSummary,
+  computeInvestedVsReceived,
+  buildCashFlowCsv,
+  exportCashFlowCsv,
+} from "../cashflow";
 import { EXCHANGE_RATE_FALLBACK } from "../macroDefaults";
 import type { WatchlistItem } from "../watchlist";
+import { ptBR } from "../i18n/dict.ptBR";
+import { en } from "../i18n/dict.en";
+import { es } from "../i18n/dict.es";
 
 function mkItem(overrides: Partial<WatchlistItem>): WatchlistItem {
   return {
@@ -367,6 +376,54 @@ describe("Cashflow logic", () => {
       // 150 USD * 10 * 5.5 = 8250 BRL
       expect(result[0].invested).toBe(150 * 10 * EXCHANGE_RATE_FALLBACK);
       expect(result[0].invested).toBe(8250);
+    });
+  });
+
+  describe("exportCashFlowCsv & buildCashFlowCsv (Item 3 - Localized Headers & Decomposed Columns)", () => {
+    it("has all 9 header keys defined in dict.ptBR, dict.en, and dict.es", () => {
+      const requiredKeys = ["month", "amount", "paid", "realized", "announced", "projected", "cumulative", "currency", "contributors"] as const;
+      for (const key of requiredKeys) {
+        expect(ptBR.tabs.cashflow.csvHeaders[key]).toBeTruthy();
+        expect(en.tabs.cashflow.csvHeaders[key]).toBeTruthy();
+        expect(es.tabs.cashflow.csvHeaders[key]).toBeTruthy();
+      }
+    });
+
+    it("builds CSV string with localized headers from dictionaries and decomposed columns", () => {
+      const mockBucket = {
+        month: "Jan/26",
+        monthIndex: 0,
+        calendarMonth: 0,
+        calendarYear: 2026,
+        amount: 100,
+        paidAmount: 50,
+        realizedAmount: 50,
+        announcedAmount: 25,
+        projectedAmount: 25,
+        cumulativeTotal: 100,
+        contributors: [{ ticker: "PETR4", amount: 100, type: "STOCK_BR" as const }],
+        isBest: false,
+        isWorst: false,
+        concentratedTicker: null,
+      };
+
+      const csvPt = buildCashFlowCsv([mockBucket], "BRL", ptBR.tabs.cashflow.csvHeaders);
+      const linesPt = csvPt.split("\n");
+      expect(linesPt[0]).toBe('"Mês","Total Projetado","Pago","Realizado","Anunciado","Projetado","Acumulado","Moeda","Contribuintes"');
+      expect(linesPt[1]).toBe('"Jan/26","100.00","50.00","50.00","25.00","25.00","100.00","BRL","PETR4:100.00"');
+
+      const csvEn = buildCashFlowCsv([mockBucket], "USD", en.tabs.cashflow.csvHeaders);
+      const linesEn = csvEn.split("\n");
+      expect(linesEn[0]).toBe('"Month","Total Projected","Paid","Realized","Announced","Projected","Cumulative","Currency","Contributors"');
+      expect(linesEn[1]).toBe('"Jan/26","100.00","50.00","50.00","25.00","25.00","100.00","USD","PETR4:100.00"');
+
+      const csvEs = buildCashFlowCsv([mockBucket], "BRL", es.tabs.cashflow.csvHeaders);
+      const linesEs = csvEs.split("\n");
+      expect(linesEs[0]).toBe('"Mes","Total Proyectado","Pagado","Realizado","Anunciado","Proyectado","Acumulado","Moneda","Contribuyentes"');
+    });
+
+    it("exportCashFlowCsv executes safely without throwing when DOM is unavailable", () => {
+      expect(() => exportCashFlowCsv([], "BRL", ptBR.tabs.cashflow.csvHeaders)).not.toThrow();
     });
   });
 });

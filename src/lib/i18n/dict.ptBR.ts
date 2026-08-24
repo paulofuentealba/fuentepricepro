@@ -635,6 +635,17 @@ export const ptBR = {
       emptyDesc:
         "Adicione ativos pagadores de dividendos para ver o calendário anual, a curva de snowball e o detalhamento mensal.",
       emptyAddFirstAsset: "Adicione seu primeiro ativo",
+      csvHeaders: {
+        month: "Mês",
+        amount: "Total Projetado",
+        paid: "Pago",
+        realized: "Realizado",
+        announced: "Anunciado",
+        projected: "Projetado",
+        cumulative: "Acumulado",
+        currency: "Moeda",
+        contributors: "Contribuintes",
+      },
     },
   },
 

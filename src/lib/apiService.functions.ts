@@ -15,7 +15,7 @@ import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 // Re-export public types so existing `@/lib/apiService.server` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
 import { cleanTicker } from "../lib/formatters";
-import { type MacroRates, MACRO_RATES_FALLBACK } from "./macroDefaults";
+import { type MacroRates, MACRO_RATES_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
 
 // -------- Input caps (public, unauthenticated endpoints) --------
 // Keep these tight — anything past normal user input is abuse, not a real query.
@@ -334,7 +334,7 @@ export const fetchQuoteFn = createServerFn({ method: "GET" })
 export const fetchExchangeRatesFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ USDBRL: number }> => {
     // Fallback default in case of failure to prevent UI crashing
-    const fallback = { USDBRL: 5.5 };
+    const fallback = { USDBRL: EXCHANGE_RATE_FALLBACK };
     try {
       const q = await fetchYahooQuote("BRL=X");
       if (q && q.price > 0) {

@@ -633,6 +633,17 @@ export const en = {
       emptyDesc:
         "Add dividend-paying assets to see a projected 12-month calendar, snowball line, and per-month breakdown.",
       emptyAddFirstAsset: "Add your first asset",
+      csvHeaders: {
+        month: "Month",
+        amount: "Total Projected",
+        paid: "Paid",
+        realized: "Realized",
+        announced: "Announced",
+        projected: "Projected",
+        cumulative: "Cumulative",
+        currency: "Currency",
+        contributors: "Contributors",
+      },
     },
   },
 

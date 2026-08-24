@@ -640,6 +640,17 @@ export const es = {
       emptyDesc:
         "Añade activos que pagan dividendos para ver el calendario anual, la curva de snowball y el desglose mensual.",
       emptyAddFirstAsset: "Añade tu primer activo",
+      csvHeaders: {
+        month: "Mes",
+        amount: "Total Proyectado",
+        paid: "Pagado",
+        realized: "Realizado",
+        announced: "Anunciado",
+        projected: "Proyectado",
+        cumulative: "Acumulado",
+        currency: "Moneda",
+        contributors: "Contribuyentes",
+      },
     },
   },
 

@@ -5,6 +5,7 @@ import {
   normalizeDateStr,
   groupRealizedIncomeByMonth,
   computeRealizedIncomeSummary,
+  type RealizedIncomeEvent,
 } from "../realizedIncome";
 import { type Transaction } from "../transactionsLogic";
 import { type DividendEvent } from "../domain";
@@ -588,6 +589,47 @@ describe("realizedIncome", () => {
       expect(result).toHaveLength(12);
       // Last month should be the 15th item
       expect(result[result.length - 1].monthKey).toBe("2024-03");
+    });
+
+    it("converts amounts when target currency and fxRate are provided", () => {
+      const events: RealizedIncomeEvent[] = [
+        {
+          ticker: "PETR4",
+          currency: "BRL",
+          exDate: "2024-05-10",
+          paymentDate: "2024-05-20",
+          isPaid: true,
+          quantityHeld: 100,
+          amountPerShareGross: 1.0,
+          amountGross: 100,
+          amountNet: 100,
+          taxType: "dividend",
+        },
+        {
+          ticker: "AAPL",
+          currency: "USD",
+          exDate: "2024-05-10",
+          paymentDate: "2024-05-20",
+          isPaid: true,
+          quantityHeld: 10,
+          amountPerShareGross: 2.0,
+          amountGross: 20,
+          amountNet: 14, // 30% tax -> 14 USD
+          taxType: "us_dividend",
+        },
+      ];
+
+      const fxRate = 6.0;
+      // Target currency BRL: 100 BRL + 14 USD * 6 = 100 + 84 = 184 BRL
+      const resultBrl = groupRealizedIncomeByMonth(events, undefined, "ptBR", "BRL", fxRate);
+      expect(resultBrl).toHaveLength(1);
+      expect(resultBrl[0].monthKey).toBe("2024-05");
+      expect(resultBrl[0].amountNet).toBe(184);
+      expect(resultBrl[0].paidAmount).toBe(184);
+
+      // Without target currency (legacy): raw sum 100 + 14 = 114
+      const resultRaw = groupRealizedIncomeByMonth(events, undefined, "ptBR");
+      expect(resultRaw[0].amountNet).toBe(114);
     });
   });
 });

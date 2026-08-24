@@ -261,7 +261,14 @@ export function HorizonteHero() {
     return () => window.removeEventListener("resize", handleResize);
   }, [coveragePercent, needsGoalSetup]);
 
-  const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0);
+  const monthsLabel = formatMonthsAsYearsMonths(monthsToFI ?? 0, {
+    year: t.common.year,
+    years: t.common.years,
+    month: t.common.month,
+    months: t.common.months,
+    separator: t.common.durationSeparator,
+    lessThanOneMonth: t.common.lessThanOneMonth,
+  });
   const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", locale);
   const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", locale);
 
