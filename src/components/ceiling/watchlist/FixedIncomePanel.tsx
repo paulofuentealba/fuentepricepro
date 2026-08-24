@@ -11,8 +11,7 @@ interface Props {
 }
 
 export function FixedIncomePanel({ item }: Props) {
-  const { t } = useI18n();
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
 
   const accrual = calculateFixedIncomeBalance(item, macroRates);
@@ -21,7 +20,7 @@ export function FixedIncomePanel({ item }: Props) {
   let rateDisplay = "N/A";
   if (item.rate != null && item.indexer) {
     if (item.indexer.toUpperCase() === "CDI") {
-      rateDisplay = `${item.rate}% do CDI`;
+      rateDisplay = t.watchlist.fixedIncomePanel.cdiRate.replace("{{rate}}", String(item.rate));
     } else {
       rateDisplay = `${item.indexer} + ${item.rate}%`;
     }

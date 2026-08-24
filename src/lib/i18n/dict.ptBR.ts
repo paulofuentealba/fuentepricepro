@@ -424,6 +424,7 @@ export const ptBR = {
       rateYield: "Taxa/Yield",
       maturityDate: "Vencimento",
       accruedBalance: "Saldo Atualizado",
+      cdiRate: "{{rate}}% do CDI",
     },
     updateBtn: "Atualizar Posição",
     addTitle: "Adicionar à Minha Carteira",

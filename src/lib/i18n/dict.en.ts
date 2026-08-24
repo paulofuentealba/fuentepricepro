@@ -422,6 +422,7 @@ export const en = {
       rateYield: "Rate/Yield",
       maturityDate: "Maturity Date",
       accruedBalance: "Accrued Balance",
+      cdiRate: "{{rate}}% of CDI",
     },
     updateBtn: "Update Holdings",
     addTitle: "Add to My Portfolio",

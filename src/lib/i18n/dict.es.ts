@@ -426,6 +426,7 @@ export const es = {
       rateYield: "Tasa/Yield",
       maturityDate: "Vencimiento",
       accruedBalance: "Saldo Acumulado",
+      cdiRate: "{{rate}}% del CDI",
     },
     updateBtn: "Actualizar Posición",
     addTitle: "Añadir a Mi Portafolio",
