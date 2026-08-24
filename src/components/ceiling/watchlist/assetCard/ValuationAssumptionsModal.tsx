@@ -148,7 +148,7 @@ export function ValuationAssumptionsModal({
                   {t.valuationAssumptions.confidence}
                 </div>
                 <p className="mt-1 text-muted-foreground">
-                  Cálculos sincronizados com bases auditadas (CVM / SEC EDGAR / BACEN SGS).
+                  {t.valuationAssumptions.auditDisclaimer}
                 </p>
               </div>
             </div>

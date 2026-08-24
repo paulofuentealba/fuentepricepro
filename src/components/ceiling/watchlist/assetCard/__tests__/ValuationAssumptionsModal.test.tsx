@@ -25,6 +25,8 @@ vi.mock("@/lib/i18n-provider", () => ({
         consensusLabel: "Fuente Consensus:",
         activeCeilingLabel: "Preço Teto Ativo:",
         safetyMarginLabel: "Margem de Segurança:",
+        auditDisclaimer:
+          "Cálculos sincronizados com bases auditadas (CVM / SEC EDGAR / BACEN SGS).",
       },
     },
   }),
@@ -88,5 +90,8 @@ describe("ValuationAssumptionsModal", () => {
     expect(screen.getByText(/Fuente Consensus:/i)).toBeTruthy();
     expect(screen.getAllByText("R$ 45.00").length).toBeGreaterThan(0);
     expect(screen.getByText("+15.5%")).toBeTruthy();
+    expect(
+      screen.getByText("Cálculos sincronizados com bases auditadas (CVM / SEC EDGAR / BACEN SGS).")
+    ).toBeTruthy();
   });
 });

@@ -1390,6 +1390,8 @@ export const en = {
     consensusLabel: "Fuente Consensus:",
     activeCeilingLabel: "Active Ceiling Price:",
     safetyMarginLabel: "Safety Margin:",
+    auditDisclaimer:
+      "Calculations synchronized with audited data sources (CVM / SEC EDGAR / BACEN SGS).",
   },
   buyAndHoldChecklist: {
     title: "Buy & Hold Checklist",

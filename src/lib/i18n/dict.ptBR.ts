@@ -1400,6 +1400,8 @@ export const ptBR = {
     consensusLabel: "Fuente Consensus:",
     activeCeilingLabel: "Preço Teto Ativo:",
     safetyMarginLabel: "Margem de Segurança:",
+    auditDisclaimer:
+      "Cálculos sincronizados com bases auditadas (CVM / SEC EDGAR / BACEN SGS).",
   },
   buyAndHoldChecklist: {
     title: "Checklist Buy & Hold",

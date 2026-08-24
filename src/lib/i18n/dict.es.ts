@@ -1404,6 +1404,8 @@ export const es = {
     consensusLabel: "Fuente Consensus:",
     activeCeilingLabel: "Precio Techo Activo:",
     safetyMarginLabel: "Margen de Seguridad:",
+    auditDisclaimer:
+      "Cálculos sincronizados con bases auditadas (CVM / SEC EDGAR / BACEN SGS).",
   },
   buyAndHoldChecklist: {
     title: "Checklist Buy & Hold",
