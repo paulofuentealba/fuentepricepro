@@ -21,14 +21,15 @@ A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos
      - **Lote 2 (8 itens):** Resiliência temporal em date ranges, ordenação cronológica e YoY nulo no 1º ano de dividendos, Preço Teto neutro para margens negativas, prevenção de badge espúrio de simulação, prevenção de colisão em popover de busca, desduplicação SSOT de observers de dividendos, conversão cambial canônica no header do sheet e remoção da prop morta `isPro`.
        - **Status:** **100% Concluído e Mesclado em main/dev.**
      - **Tier 1 Total:** **100% Concluído (14 de 14 itens aprovados e mesclados em main/dev).**
-   - **Tier 2 (i18n, Formatação & Limpeza de Código Morto — 18 achados fatiados em 3 Lotes):**
+   - **Tier 2 (i18n, Formatação & Limpeza de Código Morto — 21 itens fatiados em 3 Lotes):**
      - **Lote 1 (9 itens — Troca Direta de String por Chave):** **100% Concluído e Mesclado em main/dev (`409e9c0`).**
-     - **Lote 2 (7 itens — Lógica de Formatação e Locale):** **100% Concluído (7 de 7 itens aprovados e commitados em `dev`).**
-     - **Lote 3 (3 itens originais + 2 achados catalogados — Limpeza de Código Morto):** **Pendente de Execução.**
+     - **Lote 2 (7 itens — Lógica de Formatação e Locale):** **100% Concluído e Mesclado em main/dev (`dd9fbff`).**
+     - **Lote 3 (5 itens — Limpeza de Código Morto & Chaves Órfãs):** **100% Concluído (5 de 5 itens aprovados e commitados em `dev`).**
+   - **Status Geral da Fase 2:** **100% CONCLUÍDA (48 itens aprovados e testados).**
 
 3. **FASE 3 — Rotas, Governança de Dados Pessoais (LGPD) e Infraestrutura:**
    - Varredura de `src/routes/**`, ciclo de vida e retenção de dados pessoais no Firestore, integridade da exclusão total de conta (LGPD) e auditoria de segurança em Server Functions.
-   - **Status:** **Não Iniciada (Aguardando conclusão da Fase 2).**
+   - **Status:** **Não Iniciada (Aguardando início da Fase 3).**
 
 ---
 
@@ -122,19 +123,21 @@ A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos
 
 ---
 
-## ⏳ 3. O Que Continua Pendente
+### 🔹 FASE 2 — Tier 2 / Lote 3 (Limpeza de Código Morto & Chaves Órfãs — 5 de 5 Concluídos)
 
-### 📌 A. Fase 2 — Tier 2 / Lote 3 (Limpeza de Código Morto — 3 itens originais + 2 novas limpezas catalogadas)
-
-1. **`SummaryCard.tsx` (D.1):** Excluir o arquivo órfão `src/components/ceiling/watchlist/SummaryCard.tsx` (não importado, preservando o componente ativo homônimo em `src/routes/app/index.tsx`).
-2. **`CashFlowHeader.tsx:7` (D.2):** Remover a exportação do tipo não utilizado `ViewMode`.
-3. **`AssetCard.tsx` (D.3):** Limpeza residual de imports e propriedades não referenciadas no topo do arquivo.
-4. **`dict.*.ts` (Limpeza catalogada do Item 4):** Avaliar/remover a chave órfã `result.sharesNeeded` (substituída por `result.sharesNeededLabel`).
-5. **`dict.*.ts` (Limpeza catalogada do Item 7):** Avaliar/remover a chave estática `dividendHeatmap.monthsShort` (substituída pela geração dinâmica via `Intl.DateTimeFormat`).
+| Item | Componente / Arquivo | Descrição da Correção Realizada | Commit |
+| :--- | :--- | :--- | :---: |
+| **Item 1** | `SummaryCard.tsx` | Exclusão do arquivo órfão `src/components/ceiling/watchlist/SummaryCard.tsx` (não importado, mantendo a implementação ativa local em `src/routes/app/index.tsx`). | `6e388ce` |
+| **Item 2** | `CashFlowHeader.tsx` | Remoção da exportação do tipo não utilizado `ViewMode`. | `3deb2a8` |
+| **Item 3** | `AssetCard.tsx` | Unificação e consolidação de imports por módulo/categoria e remoção dos símbolos não utilizados `ceilingPrice` e `safetyMargin`. | `2b956d8` |
+| **Item 4** | `dict.*.ts` | Remoção da chave órfã `result.sharesNeeded` nos 3 dicionários (`ptBR`, `en`, `es`), preservando `result.sharesNeededLabel`. | `3774fd3` |
+| **Item 5** | `dict.*.ts` | Remoção do array estático órfão `dividendHeatmap.monthsShort` nos 3 dicionários (`ptBR`, `en`, `es`), substituído pela geração dinâmica via `Intl.DateTimeFormat`. | `b8d61c0` |
 
 ---
 
-### 📌 B. FASE 3 — Rotas, Governança LGPD e Infraestrutura (Ainda Não Iniciada)
+## ⏳ 3. O Que Continua Pendente
+
+### 📌 FASE 3 — Rotas, Governança LGPD e Infraestrutura (Próxima Fase)
 
 1. **Varredura Completa de Rotas (`src/routes/**`):**
    - Auditoria de rotas públicas e administrativas (`/settings`, `/auth`, `/admin`, `/privacy`, `/terms`, `/subscription-terms`, `/guides/dividend-valuation`).
@@ -147,8 +150,12 @@ A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos
 
 ---
 
-## 🎯 4. Conclusão e Próximo Passo Recomendado
+## 🎯 4. Conclusão da Fase 2 e Próximo Passo Recomendado
 
-O **Tier 0** (13 itens), o **Tier 1** (14 itens), o **Tier 2 / Lote 1** (9 itens) e agora o **Tier 2 / Lote 2** (7 itens) da Fase 2 foram **100% concluídos**, somando **43 itens aprovados e validados sob a proteção de 705 testes unitários automatizados**.
+A **FASE 2 ESTÁ 100% CONCLUÍDA**, totalizando **48 achados auditados, corrigidos e validados**:
+- **Tier 0 (Críticos):** 13 itens.
+- **Tier 1 (Auditabilidade & Semântica):** 14 itens (Lote 1: 6 itens, Lote 2: 8 itens).
+- **Tier 2 (i18n & Limpeza):** 21 itens (Lote 1: 9 itens, Lote 2: 7 itens, Lote 3: 5 itens).
+- **Proteção Contínua:** **705 testes unitários passando em 116 arquivos** com 0 erros de compilação TypeScript e 0 warnings de SSOT leaks.
 
-O **próximo lote** para execução após a sincronização de `dev` com `main` é o **Tier 2 / Lote 3 (Limpeza de Código Morto — 3 itens originais + 2 limpezas catalogadas)** para encerrar integralmente a **Fase 2**.
+O **próximo passo** após a sincronização de `dev` com `main` é o início da **FASE 3 (Rotas, Governança LGPD e Infraestrutura)**.
