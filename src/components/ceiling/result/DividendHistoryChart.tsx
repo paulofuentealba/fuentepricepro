@@ -22,16 +22,18 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
   const { t } = useI18n();
 
   const chartData = useMemo(() => {
-    return data.map((d, i) => {
-      let yoy = 0;
-      if (i > 0 && data[i - 1].amount > 0) {
-        yoy = (d.amount - data[i - 1].amount) / data[i - 1].amount;
+    if (!data || data.length === 0) return [];
+    const sorted = [...data].sort((a, b) => a.year - b.year);
+    return sorted.map((d, i) => {
+      let yoy: number | null = null;
+      if (i > 0 && sorted[i - 1].amount > 0) {
+        yoy = ((d.amount - sorted[i - 1].amount) / sorted[i - 1].amount) * 100;
       }
-      return { ...d, yoy: yoy * 100 };
+      return { ...d, yoy };
     });
   }, [data]);
 
-  const max = Math.max(...data.map((d) => d.amount), 0);
+  const max = Math.max(...(data || []).map((d) => d.amount), 0);
   return (
     <div className="rounded-xl border border-border/50 bg-background/30 p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -64,7 +66,10 @@ export function DividendHistoryChart({ data, currency, locale, title }: Props) {
               content={
                 <ChartTooltipContent
                   formatter={(v: any, name: any) => {
-                    if (name === "yoy") return [`${v.toFixed(1)}%`, t.result.yoyGrowth];
+                    if (name === "yoy") {
+                      if (v == null || !Number.isFinite(v)) return ["—", t.result.yoyGrowth];
+                      return [`${v.toFixed(1)}%`, t.result.yoyGrowth];
+                    }
                     return [formatCurrency(v, currency, locale), t.result.dividends];
                   }}
                 />
