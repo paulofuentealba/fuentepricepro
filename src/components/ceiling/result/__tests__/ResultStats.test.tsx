@@ -1,4 +1,4 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { ResultStats } from "../ResultStats";
@@ -161,5 +161,41 @@ describe("ResultStats — Paywall & InfoTooltip decoupling", () => {
     fireEvent.click(summaryText);
 
     expect(onShowPaywall).not.toHaveBeenCalled();
+  });
+
+  describe("Ceiling Price and Safety Margin styling (Tier 1 / Item 3)", () => {
+    it("renders both cards with success style when positive is true and available", () => {
+      const { container } = renderComponent({ positive: true, isUnavailable: false });
+      const cards = container.querySelectorAll(".grid.gap-3.sm\\:grid-cols-2 > div");
+      expect(cards.length).toBe(2);
+
+      // Ceiling price card
+      expect(cards[0].className).toContain("border-success/30 bg-success/10");
+      // Safety margin card
+      expect(cards[1].className).toContain("border-success/30 bg-success/10");
+    });
+
+    it("renders both cards with muted style when positive is false (no false green signal on negative margin)", () => {
+      const { container } = renderComponent({ positive: false, isUnavailable: false });
+      const cards = container.querySelectorAll(".grid.gap-3.sm\\:grid-cols-2 > div");
+      expect(cards.length).toBe(2);
+
+      // Ceiling price card must be muted, NOT green success
+      expect(cards[0].className).toContain("border-muted/30 bg-muted/10");
+      expect(cards[0].className).not.toContain("border-success/30");
+
+      // Safety margin card must be muted
+      expect(cards[1].className).toContain("border-muted/30 bg-muted/10");
+      expect(cards[1].className).not.toContain("border-success/30");
+    });
+
+    it("renders both cards with muted style when calculation is unavailable", () => {
+      const { container } = renderComponent({ positive: true, isUnavailable: true });
+      const cards = container.querySelectorAll(".grid.gap-3.sm\\:grid-cols-2 > div");
+      expect(cards.length).toBe(2);
+
+      expect(cards[0].className).toContain("border-muted/30 bg-muted/10");
+      expect(cards[1].className).toContain("border-muted/30 bg-muted/10");
+    });
   });
 });

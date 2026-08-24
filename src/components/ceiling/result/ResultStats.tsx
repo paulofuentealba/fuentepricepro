@@ -298,8 +298,13 @@ export function ResultStats({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-success/30 bg-success/10 p-4">
-          <div className="flex items-center gap-2 text-success">
+        <div
+          className={
+            "rounded-xl border p-4 " +
+            (!isUnavailable && positive ? "border-success/30 bg-success/10" : "border-muted/30 bg-muted/10")
+          }
+        >
+          <div className={"flex items-center gap-2 " + (!isUnavailable && positive ? "text-success" : "text-muted-foreground")}>
             <TrendingUp className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">
               {t.result.ceilingPrice}{" "}
