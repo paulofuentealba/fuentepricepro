@@ -1,4 +1,4 @@
-import { formatCurrency, formatPercent, displayTicker } from "@/lib/i18n";
+import { formatCurrency, formatPercent, formatNumber, displayTicker } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n-provider";
@@ -74,7 +74,7 @@ export function SafetyMarginBadge({
   margin: number | null | undefined;
   className?: string;
 }) {
-  const { t } = useI18n();
+  const { locale } = useI18n();
 
   if (margin === null || margin === undefined || isNaN(margin)) {
     return <span className={cn("text-xs text-muted-foreground", className)}>—</span>;
@@ -88,7 +88,7 @@ export function SafetyMarginBadge({
         className={cn("text-xs font-semibold", isPositive ? "text-success" : "text-destructive")}
       >
         {isPositive ? "+" : ""}
-        {margin.toFixed(1)}%
+        {formatNumber(margin, locale, 1)}%
       </div>
     </div>
   );
