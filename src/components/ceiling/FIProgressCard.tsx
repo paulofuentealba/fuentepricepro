@@ -20,21 +20,21 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { useFIProgress } from "@/lib/useFIProgress";
+import type { Dict } from "@/lib/i18n";
 
-function formatDuration(months: number, t: any): string {
-  if (!isFinite(months) || months > 1200) return t.fiMode.moreThan100;
-  if (months <= 0) return t.fiMode.achieved;
+function formatDuration(months: number, fiMode: Dict["fiMode"]): string {
+  if (!isFinite(months) || months > 1200) return fiMode.moreThan100;
+  if (months <= 0) return fiMode.achieved;
 
   const years = Math.floor(months / 12);
   const remainingMonths = Math.ceil(months % 12);
 
-  const parts = [];
-  // Hardcoded for now but let's replace with simple translation later or keep simple
-  if (years > 0) parts.push(`${years} ${years === 1 ? "ano" : "anos"}`);
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${years} ${years === 1 ? fiMode.yearSingle : fiMode.yearPlural}`);
   if (remainingMonths > 0)
-    parts.push(`${remainingMonths} ${remainingMonths === 1 ? "mês" : "meses"}`);
+    parts.push(`${remainingMonths} ${remainingMonths === 1 ? fiMode.monthSingle : fiMode.monthPlural}`);
 
-  return t.fiMode.monthsRemaining.replace("{time}", parts.join(" e "));
+  return fiMode.monthsRemaining.replace("{time}", parts.join(fiMode.andJoiner));
 }
 
 export function FIProgressCard() {
@@ -212,7 +212,7 @@ export function FIProgressCard() {
                   <p className="text-xs font-mono text-muted-foreground">
                     {isReached
                       ? t.fiMode.achieved
-                      : formatDuration(monthsToFI ?? Infinity, t)}
+                      : formatDuration(monthsToFI ?? Infinity, t.fiMode)}
                   </p>
                 </div>
               </div>

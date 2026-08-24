@@ -69,8 +69,8 @@ vi.mock("@/lib/useFIProgress", () => ({
     monthlyCostGoal: 5000,
     monthlyContribution: 1000,
     currentMonthlyIncome: 1200,
-    progressPct: 24,
-    monthsToGoal: 48,
+    coveragePercent: 24,
+    monthsToFI: 50,
     isReached: false,
     isSetup: true,
   }),
@@ -103,27 +103,30 @@ describe("FIProgressCard i18n", () => {
     vi.clearAllMocks();
   });
 
-  it("renders localized title and notice in Portuguese (ptBR)", () => {
+  it("renders localized title, notice and countdown in Portuguese (ptBR)", () => {
     renderWithLocale("ptBR");
     expect(screen.getByText("Independência financeira")).toBeInTheDocument();
     expect(
       screen.getByText("Valores consolidados com base na cotação atual.")
     ).toBeInTheDocument();
+    expect(screen.getByText("4 anos e 2 meses para IF")).toBeInTheDocument();
   });
 
-  it("renders localized title and notice in English (en)", () => {
+  it("renders localized title, notice and countdown in English (en)", () => {
     renderWithLocale("en");
     expect(screen.getByText("Financial Independence")).toBeInTheDocument();
     expect(
       screen.getByText("Consolidated values based on current prices.")
     ).toBeInTheDocument();
+    expect(screen.getByText("4 years and 2 months to FI")).toBeInTheDocument();
   });
 
-  it("renders localized title and notice in Spanish (es)", () => {
+  it("renders localized title, notice and countdown in Spanish (es)", () => {
     renderWithLocale("es");
     expect(screen.getByText("Independencia financiera")).toBeInTheDocument();
     expect(
       screen.getByText("Valores consolidados con base en la cotización actual.")
     ).toBeInTheDocument();
+    expect(screen.getByText("4 años y 2 meses para IF")).toBeInTheDocument();
   });
 });
