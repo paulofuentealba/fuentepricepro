@@ -26,6 +26,7 @@ import { RetrospectiveSimulatorCard } from "./RetrospectiveSimulatorCard";
 
 import { exchangeRateQueryOptions, assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, displayTicker, toIntlLocale, formatPercent } from "@/lib/i18n";
+import { convertCurrency } from "@/lib/currency";
 
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
@@ -376,7 +377,7 @@ export function AssetDetailSheet({
             {item && item.currency === "USD" && fx?.USDBRL && (
               <div className="text-right">
                 <p className="text-xs text-muted-foreground tabular-nums">
-                  ~ {formatCurrency(livePrice * fx.USDBRL, "BRL", locale)} ({t.common.converted})
+                  ~ {formatCurrency(convertCurrency(livePrice, "USD", "BRL", fx.USDBRL), "BRL", locale)} ({t.common.converted})
                 </p>
               </div>
             )}

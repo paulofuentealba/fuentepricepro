@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { AssetDetailSheet } from "../AssetDetailSheet";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
@@ -33,11 +34,28 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
-    useQuery: () => ({
-      data: { ticker: "PETR4", price: 30 },
-      isPending: false,
-      isError: false,
-    }),
+    useQuery: (options: any = {}) => {
+      const key = Array.isArray(options?.queryKey) ? options.queryKey[0] : "";
+      if (key === "exchangeRate") {
+        return {
+          data: { USDBRL: 5.5 },
+          isPending: false,
+          isError: false,
+        };
+      }
+      if (key === "quote") {
+        return {
+          data: { ticker: options?.queryKey?.[1] ?? "PETR4", price: 100 },
+          isPending: false,
+          isError: false,
+        };
+      }
+      return {
+        data: { ticker: "PETR4", price: 30 },
+        isPending: false,
+        isError: false,
+      };
+    },
   };
 });
 
@@ -123,5 +141,46 @@ describe("AssetDetailSheet (Tier 1 / Item 5)", () => {
     );
 
     expect(screen.getByText("Investindo desde:")).toBeDefined();
+  });
+
+  describe("Currency conversion header SSOT (Tier 1 / Item 7)", () => {
+    it("displays converted BRL price in header when asset currency is USD and FX rate is available", () => {
+      const usdItem: ValuedWatchlistItem = {
+        ...mockItem,
+        id: "test-asset-usd",
+        ticker: "AAPL",
+        name: "Apple Inc.",
+        type: "STOCK_US",
+        currency: "USD",
+        currentPrice: 100.0,
+        livePrice: 100.0,
+      };
+
+      render(
+        <TooltipProvider>
+          <AssetDetailSheet
+            item={usdItem}
+            onClose={vi.fn()}
+          />
+        </TooltipProvider>
+      );
+
+      // Converted: 100 * 5.5 = R$ 550,00
+      expect(screen.getByText(/R\$\s*550,00/i)).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(dict.ptBR.common.converted, "i"))).toBeInTheDocument();
+    });
+
+    it("does NOT display converted price in header when asset currency is BRL", () => {
+      render(
+        <TooltipProvider>
+          <AssetDetailSheet
+            item={mockItem}
+            onClose={vi.fn()}
+          />
+        </TooltipProvider>
+      );
+
+      expect(screen.queryByText(new RegExp(dict.ptBR.common.converted, "i"))).not.toBeInTheDocument();
+    });
   });
 });
