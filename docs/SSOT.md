@@ -104,6 +104,11 @@
   - Endpoint BFF `fetchValuedPortfolioFn` no TanStack Start com feature gate `USE_BFF_PORTFOLIO_VALUATION`.
   - Interface Simples/Avançado e Modal de Premissas DTO-driven com 100% de cobertura i18n nos 3 idiomas.
   - Procedimento operacional de Rollback documentado e validado em 3 gates (`tsc`, 419 testes, build).
+- **20–24/08/2026**: **Varredura Arquitetural Multi-Lente Definitiva (Sweep v2 — 100% Concluído)**:
+  - **Fase 1 (Núcleo Financeiro)**: Algoritmo Hare-Niemeyer em alocação, correção de snapshots corrompidos de patrimônio investido, eliminação de fallback `items[0]` no HG Brasil, resiliência SEC EDGAR e centralização de TTLs em `cacheConfig.server.ts`.
+  - **Fase 2 (Componentes)**: 48 itens corrigidos (Tier 0 críticos, Tier 1 auditabilidade/semântica, Tier 2 i18n e limpeza de código morto nos 3 idiomas).
+  - **Fase 3 (Rotas, Governança LGPD e Infra)**: Guarda de rota em `/settings`, sanitização e teto `MAX_PORTFOLIO_BFF_ITEMS = 250` no BFF, validação estrita de datas de benchmark, inclusão de `feedbacks` no backup JSON de exportação e TTL de 12 meses (365 dias) no Cookie Consent.
+  - **Suíte de Testes Expandida**: 710 testes unitários passando em 116 arquivos sem falhas e 0 erros de compilação.
 
 ---
 
@@ -300,6 +305,7 @@ Em caso de necessidade de contingência após deploys:
 ## 8. Status Atual do Repositório
 
 - **Branch Ativa**: `dev`
-- **Sincronização com GitHub**: 100% atualizado via `git push origin dev`.
-- **Suíte de Testes**: **70 arquivos de teste passando (419 testes unitários e de integração aprovados)**.
+- **Sincronização com GitHub**: 100% atualizado.
+- **Suíte de Testes**: **116 arquivos de teste passando (710 testes unitários e de integração aprovados, 0 falhas)**.
+- **Varredura Arquitetural Multi-Lente (Sweep v2)**: **100% Concluída (Fases 1, 2 e 3)**.
 - **SSOT Status**: Este arquivo [`docs/SSOT.md`](file:///C:/Users/paulo/OneDrive/Fuente%20Price%20Pro/docs/SSOT.md) passa a reger como a **Fonte Única da Verdade** de toda a engenharia e produto do Fuente Price Pro.

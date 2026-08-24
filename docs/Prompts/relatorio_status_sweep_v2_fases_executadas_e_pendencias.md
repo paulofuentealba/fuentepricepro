@@ -1,12 +1,12 @@
 # Relatório de Status Consolidado — Varredura Multi-Lente (Sweep v2)
-**Referência:** `super_prompt_v2_sweep_multi_skill.md` & Plano de Ação Consolidado da Fase 2  
-**Data:** 24 de Agosto de 2026 | **Status da Base de Código:** `dev` e `main` sincronizados | 116 arquivos de teste | **705 testes unitários passando** (0 falhas) | **Fase 2: 100% Concluída**
+**Referência:** `super_prompt_v2_sweep_multi_skill.md` & Plano de Ação Consolidado  
+**Data:** 24 de Agosto de 2026 | **Status da Base de Código:** Branch `dev` | 116 arquivos de teste | **710 testes unitários passando** (0 falhas) | **Fases 1, 2 e 3: 100% Concluídas**
 
 ---
 
 ## 🧭 1. Visão Geral do Fatiamento do Sweep
 
-A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos da base) foi estruturada em **3 Fases principais**:
+A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos da base) foi estruturada em **3 Fases principais**, agora **100% concluídas**:
 
 1. **FASE 1 — Núcleo Financeiro (`src/lib/` & APIs de Servidor):**
    - Foco em integridade contábil, cálculos matemáticos, timezone, fallbacks cambiais/macroeconômicos e resiliência de cache.
@@ -24,12 +24,15 @@ A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos
    - **Tier 2 (i18n, Formatação & Limpeza de Código Morto — 21 itens fatiados em 3 Lotes):**
      - **Lote 1 (9 itens — Troca Direta de String por Chave):** **100% Concluído e Mesclado em main/dev (`409e9c0`).**
      - **Lote 2 (7 itens — Lógica de Formatação e Locale):** **100% Concluído e Mesclado em main/dev (`dd9fbff`).**
-     - **Lote 3 (5 itens — Limpeza de Código Morto & Chaves Órfãs):** **100% Concluído (5 de 5 itens aprovados e commitados em `dev`).**
+     - **Lote 3 (5 itens — Limpeza de Código Morto & Chaves Órfãs):** **100% Concluído e Mesclado em main/dev (`77cefdd`).**
    - **Status Geral da Fase 2:** **100% CONCLUÍDA (48 itens aprovados e testados).**
 
 3. **FASE 3 — Rotas, Governança de Dados Pessoais (LGPD) e Infraestrutura:**
-   - Varredura de `src/routes/**`, ciclo de vida e retenção de dados pessoais no Firestore, integridade da exclusão total de conta (LGPD) e auditoria de segurança em Server Functions.
-   - **Status:** **Não Iniciada (Aguardando início da Fase 3).**
+   - **Tier 1 / Lote 1 (Segurança & Estabilidade — 3 itens):** Guarda de rota em `/settings` (`beforeLoad`), sanitização de tickers e limitação de payload (`MAX_PORTFOLIO_BFF_ITEMS = 250`) no BFF, validação de datas ISO e allowlist de benchmark em `fetchBenchmarkHistoryFn`.
+     - **Status:** **100% Concluído (`138e93e`).**
+   - **Tier 2 / Lote 2 (Governança LGPD — 2 itens):** Inclusão de mensagens de feedback no backup pré-exclusão (`dataExport.ts`) e TTL de 12 meses (365 dias) no Cookie Consent (`cookieConsent.ts`).
+     - **Status:** **100% Concluído (`1d248c0`).**
+   - **Status Geral da Fase 3:** **100% CONCLUÍDA (5 de 5 itens aprovados e testados).**
 
 ---
 
@@ -135,27 +138,40 @@ A varredura completa multi-lente (9 perspectivas aplicadas sobre os 274 arquivos
 
 ---
 
-## ⏳ 3. O Que Continua Pendente
+### 🔹 FASE 3 — Rotas, Governança LGPD e Infraestrutura (5 de 5 Concluídos)
 
-### 📌 FASE 3 — Rotas, Governança LGPD e Infraestrutura (Próxima Fase)
+#### Tier 1 / Lote 1 — Segurança e Estabilidade Server-Side
 
-1. **Varredura Completa de Rotas (`src/routes/**`):**
-   - Auditoria de rotas públicas e administrativas (`/settings`, `/auth`, `/admin`, `/privacy`, `/terms`, `/subscription-terms`, `/guides/dividend-valuation`).
-2. **Governança de Dados Pessoais & LGPD/GDPR (Lente 1.8):**
-   - Auditoria do fluxo de exclusão total de conta (`accountDeletion.ts`) cobrindo todas as subcoleções Firestore (`feedback`, `settings`, `watchlist`, `transactions`).
-   - Verificação de políticas de retenção de cookies e consentimento (`CookieConsentBanner.tsx`).
-3. **Segurança e Performance Server-Side (Lente 1.9):**
-   - Auditoria de injeção e sanitização nas Server Functions restantes (`apiService.functions.ts` e rotas do TanStack Start).
-   - Validação e auditoria das regras de segurança do Firestore (`firestore.rules`) contra novas coleções e operações de mutação.
+| Item | Componente / Arquivo | Descrição da Correção Realizada | Commit |
+| :--- | :--- | :--- | :--- |
+| **Item 1** | `settings.tsx` | Adicionada guarda de rota assíncrona `beforeLoad` aguardando inicialização do Firebase Auth e redirecionando visitantes anônimos para `/auth`. | `138e93e` |
+| **Item 2** | `portfolioBffLogic.ts`, `portfolioBff.functions.ts` | Adicionado teto defensivo de `MAX_PORTFOLIO_BFF_ITEMS = 250` contra DoS e sanitização estrita de tickers (descarte seguro de nulos, vazios ou tipos não-string sem falhar a requisição). | `138e93e` |
+| **Item 3** | `apiService.functions.ts`, `benchmark.server.ts` | Validação de datas ISO `YYYY-MM-DD`, allowlist de benchmarks e guardas defensivas contra timestamps `NaN` nas chamadas ao Banco Central (SGS) e Yahoo Finance. | `138e93e` |
+
+#### Tier 2 / Lote 2 — Governança de Dados Pessoais (LGPD)
+
+| Item | Componente / Arquivo | Descrição da Correção Realizada | Commit |
+| :--- | :--- | :--- | :--- |
+| **Item 1** | `dataExport.ts`, `settings.tsx` | Inclusão das mensagens da subcoleção `users/{uid}/feedbacks` no backup JSON de exportação pré-exclusão, garantindo a completude do direito de acesso/portabilidade LGPD. | `1d248c0` |
+| **Item 2** | `cookieConsent.ts` | Implementado TTL de **12 meses (365 dias)** no consentimento de cookies persistido em `localStorage`, reexibindo o banner automaticamente após a expiração. | `1d248c0` |
 
 ---
 
-## 🎯 4. Conclusão da Fase 2 e Próximo Passo Recomendado
+## ⏳ 3. Status das Pendências e Backlog
 
-A **FASE 2 ESTÁ 100% CONCLUÍDA**, totalizando **48 achados auditados, corrigidos e validados**:
-- **Tier 0 (Críticos):** 13 itens.
-- **Tier 1 (Auditabilidade & Semântica):** 14 itens (Lote 1: 6 itens, Lote 2: 8 itens).
-- **Tier 2 (i18n & Limpeza):** 21 itens (Lote 1: 9 itens, Lote 2: 7 itens, Lote 3: 5 itens).
-- **Proteção Contínua:** **705 testes unitários passando em 116 arquivos** com 0 erros de compilação TypeScript e 0 warnings de SSOT leaks.
+Com a conclusão da Fase 3, **todas as 3 Fases do Sweep v2 foram integralmente executadas e validadas**:
+- **Fase 1 (Núcleo Financeiro):** 100% Concluída.
+- **Fase 2 (Camada de Componentes — Tiers 0, 1 e 2):** 100% Concluída (48 itens).
+- **Fase 3 (Rotas, Governança LGPD e Infraestrutura — Tiers 1 e 2):** 100% Concluída (5 itens).
 
-O **próximo passo** após a sincronização de `dev` com `main` é o início da **FASE 3 (Rotas, Governança LGPD e Infraestrutura)**.
+### 📌 Itens de Backlog / Evolução Futura (Registrados para pós-monetização)
+1. **Regra de Firestore Preventiva para Campos de Privilégio:** Quando campos administrativos (como `role`, `isAdmin`) forem adicionados ao documento `users/{userId}`, adicionar validação estrita no `firestore.rules` impedindo auto-atribuição pelo usuário (hoje o privilégio é 100% controlado via Firebase Auth Custom Claims, sem risco).
+
+---
+
+## 🎯 4. Conclusão Final do Sweep v2
+
+A **Varredura Arquitetural Multi-Lente (Sweep v2) ESTÁ 100% CONCLUÍDA**, com:
+- **Total de Correções:** **53+ melhorias estruturais, financeiras e de governança** aplicadas em toda a base.
+- **Proteção e Qualidade:** **710 testes unitários passando em 116 arquivos**, 0 erros de tipagem TypeScript (`npx tsc --noEmit`), e build de produção 100% limpo com validação de design tokens e SSOT.
+- **Conformidade LGPD & CVM:** Exportação integral de dados, exclusão ponta a ponta com revogação de credenciais, disclaimer regulatório preventivo e governança de cookies com expiração periódica.
