@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useI18n } from "@/lib/i18n-provider";
+import { formatCurrency } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-provider";
 import { useSubscription } from "@/lib/subscription";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -135,7 +136,7 @@ export function Header({ variant = "app" }: HeaderProps) {
           )}
           {variant === "app" && !usdAssetsLoading && hasUSDAssets && fx?.USDBRL && (
             <div className="hidden items-center justify-center rounded-md border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium tracking-tight text-primary shadow-primary/10 backdrop-blur-sm md:flex">
-              USD/BRL R$ {fx.USDBRL.toFixed(2)}
+              USD/BRL {formatCurrency(fx.USDBRL, "BRL", locale)}
             </div>
           )}
 
