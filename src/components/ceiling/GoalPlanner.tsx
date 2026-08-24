@@ -103,7 +103,7 @@ function GoalPlannerImpl({ annualDividend, currentPrice, currency }: GoalPlanner
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-primary/30 bg-primary/10 p-3">
                 <div className="text-[10px] uppercase tracking-wide text-primary/80">
-                  {t.result.sharesNeeded.split("{{qty}}")[0].trim() || t.common.shares}
+                  {t.result.sharesNeededLabel}
                 </div>
                 <div className="mt-1 text-2xl font-bold tabular-nums text-foreground">
                   {sharesLabel}

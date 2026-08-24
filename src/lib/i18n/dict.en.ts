@@ -318,6 +318,7 @@ export const en = {
     goalPlannerLocked: "Sign in to unlock the Goal Planner",
     desiredMonthlyIncome: "Desired monthly income",
     sharesNeeded: "You need {{qty}} shares",
+    sharesNeededLabel: "Shares needed",
     capitalRequired: "Estimated capital",
     noDividendData: "Not enough dividend data to project shares for this asset.",
     adjustMonthlyContribution: "Adjust monthly contribution",

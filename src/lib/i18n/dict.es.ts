@@ -321,6 +321,7 @@ export const es = {
     goalPlannerLocked: "Inicia sesión para desbloquear el Planificador de Metas",
     desiredMonthlyIncome: "Ingreso mensual deseado",
     sharesNeeded: "Necesitas {{qty}} acciones",
+    sharesNeededLabel: "Acciones necesarias",
     capitalRequired: "Capital estimado",
     noDividendData:
       "No hay suficientes datos de dividendos para proyectar acciones para este activo.",
