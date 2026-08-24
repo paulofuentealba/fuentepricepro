@@ -4,6 +4,7 @@ import { auth } from "@/integrations/firebase/client";
 
 interface AuthCtx {
   user: User | null;
+  isAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -12,11 +13,22 @@ const Ctx = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          const tokenResult = await currentUser.getIdTokenResult();
+          setIsAdmin(tokenResult.claims?.isAdmin === true);
+        } catch {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -24,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthCtx = {
     user,
+    isAdmin,
     loading,
     signOut: async () => {
       await firebaseSignOut(auth);
@@ -38,6 +51,7 @@ export function useAuth(): AuthCtx {
   if (!ctx) {
     return {
       user: null,
+      isAdmin: false,
       loading: false,
       signOut: async () => {},
     };

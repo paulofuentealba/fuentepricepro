@@ -12,6 +12,7 @@ import {
   FolderOpen,
   Scale,
   ShieldAlert,
+  Shield,
   Sparkles,
   BarChart3,
   TrendingUp,
@@ -48,7 +49,7 @@ interface HeaderProps {
 
 export function Header({ variant = "app" }: HeaderProps) {
   const { locale, setLocale, t } = useI18n();
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading, isAdmin } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -209,6 +210,14 @@ export function Header({ variant = "app" }: HeaderProps) {
                       <span className="truncate">{user.email}</span>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer flex items-center">
+                          <Shield className="mr-2 h-4 w-4" />
+                          {t.admin.title}
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/settings" className="cursor-pointer flex items-center">
                         <Settings className="mr-2 h-4 w-4" />
@@ -327,6 +336,16 @@ export function Header({ variant = "app" }: HeaderProps) {
                           <span className="text-xs text-muted-foreground truncate">{user.email}</span>
                         </div>
                       </div>
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-sm font-medium flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                        >
+                          <Shield className="h-4 w-4" />
+                          {t.admin.title}
+                        </Link>
+                      )}
                       <Link
                         to="/settings"
                         onClick={() => setMobileMenuOpen(false)}

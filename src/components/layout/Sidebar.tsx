@@ -11,6 +11,7 @@ import {
   Menu,
   ChevronRight,
   ShieldAlert,
+  Shield,
   BookOpen,
   User,
   Settings,
@@ -37,7 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function Sidebar() {
   const { t } = useI18n();
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading, isAdmin } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
   const location = useLocation();
@@ -46,16 +47,28 @@ export function Sidebar() {
 
   useEffect(() => {
     setIsMounted(true);
-    const stored = localStorage.getItem("fpp_sidebar_collapsed");
-    if (stored !== null) {
-      setIsCollapsed(stored === "true");
+    try {
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        const stored = localStorage.getItem("fpp_sidebar_collapsed");
+        if (stored !== null) {
+          setIsCollapsed(stored === "true");
+        }
+      }
+    } catch {
+      // Ignore storage access errors
     }
   }, []);
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
-    localStorage.setItem("fpp_sidebar_collapsed", String(newState));
+    try {
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        localStorage.setItem("fpp_sidebar_collapsed", String(newState));
+      }
+    } catch {
+      // Ignore storage access errors
+    }
   };
 
   const tabs = [
@@ -278,6 +291,14 @@ export function Sidebar() {
                   <span className="truncate">{user.displayName || "Usuário"}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="cursor-pointer flex items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      {t.admin.title}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/settings" className="cursor-pointer flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
