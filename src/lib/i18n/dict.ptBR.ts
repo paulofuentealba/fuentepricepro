@@ -630,6 +630,10 @@ export const ptBR = {
       monthlyAverage: "Média Mensal",
       next30Days: "Próximos 30 Dias",
       topPayer: "Maior Pagador",
+      emptyTitle: "Sua história de fluxo de caixa começa aqui",
+      emptyDesc:
+        "Adicione ativos pagadores de dividendos para ver o calendário anual, a curva de snowball e o detalhamento mensal.",
+      emptyAddFirstAsset: "Adicione seu primeiro ativo",
     },
   },
 

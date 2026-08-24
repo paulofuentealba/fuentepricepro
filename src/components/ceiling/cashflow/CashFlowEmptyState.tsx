@@ -9,22 +9,17 @@ interface Props {
 }
 
 export function CashFlowEmptyState({ onNavigateToCalculator }: Props) {
-  const { locale } = useI18n();
-  const isEn = locale === "en";
+  const { t } = useI18n();
   return (
     <Card className="border-dashed border-border/60 bg-card/30">
       <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
         <SuccessIconBox icon={Sparkles} size="lg" />
         <div>
           <h3 className="text-lg font-semibold text-foreground">
-            {isEn
-              ? "Your cash-flow story starts here"
-              : "Sua história de fluxo de caixa começa aqui"}
+            {t.tabs.cashflow.emptyTitle}
           </h3>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            {isEn
-              ? "Add dividend-paying assets to see a projected 12-month calendar, snowball line, and per-month breakdown."
-              : "Adicione ativos pagadores de dividendos para ver o calendário anual, a curva de snowball e o detalhamento mensal."}
+            {t.tabs.cashflow.emptyDesc}
           </p>
         </div>
         {onNavigateToCalculator && (
@@ -33,7 +28,7 @@ export function CashFlowEmptyState({ onNavigateToCalculator }: Props) {
             onClick={onNavigateToCalculator}
             className="bg-success text-success-foreground hover:bg-success/90"
           >
-            {isEn ? "Add your first asset" : "Adicione seu primeiro ativo"}
+            {t.tabs.cashflow.emptyAddFirstAsset}
           </Button>
         )}
       </CardContent>

@@ -628,6 +628,10 @@ export const en = {
       monthlyAverage: "Monthly Average",
       next30Days: "Next 30 Days",
       topPayer: "Top Payer",
+      emptyTitle: "Your cash-flow story starts here",
+      emptyDesc:
+        "Add dividend-paying assets to see a projected 12-month calendar, snowball line, and per-month breakdown.",
+      emptyAddFirstAsset: "Add your first asset",
     },
   },
 

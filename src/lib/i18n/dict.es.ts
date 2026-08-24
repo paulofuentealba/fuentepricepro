@@ -635,6 +635,10 @@ export const es = {
       monthlyAverage: "Promedio Mensual",
       next30Days: "Próximos 30 Días",
       topPayer: "Mayor Pagador",
+      emptyTitle: "Tu historia de flujo de caja comienza aquí",
+      emptyDesc:
+        "Añade activos que pagan dividendos para ver el calendario anual, la curva de snowball y el desglose mensual.",
+      emptyAddFirstAsset: "Añade tu primer activo",
     },
   },
 
