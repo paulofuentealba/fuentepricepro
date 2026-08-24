@@ -31,6 +31,10 @@ export async function fetchBcbBenchmarkSeries(
   toDate: string,
 ): Promise<BenchmarkPoint[]> {
   try {
+    if (!fromDate || !toDate || !/^\d{4}-\d{2}-\d{2}$/.test(fromDate) || !/^\d{4}-\d{2}-\d{2}$/.test(toDate)) {
+      return [];
+    }
+
     const dataInicial = formatDateBcb(fromDate);
     const dataFinal = formatDateBcb(toDate);
     const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${seriesCode}/dados?dataInicial=${encodeURIComponent(
@@ -148,8 +152,16 @@ export async function fetchYahooBenchmarkSeries(
   toDate: string,
 ): Promise<BenchmarkPoint[]> {
   try {
+    if (!fromDate || !toDate || !/^\d{4}-\d{2}-\d{2}$/.test(fromDate) || !/^\d{4}-\d{2}-\d{2}$/.test(toDate)) {
+      return [];
+    }
+
     const startSec = Math.floor(new Date(fromDate).getTime() / 1000);
     const endSec = Math.floor(new Date(toDate).getTime() / 1000) + 86400;
+
+    if (Number.isNaN(startSec) || Number.isNaN(endSec)) {
+      return [];
+    }
 
     const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
       symbol,

@@ -44,6 +44,20 @@ import {
 import { useI18n } from "@/lib/i18n-provider";
 
 export const Route = createFileRoute("/settings")({
+  beforeLoad: async () => {
+    // Wait for auth to be initialized
+    await new Promise<void>((resolve) => {
+      const unsubscribe = auth.onAuthStateChanged(() => {
+        unsubscribe();
+        resolve();
+      });
+    });
+
+    const user = auth.currentUser;
+    if (!user) {
+      throw redirect({ to: "/auth" });
+    }
+  },
   component: SettingsPage,
 });
 

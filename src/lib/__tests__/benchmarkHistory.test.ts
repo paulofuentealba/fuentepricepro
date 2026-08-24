@@ -91,4 +91,20 @@ describe("Benchmark History Calculations (Shared Layer SSOT)", () => {
       globalThis.fetch = originalFetch;
     }
   });
+
+  it("should immediately return empty array for malformed fromDate/toDate without calling fetch", async () => {
+    const fetchSpy = vi.fn();
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = fetchSpy;
+
+    try {
+      expect(await fetchBcbBenchmarkSeries(12, "invalid-date", "2024-01-10")).toEqual([]);
+      expect(await fetchBcbBenchmarkSeries(12, "2024-01-01", "not-a-date")).toEqual([]);
+      expect(await fetchYahooBenchmarkSeries("^BVSP", "malformed", "2024-01-10")).toEqual([]);
+      expect(await fetchYahooBenchmarkSeries("^BVSP", "2024-01-01", "malformed")).toEqual([]);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

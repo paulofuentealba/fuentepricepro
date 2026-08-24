@@ -38,6 +38,8 @@ export interface FetchValuedPortfolioInput {
   exchangeRate?: number;
 }
 
+export const MAX_PORTFOLIO_BFF_ITEMS = 250;
+
 /**
  * Pure function to compute portfolio valuation on the backend in 1 network round-trip.
  * Adheres strictly to ADR-001 (BFF consolidation) and ADR-002 (Valuation Dispatcher).
@@ -53,14 +55,19 @@ export async function computeValuedPortfolioInternal(
     selicPct = SELIC_FALLBACK,
     terminalGrowthRate = 0.045,
     exchangeRate = EXCHANGE_RATE_FALLBACK,
-  } = input;
+  } = input || {};
 
-  const positionsMap = reconcileAllPositions(transactions, now);
+  const safeItems = Array.isArray(items) ? items.slice(0, MAX_PORTFOLIO_BFF_ITEMS) : [];
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+
+  const positionsMap = reconcileAllPositions(safeTransactions, now);
 
   const valuedItems: ValuedPortfolioResponse["items"] = [];
 
-  for (const item of items) {
+  for (const item of safeItems) {
+    if (!item || typeof item.ticker !== "string") continue;
     const ticker = item.ticker.trim().toUpperCase();
+    if (!ticker) continue;
     let asset: Asset | null = (await getCachedAsset(ticker)) as unknown as Asset | null;
 
     if (!asset && fetchAssetFn) {

@@ -80,4 +80,62 @@ describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
     expect(response.summary.currentValue).toBe(100 * 34.0 + 10 * 160.0);
     expect(response.summary.totalDividends).toBe(100 * 3.2 + 10 * 13.2);
   });
+
+  it("should gracefully ignore null, undefined, empty, or non-string tickers without throwing", async () => {
+    const malformedItems: any[] = [
+      null,
+      undefined,
+      {},
+      { ticker: "" },
+      { ticker: "   " },
+      { ticker: 12345 },
+      {
+        id: "valid-1",
+        ticker: "ITSA4",
+        type: "STOCK_BR",
+        currency: "BRL",
+        currentPrice: 10.0,
+        averagePrice: 9.0,
+        quantity: 50,
+        targetYield: 6.0,
+        annualDividend: 0.8,
+      },
+    ];
+
+    const response = await computeValuedPortfolioInternal({
+      uid: "user_test_123",
+      items: malformedItems,
+    });
+
+    expect(response.items).toHaveLength(1);
+    expect(response.items[0].ticker).toBe("ITSA4");
+  });
+
+  it("should cap items to MAX_PORTFOLIO_BFF_ITEMS", async () => {
+    const oversizedItems: WatchlistItem[] = Array.from({ length: 300 }, (_, i) => ({
+      id: `item-${i}`,
+      ticker: `TEST${i}`,
+      name: `Test Asset ${i}`,
+      type: "STOCK_BR",
+      currency: "BRL",
+      currentPrice: 10.0,
+      averagePrice: 10.0,
+      quantity: 1,
+      targetYield: 6.0,
+      annualDividend: 0.5,
+      ceilingPrice: 8.33,
+      safetyMargin: -16.7,
+      paymentMonths: [1],
+      payoutRatio: 50,
+      addedAt: 1700000000000,
+      investingSince: 1700000000000,
+    }));
+
+    const response = await computeValuedPortfolioInternal({
+      uid: "user_test_123",
+      items: oversizedItems,
+    });
+
+    expect(response.items).toHaveLength(250);
+  });
 });

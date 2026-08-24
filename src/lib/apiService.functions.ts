@@ -550,13 +550,31 @@ import {
 
 export type { BenchmarkPoint, BenchmarkType };
 
+const VALID_BENCHMARKS = new Set<BenchmarkType>(["CDI", "SELIC", "IBOV", "SPX"]);
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function sanitizeBenchmarkDate(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!ISO_DATE_RE.test(trimmed)) return "";
+  const timestamp = Date.parse(trimmed);
+  return Number.isNaN(timestamp) ? "" : trimmed;
+}
+
 export const fetchBenchmarkHistoryFn = createServerFn({ method: "GET" })
   .validator(
     (data: {
       benchmark: BenchmarkType;
       fromDate: string;
       toDate: string;
-    }) => data,
+    }) => {
+      const benchmark = VALID_BENCHMARKS.has(data?.benchmark)
+        ? data.benchmark
+        : ("" as BenchmarkType);
+      const fromDate = sanitizeBenchmarkDate(data?.fromDate);
+      const toDate = sanitizeBenchmarkDate(data?.toDate);
+      return { benchmark, fromDate, toDate };
+    },
   )
   .handler(async ({ data }): Promise<BenchmarkPoint[]> => {
     const { benchmark, fromDate, toDate } = data || {};
