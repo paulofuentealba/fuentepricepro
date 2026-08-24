@@ -112,7 +112,7 @@ export function AddToWatchlistDialog({
           className={cn("gap-2", buttonClassName)}
           onClick={() =>
             openAuthModal({
-              message: "Sign in to save this asset to your watchlist. We'll add it right after.",
+              message: t.watchlist.signInToSave,
               onSuccess: () => {
                 if (items.length >= freeAssetLimit && !existing) {
                   setShowPaywall(true);

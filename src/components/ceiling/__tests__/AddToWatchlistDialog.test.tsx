@@ -222,4 +222,24 @@ describe("AddToWatchlistDialog", () => {
     );
     expect(toast.success).toHaveBeenCalledWith("Ativo adicionado com sucesso.");
   });
+
+  it("calls openAuthModal with localized signInToSave message when unauthenticated", () => {
+    mockUser = null;
+    render(
+      <AddToWatchlistDialog
+        asset={mockAsset}
+        targetYield={0.06}
+        averagePrice={null}
+      />
+    );
+
+    const addBtn = screen.getByRole("button", { name: /adicionar/i });
+    fireEvent.click(addBtn);
+
+    expect(mockOpenAuthModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Entre para salvar este ativo na sua carteira. Nós o adicionaremos logo em seguida.",
+      })
+    );
+  });
 });

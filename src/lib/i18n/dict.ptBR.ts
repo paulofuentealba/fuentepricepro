@@ -374,6 +374,8 @@ export const ptBR = {
     nextPayments: "Próximos pagamentos",
     paginationAriaLabel: "Navegação de pagamentos",
     addBtn: "Adicionar à Minha Carteira",
+    signInToSave:
+      "Entre para salvar este ativo na sua carteira. Nós o adicionaremos logo em seguida.",
     saveChanges: "Salvar Alterações",
     bulkEdit: "Edição Rápida",
     gridView: "Visão em Grade",

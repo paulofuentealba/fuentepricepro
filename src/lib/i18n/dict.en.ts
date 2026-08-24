@@ -372,6 +372,8 @@ export const en = {
     nextPayments: "Next Payments",
     paginationAriaLabel: "Payment navigation",
     addBtn: "Add to My Portfolio",
+    signInToSave:
+      "Sign in to save this asset to your watchlist. We'll add it right after.",
     saveChanges: "Save Changes",
     bulkEdit: "Bulk Edit",
     gridView: "Grid View",

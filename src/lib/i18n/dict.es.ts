@@ -376,6 +376,8 @@ export const es = {
     nextPayments: "Próximos pagos",
     paginationAriaLabel: "Navegación de pagos",
     addBtn: "Añadir a Mi Portafolio",
+    signInToSave:
+      "Inicia sesión para guardar este activo en tu cartera. Lo agregaremos inmediatamente después.",
     saveChanges: "Guardar Cambios",
     bulkEdit: "Edición Rápida",
     gridView: "Vista en Cuadrícula",
