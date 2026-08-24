@@ -166,55 +166,55 @@ export function TickerSearchField({
         />
       </div>
 
-      {open && suggestions.length > 0 && (
+      {open && shouldSearch && (
         <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover shadow-lg">
-          <ul className="max-h-64 overflow-auto py-1">
-            {suggestions.map((a, idx) => {
-              const sc = getShareClassBadge(a.ticker, a.type);
-              return (
-                <li key={a.ticker}>
-                  <button
-                    type="button"
-                    onClick={() => pick(a)}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
-                      highlightedIndex === idx && "bg-accent text-accent-foreground",
-                    )}
-                  >
-                    <span className="flex flex-col">
-                      <span className="flex items-center gap-1.5 font-medium text-foreground">
-                        {displayTicker(a.ticker)}
-                        {sc && (
-                          <span
-                            className={cn(
-                              "text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
-                              sc.className,
-                            )}
-                          >
-                            {sc.label}
-                          </span>
-                        )}
+          {searching ? (
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              {t.form.searching}
+            </div>
+          ) : suggestions.length > 0 ? (
+            <ul className="max-h-64 overflow-auto py-1">
+              {suggestions.map((a, idx) => {
+                const sc = getShareClassBadge(a.ticker, a.type);
+                return (
+                  <li key={a.ticker}>
+                    <button
+                      type="button"
+                      onClick={() => pick(a)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
+                        highlightedIndex === idx && "bg-accent text-accent-foreground",
+                      )}
+                    >
+                      <span className="flex flex-col">
+                        <span className="flex items-center gap-1.5 font-medium text-foreground">
+                          {displayTicker(a.ticker)}
+                          {sc && (
+                            <span
+                              className={cn(
+                                "text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
+                                sc.className,
+                              )}
+                            >
+                              {sc.label}
+                            </span>
+                          )}
+                        </span>
+                        <span className="line-clamp-1 text-xs text-muted-foreground">{a.name}</span>
                       </span>
-                      <span className="line-clamp-1 text-xs text-muted-foreground">{a.name}</span>
-                    </span>
-                    <Badge variant="secondary" className="shrink-0">
-                      {t.types[a.type]}
-                    </Badge>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-      {open && shouldSearch && !searching && suggestions.length === 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
-          {t.form.noAssetsFound}
-        </div>
-      )}
-      {open && searching && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
-          {t.form.searching}
+                      <Badge variant="secondary" className="shrink-0">
+                        {t.types[a.type]}
+                      </Badge>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              {t.form.noAssetsFound}
+            </div>
+          )}
         </div>
       )}
       {!hideSelectError && !selected && query.trim() !== "" && !open && (

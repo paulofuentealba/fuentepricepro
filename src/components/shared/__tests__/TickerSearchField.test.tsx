@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, act } from "@testing-library/react";
 import { TickerSearchField } from "../TickerSearchField";
 import { dict } from "@/lib/i18n";
 import type { SearchHit } from "@/lib/apiService.functions";
@@ -123,6 +123,7 @@ describe("TickerSearchField", () => {
   });
 
   it("allows manual selection by clicking on a suggestion item", () => {
+    vi.useFakeTimers();
     const onPick = vi.fn();
     mockQueryData = [
       {
@@ -138,6 +139,9 @@ describe("TickerSearchField", () => {
     const input = screen.getByRole("textbox");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "VALE3" } });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
 
     const itemButton = screen.getByRole("button", { name: /VALE3/i });
     fireEvent.click(itemButton);
@@ -149,5 +153,54 @@ describe("TickerSearchField", () => {
         name: "Vale S.A.",
       })
     );
+    vi.useRealTimers();
+  });
+
+  describe("Popover container collision prevention (Tier 1 / Item 5)", () => {
+    it("renders ONLY the searching state and hides previous suggestions during active search", () => {
+      // Even if previous query data exists in cache, isFetching must take precedence
+      mockQueryData = [
+        {
+          ticker: "PETR3",
+          name: "Petrobras ON",
+          type: "STOCK_BR",
+          sector: "Petróleo",
+        },
+      ];
+      mockIsFetching = true;
+
+      const { container } = render(<TickerSearchField onPick={vi.fn()} />);
+      const input = screen.getByRole("textbox");
+      fireEvent.focus(input);
+      fireEvent.change(input, { target: { value: "PETR4" } });
+
+      // Popover container exists
+      const popovers = container.querySelectorAll(".absolute.z-50");
+      expect(popovers.length).toBe(1);
+
+      // Displays "Buscando ativo..."
+      expect(screen.getByText(dict.ptBR.form.searching)).toBeInTheDocument();
+      // Must NOT render previous suggestions list concurrently
+      expect(screen.queryByText(/Petrobras ON/i)).not.toBeInTheDocument();
+    });
+
+    it("renders 'noAssetsFound' when search completes with empty results", () => {
+      vi.useFakeTimers();
+      mockQueryData = [];
+      mockIsFetching = false;
+
+      const { container } = render(<TickerSearchField onPick={vi.fn()} />);
+      const input = screen.getByRole("textbox");
+      fireEvent.focus(input);
+      fireEvent.change(input, { target: { value: "NONEXISTENT" } });
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+
+      const popovers = container.querySelectorAll(".absolute.z-50");
+      expect(popovers.length).toBe(1);
+      expect(screen.getByText(dict.ptBR.form.noAssetsFound)).toBeInTheDocument();
+      vi.useRealTimers();
+    });
   });
 });
