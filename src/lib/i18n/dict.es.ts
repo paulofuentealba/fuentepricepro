@@ -320,7 +320,6 @@ export const es = {
     goalPlannerSubtitle: "¿Cuántas acciones para alcanzar su ingreso mensual deseado?",
     goalPlannerLocked: "Inicia sesión para desbloquear el Planificador de Metas",
     desiredMonthlyIncome: "Ingreso mensual deseado",
-    sharesNeeded: "Necesitas {{qty}} acciones",
     sharesNeededLabel: "Acciones necesarias",
     capitalRequired: "Capital estimado",
     noDividendData:

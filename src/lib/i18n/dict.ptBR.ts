@@ -319,7 +319,6 @@ export const ptBR = {
     goalPlannerSubtitle: "Quantas cotas você precisa para atingir sua renda mensal desejada?",
     goalPlannerLocked: "Entre para desbloquear o Simulador de Renda",
     desiredMonthlyIncome: "Renda mensal desejada",
-    sharesNeeded: "Você precisa de {{qty}} cotas",
     sharesNeededLabel: "Cotas necessárias",
     capitalRequired: "Capital estimado",
     noDividendData: "Dados insuficientes para projetar cotas deste ativo.",
