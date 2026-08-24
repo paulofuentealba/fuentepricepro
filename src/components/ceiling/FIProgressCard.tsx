@@ -99,7 +99,7 @@ export function FIProgressCard() {
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground tracking-widest">
-                  Independência financeira
+                  {t.fiMode.financialIndependence}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -188,7 +188,7 @@ export function FIProgressCard() {
                   {t.fiMode.passiveIncome}
                 </p>
                 <p className="text-[9px] text-muted-foreground/70 italic mt-1">
-                  Valores consolidados com base na cotação atual.
+                  {t.fiMode.consolidatedValuesNotice}
                 </p>
               </div>
             )}

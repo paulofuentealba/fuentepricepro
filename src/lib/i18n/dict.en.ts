@@ -1099,6 +1099,8 @@ export const en = {
   },
   fiMode: {
     title: "FI Mode (Financial Independence)",
+    financialIndependence: "Financial Independence",
+    consolidatedValuesNotice: "Consolidated values based on current prices.",
     configTitle: "Configure FI Goals",
     monthlyCostGoal: "Monthly Cost of Living",
     monthlyContribution: "Monthly Contribution",

@@ -1113,6 +1113,8 @@ export const es = {
   },
   fiMode: {
     title: "Modo IF (Independencia Financiera)",
+    financialIndependence: "Independencia financiera",
+    consolidatedValuesNotice: "Valores consolidados con base en la cotización actual.",
     configTitle: "Configurar Objetivos IF",
     monthlyCostGoal: "Costo de Vida Mensual",
     monthlyContribution: "Contribución Mensual",

@@ -1109,6 +1109,8 @@ export const ptBR = {
   },
   fiMode: {
     title: "Modo IF (Independência Financeira)",
+    financialIndependence: "Independência financeira",
+    consolidatedValuesNotice: "Valores consolidados com base na cotação atual.",
     configTitle: "Configurar Metas IF",
     monthlyCostGoal: "Custo de Vida Mensal",
     monthlyContribution: "Aporte Mensal",
