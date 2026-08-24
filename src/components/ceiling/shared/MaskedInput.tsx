@@ -18,16 +18,18 @@ export const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
     const { locale } = useI18n();
 
     // Determine separators based on locale
-    const isPT = locale === "ptBR";
-    const thousandSeparator = isPT ? "." : ",";
-    const decimalSeparator = isPT ? "," : ".";
+    // In ptBR and es, standard decimal separator is comma (,) and thousand separator is period (.)
+    // In English (en), decimal separator is period (.) and thousand separator is comma (,)
+    const isEn = locale === "en";
+    const thousandSeparator = isEn ? "," : ".";
+    const decimalSeparator = isEn ? "." : ",";
 
     // Determine prefix/suffix
     let prefix = "";
     let suffix = "";
 
     if (formatMode === "currency") {
-      prefix = currencySymbol ? `${currencySymbol} ` : isPT ? "R$ " : "$ ";
+      prefix = currencySymbol ? `${currencySymbol} ` : isEn ? "$ " : "R$ ";
     } else if (formatMode === "percentage") {
       suffix = "%";
     }
@@ -49,7 +51,7 @@ export const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
           }
         }}
         // Remove allowedDecimalSeparators if we want strict decimal separators per locale
-        allowedDecimalSeparators={isPT ? [",", "."] : [".", ","]}
+        allowedDecimalSeparators={isEn ? [".", ","] : [",", "."]}
         // We do not use valueIsNumericString because we are passing an actual number
       />
     );
