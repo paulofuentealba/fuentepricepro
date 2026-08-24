@@ -7,6 +7,7 @@ import {
   type ValuationResult,
 } from "./calculations";
 import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
+import { convertCurrency } from "./currency";
 import type { WatchlistItem } from "./watchlist";
 import type { Transaction } from "./transactionsLogic";
 import type { Asset } from "./domain";
@@ -126,9 +127,18 @@ export async function computeValuedPortfolioInternal(
     });
   }
 
-  const totalInvested = valuedItems.reduce((acc, it) => acc + it.totalCost, 0);
-  const currentValue = valuedItems.reduce((acc, it) => acc + it.totalValue, 0);
-  const totalDividends = valuedItems.reduce((acc, it) => acc + it.totalDividends, 0);
+  const totalInvested = valuedItems.reduce(
+    (acc, it) => acc + convertCurrency(it.totalCost, it.currency || "BRL", "BRL", exchangeRate),
+    0,
+  );
+  const currentValue = valuedItems.reduce(
+    (acc, it) => acc + convertCurrency(it.totalValue, it.currency || "BRL", "BRL", exchangeRate),
+    0,
+  );
+  const totalDividends = valuedItems.reduce(
+    (acc, it) => acc + convertCurrency(it.totalDividends, it.currency || "BRL", "BRL", exchangeRate),
+    0,
+  );
 
   return {
     items: valuedItems,

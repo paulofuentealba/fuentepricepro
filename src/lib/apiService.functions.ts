@@ -637,7 +637,15 @@ export function formatYahooTicker(ticker: string): string {
  * for an individual asset ticker via Yahoo Finance.
  */
 export const fetchAssetPriceHistoryFn = createServerFn({ method: "GET" })
-  .validator((data: { ticker: string; fromDate: string; toDate: string }) => data)
+  .validator(
+    (data: { ticker: string; fromDate: string; toDate: string }) => {
+      const rawTicker = sanitizeTicker(data?.ticker);
+      const ticker = TICKER_RE.test(rawTicker) ? rawTicker : "";
+      const fromDate = sanitizeBenchmarkDate(data?.fromDate);
+      const toDate = sanitizeBenchmarkDate(data?.toDate);
+      return { ticker, fromDate, toDate };
+    },
+  )
   .handler(async ({ data }): Promise<BenchmarkPoint[]> => {
     const { ticker, fromDate, toDate } = data || {};
     if (!ticker || !fromDate || !toDate) return [];

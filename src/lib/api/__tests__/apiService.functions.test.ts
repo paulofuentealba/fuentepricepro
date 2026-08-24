@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchAssetFn } from "../../apiService.functions";
+import { fetchAssetFn, fetchAssetPriceHistoryFn } from "../../apiService.functions";
 import * as brapiServer from "../brapi.server";
 import * as yahooServer from "../yahoo.server";
 import * as hgBrasilServer from "../hgBrasil.server";
@@ -16,12 +16,21 @@ vi.mock("../assetCache.server");
 vi.mock("@tanstack/react-start", () => {
   return {
     createServerFn: () => {
+      let validateFn: (data: any) => any = (d: any) => d;
       const builder = {
-        validator: () => builder,
-        handler: (fn: any) => fn
+        validator: (v: any) => {
+          validateFn = v;
+          return builder;
+        },
+        handler: (fn: any) => {
+          return async (args: any) => {
+            const data = validateFn(args?.data);
+            return fn({ ...args, data });
+          };
+        },
       };
       return builder;
-    }
+    },
   };
 });
 
@@ -214,5 +223,22 @@ describe("apiService.functions (BR Enrichment Fallback)", () => {
     // Will be estimated by the rule engine
     expect(res.dividendEvents[0].paymentDate).toBe("2026-09-15T00:00:00.000Z"); 
     expect(res.dividendEvents[0].paymentDateEstimated).toBe(true);
+  });
+});
+
+describe("fetchAssetPriceHistoryFn (Input Sanitization & Validation)", () => {
+  it("should return empty array for invalid/empty ticker or malformed dates without querying Yahoo", async () => {
+    // Empty ticker
+    expect(await fetchAssetPriceHistoryFn({ data: { ticker: "", fromDate: "2024-01-01", toDate: "2024-01-10" } })).toEqual([]);
+    
+    // Malformed ticker (special chars forbidden by TICKER_RE)
+    expect(await fetchAssetPriceHistoryFn({ data: { ticker: "INVALID$$$$$TICKER###", fromDate: "2024-01-01", toDate: "2024-01-10" } })).toEqual([]);
+    
+    // Malformed dates
+    expect(await fetchAssetPriceHistoryFn({ data: { ticker: "PETR4", fromDate: "invalid-date", toDate: "2024-01-10" } })).toEqual([]);
+    expect(await fetchAssetPriceHistoryFn({ data: { ticker: "PETR4", fromDate: "2024-01-01", toDate: "not-a-date" } })).toEqual([]);
+    
+    // Empty data object
+    expect(await fetchAssetPriceHistoryFn({ data: {} as any })).toEqual([]);
   });
 });

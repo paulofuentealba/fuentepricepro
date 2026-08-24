@@ -138,4 +138,75 @@ describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
 
     expect(response.items).toHaveLength(250);
   });
+
+  it("should convert USD assets using exchangeRate in summary totals while preserving native currency on individual items", async () => {
+    const items: WatchlistItem[] = [
+      {
+        id: "brl-1",
+        ticker: "ITSA4",
+        name: "Itaúsa",
+        type: "STOCK_BR",
+        currency: "BRL",
+        currentPrice: 10.0,
+        averagePrice: 8.0,
+        quantity: 100,
+        targetYield: 6.0,
+        annualDividend: 0.8,
+        ceilingPrice: 13.33,
+        safetyMargin: 33.3,
+        paymentMonths: [3, 6, 9, 12],
+        payoutRatio: 40,
+        addedAt: 1700000000000,
+        investingSince: 1700000000000,
+      },
+      {
+        id: "usd-1",
+        ticker: "AAPL",
+        name: "Apple Inc.",
+        type: "STOCK_US",
+        currency: "USD",
+        currentPrice: 200.0,
+        averagePrice: 150.0,
+        quantity: 10,
+        targetYield: 3.0,
+        annualDividend: 4.0,
+        ceilingPrice: 133.33,
+        safetyMargin: -33.3,
+        paymentMonths: [2, 5, 8, 11],
+        payoutRatio: 25,
+        addedAt: 1700000000000,
+        investingSince: 1700000000000,
+      },
+    ];
+
+    const fxRate = 6.0; // 1 USD = 6.00 BRL
+    const response = await computeValuedPortfolioInternal({
+      uid: "user_test_mixed",
+      items,
+      exchangeRate: fxRate,
+    });
+
+    expect(response.items).toHaveLength(2);
+
+    const brlItem = response.items.find((i) => i.ticker === "ITSA4");
+    const usdItem = response.items.find((i) => i.ticker === "AAPL");
+
+    // Individual items stay in native currency
+    expect(brlItem?.totalCost).toBe(100 * 8.0); // 800 BRL
+    expect(brlItem?.totalValue).toBe(100 * 10.0); // 1000 BRL
+    expect(brlItem?.totalDividends).toBe(100 * 0.8); // 80 BRL
+
+    expect(usdItem?.totalCost).toBe(10 * 150.0); // 1500 USD
+    expect(usdItem?.totalValue).toBe(10 * 200.0); // 2000 USD
+    expect(usdItem?.totalDividends).toBe(10 * 4.0); // 40 USD
+
+    // Summary converts USD to BRL:
+    // totalInvested: 800 BRL + (1500 USD * 6.0) = 800 + 9000 = 9800 BRL
+    expect(response.summary.totalInvested).toBe(800 + 1500 * fxRate);
+    // currentValue: 1000 BRL + (2000 USD * 6.0) = 1000 + 12000 = 13000 BRL
+    expect(response.summary.currentValue).toBe(1000 + 2000 * fxRate);
+    // totalDividends: 80 BRL + (40 USD * 6.0) = 80 + 240 = 320 BRL
+    expect(response.summary.totalDividends).toBe(80 + 40 * fxRate);
+    expect(response.summary.projectedAnnualIncome).toBe(80 + 40 * fxRate);
+  });
 });
