@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n-provider";
 import type { ValuationAssumption, ValuationResult } from "@/lib/calculations";
+import type { Currency } from "@/lib/domain";
+import { formatCurrency, formatNumber } from "@/lib/formatters";
 import { ShieldCheck, Info, Sparkles, Sliders, CheckCircle2 } from "lucide-react";
 
 export interface ValuationAssumptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
   ticker: string;
+  currency?: Currency;
   valuation?: ValuationResult | null;
   onUpdateAssumption?: (key: string, value: number) => void;
 }
@@ -19,10 +22,11 @@ export function ValuationAssumptionsModal({
   isOpen,
   onClose,
   ticker,
+  currency = "BRL",
   valuation,
   onUpdateAssumption,
 }: ValuationAssumptionsModalProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [isAdvanced, setIsAdvanced] = useState(false);
   const [customValues, setCustomValues] = useState<Record<string, number>>({});
 
@@ -121,7 +125,7 @@ export function ValuationAssumptionsModal({
                   {t.valuationAssumptions.consensusLabel}
                 </span>
                 <span className="text-base font-bold text-foreground">
-                  {valuation.fuenteConsensus != null ? `R$ ${valuation.fuenteConsensus.toFixed(2)}` : "—"}
+                  {valuation.fuenteConsensus != null ? formatCurrency(valuation.fuenteConsensus, currency, locale) : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-border/40 pt-2">
@@ -129,7 +133,7 @@ export function ValuationAssumptionsModal({
                   {t.valuationAssumptions.activeCeilingLabel}
                 </span>
                 <span className="text-sm font-semibold text-primary">
-                  {valuation.activeCeiling != null ? `R$ ${valuation.activeCeiling.toFixed(2)}` : "—"}
+                  {valuation.activeCeiling != null ? formatCurrency(valuation.activeCeiling, currency, locale) : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-border/40 pt-2">
@@ -137,7 +141,7 @@ export function ValuationAssumptionsModal({
                   {t.valuationAssumptions.safetyMarginLabel}
                 </span>
                 <span className={`text-sm font-bold ${valuation.positive ? "text-success" : "text-danger"}`}>
-                  {valuation.margin != null ? `${valuation.margin > 0 ? "+" : ""}${valuation.margin.toFixed(1)}%` : "—"}
+                  {valuation.margin != null ? `${valuation.margin > 0 ? "+" : ""}${formatNumber(valuation.margin, locale, 1)}%` : "—"}
                 </span>
               </div>
 

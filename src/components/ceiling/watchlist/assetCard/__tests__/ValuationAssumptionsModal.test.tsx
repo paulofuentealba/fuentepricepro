@@ -8,6 +8,7 @@ import type { ValuationResult } from "@/lib/calculations";
 // Mock i18n
 vi.mock("@/lib/i18n-provider", () => ({
   useI18n: () => ({
+    locale: "ptBR",
     t: {
       valuationAssumptions: {
         title: "Premissas de Valuation",
@@ -76,22 +77,38 @@ describe("ValuationAssumptionsModal", () => {
     shareholderYield: null,
   };
 
-  it("renders Simple Mode by default with consensus and active ceiling", () => {
+  it("renders Simple Mode by default with canonical BRL currency and active ceiling", () => {
     render(
       <ValuationAssumptionsModal
         isOpen={true}
         onClose={() => {}}
         ticker="BBSE3"
+        currency="BRL"
         valuation={mockValuation}
       />
     );
 
     expect(screen.getByText(/Premissas de Valuation — BBSE3/i)).toBeTruthy();
     expect(screen.getByText(/Fuente Consensus:/i)).toBeTruthy();
-    expect(screen.getAllByText("R$ 45.00").length).toBeGreaterThan(0);
-    expect(screen.getByText("+15.5%")).toBeTruthy();
+    expect(screen.getAllByText("R$ 45,00").length).toBeGreaterThan(0);
+    expect(screen.getByText("+15,5%")).toBeTruthy();
     expect(
       screen.getByText("Cálculos sincronizados com bases auditadas (CVM / SEC EDGAR / BACEN SGS).")
     ).toBeTruthy();
   });
+
+  it("renders canonical USD currency formatting when currency is USD", () => {
+    render(
+      <ValuationAssumptionsModal
+        isOpen={true}
+        onClose={() => {}}
+        ticker="KO"
+        currency="USD"
+        valuation={mockValuation}
+      />
+    );
+
+    expect(screen.getAllByText("US$ 45.00").length).toBeGreaterThan(0);
+  });
 });
+

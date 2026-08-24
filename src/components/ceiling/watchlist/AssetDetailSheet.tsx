@@ -459,6 +459,7 @@ export function AssetDetailSheet({
                         isOpen={isAssumptionsModalOpen}
                         onClose={() => setIsAssumptionsModalOpen(false)}
                         ticker={item.ticker}
+                        currency={asset.currency || item.currency}
                         valuation={valuation}
                       />
                     </>
