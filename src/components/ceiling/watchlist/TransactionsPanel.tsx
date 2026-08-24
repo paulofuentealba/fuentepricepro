@@ -241,7 +241,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
                     </span>
                     <span>·</span>
                     <span className="font-mono text-[11px] text-muted-foreground/80">
-                      {t.transactions.runningBalance?.replace("{balance}", String(tx.runningBalance)) ?? `Saldo: ${tx.runningBalance} cotas`}
+                      {t.transactions.runningBalance.replace("{balance}", String(tx.runningBalance))}
                     </span>
                   </div>
                 </div>
