@@ -1,59 +1,58 @@
-import { Bell, Share2 } from "lucide-react";
+import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { AlertTriangle, Bell, Share2, TrendingUp, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+
 import type { Asset } from "@/lib/domain";
-import { ceilingPrice, isUsAsset, netAfterTax, safetyMargin, yieldOnCost } from "@/lib/calculations";
+import type { LiveQuote } from "@/lib/apiService.functions";
+import type { WatchlistItem } from "@/lib/watchlist";
+import { type AssetMeta } from "../ceiling/watchlist/utils";
+import {
+  calculateBvps,
+  calculateHistoricalYieldAverage,
+  getAssetValuation,
+  GORDON_TERMINAL_GROWTH_RATE,
+  isUsAsset,
+  netAfterTax,
+  yieldOnCost,
+} from "@/lib/calculations";
+import { usePendingEvents } from "@/lib/corporateEvents";
+import { formatCurrency, getLocalDateISOString } from "@/lib/formatters";
+import { useI18n } from "@/lib/i18n-provider";
+import { SELIC_FALLBACK } from "@/lib/macroDefaults";
+import { assetPriceHistoryQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import {
   buildResultShareText,
   computeAvgDividend,
   formatResultDate,
   type Timeframe,
 } from "@/lib/resultCard";
-import { AddToWatchlistDialog } from "../ceiling/AddToWatchlistDialog";
-import { IndicatorGrid } from "../ceiling/IndicatorGrid";
-import { GoalPlanner } from "../ceiling/GoalPlanner";
-import { DividendHistoryChart } from "../ceiling/result/DividendHistoryChart";
-import { ResultStats } from "../ceiling/result/ResultStats";
-import { PaywallDialog } from "../ui/PaywallDialog";
-import { useState, useMemo } from "react";
-
-import { memo, useCallback, type KeyboardEvent, useRef } from "react";
-import { ValuationRadar } from "@/components/ui/ValuationRadar";
 import { useSelic } from "@/lib/useSelic";
-import { SELIC_FALLBACK } from "@/lib/macroDefaults";
-import {
-  getAssetValuation,
-  calculateBvps,
-  calculateHistoricalYieldAverage,
-  GORDON_TERMINAL_GROWTH_RATE,
-} from "@/lib/calculations";
-import { useQuery } from "@tanstack/react-query";
-import { ipcaFiveYearAverageQueryOptions, assetPriceHistoryQueryOptions } from "@/lib/queryOptions";
-import { AlertTriangle } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ValuationRadar } from "@/components/ui/ValuationRadar";
+import { PaywallDialog } from "../ui/PaywallDialog";
 
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { useI18n } from "@/lib/i18n-provider";
-import type { LiveQuote } from "@/lib/apiService.functions";
-import type { WatchlistItem } from "@/lib/watchlist";
+import { AddToWatchlistDialog } from "../ceiling/AddToWatchlistDialog";
+import { GoalPlanner } from "../ceiling/GoalPlanner";
+import { IndicatorGrid } from "../ceiling/IndicatorGrid";
+import { DividendHistoryChart } from "../ceiling/result/DividendHistoryChart";
+import { ResultStats } from "../ceiling/result/ResultStats";
 import { AssetCardHeader } from "../ceiling/watchlist/assetCard/AssetCardHeader";
 import { AssetCardTags } from "../ceiling/watchlist/assetCard/AssetCardTags";
 import {
   buildAssetShareText,
   useAssetCardDerived,
 } from "../ceiling/watchlist/assetCard/useAssetCardDerived";
-import { usePendingEvents } from "@/lib/corporateEvents";
-import { cn } from "@/lib/utils";
-import { X, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatCurrency, getLocalDateISOString } from "@/lib/formatters";
-
-import { type AssetMeta } from "../ceiling/watchlist/utils";
 
 export interface AssetCardProps {
   asset?: Asset;
