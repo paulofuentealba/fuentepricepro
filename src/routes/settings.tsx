@@ -402,18 +402,21 @@ function DeleteAccountWizard({
       const assetsRef = collection(db, "users", user.uid, "assets");
       const txRef = collection(db, "users", user.uid, "transactions");
       const snapshotsRef = collection(db, "users", user.uid, "portfolioSnapshots");
+      const feedbacksRef = collection(db, "users", user.uid, "feedbacks");
 
-      const [userDocSnap, assetsSnap, txSnap, snapshotsSnap] = await Promise.all([
+      const [userDocSnap, assetsSnap, txSnap, snapshotsSnap, feedbacksSnap] = await Promise.all([
         getDoc(userDocRef),
         getDocs(assetsRef),
         getDocs(txRef),
         getDocs(snapshotsRef),
+        getDocs(feedbacksRef),
       ]);
 
       const userDocData = userDocSnap.exists() ? userDocSnap.data() : null;
       const assetsData = assetsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
       const txData = txSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
       const snapshotsData = snapshotsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const feedbacksData = feedbacksSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
       let localMappings: Record<string, string> = {};
       try {
@@ -434,6 +437,7 @@ function DeleteAccountWizard({
         assets: assetsData,
         transactions: txData,
         portfolioSnapshots: snapshotsData,
+        feedbacks: feedbacksData,
         metadata: {
           userId: user.uid,
           email: user.email,

@@ -11,6 +11,8 @@
  */
 
 export const COOKIE_CONSENT_STORAGE_KEY = "cookieConsent.v1";
+export const COOKIE_CONSENT_TTL_DAYS = 365;
+export const COOKIE_CONSENT_TTL_MS = COOKIE_CONSENT_TTL_DAYS * 24 * 60 * 60 * 1000;
 
 export interface CookieConsentValue {
   analytics: boolean;
@@ -26,14 +28,27 @@ function isCookieConsentValue(value: unknown): value is CookieConsentValue {
   );
 }
 
-/** Reads the raw persisted consent value, or null if unset/invalid. */
-export function getCookieConsent(): CookieConsentValue | null {
+/**
+ * Checks whether a consent timestamp is expired (older than 365 days).
+ */
+export function isCookieConsentExpired(timestamp: string, now: number = Date.now()): boolean {
+  const parsed = Date.parse(timestamp);
+  if (Number.isNaN(parsed)) return true;
+  return now - parsed > COOKIE_CONSENT_TTL_MS;
+}
+
+/** Reads the raw persisted consent value, or null if unset, invalid, or expired. */
+export function getCookieConsent(now: number = Date.now()): CookieConsentValue | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    return isCookieConsentValue(parsed) ? parsed : null;
+    if (!isCookieConsentValue(parsed)) return null;
+    if (isCookieConsentExpired(parsed.timestamp, now)) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -57,18 +72,18 @@ export function setCookieConsent(analytics: boolean): void {
  * Whether the user has explicitly opted into analytics cookies.
  *
  * Returns `false` by default — before any decision, if the stored value
- * is missing/invalid, or if the user explicitly rejected. Returns `true`
- * only after an explicit acceptance.
+ * is missing/invalid/expired, or if the user explicitly rejected. Returns `true`
+ * only after an explicit acceptance within the active 365-day TTL.
  *
  * Intended to gate future analytics bootstrap code (e.g. PostHog), which
  * is NOT installed by this module.
  */
-export function hasAnalyticsConsent(): boolean {
-  const consent = getCookieConsent();
+export function hasAnalyticsConsent(now?: number): boolean {
+  const consent = getCookieConsent(now);
   return consent?.analytics === true;
 }
 
-/** Whether the user has made any choice yet (accepted or rejected). */
-export function hasConsentDecision(): boolean {
-  return getCookieConsent() !== null;
+/** Whether the user has made an active, unexpired choice yet (accepted or rejected). */
+export function hasConsentDecision(now?: number): boolean {
+  return getCookieConsent(now) !== null;
 }

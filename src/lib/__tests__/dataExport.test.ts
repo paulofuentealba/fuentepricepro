@@ -19,6 +19,9 @@ describe("buildUserDataExport", () => {
       portfolioSnapshots: [
         { date: "2026-08-01", totalValueBRL: 3850, totalInvestedBRL: 3500, createdAt: 1700000000000 },
       ],
+      feedbacks: [
+        { id: "fb-1", message: "Great app!", createdAt: "2026-08-01T10:00:00.000Z" },
+      ],
       metadata: {
         userId: "user-123",
         email: "test@example.com",
@@ -43,6 +46,8 @@ describe("buildUserDataExport", () => {
     expect(result.data.assets).toHaveLength(1);
     expect(result.data.transactions).toHaveLength(1);
     expect(result.data.portfolioSnapshots).toHaveLength(1);
+    expect(result.data.feedbacks).toHaveLength(1);
+    expect(result.data.feedbacks[0].message).toBe("Great app!");
   });
 
   it("should exclude enrichedFundamentals public market data", () => {
@@ -114,5 +119,6 @@ describe("buildUserDataExport", () => {
     expect(result.data.assets).toEqual([]);
     expect(result.data.transactions).toEqual([]);
     expect(result.data.portfolioSnapshots).toEqual([]);
+    expect(result.data.feedbacks).toEqual([]);
   });
 });

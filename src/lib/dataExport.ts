@@ -4,6 +4,7 @@ export interface UserDataExportInput {
   assets?: Record<string, any>[];
   transactions?: Record<string, any>[];
   portfolioSnapshots?: Record<string, any>[];
+  feedbacks?: Record<string, any>[];
   metadata: {
     userId: string;
     email?: string | null;
@@ -25,6 +26,7 @@ export interface UserDataExportPayload {
     assets: Record<string, any>[];
     transactions: Record<string, any>[];
     portfolioSnapshots: Record<string, any>[];
+    feedbacks: Record<string, any>[];
   };
 }
 
@@ -40,6 +42,7 @@ export function buildUserDataExport(input: UserDataExportInput): UserDataExportP
     assets = [],
     transactions = [],
     portfolioSnapshots = [],
+    feedbacks = [],
     metadata,
   } = input;
 
@@ -74,6 +77,12 @@ export function buildUserDataExport(input: UserDataExportInput): UserDataExportP
     return cleanSnap;
   });
 
+  // Clean feedbacks
+  const cleanFeedbacks = (feedbacks || []).map((fb) => {
+    const { ...cleanFb } = fb || {};
+    return cleanFb;
+  });
+
   return {
     version: "1.0",
     exportedAt: metadata.exportedAt,
@@ -87,6 +96,7 @@ export function buildUserDataExport(input: UserDataExportInput): UserDataExportP
       assets: cleanAssets,
       transactions: cleanTransactions,
       portfolioSnapshots: cleanSnapshots,
+      feedbacks: cleanFeedbacks,
     },
   };
 }
