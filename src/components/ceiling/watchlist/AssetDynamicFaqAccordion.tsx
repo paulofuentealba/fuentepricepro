@@ -31,10 +31,10 @@ export function AssetDynamicFaqAccordion({ asset, valuation }: Props) {
         <HelpCircle className="h-4 w-4 text-primary" />
         <div>
           <h3 className="text-sm font-semibold text-foreground">
-            {t.assetFaq?.title || "Dúvidas Frequentes"}
+            {t.assetFaq.title}
           </h3>
           <p className="text-xs text-muted-foreground">
-            {t.assetFaq?.subtitle || "Respostas diretas geradas a partir dos dados do ativo"}
+            {t.assetFaq.subtitle}
           </p>
         </div>
       </div>
