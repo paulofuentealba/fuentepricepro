@@ -263,9 +263,9 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
       }
     }
 
-    // Enrich paymentDate for US Nasdaq stocks when paymentDate is null from Yahoo
+    // Enrich paymentDate for US Nasdaq stocks/ETFs when paymentDate is null from Yahoo
     if (!looksBr && asset.dividendEvents && asset.dividendEvents.length > 0) {
-      const nasdaqMap = await fetchNasdaqDividends(raw).catch(() => new Map<string, string>());
+      const nasdaqMap = await fetchNasdaqDividends(raw, asset.type).catch(() => new Map<string, string>());
       if (nasdaqMap.size > 0) {
         for (const ev of asset.dividendEvents) {
           if (ev.paymentDate == null && ev.exDate) {

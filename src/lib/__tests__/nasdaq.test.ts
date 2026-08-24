@@ -63,4 +63,38 @@ describe("nasdaq.server", () => {
 
     vi.restoreAllMocks();
   });
+
+  it("constructs URL with assetclass=etf when assetType is ETF", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ data: { dividends: { rows: [] } } }), { status: 200 })
+    );
+
+    await fetchNasdaqDividends("QQQ", "ETF");
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "https://api.nasdaq.com/api/quote/QQQ/dividends?assetclass=etf",
+      expect.anything()
+    );
+
+    vi.restoreAllMocks();
+  });
+
+  it("constructs URL with assetclass=stocks when assetType is STOCK_US or omitted", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ data: { dividends: { rows: [] } } }), { status: 200 })
+    );
+
+    await fetchNasdaqDividends("AAPL", "STOCK_US");
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+      "https://api.nasdaq.com/api/quote/AAPL/dividends?assetclass=stocks",
+      expect.anything()
+    );
+
+    await fetchNasdaqDividends("NVDA");
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+      "https://api.nasdaq.com/api/quote/NVDA/dividends?assetclass=stocks",
+      expect.anything()
+    );
+
+    vi.restoreAllMocks();
+  });
 });

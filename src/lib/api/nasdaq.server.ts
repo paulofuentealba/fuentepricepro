@@ -1,17 +1,22 @@
 import { dedupeInFlight, fetchWithRetry } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
+import type { AssetType } from "../domain";
 
 /**
- * Fetches dividend payment dates from Nasdaq Public API for a US stock.
+ * Fetches dividend payment dates from Nasdaq Public API for a US stock or ETF.
  * Returns a Map of `exDate (YYYY-MM-DD)` -> `paymentDate (YYYY-MM-DD)`.
  * If ticker is NYSE-listed or fails, returns an empty Map gracefully without throwing.
  */
-export async function fetchNasdaqDividends(ticker: string): Promise<Map<string, string>> {
+export async function fetchNasdaqDividends(
+  ticker: string,
+  assetType?: AssetType,
+): Promise<Map<string, string>> {
   const clean = ticker.toUpperCase().trim();
-  return dedupeInFlight(`nasdaq:dividends:${clean}`, async () => {
+  const assetClass = assetType === "ETF" ? "etf" : "stocks";
+  return dedupeInFlight(`nasdaq:dividends:${clean}:${assetClass}`, async () => {
     const map = new Map<string, string>();
     try {
-      const url = `https://api.nasdaq.com/api/quote/${encodeURIComponent(clean)}/dividends?assetclass=stocks`;
+      const url = `https://api.nasdaq.com/api/quote/${encodeURIComponent(clean)}/dividends?assetclass=${assetClass}`;
       const res = await fetchWithRetry(url, "nasdaq", {
         headers: {
           "User-Agent":
