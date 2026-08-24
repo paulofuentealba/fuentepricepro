@@ -52,7 +52,7 @@ import { usePendingEvents } from "@/lib/corporateEvents";
 import { cn } from "@/lib/utils";
 import { X, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/formatters";
+import { formatCurrency, getLocalDateISOString } from "@/lib/formatters";
 
 import { type AssetMeta } from "../ceiling/watchlist/utils";
 
@@ -419,9 +419,9 @@ function SearchVariant({
   const priceHistoryFromDate = useMemo(() => {
     const d = new Date();
     d.setFullYear(d.getFullYear() - 5);
-    return d.toISOString().slice(0, 10);
+    return getLocalDateISOString(d);
   }, []);
-  const priceHistoryToDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const priceHistoryToDate = useMemo(() => getLocalDateISOString(), []);
   const { data: priceHistory } = useQuery(
     assetPriceHistoryQueryOptions(asset.ticker, priceHistoryFromDate, priceHistoryToDate),
   );

@@ -13,6 +13,7 @@ import { calculateIrr, buildCashFlowsFromPortfolio, getEffectiveTransactions, is
 import { annualizeReturn } from "@/lib/benchmark";
 import { useWatchlist } from "@/lib/watchlist";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getLocalDateISOString } from "@/lib/formatters";
 
 interface Props {
   transactions: Transaction[];
@@ -55,8 +56,8 @@ export function PortfolioIrrCard({
     }
     const fromTimestamp = Math.min(...filteredTransactions.map((tx) => tx.date));
     const days = Math.max(1, Math.round((Date.now() - fromTimestamp) / (1000 * 60 * 60 * 24)));
-    const fDate = new Date(fromTimestamp).toISOString().slice(0, 10);
-    const tDate = new Date().toISOString().slice(0, 10);
+    const fDate = getLocalDateISOString(fromTimestamp);
+    const tDate = getLocalDateISOString();
     return { fromDate: fDate, toDate: tDate, daysInPeriod: days, hasTransactions: true };
   }, [filteredTransactions]);
 

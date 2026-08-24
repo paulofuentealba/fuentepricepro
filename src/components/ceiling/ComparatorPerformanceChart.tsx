@@ -17,6 +17,7 @@ import type { Asset } from "@/lib/domain";
 import type { BenchmarkPoint } from "@/lib/benchmark";
 import { assetPriceHistoryQueryOptions, benchmarkHistoryQueryOptions } from "@/lib/queryOptions";
 import { displayTicker, toIntlLocale, type Locale } from "@/lib/i18n";
+import { getLocalDateISOString } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,7 @@ export type TimeRange = "6M" | "1A" | "5A";
 
 function getDatesForRange(range: TimeRange): { fromDate: string; toDate: string } {
   const now = new Date();
-  const toDate = now.toISOString().slice(0, 10);
+  const toDate = getLocalDateISOString(now);
 
   const past = new Date(now);
   if (range === "6M") {
@@ -46,7 +47,7 @@ function getDatesForRange(range: TimeRange): { fromDate: string; toDate: string 
   } else if (range === "5A") {
     past.setFullYear(past.getFullYear() - 5);
   }
-  const fromDate = past.toISOString().slice(0, 10);
+  const fromDate = getLocalDateISOString(past);
   return { fromDate, toDate };
 }
 

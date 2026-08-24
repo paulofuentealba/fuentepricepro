@@ -89,5 +89,13 @@ describe("getLocalDateISOString", () => {
     expect(getLocalDateISOString("invalid-date-string")).toBe("");
     expect(getLocalDateISOString(NaN)).toBe("");
   });
+
+  it("preserves local day for late-night hours (e.g. 22h00) that would roll over in UTC to the next day", () => {
+    // 2026-08-21 at 22:30:00 local time
+    const lateNightDate = new Date(2026, 7, 21, 22, 30, 0);
+    expect(getLocalDateISOString(lateNightDate)).toBe("2026-08-21");
+    // Verify that the local calendar day is 21
+    expect(lateNightDate.getDate()).toBe(21);
+  });
 });
 
