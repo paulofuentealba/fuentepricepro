@@ -9,7 +9,7 @@ import type { AssetType } from "@/lib/domain";
 import type { SearchHit } from "@/lib/apiService.functions";
 import { searchQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
-import { displayTicker } from "@/lib/i18n";
+import { displayTicker, getDisplayAssetType } from "@/lib/i18n";
 import { getShareClassBadge } from "@/lib/classify";
 
 const ALL_TYPES: AssetType[] = [
@@ -203,7 +203,7 @@ export function TickerSearchField({
                         <span className="line-clamp-1 text-xs text-muted-foreground">{a.name}</span>
                       </span>
                       <Badge variant="secondary" className="shrink-0">
-                        {t.types[a.type]}
+                        {t.types[getDisplayAssetType(a.type)]}
                       </Badge>
                     </button>
                   </li>

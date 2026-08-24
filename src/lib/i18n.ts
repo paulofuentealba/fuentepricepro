@@ -9,6 +9,7 @@ export {
   formatNumber,
   formatCompactCurrency,
   displayTicker,
+  getDisplayAssetType,
   toIntlLocale,
 } from "./formatters";
 

@@ -11,7 +11,7 @@ import { useQueries } from "@tanstack/react-query";
 import { getAssetValuation, avgDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { SELIC_FALLBACK } from "@/lib/macroDefaults";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, getDisplayAssetType } from "@/lib/formatters";
 import { displayTicker } from "@/lib/i18n";
 import { getShareClassBadge } from "@/lib/classify";
 import { useI18n } from "@/lib/i18n-provider";
@@ -149,7 +149,7 @@ export function AssetComparator() {
                           <span className="text-xs text-muted-foreground">{a.name}</span>
                         </span>
                         <Badge variant="secondary" className="shrink-0">
-                          {t.types[a.type]}
+                          {t.types[getDisplayAssetType(a.type)]}
                         </Badge>
                       </button>
                     </li>

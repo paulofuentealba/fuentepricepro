@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
 import { getPositionValue } from "./calculations";
 import { useI18n } from "./i18n-provider";
+import { getDisplayAssetType } from "./formatters";
 
 export type RiskWarning = {
   id: string;
@@ -79,10 +80,12 @@ export function usePortfolioRisk() {
 
       totalEquity += value;
 
+      const displayType = getDisplayAssetType(item.type);
+
       assets.push({
         id: item.id,
         ticker: item.ticker,
-        type: item.type,
+        type: displayType,
         weightPct: 0,
         valueBase: value,
       });
@@ -91,7 +94,7 @@ export function usePortfolioRisk() {
       currencyMap[itemCurrency] = (currencyMap[itemCurrency] || 0) + value;
 
       // Type
-      typeMap[item.type] = (typeMap[item.type] || 0) + value;
+      typeMap[displayType] = (typeMap[displayType] || 0) + value;
 
       // Sector
       const sector = item.sector || t.common.other;

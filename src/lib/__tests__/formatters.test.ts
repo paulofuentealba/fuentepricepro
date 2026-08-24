@@ -5,6 +5,7 @@ import {
   formatNumber,
   formatMonthsAsYearsMonths,
   getLocalDateISOString,
+  getDisplayAssetType,
 } from "../formatters";
 import { ptBR } from "../i18n/dict.ptBR";
 import { en } from "../i18n/dict.en";
@@ -140,6 +141,22 @@ describe("getLocalDateISOString", () => {
     expect(getLocalDateISOString(lateNightDate)).toBe("2026-08-21");
     // Verify that the local calendar day is 21
     expect(lateNightDate.getDate()).toBe(21);
+  });
+});
+
+describe("getDisplayAssetType", () => {
+  it("maps FII, FII_INFRA, and FIAGRO to FII", () => {
+    expect(getDisplayAssetType("FII")).toBe("FII");
+    expect(getDisplayAssetType("FII_INFRA")).toBe("FII");
+    expect(getDisplayAssetType("FIAGRO")).toBe("FII");
+  });
+
+  it("returns other asset types unaltered", () => {
+    expect(getDisplayAssetType("STOCK_BR")).toBe("STOCK_BR");
+    expect(getDisplayAssetType("STOCK_US")).toBe("STOCK_US");
+    expect(getDisplayAssetType("REIT")).toBe("REIT");
+    expect(getDisplayAssetType("ETF")).toBe("ETF");
+    expect(getDisplayAssetType("FIXED_INCOME")).toBe("FIXED_INCOME");
   });
 });
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { usePortfolioRisk } from "@/lib/usePortfolioRisk";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, getDisplayAssetType } from "@/lib/formatters";
 import { AlertTriangle, PieChart, ShieldAlert, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -136,7 +136,7 @@ export function RiskRadar() {
                 <div key={tItem.type} className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">
-                      {t.types[tItem.type as keyof typeof t.types] ?? tItem.type}
+                      {t.types[getDisplayAssetType(tItem.type) as keyof typeof t.types] ?? tItem.type}
                     </span>
                     <span className="text-muted-foreground">
                       {formatPercent(tItem.weightPct, l)}

@@ -1,3 +1,5 @@
+import { getDisplayAssetType } from "@/lib/formatters";
+
 export const ASSET_TYPE_COLORS: Record<string, string> = {
   STOCK_US: "hsl(var(--asset-stock-us))",
   STOCK_BR: "hsl(var(--asset-stock-br))",
@@ -13,6 +15,7 @@ export const ASSET_TYPE_COLORS: Record<string, string> = {
 
 export function getColorForAsset(type?: string): string {
   if (!type) return ASSET_TYPE_COLORS.OTHER;
-  if (type in ASSET_TYPE_COLORS) return ASSET_TYPE_COLORS[type];
+  const mapped = getDisplayAssetType(type);
+  if (mapped in ASSET_TYPE_COLORS) return ASSET_TYPE_COLORS[mapped];
   return ASSET_TYPE_COLORS.OTHER;
 }

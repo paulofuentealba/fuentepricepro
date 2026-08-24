@@ -17,7 +17,7 @@ import {
   yieldOnCost,
 } from "@/lib/calculations";
 import { usePendingEvents } from "@/lib/corporateEvents";
-import { formatCurrency, getLocalDateISOString } from "@/lib/formatters";
+import { formatCurrency, getLocalDateISOString, getDisplayAssetType } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { SELIC_FALLBACK } from "@/lib/macroDefaults";
 import { assetPriceHistoryQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
@@ -133,7 +133,7 @@ function AllocationVariant({
         <span className="text-sm font-semibold text-foreground">{item.ticker}</span>
         <Badge variant="secondary" className="text-[10px]">
           <span className="mr-1">{flagFor(item.currency)}</span>
-          {t.types[item.type]}
+          {t.types[getDisplayAssetType(item.type)]}
         </Badge>
       </div>
 
@@ -487,7 +487,7 @@ function SearchVariant({
             <h2 className="text-lg font-semibold leading-none tracking-tight">{displayTicker}</h2>
             <Badge variant="secondary">
               <span className="mr-1">{asset.currency === "USD" ? "🇺🇸" : "🇧🇷"}</span>
-              {t.types[asset.type]}
+              {t.types[getDisplayAssetType(asset.type)]}
             </Badge>
             {(timeframe !== 3 ||
               localTargetYield !== initialTargetYield ||

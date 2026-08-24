@@ -1,4 +1,4 @@
-import { formatCurrency, formatPercent, formatNumber, displayTicker } from "@/lib/i18n";
+import { formatCurrency, formatPercent, formatNumber, displayTicker, getDisplayAssetType } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n-provider";
@@ -24,7 +24,7 @@ export function AssetTicker({
         <span className="font-semibold text-foreground">{displayTicker(ticker)}</span>
         {type && (
           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-            {t.types[type]}
+            {t.types[getDisplayAssetType(type)]}
           </Badge>
         )}
       </div>

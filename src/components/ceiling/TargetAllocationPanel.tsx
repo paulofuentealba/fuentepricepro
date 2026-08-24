@@ -19,8 +19,6 @@ const ASSET_TYPES: AssetType[] = [
   "FII",
   "REIT",
   "ETF",
-  "FII_INFRA",
-  "FIAGRO",
   "FIXED_INCOME",
 ];
 

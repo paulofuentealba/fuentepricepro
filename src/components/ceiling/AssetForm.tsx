@@ -16,14 +16,13 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
 import { useSettings } from "@/lib/settings";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
+import { getDisplayAssetType } from "@/lib/formatters";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
   "STOCK_BR",
   "REIT",
   "FII",
-  "FII_INFRA",
-  "FIAGRO",
   "ETF",
 ];
 
@@ -124,7 +123,7 @@ export function AssetForm({ onSubmit, isSubmitting, initialTicker }: Props) {
             <>
               <Badge className="gap-1 bg-success/15 text-success ring-1 ring-success/30 hover:bg-success/20">
                 <Sparkles className="h-3 w-3" />
-                {t.types[activeType]}
+                {t.types[getDisplayAssetType(activeType)]}
               </Badge>
               <button
                 type="button"

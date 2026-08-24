@@ -3,7 +3,7 @@ import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { getAssetPnL } from "@/lib/selectors/assetPnL";
 import { getColorForAsset } from "@/components/ceiling/shared/chartColors";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, getDisplayAssetType } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -223,11 +223,11 @@ function PortfolioRow({
         <span
           className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
           style={{
-            backgroundColor: `color-mix(in srgb, ${getColorForAsset(item.type)} 16%, transparent)`,
-            color: getColorForAsset(item.type),
+            backgroundColor: `color-mix(in srgb, ${getColorForAsset(getDisplayAssetType(item.type))} 16%, transparent)`,
+            color: getColorForAsset(getDisplayAssetType(item.type)),
           }}
         >
-          {t.types[item.type as keyof typeof t.types] ?? item.type}
+          {t.types[getDisplayAssetType(item.type) as keyof typeof t.types] ?? item.type}
         </span>
       </td>
       <td className="px-4 py-3 text-right tabular-nums">{item.quantity}</td>

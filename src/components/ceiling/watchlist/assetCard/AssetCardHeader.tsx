@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatCurrency, displayTicker, formatPercent } from "@/lib/i18n";
+import { formatCurrency, displayTicker, formatPercent, getDisplayAssetType } from "@/lib/i18n";
 import { PriceTag } from "../../shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
 import type { LiveQuote } from "@/lib/apiService.functions";
@@ -113,7 +113,7 @@ export function AssetCardHeader({
           </span>
           <Badge variant="secondary" className="text-[10px]">
             <span className="mr-1">{flagFor(item.currency)}</span>
-            {t.types[item.type]}
+            {t.types[getDisplayAssetType(item.type)]}
           </Badge>
           {item.sector && (
             <Badge

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, act } from "@testing-library/react";
 import { AssetForm } from "../AssetForm";
 import { dict } from "@/lib/i18n";
 import type { SearchHit } from "@/lib/apiService.functions";
@@ -116,5 +116,24 @@ describe("AssetForm", () => {
         targetYield: 0.06,
       })
     );
+  });
+
+  it("displays 'FII' badge when the detected asset type is FII_INFRA or FIAGRO", () => {
+    const mockSubmit = vi.fn();
+    render(<AssetForm onSubmit={mockSubmit} />);
+
+    // Pick an asset with type FII_INFRA inside act
+    act(() => {
+      mockPickHandler!({
+        ticker: "JURO11",
+        name: "Sparta Infra",
+        type: "FII_INFRA",
+        sector: null,
+      });
+    });
+
+    // Badge should render "FII" (FII), NOT "FII-Infra"
+    expect(screen.getByText(dict.ptBR.types.FII)).toBeInTheDocument();
+    expect(screen.queryByText(dict.ptBR.types.FII_INFRA)).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import type { Currency } from "./domain";
+import type { AssetType, Currency } from "./domain";
 
 export type Locale = "en" | "ptBR" | "es";
 
@@ -68,6 +68,19 @@ export function displayTicker(ticker: string): string {
   // Kept as an alias for cleanTicker to avoid drift between the two — they
   // used to implement the same suffix-stripping logic twice, out of sync.
   return cleanTicker(ticker);
+}
+
+/**
+ * Maps an internal AssetType to its user-facing display AssetType (Single Source of Truth).
+ * Consolidates FII_INFRA and FIAGRO into FII for all presentation layers.
+ */
+export function getDisplayAssetType(type: AssetType): AssetType;
+export function getDisplayAssetType(type: string): string;
+export function getDisplayAssetType(type: AssetType | string | undefined | null): AssetType | string {
+  if (type === "FII_INFRA" || type === "FIAGRO") {
+    return "FII";
+  }
+  return type ?? "";
 }
 
 export interface DurationLabels {

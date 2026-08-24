@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, getDisplayAssetType } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -56,10 +56,11 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
       if (value <= 0) continue;
 
       const valueInBrl = convertCurrency(value, it.currency, "BRL", exchangeRate);
-      const typeLabel = t.types[it.type] || it.type;
+      const displayType = getDisplayAssetType(it.type);
+      const typeLabel = t.types[displayType as import("@/lib/domain").AssetType] || displayType;
 
       if (!totals.has(typeLabel)) {
-        totals.set(typeLabel, { name: typeLabel, value: 0, type: it.type });
+        totals.set(typeLabel, { name: typeLabel, value: 0, type: displayType });
       }
       totals.get(typeLabel)!.value += valueInBrl;
     }

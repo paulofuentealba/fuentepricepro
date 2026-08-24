@@ -7,7 +7,7 @@ import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps, GORDON_TE
 import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
 import { SELIC_FALLBACK } from "@/lib/macroDefaults";
-import { formatCurrency, formatPercent, getLocalDateISOString } from "@/lib/formatters";
+import { formatCurrency, formatPercent, getLocalDateISOString, getDisplayAssetType } from "@/lib/formatters";
 
 import {
   Table,
@@ -238,7 +238,7 @@ export function DividendRadar() {
                             variant="secondary"
                             className="text-[10px] font-semibold bg-muted text-muted-foreground border-transparent uppercase tracking-wider"
                           >
-                            {t.types[asset.type as keyof typeof t.types] || asset.type}
+                            {t.types[getDisplayAssetType(asset.type) as keyof typeof t.types] || asset.type}
                           </Badge>
                         </TableCell>
                         <TableCell>

@@ -18,7 +18,7 @@ import { ChartContainer } from "@/components/ui/chart";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Currency } from "@/lib/domain";
-import { formatCurrency } from "@/lib/i18n";
+import { formatCurrency, getDisplayAssetType } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { toast } from "sonner";
@@ -103,7 +103,8 @@ export function SmartAllocation() {
       const val = it.currentPrice * it.quantity;
       if (val > 0) {
         const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
-        allocMap[it.type] = (allocMap[it.type] || 0) + inBrl;
+        const displayType = getDisplayAssetType(it.type);
+        allocMap[displayType] = (allocMap[displayType] || 0) + inBrl;
         totalBRL += inBrl;
       }
     }
@@ -218,8 +219,9 @@ export function SmartAllocation() {
       const val = it.currentPrice * it.quantity;
       if (val > 0) {
         const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
-        beforeMap[it.type] = (beforeMap[it.type] || 0) + inBrl;
-        afterMap[it.type] = (afterMap[it.type] || 0) + inBrl;
+        const displayType = getDisplayAssetType(it.type);
+        beforeMap[displayType] = (beforeMap[displayType] || 0) + inBrl;
+        afterMap[displayType] = (afterMap[displayType] || 0) + inBrl;
         hasAny = true;
       }
     }
@@ -228,7 +230,8 @@ export function SmartAllocation() {
       const cost = r.shares * r.item.currentPrice;
       if (cost > 0) {
         const inBrl = convertCurrency(cost, r.item.currency, "BRL", exchangeRate);
-        afterMap[r.item.type] = (afterMap[r.item.type] || 0) + inBrl;
+        const displayType = getDisplayAssetType(r.item.type);
+        afterMap[displayType] = (afterMap[displayType] || 0) + inBrl;
       }
     }
 
@@ -237,7 +240,7 @@ export function SmartAllocation() {
     );
     let barData = typeNames
       .map((type) => ({
-        name: t.types[type as AssetType] || type,
+        name: t.types[getDisplayAssetType(type as AssetType) as AssetType] || type,
         type,
         before: beforeMap[type] || 0,
         after: afterMap[type] || 0,
