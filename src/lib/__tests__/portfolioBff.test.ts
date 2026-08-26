@@ -209,4 +209,44 @@ describe("portfolioBff.server - BFF Valuation & Feature Gate", () => {
     expect(response.summary.totalDividends).toBe(80 + 40 * fxRate);
     expect(response.summary.projectedAnnualIncome).toBe(80 + 40 * fxRate);
   });
+
+  it("should apply classTargetYields to compute ceilingPrice when item has no custom targetYield", async () => {
+    const fiiItem: WatchlistItem = {
+      id: "fii-1",
+      ticker: "KNRI11",
+      name: "Kinea Renda",
+      type: "FII",
+      currency: "BRL",
+      currentPrice: 150.0,
+      averagePrice: 140.0,
+      quantity: 10,
+      targetYield: null as any, // Not customized on item
+      annualDividend: 12.0,
+      ceilingPrice: 200.0,
+      safetyMargin: 33.3,
+      paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      payoutRatio: 95,
+      addedAt: 1700000000000,
+      investingSince: 1700000000000,
+    };
+
+    // 1. Without classTargetYields (default global 6%) -> Bazin = 12 / 0.06 = 200.0
+    const responseDefault = await computeValuedPortfolioInternal({
+      uid: "user_test_default",
+      items: [fiiItem],
+      targetYield: 6.0,
+    });
+    expect(responseDefault.items[0].bazin).toBeCloseTo(200.0, 1);
+
+    // 2. With classTargetYields (FII = 8.5%) -> Bazin = 12 / 0.085 = 141.17
+    const responseClass = await computeValuedPortfolioInternal({
+      uid: "user_test_class",
+      items: [fiiItem],
+      targetYield: 6.0,
+      classTargetYields: {
+        FII: 8.5,
+      },
+    });
+    expect(responseClass.items[0].bazin).toBeCloseTo(12.0 / 0.085, 1);
+  });
 });

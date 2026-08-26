@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWatchlist, type WatchlistItem } from "./watchlist";
 import { useSettings } from "./settings";
+import { useUserSettings, type UserSettings } from "./useUserSettings";
 import { useLiveQuotesAndMeta } from "@/components/ceiling/watchlist/useLiveQuotesAndMeta";
 import {
   getAssetValuation,
@@ -10,6 +11,7 @@ import {
   getPositionValue,
   calculateBvps,
   GORDON_TERMINAL_GROWTH_RATE,
+  resolveTargetYield,
   type ValuationResult,
 } from "./calculations";
 import { useSelic } from "./useSelic";
@@ -114,7 +116,7 @@ export function computeTotals(
 function useValuedPortfolioClientSide(
   items: WatchlistItem[],
   transactions: Transaction[],
-  globalYield: number,
+  settings: UserSettings,
   isAppLoading: boolean,
   watchlistRest: ReturnType<typeof useWatchlist>,
 ) {
@@ -153,6 +155,7 @@ function useValuedPortfolioClientSide(
       }
 
       const isClosedPosition = hasTransactions && quantity === 0;
+      const effectiveYield = resolveTargetYield(it, settings).effectiveYield;
 
       return {
         ...it,
@@ -160,10 +163,10 @@ function useValuedPortfolioClientSide(
         averagePrice,
         investingSince,
         isClosedPosition,
-        targetYield: it.targetYield ?? globalYield,
+        targetYield: effectiveYield,
       };
     });
-  }, [items, globalYield, txByTicker]);
+  }, [items, settings, txByTicker]);
 
   const { quotes, meta, dividendEventsMap, dataUpdatedAt: lastUpdatedAt } = useLiveQuotesAndMeta(baseItems);
   const { data: selic } = useSelic();
@@ -269,7 +272,7 @@ export function transformBffItemToValuedItem(
 function useValuedPortfolioBff(
   items: WatchlistItem[],
   transactions: Transaction[],
-  globalYield: number,
+  settings: UserSettings,
   isAppLoading: boolean,
   watchlistRest: ReturnType<typeof useWatchlist>,
   useBff: boolean,
@@ -282,12 +285,16 @@ function useValuedPortfolioBff(
   const { loading: isAuthLoading } = useAuth();
 
   const itemsWithYield = useMemo(
-    () => items.map((it) => ({ ...it, targetYield: it.targetYield ?? globalYield })),
-    [items, globalYield],
+    () =>
+      items.map((it) => ({
+        ...it,
+        targetYield: resolveTargetYield(it, settings).effectiveYield,
+      })),
+    [items, settings],
   );
 
   const bffQuery = useQuery({
-    queryKey: ["bffPortfolio", itemsWithYield.map((i) => i.ticker).join(","), transactions.length],
+    queryKey: ["bffPortfolio", itemsWithYield.map((i) => i.ticker).join(","), transactions.length, settings.targetYield, JSON.stringify(settings.classTargetYields || {})],
     queryFn: () =>
       fetchValuedPortfolioFn({
         data: {
@@ -297,6 +304,8 @@ function useValuedPortfolioBff(
           selicPct: selic ?? SELIC_FALLBACK,
           terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
           exchangeRate: fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK,
+          classTargetYields: settings.classTargetYields,
+          targetYield: settings.targetYield,
         },
       }),
     enabled: useBff && !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
@@ -339,7 +348,7 @@ function useValuedPortfolioComputation() {
   const { items, isPending: isWatchlistPending } = watchlistResult;
   const { transactions = [], isLoading: isTxLoading } = useTransactions();
   const { loading: isAuthLoading } = useAuth();
-  const { targetYield: globalYield } = useSettings();
+  const { settings } = useUserSettings();
   const useBff = Boolean(useFeatureGate("USE_BFF_PORTFOLIO_VALUATION"));
 
   const isAppLoading = isAuthLoading || isWatchlistPending || isTxLoading;
@@ -347,7 +356,7 @@ function useValuedPortfolioComputation() {
   const clientResult = useValuedPortfolioClientSide(
     items ?? [],
     transactions,
-    globalYield,
+    settings,
     isAppLoading,
     watchlistResult,
   );
@@ -355,7 +364,7 @@ function useValuedPortfolioComputation() {
   const bffResult = useValuedPortfolioBff(
     items ?? [],
     transactions,
-    globalYield,
+    settings,
     isAppLoading,
     watchlistResult,
     useBff,

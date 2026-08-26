@@ -11,7 +11,11 @@ export interface UserSettings {
   targetYield: number;
   displayCurrency: Currency;
   smartAllocationTargets: Record<AssetType, number>;
+  classTargetYields?: Partial<Record<AssetType, number>>;
+  excludeAboveCeiling?: boolean;
+  excludeYieldTraps?: boolean;
   maxConcentrationPerAsset?: number | null;
+  maxConcentrationPerClass?: Partial<Record<AssetType, number>> | null;
   monthlyLivingCostGoal?: number;
   monthlyLivingCostGoalCurrency?: Currency;
   estimatedMonthlyContribution?: number;

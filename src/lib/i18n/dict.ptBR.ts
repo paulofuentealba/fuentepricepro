@@ -758,6 +758,16 @@ export const ptBR = {
     concentrationLimitBadge: "Concentração alta",
     beforeCurrent: "Antes (Atual)",
     afterProjected: "Depois (Projetado)",
+    classTargetYieldsTitle: "Yield-Alvo por Classe (%)",
+    classTargetYieldsDesc: "Defina o dividend yield mínimo desejado para cada classe de ativo ao calcular o Preço Teto Bazin.",
+    marketRef: "Ref. Mercado",
+    exclusionCriteriaTitle: "Critérios de Exclusão",
+    excludeAboveCeilingLabel: "Não sugerir ativos acima do Preço Teto",
+    excludeAboveCeilingDesc: "Oculta automaticamente ativos cuja cotação atual esteja acima do preço-teto de consenso Fuente.",
+    excludeYieldTrapsLabel: "Não sugerir ativos com sinal de armadilha de yield",
+    excludeYieldTrapsDesc: "Filtra ativos com payout insustentável (>100%), dividendos não recorrentes ou deterioração de lucros.",
+    maxConcentrationPerClassLabel: "Teto de Concentração por Classe (%)",
+    maxConcentrationPerClassHint: "Limite máximo de patrimônio permitido em uma única classe de ativo.",
   },
 
   snowball: {

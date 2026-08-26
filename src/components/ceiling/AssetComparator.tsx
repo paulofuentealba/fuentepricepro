@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { Search, X, Scale, Info, Plus, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { searchQueryOptions, assetQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
-import { useQueries } from "@tanstack/react-query";
-import { getAssetValuation, avgDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
+import { getAssetValuation, avgDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE, resolveTargetYield, getCanonicalAnnualDividend } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
 import { SELIC_FALLBACK } from "@/lib/macroDefaults";
 import { formatCurrency, formatPercent, getDisplayAssetType } from "@/lib/formatters";
@@ -21,8 +20,8 @@ import { AssetCard } from "@/components/shared/AssetCard";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AssetDetailSheet } from "./watchlist/AssetDetailSheet";
 import { useSettings } from "@/lib/settings";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { useWatchlist } from "@/lib/watchlist";
-import { getCanonicalAnnualDividend } from "@/lib/calculations";
 import { buildComparatorCsv, downloadCsv, type ComparatorExportRow } from "@/lib/csv";
 import { ComparatorPerformanceChart } from "./ComparatorPerformanceChart";
 
@@ -43,6 +42,7 @@ export function AssetComparator() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { settings } = useUserSettings();
   const { data: selic } = useSelic();
   const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
 
@@ -192,7 +192,7 @@ function ComparatorCards({
 }) {
   const { t } = useI18n();
   const { items: portfolioItems } = useWatchlist();
-  const { targetYield: globalYield } = useSettings();
+  const { settings } = useUserSettings();
   const { data: selic } = useSelic();
   const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
   const [selectedDetailItem, setSelectedDetailItem] = useState<any>(null);
@@ -218,7 +218,7 @@ function ComparatorCards({
     try {
       const rows: ComparatorExportRow[] = dataMap.map((data) => {
         const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
-        const activeYield = savedItem?.targetYield ?? globalYield;
+        const activeYield = resolveTargetYield(savedItem || data, settings).effectiveYield;
         const avgDiv = getCanonicalAnnualDividend(data, 3);
         const val = getAssetValuation({
           targetYield: activeYield,
@@ -261,7 +261,7 @@ function ComparatorCards({
       console.error("[comparator-export] failed", err);
       toast.error(t.toasts.exportFailed);
     }
-  }, [dataMap, portfolioItems, globalYield, selic, ipcaAvg, t]);
+  }, [dataMap, portfolioItems, settings, selic, ipcaAvg, t]);
 
   if (isLoading) {
     return (
@@ -300,7 +300,7 @@ function ComparatorCards({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {dataMap.map((data) => {
           const savedItem = portfolioItems?.find((it) => it.ticker === data.ticker);
-          const activeYield = savedItem?.targetYield ?? globalYield;
+          const activeYield = resolveTargetYield(savedItem || data, settings).effectiveYield;
           const avgDiv = getCanonicalAnnualDividend(data, 3);
           const val = getAssetValuation({
             targetYield: activeYield,

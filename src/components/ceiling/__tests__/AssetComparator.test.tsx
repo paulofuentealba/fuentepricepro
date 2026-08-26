@@ -35,6 +35,13 @@ vi.mock("@/lib/settings", () => ({
   }),
 }));
 
+vi.mock("@/lib/useUserSettings", () => ({
+  useUserSettings: () => ({
+    settings: { targetYield: 6, displayCurrency: "BRL" },
+    updateSettings: vi.fn(),
+  }),
+}));
+
 vi.mock("@/lib/watchlist", () => ({
   useWatchlist: () => ({
     items: mockWatchlistItems,

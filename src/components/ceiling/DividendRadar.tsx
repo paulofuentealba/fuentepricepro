@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, TrendingUp, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n-provider";
-import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
+import { getAssetValuation, getCanonicalAnnualDividend, calculateBvps, GORDON_TERMINAL_GROWTH_RATE, resolveTargetYield } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { useSelic } from "@/lib/useSelic";
 import { SELIC_FALLBACK } from "@/lib/macroDefaults";
@@ -68,9 +68,13 @@ export function DividendRadar() {
         const canonicalDiv = getCanonicalAnnualDividend(asset, 3);
         const assetType = asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US");
         const currency = market === "BR" ? "BRL" : "USD";
+        const effectiveYield = resolveTargetYield(
+          { type: assetType, targetYield: asset.targetYield },
+          settings,
+        ).effectiveYield;
 
         const valuation = getAssetValuation({
-          targetYield,
+          targetYield: effectiveYield,
           currentPrice: asset.currentPrice,
           avgDividend: canonicalDiv,
           eps: asset.metrics?.eps ?? null,

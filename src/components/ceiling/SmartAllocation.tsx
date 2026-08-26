@@ -94,6 +94,18 @@ export function SmartAllocation() {
   const setMaxConcentration = (val: number | null) =>
     updateSettings({ maxConcentrationPerAsset: val });
 
+  const classTargetYields = settings.classTargetYields;
+  const setClassTargetYields = (yields: Partial<Record<AssetType, number>>) =>
+    updateSettings({ classTargetYields: yields });
+
+  const excludeAboveCeiling = settings.excludeAboveCeiling ?? false;
+  const setExcludeAboveCeiling = (val: boolean) =>
+    updateSettings({ excludeAboveCeiling: val });
+
+  const excludeYieldTraps = settings.excludeYieldTraps ?? false;
+  const setExcludeYieldTraps = (val: boolean) =>
+    updateSettings({ excludeYieldTraps: val });
+
   const currentAllocationPct = useMemo(() => {
     const allocMap: Record<string, number> = {
       STOCK_BR: 0, STOCK_US: 0, FII: 0, REIT: 0, ETF: 0, FII_INFRA: 0, FIAGRO: 0, FIXED_INCOME: 0
@@ -377,6 +389,12 @@ export function SmartAllocation() {
                 maxConcentration={maxConcentration}
                 onMaxConcentrationChange={setMaxConcentration}
                 currentAllocationPct={currentAllocationPct}
+                classTargetYields={classTargetYields}
+                onClassTargetYieldsChange={setClassTargetYields}
+                excludeAboveCeiling={excludeAboveCeiling}
+                onExcludeAboveCeilingChange={setExcludeAboveCeiling}
+                excludeYieldTraps={excludeYieldTraps}
+                onExcludeYieldTrapsChange={setExcludeYieldTraps}
               />
             </div>
             {(FEATURE_GATES.targetAllocation && !isPro) && (

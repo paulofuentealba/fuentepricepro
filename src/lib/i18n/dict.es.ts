@@ -763,6 +763,16 @@ export const es = {
     concentrationLimitBadge: "Concentración alta",
     beforeCurrent: "Antes (Actual)",
     afterProjected: "Después (Proyectado)",
+    classTargetYieldsTitle: "Yield Objetivo por Clase (%)",
+    classTargetYieldsDesc: "Define el dividend yield mínimo deseado para cada clase de activo al calcular el Precio Techo Bazin.",
+    marketRef: "Ref. Mercado",
+    exclusionCriteriaTitle: "Criterios de Exclusión",
+    excludeAboveCeilingLabel: "No sugerir activos por encima del Precio Techo",
+    excludeAboveCeilingDesc: "Oculta automáticamente activos cuya cotización actual supere el precio techo de consenso Fuente.",
+    excludeYieldTrapsLabel: "No sugerir activos con señales de trampa de yield",
+    excludeYieldTrapsDesc: "Filtra activos con payout insostenible (>100%), dividendos no recurrentes o deterioro de utilidades.",
+    maxConcentrationPerClassLabel: "Techo de Concentración por Clase (%)",
+    maxConcentrationPerClassHint: "Límite máximo de patrimonio permitido en una sola clase de activo.",
   },
 
   snowball: {

@@ -4,13 +4,14 @@ import {
   getAssetValuation,
   getCanonicalAnnualDividend,
   yieldOnCost,
+  resolveTargetYield,
   type ValuationResult,
 } from "./calculations";
 import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
 import { convertCurrency } from "./currency";
 import type { WatchlistItem } from "./watchlist";
 import type { Transaction } from "./transactionsLogic";
-import type { Asset } from "./domain";
+import type { Asset, AssetType } from "./domain";
 
 export interface ValuedPortfolioResponse {
   items: Array<WatchlistItem & ValuationResult & {
@@ -37,6 +38,8 @@ export interface FetchValuedPortfolioInput {
   selicPct?: number;
   terminalGrowthRate?: number;
   exchangeRate?: number;
+  classTargetYields?: Partial<Record<AssetType, number>>;
+  targetYield?: number;
 }
 
 export const MAX_PORTFOLIO_BFF_ITEMS = 250;
@@ -94,9 +97,15 @@ export async function computeValuedPortfolioInternal(
     const dividendCagr = asset?.metrics?.dividendCagr5y ?? null;
     const dividendHistory = asset?.dividendHistory ?? [];
 
+    const assetType = item.type || asset?.type || "STOCK_BR";
+    const effectiveYield = resolveTargetYield(
+      { type: assetType, targetYield: item.targetYield },
+      { targetYield: input.targetYield, classTargetYields: input.classTargetYields },
+    ).effectiveYield;
+
     const valuation = getAssetValuation({
       ticker,
-      targetYield: item.targetYield ?? 6,
+      targetYield: effectiveYield,
       currentPrice,
       avgDividend: annualDividend,
       eps,
@@ -106,7 +115,7 @@ export async function computeValuedPortfolioInternal(
       selicPct,
       terminalGrowthRate,
       currency: item.currency || asset?.currency || "BRL",
-      type: item.type || asset?.type || "STOCK_BR",
+      type: assetType,
     });
 
     const totalValue = quantity * currentPrice;

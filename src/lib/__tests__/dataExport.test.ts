@@ -158,4 +158,35 @@ describe("buildUserDataExport", () => {
     expect(result.data.portfolioSnapshots).toEqual([]);
     expect(result.data.feedbacks).toEqual([]);
   });
+
+  it("should include classTargetYields and exclusion toggles in exported profileAndSettings", () => {
+    const input = {
+      userDoc: {
+        settings: {
+          targetYield: 6,
+          displayCurrency: "BRL",
+          smartAllocationTargets: { STOCK_BR: 40, FII: 60 },
+          classTargetYields: { STOCK_BR: 6.5, FII: 8.5 },
+          excludeAboveCeiling: true,
+          excludeYieldTraps: true,
+        },
+      },
+      metadata: {
+        userId: "user-with-class-yields",
+        email: "investor@example.com",
+        exportedAt: "2026-08-26T12:00:00.000Z",
+      },
+    };
+
+    const result = buildUserDataExport(input);
+
+    expect(result.user.profileAndSettings.settings).toEqual({
+      targetYield: 6,
+      displayCurrency: "BRL",
+      smartAllocationTargets: { STOCK_BR: 40, FII: 60 },
+      classTargetYields: { STOCK_BR: 6.5, FII: 8.5 },
+      excludeAboveCeiling: true,
+      excludeYieldTraps: true,
+    });
+  });
 });

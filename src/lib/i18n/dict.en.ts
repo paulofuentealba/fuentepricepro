@@ -754,6 +754,16 @@ export const en = {
     concentrationLimitBadge: "High concentration",
     beforeCurrent: "Before (Current)",
     afterProjected: "After (Projected)",
+    classTargetYieldsTitle: "Target Yield by Class (%)",
+    classTargetYieldsDesc: "Set the minimum expected dividend yield for each asset class when calculating the Bazin Ceiling Price.",
+    marketRef: "Market Ref.",
+    exclusionCriteriaTitle: "Exclusion Criteria",
+    excludeAboveCeilingLabel: "Do not suggest assets above Ceiling Price",
+    excludeAboveCeilingDesc: "Automatically filters out assets whose current price is higher than the Fuente consensus ceiling price.",
+    excludeYieldTrapsLabel: "Do not suggest assets with yield trap signals",
+    excludeYieldTrapsDesc: "Filters out assets with unsustainable payout (>100%), non-recurring dividends, or earnings deterioration.",
+    maxConcentrationPerClassLabel: "Max Concentration per Class (%)",
+    maxConcentrationPerClassHint: "Maximum equity percentage allowed in a single asset class.",
   },
 
   snowball: {

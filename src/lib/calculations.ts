@@ -55,6 +55,59 @@ export function yieldOnCost(
   return (annualDividend / averagePrice) * 100;
 }
 
+export type TargetYieldSource = "item" | "class" | "global";
+
+export interface ResolvedTargetYield {
+  effectiveYield: number;
+  source: TargetYieldSource;
+}
+
+/**
+ * Market reference yields per asset class for informational display.
+ * Purely for visual guidance in UI — NOT silently applied as saved user defaults.
+ */
+export const CLASS_MARKET_REFERENCE_YIELDS: Record<AssetType, number> = {
+  STOCK_BR: 6.0,
+  STOCK_US: 4.0,
+  FII: 8.0,
+  REIT: 4.0,
+  ETF: 4.0,
+  FII_INFRA: 8.0,
+  FIAGRO: 8.0,
+  FIXED_INCOME: 10.0,
+};
+
+/**
+ * Pure function resolving target yield according to the 3-level hierarchy:
+ * 1º Nível (Específico do Ativo): item.targetYield manual se customizado no ativo individual (> 0).
+ * 2º Nível (Classe do Ativo): classTargetYields[item.type] se configurado (> 0).
+ * 3º Nível (Global / Fallback): settings.targetYield global (default 6.0%).
+ */
+export function resolveTargetYield(
+  item: { type: AssetType; targetYield?: number | null } | { type: AssetType; customTargetYield?: number | null },
+  settings?: { targetYield?: number; classTargetYields?: Partial<Record<AssetType, number>> | null } | null,
+): ResolvedTargetYield {
+  // 1º Nível (Específico do Ativo): item.targetYield manual se customizado no ativo individual (> 0)
+  const itemYield = "targetYield" in item ? item.targetYield : (item as any).customTargetYield;
+  if (typeof itemYield === "number" && itemYield > 0 && Number.isFinite(itemYield)) {
+    return { effectiveYield: itemYield, source: "item" };
+  }
+
+  // 2º Nível (Classe do Ativo): classTargetYields[item.type] se configurado (> 0)
+  const classYield = settings?.classTargetYields?.[item.type];
+  if (typeof classYield === "number" && classYield > 0 && Number.isFinite(classYield)) {
+    return { effectiveYield: classYield, source: "class" };
+  }
+
+  // 3º Nível (Global / Fallback): settings.targetYield global (default 6.0%)
+  const globalYield =
+    typeof settings?.targetYield === "number" && settings.targetYield > 0 && Number.isFinite(settings.targetYield)
+      ? settings.targetYield
+      : 6.0;
+
+  return { effectiveYield: globalYield, source: "global" };
+}
+
 /** US withholding tax applied to dividends paid to non-US foreign investors. */
 export const US_DIVIDEND_TAX_RATE = 0.3;
 /** Brazilian withholding tax applied to JCP (Juros sobre Capital Próprio). */
