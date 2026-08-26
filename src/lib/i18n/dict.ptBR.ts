@@ -1601,6 +1601,9 @@ export const ptBR = {
   askEngine: {
     strategies: {
       balanceTargets: "Reequilíbrio de Metas",
+      accelerateSnowball: "Acelerar Bola de Neve",
+      correctDrift: "Corrigir Desvio",
+      reinforcePayer: "Reforçar Quem Pagou",
     },
     reasons: {
       farthestBelowTarget: "Classe com maior desvio abaixo da sua meta configurada",
@@ -1608,6 +1611,8 @@ export const ptBR = {
       excludedAboveCeiling: "Preço de mercado acima do preço teto configurado",
       excludedYieldTrap: "Sinal de armadilha de yield detectado nos indicadores",
       excludedInvalidPrice: "Preço de mercado indisponível ou zerado",
+      highestNetYield: "Maior Dividend Yield líquido entre os ativos elegíveis",
+      reinforcePayer: "Reinvestimento no próprio ativo que gerou os proventos",
     },
     consequences: {
       annualIncomeAdded: "Renda anual estimada adicionada",

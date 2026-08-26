@@ -21,6 +21,8 @@ export interface AskContext {
   settings: AskEngineSettings;
   /** ISO timestamp string representing the reference time for calculations (replaces Date.now()). */
   asOf: string;
+  /** Optional source ticker when the question originates from a specific dividend payer (e.g. Reinforce Payer). */
+  sourceTicker?: string;
 }
 
 /**
@@ -31,6 +33,8 @@ export interface AskStrategyContext {
   availableAmount: number;
   settings: AskEngineSettings;
   asOf: string;
+  /** Optional source ticker when the question originates from a specific dividend payer (e.g. Reinforce Payer). */
+  sourceTicker?: string;
 }
 
 /**

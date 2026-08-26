@@ -1605,6 +1605,9 @@ export const es = {
   askEngine: {
     strategies: {
       balanceTargets: "Reequilibrio de Metas",
+      accelerateSnowball: "Acelerar Bola de Nieve",
+      correctDrift: "Corregir Desviación",
+      reinforcePayer: "Reforzar Quien Pagó",
     },
     reasons: {
       farthestBelowTarget: "Clase de activos con mayor desviación por debajo de su meta configurada",
@@ -1612,6 +1615,8 @@ export const es = {
       excludedAboveCeiling: "Precio de mercado por encima del precio techo configurado",
       excludedYieldTrap: "Señal de trampa de yield detectada en los indicadores",
       excludedInvalidPrice: "Precio de mercado no disponible o en cero",
+      highestNetYield: "Mayor Dividend Yield neto entre los activos elegibles",
+      reinforcePayer: "Reinversión en el propio activo que generó los dividendos",
     },
     consequences: {
       annualIncomeAdded: "Ingreso anual estimado añadido",

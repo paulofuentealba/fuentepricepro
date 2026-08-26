@@ -1591,6 +1591,9 @@ export const en = {
   askEngine: {
     strategies: {
       balanceTargets: "Target Rebalancing",
+      accelerateSnowball: "Accelerate Snowball",
+      correctDrift: "Correct Drift",
+      reinforcePayer: "Reinforce Payer",
     },
     reasons: {
       farthestBelowTarget: "Asset class furthest below your configured target",
@@ -1598,6 +1601,8 @@ export const en = {
       excludedAboveCeiling: "Market price is above configured ceiling price",
       excludedYieldTrap: "Yield trap warning signal detected in fundamentals",
       excludedInvalidPrice: "Market price unavailable or zero",
+      highestNetYield: "Highest net dividend yield among eligible assets",
+      reinforcePayer: "Reinvestment into the specific asset that paid dividends",
     },
     consequences: {
       annualIncomeAdded: "Estimated annual income added",
