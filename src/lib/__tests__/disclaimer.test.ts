@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   DISCLAIMER_VERSION,
+  TAX_DISCLAIMER_VERSION,
   isDisclaimerAccepted,
+  isTaxDisclaimerAccepted,
   resolveDisclaimerText,
   type RegulatoryDisclaimerVariant,
 } from "../disclaimer";
@@ -36,6 +38,37 @@ describe("Regulatory Disclaimer (Prompt 132 / Item 0.4)", () => {
       };
       expect(isDisclaimerAccepted(settings, "v2")).toBe(true);
       expect(isDisclaimerAccepted(settings, "v1")).toBe(false);
+    });
+  });
+
+  describe("TAX_DISCLAIMER_VERSION & Tax Acceptance Detection (Prompt 137)", () => {
+    it("exports TAX_DISCLAIMER_VERSION as a non-empty string", () => {
+      expect(TAX_DISCLAIMER_VERSION).toBeDefined();
+      expect(typeof TAX_DISCLAIMER_VERSION).toBe("string");
+      expect(TAX_DISCLAIMER_VERSION.length).toBeGreaterThan(0);
+    });
+
+    it("returns true when settings has matching taxDisclaimerAcceptedVersion", () => {
+      const settings = {
+        taxDisclaimerAcceptedVersion: TAX_DISCLAIMER_VERSION,
+      };
+      expect(isTaxDisclaimerAccepted(settings)).toBe(true);
+    });
+
+    it("returns false when taxDisclaimerAcceptedVersion is outdated, absent, or null", () => {
+      expect(isTaxDisclaimerAccepted({ taxDisclaimerAcceptedVersion: "v0" })).toBe(false);
+      expect(isTaxDisclaimerAccepted({ taxDisclaimerAcceptedVersion: "" })).toBe(false);
+      expect(isTaxDisclaimerAccepted({ taxDisclaimerAcceptedVersion: undefined })).toBe(false);
+      expect(isTaxDisclaimerAccepted(null)).toBe(false);
+      expect(isTaxDisclaimerAccepted(undefined)).toBe(false);
+    });
+
+    it("allows checking against a custom requiredVersion", () => {
+      const settings = {
+        taxDisclaimerAcceptedVersion: "v2",
+      };
+      expect(isTaxDisclaimerAccepted(settings, "v2")).toBe(true);
+      expect(isTaxDisclaimerAccepted(settings, "v1")).toBe(false);
     });
   });
 

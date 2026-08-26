@@ -21,6 +21,8 @@ export interface UserSettings {
   estimatedMonthlyContribution?: number;
   disclaimerAcceptedVersion?: string;
   disclaimerAcceptedAt?: number;
+  taxDisclaimerAcceptedVersion?: string;
+  taxDisclaimerAcceptedAt?: number;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {

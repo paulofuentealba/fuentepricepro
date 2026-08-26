@@ -5,6 +5,7 @@ import type { UserSettings } from "./useUserSettings";
  * Must be incremented whenever the legal text undergoes significant normative revisions.
  */
 export const DISCLAIMER_VERSION = "v1";
+export const TAX_DISCLAIMER_VERSION = "v1";
 
 export type RegulatoryDisclaimerVariant = "calculation" | "tax" | "full";
 
@@ -19,6 +20,19 @@ export function isDisclaimerAccepted(
     return false;
   }
   return settings.disclaimerAcceptedVersion.trim() === requiredVersion.trim();
+}
+
+/**
+ * Pure function to check if the user has accepted the specific tax simulation disclaimer version.
+ */
+export function isTaxDisclaimerAccepted(
+  settings?: Pick<UserSettings, "taxDisclaimerAcceptedVersion"> | null,
+  requiredVersion: string = TAX_DISCLAIMER_VERSION,
+): boolean {
+  if (!settings || typeof settings.taxDisclaimerAcceptedVersion !== "string") {
+    return false;
+  }
+  return settings.taxDisclaimerAcceptedVersion.trim() === requiredVersion.trim();
 }
 
 /**
