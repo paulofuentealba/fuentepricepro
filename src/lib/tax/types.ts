@@ -79,5 +79,22 @@ export interface RealizedGainEvent {
   costBasis: number; // averagePriceAtSaleTime * quantity
   gain: number; // proceeds - costBasis (negative = loss)
   fees?: number;
+  assetType?: AssetType;
 }
+
+/**
+ * Result of the monthly capital gains tax calculation for Brazilian stocks (Prompt 140 / Item 2.1c).
+ */
+export interface MonthlyCapitalGainsResult {
+  month: string; // "YYYY-MM"
+  totalSales: number;
+  totalGain: number;
+  isExempt: boolean;
+  lossCarryforwardUsed: number;
+  lossCarryforwardRemaining: number;
+  taxableGain: number;
+  taxDue: number; // 15% on taxableGain
+  unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
+}
+
 
