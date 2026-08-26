@@ -1588,4 +1588,19 @@ export const en = {
     disclaimer: "Strictly illustrative simulation assuming constant share price and dividend payments. Does not consider taxes or market fluctuations and is not a guarantee of future returns.",
     notApplicableFI: "Share reinvestment projection is not applicable to Fixed Income assets.",
   },
+  askEngine: {
+    strategies: {
+      balanceTargets: "Target Rebalancing",
+    },
+    reasons: {
+      farthestBelowTarget: "Asset class furthest below your configured target",
+      positiveSafetyMargin: "Asset with positive safety margin versus ceiling price",
+      excludedAboveCeiling: "Market price is above configured ceiling price",
+      excludedYieldTrap: "Yield trap warning signal detected in fundamentals",
+      excludedInvalidPrice: "Market price unavailable or zero",
+    },
+    consequences: {
+      annualIncomeAdded: "Estimated annual income added",
+    },
+  },
 };

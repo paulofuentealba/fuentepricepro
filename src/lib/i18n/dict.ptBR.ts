@@ -1598,4 +1598,19 @@ export const ptBR = {
     disclaimer: "Simulação ilustrativa assumindo cota e proventos constantes. Não considera taxas, tributação ou variação futura de mercado e não constitui garantia de retorno.",
     notApplicableFI: "A projeção de reinvestimento de cotas não se aplica a ativos de Renda Fixa.",
   },
+  askEngine: {
+    strategies: {
+      balanceTargets: "Reequilíbrio de Metas",
+    },
+    reasons: {
+      farthestBelowTarget: "Classe com maior desvio abaixo da sua meta configurada",
+      positiveSafetyMargin: "Ativo com margem de segurança positiva frente ao preço teto",
+      excludedAboveCeiling: "Preço de mercado acima do preço teto configurado",
+      excludedYieldTrap: "Sinal de armadilha de yield detectado nos indicadores",
+      excludedInvalidPrice: "Preço de mercado indisponível ou zerado",
+    },
+    consequences: {
+      annualIncomeAdded: "Renda anual estimada adicionada",
+    },
+  },
 } satisfies typeof en;

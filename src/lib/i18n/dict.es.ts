@@ -1602,4 +1602,19 @@ export const es = {
     disclaimer: "Simulación ilustrativa asumiendo cuota y dividendos constantes. No considera impuestos o fluctuaciones futuras y no constituye garantía de rentabilidad.",
     notApplicableFI: "La proyección de reinversión de cuotas no se aplica a activos de Renta Fija.",
   },
+  askEngine: {
+    strategies: {
+      balanceTargets: "Reequilibrio de Metas",
+    },
+    reasons: {
+      farthestBelowTarget: "Clase de activos con mayor desviación por debajo de su meta configurada",
+      positiveSafetyMargin: "Activo con margen de seguridad positivo frente al precio techo",
+      excludedAboveCeiling: "Precio de mercado por encima del precio techo configurado",
+      excludedYieldTrap: "Señal de trampa de yield detectada en los indicadores",
+      excludedInvalidPrice: "Precio de mercado no disponible o en cero",
+    },
+    consequences: {
+      annualIncomeAdded: "Ingreso anual estimado añadido",
+    },
+  },
 } satisfies typeof en;
