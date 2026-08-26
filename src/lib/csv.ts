@@ -29,7 +29,7 @@ export interface ParsedCsvRow {
   investingSince?: number | null;
 }
 
-function csvEscape(v: string | number | null): string {
+export function csvEscape(v: string | number | null): string {
   const s = v == null ? "" : String(v);
   if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;

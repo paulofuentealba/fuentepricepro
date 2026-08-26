@@ -6,13 +6,15 @@ import type { AssetType } from "@/lib/domain";
  * Explicit slice of UserSettings consumed by the AskEngine.
  * Adheres strictly to Rule 1: Reuses UserSettings SSOT, no parallel configuration types.
  */
-export type AskEngineSettings = Pick<
-  UserSettings,
-  | "smartAllocationTargets"
-  | "excludeAboveCeiling"
-  | "excludeYieldTraps"
-  | "maxConcentrationPerAsset"
-  | "maxConcentrationPerClass"
+export type AskEngineSettings = Partial<
+  Pick<
+    UserSettings,
+    | "smartAllocationTargets"
+    | "excludeAboveCeiling"
+    | "excludeYieldTraps"
+    | "maxConcentrationPerAsset"
+    | "maxConcentrationPerClass"
+  >
 >;
 
 export interface AskContext {
