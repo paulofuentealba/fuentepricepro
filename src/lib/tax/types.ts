@@ -97,4 +97,19 @@ export interface MonthlyCapitalGainsResult {
   unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
 }
 
+/**
+ * Result of the monthly capital gains tax calculation for Real Estate Investment Funds (FIIs) (Prompt 141 / Item 2.1d).
+ */
+export interface MonthlyFiiCapitalGainsResult {
+  month: string; // "YYYY-MM"
+  totalSales: number;
+  totalGain: number;
+  lossCarryforwardUsed: number;
+  lossCarryforwardRemaining: number;
+  taxableGain: number;
+  taxDue: number; // 20% on taxableGain
+  unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
+}
+
+
 

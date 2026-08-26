@@ -1,6 +1,7 @@
 import { getLocalDateISOString } from "@/lib/formatters";
 import type { AssetType } from "@/lib/domain";
 import type { RealizedGainEvent, MonthlyCapitalGainsResult } from "../types";
+import { getEventAssetType } from "../utils";
 
 /**
  * Brazilian Stock Capital Gains Rate for ordinary swing trade transactions (15%).
@@ -14,22 +15,6 @@ export const BR_STOCK_CAPITAL_GAINS_RATE = 0.15;
 export const BR_MONTHLY_SALES_EXEMPTION_THRESHOLD = 20000.0;
 
 // REGRA DE ETF PENDENTE DE REVISAO JURIDICA HUMANA — tratamento adotado (excluído da isenção de ações, tributado à parte) é a interpretação mais conservadora, mas a legislação tem ambiguidade prática reconhecida sobre ETF de ações vs. fundos.
-
-function getEventAssetType(
-  ev: RealizedGainEvent,
-  assetTypeByTicker?: Record<string, AssetType | undefined> | Map<string, AssetType>,
-): AssetType | undefined {
-  if (ev.assetType) {
-    return ev.assetType;
-  }
-  if (!assetTypeByTicker) {
-    return undefined;
-  }
-  if (assetTypeByTicker instanceof Map) {
-    return assetTypeByTicker.get(ev.ticker);
-  }
-  return assetTypeByTicker[ev.ticker];
-}
 
 /**
  * Pure function to calculate monthly capital gains tax on Brazilian stock sales (Item 2.1c).
