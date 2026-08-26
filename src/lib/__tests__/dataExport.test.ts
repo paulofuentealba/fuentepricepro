@@ -14,7 +14,29 @@ describe("buildUserDataExport", () => {
         { id: "STOCK_BR:PETR4", ticker: "PETR4", currentPrice: 38.5, quantity: 100 },
       ],
       transactions: [
-        { id: "tx-1", ticker: "PETR4", type: "buy", date: 1700000000000, quantity: 100, pricePerShare: 35.0 },
+        {
+          id: "tx-1",
+          ticker: "PETR4",
+          type: "buy",
+          date: 1700000000000,
+          quantity: 100,
+          pricePerShare: 35.0,
+          thesisSnapshot: {
+            consensusPrice: 42.0,
+            bazinPrice: 40.0,
+            grahamPrice: 45.0,
+            gordonPrice: 41.0,
+            purchasePrice: 35.0,
+            safetyMarginVsConsensus: 20.0,
+            payoutRatio: 0.5,
+            dividendYield: 8.5,
+            dividendCagr5y: 12.0,
+            piotroskiScore: 8,
+            isYieldTrap: false,
+            valuationVersion: "fuente-v1",
+            capturedAt: 1700000000000,
+          },
+        },
       ],
       portfolioSnapshots: [
         { date: "2026-08-01", totalValueBRL: 3850, totalInvestedBRL: 3500, createdAt: 1700000000000 },
@@ -45,6 +67,21 @@ describe("buildUserDataExport", () => {
     });
     expect(result.data.assets).toHaveLength(1);
     expect(result.data.transactions).toHaveLength(1);
+    expect(result.data.transactions[0].thesisSnapshot).toEqual({
+      consensusPrice: 42.0,
+      bazinPrice: 40.0,
+      grahamPrice: 45.0,
+      gordonPrice: 41.0,
+      purchasePrice: 35.0,
+      safetyMarginVsConsensus: 20.0,
+      payoutRatio: 0.5,
+      dividendYield: 8.5,
+      dividendCagr5y: 12.0,
+      piotroskiScore: 8,
+      isYieldTrap: false,
+      valuationVersion: "fuente-v1",
+      capturedAt: 1700000000000,
+    });
     expect(result.data.portfolioSnapshots).toHaveLength(1);
     expect(result.data.feedbacks).toHaveLength(1);
     expect(result.data.feedbacks[0].message).toBe("Great app!");

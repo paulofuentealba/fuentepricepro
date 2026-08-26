@@ -67,11 +67,99 @@ export async function persistTransactionsBatch(
     );
     const successfullyAddedTxs: Transaction[] = [];
 
+    const existingItem = existingWatchlistItems.find(
+      (it) => it.ticker.toUpperCase() === ticker,
+    );
+
+    let assetData: any = null;
+    let valuationUnavailableReason: string | null = null;
+    if (fetchAssetData) {
+      try {
+        assetData = await fetchAssetData(ticker);
+      } catch {
+        valuationUnavailableReason = "FETCH_ASSET_DATA_FAILED";
+      }
+    }
+
+    const type = existingItem?.type || assetData?.type || classifyBr(ticker);
+    const currency =
+      existingItem?.currency ||
+      assetData?.currency ||
+      (["STOCK_US", "REIT"].includes(type) ? "USD" : "BRL");
+    const annualDiv = assetData
+      ? (getCanonicalAnnualDividend(assetData, 3) || assetData?.annualDividend || 0)
+      : existingItem?.annualDividend ?? 0;
+    const target = existingItem?.targetYield ?? 6;
+
+    let baseValuation: ReturnType<typeof getAssetValuation> | null = null;
+    try {
+      baseValuation = getAssetValuation({
+        targetYield: target,
+        currentPrice: assetData?.currentPrice || existingItem?.currentPrice || 1,
+        avgDividend: annualDiv,
+        eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
+        bvps: assetData?.metrics?.bvps ?? null,
+        dividendCagr: assetData?.metrics?.dividendCagr5y ?? null,
+        currency,
+        type,
+      });
+    } catch {
+      valuationUnavailableReason = "VALUATION_CALCULATION_FAILED";
+    }
+
+    const payoutRatio =
+      existingItem?.payoutRatio ??
+      assetData?.metrics?.payoutRatio ??
+      assetData?.payoutRatio ??
+      null;
+    const dividendCagr5y =
+      assetData?.metrics?.dividendCagr5y ??
+      (existingItem as any)?.dividendCagr5y ??
+      null;
+    const piotroskiScore =
+      assetData?.metrics?.piotroskiScore ??
+      assetData?.piotroskiScore ??
+      null;
+
     for (const parsed of tickerParsedList) {
       current++;
       const txId = typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `tx_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+
+      let thesisSnapshot = null;
+      if (parsed.type !== "SELL") {
+        const purchasePrice = parsed.price;
+        const consensusPrice = baseValuation?.fuenteConsensus ?? null;
+        const safetyMarginVsConsensus =
+          consensusPrice != null && purchasePrice > 0
+            ? ((consensusPrice - purchasePrice) / purchasePrice) * 100
+            : null;
+        const dy =
+          purchasePrice > 0 && annualDiv > 0
+            ? (annualDiv / purchasePrice) * 100
+            : (baseValuation?.dividendYield ?? null);
+
+        thesisSnapshot = {
+          consensusPrice,
+          bazinPrice: baseValuation?.methods?.bazin ?? null,
+          grahamPrice: baseValuation?.methods?.graham ?? null,
+          gordonPrice: baseValuation?.methods?.gordon ?? null,
+          purchasePrice,
+          safetyMarginVsConsensus,
+          payoutRatio,
+          dividendYield: dy,
+          dividendCagr5y,
+          piotroskiScore,
+          isYieldTrap: baseValuation?.yieldTrapWarning ? true : false,
+          valuationVersion: "fuente-v1",
+          capturedAt: Date.now(),
+          unavailableReason:
+            consensusPrice == null
+              ? (valuationUnavailableReason || "FUNDAMENTALS_UNAVAILABLE")
+              : null,
+        };
+      }
 
       const tx: Transaction = {
         id: txId,
@@ -82,6 +170,7 @@ export async function persistTransactionsBatch(
         pricePerShare: parsed.price,
         fees: parsed.costs || 0,
         notes: parsed.notes || null,
+        thesisSnapshot,
       };
 
       try {
@@ -112,29 +201,6 @@ export async function persistTransactionsBatch(
       affectedTickers.push(ticker);
       const allTickerTxs = [...currentTickerTxs, ...successfullyAddedTxs];
       const holding = recalculateHoldingFromTransactions(allTickerTxs);
-
-      const existingItem = existingWatchlistItems.find(
-        (it) => it.ticker.toUpperCase() === ticker,
-      );
-
-      let assetData: any = null;
-      if (fetchAssetData) {
-        try {
-          assetData = await fetchAssetData(ticker);
-        } catch {
-          // ignore API error, fallback below
-        }
-      }
-
-      const type = existingItem?.type || assetData?.type || classifyBr(ticker);
-      const currency =
-        existingItem?.currency ||
-        assetData?.currency ||
-        (["STOCK_US", "REIT"].includes(type) ? "USD" : "BRL");
-      const annualDiv = assetData
-        ? getCanonicalAnnualDividend(assetData, 3)
-        : existingItem?.annualDividend ?? 0;
-      const target = existingItem?.targetYield ?? 6;
 
       const currentPrice =
         assetData?.currentPrice ||

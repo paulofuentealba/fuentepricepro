@@ -82,16 +82,22 @@ function rowToItem(row: any): Transaction {
     date: typeof row.date === "number" ? row.date : 0,
     quantity: typeof row.quantity === "number" ? row.quantity : 0,
     pricePerShare: typeof row.pricePerShare === "number" ? row.pricePerShare : 0,
+    factor: row.factor ?? null,
     fees: row.fees ?? null,
     notes: row.notes ?? null,
+    thesisSnapshot: row.thesisSnapshot ?? null,
   };
 }
 
 function itemToRow(item: Transaction, userId: string) {
-  return {
+  const row: Record<string, any> = {
     ...item,
     user_id: userId,
   };
+  if (item.thesisSnapshot === undefined) {
+    delete row.thesisSnapshot;
+  }
+  return row;
 }
 
 // ---------- React Query Hook ----------

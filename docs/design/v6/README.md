@@ -18,7 +18,7 @@
    - **Login & Autenticação**: Fluxo de entrada elegante com suporte a credenciais e Google Auth.
    - **Onboarding (4 passos)**:
      - *Passo 1*: Perfil do investidor e estágio financeiro.
-     - *Passo 2*: Importação inicial da carteira ou cadastro manual.
+     - *Passo 2*: Tolerância a risco ("como você reage a uma queda de 20%?").
      - *Passo 3*: Metas de alocação patrimonial por classe.
      - *Passo 4*: Yield-alvo configurável por classe de ativo e aceite de termos.
 

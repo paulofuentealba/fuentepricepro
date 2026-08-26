@@ -6,8 +6,9 @@ import { TransactionFormFields } from "@/components/ceiling/watchlist/Transactio
 import type { SearchHit } from "@/lib/apiService.functions";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
-import { useTransactions, recalculateHoldingFromTransactions, type Transaction } from "@/lib/transactions";
+import { useTransactions, recalculateHoldingFromTransactions, type Transaction, type ThesisSnapshot } from "@/lib/transactions";
 import { buildWatchlistItem } from "@/lib/buildWatchlistItem";
+import { getAssetValuation } from "@/lib/calculations";
 import { useSettings } from "@/lib/settings";
 import { useI18n } from "@/lib/i18n-provider";
 
@@ -82,8 +83,73 @@ export function NewContributionDialog({ open, onOpenChange }: Props) {
 
   async function handleSaveTransaction(tx: Transaction) {
     if (!workingItem) return;
-    await upsertTransaction(tx);
-    const newTxs = [...transactions.filter((t) => t.id !== tx.id), tx].filter(
+
+    let finalTx: Transaction = tx;
+    if (tx.type === "buy" && !tx.thesisSnapshot) {
+      try {
+        const val = getAssetValuation({
+          targetYield: workingItem.targetYield,
+          currentPrice: tx.pricePerShare || workingItem.currentPrice || 1,
+          avgDividend: workingItem.annualDividend,
+          eps: (assetResult.data as any)?.epsCurrent ?? (assetResult.data as any)?.metrics?.eps ?? null,
+          bvps: (assetResult.data as any)?.metrics?.bvps ?? null,
+          dividendCagr: (assetResult.data as any)?.metrics?.dividendCagr5y ?? null,
+          currency: workingItem.currency,
+          type: workingItem.type,
+        });
+
+        const consensusPrice = val.fuenteConsensus;
+        const safetyMarginVsConsensus =
+          consensusPrice != null && tx.pricePerShare > 0
+            ? ((consensusPrice - tx.pricePerShare) / tx.pricePerShare) * 100
+            : null;
+        const dy =
+          tx.pricePerShare > 0 && workingItem.annualDividend > 0
+            ? (workingItem.annualDividend / tx.pricePerShare) * 100
+            : val.dividendYield;
+
+        const snapshot: ThesisSnapshot = {
+          consensusPrice,
+          bazinPrice: val.methods.bazin,
+          grahamPrice: val.methods.graham,
+          gordonPrice: val.methods.gordon,
+          purchasePrice: tx.pricePerShare,
+          safetyMarginVsConsensus,
+          payoutRatio: workingItem.payoutRatio ?? null,
+          dividendYield: dy,
+          dividendCagr5y: (assetResult.data as any)?.metrics?.dividendCagr5y ?? null,
+          piotroskiScore: (assetResult.data as any)?.metrics?.piotroskiScore ?? null,
+          isYieldTrap: !!val.yieldTrapWarning,
+          valuationVersion: "fuente-v1",
+          capturedAt: Date.now(),
+          unavailableReason: consensusPrice == null ? "CONSENSUS_UNAVAILABLE" : null,
+        };
+        finalTx = { ...tx, thesisSnapshot: snapshot };
+      } catch {
+        finalTx = {
+          ...tx,
+          thesisSnapshot: {
+            consensusPrice: null,
+            bazinPrice: null,
+            grahamPrice: null,
+            gordonPrice: null,
+            purchasePrice: tx.pricePerShare,
+            safetyMarginVsConsensus: null,
+            payoutRatio: null,
+            dividendYield: null,
+            dividendCagr5y: null,
+            piotroskiScore: null,
+            isYieldTrap: null,
+            valuationVersion: "fuente-v1",
+            capturedAt: Date.now(),
+            unavailableReason: "VALUATION_ERROR",
+          },
+        };
+      }
+    }
+
+    await upsertTransaction(finalTx);
+    const newTxs = [...transactions.filter((t) => t.id !== finalTx.id), finalTx].filter(
       (t) => t.ticker === workingItem.ticker,
     );
     const { quantity, averagePrice } = recalculateHoldingFromTransactions(

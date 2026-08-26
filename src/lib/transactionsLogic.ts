@@ -1,3 +1,20 @@
+export interface ThesisSnapshot {
+  consensusPrice: number | null;
+  bazinPrice: number | null;
+  grahamPrice: number | null;
+  gordonPrice: number | null;
+  purchasePrice: number;
+  safetyMarginVsConsensus: number | null;
+  payoutRatio: number | null;
+  dividendYield: number | null;
+  dividendCagr5y: number | null;
+  piotroskiScore: number | null;
+  isYieldTrap: boolean | null;
+  valuationVersion: string;
+  capturedAt: number;
+  unavailableReason?: string | null;
+}
+
 export interface Transaction {
   id: string;
   ticker: string;
@@ -14,6 +31,7 @@ export interface Transaction {
   factor?: number | null;
   fees?: number | null; // corretagem/taxas, a Receita manda incluir no custo
   notes?: string | null;
+  thesisSnapshot?: ThesisSnapshot | null;
 }
 
 /**
