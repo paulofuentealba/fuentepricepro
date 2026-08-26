@@ -4,28 +4,48 @@ export type Jurisdiction = "BR" | "US";
 
 export type TaxCategory = "dividend" | "interest_on_capital" | "capital_gains";
 
+export interface TaxSimulationError {
+  ticker: string;
+  code: "INVALID_AMOUNT" | "INCOMPATIBLE_JURISDICTION" | "MISSING_DATA";
+  message: string;
+}
+
 /**
- * Clean position-level representation of a tax simulation entry.
- * Consumes already-calculated net/gross amounts from the valuation SSOT without duplicating ValuationResult.
+ * Input position provided to tax simulation adapters.
+ */
+export interface TaxSimulationPositionInput {
+  ticker: string;
+  type: AssetType;
+  grossAmount: number;
+  jurisdiction?: Jurisdiction;
+  currency?: Currency;
+  customTaxRate?: number | null;
+  isJCP?: boolean;
+}
+
+/**
+ * Output position enriched with tax calculation results from the SSOT.
  */
 export interface TaxSimulationPosition {
   ticker: string;
   type: AssetType;
   jurisdiction: Jurisdiction;
+  currency: Currency;
   grossAmount: number;
   netAmount: number;
   withheldTax: number;
   taxRate: number;
+  customTaxRate?: number | null;
+  isJCP?: boolean;
 }
 
 /**
- * Context input for tax simulation calculations.
- * Pure interface adhering to Rule 1: zero duplication of calculation logic or parallel state.
+ * Context input for tax simulation calculations across a portfolio.
  */
 export interface TaxContext {
   jurisdiction: Jurisdiction;
   currency: Currency;
-  positions: TaxSimulationPosition[];
+  positions: TaxSimulationPositionInput[];
   period?: {
     year: number;
     month?: number;
@@ -33,7 +53,7 @@ export interface TaxContext {
 }
 
 /**
- * Output model for tax simulation routines across jurisdictions.
+ * Standardized result returned by all tax simulation adapters.
  */
 export interface TaxSimulationResult {
   jurisdiction: Jurisdiction;
@@ -42,5 +62,6 @@ export interface TaxSimulationResult {
   totalTax: number;
   effectiveTaxRate: number;
   positions: TaxSimulationPosition[];
+  errors?: TaxSimulationError[];
   calculatedAt: string;
 }
