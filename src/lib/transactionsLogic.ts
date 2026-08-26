@@ -34,6 +34,52 @@ export interface Transaction {
   thesisSnapshot?: ThesisSnapshot | null;
 }
 
+export interface PositionHoldingState {
+  quantity: number;
+  averagePrice: number;
+}
+
+/**
+ * Pure state reducer applying a single transaction to an existing position holding state.
+ * Implements Brazilian tax/accounting rules for weighted average price:
+ * - Buys: increase quantity and compute new weighted average price (including fees in cost basis).
+ * - Sells: decrease quantity without altering average price; resets averagePrice to 0 if quantity reaches 0.
+ * - Corporate actions: scale quantity and inversely scale averagePrice by factor.
+ */
+export function applyTransactionToHolding(
+  state: PositionHoldingState,
+  tx: Transaction,
+): PositionHoldingState {
+  let { quantity, averagePrice } = state;
+
+  if (tx.type === "buy") {
+    const currentTotalCost = averagePrice * quantity;
+    const txCost = (tx.pricePerShare * tx.quantity) + (tx.fees || 0);
+    quantity += tx.quantity;
+    if (quantity > 0) {
+      averagePrice = (currentTotalCost + txCost) / quantity;
+    }
+  } else if (tx.type === "sell") {
+    quantity -= tx.quantity;
+    if (quantity <= 0) {
+      quantity = 0;
+      averagePrice = 0; // Reset average price when position is fully closed
+    }
+  } else if (tx.type === "corporate_action") {
+    const factor = tx.factor ?? 1;
+    if (Number.isFinite(factor) && factor > 0) {
+      // Split/grouping: scale quantity and inverse-scale average price so
+      // total invested capital stays identical. Applied in chronological
+      // order alongside buys/sells.
+      quantity *= factor;
+      averagePrice /= factor;
+      if (quantity < 0) quantity = 0;
+    }
+  }
+
+  return { quantity, averagePrice };
+}
+
 /**
  * Calculates current quantity and average price purely from a list of transactions.
  * Assumes Brazilian Revenue rule:
@@ -44,37 +90,12 @@ export interface Transaction {
 export function recalculateHoldingFromTransactions(transactions: Transaction[]): { quantity: number; averagePrice: number } {
   const sorted = [...transactions].sort((a, b) => a.date - b.date);
 
-  let quantity = 0;
-  let averagePrice = 0;
-
+  let state: PositionHoldingState = { quantity: 0, averagePrice: 0 };
   for (const tx of sorted) {
-    if (tx.type === "buy") {
-      const currentTotalCost = averagePrice * quantity;
-      const txCost = (tx.pricePerShare * tx.quantity) + (tx.fees || 0);
-      quantity += tx.quantity;
-      if (quantity > 0) {
-        averagePrice = (currentTotalCost + txCost) / quantity;
-      }
-    } else if (tx.type === "sell") {
-      quantity -= tx.quantity;
-      if (quantity <= 0) {
-        quantity = 0;
-        averagePrice = 0; // Reset average price when position is fully closed
-      }
-    } else if (tx.type === "corporate_action") {
-      const factor = tx.factor ?? 1;
-      if (Number.isFinite(factor) && factor > 0) {
-        // Split/grouping: scale quantity and inverse-scale average price so
-        // total invested capital stays identical. Applied in chronological
-        // order alongside buys/sells.
-        quantity *= factor;
-        averagePrice /= factor;
-        if (quantity < 0) quantity = 0;
-      }
-    }
+    state = applyTransactionToHolding(state, tx);
   }
 
-  return { quantity, averagePrice };
+  return state;
 }
 
 /**

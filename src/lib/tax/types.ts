@@ -65,3 +65,19 @@ export interface TaxSimulationResult {
   errors?: TaxSimulationError[];
   calculatedAt: string;
 }
+
+/**
+ * Represents a single realized gain/loss event from a sell transaction.
+ * Foundation for Brazilian and US capital gains calculation (Item 2.1b).
+ */
+export interface RealizedGainEvent {
+  ticker: string;
+  saleDate: number; // Timestamp (Unix epoch in ms), matches Transaction.date
+  quantity: number;
+  salePrice: number;
+  proceeds: number; // (salePrice * quantity) - fees
+  costBasis: number; // averagePriceAtSaleTime * quantity
+  gain: number; // proceeds - costBasis (negative = loss)
+  fees?: number;
+}
+
