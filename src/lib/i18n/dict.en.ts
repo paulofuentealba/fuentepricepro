@@ -798,8 +798,15 @@ export const en = {
     reject: "Reject",
   },
   regulatoryDisclaimer: {
+    // TEXTO PENDENTE DE REVISAO JURIDICA HUMANA — Informative translation; PT-BR is normative
+    calculation:
+      "Calculation suggestion, not investment advice. Calculated exclusively based on the criteria and goals you configured. Does not constitute securities advisory (CVM/SEC). The decision to follow it or not is entirely yours.",
+    tax:
+      "Estimate, not tax advice. Calculated from the data you registered. Tax rules have exceptions and change over time. Confirm with your accountant before filing.",
+    full:
+      "Calculation suggestion and tax estimate, not investment advice or formal advisory. Calculated exclusively from the criteria, goals, and data you configured. Market and tax rules have exceptions and change. Final capital allocation and tax filing decisions are solely your responsibility.",
     message:
-      "Fuente Price Pro is an educational and quantitative analysis tool. No calculation, projection, or valuation consensus constitutes investment advice, securities analysis, or formal tax opinion. Consult a certified professional before deciding.",
+      "Calculation suggestion, not investment advice. Calculated exclusively based on the criteria and goals you configured. Does not constitute securities advisory (CVM/SEC). The decision to follow it or not is entirely yours.",
   },
   landing: {
     badge: "✨ Built for serious dividend investors",

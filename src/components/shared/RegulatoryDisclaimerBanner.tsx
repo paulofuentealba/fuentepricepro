@@ -1,5 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
+import { resolveDisclaimerText, type RegulatoryDisclaimerVariant } from "@/lib/disclaimer";
+import { cn } from "@/lib/utils";
 
 /**
  * Persistent regulatory (CVM-oriented) disclaimer, shown as a discreet
@@ -22,7 +24,17 @@ export const EXCLUDED_APP_ROUTES = [
   "/app/docs",
 ];
 
-export function RegulatoryDisclaimerBanner() {
+export interface RegulatoryDisclaimerBannerProps {
+  variant?: RegulatoryDisclaimerVariant;
+  className?: string;
+  forceShow?: boolean;
+}
+
+export function RegulatoryDisclaimerBanner({
+  variant = "calculation",
+  className,
+  forceShow = false,
+}: RegulatoryDisclaimerBannerProps = {}) {
   const { t } = useI18n();
   const location = useLocation();
 
@@ -35,17 +47,20 @@ export function RegulatoryDisclaimerBanner() {
       (route) => location.pathname === route || location.pathname.startsWith(`${route}/`),
     );
 
-  if (isExcluded) return null;
+  if (!forceShow && isExcluded) return null;
+
+  const disclaimerText = resolveDisclaimerText(t, variant);
 
   return (
     <div
       role="note"
-      aria-label={t.regulatoryDisclaimer.message}
-      className="border-t border-border/60 bg-muted/30 px-4 py-2 sm:px-6"
+      aria-label={disclaimerText}
+      className={cn("border-t border-border/60 bg-muted/30 px-4 py-2 sm:px-6", className)}
     >
       <p className="mx-auto max-w-6xl text-center text-[11px] leading-relaxed text-muted-foreground">
-        {t.regulatoryDisclaimer.message}
+        {disclaimerText}
       </p>
     </div>
   );
 }
+

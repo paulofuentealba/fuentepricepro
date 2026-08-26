@@ -803,8 +803,15 @@ export const ptBR = {
     reject: "Rejeitar",
   },
   regulatoryDisclaimer: {
+    // TEXTO PENDENTE DE REVISAO JURIDICA HUMANA — PT-BR é a fonte normativa
+    calculation:
+      "Sugestão de cálculo, não recomendação de investimento. Calculada exclusivamente a partir dos critérios e metas que você configurou. Não constitui consultoria de valores mobiliários (CVM). A decisão de seguir ou não é exclusivamente sua.",
+    tax:
+      "Estimativa, não consultoria tributária. Cálculo a partir dos dados que você registrou. Regras tributárias têm exceções e mudam. Confirme com seu contador antes de apurar.",
+    full:
+      "Sugestão de cálculo e estimativa tributária, não recomendação de investimento nem consultoria formal. Calculada exclusivamente a partir dos critérios, metas e dados que você configurou. Regras fiscais e de mercado têm exceções e mudam. A decisão final de alocação de capital e apuração fiscal é de sua exclusiva responsabilidade.",
     message:
-      "Fuente Price Pro é uma ferramenta educacional e de análise quantitativa. Nenhum cálculo, projeção ou consenso de valuation constitui recomendação de investimento, análise de valores mobiliários ou parecer fiscal formal. Consulte um profissional certificado antes de decidir.",
+      "Sugestão de cálculo, não recomendação de investimento. Calculada exclusivamente a partir dos critérios e metas que você configurou. Não constitui consultoria de valores mobiliários (CVM). A decisão de seguir ou não é exclusivamente sua.",
   },
   landing: {
     badge: "✨ Construído para investidores de dividendos sérios",

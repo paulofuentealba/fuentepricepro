@@ -92,8 +92,12 @@ export function BuyAndHoldChecklistCard({ asset, valuation }: Props) {
         })}
       </div>
 
-      <div className="pt-1 text-[11px] text-muted-foreground/70 border-t border-border/30">
-        <p>{t.regulatoryDisclaimer?.message}</p>
+      <div className="pt-2 border-t border-border/30">
+        <RegulatoryDisclaimerBanner
+          variant="calculation"
+          forceShow
+          className="border-t-0 bg-transparent p-0 text-left"
+        />
       </div>
     </div>
   );

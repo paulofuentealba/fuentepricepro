@@ -87,21 +87,50 @@ describe("RegulatoryDisclaimerBanner (Tier 1 / Item 6)", () => {
     });
   });
 
-  it("does not alter the approved legal text (PT-BR)", () => {
-    expect(dict.ptBR.regulatoryDisclaimer.message).toBe(
-      "Fuente Price Pro é uma ferramenta educacional e de análise quantitativa. Nenhum cálculo, projeção ou consenso de valuation constitui recomendação de investimento, análise de valores mobiliários ou parecer fiscal formal. Consulte um profissional certificado antes de decidir.",
+  it("renders specific variants correctly", () => {
+    mockPathname = "/app/screener";
+    mockLocale = "ptBR";
+
+    const { unmount: u1 } = render(<RegulatoryDisclaimerBanner variant="calculation" />);
+    expect(screen.getByText(dict.ptBR.regulatoryDisclaimer.calculation)).toBeInTheDocument();
+    u1();
+
+    const { unmount: u2 } = render(<RegulatoryDisclaimerBanner variant="tax" />);
+    expect(screen.getByText(dict.ptBR.regulatoryDisclaimer.tax)).toBeInTheDocument();
+    u2();
+
+    const { unmount: u3 } = render(<RegulatoryDisclaimerBanner variant="full" />);
+    expect(screen.getByText(dict.ptBR.regulatoryDisclaimer.full)).toBeInTheDocument();
+    u3();
+  });
+
+  it("renders on excluded routes when forceShow is true", () => {
+    mockPathname = "/terms";
+    mockLocale = "ptBR";
+
+    const { container: hiddenContainer } = render(<RegulatoryDisclaimerBanner />);
+    expect(hiddenContainer).toBeEmptyDOMElement();
+    cleanup();
+
+    render(<RegulatoryDisclaimerBanner forceShow variant="full" />);
+    expect(screen.getByText(dict.ptBR.regulatoryDisclaimer.full)).toBeInTheDocument();
+  });
+
+  it("does not alter the approved legal text for calculation variant (PT-BR)", () => {
+    expect(dict.ptBR.regulatoryDisclaimer.calculation).toBe(
+      "Sugestão de cálculo, não recomendação de investimento. Calculada exclusivamente a partir dos critérios e metas que você configurou. Não constitui consultoria de valores mobiliários (CVM). A decisão de seguir ou não é exclusivamente sua.",
     );
   });
 
-  it("does not alter the approved legal text (EN)", () => {
-    expect(dict.en.regulatoryDisclaimer.message).toBe(
-      "Fuente Price Pro is an educational and quantitative analysis tool. No calculation, projection, or valuation consensus constitutes investment advice, securities analysis, or formal tax opinion. Consult a certified professional before deciding.",
+  it("does not alter the approved legal text for calculation variant (EN)", () => {
+    expect(dict.en.regulatoryDisclaimer.calculation).toBe(
+      "Calculation suggestion, not investment advice. Calculated exclusively based on the criteria and goals you configured. Does not constitute securities advisory (CVM/SEC). The decision to follow it or not is entirely yours.",
     );
   });
 
-  it("does not alter the approved legal text (ES)", () => {
-    expect(dict.es.regulatoryDisclaimer.message).toBe(
-      "Fuente Price Pro es una herramienta educativa y de análisis cuantitativo. Ningún cálculo, proyección o consenso de valuation constituye recomendación de inversión, análisis de valores mobiliarios u opinión fiscal formal. Consulte a un profesional certificado antes de decidir.",
+  it("does not alter the approved legal text for calculation variant (ES)", () => {
+    expect(dict.es.regulatoryDisclaimer.calculation).toBe(
+      "Sugerencia de cálculo, no recomendación de inversión. Calculada exclusivamente a partir de los criterios y metas que configuró. No constituye asesoría de valores mobiliarios (CVM). La decisión de seguirla o no es exclusivamente suya.",
     );
   });
 });

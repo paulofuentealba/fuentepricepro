@@ -189,4 +189,27 @@ describe("buildUserDataExport", () => {
       excludeYieldTraps: true,
     });
   });
+
+  it("should include disclaimerAcceptedVersion and disclaimerAcceptedAt in exported profileAndSettings", () => {
+    const input = {
+      userDoc: {
+        disclaimerAcceptedVersion: "v1",
+        disclaimerAcceptedAt: 1770000000000,
+        settings: {
+          targetYield: 6,
+          displayCurrency: "BRL",
+        },
+      },
+      metadata: {
+        userId: "user-with-disclaimer",
+        email: "legal@example.com",
+        exportedAt: "2026-08-26T12:00:00.000Z",
+      },
+    };
+
+    const result = buildUserDataExport(input);
+
+    expect(result.user.profileAndSettings.disclaimerAcceptedVersion).toBe("v1");
+    expect(result.user.profileAndSettings.disclaimerAcceptedAt).toBe(1770000000000);
+  });
 });

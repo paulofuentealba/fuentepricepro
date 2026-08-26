@@ -19,6 +19,8 @@ export interface UserSettings {
   monthlyLivingCostGoal?: number;
   monthlyLivingCostGoalCurrency?: Currency;
   estimatedMonthlyContribution?: number;
+  disclaimerAcceptedVersion?: string;
+  disclaimerAcceptedAt?: number;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
