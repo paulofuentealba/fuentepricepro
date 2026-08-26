@@ -26,6 +26,7 @@ import { Route as AppScreenerRouteImport } from './routes/app/screener'
 import { Route as AppRiskradarRouteImport } from './routes/app/riskradar'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
+import { Route as AppExplorarRouteImport } from './routes/app/explorar'
 import { Route as AppDocsRouteImport } from './routes/app/docs'
 import { Route as AppComparatorRouteImport } from './routes/app.comparator'
 import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
@@ -116,6 +117,11 @@ const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
   path: '/globalradar',
   getParentRoute: () => AppRoute,
 } as any)
+const AppExplorarRoute = AppExplorarRouteImport.update({
+  id: '/explorar',
+  path: '/explorar',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDocsRoute = AppDocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
+  '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/riskradar': typeof AppRiskradarRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
+  '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/riskradar': typeof AppRiskradarRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/app/cashflow': typeof AppCashflowRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/docs': typeof AppDocsRoute
+  '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/riskradar': typeof AppRiskradarRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/app/cashflow'
     | '/app/comparator'
     | '/app/docs'
+    | '/app/explorar'
     | '/app/globalradar'
     | '/app/myportfolio'
     | '/app/riskradar'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/app/cashflow'
     | '/app/comparator'
     | '/app/docs'
+    | '/app/explorar'
     | '/app/globalradar'
     | '/app/myportfolio'
     | '/app/riskradar'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/app/cashflow'
     | '/app/comparator'
     | '/app/docs'
+    | '/app/explorar'
     | '/app/globalradar'
     | '/app/myportfolio'
     | '/app/riskradar'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGlobalradarRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/explorar': {
+      id: '/app/explorar'
+      path: '/explorar'
+      fullPath: '/app/explorar'
+      preLoaderRoute: typeof AppExplorarRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/docs': {
       id: '/app/docs'
       path: '/docs'
@@ -428,6 +447,7 @@ interface AppRouteChildren {
   AppCashflowRoute: typeof AppCashflowRoute
   AppComparatorRoute: typeof AppComparatorRoute
   AppDocsRoute: typeof AppDocsRoute
+  AppExplorarRoute: typeof AppExplorarRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
   AppRiskradarRoute: typeof AppRiskradarRoute
@@ -441,6 +461,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCashflowRoute: AppCashflowRoute,
   AppComparatorRoute: AppComparatorRoute,
   AppDocsRoute: AppDocsRoute,
+  AppExplorarRoute: AppExplorarRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
   AppRiskradarRoute: AppRiskradarRoute,

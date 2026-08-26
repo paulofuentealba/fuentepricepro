@@ -567,6 +567,31 @@ export const ptBR = {
     contextBalanced: "{{under}} de {{total}} ativos abaixo do teto — mercado equilibrado.",
   },
 
+  nav: {
+    sections: {
+      decide: "Decidir",
+      track: "Acompanhar",
+      analyze: "Analisar",
+    },
+    reinvest: "Reinvestir",
+    contributionPlan: "Plano de aporte",
+    withdraw: "Retirar",
+    whatChanged: "O que mudou",
+    guaranteedIncome: "Renda garantida",
+    taxReality: "Realidade fiscal",
+    myPortfolio: "Minha carteira",
+    exploreAssets: "Explorar ativos",
+    audit: "Auditoria",
+    comingSoon: "Em breve",
+    home: "Início",
+    admin: "Admin",
+    theme: {
+      light: "Modo Claro",
+      dark: "Modo Escuro",
+      toggle: "Alternar tema",
+    },
+  },
+
   tabs: {
     financialIndependence: "Independência Financeira",
     screener: "Screener",

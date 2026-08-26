@@ -565,6 +565,31 @@ export const en = {
     contextBalanced: "{{under}} of {{total}} assets below ceiling — balanced market.",
   },
 
+  nav: {
+    sections: {
+      decide: "Decide",
+      track: "Track",
+      analyze: "Analyze",
+    },
+    reinvest: "Reinvest",
+    contributionPlan: "Contribution plan",
+    withdraw: "Withdraw",
+    whatChanged: "What changed",
+    guaranteedIncome: "Guaranteed income",
+    taxReality: "Tax reality",
+    myPortfolio: "My portfolio",
+    exploreAssets: "Explore assets",
+    audit: "Audit",
+    comingSoon: "Coming soon",
+    home: "Home",
+    admin: "Admin",
+    theme: {
+      light: "Light Mode",
+      dark: "Dark Mode",
+      toggle: "Toggle theme",
+    },
+  },
+
   tabs: {
     financialIndependence: "Financial Independence",
     screener: "Screener",

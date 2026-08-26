@@ -53,7 +53,7 @@ function AppLayout() {
 
   if (loading) {
     return (
-      <div className="dark flex h-screen flex-col overflow-hidden bg-background text-foreground">
+      <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
         <Header />
         <div className="flex flex-1 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -63,7 +63,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="dark flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <Header />
       <GuestWarningBanner />
       <div className="flex flex-1 overflow-hidden flex-row">

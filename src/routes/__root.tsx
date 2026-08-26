@@ -18,6 +18,7 @@ import { I18nProvider } from "../lib/i18n-provider";
 import { SubscriptionProvider } from "../lib/subscription";
 import { SettingsProvider } from "../lib/settings";
 import { ValuedPortfolioProvider } from "../lib/useValuedPortfolio";
+import { ThemeProvider } from "../lib/theme-provider";
 import { CookieConsentBanner } from "../components/shared/CookieConsentBanner";
 
 function NotFoundComponent() {
@@ -118,9 +119,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const themeInitScript = `
+    (function() {
+      try {
+        var key = 'ceilingPricePro.theme.v1';
+        var stored = localStorage.getItem(key);
+        var isDark = stored ? (stored === 'dark' || (stored === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) : (window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true);
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  `;
+
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
       <body className="relative min-h-screen bg-background text-foreground antialiased selection:bg-primary/30">
@@ -137,22 +156,24 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <AuthProvider>
-          <SubscriptionProvider>
-            <SettingsProvider>
-              <AuthModalProvider>
-                <ValuedPortfolioProvider>
-                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                  <Outlet />
-                  <Toaster theme="dark" richColors position="top-right" />
-                  <CookieConsentBanner />
-                </ValuedPortfolioProvider>
-              </AuthModalProvider>
-            </SettingsProvider>
-          </SubscriptionProvider>
-        </AuthProvider>
-      </I18nProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <SubscriptionProvider>
+              <SettingsProvider>
+                <AuthModalProvider>
+                  <ValuedPortfolioProvider>
+                    {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                    <Outlet />
+                    <Toaster theme="dark" richColors position="top-right" />
+                    <CookieConsentBanner />
+                  </ValuedPortfolioProvider>
+                </AuthModalProvider>
+              </SettingsProvider>
+            </SubscriptionProvider>
+          </AuthProvider>
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

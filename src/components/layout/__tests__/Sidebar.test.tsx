@@ -1,33 +1,36 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import React from "react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { Sidebar } from "../Sidebar";
-import { dict, type Locale } from "@/lib/i18n";
+import { ptBR } from "@/lib/i18n/dict.ptBR";
 
-let currentLocale: Locale = "ptBR";
-let mockIsAdmin = false;
-let mockUser: any = { displayName: "Admin User", photoURL: null };
-
-vi.mock("@/lib/i18n-provider", () => ({
-  useI18n: () => ({
-    locale: currentLocale,
-    setLocale: vi.fn(),
-    t: dict[currentLocale],
-  }),
-}));
-
+// Mock @tanstack/react-router
 vi.mock("@tanstack/react-router", () => ({
-  useLocation: () => ({ pathname: "/app/" }),
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+  useLocation: () => ({ pathname: "/app/smartallocation" }),
 }));
+
+// Mock hooks
+let mockIsAdmin = false;
+let mockUser: { displayName: string; photoURL: string | null } | null = null;
+let mockIsPro = false;
 
 vi.mock("@/lib/auth-provider", () => ({
   useAuth: () => ({
-    user: mockUser,
-    isAdmin: mockIsAdmin,
-    signOut: vi.fn(),
+    get user() {
+      return mockUser;
+    },
     loading: false,
+    get isAdmin() {
+      return mockIsAdmin;
+    },
+    signOut: vi.fn(),
   }),
 }));
 
@@ -39,36 +42,86 @@ vi.mock("@/lib/auth-modal", () => ({
 
 vi.mock("@/lib/subscription", () => ({
   useSubscription: () => ({
-    isPro: true,
+    get isPro() {
+      return mockIsPro;
+    },
   }),
 }));
 
-describe("Sidebar — Admin link in profile dropdown", () => {
+vi.mock("@/lib/i18n-provider", () => ({
+  useI18n: () => ({
+    t: ptBR,
+    locale: "ptBR",
+    setLocale: vi.fn(),
+  }),
+}));
+
+vi.mock("@/lib/theme-provider", () => ({
+  useTheme: () => ({
+    theme: "dark",
+    setTheme: vi.fn(),
+    isDark: true,
+  }),
+}));
+
+describe("Sidebar Navigation (Prompt 130)", () => {
   beforeEach(() => {
-    cleanup();
-    vi.clearAllMocks();
+    mockIsAdmin = false;
+    mockUser = null;
+    mockIsPro = false;
   });
 
-  it("renders Admin link pointing to /admin when isAdmin is true and profile dropdown is opened", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders 3 semantic verb sections: Decidir, Acompanhar, Analisar", () => {
+    render(<Sidebar />);
+    expect(screen.getByText(ptBR.nav.sections.decide)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.sections.track)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.sections.analyze)).toBeInTheDocument();
+  });
+
+  it("renders Plano de Aporte pointing to /app/smartallocation", () => {
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.nav.contributionPlan).closest("a");
+    expect(link).toHaveAttribute("href", "/app/smartallocation");
+  });
+
+  it("renders Minha Carteira pointing to /app/myportfolio", () => {
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.nav.myPortfolio).closest("a");
+    expect(link).toHaveAttribute("href", "/app/myportfolio");
+  });
+
+  it("renders Explorar Ativos pointing to /app/explorar", () => {
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.nav.exploreAssets).closest("a");
+    expect(link).toHaveAttribute("href", "/app/explorar");
+  });
+
+  it("renders disabled items with 'Em breve' badges", () => {
+    render(<Sidebar />);
+    expect(screen.getByText(ptBR.nav.reinvest)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.whatChanged)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.guaranteedIncome)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.taxReality)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.audit)).toBeInTheDocument();
+
+    const badges = screen.getAllByText(ptBR.nav.comingSoon);
+    expect(badges.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("renders Admin link when isAdmin is true", () => {
     mockIsAdmin = true;
     render(<Sidebar />);
-
-    const trigger = screen.getByText("Admin User");
-    fireEvent.pointerDown(trigger, { pointerType: "mouse" });
-
-    const adminText = screen.getByText(dict.ptBR.admin.title);
-    expect(adminText).toBeInTheDocument();
-    expect(adminText.closest("a")).toHaveAttribute("href", "/admin");
+    const adminLink = screen.getByText(ptBR.nav.admin).closest("a");
+    expect(adminLink).toHaveAttribute("href", "/admin");
   });
 
-  it("does not render Admin link when isAdmin is false and profile dropdown is opened", () => {
+  it("does not render Admin link when isAdmin is false", () => {
     mockIsAdmin = false;
     render(<Sidebar />);
-
-    const trigger = screen.getByText("Admin User");
-    fireEvent.pointerDown(trigger, { pointerType: "mouse" });
-
-    const adminText = screen.queryByText(dict.ptBR.admin.title);
-    expect(adminText).not.toBeInTheDocument();
+    expect(screen.queryByText(ptBR.nav.admin)).not.toBeInTheDocument();
   });
 });

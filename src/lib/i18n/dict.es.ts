@@ -572,6 +572,31 @@ export const es = {
     contextBalanced: "{{under}} de {{total}} activos por debajo del techo — mercado equilibrado.",
   },
 
+  nav: {
+    sections: {
+      decide: "Decidir",
+      track: "Seguir",
+      analyze: "Analizar",
+    },
+    reinvest: "Reinvertir",
+    contributionPlan: "Plan de aportes",
+    withdraw: "Retirar",
+    whatChanged: "Qué cambió",
+    guaranteedIncome: "Renta garantizada",
+    taxReality: "Realidad fiscal",
+    myPortfolio: "Mi cartera",
+    exploreAssets: "Explorar activos",
+    audit: "Auditoría",
+    comingSoon: "Próximamente",
+    home: "Inicio",
+    admin: "Admin",
+    theme: {
+      light: "Modo Claro",
+      dark: "Modo Oscuro",
+      toggle: "Cambiar tema",
+    },
+  },
+
   tabs: {
     financialIndependence: "Independencia Financiera",
     screener: "Screener",
