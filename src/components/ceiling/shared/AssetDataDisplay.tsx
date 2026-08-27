@@ -21,9 +21,9 @@ export function AssetTicker({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        <span className="font-semibold text-foreground">{displayTicker(ticker)}</span>
+        <span className="font-mono font-semibold text-foreground">{displayTicker(ticker)}</span>
         {type && (
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+          <Badge variant="secondary" className="text-[10px] font-display px-1.5 py-0">
             {t.types[getDisplayAssetType(type)]}
           </Badge>
         )}
@@ -61,7 +61,7 @@ export function PriceTag({
     return <span className={cn("text-muted-foreground", className)}>—</span>;
 
   return (
-    <span className={cn("font-medium", className)}>
+    <span className={cn("font-mono font-medium", className)}>
       {formatCurrency(value, currency as Currency, locale)}
     </span>
   );
@@ -85,7 +85,7 @@ export function SafetyMarginBadge({
   return (
     <div className={cn("flex flex-col", className)}>
       <div
-        className={cn("text-xs font-semibold", isPositive ? "text-success" : "text-destructive")}
+        className={cn("text-xs font-mono font-semibold", isPositive ? "text-success" : "text-destructive")}
       >
         {isPositive ? "+" : ""}
         {formatNumber(margin, locale, 1)}%
@@ -108,7 +108,7 @@ export function YieldIndicator({
   }
 
   return (
-    <span className={cn("font-bold text-primary", className)}>
+    <span className={cn("font-mono font-bold text-primary", className)}>
       {formatPercent(value, locale, 1)}
     </span>
   );

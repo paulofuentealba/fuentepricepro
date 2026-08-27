@@ -136,11 +136,11 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
         <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
-              <TableHead>{t.global.asset}</TableHead>
-              <TableHead>{t.global.currentPrice}</TableHead>
-              <TableHead>{t.global.averagePrice}</TableHead>
-              <TableHead>{t.global.quantity}</TableHead>
-              <TableHead className="text-right">{t.global.total}</TableHead>
+              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.asset}</TableHead>
+              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.currentPrice}</TableHead>
+              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.averagePrice}</TableHead>
+              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.quantity}</TableHead>
+              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{t.global.total}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
