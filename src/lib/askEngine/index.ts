@@ -5,6 +5,7 @@ export * from "./strategies/balanceTargets";
 export * from "./strategies/accelerateSnowball";
 export * from "./strategies/correctDrift";
 export * from "./strategies/reinforcePayer";
+export * from "./strategies/buyDiscount";
 export * from "./resolveReasonText";
 export * from "./exportCsv";
 

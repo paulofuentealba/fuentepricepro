@@ -1,35 +1,75 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo } from "react";
 import { BlurredPreviewOverlay } from "@/components/ceiling/BlurredPreviewOverlay";
 import { useFeatureGate } from "@/lib/useFeatureGate";
-
-const SmartAllocation = lazy(() =>
-  import("@/components/ceiling/SmartAllocation").then((m) => ({ default: m.SmartAllocation })),
-);
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
+import { useUserSettings } from "@/lib/useUserSettings";
+import { useI18n } from "@/lib/i18n-provider";
+import { downloadCsv } from "@/lib/csv";
+import {
+  correctDriftStrategy,
+  accelerateSnowballStrategy,
+  buyDiscountStrategy,
+  buildAskResultCsv,
+  resolveReasonText,
+  type AskEngineSettings,
+} from "@/lib/askEngine";
+import { AskScreen } from "@/components/ask/AskScreen";
 
 export const Route = createFileRoute("/app/smartallocation")({
   component: SmartAllocationRoute,
 });
 
-function SmartAllocationSkeleton() {
-  return (
-    <div className="space-y-6 mx-auto max-w-4xl">
-      <Skeleton className="h-32 w-full rounded-2xl bg-muted/30" />
-      <Skeleton className="h-[320px] w-full rounded-2xl bg-muted/30" />
-    </div>
-  );
-}
-
 function SmartAllocationRoute() {
   const smartAllocationUnlocked = useFeatureGate("smartAllocationUnlocked") as boolean;
+  const { t } = useI18n();
+  const { valuedItems, isAppLoading } = useValuedPortfolio();
+  const { settings } = useUserSettings();
+  const currency = settings?.displayCurrency || "BRL";
+
+  const askSettings: AskEngineSettings = useMemo(() => {
+    return {
+      smartAllocationTargets: settings?.smartAllocationTargets,
+      excludeAboveCeiling: settings?.excludeAboveCeiling,
+      excludeYieldTraps: settings?.excludeYieldTraps,
+      maxConcentrationPerAsset: settings?.maxConcentrationPerAsset,
+      maxConcentrationPerClass: settings?.maxConcentrationPerClass,
+    };
+  }, [settings]);
+
+  const strategies = useMemo(
+    () => [correctDriftStrategy, accelerateSnowballStrategy, buyDiscountStrategy],
+    [],
+  );
 
   const allocationContent = (
-    <Suspense fallback={<SmartAllocationSkeleton />}>
-      <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-4xl">
-        <SmartAllocation />
-      </div>
-    </Suspense>
+    <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-4xl">
+      <AskScreen
+        titleKey="askScreen.contributionTitle"
+        subtitleKey="askScreen.contributionSubtitle"
+        questionKey="askScreen.contributionQuestion"
+        amountLabelKey="askScreen.availableAmountLabelContribution"
+        strategies={strategies}
+        defaultStrategyId="correctDrift"
+        positions={valuedItems}
+        settings={askSettings}
+        currency={currency}
+        isLoading={isAppLoading}
+        onExport={(res, strat) => {
+          const date = new Date().toISOString().split("T")[0];
+          const csv = buildAskResultCsv(
+            res,
+            {
+              questionLabel: t.askScreen?.contributionQuestion || "Plano de Aporte",
+              strategyLabel: resolveReasonText(t, strat.labelKey),
+              generatedAt: date,
+            },
+            t,
+          );
+          downloadCsv(`plano-de-aporte-${date}.csv`, csv);
+        }}
+      />
+    </div>
   );
 
   if (!smartAllocationUnlocked) {

@@ -38,6 +38,7 @@ export interface AskScreenProps {
   titleKey?: string;
   subtitleKey?: string;
   questionKey: string;
+  amountLabelKey?: string;
   initialAmount?: number;
   amountHelperText?: string;
   strategies: Strategy[];
@@ -77,6 +78,7 @@ export function AskScreen({
   titleKey = "askScreen.reinvestTitle",
   subtitleKey = "askScreen.reinvestSubtitle",
   questionKey,
+  amountLabelKey = "askScreen.availableAmountLabel",
   initialAmount = 0,
   amountHelperText,
   strategies,
@@ -148,6 +150,7 @@ export function AskScreen({
   const title = resolveReasonText(t, titleKey);
   const subtitle = subtitleKey ? resolveReasonText(t, subtitleKey) : "";
   const question = resolveReasonText(t, questionKey);
+  const amountLabel = resolveReasonText(t, amountLabelKey);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -189,7 +192,7 @@ export function AskScreen({
                 htmlFor="available-amount-input"
                 className="text-sm font-display font-semibold text-foreground"
               >
-                {t.askScreen?.availableAmountLabel || "Valor disponível para reinvestir"}
+                {amountLabel}
               </Label>
               <div className="relative max-w-xs">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
@@ -203,7 +206,7 @@ export function AskScreen({
                   value={rawAmount}
                   onChange={(e) => setRawAmount(e.target.value)}
                   className="pl-9 font-serif text-lg font-semibold text-foreground"
-                  aria-label={t.askScreen?.availableAmountLabel || "Valor disponível"}
+                  aria-label={amountLabel}
                 />
               </div>
             </div>
