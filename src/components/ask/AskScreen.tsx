@@ -325,7 +325,7 @@ export function AskScreen({
                       {/* Left: Rank & Ticker & Reason */}
                       <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[11px] font-mono font-bold text-primary">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-mono font-bold text-accent-foreground">
                             {idx + 1}
                           </span>
                           <span className="font-mono font-bold text-base text-foreground">
@@ -339,7 +339,7 @@ export function AskScreen({
                         {/* Progress bar */}
                         <div className="h-1.5 w-full max-w-md rounded-full bg-muted/60 overflow-hidden">
                           <div
-                            className="h-full bg-primary transition-all duration-500 motion-reduce:transition-none"
+                            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500 motion-reduce:transition-none"
                             style={{ width: `${Math.max(4, alloc.percentOfTotal)}%` }}
                           />
                         </div>
