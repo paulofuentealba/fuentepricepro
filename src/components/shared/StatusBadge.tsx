@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 interface StatusBadgeProps {
   children: ReactNode;
   icon?: React.ElementType;
-  variant?: "success" | "warning" | "danger" | "default";
+  variant?: "success" | "warning" | "danger" | "default" | "gold";
   className?: string;
 }
 
@@ -19,12 +19,13 @@ export function StatusBadge({
     warning: "bg-warning/10 text-warning ring-warning/20",
     danger: "bg-danger/10 text-danger ring-danger/20",
     default: "bg-primary/10 text-primary ring-primary/20",
+    gold: "bg-accent/15 text-accent-foreground ring-accent/30",
   };
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1",
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-display font-medium ring-1",
         variants[variant],
         className,
       )}
