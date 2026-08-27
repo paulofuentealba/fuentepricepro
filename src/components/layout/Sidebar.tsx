@@ -39,6 +39,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
+import { useUserSettings } from "@/lib/useUserSettings";
+import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
+import { formatCurrency } from "@/lib/formatters";
 
 interface NavItem {
   key: string;
@@ -60,9 +63,17 @@ export function Sidebar() {
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
   const { theme, setTheme, isDark } = useTheme();
+  const { settings } = useUserSettings();
+  const currency = settings?.displayCurrency || "BRL";
+  const { summary } = useRealizedIncomeSummary(currency);
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  const reinvestBadge =
+    summary?.currentMonth && summary.currentMonth > 0
+      ? formatCurrency(summary.currentMonth, currency, locale)
+      : undefined;
 
   useEffect(() => {
     setIsMounted(true);
@@ -97,8 +108,10 @@ export function Sidebar() {
         {
           key: "reinvestir",
           label: t.nav.reinvest,
+          path: "/app/reinvestir",
           icon: RotateCcw,
-          disabled: true,
+          disabled: false,
+          badge: reinvestBadge,
         },
         {
           key: "plano-aporte",

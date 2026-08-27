@@ -44,7 +44,7 @@ export function MetricBox({
     >
       <div className="flex items-center gap-1.5">
         <span
-          className={cn("text-[10px] font-semibold uppercase tracking-wider", {
+          className={cn("text-[10px] font-display font-semibold uppercase tracking-wider", {
             "text-muted-foreground": variant === "default" && !isSuccess && !isDanger && !isWarning,
             "text-success/80": isSuccess,
             "text-danger/80": isDanger,
@@ -57,7 +57,7 @@ export function MetricBox({
       </div>
 
       <div
-        className={cn("mt-1 text-sm font-bold tabular-nums", {
+        className={cn("mt-1 text-sm font-serif font-bold tabular-nums", {
           "text-foreground": variant === "default" && !isSuccess && !isDanger && !isWarning,
           "text-success": isSuccess,
           "text-danger": isDanger,
@@ -68,7 +68,7 @@ export function MetricBox({
       </div>
 
       {actualSubValue && (
-        <div className="mt-0.5 text-[11px] leading-tight text-muted-foreground/80">
+        <div className="mt-0.5 text-[11px] font-mono leading-tight text-muted-foreground/80">
           {actualSubValue}
         </div>
       )}

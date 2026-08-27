@@ -213,7 +213,7 @@ export function TaxRealityScreen({
                     {tScreen.title}
                   </StatusBadge>
                 </div>
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                <h1 className="mt-2 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                   {tScreen.title}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">{tScreen.subtitle}</p>
@@ -224,7 +224,7 @@ export function TaxRealityScreen({
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground mb-4">
               <Coins className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">{tScreen.emptyStateTitle}</h3>
+            <h3 className="font-serif text-lg font-semibold text-foreground">{tScreen.emptyStateTitle}</h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               {tScreen.emptyStateDesc}
             </p>
@@ -247,7 +247,7 @@ export function TaxRealityScreen({
                   {tScreen.title}
                 </StatusBadge>
               </div>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="mt-2 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 {tScreen.title}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">{tScreen.subtitle}</p>
@@ -256,7 +256,7 @@ export function TaxRealityScreen({
               <button
                 type="button"
                 onClick={onExport}
-                className="self-start sm:self-center inline-flex items-center gap-1.5 rounded-lg border border-border/40 bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+                className="self-start sm:self-center inline-flex items-center gap-1.5 rounded-lg border border-border/40 bg-background px-3 py-1.5 text-sm font-display font-medium text-foreground hover:bg-muted/50 transition-colors"
               >
                 <ChevronRight className="h-4 w-4" />
                 <span>{tScreen.exportBtn || "Exportar"}</span>
@@ -315,20 +315,20 @@ export function TaxRealityScreen({
           {/* Monthly Detail — Stocks */}
           {stockMonthly.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.stocksTitle}
               </h3>
               <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{tScreen.monthlyDetail.monthHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
-                      <TableHead className="text-center">{tScreen.monthlyDetail.exemptHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-center">{tScreen.monthlyDetail.exemptHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -372,19 +372,19 @@ export function TaxRealityScreen({
           {/* Monthly Detail — FIIs & FIAGROs */}
           {fiiMonthly.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.fiisTitle}
               </h3>
               <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{tScreen.monthlyDetail.monthHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -417,19 +417,19 @@ export function TaxRealityScreen({
           {/* Monthly Detail — ETFs */}
           {etfMonthly.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.etfsTitle}
               </h3>
               <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{tScreen.monthlyDetail.monthHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
-                      <TableHead className="text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -465,13 +465,13 @@ export function TaxRealityScreen({
               <div className="flex items-start gap-3">
                 <ShieldAlert className="h-5 w-5 text-warning shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">{tScreen.unclassified.title}</h4>
+                  <h4 className="font-display font-semibold text-foreground">{tScreen.unclassified.title}</h4>
                   <p className="mt-1 text-sm text-muted-foreground">{tScreen.unclassified.description}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {allUnclassifiedTickers.map((ticker) => (
                       <span
                         key={ticker}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 text-warning text-xs font-medium px-2.5 py-1"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 text-warning text-xs font-mono font-bold px-2.5 py-1"
                       >
                         {ticker}
                       </span>
@@ -479,7 +479,7 @@ export function TaxRealityScreen({
                   </div>
                   <button
                     type="button"
-                    className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+                    className="mt-3 inline-flex items-center gap-1.5 text-sm font-display font-medium text-primary hover:text-primary/80"
                     onClick={() => window.location.href = "/app/settings"}
                   >
                     {tScreen.unclassified.ctaConfigure}
@@ -492,7 +492,7 @@ export function TaxRealityScreen({
 
           {/* Limits Declared Section — MANDATORY, always visible, non-dismissible */}
           <div className="space-y-3 rounded-xl border-2 border-destructive/40 bg-destructive/5 p-4">
-            <h4 className="flex items-center gap-2 text-lg font-semibold text-destructive">
+            <h4 className="flex items-center gap-2 font-serif text-lg font-semibold text-destructive">
               <AlertCircle className="h-5 w-5 shrink-0" />
               {tScreen.limitsDeclared.title}
             </h4>

@@ -64,7 +64,20 @@ vi.mock("@/lib/theme-provider", () => ({
   }),
 }));
 
-describe("Sidebar Navigation (Prompt 130)", () => {
+vi.mock("@/lib/useUserSettings", () => ({
+  useUserSettings: () => ({
+    settings: { displayCurrency: "BRL" },
+  }),
+}));
+
+vi.mock("@/lib/useRealizedIncomeSummary", () => ({
+  useRealizedIncomeSummary: () => ({
+    summary: { currentMonth: 1130 },
+    isLoading: false,
+  }),
+}));
+
+describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
   beforeEach(() => {
     mockIsAdmin = false;
     mockUser = null;
@@ -88,6 +101,18 @@ describe("Sidebar Navigation (Prompt 130)", () => {
     expect(link).toHaveAttribute("href", "/app/smartallocation");
   });
 
+  it("renders Reinvestir pointing to /app/reinvestir with dynamic badge", () => {
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.nav.reinvest).closest("a");
+    expect(link).toHaveAttribute("href", "/app/reinvestir");
+  });
+
+  it("renders Realidade Fiscal pointing to /app/realidade-fiscal", () => {
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.nav.taxReality).closest("a");
+    expect(link).toHaveAttribute("href", "/app/realidade-fiscal");
+  });
+
   it("renders Minha Carteira pointing to /app/myportfolio", () => {
     render(<Sidebar />);
     const link = screen.getByText(ptBR.nav.myPortfolio).closest("a");
@@ -100,16 +125,15 @@ describe("Sidebar Navigation (Prompt 130)", () => {
     expect(link).toHaveAttribute("href", "/app/explorar");
   });
 
-  it("renders disabled items with 'Em breve' badges", () => {
+  it("renders genuinely disabled items with 'Em breve' badges", () => {
     render(<Sidebar />);
-    expect(screen.getByText(ptBR.nav.reinvest)).toBeInTheDocument();
     expect(screen.getByText(ptBR.nav.whatChanged)).toBeInTheDocument();
     expect(screen.getByText(ptBR.nav.guaranteedIncome)).toBeInTheDocument();
-    expect(screen.getByText(ptBR.nav.taxReality)).toBeInTheDocument();
+    expect(screen.getByText(ptBR.nav.withdraw)).toBeInTheDocument();
     expect(screen.getByText(ptBR.nav.audit)).toBeInTheDocument();
 
     const badges = screen.getAllByText(ptBR.nav.comingSoon);
-    expect(badges.length).toBeGreaterThanOrEqual(5);
+    expect(badges.length).toBe(4);
   });
 
   it("renders Admin link when isAdmin is true", () => {

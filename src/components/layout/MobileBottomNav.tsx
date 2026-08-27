@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Compass,
+  RotateCcw,
   Sparkles,
   FolderOpen,
   BarChart3,
@@ -21,6 +22,13 @@ export function MobileBottomNav() {
       label: t.nav.home,
       icon: Compass,
       exact: true,
+    },
+    {
+      key: "reinvestir",
+      path: "/app/reinvestir",
+      label: t.nav.reinvest,
+      icon: RotateCcw,
+      exact: false,
     },
     {
       key: "smartallocation",
@@ -54,7 +62,7 @@ export function MobileBottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden bg-background/95 backdrop-blur-lg border-t border-border/60 min-h-[64px] pb-[env(safe-area-inset-bottom,0px)]">
-      <div className="grid grid-cols-5 w-full items-center h-[64px] px-1">
+      <div className="grid grid-cols-6 w-full items-center h-[64px] px-1">
         {slots.map(({ key, path, label, icon: Icon, exact }) => {
           const isActive = exact
             ? location.pathname === "/app" || location.pathname === "/app/"

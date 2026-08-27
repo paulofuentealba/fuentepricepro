@@ -161,7 +161,7 @@ export function AskScreen({
                   {title}
                 </StatusBadge>
               </div>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="mt-2 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 {question}
               </h1>
               {subtitle && (
@@ -173,7 +173,7 @@ export function AskScreen({
               <Button
                 variant="outline"
                 size="sm"
-                className="self-start sm:self-center"
+                className="self-start sm:self-center font-display"
                 onClick={() => onExport(result, activeStrategy)}
               >
                 <Download className="mr-1.5 h-4 w-4" />
@@ -187,7 +187,7 @@ export function AskScreen({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label
                 htmlFor="available-amount-input"
-                className="text-sm font-semibold text-foreground"
+                className="text-sm font-display font-semibold text-foreground"
               >
                 {t.askScreen?.availableAmountLabel || "Valor disponível para reinvestir"}
               </Label>
@@ -202,7 +202,7 @@ export function AskScreen({
                   step="any"
                   value={rawAmount}
                   onChange={(e) => setRawAmount(e.target.value)}
-                  className="pl-9 font-semibold text-foreground"
+                  className="pl-9 font-serif text-lg font-semibold text-foreground"
                   aria-label={t.askScreen?.availableAmountLabel || "Valor disponível"}
                 />
               </div>
@@ -230,7 +230,7 @@ export function AskScreen({
                     key={strat.id}
                     value={strat.id}
                     onClick={() => setActiveStrategyId(strat.id)}
-                    className="py-2 text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    className="py-2 text-xs sm:text-sm font-display font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
                   >
                     {resolveReasonText(t, strat.labelKey)}
                   </TabsTrigger>
@@ -247,7 +247,7 @@ export function AskScreen({
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-warning mb-3">
                 <AlertCircle className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {t.askScreen?.noTargetsConfiguredTitle || "Metas de alocação não configuradas"}
               </h3>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
@@ -256,7 +256,7 @@ export function AskScreen({
               </p>
               <div className="mt-5 flex justify-center gap-3">
                 <Link to="/app/smartallocation">
-                  <Button variant="default" size="sm">
+                  <Button variant="default" size="sm" className="font-display">
                     {t.askScreen?.configureTargetsBtn || "Configurar Metas"}
                     <ArrowRight className="ml-1.5 h-4 w-4" />
                   </Button>
@@ -268,7 +268,7 @@ export function AskScreen({
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
                 <Coins className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {t.askScreen?.reinforceNoPayerTitle || "Nenhum pagador específico selecionado"}
               </h3>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
@@ -281,7 +281,7 @@ export function AskScreen({
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
                 <ShieldAlert className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {t.askScreen?.noEligibleAssetsTitle || "Nenhum ativo elegível para esta estratégia"}
               </h3>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
@@ -294,7 +294,7 @@ export function AskScreen({
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
                 <Coins className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {t.askScreen?.insufficientFundsTitle || "Valor disponível insuficiente"}
               </h3>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
@@ -303,7 +303,7 @@ export function AskScreen({
               </p>
               <p className="mt-3 text-xs font-medium text-muted-foreground">
                 {t.askScreen?.leftoverLabel || "Sobra em caixa:"}{" "}
-                {formatCurrency(result.leftover, currency, locale)}
+                <span className="font-mono">{formatCurrency(result.leftover, currency, locale)}</span>
               </p>
             </Card>
           ) : (
@@ -325,13 +325,13 @@ export function AskScreen({
                       {/* Left: Rank & Ticker & Reason */}
                       <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[11px] font-mono font-bold text-primary">
                             {idx + 1}
                           </span>
-                          <span className="font-bold text-base text-foreground">
+                          <span className="font-mono font-bold text-base text-foreground">
                             {alloc.ticker}
                           </span>
-                          <span className="text-xs font-semibold text-primary/80">
+                          <span className="text-xs font-mono font-semibold text-primary/80">
                             {alloc.percentOfTotal}%
                           </span>
                         </div>
@@ -351,10 +351,10 @@ export function AskScreen({
 
                       {/* Right: Quantity and Amount */}
                       <div className="flex sm:flex-col items-center sm:items-end justify-between border-t border-border/30 pt-2 sm:border-0 sm:pt-0 shrink-0">
-                        <span className="text-base font-bold text-foreground">
+                        <span className="text-base font-serif font-semibold text-foreground">
                           {formatCurrency(alloc.amountBRL, currency, locale)}
                         </span>
-                        <span className="text-xs font-medium text-muted-foreground">
+                        <span className="text-xs font-mono font-medium text-muted-foreground">
                           {alloc.quantity} {t.askScreen?.sharesUnit || "cotas"}
                         </span>
                       </div>
@@ -365,8 +365,8 @@ export function AskScreen({
 
               {/* Leftover Box */}
               <div className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-                <span>{t.askScreen?.leftoverLabel || "Sobra em caixa (cotas inteiras não fracionadas):"}</span>
-                <span className="font-semibold text-foreground">
+                <span className="font-display">{t.askScreen?.leftoverLabel || "Sobra em caixa (cotas inteiras não fracionadas):"}</span>
+                <span className="font-mono font-semibold text-foreground">
                   {formatCurrency(result.leftover, currency, locale)}
                 </span>
               </div>
@@ -374,7 +374,7 @@ export function AskScreen({
               {/* Consequences Impact Section */}
               {result.consequences.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <h4 className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider">
                     {t.askScreen?.consequencesTitle || "Impacto Projetado"}
                   </h4>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -399,7 +399,7 @@ export function AskScreen({
               <button
                 type="button"
                 onClick={() => setShowExcluded(!showExcluded)}
-                className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center justify-between w-full text-xs font-display font-medium text-muted-foreground hover:text-foreground transition-colors"
                 aria-expanded={showExcluded}
               >
                 <span className="flex items-center gap-1.5">
@@ -422,7 +422,7 @@ export function AskScreen({
                       key={item.ticker}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-1 border-b border-border/20 last:border-0"
                     >
-                      <span className="font-semibold text-foreground">
+                      <span className="font-mono font-bold text-foreground">
                         {item.ticker}
                       </span>
                       <span className="text-muted-foreground">
