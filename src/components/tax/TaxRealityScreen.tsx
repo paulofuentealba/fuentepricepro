@@ -164,6 +164,17 @@ export function TaxRealityScreen({
     );
   }, [etfMonthly]);
 
+  const fiInfraYearTotals = useMemo(() => {
+    return fiInfraMonthly.reduce(
+      (acc, m) => {
+        acc.totalSales += m.totalSales;
+        acc.totalGain += m.totalGain;
+        return acc;
+      },
+      { totalSales: 0, totalGain: 0 },
+    );
+  }, [fiInfraMonthly]);
+
   // Aggregate unclassified tickers from all tracks
   const allUnclassifiedTickers = useMemo(() => {
     const set = new Set<string>();
@@ -270,7 +281,11 @@ export function TaxRealityScreen({
           <div
             className={cn(
               "grid gap-4 sm:grid-cols-2",
-              etfMonthly.length > 0 ? "lg:grid-cols-5" : "lg:grid-cols-4",
+              [etfMonthly.length > 0, fiInfraMonthly.length > 0].filter(Boolean).length === 2
+                ? "lg:grid-cols-6"
+                : etfMonthly.length > 0 || fiInfraMonthly.length > 0
+                  ? "lg:grid-cols-5"
+                  : "lg:grid-cols-4",
             )}
           >
             <MetricBox
@@ -301,6 +316,15 @@ export function TaxRealityScreen({
                 variant="warning"
                 trend="neutral"
                 subValue={tScreen.summary.etfCgHelper}
+              />
+            )}
+            {fiInfraMonthly.length > 0 && (
+              <MetricBox
+                label={tScreen.summary.fiInfraCgLabel}
+                value={formatCurrency(fiInfraYearTotals.totalGain, "BRL", locale)}
+                variant="success"
+                trend="up"
+                subValue={tScreen.summary.fiInfraCgHelper}
               />
             )}
             <MetricBox

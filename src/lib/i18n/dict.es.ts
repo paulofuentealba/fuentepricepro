@@ -1694,6 +1694,8 @@ export const es = {
       fiiCgHelper: "Impuesto debido sobre ganancias en ventas de FIIs y FIAGROs (20% sin exención de volumen)",
       etfCgLabel: "Ganancia de Capital — ETFs",
       etfCgHelper: "Impuesto debido sobre ganancias en ventas de ETFs de acciones (15% sin exención de volumen)",
+      fiInfraCgLabel: "Ganancia de Capital — FI-Infra",
+      fiInfraCgHelper: "Exento de impuesto para persona física (0%), sin límite de valor",
       totalTaxLabel: "Impuesto Total Estimado",
       totalTaxHelper: "Suma del impuesto debido en acciones, FIIs/FIAGROs y ETFs en el año (carryforwards no mezclados entre sí)",
     },

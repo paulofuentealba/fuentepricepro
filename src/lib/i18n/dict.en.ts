@@ -1680,6 +1680,8 @@ export const en = {
       fiiCgHelper: "Tax due on gains from FII and FIAGRO sales (20% flat, no volume exemption)",
       etfCgLabel: "Capital Gains — ETFs",
       etfCgHelper: "Tax due on gains from equity ETF sales (15% flat, no volume exemption)",
+      fiInfraCgLabel: "Capital Gains — FI-Infra",
+      fiInfraCgHelper: "Tax-exempt for individuals (0%), no value cap",
       totalTaxLabel: "Total Estimated Tax",
       totalTaxHelper: "Sum of tax due on stocks, FIIs/FIAGROs, and ETFs for the year (carryforwards never summed across tracks)",
     },
