@@ -98,7 +98,7 @@ export interface MonthlyCapitalGainsResult {
 }
 
 /**
- * Result of the monthly capital gains tax calculation for Real Estate Investment Funds (FIIs) (Prompt 141 / Item 2.1d).
+ * Result of the monthly capital gains tax calculation for Real Estate Investment Funds (FIIs) and FIAGROs (Prompt 141 & 143 / Item 2.1d & 2.1e).
  */
 export interface MonthlyFiiCapitalGainsResult {
   month: string; // "YYYY-MM"
@@ -111,5 +111,34 @@ export interface MonthlyFiiCapitalGainsResult {
   unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
 }
 
+/**
+ * Result of the monthly capital gains tax calculation for Infrastructure Investment Funds (FI-Infra) (Prompt 143 / Item 2.1e).
+ * FI-Infra gains and losses are 100% exempt for individuals (Lei 12.431/2011 art. 3º).
+ * taxDue is always 0, and lossCarryforward fields are always 0.
+ */
+export interface MonthlyFiInfraCapitalGainsResult {
+  month: string; // "YYYY-MM"
+  totalSales: number;
+  totalGain: number;
+  lossCarryforwardUsed: number;
+  lossCarryforwardRemaining: number;
+  taxableGain: number;
+  taxDue: number; // Always 0 for individuals (0% tax rate)
+  unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
+}
 
-
+/**
+ * Result of the monthly capital gains tax calculation for Equity Exchange Traded Funds (ETFs) (Prompt 143 / Item 2.1e).
+ * Equity ETFs are taxed at 15% flat without sales volume exemption (Lei 13.043/2014 / IN RFB 1.585/2015).
+ * Carryforward is tracked in a dedicated track separate from stocks and FIIs.
+ */
+export interface MonthlyEtfCapitalGainsResult {
+  month: string; // "YYYY-MM"
+  totalSales: number;
+  totalGain: number;
+  lossCarryforwardUsed: number;
+  lossCarryforwardRemaining: number;
+  taxableGain: number;
+  taxDue: number; // 15% on taxableGain
+  unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
+}

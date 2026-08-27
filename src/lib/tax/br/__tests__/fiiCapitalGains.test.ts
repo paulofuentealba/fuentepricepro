@@ -245,18 +245,80 @@ describe("calculateFiiCapitalGainsTax (Prompt 141 / Item 2.1d)", () => {
     expect(results[0].unclassifiedTickers).toEqual(["UNKNOWN_TICKER"]);
   });
 
-  it("strictly excludes FIAGRO and FII_INFRA from calculateFiiCapitalGainsTax", () => {
+  it("includes FIAGRO and taxes 20% flat without volume exemption (Lei 14.130/2021)", () => {
     const events: RealizedGainEvent[] = [
       {
-        ticker: "RURA11",
+        ticker: "KNCA11",
         saleDate: tsJan,
         quantity: 100,
-        salePrice: 10,
-        proceeds: 1000,
-        costBasis: 800,
-        gain: 200,
+        salePrice: 105,
+        proceeds: 10500,
+        costBasis: 10000,
+        gain: 500,
         assetType: "FIAGRO",
       },
+    ];
+
+    const results = calculateFiiCapitalGainsTax(events);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toEqual({
+      month: "2026-01",
+      totalSales: 10500,
+      totalGain: 500,
+      lossCarryforwardUsed: 0,
+      lossCarryforwardRemaining: 0,
+      taxableGain: 500,
+      taxDue: 100, // 20% of 500 = 100
+    });
+  });
+
+  it("proves mutual carryforward sharing between FII and FIAGRO in the same track", () => {
+    // Month 1: FII loss of R$ 5,000
+    // Month 2: FIAGRO gain of R$ 8,000
+    // Expected: FIAGRO gain consumes R$ 5,000 FII loss carryforward, taxes remaining R$ 3,000 at 20% = R$ 600
+    const events: RealizedGainEvent[] = [
+      {
+        ticker: "HGLG11",
+        saleDate: tsJan,
+        quantity: 50,
+        salePrice: 150,
+        proceeds: 7500,
+        costBasis: 12500,
+        gain: -5000,
+        assetType: "FII",
+      },
+      {
+        ticker: "RURA11",
+        saleDate: tsFeb,
+        quantity: 800,
+        salePrice: 10,
+        proceeds: 8000,
+        costBasis: 0,
+        gain: 8000,
+        assetType: "FIAGRO",
+      },
+    ];
+
+    const results = calculateFiiCapitalGainsTax(events);
+    expect(results).toHaveLength(2);
+
+    // Month 1: FII loss accumulated
+    expect(results[0].month).toBe("2026-01");
+    expect(results[0].totalGain).toBe(-5000);
+    expect(results[0].lossCarryforwardRemaining).toBe(5000);
+    expect(results[0].taxDue).toBe(0);
+
+    // Month 2: FIAGRO gain offsets FII loss
+    expect(results[1].month).toBe("2026-02");
+    expect(results[1].totalGain).toBe(8000);
+    expect(results[1].lossCarryforwardUsed).toBe(5000);
+    expect(results[1].lossCarryforwardRemaining).toBe(0);
+    expect(results[1].taxableGain).toBe(3000);
+    expect(results[1].taxDue).toBe(600); // 20% of 3000
+  });
+
+  it("strictly excludes FII_INFRA, ETF, and STOCK_BR from calculateFiiCapitalGainsTax", () => {
+    const events: RealizedGainEvent[] = [
       {
         ticker: "JURO11",
         saleDate: tsJan,
@@ -268,6 +330,16 @@ describe("calculateFiiCapitalGainsTax (Prompt 141 / Item 2.1d)", () => {
         assetType: "FII_INFRA",
       },
       {
+        ticker: "BOVA11",
+        saleDate: tsJan,
+        quantity: 10,
+        salePrice: 120,
+        proceeds: 1200,
+        costBasis: 1000,
+        gain: 200,
+        assetType: "ETF",
+      },
+      {
         ticker: "HGLG11",
         saleDate: tsJan,
         quantity: 10,
@@ -277,13 +349,23 @@ describe("calculateFiiCapitalGainsTax (Prompt 141 / Item 2.1d)", () => {
         gain: 200,
         assetType: "FII",
       },
+      {
+        ticker: "VGIA11",
+        saleDate: tsJan,
+        quantity: 100,
+        salePrice: 9,
+        proceeds: 900,
+        costBasis: 800,
+        gain: 100,
+        assetType: "FIAGRO",
+      },
     ];
 
     const results = calculateFiiCapitalGainsTax(events);
     expect(results).toHaveLength(1);
-    expect(results[0].totalSales).toBe(1600); // Only HGLG11
-    expect(results[0].totalGain).toBe(200);
-    expect(results[0].taxDue).toBe(40);
+    expect(results[0].totalSales).toBe(2500); // 1600 (HGLG11) + 900 (VGIA11)
+    expect(results[0].totalGain).toBe(300);   // 200 + 100
+    expect(results[0].taxDue).toBe(60);      // 300 * 0.20
   });
 
   it("returns an empty array when no events are provided", () => {

@@ -151,4 +151,33 @@ describe("TaxRealityScreen (Prompt 142 / Item 2.2)", () => {
     expect(screen.getByText(dict.ptBR.taxRealityScreen.unclassified.title)).toBeInTheDocument();
     expect(screen.getByText("UNK3")).toBeInTheDocument();
   });
+
+  it("renders ETF metric card and ETF monthly table when ETF sales exist in the current year", () => {
+    const assetTypeByTicker = new Map<string, AssetType>([
+      ["BOVA11", "ETF"],
+    ]);
+
+    const context = createMockTaxContext({
+      assetTypeByTicker,
+      realizedGainEvents: [
+        {
+          ticker: "BOVA11",
+          saleDate: new Date(2026, 7, 10).getTime(),
+          quantity: 50,
+          salePrice: 120,
+          proceeds: 6000,
+          costBasis: 5000,
+          gain: 1000,
+        },
+      ],
+    });
+
+    render(<TaxRealityScreen context={context} isLoading={false} />);
+
+    // ETF Summary metric card
+    expect(screen.getByText(dict.ptBR.taxRealityScreen.summary.etfCgLabel)).toBeInTheDocument();
+    // ETF Monthly detail table
+    expect(screen.getByText(dict.ptBR.taxRealityScreen.monthlyDetail.etfsTitle)).toBeInTheDocument();
+  });
 });
+

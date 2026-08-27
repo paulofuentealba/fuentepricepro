@@ -6,10 +6,14 @@ import type { TaxRealityContext } from "@/lib/tax/buildTaxContext";
 import {
   calculateMonthlyCapitalGainsTax,
   calculateFiiCapitalGainsTax,
+  calculateEtfCapitalGainsTax,
+  calculateFiInfraCapitalGainsTax,
 } from "@/lib/tax";
 import type {
   MonthlyCapitalGainsResult,
   MonthlyFiiCapitalGainsResult,
+  MonthlyEtfCapitalGainsResult,
+  MonthlyFiInfraCapitalGainsResult,
   RealizedGainEvent,
 } from "@/lib/tax/types";
 import { TaxSimulationDisclaimer } from "@/components/shared/TaxSimulationDisclaimer";
@@ -49,6 +53,8 @@ export interface TaxRealityScreenProps {
 
 type MonthlyStockRow = MonthlyCapitalGainsResult & { isCurrentYear: boolean };
 type MonthlyFiiRow = MonthlyFiiCapitalGainsResult & { isCurrentYear: boolean };
+type MonthlyEtfRow = MonthlyEtfCapitalGainsResult & { isCurrentYear: boolean };
+type MonthlyFiInfraRow = MonthlyFiInfraCapitalGainsResult & { isCurrentYear: boolean };
 
 export function TaxRealityScreen({
   context,
@@ -58,7 +64,7 @@ export function TaxRealityScreen({
   const { t, locale } = useI18n();
   const tScreen = t.taxRealityScreen;
 
-  // ---- Pure calculations from the 4 modules (no new tax logic here) ----
+  // ---- Pure calculations from the tax modules (no new tax logic here) ----
   const {
     assetTypeByTicker,
     realizedGainEvents,
@@ -79,7 +85,7 @@ export function TaxRealityScreen({
       .map((r) => ({ ...r, isCurrentYear: true }));
   }, [realizedGainEvents, assetTypeByTicker, currentYear]);
 
-  // 3. FII Capital Gains (monthly) — current year only
+  // 2. FII & FIAGRO Capital Gains (monthly) — current year only
   const fiiMonthly = useMemo((): MonthlyFiiRow[] => {
     if (!realizedGainEvents.length) return [];
     const results = calculateFiiCapitalGainsTax(
@@ -92,7 +98,33 @@ export function TaxRealityScreen({
       .map((r) => ({ ...r, isCurrentYear: true }));
   }, [realizedGainEvents, assetTypeByTicker, currentYear]);
 
-  // 4. Aggregated totals for current year
+  // 3. ETF Capital Gains (monthly) — current year only
+  const etfMonthly = useMemo((): MonthlyEtfRow[] => {
+    if (!realizedGainEvents.length) return [];
+    const results = calculateEtfCapitalGainsTax(
+      realizedGainEvents,
+      0, // priorLossCarryforward — ideally from persisted state; 0 for now
+      assetTypeByTicker,
+    );
+    return results
+      .filter((r) => r.month.startsWith(String(currentYear)))
+      .map((r) => ({ ...r, isCurrentYear: true }));
+  }, [realizedGainEvents, assetTypeByTicker, currentYear]);
+
+  // 4. FI-Infra Capital Gains (monthly) — current year only (100% isento, taxDue = 0)
+  const fiInfraMonthly = useMemo((): MonthlyFiInfraRow[] => {
+    if (!realizedGainEvents.length) return [];
+    const results = calculateFiInfraCapitalGainsTax(
+      realizedGainEvents,
+      0,
+      assetTypeByTicker,
+    );
+    return results
+      .filter((r) => r.month.startsWith(String(currentYear)))
+      .map((r) => ({ ...r, isCurrentYear: true }));
+  }, [realizedGainEvents, assetTypeByTicker, currentYear]);
+
+  // 5. Aggregated totals for current year
   const stockYearTotals = useMemo(() => {
     return stockMonthly.reduce(
       (acc, m) => {
@@ -119,7 +151,20 @@ export function TaxRealityScreen({
     );
   }, [fiiMonthly]);
 
-  // Aggregate unclassified tickers from both tracks
+  const etfYearTotals = useMemo(() => {
+    return etfMonthly.reduce(
+      (acc, m) => {
+        acc.totalSales += m.totalSales;
+        acc.totalGain += m.totalGain;
+        acc.totalTaxDue += m.taxDue;
+        acc.finalCarryforward = m.lossCarryforwardRemaining;
+        return acc;
+      },
+      { totalSales: 0, totalGain: 0, totalTaxDue: 0, finalCarryforward: 0 },
+    );
+  }, [etfMonthly]);
+
+  // Aggregate unclassified tickers from all tracks
   const allUnclassifiedTickers = useMemo(() => {
     const set = new Set<string>();
     for (const m of stockMonthly) {
@@ -128,10 +173,17 @@ export function TaxRealityScreen({
     for (const m of fiiMonthly) {
       m.unclassifiedTickers?.forEach((t) => set.add(t));
     }
+    for (const m of etfMonthly) {
+      m.unclassifiedTickers?.forEach((t) => set.add(t));
+    }
+    for (const m of fiInfraMonthly) {
+      m.unclassifiedTickers?.forEach((t) => set.add(t));
+    }
     return Array.from(set).sort();
-  }, [stockMonthly, fiiMonthly]);
+  }, [stockMonthly, fiiMonthly, etfMonthly, fiInfraMonthly]);
 
-  const totalEstimatedTax = stockYearTotals.totalTaxDue + fiiYearTotals.totalTaxDue;
+  const totalEstimatedTax =
+    stockYearTotals.totalTaxDue + fiiYearTotals.totalTaxDue + etfYearTotals.totalTaxDue;
 
   // ---- Loading State ----
   if (isLoading) {
@@ -144,7 +196,11 @@ export function TaxRealityScreen({
   }
 
   // ---- Empty State (no sales in current year) ----
-  const hasAnySales = stockMonthly.length > 0 || fiiMonthly.length > 0;
+  const hasAnySales =
+    stockMonthly.length > 0 ||
+    fiiMonthly.length > 0 ||
+    etfMonthly.length > 0 ||
+    fiInfraMonthly.length > 0;
   if (!hasAnySales) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -211,7 +267,12 @@ export function TaxRealityScreen({
 
         <CardContent className="space-y-6">
           {/* Summary Cards Grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            className={cn(
+              "grid gap-4 sm:grid-cols-2",
+              etfMonthly.length > 0 ? "lg:grid-cols-5" : "lg:grid-cols-4",
+            )}
+          >
             <MetricBox
               label={tScreen.summary.dividendsLabel}
               value={formatCurrency(context.totalDividendNet, "BRL", locale)}
@@ -233,6 +294,15 @@ export function TaxRealityScreen({
               trend="neutral"
               subValue={tScreen.summary.fiiCgHelper}
             />
+            {etfMonthly.length > 0 && (
+              <MetricBox
+                label={tScreen.summary.etfCgLabel}
+                value={formatCurrency(etfYearTotals.totalTaxDue, "BRL", locale)}
+                variant="warning"
+                trend="neutral"
+                subValue={tScreen.summary.etfCgHelper}
+              />
+            )}
             <MetricBox
               label={tScreen.summary.totalTaxLabel}
               value={formatCurrency(totalEstimatedTax, "BRL", locale)}
@@ -299,7 +369,7 @@ export function TaxRealityScreen({
             </div>
           )}
 
-          {/* Monthly Detail — FIIs */}
+          {/* Monthly Detail — FIIs & FIAGROs */}
           {fiiMonthly.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
@@ -319,6 +389,51 @@ export function TaxRealityScreen({
                   </TableHeader>
                   <TableBody>
                     {fiiMonthly.map((month) => (
+                      <TableRow key={month.month}>
+                        <TableCell className="font-medium">{month.month}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(month.totalSales, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(month.totalGain, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(month.taxableGain, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-destructive">
+                          {formatCurrency(month.taxDue, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-muted-foreground">
+                          {formatCurrency(month.lossCarryforwardRemaining, "BRL", locale)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+
+          {/* Monthly Detail — ETFs */}
+          {etfMonthly.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground">
+                {tScreen.monthlyDetail.etfsTitle}
+              </h3>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className="text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
+                      <TableHead className="text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
+                      <TableHead className="text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
+                      <TableHead className="text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
+                      <TableHead className="text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {etfMonthly.map((month) => (
                       <TableRow key={month.month}>
                         <TableCell className="font-medium">{month.month}</TableCell>
                         <TableCell className="text-right font-mono">

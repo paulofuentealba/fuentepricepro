@@ -1,49 +1,46 @@
 import { getLocalDateISOString } from "@/lib/formatters";
 import type { AssetType } from "@/lib/domain";
-import type { RealizedGainEvent, MonthlyFiiCapitalGainsResult } from "../types";
+import type { RealizedGainEvent, MonthlyEtfCapitalGainsResult } from "../types";
 import { getEventAssetType } from "../utils";
-
-/**
- * Brazilian Real Estate Investment Fund (FII) Capital Gains Tax Rate (20% flat).
- */
-export const BR_FII_CAPITAL_GAINS_RATE = 0.20;
+import { BR_STOCK_CAPITAL_GAINS_RATE } from "./monthlyExemption";
 
 // =========================================================================================
-// REGRAS FISCAIS DE FII E FIAGRO (Fundamentação Legal e Prática de Mercado):
-// 1. FIIs (Lei 8.668/1993): Tributação de 20% flat sobre ganho de capital líquido na alienação
-//    de cotas em bolsa por pessoa física, sem teto de isenção de volume mensal.
-// 2. FIAGRO (Lei 14.130/2021 c/c Lei 8.668/1993): Equiparação expressa ao regime tributário
-//    dos FIIs para pessoas físicas. Ganho de capital tributado a 20% flat, compartilhando a
-//    mesma trilha de apuração e compensação de prejuízos com FIIs.
+// REGRA FISCAL DE ETFS DE RENDA VARIÁVEL (Fundamentação Legal):
+// 1. ETFs de Ações (Lei 13.043/2014 / IN RFB 1.585/2015, art. 59): Tributação à alíquota de 15%
+//    sobre o ganho de capital líquido auferido em operações comuns na B3.
+// 2. Ausência de Isenção de Volume: Não se aplica o limite de isenção de R$ 20.000/mês
+//    (exclusivo para o mercado à vista de ações).
+// 3. Compensação de Prejuízos: Segregada em trilha própria (não compensa com ações nem FIIs).
+// 4. LIMITE DECLARADO: ETFs de Renda Fixa (IN RFB 1.585/2015, art. 31 - tabela regressiva)
+//    permanecem fora do escopo deste módulo.
 // =========================================================================================
 
 /**
- * Pure function to calculate monthly capital gains tax on Real Estate Investment Fund (FII)
- * and Agroindustrial Investment Fund (FIAGRO) sales (Prompt 141 & 143 / Item 2.1d & 2.1e).
+ * Pure function to calculate monthly capital gains tax on Equity Exchange Traded Funds (ETFs) sales (Prompt 143 / Item 2.1e).
  *
- * Implements Brazilian tax law rules for FIIs & FIAGROs:
- * - 20% flat tax on net capital gains (proceeds - costBasis).
- * - NO sales volume exemption (the R$ 20,000 threshold applies solely to stocks, not FIIs/FIAGROs).
- * - Losses always accumulate into `lossCarryforwardRemaining` (dedicated FII/FIAGRO track).
- * - FII/FIAGRO losses can ONLY offset FII/FIAGRO gains, NEVER stock gains or ETF gains (and vice-versa).
- * - Unclassified tickers (missing/unresolvable assetType) are NEVER assumed to be FIIs/FIAGROs;
+ * Implements Brazilian tax law rules for Equity ETFs (Lei 13.043/2014 / IN RFB 1.585/2015 art. 59):
+ * - 15% flat tax on net capital gains (proceeds - costBasis), reusing BR_STOCK_CAPITAL_GAINS_RATE.
+ * - NO sales volume exemption (the R$ 20,000 threshold applies solely to individual stocks, not ETFs).
+ * - Losses always accumulate into `lossCarryforwardRemaining` (dedicated ETF track).
+ * - ETF losses can ONLY offset ETF gains, NEVER stock gains or FII/FIAGRO gains (and vice-versa).
+ * - Unclassified tickers (missing/unresolvable assetType) are NEVER assumed to be ETFs;
  *   they are excluded from the calculation and reported in `unclassifiedTickers`.
  *
  * @param events List of realized gain events from sell transactions.
- * @param priorLossCarryforward Initial accumulated FII/FIAGRO loss carryforward from prior periods.
- * @param assetTypeByTicker Optional map/dictionary of asset types to filter only FIIs and FIAGROs.
+ * @param priorLossCarryforward Initial accumulated ETF loss carryforward from prior periods.
+ * @param assetTypeByTicker Optional map/dictionary of asset types to filter only ETFs.
  */
-export function calculateFiiCapitalGainsTax(
+export function calculateEtfCapitalGainsTax(
   events: RealizedGainEvent[],
   priorLossCarryforward: number = 0,
   assetTypeByTicker?: Record<string, AssetType | undefined> | Map<string, AssetType>,
-): MonthlyFiiCapitalGainsResult[] {
+): MonthlyEtfCapitalGainsResult[] {
   if (!events || events.length === 0) {
     return [];
   }
 
   // 1. Group events and unclassified tickers by calendar month ("YYYY-MM") using local date components
-  const fiiEventsByMonth = new Map<string, RealizedGainEvent[]>();
+  const etfEventsByMonth = new Map<string, RealizedGainEvent[]>();
   const unclassifiedByMonth = new Map<string, Set<string>>();
 
   for (const ev of events) {
@@ -60,17 +57,17 @@ export function calculateFiiCapitalGainsTax(
       continue;
     }
 
-    if (resolvedType === "FII" || resolvedType === "FIAGRO") {
-      const list = fiiEventsByMonth.get(monthKey) || [];
+    if (resolvedType === "ETF") {
+      const list = etfEventsByMonth.get(monthKey) || [];
       list.push(ev);
-      fiiEventsByMonth.set(monthKey, list);
+      etfEventsByMonth.set(monthKey, list);
     }
-    // Note: STOCK_BR, STOCK_US, REIT, ETF, FII_INFRA are excluded from this module.
+    // Note: STOCK_BR, STOCK_US, REIT, FII, FIAGRO, FII_INFRA are excluded from this module.
   }
 
-  // Collect all months that have either FII events or unclassified events
+  // Collect all months that have either ETF events or unclassified events
   const allMonths = new Set<string>([
-    ...Array.from(fiiEventsByMonth.keys()),
+    ...Array.from(etfEventsByMonth.keys()),
     ...Array.from(unclassifiedByMonth.keys()),
   ]);
 
@@ -81,15 +78,16 @@ export function calculateFiiCapitalGainsTax(
   // 2. Sort months chronologically
   const sortedMonths = Array.from(allMonths).sort();
 
-  const results: MonthlyFiiCapitalGainsResult[] = [];
+  const results: MonthlyEtfCapitalGainsResult[] = [];
   let currentCarryforward = Math.max(0, priorLossCarryforward);
 
   for (const month of sortedMonths) {
-    const monthEvents = fiiEventsByMonth.get(month) || [];
+    const monthEvents = etfEventsByMonth.get(month) || [];
     const unclassifiedSet = unclassifiedByMonth.get(month);
-    const unclassifiedTickers = unclassifiedSet && unclassifiedSet.size > 0
-      ? Array.from(unclassifiedSet).sort()
-      : undefined;
+    const unclassifiedTickers =
+      unclassifiedSet && unclassifiedSet.size > 0
+        ? Array.from(unclassifiedSet).sort()
+        : undefined;
 
     let totalSales = 0;
     let totalGain = 0;
@@ -104,7 +102,7 @@ export function calculateFiiCapitalGainsTax(
     totalGain = Math.round(totalGain * 100) / 100;
 
     if (totalGain <= 0) {
-      // Net loss in the month -> accumulates into FII loss carryforward
+      // Net loss in the month -> accumulates into ETF loss carryforward
       const monthlyLoss = Math.abs(totalGain);
       const newCarryforward = Math.round((currentCarryforward + monthlyLoss) * 100) / 100;
 
@@ -121,7 +119,7 @@ export function calculateFiiCapitalGainsTax(
 
       currentCarryforward = newCarryforward;
     } else {
-      // Net gain in the month -> offset FII carryforward first, then apply 20% flat tax
+      // Net gain in the month -> offset ETF carryforward first, then apply 15% flat tax
       let lossCarryforwardUsed = 0;
       let taxableGain = totalGain;
 
@@ -132,7 +130,7 @@ export function calculateFiiCapitalGainsTax(
         currentCarryforward = Math.round((currentCarryforward - lossCarryforwardUsed) * 100) / 100;
       }
 
-      const taxDue = Math.round(taxableGain * BR_FII_CAPITAL_GAINS_RATE * 100) / 100;
+      const taxDue = Math.round(taxableGain * BR_STOCK_CAPITAL_GAINS_RATE * 100) / 100;
 
       results.push({
         month,
