@@ -37,6 +37,12 @@ export interface AskScreenProps {
    * sentence. When omitted, `questionKey` renders as a single line. */
   questionLeadKey?: string;
   questionEmphasisKey?: string;
+  /** Dynamic eyebrow text (e.g. "TAEE11 pagou hoje · 3 pagamentos esta semana") that replaces
+   * the static `subtitleKey` line above the title when present. */
+  eyebrowOverride?: string;
+  /** Optional highlight card (matches the prototype's `.insight` gold banner) rendered below
+   * the main .ask card — e.g. "Dinheiro parado custa caro". */
+  insight?: { title: string; description: string; value: string };
   amountLabelKey?: string;
   initialAmount?: number;
   amountHelperText?: string;
@@ -83,6 +89,8 @@ export function AskScreen({
   questionKey,
   questionLeadKey,
   questionEmphasisKey,
+  eyebrowOverride,
+  insight,
   amountLabelKey = "askScreen.availableAmountLabel",
   initialAmount = 0,
   amountHelperText,
@@ -173,9 +181,9 @@ export function AskScreen({
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
       {/* Page header — .top equivalent, outside the .ask card */}
       <div>
-        {subtitle && (
+        {(eyebrowOverride || subtitle) && (
           <div className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground">
-            {subtitle}
+            {eyebrowOverride || subtitle}
           </div>
         )}
         <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -480,6 +488,19 @@ export function AskScreen({
               trend="up"
             />
           ))}
+        </div>
+      )}
+
+      {/* Insight banner — .insight equivalent */}
+      {insight && (
+        <div className="flex flex-wrap items-center gap-4 rounded-[18px] border border-accent bg-gradient-to-br from-accent/15 to-transparent p-5 sm:p-6">
+          <div className="min-w-[230px] flex-1">
+            <h4 className="font-serif text-base font-semibold text-foreground">{insight.title}</h4>
+            <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{insight.description}</p>
+          </div>
+          <div className="font-serif text-2xl font-medium text-accent-foreground sm:text-3xl">
+            {insight.value}
+          </div>
         </div>
       )}
 

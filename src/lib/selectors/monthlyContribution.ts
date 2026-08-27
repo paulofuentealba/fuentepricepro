@@ -51,3 +51,34 @@ export function getMonthlyNetContribution(
 
   return net;
 }
+
+/**
+ * Pure selector: same net-contribution logic as `getMonthlyNetContribution`, but over an
+ * arbitrary `[windowStart, windowEnd]` timestamp range instead of a single calendar month.
+ * Used to approximate "capital added in the last 12 months" for the idle-dividends insight —
+ * same fungibility caveat applies (buys aren't provably funded by any specific dividend).
+ */
+export function getNetContributionInWindow(
+  transactions: Transaction[],
+  windowStart: number,
+  windowEnd: number = Date.now(),
+  convertToBRL: (value: number, currency: Currency) => number = (v) => v,
+  currencyByTicker: Record<string, Currency> = {},
+): number {
+  let net = 0;
+
+  for (const tx of transactions) {
+    if (tx.date < windowStart || tx.date > windowEnd) continue;
+
+    const currency = currencyByTicker[tx.ticker] ?? "BRL";
+    const amount = convertToBRL(tx.quantity * tx.pricePerShare, currency);
+
+    if (tx.type === "buy") {
+      net += amount;
+    } else if (tx.type === "sell") {
+      net -= amount;
+    }
+  }
+
+  return net;
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getMonthlyNetContribution } from "../monthlyContribution";
+import { getMonthlyNetContribution, getNetContributionInWindow } from "../monthlyContribution";
 import type { Transaction } from "@/lib/transactions";
 
 function makeTx(overrides: Partial<Transaction>): Transaction {
@@ -70,5 +70,37 @@ describe("getMonthlyNetContribution", () => {
     const txs = [makeTx({ ticker: "VALE3", type: "buy", quantity: 3, pricePerShare: 10 })]; // 30
 
     expect(getMonthlyNetContribution(txs, REFERENCE)).toBe(30);
+  });
+});
+
+describe("getNetContributionInWindow", () => {
+  const windowStart = new Date(2023, 7, 1).getTime(); // Aug 1, 2023
+  const windowEnd = new Date(2024, 7, 1).getTime(); // Aug 1, 2024
+
+  it("sums buys minus sells across the full window, spanning multiple months", () => {
+    const txs = [
+      makeTx({ id: "1", date: new Date(2023, 9, 1).getTime(), type: "buy", quantity: 10, pricePerShare: 20 }), // 200
+      makeTx({ id: "2", date: new Date(2024, 2, 1).getTime(), type: "sell", quantity: 5, pricePerShare: 20 }), // -100
+    ];
+    expect(getNetContributionInWindow(txs, windowStart, windowEnd)).toBe(100);
+  });
+
+  it("excludes transactions outside the window on either side", () => {
+    const txs = [
+      makeTx({ id: "1", date: new Date(2023, 6, 1).getTime(), quantity: 10, pricePerShare: 20 }), // before window
+      makeTx({ id: "2", date: new Date(2024, 8, 1).getTime(), quantity: 10, pricePerShare: 20 }), // after window
+    ];
+    expect(getNetContributionInWindow(txs, windowStart, windowEnd)).toBe(0);
+  });
+
+  it("applies currency conversion per ticker via the injected convertToBRL + currencyByTicker map", () => {
+    const txs = [
+      makeTx({ id: "1", ticker: "AAPL", date: new Date(2024, 0, 1).getTime(), quantity: 2, pricePerShare: 100 }), // 200 USD
+    ];
+    const convertToBRL = (value: number, currency: string) =>
+      currency === "USD" ? value * 5 : value;
+
+    const result = getNetContributionInWindow(txs, windowStart, windowEnd, convertToBRL, { AAPL: "USD" });
+    expect(result).toBe(1000);
   });
 });

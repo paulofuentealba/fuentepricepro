@@ -1679,6 +1679,11 @@ export const ptBR = {
     reinvestHintSnowball: "Maior DY abaixo do teto",
     reinvestHintDrift: "Volta pra meta",
     reinvestHintPayer: "Mesma posição",
+    reinvestEyebrowTodaySingle: "{{ticker}} pagou hoje · 1 pagamento esta semana",
+    reinvestEyebrowTodayPlural: "{{ticker}} pagou hoje · {{count}} pagamentos esta semana",
+    idleDividendsTitle: "Dinheiro parado custa caro",
+    idleDividendsDesc:
+      "Nos últimos 12 meses você recebeu {{received}} em proventos e registrou {{invested}} em novas compras. A diferença, reinvestida ao seu DY médio, renderia {{extra}}/mês de renda extra — para sempre. Estimativa aproximada: dinheiro é fungível, não rastreamos a origem exata de cada compra.",
     contributionHintDrift: "Corrige desvios",
     contributionHintSnowball: "Maior DY hoje",
     contributionHintDiscount: "Maior margem",

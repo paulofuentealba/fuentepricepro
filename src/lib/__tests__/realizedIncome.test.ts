@@ -5,6 +5,8 @@ import {
   normalizeDateStr,
   groupRealizedIncomeByMonth,
   computeRealizedIncomeSummary,
+  computeRecentPaymentInsight,
+  sumReceivedInWindow,
   type RealizedIncomeEvent,
 } from "../realizedIncome";
 import { type Transaction } from "../transactionsLogic";
@@ -684,6 +686,115 @@ describe("realizedIncome", () => {
       // Without target currency (legacy): raw sum 100 + 14 = 114
       const resultRaw = groupRealizedIncomeByMonth(events, undefined, "ptBR");
       expect(resultRaw[0].amountNet).toBe(114);
+    });
+  });
+
+  describe("computeRecentPaymentInsight", () => {
+    const baseEvent: RealizedIncomeEvent = {
+      ticker: "TAEE11",
+      currency: "BRL",
+      exDate: "2024-06-10",
+      paymentDate: "2024-06-13",
+      isPaid: true,
+      quantityHeld: 10,
+      amountPerShareGross: 1,
+      amountGross: 10,
+      amountNet: 10,
+      taxType: "rendimento_fii",
+    };
+
+    it("returns null when there are no paid events", () => {
+      const result = computeRecentPaymentInsight(
+        [{ ...baseEvent, isPaid: false, paymentDate: null }],
+        "2024-06-13",
+      );
+      expect(result).toBeNull();
+    });
+
+    it("picks the most recently paid ticker and flags isToday correctly", () => {
+      // 2024-06-13 is a Thursday
+      const events: RealizedIncomeEvent[] = [
+        { ...baseEvent, ticker: "HGLG11", paymentDate: "2024-06-10" }, // Monday same week
+        { ...baseEvent, ticker: "TAEE11", paymentDate: "2024-06-13" }, // today
+        { ...baseEvent, ticker: "KNIP11", paymentDate: "2024-06-05" }, // previous week
+      ];
+
+      const result = computeRecentPaymentInsight(events, "2024-06-13");
+      expect(result).not.toBeNull();
+      expect(result!.ticker).toBe("TAEE11");
+      expect(result!.isToday).toBe(true);
+      // Only HGLG11 (Mon) and TAEE11 (Thu) fall within the Mon-Sun week of 2024-06-13
+      expect(result!.paymentsThisWeek).toBe(2);
+    });
+
+    it("ignores announced-but-unpaid events entirely", () => {
+      const events: RealizedIncomeEvent[] = [
+        { ...baseEvent, ticker: "TAEE11", paymentDate: "2024-06-13" },
+        { ...baseEvent, ticker: "FUTR11", isPaid: false, paymentDate: "2024-06-20", paymentDateEstimated: true },
+      ];
+      const result = computeRecentPaymentInsight(events, "2024-06-13");
+      expect(result!.ticker).toBe("TAEE11");
+      expect(result!.paymentsThisWeek).toBe(1);
+    });
+  });
+
+  describe("sumReceivedInWindow", () => {
+    it("sums only paid events within the inclusive date window, converting currency", () => {
+      const events: RealizedIncomeEvent[] = [
+        {
+          ticker: "TAEE11",
+          currency: "BRL",
+          exDate: "2023-08-01",
+          paymentDate: "2023-08-05",
+          isPaid: true,
+          quantityHeld: 10,
+          amountPerShareGross: 5,
+          amountGross: 50,
+          amountNet: 50,
+          taxType: "rendimento_fii",
+        },
+        {
+          ticker: "SCHD",
+          currency: "USD",
+          exDate: "2024-01-10",
+          paymentDate: "2024-01-15",
+          isPaid: true,
+          quantityHeld: 10,
+          amountPerShareGross: 1,
+          amountGross: 10,
+          amountNet: 7,
+          taxType: "us_dividend",
+        },
+        {
+          ticker: "OLD11",
+          currency: "BRL",
+          exDate: "2022-01-01",
+          paymentDate: "2022-01-05",
+          isPaid: true,
+          quantityHeld: 10,
+          amountPerShareGross: 100,
+          amountGross: 1000,
+          amountNet: 1000,
+          taxType: "rendimento_fii",
+        },
+        {
+          ticker: "FUTR11",
+          currency: "BRL",
+          exDate: "2024-02-01",
+          paymentDate: "2024-02-05",
+          isPaid: false, // announced, not paid — must be excluded
+          quantityHeld: 10,
+          amountPerShareGross: 999,
+          amountGross: 9990,
+          amountNet: 9990,
+          taxType: "rendimento_fii",
+        },
+      ];
+
+      // Window: last 12 months from 2024-08-01 -> [2023-08-01, 2024-08-01]
+      const total = sumReceivedInWindow(events, "2023-08-01", "2024-08-01", "BRL", 6.0);
+      // TAEE11: 50 BRL + SCHD: 7 USD * 6 = 42 BRL = 92; OLD11 (2022) and FUTR11 (unpaid) excluded
+      expect(total).toBe(92);
     });
   });
 });

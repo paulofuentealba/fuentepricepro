@@ -1683,6 +1683,11 @@ export const es = {
     reinvestHintSnowball: "Mayor DY bajo el techo",
     reinvestHintDrift: "Vuelve a la meta",
     reinvestHintPayer: "Misma posición",
+    reinvestEyebrowTodaySingle: "{{ticker}} pagó hoy · 1 pago esta semana",
+    reinvestEyebrowTodayPlural: "{{ticker}} pagó hoy · {{count}} pagos esta semana",
+    idleDividendsTitle: "El dinero parado cuesta caro",
+    idleDividendsDesc:
+      "En los últimos 12 meses recibió {{received}} en dividendos y registró {{invested}} en compras nuevas. La diferencia, reinvertida a su DY promedio, rendiría {{extra}}/mes de renta extra — para siempre. Estimación aproximada: el dinero es fungible, no rastreamos el origen exacto de cada compra.",
     contributionHintDrift: "Corrige desviaciones",
     contributionHintSnowball: "Mayor DY hoy",
     contributionHintDiscount: "Mayor margen",

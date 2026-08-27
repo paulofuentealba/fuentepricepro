@@ -264,6 +264,80 @@ export function computeRealizedIncomeSummary(
   };
 }
 
+export interface RecentPaymentInsight {
+  ticker: string;
+  paymentDate: string; // ISO "YYYY-MM-DD"
+  isToday: boolean;
+  paymentsThisWeek: number;
+}
+
+/**
+ * Finds the most recently *paid* (confirmed, not estimated) dividend event and counts how many
+ * payments landed in the current ISO week (Monday-Sunday, local timezone) containing
+ * `todayISO`. Used for the "TAEE11 pagou hoje · 3 pagamentos esta semana" eyebrow on the
+ * Reinvestir screen — purely presentational, no tax/valuation logic involved.
+ *
+ * Ignores announced-but-unpaid events (`isPaid === false`) so an estimated future payment date
+ * never gets shown as "already landed in the account".
+ */
+export function computeRecentPaymentInsight(
+  events: RealizedIncomeEvent[],
+  todayISO: string = getLocalDateISOString(),
+): RecentPaymentInsight | null {
+  const paid = events.filter((e) => e.isPaid && e.paymentDate);
+  if (paid.length === 0) return null;
+
+  const sorted = [...paid].sort((a, b) => (b.paymentDate as string).localeCompare(a.paymentDate as string));
+  const mostRecent = sorted[0];
+
+  // ISO week (Monday-Sunday) containing todayISO, computed via local-noon Date to avoid
+  // DST/timezone edge cases shifting the calendar day.
+  const [y, m, d] = todayISO.split("-").map(Number);
+  const ref = new Date(y, m - 1, d, 12);
+  const isoDayOfWeek = (ref.getDay() + 6) % 7; // 0 = Monday ... 6 = Sunday
+  const monday = new Date(ref);
+  monday.setDate(ref.getDate() - isoDayOfWeek);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const weekStart = getLocalDateISOString(monday);
+  const weekEnd = getLocalDateISOString(sunday);
+
+  const paymentsThisWeek = paid.filter((e) => {
+    const day = e.paymentDate as string;
+    return day >= weekStart && day <= weekEnd;
+  }).length;
+
+  return {
+    ticker: mostRecent.ticker,
+    paymentDate: mostRecent.paymentDate as string,
+    isToday: mostRecent.paymentDate === todayISO,
+    paymentsThisWeek,
+  };
+}
+
+/**
+ * Sums `amountNet` (converted to `currency`) of *paid* events whose payment date (or ex-date
+ * fallback) falls within `[windowStartISO, windowEndISO]` (inclusive). Used for the rolling
+ * "last 12 months received" figure — `computeRealizedIncomeSummary` only covers the current
+ * calendar month/year, not an arbitrary rolling window.
+ */
+export function sumReceivedInWindow(
+  events: RealizedIncomeEvent[],
+  windowStartISO: string,
+  windowEndISO: string,
+  currency: Currency = "BRL",
+  fxRate?: number,
+): number {
+  let total = 0;
+  for (const ev of events) {
+    if (!ev.isPaid) continue;
+    const day = ev.paymentDate || ev.exDate;
+    if (day < windowStartISO || day > windowEndISO) continue;
+    total += convertCurrency(ev.amountNet, ev.currency, currency, fxRate);
+  }
+  return Math.round(total * 100) / 100;
+}
+
 export interface MonthlyDividendBucket {
   monthKey: string; // "YYYY-MM"
   monthLabel: string; // Formatted label (e.g. "nov/25")

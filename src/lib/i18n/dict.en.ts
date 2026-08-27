@@ -1669,6 +1669,11 @@ export const en = {
     reinvestHintSnowball: "Highest yield below ceiling",
     reinvestHintDrift: "Back to target",
     reinvestHintPayer: "Same position",
+    reinvestEyebrowTodaySingle: "{{ticker}} paid today · 1 payment this week",
+    reinvestEyebrowTodayPlural: "{{ticker}} paid today · {{count}} payments this week",
+    idleDividendsTitle: "Idle cash costs you money",
+    idleDividendsDesc:
+      "In the last 12 months you received {{received}} in dividends and logged {{invested}} in new purchases. The difference, reinvested at your average yield, would earn {{extra}}/month in extra income — forever. Rough estimate: money is fungible, we don't track the exact source of each purchase.",
     contributionHintDrift: "Fixes drift",
     contributionHintSnowball: "Highest yield today",
     contributionHintDiscount: "Biggest margin",

@@ -3,9 +3,15 @@ import { useMemo } from "react";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
+import { useTransactions } from "@/lib/transactions";
+import { useFIProgress } from "@/lib/useFIProgress";
 import { useFeatureGate } from "@/lib/useFeatureGate";
 import { useI18n } from "@/lib/i18n-provider";
 import { downloadCsv } from "@/lib/csv";
+import { computeRecentPaymentInsight, sumReceivedInWindow } from "@/lib/realizedIncome";
+import { getNetContributionInWindow } from "@/lib/selectors/monthlyContribution";
+import { convertCurrency } from "@/lib/currency";
+import { formatCurrency } from "@/lib/formatters";
 import {
   accelerateSnowballStrategy,
   correctDriftStrategy,
@@ -32,13 +38,71 @@ export const Route = createFileRoute("/app/reinvestir")({
 });
 
 export function ReinvestirPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isUnlocked = useFeatureGate("reinvestUnlocked");
 
-  const { valuedItems, isAppLoading } = useValuedPortfolio();
+  const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
   const { settings } = useUserSettings();
   const currency = settings?.displayCurrency || "BRL";
-  const { summary, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
+  const { summary, events, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
+  const { transactions = [] } = useTransactions();
+  const { totalCapitalBRL, monthlyIncomeBRL } = useFIProgress();
+
+  // Dynamic eyebrow: "TAEE11 pagou hoje · N pagamentos esta semana" — only shown when the most
+  // recently paid dividend actually landed today (otherwise falls back to the static subtitle).
+  const eyebrowOverride = useMemo(() => {
+    const recent = computeRecentPaymentInsight(events);
+    if (!recent || !recent.isToday) return undefined;
+    const key =
+      recent.paymentsThisWeek <= 1
+        ? "reinvestEyebrowTodaySingle"
+        : "reinvestEyebrowTodayPlural";
+    return resolveReasonText(t, `askScreen.${key}`, {
+      ticker: recent.ticker,
+      count: recent.paymentsThisWeek,
+    });
+  }, [events, t]);
+
+  // "Dinheiro parado custa caro" — compares proventos recebidos vs. novas compras nos últimos
+  // 12 meses (aproximação agregada, não rastreia a origem exata de cada compra — ver JSDoc de
+  // sumReceivedInWindow/getNetContributionInWindow).
+  const idleDividendsInsight = useMemo(() => {
+    const windowEnd = Date.now();
+    const windowStart = windowEnd - 365 * 24 * 60 * 60 * 1000;
+    const windowStartISO = new Date(windowStart).toISOString().split("T")[0];
+    const windowEndISO = new Date(windowEnd).toISOString().split("T")[0];
+
+    const received = sumReceivedInWindow(events, windowStartISO, windowEndISO, "BRL", fx?.USDBRL);
+    if (received <= 0) return null;
+
+    const currencyByTicker: Record<string, "BRL" | "USD"> = {};
+    for (const item of valuedItems) currencyByTicker[item.ticker] = item.currency;
+    const convertToBRL = (value: number, curr: "USD" | "BRL") =>
+      convertCurrency(value, curr, "BRL", fx?.USDBRL);
+    const invested = getNetContributionInWindow(
+      transactions,
+      windowStart,
+      windowEnd,
+      convertToBRL,
+      currencyByTicker,
+    );
+
+    const idle = Math.max(0, received - invested);
+    if (idle <= 0) return null;
+
+    const avgYieldPct = totalCapitalBRL > 0 ? (monthlyIncomeBRL * 12) / totalCapitalBRL : 0;
+    const extraMonthly = (idle * avgYieldPct) / 12;
+
+    return {
+      title: t.askScreen?.idleDividendsTitle || "Dinheiro parado custa caro",
+      description: resolveReasonText(t, "askScreen.idleDividendsDesc", {
+        received: formatCurrency(received, "BRL", locale),
+        invested: formatCurrency(invested, "BRL", locale),
+        extra: formatCurrency(extraMonthly, "BRL", locale),
+      }),
+      value: formatCurrency(idle, "BRL", locale),
+    };
+  }, [events, transactions, valuedItems, fx?.USDBRL, totalCapitalBRL, monthlyIncomeBRL, t, locale]);
 
   const askSettings: AskEngineSettings = useMemo(() => {
     return {
@@ -102,6 +166,8 @@ export function ReinvestirPage() {
       questionKey="askScreen.reinvestQuestion"
       questionLeadKey="askScreen.reinvestQuestionLead"
       questionEmphasisKey="askScreen.reinvestQuestionEmphasis"
+      eyebrowOverride={eyebrowOverride}
+      insight={idleDividendsInsight ?? undefined}
       initialAmount={initialAmount}
       amountHelperText={helperText}
       strategies={strategies}
