@@ -59,6 +59,15 @@ export function ReinvestirPage() {
     [],
   );
 
+  const strategyHints = useMemo(
+    () => ({
+      accelerateSnowball: t.askScreen?.reinvestHintSnowball,
+      correctDrift: t.askScreen?.reinvestHintDrift,
+      reinforcePayer: t.askScreen?.reinvestHintPayer,
+    }),
+    [t],
+  );
+
   if (isUnlocked === false) {
     return (
       <div className="mx-auto max-w-xl p-6 mt-12">
@@ -91,9 +100,12 @@ export function ReinvestirPage() {
       titleKey="askScreen.reinvestTitle"
       subtitleKey="askScreen.reinvestSubtitle"
       questionKey="askScreen.reinvestQuestion"
+      questionLeadKey="askScreen.reinvestQuestionLead"
+      questionEmphasisKey="askScreen.reinvestQuestionEmphasis"
       initialAmount={initialAmount}
       amountHelperText={helperText}
       strategies={strategies}
+      strategyHints={strategyHints}
       defaultStrategyId="accelerateSnowball"
       positions={valuedItems}
       settings={askSettings}

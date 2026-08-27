@@ -13,17 +13,12 @@ import {
 } from "@/lib/askEngine";
 import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
 import { MetricBox } from "@/components/shared/MetricBox";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Coins,
-  TrendingUp,
-  Sparkles,
   ShieldAlert,
   AlertCircle,
   ChevronDown,
@@ -38,10 +33,18 @@ export interface AskScreenProps {
   titleKey?: string;
   subtitleKey?: string;
   questionKey: string;
+  /** Optional 2-line question split, matching the prototype's `.ask-q` lead + bold emphasis
+   * sentence. When omitted, `questionKey` renders as a single line. */
+  questionLeadKey?: string;
+  questionEmphasisKey?: string;
   amountLabelKey?: string;
   initialAmount?: number;
   amountHelperText?: string;
   strategies: Strategy[];
+  /** Short subtitle rendered under each strategy tab (e.g. "Maior DY abaixo do teto"), keyed by
+   * strategy id. Screen-specific because the same strategy has a different hint depending on
+   * whether it's used for Reinvestir or Plano de Aporte. */
+  strategyHints?: Record<string, string>;
   defaultStrategyId?: string;
   positions: ValuedWatchlistItem[];
   settings: AskEngineSettings;
@@ -78,10 +81,13 @@ export function AskScreen({
   titleKey = "askScreen.reinvestTitle",
   subtitleKey = "askScreen.reinvestSubtitle",
   questionKey,
+  questionLeadKey,
+  questionEmphasisKey,
   amountLabelKey = "askScreen.availableAmountLabel",
   initialAmount = 0,
   amountHelperText,
   strategies,
+  strategyHints,
   defaultStrategyId,
   positions,
   settings,
@@ -146,103 +152,132 @@ export function AskScreen({
 
   const [showExcluded, setShowExcluded] = useState(false);
 
+  // Ticker -> company/fund name lookup, reused from the positions already loaded (no new data).
+  const tickerNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const p of positions) map[p.ticker] = p.name;
+    return map;
+  }, [positions]);
+
   // Resolved titles and question
   const title = resolveReasonText(t, titleKey);
   const subtitle = subtitleKey ? resolveReasonText(t, subtitleKey) : "";
   const question = resolveReasonText(t, questionKey);
+  const questionLead = questionLeadKey ? resolveReasonText(t, questionLeadKey) : "";
+  const questionEmphasis = questionEmphasisKey ? resolveReasonText(t, questionEmphasisKey) : "";
   const amountLabel = resolveReasonText(t, amountLabelKey);
 
-  return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      {/* Top Header Card */}
-      <Card className="border-border/60 bg-card/70 shadow-sm">
-        <CardHeader className="space-y-3 pb-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="inline-flex items-center gap-2">
-                <StatusBadge variant="default" icon={Sparkles}>
-                  {title}
-                </StatusBadge>
-              </div>
-              <h1 className="mt-2 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {question}
-              </h1>
-              {subtitle && (
-                <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
-              )}
-            </div>
+  const firstConsequence = result.consequences[0];
 
-            {onExport && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="self-start sm:self-center font-display"
-                onClick={() => onExport(result, activeStrategy)}
-              >
-                <Download className="mr-1.5 h-4 w-4" />
-                {t.askScreen?.exportBtn || "Exportar Plano"}
-              </Button>
+  return (
+    <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+      {/* Page header — .top equivalent, outside the .ask card */}
+      <div>
+        {subtitle && (
+          <div className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground">
+            {subtitle}
+          </div>
+        )}
+        <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {title}
+        </h1>
+      </div>
+
+      {/* .ask card */}
+      <div className="overflow-hidden rounded-[22px] border border-border/60 bg-card">
+        {/* .ask-top: question + amount */}
+        <div className="flex flex-wrap items-center justify-between gap-5 p-5 sm:p-6">
+          <div className="max-w-lg font-serif text-lg font-medium leading-snug text-foreground sm:text-xl">
+            {questionLead ? (
+              <>
+                {questionLead}
+                <br />
+                <span className="font-semibold text-accent">{questionEmphasis}</span>
+              </>
+            ) : (
+              question
             )}
           </div>
 
-          {/* Available Amount Input Bar */}
-          <div className="mt-4 rounded-xl border border-border/50 bg-background/50 p-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <Label
-                htmlFor="available-amount-input"
-                className="text-sm font-display font-semibold text-foreground"
-              >
-                {amountLabel}
-              </Label>
-              <div className="relative max-w-xs">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
-                  R$
-                </span>
-                <Input
-                  id="available-amount-input"
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={rawAmount}
-                  onChange={(e) => setRawAmount(e.target.value)}
-                  className="pl-9 font-serif text-lg font-semibold text-foreground"
-                  aria-label={amountLabel}
-                />
+          <div>
+            <div className="flex items-center gap-3 rounded-2xl bg-muted/50 px-4 py-2.5">
+              <div>
+                <div className="text-[10px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
+                  {amountLabel}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="font-serif text-xl font-medium text-foreground sm:text-2xl">R$</span>
+                  <Input
+                    id="available-amount-input"
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={rawAmount}
+                    onChange={(e) => setRawAmount(e.target.value)}
+                    className="h-auto w-28 border-0 bg-transparent p-0 font-serif text-xl font-medium text-foreground shadow-none focus-visible:ring-0 sm:text-2xl"
+                    aria-label={amountLabel}
+                  />
+                </div>
               </div>
+              {onExport && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-2 shrink-0 gap-1.5 font-display"
+                  onClick={() => onExport(result, activeStrategy)}
+                >
+                  <Download className="h-4 w-4" />
+                  {t.askScreen?.exportBtn || "Exportar Plano"}
+                </Button>
+              )}
             </div>
             {amountHelperText && (
               <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Info className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                <Info className="h-3.5 w-3.5 shrink-0 text-primary/70" />
                 {amountHelperText}
               </p>
             )}
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="space-y-6">
-          {/* Strategy Tabs */}
-          {strategies.length > 1 && (
-            <Tabs
-              value={activeStrategyId}
-              onValueChange={setActiveStrategyId}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto p-1 bg-muted/60">
-                {strategies.map((strat) => (
-                  <TabsTrigger
-                    key={strat.id}
-                    value={strat.id}
-                    onClick={() => setActiveStrategyId(strat.id)}
-                    className="py-2 text-xs sm:text-sm font-display font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                  >
-                    {resolveReasonText(t, strat.labelKey)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          )}
+        {/* .strat: strategy tabs with 2-line label + hint */}
+        {strategies.length > 1 && (
+          <div className="flex border-y border-border/50" role="tablist">
+            {strategies.map((strat, idx) => {
+              const isActive = strat.id === activeStrategyId;
+              const hint = strategyHints?.[strat.id];
+              return (
+                <button
+                  key={strat.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveStrategyId(strat.id)}
+                  className={cn(
+                    "flex-1 px-3 py-3 text-center text-[12px] font-display font-medium transition-colors",
+                    idx < strategies.length - 1 && "border-r border-border/50",
+                    isActive
+                      ? "bg-accent/15 text-accent-foreground font-semibold"
+                      : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
+                  )}
+                >
+                  {resolveReasonText(t, strat.labelKey)}
+                  {hint && (
+                    <span
+                      aria-hidden="true"
+                      className="mt-0.5 block text-[9px] font-normal uppercase tracking-wider opacity-70"
+                    >
+                      {hint}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-          {/* Dynamic Content Body based on loading & strategy state */}
+        {/* Dynamic Content Body based on loading & strategy state */}
+        <div className="p-5 sm:p-6">
           {isLoading ? (
             <ResultSkeleton />
           ) : result.state === "targets_not_configured" ? (
@@ -310,95 +345,59 @@ export function AskScreen({
               </p>
             </Card>
           ) : (
-            /* Success State: Render Allocations */
-            <div className="space-y-6">
-              <div className="space-y-3">
-                {result.allocations.map((alloc, idx) => {
-                  const reasonDisplay = resolveReasonText(
-                    t,
-                    alloc.reasonKey,
-                    alloc.reasonParams,
-                  );
+            /* Success State: Render Allocations as .alloc rows */
+            <div className="-mx-5 sm:-mx-6">
+              {result.allocations.map((alloc, idx) => {
+                const reasonDisplay = resolveReasonText(t, alloc.reasonKey, alloc.reasonParams);
+                const assetName = tickerNameMap[alloc.ticker];
 
-                  return (
-                    <div
-                      key={alloc.ticker}
-                      className="group flex flex-col gap-3 rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      {/* Left: Rank & Ticker & Reason */}
-                      <div className="space-y-1.5 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-mono font-bold text-accent-foreground">
-                            {idx + 1}
-                          </span>
-                          <span className="font-mono font-bold text-base text-foreground">
-                            {alloc.ticker}
-                          </span>
-                          <span className="text-xs font-mono font-semibold text-primary/80">
-                            {alloc.percentOfTotal}%
-                          </span>
-                        </div>
+                return (
+                  <div
+                    key={alloc.ticker}
+                    className="flex items-center gap-4 border-b border-dashed border-border/40 px-5 py-3.5 transition-colors last:border-b-0 hover:bg-muted/20 sm:px-6"
+                  >
+                    <span className="flex h-[25px] w-[25px] shrink-0 items-center justify-center rounded-lg bg-accent/15 font-mono text-[11.5px] font-semibold text-accent-foreground">
+                      {idx + 1}
+                    </span>
 
-                        {/* Progress bar */}
-                        <div className="h-1.5 w-full max-w-md rounded-full bg-muted/60 overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500 motion-reduce:transition-none"
-                            style={{ width: `${Math.max(4, alloc.percentOfTotal)}%` }}
-                          />
-                        </div>
-
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {reasonDisplay}
-                        </p>
+                    <div className="w-[92px] shrink-0 sm:w-[115px]">
+                      <div className="truncate font-mono text-[13.5px] font-semibold text-foreground">
+                        {alloc.ticker}
                       </div>
+                      {assetName && (
+                        <div className="truncate text-[10px] text-muted-foreground">{assetName}</div>
+                      )}
+                    </div>
 
-                      {/* Right: Quantity and Amount */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between border-t border-border/30 pt-2 sm:border-0 sm:pt-0 shrink-0">
-                        <span className="text-base font-serif font-semibold text-foreground">
-                          {formatCurrency(alloc.amountBRL, currency, locale)}
-                        </span>
-                        <span className="text-xs font-mono font-medium text-muted-foreground">
-                          {alloc.quantity} {t.askScreen?.sharesUnit || "cotas"}
-                        </span>
+                    <div className="min-w-[100px] flex-1">
+                      <div className="h-[23px] overflow-hidden rounded-lg bg-muted/50">
+                        <div
+                          className="h-full rounded-lg bg-gradient-to-r from-primary to-accent transition-all duration-500 motion-reduce:transition-none"
+                          style={{ width: `${Math.max(4, alloc.percentOfTotal)}%` }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-[10.5px] leading-tight text-muted-foreground">
+                        {reasonDisplay}
+                      </p>
+                    </div>
+
+                    <div className="w-[92px] shrink-0 text-right sm:w-[115px]">
+                      <div className="font-serif text-[17px] font-medium text-foreground sm:text-[18px]">
+                        {formatCurrency(alloc.amountBRL, currency, locale)}
+                      </div>
+                      <div className="font-mono text-[10px] text-muted-foreground">
+                        {alloc.quantity} {t.askScreen?.sharesUnit || "cotas"}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Leftover Box */}
-              <div className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-                <span className="font-display">{t.askScreen?.leftoverLabel || "Sobra em caixa (cotas inteiras não fracionadas):"}</span>
-                <span className="font-mono font-semibold text-foreground">
-                  {formatCurrency(result.leftover, currency, locale)}
-                </span>
-              </div>
-
-              {/* Consequences Impact Section */}
-              {result.consequences.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t.askScreen?.consequencesTitle || "Impacto Projetado"}
-                  </h4>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {result.consequences.map((c, i) => (
-                      <MetricBox
-                        key={i}
-                        label={resolveConsequenceLabel(t, c.valueKey)}
-                        value={formatCurrency(Number(c.value), currency, locale)}
-                        variant="success"
-                        trend="up"
-                      />
-                    ))}
                   </div>
-                </div>
-              )}
+                );
+              })}
             </div>
           )}
 
           {/* Excluded Assets Accordion / Collapsible */}
           {result.excluded.length > 0 && (
-            <div className="border-t border-border/40 pt-4">
+            <div className="mt-5 border-t border-border/40 pt-4">
               <button
                 type="button"
                 onClick={() => setShowExcluded(!showExcluded)}
@@ -437,8 +436,52 @@ export function AskScreen({
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* .ask-foot: inline stats + export */}
+        {!isLoading &&
+          result.state !== "targets_not_configured" &&
+          result.state !== "no_eligible_assets" &&
+          !(activeStrategy.id === "reinforcePayer" && result.allocations.length === 0) && (
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-muted/30 px-5 py-4 sm:px-6">
+              <div className="flex flex-wrap gap-6">
+                {firstConsequence && (
+                  <div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {resolveConsequenceLabel(t, firstConsequence.valueKey)}
+                    </div>
+                    <div className="font-serif text-base font-medium text-success">
+                      + {formatCurrency(Number(firstConsequence.value), currency, locale)}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {t.askScreen?.leftoverLabel || "Sobra em caixa"}
+                  </div>
+                  <div className="font-serif text-base font-medium text-foreground">
+                    {formatCurrency(result.leftover, currency, locale)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+      </div>
+
+      {/* Impact metrics beyond the first (kept as a grid — .ask-foot only fits 2 inline stats) */}
+      {result.consequences.length > 1 && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {result.consequences.slice(1).map((c, i) => (
+            <MetricBox
+              key={i}
+              label={resolveConsequenceLabel(t, c.valueKey)}
+              value={formatCurrency(Number(c.value), currency, locale)}
+              variant="success"
+              trend="up"
+            />
+          ))}
+        </div>
+      )}
 
       {/* Persistent Regulatory Disclaimer */}
       <RegulatoryDisclaimerBanner variant="calculation" forceShow />

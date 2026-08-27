@@ -42,14 +42,26 @@ function SmartAllocationRoute() {
     [],
   );
 
+  const strategyHints = useMemo(
+    () => ({
+      correctDrift: t.askScreen?.contributionHintDrift,
+      accelerateSnowball: t.askScreen?.contributionHintSnowball,
+      buyDiscount: t.askScreen?.contributionHintDiscount,
+    }),
+    [t],
+  );
+
   const allocationContent = (
-    <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-4xl">
+    <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-5xl">
       <AskScreen
         titleKey="askScreen.contributionTitle"
         subtitleKey="askScreen.contributionSubtitle"
         questionKey="askScreen.contributionQuestion"
+        questionLeadKey="askScreen.contributionQuestionLead"
+        questionEmphasisKey="askScreen.contributionQuestionEmphasis"
         amountLabelKey="askScreen.availableAmountLabelContribution"
         strategies={strategies}
+        strategyHints={strategyHints}
         defaultStrategyId="correctDrift"
         positions={valuedItems}
         settings={askSettings}
