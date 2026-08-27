@@ -585,6 +585,7 @@ export const ptBR = {
     comingSoon: "Em breve",
     home: "Início",
     admin: "Admin",
+    goals: "Metas",
     tagline: "Renda passiva com clareza",
     theme: {
       light: "Modo Claro",
@@ -769,6 +770,21 @@ export const ptBR = {
     excludeYieldTrapsDesc: "Filtra ativos com payout insustentável (>100%), dividendos não recorrentes ou deterioração de lucros.",
     maxConcentrationPerClassLabel: "Teto de Concentração por Classe (%)",
     maxConcentrationPerClassHint: "Limite máximo de patrimônio permitido em uma única classe de ativo.",
+  },
+
+  goalWizard: {
+    pageTitle: "Metas de Investimento",
+    pageSubtitle: "Configure as metas que orientam o Reinvestir Proventos e o Plano de Aporte",
+    step1Eyebrow: "Passo 1 de 2",
+    step1Question: "Suas metas por classe de ativo",
+    step1Helper:
+      "Ajuste como quiser — é sobre esses números que os cálculos de Reinvestir e Plano de Aporte vão trabalhar. A soma precisa fechar em 100%.",
+    step2Question: "Seus critérios de exclusão",
+    step2Helper: "Estes filtros definem o que o sistema não vai sugerir. São seus critérios, não os nossos.",
+    continueBtn: "Continuar",
+    backBtn: "Voltar",
+    finishBtn: "Concluir",
+    savedToast: "Metas salvas",
   },
 
   snowball: {

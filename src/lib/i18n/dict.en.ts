@@ -583,6 +583,7 @@ export const en = {
     comingSoon: "Coming soon",
     home: "Home",
     admin: "Admin",
+    goals: "Goals",
     tagline: "Passive income with clarity",
     theme: {
       light: "Light Mode",
@@ -765,6 +766,21 @@ export const en = {
     excludeYieldTrapsDesc: "Filters out assets with unsustainable payout (>100%), non-recurring dividends, or earnings deterioration.",
     maxConcentrationPerClassLabel: "Max Concentration per Class (%)",
     maxConcentrationPerClassHint: "Maximum equity percentage allowed in a single asset class.",
+  },
+
+  goalWizard: {
+    pageTitle: "Investment Goals",
+    pageSubtitle: "Configure the goals that drive Reinvest Dividends and the Contribution Plan",
+    step1Eyebrow: "Step 1 of 2",
+    step1Question: "Your allocation targets per asset class",
+    step1Helper:
+      "Adjust however you like — these are the numbers Reinvest and the Contribution Plan calculations work from. The total must add up to 100%.",
+    step2Question: "Your exclusion criteria",
+    step2Helper: "These filters define what the system will not suggest. They are your criteria, not ours.",
+    continueBtn: "Continue",
+    backBtn: "Back",
+    finishBtn: "Finish",
+    savedToast: "Goals saved",
   },
 
   snowball: {

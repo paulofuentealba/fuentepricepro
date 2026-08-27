@@ -258,7 +258,7 @@ export function AskScreen({
                   "A estratégia Corrigir Desvio exige metas de alocação definidas por classe. Você pode configurá-las em Metas ou utilizar as outras abas acima."}
               </p>
               <div className="mt-5 flex justify-center gap-3">
-                <Link to="/app/smartallocation">
+                <Link to="/app/metas">
                   <Button variant="default" size="sm" className="font-display">
                     {t.askScreen?.configureTargetsBtn || "Configurar Metas"}
                     <ArrowRight className="ml-1.5 h-4 w-4" />

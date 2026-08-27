@@ -18,6 +18,7 @@ import {
   Sun,
   Moon,
   Globe,
+  Target,
 } from "lucide-react";
 import { useAuthModal } from "@/lib/auth-modal";
 import { useSubscription } from "@/lib/subscription";
@@ -124,6 +125,13 @@ export function Sidebar() {
           label: t.nav.withdraw,
           icon: ArrowDownCircle,
           disabled: true,
+        },
+        {
+          key: "metas",
+          label: t.nav.goals,
+          path: "/app/metas",
+          icon: Target,
+          disabled: false,
         },
       ],
     },

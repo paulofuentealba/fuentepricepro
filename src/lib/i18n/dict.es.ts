@@ -590,6 +590,7 @@ export const es = {
     comingSoon: "Próximamente",
     home: "Inicio",
     admin: "Admin",
+    goals: "Metas",
     tagline: "Renta pasiva con claridad",
     theme: {
       light: "Modo Claro",
@@ -774,6 +775,21 @@ export const es = {
     excludeYieldTrapsDesc: "Filtra activos con payout insostenible (>100%), dividendos no recurrentes o deterioro de utilidades.",
     maxConcentrationPerClassLabel: "Techo de Concentración por Clase (%)",
     maxConcentrationPerClassHint: "Límite máximo de patrimonio permitido en una sola clase de activo.",
+  },
+
+  goalWizard: {
+    pageTitle: "Metas de Inversión",
+    pageSubtitle: "Configure las metas que orientan Reinvertir Dividendos y el Plan de Aporte",
+    step1Eyebrow: "Paso 1 de 2",
+    step1Question: "Sus metas por clase de activo",
+    step1Helper:
+      "Ajuste como quiera — es sobre estos números que los cálculos de Reinvertir y Plan de Aporte van a trabajar. La suma debe cerrar en 100%.",
+    step2Question: "Sus criterios de exclusión",
+    step2Helper: "Estos filtros definen lo que el sistema no va a sugerir. Son sus criterios, no los nuestros.",
+    continueBtn: "Continuar",
+    backBtn: "Volver",
+    finishBtn: "Concluir",
+    savedToast: "Metas guardadas",
   },
 
   snowball: {
