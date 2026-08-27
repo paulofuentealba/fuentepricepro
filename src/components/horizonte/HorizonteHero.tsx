@@ -322,7 +322,7 @@ export function HorizonteHero() {
 
   const content = hasNoAssets ? (
     <div className="w-full flex flex-col gap-2 rounded-xl bg-card border border-border p-6">
-      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+      <span className="text-xs font-display font-medium uppercase tracking-widest text-muted-foreground">
         {t.tabs.financialIndependence}
       </span>
       <span className="text-2xl font-semibold font-serif text-foreground">
@@ -376,17 +376,17 @@ export function HorizonteHero() {
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end shrink-0">
           <div className="flex flex-col items-start gap-1 sm:items-end">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1 text-xs font-display text-muted-foreground">
               {t.home.contributionThisMonth}
               <InfoTooltip content={t.home.contributionThisMonthTooltip} />
             </span>
-            <span className="text-sm font-medium text-foreground">{monthlyContributionLabel}</span>
+            <span className="text-sm font-mono font-medium text-foreground">{monthlyContributionLabel}</span>
           </div>
           <div className="flex flex-col items-start gap-1 sm:items-end">
-            <span className="text-xs text-muted-foreground">{t.home.passiveIncomeNow}</span>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-xs font-display text-muted-foreground">{t.home.passiveIncomeNow}</span>
+            <span className="text-sm font-mono font-medium text-foreground">
               {passiveIncomeLabel}
-              <span className="text-xs text-muted-foreground">{t.home.perMonth}</span>
+              <span className="text-xs font-display text-muted-foreground">{t.home.perMonth}</span>
             </span>
           </div>
           <Button
@@ -409,7 +409,7 @@ export function HorizonteHero() {
 
       {hasEnoughDataForSparkline && (
         <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground">{t.home.trajectorySparklineLabel}</span>
+          <span className="text-xs font-display text-muted-foreground">{t.home.trajectorySparklineLabel}</span>
           <HorizonteTrajectorySparkline points={trajectoryPoints} />
         </div>
       )}
@@ -419,7 +419,7 @@ export function HorizonteHero() {
           {milestones.map((milestone) => (
             <li
               key={milestone.label}
-              className={`text-xs px-3 py-1 rounded-full border ${
+              className={`text-xs font-display px-3 py-1 rounded-full border ${
                 milestone.achieved
                   ? "border-primary text-primary bg-primary/10"
                   : "border-border text-muted-foreground"

@@ -49,7 +49,7 @@ function SummaryCard({
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-card border border-border shadow-sm p-5">
-      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+      <span className="text-xs font-display font-medium uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       {isLoading ? (
@@ -58,7 +58,7 @@ function SummaryCard({
         <span className="text-2xl font-semibold font-serif text-foreground">{value}</span>
       )}
       {!isLoading && delta && (
-        <span className={`text-xs font-medium ${delta.positive ? "text-success" : "text-danger"}`}>
+        <span className={`text-xs font-mono font-medium ${delta.positive ? "text-success" : "text-danger"}`}>
           {delta.label}
         </span>
       )}
