@@ -780,15 +780,10 @@ export const es = {
   goalWizard: {
     pageTitle: "Metas de Inversión",
     pageSubtitle: "Configure las metas que orientan Reinvertir Dividendos y el Plan de Aporte",
-    step1Eyebrow: "Paso 1 de 2",
-    step1Question: "Sus metas por clase de activo",
+    step1Question: "Metas por clase de activo",
     step1Helper:
-      "Ajuste como quiera — es sobre estos números que los cálculos de Reinvertir y Plan de Aporte van a trabajar. La suma debe cerrar en 100%.",
-    step2Question: "Sus criterios de exclusión",
-    step2Helper: "Estos filtros definen lo que el sistema no va a sugerir. Son sus criterios, no los nuestros.",
-    continueBtn: "Continuar",
-    backBtn: "Volver",
-    finishBtn: "Concluir",
+      "Todos los cálculos de sugerencia del producto trabajan sobre estos números. Son suyos — cámbielos cuando quiera.",
+    finishBtn: "Guardar criterios",
     savedToast: "Metas guardadas",
   },
 

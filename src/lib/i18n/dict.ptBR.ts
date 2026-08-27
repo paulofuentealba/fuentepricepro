@@ -775,15 +775,10 @@ export const ptBR = {
   goalWizard: {
     pageTitle: "Metas de Investimento",
     pageSubtitle: "Configure as metas que orientam o Reinvestir Proventos e o Plano de Aporte",
-    step1Eyebrow: "Passo 1 de 2",
-    step1Question: "Suas metas por classe de ativo",
+    step1Question: "Metas por classe de ativo",
     step1Helper:
-      "Ajuste como quiser — é sobre esses números que os cálculos de Reinvestir e Plano de Aporte vão trabalhar. A soma precisa fechar em 100%.",
-    step2Question: "Seus critérios de exclusão",
-    step2Helper: "Estes filtros definem o que o sistema não vai sugerir. São seus critérios, não os nossos.",
-    continueBtn: "Continuar",
-    backBtn: "Voltar",
-    finishBtn: "Concluir",
+      "Todos os cálculos de sugestão do produto trabalham sobre estes números. Eles são seus — altere quando quiser.",
+    finishBtn: "Salvar critérios",
     savedToast: "Metas salvas",
   },
 

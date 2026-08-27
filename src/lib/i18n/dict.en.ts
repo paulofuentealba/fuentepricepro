@@ -771,15 +771,10 @@ export const en = {
   goalWizard: {
     pageTitle: "Investment Goals",
     pageSubtitle: "Configure the goals that drive Reinvest Dividends and the Contribution Plan",
-    step1Eyebrow: "Step 1 of 2",
-    step1Question: "Your allocation targets per asset class",
+    step1Question: "Allocation targets per asset class",
     step1Helper:
-      "Adjust however you like — these are the numbers Reinvest and the Contribution Plan calculations work from. The total must add up to 100%.",
-    step2Question: "Your exclusion criteria",
-    step2Helper: "These filters define what the system will not suggest. They are your criteria, not ours.",
-    continueBtn: "Continue",
-    backBtn: "Back",
-    finishBtn: "Finish",
+      "All product suggestion calculations work from these numbers. They are yours — change them whenever you like.",
+    finishBtn: "Save criteria",
     savedToast: "Goals saved",
   },
 
