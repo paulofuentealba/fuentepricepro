@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useAuthModal } from "@/lib/auth-modal";
 import { useSubscription } from "@/lib/subscription";
-import { SuccessIconBox } from "@/components/shared/SuccessIconBox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -189,35 +188,43 @@ export function Sidebar() {
     <TooltipProvider delayDuration={100}>
       <aside
         className={cn(
-          "h-full border-r border-border/60 bg-background/80 backdrop-blur-md transition-all duration-300 ease-in-out hidden md:flex flex-col z-20 select-none",
+          "h-full border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-md transition-all duration-300 ease-in-out hidden md:flex flex-col z-20 select-none",
           isCollapsed ? "w-16" : "w-64",
         )}
       >
         {/* Header / Brand */}
-        <div className="flex items-center justify-between p-4 border-b border-border/30 h-[72px]">
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border h-[72px]">
           {!isCollapsed ? (
             <div className="flex items-center gap-2.5 overflow-hidden pl-1">
               <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="shrink-0">
-                <circle cx="20" cy="20" r="19" stroke="var(--accent)" strokeWidth="1.4" opacity=".35" />
-                <circle cx="20" cy="20" r="13.5" stroke="var(--accent)" strokeWidth="1.4" opacity=".6" />
-                <circle cx="20" cy="20" r="8" fill="var(--accent)" />
+                <circle cx="20" cy="20" r="19" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".35" />
+                <circle cx="20" cy="20" r="13.5" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".6" />
+                <circle cx="20" cy="20" r="8" fill="var(--sidebar-accent)" />
               </svg>
-              <div className="font-serif font-bold text-sm tracking-tight text-foreground truncate">
-                Fuente <span className="text-primary font-sans font-semibold">Pro</span>
+              <div className="flex flex-col leading-tight overflow-hidden">
+                <div className="font-serif font-bold text-sm tracking-tight text-sidebar-foreground truncate">
+                  Fuente <span className="text-sidebar-accent font-sans font-semibold">Pro</span>
+                </div>
+                <div className="text-[9px] font-display font-medium uppercase tracking-[0.18em] text-sidebar-accent/80 truncate">
+                  {t.nav.tagline}
+                </div>
               </div>
             </div>
           ) : (
             <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="mx-auto shrink-0">
-              <circle cx="20" cy="20" r="19" stroke="var(--accent)" strokeWidth="1.4" opacity=".35" />
-              <circle cx="20" cy="20" r="13.5" stroke="var(--accent)" strokeWidth="1.4" opacity=".6" />
-              <circle cx="20" cy="20" r="8" fill="var(--accent)" />
+              <circle cx="20" cy="20" r="19" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".35" />
+              <circle cx="20" cy="20" r="13.5" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".6" />
+              <circle cx="20" cy="20" r="8" fill="var(--sidebar-accent)" />
             </svg>
           )}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className={cn("text-muted-foreground hover:text-foreground h-8 w-8", isCollapsed && "hidden")}
+            className={cn(
+              "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/10 h-8 w-8",
+              isCollapsed && "hidden",
+            )}
             title={isCollapsed ? "Expandir Menu" : "Recolher Menu"}
           >
             <Menu className="h-4 w-4" />
@@ -229,7 +236,7 @@ export function Sidebar() {
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-1">
               {!isCollapsed && (
-                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                <div className="px-3 pb-1 text-[11px] font-display font-semibold uppercase tracking-wider text-sidebar-foreground/50">
                   {section.title}
                 </div>
               )}
@@ -241,7 +248,7 @@ export function Sidebar() {
                   const disabledContent = (
                     <div
                       className={cn(
-                        "group relative flex items-center rounded-xl px-3 py-2 text-sm font-medium opacity-50 cursor-not-allowed text-muted-foreground",
+                        "group relative flex items-center rounded-xl px-3 py-2 text-sm font-display font-medium opacity-50 cursor-not-allowed text-sidebar-foreground/60",
                         isCollapsed ? "justify-center" : "justify-start gap-3",
                       )}
                     >
@@ -251,7 +258,7 @@ export function Sidebar() {
                           <span className="truncate flex-1 text-left">{item.label}</span>
                           <Badge
                             variant="outline"
-                            className="text-[10px] px-1.5 py-0 border-muted-foreground/30 text-muted-foreground"
+                            className="text-[10px] px-1.5 py-0 border-sidebar-foreground/25 text-sidebar-foreground/60"
                           >
                             {t.nav.comingSoon}
                           </Badge>
@@ -282,23 +289,23 @@ export function Sidebar() {
                     key={item.key}
                     to={item.path!}
                     className={cn(
-                      "group relative flex items-center rounded-xl px-3 py-2 transition-colors text-sm font-medium",
+                      "group relative flex items-center rounded-xl px-3 py-2 transition-colors text-sm font-display font-medium",
                       isCollapsed ? "justify-center" : "justify-start gap-3",
                       isActive
-                        ? "bg-primary/15 text-primary shadow-[inset_3px_0_0_0_var(--primary)] font-semibold"
-                        : "text-muted-foreground hover:bg-card hover:text-foreground",
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[inset_3px_0_0_0_var(--sidebar-accent)] font-semibold"
+                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/10 hover:text-sidebar-foreground",
                     )}
                   >
                     <Icon
                       className={cn(
                         "shrink-0",
                         isCollapsed ? "h-5 w-5" : "h-4 w-4",
-                        isActive ? "text-primary" : "",
+                        isActive ? "text-sidebar-primary-foreground" : "",
                       )}
                     />
                     {!isCollapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
                     {!isCollapsed && item.badge !== undefined && (
-                      <Badge variant="secondary" className="ml-auto text-[10px] font-semibold">
+                      <Badge className="ml-auto text-[10px] font-mono font-semibold bg-sidebar-accent text-sidebar-accent-foreground border-transparent hover:bg-sidebar-accent">
                         {item.badge}
                       </Badge>
                     )}
@@ -323,13 +330,13 @@ export function Sidebar() {
         </nav>
 
         {/* Footer Block */}
-        <div className="mt-auto border-t border-border/30 p-2 space-y-2 bg-card/20">
+        <div className="mt-auto border-t border-sidebar-border p-2 space-y-2">
           {/* Admin Link if authorized */}
           {isAdmin && (
             <Link
               to="/admin"
               className={cn(
-                "flex items-center rounded-xl px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors",
+                "flex items-center rounded-xl px-3 py-2 text-xs font-display font-semibold text-sidebar-accent hover:bg-sidebar-accent/10 transition-colors",
                 isCollapsed ? "justify-center" : "gap-2.5",
               )}
             >
@@ -364,7 +371,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   className={cn(
-                    "flex items-center rounded-xl p-1.5 transition-colors hover:bg-card w-full text-left border border-border/40 bg-card/40",
+                    "flex items-center rounded-xl p-1.5 transition-colors hover:bg-sidebar-accent/10 w-full text-left border border-sidebar-border bg-sidebar-foreground/5",
                     isCollapsed ? "justify-center" : "justify-start gap-2.5",
                   )}
                 >
@@ -373,30 +380,27 @@ export function Sidebar() {
                       <img
                         src={user.photoURL}
                         alt="Avatar"
-                        className="h-7 w-7 rounded-full object-cover ring-1 ring-border/60"
+                        className="h-7 w-7 rounded-full object-cover ring-2 ring-sidebar-accent/60"
                       />
                     ) : (
-                      <SuccessIconBox
-                        icon={User}
-                        size="sm"
-                        rounded="full"
-                        className="h-7 w-7"
-                      />
+                      <div className="h-7 w-7 rounded-full bg-sidebar-accent text-sidebar-accent-foreground flex items-center justify-center ring-2 ring-sidebar-accent/30">
+                        <User className="h-3.5 w-3.5" />
+                      </div>
                     )}
                   </div>
                   {!isCollapsed && (
                     <>
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="truncate text-xs font-semibold text-foreground">
+                        <span className="truncate text-xs font-display font-semibold text-sidebar-foreground">
                           {user.displayName || "Usuário"}
                         </span>
-                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                        <span className="text-[10px] font-mono font-medium text-sidebar-accent uppercase tracking-wider">
                           {isPro ? "Plano Pro" : "Plano Free"}
                         </span>
                       </div>
                       <Link
                         to="/settings"
-                        className="text-muted-foreground hover:text-foreground p-1 rounded-md"
+                        className="text-sidebar-foreground/60 hover:text-sidebar-foreground p-1 rounded-md"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Settings className="h-3.5 w-3.5" />
@@ -441,7 +445,7 @@ export function Sidebar() {
               size="sm"
               onClick={() => openAuthModal()}
               className={cn(
-                "w-full text-xs text-muted-foreground hover:text-foreground",
+                "w-full text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent/10",
                 isCollapsed ? "justify-center px-0" : "justify-start gap-2",
               )}
             >
@@ -454,8 +458,8 @@ export function Sidebar() {
           {!isCollapsed ? (
             <div className="flex flex-col gap-1.5 pt-1">
               {/* Theme switch */}
-              <div className="flex items-center justify-between bg-card/60 p-1 rounded-lg border border-border/50">
-                <span className="text-[11px] text-muted-foreground pl-2">{t.nav.theme.toggle}</span>
+              <div className="flex items-center justify-between bg-sidebar-foreground/5 p-1 rounded-lg border border-sidebar-border">
+                <span className="text-[11px] font-display text-sidebar-foreground/60 pl-2">{t.nav.theme.toggle}</span>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
@@ -463,8 +467,8 @@ export function Sidebar() {
                     className={cn(
                       "h-6 px-2 rounded flex items-center justify-center text-xs transition-colors",
                       !isDark
-                        ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
+                        : "text-sidebar-foreground/60 hover:text-sidebar-foreground",
                     )}
                     title={t.nav.theme.light}
                   >
@@ -476,8 +480,8 @@ export function Sidebar() {
                     className={cn(
                       "h-6 px-2 rounded flex items-center justify-center text-xs transition-colors",
                       isDark
-                        ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
+                        : "text-sidebar-foreground/60 hover:text-sidebar-foreground",
                     )}
                     title={t.nav.theme.dark}
                   >
@@ -499,7 +503,7 @@ export function Sidebar() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setTheme(isDark ? "light" : "dark")}
-                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/10"
                   >
                     {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                   </Button>
@@ -514,7 +518,7 @@ export function Sidebar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/10"
                   >
                     <Globe className="h-4 w-4" />
                   </Button>

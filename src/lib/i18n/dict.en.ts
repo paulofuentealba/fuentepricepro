@@ -583,6 +583,7 @@ export const en = {
     comingSoon: "Coming soon",
     home: "Home",
     admin: "Admin",
+    tagline: "Passive income with clarity",
     theme: {
       light: "Light Mode",
       dark: "Dark Mode",

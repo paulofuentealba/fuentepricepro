@@ -590,6 +590,7 @@ export const es = {
     comingSoon: "Próximamente",
     home: "Inicio",
     admin: "Admin",
+    tagline: "Renta pasiva con claridad",
     theme: {
       light: "Modo Claro",
       dark: "Modo Oscuro",
