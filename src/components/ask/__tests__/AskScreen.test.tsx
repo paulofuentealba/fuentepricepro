@@ -52,6 +52,7 @@ function createMockPosition(overrides: Partial<ValuedWatchlistItem>): ValuedWatc
     addedAt: 1700000000000,
     investingSince: 1700000000000,
     isClosedPosition: false,
+    isBffMode: true,
     valuation: {
       ticker: "BBAS3",
       activeCeiling: ceiling,

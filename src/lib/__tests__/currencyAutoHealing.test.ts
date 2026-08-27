@@ -55,6 +55,7 @@ describe("Currency In-Memory Resolution & Auto-Healing (Prompt 107)", () => {
         investingSince: Date.now(),
         livePrice: 38.0,
         isClosedPosition: false,
+        isBffMode: true,
         valuation: {} as any,
       },
       {
@@ -79,6 +80,7 @@ describe("Currency In-Memory Resolution & Auto-Healing (Prompt 107)", () => {
         investingSince: Date.now(),
         livePrice: 200.0,
         isClosedPosition: false,
+        isBffMode: true,
         valuation: {} as any,
       },
     );
@@ -123,6 +125,7 @@ describe("Currency In-Memory Resolution & Auto-Healing (Prompt 107)", () => {
       investingSince: Date.now(),
       livePrice: 50.0,
       isClosedPosition: false,
+      isBffMode: true,
       valuation: {} as any,
     });
 

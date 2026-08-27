@@ -107,6 +107,7 @@ const mockItem: ValuedWatchlistItem = {
   livePrice: 30.0,
   sector: "Petróleo e Gás",
   isClosedPosition: false,
+  isBffMode: true,
   valuation: {
     margin: 40.0,
     activeCeiling: 50.0,

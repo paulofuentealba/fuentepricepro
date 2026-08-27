@@ -46,6 +46,7 @@ function createItem(overrides: Partial<ValuedWatchlistItem>): ValuedWatchlistIte
     payoutRatio: null,
     valuation: dummyValuation,
     isClosedPosition: false,
+    isBffMode: true,
     ...overrides,
   };
 }

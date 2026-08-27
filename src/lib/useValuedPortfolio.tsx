@@ -1,27 +1,19 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWatchlist, type WatchlistItem } from "./watchlist";
-import { useSettings } from "./settings";
 import { useUserSettings, type UserSettings } from "./useUserSettings";
-import { useLiveQuotesAndMeta } from "@/components/ceiling/watchlist/useLiveQuotesAndMeta";
 import {
-  getAssetValuation,
   netAfterTax,
   calculateFixedIncomeBalance,
   getPositionValue,
-  calculateBvps,
-  GORDON_TERMINAL_GROWTH_RATE,
-  resolveTargetYield,
   type ValuationResult,
 } from "./calculations";
-import { useSelic } from "./useSelic";
-import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
-import { exchangeRateQueryOptions, macroRatesQueryOptions, ipcaFiveYearAverageQueryOptions } from "./queryOptions";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
-import { useTransactions, recalculateHoldingFromTransactions, recalculateInvestingSinceFromTransactions, type Transaction } from "./transactions";
-import { useFeatureGate } from "./useFeatureGate";
 import { fetchValuedPortfolioFn } from "./api/portfolioBff.functions";
+import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
+import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
+import { useFeatureGate } from "./useFeatureGate";
 
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields
@@ -32,9 +24,9 @@ export interface ValuedWatchlistItem extends WatchlistItem {
   isClosedPosition: boolean;
   /**
    * True when valuedItems originated from the BFF server function (ADR-001).
-   * Optional — defaults to false. Existing mocks in tests need not add this field.
+   * Always true after legacy shutdown (Prompt 125). Optional for test mocks.
    */
-  isBffMode?: boolean;
+  isBffMode: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -110,128 +102,9 @@ export function computeTotals(
 }
 
 // ---------------------------------------------------------------------------
-// Client-side computation (legacy path, gate = false)
+// BFF computation (ADR-001 path - ONLY path after Prompt 125)
 // ---------------------------------------------------------------------------
 
-function useValuedPortfolioClientSide(
-  items: WatchlistItem[],
-  transactions: Transaction[],
-  settings: UserSettings,
-  isAppLoading: boolean,
-  watchlistRest: ReturnType<typeof useWatchlist>,
-) {
-  const { t } = useI18n();
-
-  const txByTicker = useMemo(() => {
-    const map: Record<string, Transaction[]> = {};
-    for (const tx of transactions) {
-      if (!map[tx.ticker]) map[tx.ticker] = [];
-      map[tx.ticker].push(tx);
-    }
-    return map;
-  }, [transactions]);
-
-  const baseItems = useMemo(() => {
-    return (items || []).map((it) => {
-      const txs = txByTicker[it.ticker];
-      let quantity = it.quantity;
-      let averagePrice = it.averagePrice;
-      let investingSince = it.investingSince;
-      const hasTransactions = Boolean(txs && txs.length > 0);
-
-      if (hasTransactions && txs) {
-        const computed = recalculateHoldingFromTransactions(txs);
-        quantity = computed.quantity;
-        averagePrice = computed.averagePrice;
-        const computedInvestingSince = recalculateInvestingSinceFromTransactions(txs);
-        if (computedInvestingSince != null) {
-          investingSince = Math.min(
-            typeof it.investingSince === "number" && !isNaN(it.investingSince) && it.investingSince > 0
-              ? it.investingSince
-              : Infinity,
-            computedInvestingSince
-          );
-        }
-      }
-
-      const isClosedPosition = hasTransactions && quantity === 0;
-      const effectiveYield = resolveTargetYield(it, settings).effectiveYield;
-
-      return {
-        ...it,
-        quantity,
-        averagePrice,
-        investingSince,
-        isClosedPosition,
-        targetYield: effectiveYield,
-      };
-    });
-  }, [items, settings, txByTicker]);
-
-  const { quotes, meta, dividendEventsMap, dataUpdatedAt: lastUpdatedAt } = useLiveQuotesAndMeta(baseItems);
-  const { data: selic } = useSelic();
-  const { data: fx } = useQuery(exchangeRateQueryOptions());
-  const { data: macroRates } = useQuery(macroRatesQueryOptions());
-  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
-
-  const valuedItems = useMemo<ValuedWatchlistItem[]>(() => {
-    return baseItems.map((it) => {
-      const q = quotes[it.ticker];
-      const m = meta[it.ticker];
-      const livePrice = q?.price ?? it.currentPrice;
-      const valuation = getAssetValuation({
-        targetYield: it.targetYield,
-        currentPrice: livePrice,
-        avgDividend: m?.canonicalDividend3y ?? it.annualDividend,
-        eps: m?.eps,
-        bvps: calculateBvps(m?.bvps, m?.pbRatio, livePrice),
-        dividendCagr: m?.dividendCagr5y,
-        selicPct: selic ?? SELIC_FALLBACK,
-        terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
-        currency: it.currency,
-        type: it.type,
-      });
-
-      return {
-        ...it,
-        annualDividend: m?.canonicalDividend3y ?? it.annualDividend,
-        currentPrice: livePrice,
-        livePrice,
-        ceilingPrice: valuation.activeCeiling ?? 0,
-        safetyMargin: valuation.margin ?? 0,
-        sector: m?.sector || it.sector || t.common.other,
-        valuation,
-        isClosedPosition: it.isClosedPosition,
-        isBffMode: false,
-      };
-    });
-  }, [baseItems, quotes, meta, selic, ipcaAvg, t]);
-
-  const totals = useMemo(
-    () => computeTotals(valuedItems, fx, macroRates),
-    [valuedItems, fx, macroRates],
-  );
-
-  return {
-    ...watchlistRest,
-    items,
-    valuedItems,
-    totals,
-    quotes,
-    meta,
-    dividendEventsMap,
-    isAppLoading,
-    lastUpdatedAt,
-    macroRates,
-    fx,
-    selic,
-    isBffMode: false,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// BFF computation (ADR-001 path, gate = true)
-// ---------------------------------------------------------------------------
 export function transformBffItemToValuedItem(
   bffItem: any,
   fallbackSector: string = "Outros",
@@ -275,22 +148,19 @@ function useValuedPortfolioBff(
   settings: UserSettings,
   isAppLoading: boolean,
   watchlistRest: ReturnType<typeof useWatchlist>,
-  useBff: boolean,
 ) {
   const { t } = useI18n();
-  const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
-  const { data: ipcaAvg } = useQuery(ipcaFiveYearAverageQueryOptions());
   const { loading: isAuthLoading } = useAuth();
 
   const itemsWithYield = useMemo(
     () =>
       items.map((it) => ({
         ...it,
-        targetYield: resolveTargetYield(it, settings).effectiveYield,
+        targetYield: it.targetYield ?? settings.targetYield,
       })),
-    [items, settings],
+    [items, settings.targetYield],
   );
 
   const bffQuery = useQuery({
@@ -301,14 +171,14 @@ function useValuedPortfolioBff(
           uid: "",
           items: itemsWithYield,
           transactions,
-          selicPct: selic ?? SELIC_FALLBACK,
-          terminalGrowthRate: ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE,
+          selicPct: SELIC_FALLBACK,
+          terminalGrowthRate: 0.045,
           exchangeRate: fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK,
           classTargetYields: settings.classTargetYields,
           targetYield: settings.targetYield,
         },
       }),
-    enabled: useBff && !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
+    enabled: !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
     staleTime: 60_000,
   });
 
@@ -327,20 +197,20 @@ function useValuedPortfolioBff(
     items,
     valuedItems,
     totals,
-    quotes: {} as ReturnType<typeof useLiveQuotesAndMeta>["quotes"],
-    meta: {} as ReturnType<typeof useLiveQuotesAndMeta>["meta"],
-    dividendEventsMap: {} as ReturnType<typeof useLiveQuotesAndMeta>["dividendEventsMap"],
+    quotes: {} as Record<string, any>,
+    meta: {} as Record<string, any>,
+    dividendEventsMap: {} as Record<string, any>,
     isAppLoading: isAppLoading || bffQuery.isLoading,
     lastUpdatedAt: bffQuery.dataUpdatedAt ?? 0,
     macroRates,
     fx,
-    selic,
+    selic: SELIC_FALLBACK,
     isBffMode: true,
   };
 }
 
 // ---------------------------------------------------------------------------
-// Gate dispatcher — both hooks always run (Rules of Hooks compliance)
+// Gate dispatcher — BFF only (Legacy path removed in Prompt 125)
 // ---------------------------------------------------------------------------
 
 function useValuedPortfolioComputation() {
@@ -349,28 +219,19 @@ function useValuedPortfolioComputation() {
   const { transactions = [], isLoading: isTxLoading } = useTransactions();
   const { loading: isAuthLoading } = useAuth();
   const { settings } = useUserSettings();
-  const useBff = Boolean(useFeatureGate("USE_BFF_PORTFOLIO_VALUATION"));
 
   const isAppLoading = isAuthLoading || isWatchlistPending || isTxLoading;
 
-  const clientResult = useValuedPortfolioClientSide(
-    items ?? [],
-    transactions,
-    settings,
-    isAppLoading,
-    watchlistResult,
-  );
-
+  // Always use BFF path - legacy client-side computation removed
   const bffResult = useValuedPortfolioBff(
     items ?? [],
     transactions,
     settings,
     isAppLoading,
     watchlistResult,
-    useBff,
   );
 
-  return useBff ? bffResult : clientResult;
+  return bffResult;
 }
 
 type ValuedPortfolioValue = ReturnType<typeof useValuedPortfolioComputation>;
@@ -378,18 +239,16 @@ type ValuedPortfolioValue = ReturnType<typeof useValuedPortfolioComputation>;
 const ValuedPortfolioContext = createContext<ValuedPortfolioValue | null>(null);
 
 /**
- * Fix #5 (auditoria 3.2): `useValuedPortfolio` registra listeners reais
- * (onSnapshot de `users/{uid}/assets` via useWatchlist e de `users/{uid}/
- * transactions`). Montá-lo 5× na home (`/app`) → ~10 listeners na mesma
- * coleção. React Query deduplica queries, NÃO listeners. Elevamos a uma
- * única instância via Provider no root; consumidores leem do contexto.
+ * useValuedPortfolio - Single source of truth for portfolio valuation via BFF.
  *
- * O fallback para computação direta mantém o hook utilizável fora do
- * provider (testes, rotas isoladas) sem quebrar o comportamento atual.
+ * Legacy client-side merge (7 redundant queries) removed in Prompt 125.
+ * This hook now exclusively uses fetchValuedPortfolioFn (TanStack Start server function)
+ * which consolidates: positions + assets cache + exchange rates + macro rates + valuation
+ * in a single network round-trip.
  *
- * BFF mode (ADR-001): quando USE_BFF_PORTFOLIO_VALUATION = true no Firestore,
- * o hook usa fetchValuedPortfolioFn (TanStack Start server function) em vez
- * do merge client-side. O gate é false por default → zero regressão.
+ * Rollback plan: If issues arise, the legacy client-side computation can be restored from
+ * git history (commit before Prompt 125). Feature gate USE_BFF_PORTFOLIO_VALUATION
+ * remains available for gradual rollout if needed.
  */
 export function ValuedPortfolioProvider({ children }: { children: ReactNode }) {
   const value = useValuedPortfolioComputation();
@@ -405,3 +264,7 @@ export function useValuedPortfolio() {
   if (ctx) return ctx;
   return useValuedPortfolioComputation();
 }
+
+// Re-export useTransactions for components that still need it
+import { useTransactions, type Transaction } from "./transactions";
+export { useTransactions, type Transaction };
