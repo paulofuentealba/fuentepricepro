@@ -9,6 +9,7 @@ import {
 } from "../realizedIncome";
 import { type Transaction } from "../transactionsLogic";
 import { type DividendEvent } from "../domain";
+import { getLocalDateISOString } from "../formatters";
 
 describe("realizedIncome", () => {
   describe("normalizeDateStr", () => {
@@ -386,7 +387,7 @@ describe("realizedIncome", () => {
 
   describe("computeRealizedIncomeSummary", () => {
     it("segregates paid amounts from announced amounts", () => {
-      const currentYear = new Date().getUTCFullYear();
+      const currentYear = getLocalDateISOString().slice(0, 4);
       const events = [
         {
           ticker: "BBSE3",
@@ -421,6 +422,59 @@ describe("realizedIncome", () => {
       expect(summary.eventsCount).toBe(1);
       expect(summary.announcedTotal).toBe(150);
       expect(summary.announcedCount).toBe(1);
+    });
+
+    it("uses local calendar components rather than UTC to determine currentYear and currentMonth across timezone boundaries", () => {
+      // Simulate boundary condition: Dec 31, 2024 at 23:00 Local (which is Jan 1, 2025 in UTC)
+      const yearSpy = vi.spyOn(Date.prototype, "getFullYear").mockReturnValue(2024);
+      const monthSpy = vi.spyOn(Date.prototype, "getMonth").mockReturnValue(11); // December (0-indexed)
+      const dateSpy = vi.spyOn(Date.prototype, "getDate").mockReturnValue(31);
+      const utcYearSpy = vi.spyOn(Date.prototype, "getUTCFullYear").mockReturnValue(2025);
+      const utcMonthSpy = vi.spyOn(Date.prototype, "getUTCMonth").mockReturnValue(0); // January (0-indexed)
+
+      const events = [
+        {
+          ticker: "BBSE3",
+          currency: "BRL" as const,
+          exDate: "2024-12-20",
+          paymentDate: "2024-12-31",
+          isPaid: true,
+          quantityHeld: 100,
+          amountPerShareGross: 1.0,
+          amountGross: 100,
+          amountNet: 100,
+          taxType: "dividend" as const,
+        },
+        {
+          ticker: "VALE3",
+          currency: "BRL" as const,
+          exDate: "2025-01-01",
+          paymentDate: "2025-01-01",
+          isPaid: true,
+          quantityHeld: 100,
+          amountPerShareGross: 0.5,
+          amountGross: 50,
+          amountNet: 50,
+          taxType: "dividend" as const,
+        },
+      ];
+
+      try {
+        const summary = computeRealizedIncomeSummary(events, "BRL");
+
+        // With getLocalDateISOString (local): currentYear is "2024", currentMonth is "2024-12"
+        // Event 1 (2024-12-31) matches both currentYear and currentMonth -> 100
+        // Event 2 (2025-01-01) does not match currentYear 2024 -> only counts in allTimeTotal (150)
+        expect(summary.currentYear).toBe(100);
+        expect(summary.currentMonth).toBe(100);
+        expect(summary.allTimeTotal).toBe(150);
+      } finally {
+        yearSpy.mockRestore();
+        monthSpy.mockRestore();
+        dateSpy.mockRestore();
+        utcYearSpy.mockRestore();
+        utcMonthSpy.mockRestore();
+      }
     });
   });
 

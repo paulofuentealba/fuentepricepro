@@ -25,6 +25,7 @@ import { Route as AppSmartallocationRouteImport } from './routes/app/smartalloca
 import { Route as AppScreenerRouteImport } from './routes/app/screener'
 import { Route as AppRiskradarRouteImport } from './routes/app/riskradar'
 import { Route as AppReinvestirRouteImport } from './routes/app/reinvestir'
+import { Route as AppRealidadeFiscalRouteImport } from './routes/app/realidade-fiscal'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
 import { Route as AppExplorarRouteImport } from './routes/app/explorar'
@@ -113,6 +114,11 @@ const AppReinvestirRoute = AppReinvestirRouteImport.update({
   path: '/reinvestir',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRealidadeFiscalRoute = AppRealidadeFiscalRouteImport.update({
+  id: '/realidade-fiscal',
+  path: '/realidade-fiscal',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyportfolioRoute = AppMyportfolioRouteImport.update({
   id: '/myportfolio',
   path: '/myportfolio',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
   '/app/reinvestir': typeof AppReinvestirRoute
   '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
   '/app/reinvestir': typeof AppReinvestirRoute
   '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
+  '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
   '/app/reinvestir': typeof AppReinvestirRoute
   '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/app/explorar'
     | '/app/globalradar'
     | '/app/myportfolio'
+    | '/app/realidade-fiscal'
     | '/app/reinvestir'
     | '/app/riskradar'
     | '/app/screener'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/app/explorar'
     | '/app/globalradar'
     | '/app/myportfolio'
+    | '/app/realidade-fiscal'
     | '/app/reinvestir'
     | '/app/riskradar'
     | '/app/screener'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/app/explorar'
     | '/app/globalradar'
     | '/app/myportfolio'
+    | '/app/realidade-fiscal'
     | '/app/reinvestir'
     | '/app/riskradar'
     | '/app/screener'
@@ -417,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReinvestirRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/realidade-fiscal': {
+      id: '/app/realidade-fiscal'
+      path: '/realidade-fiscal'
+      fullPath: '/app/realidade-fiscal'
+      preLoaderRoute: typeof AppRealidadeFiscalRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/myportfolio': {
       id: '/app/myportfolio'
       path: '/myportfolio'
@@ -469,6 +488,7 @@ interface AppRouteChildren {
   AppExplorarRoute: typeof AppExplorarRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
+  AppRealidadeFiscalRoute: typeof AppRealidadeFiscalRoute
   AppReinvestirRoute: typeof AppReinvestirRoute
   AppRiskradarRoute: typeof AppRiskradarRoute
   AppScreenerRoute: typeof AppScreenerRoute
@@ -484,6 +504,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExplorarRoute: AppExplorarRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
+  AppRealidadeFiscalRoute: AppRealidadeFiscalRoute,
   AppReinvestirRoute: AppReinvestirRoute,
   AppRiskradarRoute: AppRiskradarRoute,
   AppScreenerRoute: AppScreenerRoute,

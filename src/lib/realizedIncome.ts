@@ -214,9 +214,10 @@ export function computeRealizedIncomeSummary(
   currency: Currency = "BRL",
   fxRate?: number,
 ): RealizedIncomeSummary {
-  const now = new Date();
-  const currentYearStr = String(now.getUTCFullYear());
-  const currentMonthStr = `${currentYearStr}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  // Use LOCAL timezone (consistent with tax modules in src/lib/tax/br/*.ts)
+  const nowLocal = getLocalDateISOString(); // "YYYY-MM-DD"
+  const currentYearStr = nowLocal.slice(0, 4);
+  const currentMonthStr = nowLocal.slice(0, 7); // "YYYY-MM"
 
   let currentMonth = 0;
   let currentYear = 0;

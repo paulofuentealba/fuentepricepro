@@ -13,7 +13,6 @@ import { useI18n } from "./i18n-provider";
 import { fetchValuedPortfolioFn } from "./api/portfolioBff.functions";
 import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
-import { useFeatureGate } from "./useFeatureGate";
 
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields
@@ -245,10 +244,6 @@ const ValuedPortfolioContext = createContext<ValuedPortfolioValue | null>(null);
  * This hook now exclusively uses fetchValuedPortfolioFn (TanStack Start server function)
  * which consolidates: positions + assets cache + exchange rates + macro rates + valuation
  * in a single network round-trip.
- *
- * Rollback plan: If issues arise, the legacy client-side computation can be restored from
- * git history (commit before Prompt 125). Feature gate USE_BFF_PORTFOLIO_VALUATION
- * remains available for gradual rollout if needed.
  */
 export function ValuedPortfolioProvider({ children }: { children: ReactNode }) {
   const value = useValuedPortfolioComputation();
