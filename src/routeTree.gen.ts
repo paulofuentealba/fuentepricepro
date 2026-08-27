@@ -27,6 +27,7 @@ import { Route as AppRiskradarRouteImport } from './routes/app/riskradar'
 import { Route as AppReinvestirRouteImport } from './routes/app/reinvestir'
 import { Route as AppRealidadeFiscalRouteImport } from './routes/app/realidade-fiscal'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
+import { Route as AppMetasRouteImport } from './routes/app/metas'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
 import { Route as AppExplorarRouteImport } from './routes/app/explorar'
 import { Route as AppDocsRouteImport } from './routes/app/docs'
@@ -124,6 +125,11 @@ const AppMyportfolioRoute = AppMyportfolioRouteImport.update({
   path: '/myportfolio',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMetasRoute = AppMetasRouteImport.update({
+  id: '/metas',
+  path: '/metas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
   id: '/globalradar',
   path: '/globalradar',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/app/docs': typeof AppDocsRoute
   '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
+  '/app/metas': typeof AppMetasRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
   '/app/reinvestir': typeof AppReinvestirRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/app/docs': typeof AppDocsRoute
   '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
+  '/app/metas': typeof AppMetasRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
   '/app/reinvestir': typeof AppReinvestirRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/app/docs': typeof AppDocsRoute
   '/app/explorar': typeof AppExplorarRoute
   '/app/globalradar': typeof AppGlobalradarRoute
+  '/app/metas': typeof AppMetasRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
   '/app/reinvestir': typeof AppReinvestirRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/app/docs'
     | '/app/explorar'
     | '/app/globalradar'
+    | '/app/metas'
     | '/app/myportfolio'
     | '/app/realidade-fiscal'
     | '/app/reinvestir'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/app/docs'
     | '/app/explorar'
     | '/app/globalradar'
+    | '/app/metas'
     | '/app/myportfolio'
     | '/app/realidade-fiscal'
     | '/app/reinvestir'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/app/docs'
     | '/app/explorar'
     | '/app/globalradar'
+    | '/app/metas'
     | '/app/myportfolio'
     | '/app/realidade-fiscal'
     | '/app/reinvestir'
@@ -443,6 +455,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMyportfolioRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/metas': {
+      id: '/app/metas'
+      path: '/metas'
+      fullPath: '/app/metas'
+      preLoaderRoute: typeof AppMetasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/globalradar': {
       id: '/app/globalradar'
       path: '/globalradar'
@@ -487,6 +506,7 @@ interface AppRouteChildren {
   AppDocsRoute: typeof AppDocsRoute
   AppExplorarRoute: typeof AppExplorarRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
+  AppMetasRoute: typeof AppMetasRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
   AppRealidadeFiscalRoute: typeof AppRealidadeFiscalRoute
   AppReinvestirRoute: typeof AppReinvestirRoute
@@ -503,6 +523,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDocsRoute: AppDocsRoute,
   AppExplorarRoute: AppExplorarRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
+  AppMetasRoute: AppMetasRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
   AppRealidadeFiscalRoute: AppRealidadeFiscalRoute,
   AppReinvestirRoute: AppReinvestirRoute,
