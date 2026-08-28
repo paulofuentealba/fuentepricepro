@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  calculateProfileTier,
-  determineResumptionStep,
-  DEFAULT_INVESTOR_PROFILE,
-} from "../investor-profile";
+import { calculateProfileTier, DEFAULT_INVESTOR_PROFILE } from "../investor-profile";
 
 describe("calculateProfileTier", () => {
   it("classifies as Conservative when reaction is 'sell'", () => {
@@ -47,37 +43,5 @@ describe("calculateProfileTier", () => {
     const resDefault = calculateProfileTier(DEFAULT_INVESTOR_PROFILE);
     expect(resDefault.tier).toBe("moderate");
     expect(resDefault.sublabel).toBe("income");
-  });
-});
-
-describe("determineResumptionStep", () => {
-  it("returns step 0 (Welcome) when profile is empty or completed", () => {
-    expect(determineResumptionStep(null)).toBe(0);
-    expect(determineResumptionStep(DEFAULT_INVESTOR_PROFILE)).toBe(0);
-    expect(determineResumptionStep({ ...DEFAULT_INVESTOR_PROFILE, completedAt: 123456789 })).toBe(0);
-  });
-
-  it("returns step 1 when goal is missing", () => {
-    expect(determineResumptionStep({ goal: null, horizon: "mid" })).toBe(1);
-  });
-
-  it("returns step 2 when goal is present but horizon is missing", () => {
-    expect(determineResumptionStep({ goal: "income", horizon: null })).toBe(2);
-  });
-
-  it("returns step 3 when goal and horizon are present, but reaction is missing", () => {
-    expect(determineResumptionStep({ goal: "income", horizon: "long", reaction: null })).toBe(3);
-  });
-
-  it("returns step 4 when goal, horizon, reaction are present, but experience is missing", () => {
-    expect(
-      determineResumptionStep({ goal: "income", horizon: "long", reaction: "buy", experience: null })
-    ).toBe(4);
-  });
-
-  it("returns step 5 (Result) when all 4 questions are answered", () => {
-    expect(
-      determineResumptionStep({ goal: "income", horizon: "long", reaction: "buy", experience: "advanced" })
-    ).toBe(5);
   });
 });

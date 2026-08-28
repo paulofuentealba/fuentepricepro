@@ -67,7 +67,7 @@ function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 overflow-x-hidden flex flex-col relative">
+    <div className="dark min-h-screen bg-background text-foreground selection:bg-accent/30 overflow-x-hidden flex flex-col relative">
       {/* Nav */}
       <header className="w-full">
         <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 px-6 py-5">
@@ -93,33 +93,11 @@ function LandingPage() {
               </Link>
             </nav>
             <LanguageSwitcher className="hidden md:inline-flex" />
-            {user ? (
-              <Button asChild size="sm" className="bg-primary text-sidebar-accent hover:opacity-90 rounded-full">
-                <Link to="/app">
-                  {P.nav.cta} <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Link>
-              </Button>
-            ) : (
-              <>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => openAuthModal()}
-                  className="rounded-full"
-                >
-                  {P.nav.login}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => openAuthModal()}
-                  className="bg-primary text-sidebar-accent hover:opacity-90 rounded-full"
-                >
-                  {P.nav.cta}
-                </Button>
-              </>
-            )}
+            <Button asChild size="sm" className="bg-primary text-sidebar-accent hover:opacity-90 rounded-full">
+              <Link to={user ? "/app" : "/auth"}>
+                {P.nav.login} <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -141,23 +119,13 @@ function LandingPage() {
           </motion.h1>
           <p className="text-base text-muted-foreground leading-relaxed mb-7 max-w-xl">{P.hero.sub}</p>
           <div className="flex flex-wrap gap-3 mb-4">
-            {user ? (
-              <Button
-                asChild
-                size="lg"
-                className="bg-primary text-sidebar-accent hover:opacity-90 rounded-lg font-semibold"
-              >
-                <Link to="/app">{P.hero.ctaPrimary}</Link>
-              </Button>
-            ) : (
-              <Button
-                size="lg"
-                onClick={() => openAuthModal()}
-                className="bg-primary text-sidebar-accent hover:opacity-90 rounded-lg font-semibold"
-              >
-                {P.hero.ctaPrimary}
-              </Button>
-            )}
+            <Button
+              asChild
+              size="lg"
+              className="bg-primary text-sidebar-accent hover:opacity-90 rounded-lg font-semibold"
+            >
+              <Link to="/onboarding">{P.hero.ctaPrimary}</Link>
+            </Button>
             {user ? (
               <Button asChild size="lg" variant="outline" className="rounded-lg font-semibold">
                 <Link to="/app">{P.hero.ctaSecondary}</Link>

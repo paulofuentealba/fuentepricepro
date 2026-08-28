@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-provider";
 import { auth, db } from "@/integrations/firebase/client";
@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { calculateProfileTier } from "@/lib/investor-profile";
-import { InvestorProfileFlow } from "@/components/onboarding/InvestorProfileFlow";
 import { buildUserDataExport } from "@/lib/dataExport";
 import { buildAccountDeletionPaths } from "@/lib/accountDeletion";
 import {
@@ -667,8 +666,8 @@ function DeleteAccountWizard({
 
 function InvestorProfileSettingsCard() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const { profile } = useInvestorProfile();
-  const [isRetaking, setIsRetaking] = useState(false);
 
   const { tier, sublabel } = calculateProfileTier(profile);
 
@@ -703,7 +702,7 @@ function InvestorProfileSettingsCard() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setIsRetaking(true)}
+            onClick={() => navigate({ to: "/profile", search: { returnTo: "/settings" } })}
             className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary self-start sm:self-auto"
           >
             {t.onboarding.result.retakeBtn}
@@ -713,8 +712,6 @@ function InvestorProfileSettingsCard() {
           {t.onboarding.result.descriptions[tier]}
         </p>
       </div>
-
-      {isRetaking && <InvestorProfileFlow isModal={true} onComplete={() => setIsRetaking(false)} />}
     </>
   );
 }

@@ -1,4 +1,3 @@
-import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
@@ -19,7 +18,15 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
       role="group"
       aria-label={t.languageLabel}
     >
-      <Globe className="mx-1 h-4 w-4 text-muted-foreground" aria-hidden />
+      <Button
+        type="button"
+        size="sm"
+        variant={locale === "ptBR" ? "default" : "ghost"}
+        className="h-7 rounded-full px-3 text-xs"
+        onClick={() => setLocale("ptBR")}
+      >
+        PT
+      </Button>
       <Button
         type="button"
         size="sm"
@@ -28,15 +35,6 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         onClick={() => setLocale("en")}
       >
         EN
-      </Button>
-      <Button
-        type="button"
-        size="sm"
-        variant={locale === "ptBR" ? "default" : "ghost"}
-        className="h-7 rounded-full px-3 text-xs"
-        onClick={() => setLocale("ptBR")}
-      >
-        PT-BR
       </Button>
       <Button
         type="button"

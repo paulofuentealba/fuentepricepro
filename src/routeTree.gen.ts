@@ -13,12 +13,17 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SubscriptionTermsRouteImport } from './routes/subscription-terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as OnboardingPersonalInfoRouteImport } from './routes/onboarding.personal-info'
+import { Route as OnboardingMetasRouteImport } from './routes/onboarding.metas'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
 import { Route as AppSmartallocationRouteImport } from './routes/app/smartallocation'
@@ -54,9 +59,19 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -79,10 +94,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OnboardingRoute,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const OnboardingPersonalInfoRoute = OnboardingPersonalInfoRouteImport.update({
+  id: '/personal-info',
+  path: '/personal-info',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingMetasRoute = OnboardingMetasRouteImport.update({
+  id: '/metas',
+  path: '/metas',
+  getParentRoute: () => OnboardingRoute,
 } as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   id: '/guides/dividend-valuation',
@@ -161,7 +191,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
@@ -180,13 +212,17 @@ export interface FileRoutesByFullPath {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/onboarding/metas': typeof OnboardingMetasRoute
+  '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app/': typeof AppIndexRoute
+  '/onboarding/': typeof OnboardingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
@@ -205,7 +241,10 @@ export interface FileRoutesByTo {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/onboarding/metas': typeof OnboardingMetasRoute
+  '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app': typeof AppIndexRoute
+  '/onboarding': typeof OnboardingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -213,7 +252,9 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
@@ -232,7 +273,10 @@ export interface FileRoutesById {
   '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/onboarding/metas': typeof OnboardingMetasRoute
+  '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app/': typeof AppIndexRoute
+  '/onboarding/': typeof OnboardingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -241,7 +285,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/onboarding'
     | '/privacy'
+    | '/profile'
     | '/settings'
     | '/sitemap.xml'
     | '/subscription-terms'
@@ -260,13 +306,17 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/onboarding/metas'
+    | '/onboarding/personal-info'
     | '/app/'
+    | '/onboarding/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/auth'
     | '/privacy'
+    | '/profile'
     | '/settings'
     | '/sitemap.xml'
     | '/subscription-terms'
@@ -285,14 +335,19 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/onboarding/metas'
+    | '/onboarding/personal-info'
     | '/app'
+    | '/onboarding'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/app'
     | '/auth'
+    | '/onboarding'
     | '/privacy'
+    | '/profile'
     | '/settings'
     | '/sitemap.xml'
     | '/subscription-terms'
@@ -311,7 +366,10 @@ export interface FileRouteTypes {
     | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
     | '/guides/dividend-valuation'
+    | '/onboarding/metas'
+    | '/onboarding/personal-info'
     | '/app/'
+    | '/onboarding/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -319,7 +377,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  OnboardingRoute: typeof OnboardingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubscriptionTermsRoute: typeof SubscriptionTermsRoute
@@ -357,11 +417,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -392,12 +466,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/': {
+      id: '/onboarding/'
+      path: '/'
+      fullPath: '/onboarding/'
+      preLoaderRoute: typeof OnboardingIndexRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/onboarding/personal-info': {
+      id: '/onboarding/personal-info'
+      path: '/personal-info'
+      fullPath: '/onboarding/personal-info'
+      preLoaderRoute: typeof OnboardingPersonalInfoRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/metas': {
+      id: '/onboarding/metas'
+      path: '/metas'
+      fullPath: '/onboarding/metas'
+      preLoaderRoute: typeof OnboardingMetasRouteImport
+      parentRoute: typeof OnboardingRoute
     }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
@@ -536,12 +631,30 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface OnboardingRouteChildren {
+  OnboardingMetasRoute: typeof OnboardingMetasRoute
+  OnboardingPersonalInfoRoute: typeof OnboardingPersonalInfoRoute
+  OnboardingIndexRoute: typeof OnboardingIndexRoute
+}
+
+const OnboardingRouteChildren: OnboardingRouteChildren = {
+  OnboardingMetasRoute: OnboardingMetasRoute,
+  OnboardingPersonalInfoRoute: OnboardingPersonalInfoRoute,
+  OnboardingIndexRoute: OnboardingIndexRoute,
+}
+
+const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
+  OnboardingRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  OnboardingRoute: OnboardingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubscriptionTermsRoute: SubscriptionTermsRoute,

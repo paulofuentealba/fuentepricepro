@@ -55,25 +55,3 @@ export function calculateProfileTier(profile?: Partial<InvestorProfile> | null):
 
   return { tier, sublabel };
 }
-
-/**
- * Pure function to determine the initial step to resume the questionnaire based on existing answers.
- * Returns:
- * - 0: Welcome step (if empty or already completed)
- * - 1: Goal step (if goal is missing)
- * - 2: Horizon step (if horizon is missing)
- * - 3: Reaction step (if reaction is missing)
- * - 4: Experience step (if experience is missing)
- * - 5: Result step (if all 4 questions answered)
- */
-export function determineResumptionStep(profile?: Partial<InvestorProfile> | null): number {
-  if (!profile || profile.completedAt) return 0;
-  if (!profile.goal && !profile.horizon && !profile.reaction && !profile.experience) {
-    return 0;
-  }
-  if (!profile.goal) return 1;
-  if (!profile.horizon) return 2;
-  if (!profile.reaction) return 3;
-  if (!profile.experience) return 4;
-  return 5;
-}
