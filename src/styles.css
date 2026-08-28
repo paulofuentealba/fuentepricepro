@@ -95,6 +95,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -149,6 +150,12 @@
   --muted-foreground: oklch(0.500 0.021 162.5);
   --accent: oklch(0.713 0.124 81.9);
   --accent-foreground: oklch(0.230 0.021 162.5);
+  /* Darker gold for TEXT on light backgrounds — --accent (gold-500, #c99a3a) has ~2.3:1
+     contrast against --paper/--card, well under WCAG AA. Matches the prototype's --gold-600
+     (#a97a1f in light mode exactly), which it reserves for text while gold-500 is used for
+     fills/borders/bars. Kept as a literal hex (not oklch) for exact parity with the prototype
+     value, same as every other token in this file was calibrated against its hex source. */
+  --accent-text: #a97a1f;
   --destructive: oklch(0.550 0.135 35.4);
   --destructive-foreground: oklch(0.962 0.011 84.6);
   --border: oklch(0.230 0.021 162.5 / 0.12);
@@ -205,6 +212,9 @@
   --muted-foreground: oklch(0.720 0.020 87.5);
   --accent: oklch(0.844 0.107 87.9);
   --accent-foreground: oklch(0.180 0.017 167.5);
+  /* Prototype's --gold-600 equals --gold-500 in dark mode (both #e9c877) — no separate
+     darker shade needed here, unlike light mode. */
+  --accent-text: oklch(0.844 0.107 87.9);
   --destructive: oklch(0.689 0.137 35.4);
   --destructive-foreground: oklch(0.180 0.017 167.5);
   --border: oklch(0.917 0.020 87.5 / 0.13);

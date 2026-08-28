@@ -201,7 +201,7 @@ export function AskScreen({
               <>
                 {questionLead}
                 <br />
-                <span className="font-semibold text-accent">{questionEmphasis}</span>
+                <span className="font-semibold text-accent-text">{questionEmphasis}</span>
               </>
             ) : (
               question
