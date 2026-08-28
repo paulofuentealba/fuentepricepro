@@ -254,7 +254,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     -webkit-font-smoothing: antialiased;
     position: relative;
     min-height: 100vh;
