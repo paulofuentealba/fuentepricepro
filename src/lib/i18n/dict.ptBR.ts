@@ -586,7 +586,6 @@ export const ptBR = {
     home: "Início",
     admin: "Admin",
     goals: "Metas",
-    tagline: "Renda passiva com clareza",
     theme: {
       light: "Modo Claro",
       dark: "Modo Escuro",

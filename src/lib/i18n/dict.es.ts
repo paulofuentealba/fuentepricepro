@@ -591,7 +591,6 @@ export const es = {
     home: "Inicio",
     admin: "Admin",
     goals: "Metas",
-    tagline: "Renta pasiva con claridad",
     theme: {
       light: "Modo Claro",
       dark: "Modo Oscuro",

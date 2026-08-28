@@ -57,6 +57,15 @@ interface NavSection {
   items: NavItem[];
 }
 
+/** Up to 2 initials from a display name, e.g. "Paulo Fuentealba" -> "PF". */
+function getInitials(name?: string | null): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0][0]!.toUpperCase();
+  return (parts[0][0]! + parts[parts.length - 1][0]!).toUpperCase();
+}
+
 export function Sidebar() {
   const { t, locale, setLocale } = useI18n();
   const { user, signOut, loading, isAdmin } = useAuth();
@@ -210,11 +219,11 @@ export function Sidebar() {
                 <circle cx="20" cy="20" r="8" fill="var(--sidebar-accent)" />
               </svg>
               <div className="flex flex-col leading-tight overflow-hidden">
-                <div className="font-serif font-bold text-sm tracking-tight text-sidebar-foreground truncate">
-                  Fuente <span className="text-sidebar-accent font-sans font-semibold">Pro</span>
+                <div className="font-serif font-semibold text-[18px] text-sidebar-accent truncate">
+                  Fuente
                 </div>
-                <div className="text-[9px] font-display font-medium uppercase tracking-[0.18em] text-sidebar-accent/80 truncate">
-                  {t.nav.tagline}
+                <div className="text-[9.5px] font-display font-normal uppercase tracking-[0.14em] text-sidebar-foreground/50 truncate">
+                  Price Pro
                 </div>
               </div>
             </div>
@@ -244,7 +253,7 @@ export function Sidebar() {
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-1">
               {!isCollapsed && (
-                <div className="px-3 pb-1 text-[11px] font-display font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                <div className="px-[11px] pb-1 text-[9.5px] font-display font-normal uppercase tracking-[0.14em] text-sidebar-foreground/40">
                   {section.title}
                 </div>
               )}
@@ -256,8 +265,8 @@ export function Sidebar() {
                   const disabledContent = (
                     <div
                       className={cn(
-                        "group relative flex items-center rounded-xl px-3 py-2 text-sm font-display font-medium opacity-50 cursor-not-allowed text-sidebar-foreground/60",
-                        isCollapsed ? "justify-center" : "justify-start gap-3",
+                        "group relative flex items-center rounded-[9px] px-[11px] py-[8.5px] text-[12.5px] font-display font-medium opacity-50 cursor-not-allowed text-sidebar-foreground/60",
+                        isCollapsed ? "justify-center" : "justify-start gap-2.5",
                       )}
                     >
                       <Icon className={cn("shrink-0", isCollapsed ? "h-5 w-5" : "h-4 w-4")} />
@@ -297,23 +306,23 @@ export function Sidebar() {
                     key={item.key}
                     to={item.path!}
                     className={cn(
-                      "group relative flex items-center rounded-xl px-3 py-2 transition-colors text-sm font-display font-medium",
-                      isCollapsed ? "justify-center" : "justify-start gap-3",
+                      "group relative flex items-center rounded-[9px] px-[11px] py-[8.5px] transition-colors text-[12.5px] font-display font-medium",
+                      isCollapsed ? "justify-center" : "justify-start gap-2.5",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[inset_3px_0_0_0_var(--sidebar-accent)] font-semibold"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/10 hover:text-sidebar-foreground",
+                        ? "bg-sidebar-primary text-sidebar-accent"
+                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent/10 hover:text-sidebar-foreground",
                     )}
                   >
                     <Icon
                       className={cn(
                         "shrink-0",
                         isCollapsed ? "h-5 w-5" : "h-4 w-4",
-                        isActive ? "text-sidebar-primary-foreground" : "",
+                        isActive ? "text-sidebar-accent" : "",
                       )}
                     />
                     {!isCollapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
                     {!isCollapsed && item.badge !== undefined && (
-                      <Badge className="ml-auto text-[10px] font-mono font-semibold bg-sidebar-accent text-sidebar-accent-foreground border-transparent hover:bg-sidebar-accent">
+                      <Badge className="ml-auto rounded-full px-1.5 py-0 text-[9.5px] font-mono font-bold bg-sidebar-accent text-sidebar-accent-foreground border-transparent hover:bg-sidebar-accent">
                         {item.badge}
                       </Badge>
                     )}
@@ -338,26 +347,12 @@ export function Sidebar() {
         </nav>
 
         {/* Footer Block */}
-        <div className="mt-auto border-t border-sidebar-border p-2 space-y-2">
-          {/* Admin Link if authorized */}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className={cn(
-                "flex items-center rounded-xl px-3 py-2 text-xs font-display font-semibold text-sidebar-accent hover:bg-sidebar-accent/10 transition-colors",
-                isCollapsed ? "justify-center" : "gap-2.5",
-              )}
-            >
-              <Shield className="h-4 w-4 shrink-0" />
-              {!isCollapsed && <span>{t.nav.admin}</span>}
-            </Link>
-          )}
-
+        <div className="mt-auto border-t border-sidebar-border p-2 space-y-1">
           {/* User Profile Chip */}
           {loading ? (
             <div
               className={cn(
-                "flex items-center rounded-xl p-1.5 w-full",
+                "flex items-center rounded-[10px] p-2 w-full",
                 isCollapsed ? "justify-center" : "justify-start gap-2.5",
               )}
             >
@@ -379,7 +374,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   className={cn(
-                    "flex items-center rounded-xl p-1.5 transition-colors hover:bg-sidebar-accent/10 w-full text-left border border-sidebar-border bg-sidebar-foreground/5",
+                    "flex items-center rounded-[10px] p-2 transition-colors hover:bg-sidebar-foreground/[0.06] w-full text-left",
                     isCollapsed ? "justify-center" : "justify-start gap-2.5",
                   )}
                 >
@@ -388,32 +383,23 @@ export function Sidebar() {
                       <img
                         src={user.photoURL}
                         alt="Avatar"
-                        className="h-7 w-7 rounded-full object-cover ring-2 ring-sidebar-accent/60"
+                        className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="h-7 w-7 rounded-full bg-sidebar-accent text-sidebar-accent-foreground flex items-center justify-center ring-2 ring-sidebar-accent/30">
-                        <User className="h-3.5 w-3.5" />
+                      <div className="h-8 w-8 rounded-full bg-sidebar-accent text-sidebar-accent-foreground flex items-center justify-center text-[13px] font-bold">
+                        {getInitials(user.displayName)}
                       </div>
                     )}
                   </div>
                   {!isCollapsed && (
-                    <>
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="truncate text-xs font-display font-semibold text-sidebar-foreground">
-                          {user.displayName || "Usuário"}
-                        </span>
-                        <span className="text-[10px] font-mono font-medium text-sidebar-accent uppercase tracking-wider">
-                          {isPro ? "Plano Pro" : "Plano Free"}
-                        </span>
-                      </div>
-                      <Link
-                        to="/settings"
-                        className="text-sidebar-foreground/60 hover:text-sidebar-foreground p-1 rounded-md"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Settings className="h-3.5 w-3.5" />
-                      </Link>
-                    </>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="truncate text-[12.5px] font-display font-semibold text-sidebar-foreground">
+                        {user.displayName || "Usuário"}
+                      </span>
+                      <span className="text-[10px] font-display text-sidebar-accent">
+                        {isPro ? "Plano Pro" : "Plano Free"}
+                      </span>
+                    </div>
                   )}
                 </button>
               </DropdownMenuTrigger>
@@ -462,40 +448,51 @@ export function Sidebar() {
             </Button>
           )}
 
+          {/* Admin Link if authorized */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={cn(
+                "flex items-center rounded-[9px] px-[11px] py-[7px] text-[11.5px] font-display font-medium text-sidebar-foreground/60 hover:bg-sidebar-foreground/[0.06] hover:text-sidebar-foreground transition-colors",
+                isCollapsed ? "justify-center" : "gap-2.5",
+              )}
+            >
+              <Shield className="h-4 w-4 shrink-0" />
+              {!isCollapsed && <span>{t.nav.admin}</span>}
+            </Link>
+          )}
+
           {/* Theme & Language Controls */}
           {!isCollapsed ? (
             <div className="flex flex-col gap-1.5 pt-1">
               {/* Theme switch */}
-              <div className="flex items-center justify-between bg-sidebar-foreground/5 p-1 rounded-lg border border-sidebar-border">
-                <span className="text-[11px] font-display text-sidebar-foreground/60 pl-2">{t.nav.theme.toggle}</span>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setTheme("light")}
-                    className={cn(
-                      "h-6 px-2 rounded flex items-center justify-center text-xs transition-colors",
-                      !isDark
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
-                        : "text-sidebar-foreground/60 hover:text-sidebar-foreground",
-                    )}
-                    title={t.nav.theme.light}
-                  >
-                    <Sun className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTheme("dark")}
-                    className={cn(
-                      "h-6 px-2 rounded flex items-center justify-center text-xs transition-colors",
-                      isDark
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-sm"
-                        : "text-sidebar-foreground/60 hover:text-sidebar-foreground",
-                    )}
-                    title={t.nav.theme.dark}
-                  >
-                    <Moon className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+              <div className="flex items-center gap-1 bg-sidebar-foreground/[0.07] p-1 rounded-[9px]">
+                <button
+                  type="button"
+                  onClick={() => setTheme("light")}
+                  className={cn(
+                    "flex-1 h-7 rounded-md flex items-center justify-center text-[11px] font-display font-semibold transition-colors",
+                    !isDark
+                      ? "bg-sidebar-primary text-sidebar-accent"
+                      : "text-sidebar-foreground/55 hover:text-sidebar-foreground",
+                  )}
+                  title={t.nav.theme.light}
+                >
+                  <Sun className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme("dark")}
+                  className={cn(
+                    "flex-1 h-7 rounded-md flex items-center justify-center text-[11px] font-display font-semibold transition-colors",
+                    isDark
+                      ? "bg-sidebar-primary text-sidebar-accent"
+                      : "text-sidebar-foreground/55 hover:text-sidebar-foreground",
+                  )}
+                  title={t.nav.theme.dark}
+                >
+                  <Moon className="h-3.5 w-3.5" />
+                </button>
               </div>
 
               {/* Language switcher */}

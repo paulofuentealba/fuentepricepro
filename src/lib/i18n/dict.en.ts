@@ -584,7 +584,6 @@ export const en = {
     home: "Home",
     admin: "Admin",
     goals: "Goals",
-    tagline: "Passive income with clarity",
     theme: {
       light: "Light Mode",
       dark: "Dark Mode",
