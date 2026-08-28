@@ -13,6 +13,7 @@ import {
 } from "@/lib/askEngine";
 import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
 import { MetricBox } from "@/components/shared/MetricBox";
+import { InsightBanner } from "@/components/shared/InsightBanner";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -493,15 +494,7 @@ export function AskScreen({
 
       {/* Insight banner — .insight equivalent */}
       {insight && (
-        <div className="flex flex-wrap items-center gap-4 rounded-[18px] border border-accent bg-gradient-to-br from-accent/15 to-transparent p-5 sm:p-6">
-          <div className="min-w-[230px] flex-1">
-            <h4 className="font-serif text-base font-semibold text-foreground">{insight.title}</h4>
-            <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{insight.description}</p>
-          </div>
-          <div className="font-serif text-2xl font-medium text-accent-foreground sm:text-3xl">
-            {insight.value}
-          </div>
-        </div>
+        <InsightBanner title={insight.title} description={insight.description} value={insight.value} />
       )}
 
       {/* Persistent Regulatory Disclaimer */}

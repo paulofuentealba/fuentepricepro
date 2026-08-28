@@ -16,6 +16,8 @@ import type {
   MonthlyFiInfraCapitalGainsResult,
   RealizedGainEvent,
 } from "@/lib/tax/types";
+import { BR_MONTHLY_SALES_EXEMPTION_THRESHOLD } from "@/lib/tax/br/monthlyExemption";
+import { FiscalHeroBreakdown } from "@/components/tax/FiscalHeroBreakdown";
 import { TaxSimulationDisclaimer } from "@/components/shared/TaxSimulationDisclaimer";
 import { MetricBox } from "@/components/shared/MetricBox";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -175,6 +177,30 @@ export function TaxRealityScreen({
     );
   }, [fiInfraMonthly]);
 
+  // Fiscal hero: current-month stock sales vs. the BRL 20k monthly exemption threshold
+  const currentMonthStockRow = useMemo(
+    () => stockMonthly.find((m) => m.month === currentMonthKey),
+    [stockMonthly, currentMonthKey],
+  );
+
+  const grossNetRows = useMemo(() => {
+    const map: Record<string, { gross: number; net: number }> = {};
+    for (const pos of context.brDividendsTaxResult.positions) {
+      const row = (map[pos.ticker] ??= { gross: 0, net: 0 });
+      row.gross += pos.grossAmount;
+      row.net += pos.netAmount;
+    }
+    for (const pos of context.jcpTaxResult.positions) {
+      const row = (map[pos.ticker] ??= { gross: 0, net: 0 });
+      row.gross += pos.grossAmount;
+      row.net += pos.netAmount;
+    }
+    return Object.entries(map)
+      .map(([ticker, v]) => ({ ticker, gross: v.gross, net: v.net }))
+      .sort((a, b) => b.gross - a.gross)
+      .slice(0, 5);
+  }, [context.brDividendsTaxResult.positions, context.jcpTaxResult.positions]);
+
   // Aggregate unclassified tickers from all tracks
   const allUnclassifiedTickers = useMemo(() => {
     const set = new Set<string>();
@@ -277,6 +303,18 @@ export function TaxRealityScreen({
         </CardHeader>
 
         <CardContent className="space-y-6">
+          <FiscalHeroBreakdown
+            darfDue={currentMonthStockRow?.taxDue ?? 0}
+            currentMonthSales={currentMonthStockRow?.totalSales ?? 0}
+            exemptionLimit={BR_MONTHLY_SALES_EXEMPTION_THRESHOLD}
+            lossCarryforward={stockYearTotals.finalCarryforward}
+            usWithheldTax={context.totalWithheldTax - context.jcpTaxResult.totalTax}
+            jcpWithheldTax={context.jcpTaxResult.totalTax}
+            brDividendsNet={context.totalNetDividends}
+            grossNetRows={grossNetRows}
+            currency="BRL"
+          />
+
           {/* Summary Cards Grid */}
           <div
             className={cn(
