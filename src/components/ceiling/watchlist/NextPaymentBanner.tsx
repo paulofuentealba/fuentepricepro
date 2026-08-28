@@ -164,7 +164,7 @@ export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props
               type="button"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-background/50 text-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/50"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-background text-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/50"
               aria-label={t.watchlist.previousPayments || "Pagamentos anteriores"}
               aria-disabled={page === 0}
             >
@@ -174,7 +174,7 @@ export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page === totalPages - 1}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-background/50 text-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/50"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/50 bg-background text-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/50"
               aria-label={t.watchlist.nextPayments || "Próximos pagamentos"}
               aria-disabled={page === totalPages - 1}
             >
@@ -194,7 +194,7 @@ export function NextPaymentBanner({ items, meta, dividendEventsMap = {} }: Props
           return (
             <div
               key={`${upcoming.item.ticker}-${page}-${idx}`}
-              className="flex items-center justify-between bg-background/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-success/10 shadow-sm"
+              className="flex items-center justify-between bg-background px-3 py-2 rounded-lg border border-success/10 shadow-sm"
             >
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-foreground text-sm">

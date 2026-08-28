@@ -82,7 +82,7 @@ export function FIProgressCard() {
 
   return (
     <div className="w-full mb-6">
-      <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-background/50 backdrop-blur-md shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
         {/* Glow Effects */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           {isReached ? (

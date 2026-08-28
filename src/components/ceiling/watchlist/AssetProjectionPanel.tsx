@@ -57,7 +57,7 @@ export function AssetProjectionPanel({ item, asset, currency }: Props) {
   }, [projection.timeline]);
 
   return (
-    <div className="rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm p-4 sm:p-5 shadow-sm space-y-5">
+    <div className="rounded-xl border border-border/50 bg-background p-4 sm:p-5 shadow-sm space-y-5">
       {/* Top Controls: Title, Period selector chips & Monthly contribution */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export function AssetProjectionPanel({ item, asset, currency }: Props) {
                 if (!active || !payload || !payload.length) return null;
                 const data = payload[0].payload;
                 return (
-                  <div className="rounded-lg border border-border/80 bg-background/95 p-3 shadow-xl backdrop-blur-md text-xs space-y-1.5 min-w-[180px]">
+                  <div className="rounded-lg border border-border/80 bg-background p-3 text-xs space-y-1.5 min-w-[180px]">
                     <p className="font-semibold text-foreground border-b border-border/50 pb-1">
                       {t.projection.month} {data.month}
                     </p>
@@ -209,7 +209,7 @@ export function AssetProjectionPanel({ item, asset, currency }: Props) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
-        <div className="bg-background/40 p-3 rounded-lg border border-border/40 space-y-1">
+        <div className="bg-background p-3 rounded-lg border border-border/40 space-y-1">
           <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] font-medium">
             <Layers className="h-3.5 w-3.5 text-success" />
             <span>{t.projection.sharesCardTitle}</span>
@@ -219,7 +219,7 @@ export function AssetProjectionPanel({ item, asset, currency }: Props) {
           </p>
         </div>
 
-        <div className="bg-background/40 p-3 rounded-lg border border-border/40 space-y-1">
+        <div className="bg-background p-3 rounded-lg border border-border/40 space-y-1">
           <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] font-medium">
             <DollarSign className="h-3.5 w-3.5 text-primary" />
             <span>{t.projection.incomeCardTitle}</span>
@@ -229,7 +229,7 @@ export function AssetProjectionPanel({ item, asset, currency }: Props) {
           </p>
         </div>
 
-        <div className="bg-background/40 p-3 rounded-lg border border-border/40 space-y-1">
+        <div className="bg-background p-3 rounded-lg border border-border/40 space-y-1">
           <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] font-medium">
             <Wallet className="h-3.5 w-3.5 text-primary" />
             <span>{t.projection.totalInvestedCardTitle}</span>

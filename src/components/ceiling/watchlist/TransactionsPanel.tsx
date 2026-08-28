@@ -217,7 +217,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
               placeholder={t.transactions.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 pl-8 text-xs bg-background/50"
+              className="h-8 pl-8 text-xs bg-background"
             />
           </div>
           <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
@@ -237,7 +237,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
                   "px-2.5 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap",
                   filterType === tab.key
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-background/40 text-muted-foreground hover:text-foreground hover:bg-background/70 border border-border/40",
+                    : "bg-background text-muted-foreground hover:text-foreground hover:bg-muted/40 border border-border/40",
                 )}
               >
                 {tab.label}

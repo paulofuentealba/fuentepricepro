@@ -154,7 +154,7 @@ export function PortfolioIrrCard({
   // Empty state if no transactions exist in the active currency
   if (!hasTransactions) {
     return (
-      <Card className="border border-border/50 bg-background/40 backdrop-blur-md">
+      <Card className="rounded-2xl border border-border bg-card">
         <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-muted/60 flex items-center justify-center border border-border/60 shrink-0">
             <Percent className="h-5 w-5 text-muted-foreground" />
@@ -175,7 +175,7 @@ export function PortfolioIrrCard({
   const cardTitleLabel = activeCurrency === "BRL" ? t.tabs.chart.irrBrlLabel : t.tabs.chart.irrUsdLabel;
 
   return (
-    <Card className="border border-success/30 bg-success/10 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+    <Card className="rounded-2xl border border-success/30 bg-success/10">
       <CardContent className="p-4">
         <TooltipProvider delayDuration={150}>
           <div className="flex items-center justify-between gap-2 mb-3">
@@ -227,7 +227,7 @@ export function PortfolioIrrCard({
 
         {activeCurrency === "BRL" ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-            <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+            <div className="rounded-lg bg-card border border-success/25 p-3">
               <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
                 <TrendingUp className="h-3.5 w-3.5 text-success" />
                 {cardTitleLabel}
@@ -237,7 +237,7 @@ export function PortfolioIrrCard({
               </p>
             </div>
 
-            <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+            <div className="rounded-lg bg-card border border-success/25 p-3">
               <span className="text-[11px] text-muted-foreground flex items-center justify-between gap-1.5 font-medium">
                 <span className="flex items-center gap-1.5">
                   <BarChart2 className="h-3.5 w-3.5 text-success/80" />
@@ -265,7 +265,7 @@ export function PortfolioIrrCard({
               </p>
             </div>
 
-            <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+            <div className="rounded-lg bg-card border border-success/25 p-3">
               <span className="text-[11px] text-muted-foreground flex items-center justify-between gap-1.5 font-medium">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="h-3.5 w-3.5 text-success/80" />
@@ -295,7 +295,7 @@ export function PortfolioIrrCard({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+            <div className="rounded-lg bg-card border border-success/25 p-3">
               <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
                 <TrendingUp className="h-3.5 w-3.5 text-success" />
                 {cardTitleLabel}
@@ -305,7 +305,7 @@ export function PortfolioIrrCard({
               </p>
             </div>
 
-            <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+            <div className="rounded-lg bg-card border border-success/25 p-3">
               <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
                 <BarChart2 className="h-3.5 w-3.5 text-success/80" />
                 {t.tabs.chart.spxBenchmark}

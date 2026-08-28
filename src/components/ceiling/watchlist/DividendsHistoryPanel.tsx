@@ -97,7 +97,7 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
 
   if (events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg border-border/50 bg-background/50 mt-4">
+      <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg border-border/50 bg-background mt-4">
         <History className="h-12 w-12 text-muted-foreground/50 mb-4" />
         <h3 className="text-lg font-medium">{t.watchlist.noDividendHistory}</h3>
         <p className="text-sm text-muted-foreground mt-2">
@@ -109,7 +109,7 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
 
   return (
     <div className="space-y-6 mt-4">
-      <Card className="bg-background/60 backdrop-blur-sm border-border/50">
+      <Card className="bg-background border-border/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <History className="h-4 w-4 text-primary" />
@@ -179,7 +179,7 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
         }
       />
 
-      <div className="rounded-lg border border-border/50 bg-background/60 backdrop-blur-sm overflow-hidden">
+      <div className="rounded-lg border border-border/50 bg-background overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>

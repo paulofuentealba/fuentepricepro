@@ -46,7 +46,7 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-popover/95 backdrop-blur-xl border-border shadow-2xl">
+      <DialogContent className="sm:max-w-md bg-popover border-border">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             {t.watchlist.csvImportTitle}
@@ -57,7 +57,7 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
         </DialogHeader>
 
         <div className="space-y-4 my-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-background/50 border border-border/60 gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-background border border-border/60 gap-3">
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-xs font-semibold text-foreground">
                 {t.watchlist.csvImportTemplateNotice}
@@ -82,7 +82,7 @@ export function CsvImportUploader({ open, onOpenChange }: CsvImportUploaderProps
             className={`group relative flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
               isDragging
                 ? "border-primary bg-primary/5 shadow-inner"
-                : "border-border/60 bg-background/40 hover:border-primary/50 hover:bg-background/80"
+                : "border-border/60 bg-background hover:border-primary/50 hover:bg-muted/40"
             }`}
             onDragOver={(e) => {
               e.preventDefault();

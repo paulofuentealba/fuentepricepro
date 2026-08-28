@@ -17,7 +17,7 @@ export function RiskRadar() {
 
   if (risk.totalEquity === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/50 rounded-2xl bg-background/20 backdrop-blur mt-8">
+      <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border rounded-2xl bg-card mt-8">
         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
           <ShieldAlert className="w-8 h-8 text-primary" />
         </div>
@@ -96,10 +96,10 @@ export function RiskRadar() {
 
       {/* Global Vision */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-background/40 backdrop-blur-md">
+        <Card className="border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <PieChart className="h-4 w-4" />
+            <CardTitle className="font-serif text-base font-medium flex items-center gap-2">
+              <PieChart className="h-4 w-4 text-muted-foreground" />
               {t.riskRadar.currencyExposure}
             </CardTitle>
           </CardHeader>
@@ -123,10 +123,10 @@ export function RiskRadar() {
           </CardContent>
         </Card>
 
-        <Card className="bg-background/40 backdrop-blur-md">
+        <Card className="border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <PieChart className="h-4 w-4" />
+            <CardTitle className="font-serif text-base font-medium flex items-center gap-2">
+              <PieChart className="h-4 w-4 text-muted-foreground" />
               {t.riskRadar.typeExposure}
             </CardTitle>
           </CardHeader>
@@ -157,13 +157,13 @@ export function RiskRadar() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Asset Concentration */}
-        <Card className="bg-background/40 backdrop-blur-md">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="text-lg">{t.riskRadar.assetConcentration}</CardTitle>
+            <CardTitle className="font-serif text-base font-medium">{t.riskRadar.assetConcentration}</CardTitle>
             <CardDescription>{t.riskRadar.assetConcentrationDesc}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative overflow-x-auto rounded-lg border border-border/50">
+            <div className="relative overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
@@ -215,13 +215,13 @@ export function RiskRadar() {
         </Card>
 
         {/* Sector Concentration */}
-        <Card className="bg-background/40 backdrop-blur-md">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="text-lg">{t.riskRadar.sectorExposure}</CardTitle>
+            <CardTitle className="font-serif text-base font-medium">{t.riskRadar.sectorExposure}</CardTitle>
             <CardDescription>{t.riskRadar.sectorExposureDesc}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative overflow-x-auto rounded-lg border border-border/50">
+            <div className="relative overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>

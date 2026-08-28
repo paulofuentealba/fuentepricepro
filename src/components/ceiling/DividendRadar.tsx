@@ -143,14 +143,14 @@ export function DividendRadar() {
         />
       </div>
 
-      <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-2xl">
+      <Card className="border-border">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="font-serif text-base font-medium flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               {t.radar.topOpportunities}
             </CardTitle>
-            <div className="text-sm text-muted-foreground bg-accent/30 px-3 py-1.5 rounded-md border border-border/40 inline-flex items-center gap-1.5">
+            <div className="text-sm text-muted-foreground bg-accent/15 px-3 py-1.5 rounded-md border border-border inline-flex items-center gap-1.5">
               <Info className="h-4 w-4" />
               {t.radar.globalYieldNote?.replace("{targetYield}", targetYield.toString())}
             </div>

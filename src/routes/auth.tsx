@@ -5,7 +5,6 @@ import { Gauge, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -131,108 +130,147 @@ function AuthPage() {
     );
   }
 
+  const authQuestions = [
+    "I have $2,500. Where should it go?",
+    "A dividend just landed. What do I reinvest it in?",
+    "How much is left after tax?",
+    "What changed since I last checked?",
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-md">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-3">
-          <SuccessIconBox icon={Gauge} size="md" rounded="xl" />
-          <div className="text-left">
-            <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Fuente Price Pro
-            </h1>
-            <div className="text-xs text-muted-foreground">
-              Intelligent Ceiling Portfolio Valuation & Passive Income Engineering tool
+    <div className="grid min-h-screen lg:grid-cols-2">
+      <div className="hidden flex-col justify-between bg-sidebar p-11 text-sidebar-foreground lg:flex">
+        <div>
+          <Link to="/" className="mb-10 flex items-center gap-2.5">
+            <SuccessIconBox icon={Gauge} size="md" rounded="xl" />
+            <div className="font-serif text-lg font-semibold text-sidebar-accent">
+              Fuente <span className="text-sidebar-foreground/60">Price Pro</span>
             </div>
+          </Link>
+          <h2 className="mb-4 font-serif text-[31px] font-medium leading-[1.25]">
+            Your portfolio answers <b className="font-semibold text-sidebar-accent">what to do next</b>
+          </h2>
+          <p className="mb-7 text-[13.5px] leading-relaxed text-sidebar-foreground/60">
+            Sign in to see the questions only a tool that knows your average cost can answer.
+          </p>
+          <div className="space-y-[13px]">
+            {authQuestions.map((q) => (
+              <div key={q} className="flex gap-[11px] text-[12.5px] text-sidebar-foreground/70">
+                <span className="font-bold text-sidebar-accent">◈</span>
+                <span>{q}</span>
+              </div>
+            ))}
           </div>
-        </Link>
+        </div>
+        <div className="text-[11.5px] leading-relaxed text-sidebar-foreground/45">
+          Calculation and organization tool. Not investment advice or securities consulting.
+        </div>
+      </div>
 
-        <Card className="border-border/60 bg-card/60">
-          <CardContent className="pt-6">
-            <div className="mb-5 flex rounded-lg border border-border/60 bg-background/40 p-1">
-              <button
-                type="button"
-                onClick={() => setMode("signin")}
-                className={
-                  "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors " +
-                  (mode === "signin"
-                    ? "bg-success/15 text-success ring-1 ring-success/30"
-                    : "text-muted-foreground hover:text-foreground")
-                }
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("signup")}
-                className={
-                  "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors " +
-                  (mode === "signup"
-                    ? "bg-success/15 text-success ring-1 ring-success/30"
-                    : "text-muted-foreground hover:text-foreground")
-                }
-              >
-                Create Account
-              </button>
+      <div className="flex flex-col justify-center px-6 py-10 sm:px-10">
+        <div className="mx-auto w-full max-w-[420px]">
+          <Link to="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
+            <SuccessIconBox icon={Gauge} size="md" rounded="xl" />
+            <div className="text-left">
+              <h1 className="text-base font-semibold tracking-tight text-foreground">
+                Fuente Price Pro
+              </h1>
             </div>
+          </Link>
 
-            <form onSubmit={handleEmail} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="auth-email">{t.global.email}</Label>
-                <Input
-                  id="auth-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="auth-password">{t.global.password}</Label>
-                <Input
-                  id="auth-password"
-                  type="password"
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={busy}
-                className="w-full bg-success text-success-foreground hover:bg-success/90"
-              >
-                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "signup" ? "Create Account" : "Sign In"}
-              </Button>
-            </form>
+          <h3 className="mb-1.5 font-serif text-[26px] font-medium text-foreground">
+            {mode === "signup" ? "Create your account" : "Sign in to your account"}
+          </h3>
+          <p className="mb-6 text-[13px] text-muted-foreground">
+            {mode === "signup"
+              ? "Free for up to 8 assets. No credit card required."
+              : "Continue where you left off."}
+          </p>
 
-            <div className="my-5 flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-              <div className="h-px flex-1 bg-border/60" />
-              or
-              <div className="h-px flex-1 bg-border/60" />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogle}
+            disabled={busy}
+            className="mb-3 w-full justify-center gap-2 border-border bg-card font-display text-[13px] font-semibold hover:border-accent"
+          >
+            <GoogleIcon className="h-[17px] w-[17px]" />
+            Continue with Google
+          </Button>
+
+          <div className="my-[18px] flex items-center gap-3 text-[11px] text-muted-foreground">
+            <div className="h-px flex-1 bg-border" />
+            or
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <form onSubmit={handleEmail} className="space-y-3.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="auth-email">{t.global.email}</Label>
+              <Input
+                id="auth-email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="auth-password">{t.global.password}</Label>
+              <Input
+                id="auth-password"
+                type="password"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
             <Button
-              type="button"
-              variant="outline"
-              onClick={handleGoogle}
+              type="submit"
               disabled={busy}
-              className="w-full border-border/60 bg-background/40 hover:bg-background"
+              className="w-full bg-sidebar-primary font-display text-[12.5px] font-semibold text-sidebar-accent hover:opacity-90"
             >
-              <GoogleIcon className="mr-2 h-4 w-4" />
-              Continue with Google
+              {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {mode === "signup" ? "Create free account" : "Sign In"}
             </Button>
-          </CardContent>
-        </Card>
+          </form>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">
-            ← Back to calculator
-          </Link>
-        </p>
+          <div className="mt-[18px] text-center text-[12.5px] text-muted-foreground">
+            {mode === "signup" ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("signin")}
+                  className="font-semibold text-accent-text hover:underline"
+                >
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                Don&apos;t have an account yet?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("signup")}
+                  className="font-semibold text-accent-text hover:underline"
+                >
+                  Create free account
+                </button>
+              </>
+            )}
+          </div>
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            <Link to="/" className="hover:text-foreground">
+              ← Back to calculator
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

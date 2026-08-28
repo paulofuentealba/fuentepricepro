@@ -377,7 +377,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
                 {t.brokerNote.selectBroker}
               </Label>
               <Select value={selectedBroker} onValueChange={handleBrokerChange}>
-                <SelectTrigger className="w-full bg-background/50">
+                <SelectTrigger className="w-full bg-background">
                   <SelectValue placeholder={t.brokerNote.selectBroker} />
                 </SelectTrigger>
                 <SelectContent>
@@ -393,7 +393,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
 
             <div
               className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
-                isDragging ? "border-success bg-success/5 scale-[1.02]" : "border-border/60 bg-background/40 hover:bg-muted/50"
+                isDragging ? "border-success bg-success/5 scale-[1.02]" : "border-border/60 bg-background hover:bg-muted/50"
               }`}
               onDragOver={(e) => {
                 e.preventDefault();
@@ -457,7 +457,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
                 return (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl bg-background/50 border border-border/60 space-y-2.5"
+                    className="p-3.5 rounded-xl bg-background border border-border/60 space-y-2.5"
                   >
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-foreground truncate max-w-[200px]" title={item.rawSpecification}>
@@ -493,7 +493,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
                           })
                         }
                         placeholder={t.brokerNote.enterTicker}
-                        className="bg-background/80 uppercase tracking-wide text-xs h-9 focus-visible:ring-primary"
+                        className="bg-background uppercase tracking-wide text-xs h-9 focus-visible:ring-primary"
                       />
                     </div>
                   </div>
@@ -504,7 +504,7 @@ export function BrokerNoteUploader({ open, onOpenChange }: BrokerNoteUploaderPro
             <Button
               onClick={handleConfirmResolution}
               disabled={isProcessing}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-primary/30 transition-all"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all"
             >
               {isProcessing ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />

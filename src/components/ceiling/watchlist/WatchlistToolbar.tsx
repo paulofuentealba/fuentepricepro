@@ -61,7 +61,7 @@ export function WatchlistToolbar({
           onOpenCsvImporter={onOpenCsvImporter}
         />
         <DataManagement />
-        <div className="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border/60 bg-background/50 p-0.5 shrink-0">
+        <div className="inline-flex h-8 items-center gap-0.5 rounded-lg border border-border/60 bg-background p-0.5 shrink-0">
           <button
             type="button"
             onClick={() => setViewMode("grid")}

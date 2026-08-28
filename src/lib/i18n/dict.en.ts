@@ -876,6 +876,131 @@ export const en = {
       tableYield: "Yield",
       tableConsensus: "Consensus",
     },
+    page: {
+      nav: {
+        questions: "Questions",
+        comparison: "Comparison",
+        pricing: "Pricing",
+        guides: "Guides",
+        login: "Log in",
+        cta: "Start free",
+      },
+      hero: {
+        eyebrow: "For dividend investors · B3 + US",
+        title1: "Does your portfolio know how to answer",
+        title2: "what to do with your next contribution?",
+        sub: "Other platforms show asset indicators. Fuente calculates, from the portfolio you actually have and the criteria you define, where to invest, what to reinvest, and how much is left after tax — in Brazil and the US.",
+        ctaPrimary: "Create free account",
+        ctaSecondary: "See demo",
+        fine: "Free up to 8 assets · no credit card required",
+      },
+      heroCard: {
+        eyebrow: "Contribution plan · example",
+        question: "I have $2,500. Where should it go?",
+        tagStockBR: "BR Stocks",
+        tagForeign: "US ETF",
+        noteLabel: "Calculated suggestion.",
+        noteText: "Based on the criteria you configured. The decision to follow it or not is yours.",
+      },
+      questions: {
+        title: "The questions your spreadsheet answers in 40 minutes",
+        subtitle:
+          "And that Fuente answers on one screen — because it knows your average cost, your history, and your two tax realities.",
+        items: [
+          {
+            title: "I have $2,500. Where should it go?",
+            desc: "Considers your targets by asset class, your margin against the consensus ceiling price, and what's already too concentrated.",
+          },
+          {
+            title: "A dividend just landed. What do I reinvest it in?",
+            desc: "Every week. Without leaving cash idle, without opening ten tabs to decide on $60.",
+          },
+          {
+            title: "I need to withdraw. Where from?",
+            desc: "Considers your monthly tax exemption, accumulated losses, and which position sacrifices the least future income.",
+          },
+          {
+            title: "What changed since I last looked?",
+            desc: "A dividend cut, a deteriorating payout ratio, an asset entering your buy zone. You don't need to keep watch.",
+          },
+          {
+            title: "How much is left after tax?",
+            desc: "30% withheld in the US, 15% on JCP, REITs tax-exempt. Gross yield is fiction — we show the real net.",
+          },
+          {
+            title: "Which are my dry months?",
+            desc: "If your three biggest holdings pay in the same months, you have gaps in your year. We point them out.",
+          },
+        ],
+      },
+      comparison: {
+        title: "Why you can't do this on the others",
+        subtitle: "It's not about indicators. It's that they don't know what you actually hold.",
+        colFeature: "Feature",
+        colFuente: "Fuente",
+        colStatusInvest: "Platform A",
+        colInvestidor10: "Platform B",
+        partialLabel: "partial",
+        rows: [
+          { feature: "Indicators and Bazin ceiling price", statusInvest: "yes", investidor10: "yes" },
+          { feature: "Consensus of 3 methods with median", statusInvest: "no", investidor10: "no" },
+          {
+            feature: "Portfolio with weighted average cost",
+            statusInvest: "partial",
+            investidor10: "partial",
+          },
+          { feature: "Import statements from 14 brokers", statusInvest: "partial", investidor10: "no" },
+          { feature: "Contribution suggestion from your own portfolio", statusInvest: "no", investidor10: "no" },
+          { feature: "Real net income BR + US", statusInvest: "no", investidor10: "no" },
+          { feature: "Alerts on what changed in your thesis", statusInvest: "no", investidor10: "no" },
+        ],
+        legalNoteLabel: "About this comparison:",
+        legalNoteText:
+          "based on the platforms' public resources as of Aug/2026. Features change — check the sources before deciding. Fuente Price Pro is a calculation and organization tool; it does not fully replace the others, and each investor should evaluate what fits their needs.",
+      },
+      pricing: {
+        title: "Pricing",
+        subtitle: "Start free. Subscribe when your portfolio grows.",
+        priceSuffix: "/month",
+        free: {
+          name: "Free",
+          tagline: "To start getting organized",
+          cta: "Create account",
+          features: [
+            "Up to 8 assets in your portfolio",
+            "Ceiling price consensus",
+            "Reinvest dividends",
+            "What changed (weekly)",
+            "Dividend calendar",
+          ],
+        },
+        pro: {
+          badge: "Recommended",
+          name: "Pro",
+          tagline: "For those living off passive income",
+          cta: "Try 14 days",
+          features: [
+            "Unlimited assets",
+            "Everything in the free plan",
+            "BR + US tax reality",
+            "Contribution plan with strategies",
+            "Lower-impact withdrawals",
+            "Decision audit trail",
+            "Broker statement import",
+          ],
+        },
+        legalNoteLabel: "Important notice:",
+        legalNoteText:
+          "Fuente Price Pro is a calculation and information organization tool. It does not constitute investment advice, securities advisory (CVM) or tax advisory. All results derive exclusively from the criteria you configure. Tax calculations are estimates and do not replace your accountant. The decision to follow any suggestion or not is exclusively yours.",
+      },
+      footer: {
+        brand: "Fuente Price Pro",
+        madeIn: "Made in Brazil",
+        col1: ["Guides", "Dividend valuation", "Documentation"],
+        col2: ["Terms of use", "Privacy", "Subscription terms"],
+        col3: ["Contact", "Feedback"],
+      },
+    },
   },
   settings: {
     title: "Settings",

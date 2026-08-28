@@ -39,7 +39,7 @@ export function WatchlistAssetGrid({
 
   if (filteredAndSorted.length === 0 && valuedItemsLength > 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-border/50 bg-background/40 backdrop-blur-md">
+      <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-border/50 bg-background">
         <p className="text-sm text-muted-foreground mb-4">
           {t.emptyStates?.noMatch || "Nenhum ativo encontrado."}
         </p>

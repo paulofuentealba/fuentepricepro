@@ -142,7 +142,7 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   }
 
   return (
-    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-2xl">
+    <Card className="rounded-2xl border border-border bg-card">
       <CardContent className="pt-5 space-y-6">
         <CashFlowHeader
           title={t.watchlist.cashFlowTitle}

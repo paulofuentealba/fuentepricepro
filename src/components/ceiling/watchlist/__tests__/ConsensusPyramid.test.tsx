@@ -1,4 +1,4 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ConsensusPyramid } from "../ConsensusPyramid";
@@ -34,9 +34,10 @@ describe("ConsensusPyramid (Tier 1 / Item 4)", () => {
 
     render(<ConsensusPyramid valuation={valuation} currency="BRL" />);
 
-    // 4 InfoTooltips devem estar presentes (Gordon, Bazin, Graham + Consenso central)
-    const links = screen.getAllByRole("link");
-    expect(links.length).toBe(4);
+    // 4 tooltip triggers devem estar presentes (Gordon, Bazin, Graham + Consenso central)
+    // Cada trigger tem um botão/span com ícone HelpCircle (lucide-circle-question-mark)
+    const lucideIcons = document.querySelectorAll(".lucide-circle-question-mark");
+    expect(lucideIcons.length).toBe(4);
 
     // Valores formatados
     expect(screen.getAllByText("R$ 45,50").length).toBe(2); // Bazin e Consenso
@@ -54,9 +55,9 @@ describe("ConsensusPyramid (Tier 1 / Item 4)", () => {
 
     render(<ConsensusPyramid valuation={valuation} currency="BRL" />);
 
-    // Tooltips continuam presentes com as mensagens de não-aplicabilidade
-    const links = screen.getAllByRole("link");
-    expect(links.length).toBe(4);
+    // Tooltip triggers continuam presentes
+    const lucideIcons = document.querySelectorAll(".lucide-circle-question-mark");
+    expect(lucideIcons.length).toBe(4);
 
     // Vértices mostram N/A
     const naElements = screen.getAllByText("N/A");

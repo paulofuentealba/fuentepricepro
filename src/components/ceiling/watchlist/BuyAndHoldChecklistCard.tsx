@@ -28,7 +28,7 @@ export function BuyAndHoldChecklistCard({ asset, valuation }: Props) {
   const scorePct = totalApplicable > 0 ? (score / totalApplicable) * 100 : 0;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm p-4 sm:p-5 shadow-sm space-y-4">
+    <div className="rounded-xl border border-border/50 bg-background p-4 sm:p-5 shadow-sm space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export function BuyAndHoldChecklistCard({ asset, valuation }: Props) {
         </div>
       </div>
 
-      <div className="divide-y divide-border/40 rounded-lg border border-border/40 overflow-hidden bg-background/30 text-xs">
+      <div className="divide-y divide-border/40 rounded-lg border border-border/40 overflow-hidden bg-background text-xs">
         {criteria.map((item) => {
           const label = (t.buyAndHoldChecklist as any)[item.labelKey] || item.labelKey;
           const tooltip = (t.buyAndHoldChecklist as any)[item.tooltipKey];

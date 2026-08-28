@@ -93,7 +93,7 @@ export function RealizedIncomeSummaryCards({
   const { t, locale } = useI18n();
 
   return (
-    <div className="rounded-xl border border-success/30 bg-success/10 p-4 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.15)] space-y-3">
+    <div className="rounded-2xl border border-success/30 bg-success/10 p-4 space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-success/20 flex items-center justify-center border border-success/30 shrink-0">
@@ -122,7 +122,7 @@ export function RealizedIncomeSummaryCards({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-        <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+        <div className="rounded-lg bg-card border border-success/25 p-3">
           <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <CalendarClock className="h-3.5 w-3.5 text-success" />
             {t.tabs.chart.currentMonthRealized}
@@ -132,7 +132,7 @@ export function RealizedIncomeSummaryCards({
           </p>
         </div>
 
-        <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+        <div className="rounded-lg bg-card border border-success/25 p-3">
           <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <TrendingUp className="h-3.5 w-3.5 text-success" />
             {t.tabs.chart.currentYearRealized}
@@ -142,7 +142,7 @@ export function RealizedIncomeSummaryCards({
           </p>
         </div>
 
-        <div className="rounded-lg bg-background/60 border border-success/25 p-3">
+        <div className="rounded-lg bg-card border border-success/25 p-3">
           <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <Coins className="h-3.5 w-3.5 text-success" />
             {t.tabs.chart.allTimeRealized}
@@ -190,7 +190,7 @@ function SummaryStatCard({
   icon?: ReactNode;
 }) {
   return (
-    <Card className="border border-border/50 bg-background/60 backdrop-blur-md">
+    <Card className="rounded-2xl border border-border bg-card">
       <CardContent className="p-4">
         <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           {icon}

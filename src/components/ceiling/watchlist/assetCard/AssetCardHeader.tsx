@@ -108,7 +108,7 @@ export function AssetCardHeader({
     <div className="flex items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="flex items-center flex-wrap gap-2 pr-2">
-          <span className="text-base font-semibold text-foreground drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">
+          <span className="text-base font-semibold text-foreground">
             {displayTicker(item.ticker)}
           </span>
           <Badge variant="secondary" className="text-[10px]">
@@ -133,7 +133,7 @@ export function AssetCardHeader({
           )}
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold tabular-nums text-foreground/90 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
+          <span className="text-sm font-semibold tabular-nums text-foreground/90">
             <PriceTag value={livePrice} currency={item.currency} />
           </span>
           {changePct != null && (

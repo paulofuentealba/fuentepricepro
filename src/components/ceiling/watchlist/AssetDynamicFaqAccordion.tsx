@@ -26,7 +26,7 @@ export function AssetDynamicFaqAccordion({ asset, valuation }: Props) {
   if (faqItems.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm p-4 sm:p-5 shadow-sm space-y-3">
+    <div className="rounded-xl border border-border/50 bg-background p-4 sm:p-5 shadow-sm space-y-3">
       <div className="flex items-center gap-2">
         <HelpCircle className="h-4 w-4 text-primary" />
         <div>
@@ -44,7 +44,7 @@ export function AssetDynamicFaqAccordion({ asset, valuation }: Props) {
           <AccordionItem
             key={item.id}
             value={item.id}
-            className="border border-border/40 rounded-lg px-3 bg-background/30 transition-colors"
+            className="border border-border/40 rounded-lg px-3 bg-background transition-colors"
           >
             <AccordionTrigger className="text-xs font-medium text-foreground hover:no-underline py-2.5">
               {item.question}

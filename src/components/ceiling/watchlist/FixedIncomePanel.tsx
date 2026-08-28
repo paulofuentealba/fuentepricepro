@@ -46,7 +46,7 @@ export function FixedIncomePanel({ item }: Props) {
   }
 
   return (
-    <div className="relative mt-6 overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-md p-6 shadow-2xl">
+    <div className="relative mt-6 overflow-hidden rounded-xl border border-border/50 bg-card p-6">
       {/* Decorative Glow */}
       <div className="pointer-events-none absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/10 blur-[80px]" />
 

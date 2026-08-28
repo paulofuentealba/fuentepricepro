@@ -21,7 +21,6 @@ import {
   Key,
   Loader2,
   LogOut,
-  Settings as SettingsIcon,
   Shield,
   CreditCard,
   User,
@@ -179,14 +178,14 @@ function SettingsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header Simples */}
-      <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-        <div className="container max-w-6xl mx-auto flex h-14 items-center justify-between px-4">
+      <header className="border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+        <div className="container max-w-5xl mx-auto flex h-14 items-center justify-between px-4">
           <div
-            className="flex items-center gap-2 font-bold cursor-pointer"
+            className="flex items-center gap-2 font-display font-semibold cursor-pointer"
             onClick={() => (window.location.href = "/app")}
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-              <span className="text-primary-foreground text-lg">F</span>
+              <span className="font-serif text-primary-foreground text-lg">F</span>
             </div>
             <span className="hidden sm:inline-block">{t.appTitle}</span>
           </div>
@@ -196,61 +195,66 @@ function SettingsPage() {
         </div>
       </header>
 
-      <main className="container max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row gap-8">
-        {/* Sidebar */}
-        <aside className="w-full md:w-64 shrink-0">
-          <div className="flex items-center gap-3 mb-6 px-2">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <SettingsIcon className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-lg">{S.title}</h2>
-              <p className="text-xs text-muted-foreground">{S.subtitle}</p>
-            </div>
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+        {/* Top — eyebrow + h1.pg equivalent */}
+        <div className="mb-5">
+          <div className="text-[10.5px] font-display font-semibold uppercase tracking-wider text-primary">
+            {S.subtitle}
           </div>
-          <nav className="space-y-1">
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "profile"
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              <User className="h-4 w-4" /> {S.tabs.profile}
-            </button>
-            <button
-              onClick={() => setActiveTab("subscription")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "subscription"
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              <CreditCard className="h-4 w-4" /> {S.tabs.subscription}
-            </button>
-            <button
-              onClick={() => setActiveTab("privacy")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "privacy"
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              <Shield className="h-4 w-4" /> {S.tabs.privacy}
-            </button>
-          </nav>
-        </aside>
+          <h1 className="mt-1 font-serif text-2xl font-medium tracking-tight text-foreground sm:text-[28px]">
+            {S.title}
+          </h1>
+        </div>
+
+        {/* Tabs — .tabs / .tab equivalent */}
+        <div className="mb-5 flex flex-wrap gap-1 border-b border-border" role="tablist">
+          <button
+            role="tab"
+            aria-selected={activeTab === "profile"}
+            onClick={() => setActiveTab("profile")}
+            className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-[12.5px] font-display transition-colors ${
+              activeTab === "profile"
+                ? "border-accent font-semibold text-foreground"
+                : "border-transparent font-medium text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <User className="h-3.5 w-3.5" /> {S.tabs.profile}
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === "subscription"}
+            onClick={() => setActiveTab("subscription")}
+            className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-[12.5px] font-display transition-colors ${
+              activeTab === "subscription"
+                ? "border-accent font-semibold text-foreground"
+                : "border-transparent font-medium text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <CreditCard className="h-3.5 w-3.5" /> {S.tabs.subscription}
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === "privacy"}
+            onClick={() => setActiveTab("privacy")}
+            className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-[12.5px] font-display transition-colors ${
+              activeTab === "privacy"
+                ? "border-accent font-semibold text-foreground"
+                : "border-transparent font-medium text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Shield className="h-3.5 w-3.5" /> {S.tabs.privacy}
+          </button>
+        </div>
 
         {/* Content Area */}
-        <section className="flex-1 space-y-6">
+        <section className="space-y-4">
           {activeTab === "profile" && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold">{S.profile.title}</h3>
               <form
                 onSubmit={handleSaveProfile}
-                className="p-6 rounded-xl border border-border/50 bg-card space-y-6"
+                className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6 space-y-6"
               >
+                <h3 className="font-serif text-[15px] font-medium text-foreground">{S.profile.title}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label>{S.profile.name}</Label>
@@ -292,11 +296,11 @@ function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border/50 flex items-center justify-between">
+                <div className="pt-4 border-t border-dashed border-border/40 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
                     {S.profile.id} <span className="font-mono">{user.uid}</span>
                   </p>
-                  <Button type="submit" disabled={isSavingProfile}>
+                  <Button type="submit" disabled={isSavingProfile} className="font-display">
                     {isSavingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     {S.profile.saveBtn}
                   </Button>
@@ -310,12 +314,12 @@ function SettingsPage() {
 
           {activeTab === "subscription" && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold">{S.subscription.title}</h3>
-              <div className="p-6 rounded-xl border border-border/50 bg-card">
+              <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+                <h3 className="font-serif text-[15px] font-medium text-foreground mb-3">{S.subscription.title}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {S.subscription.currentPlan} <strong>{S.subscription.free}</strong>.
+                  {S.subscription.currentPlan} <strong className="text-foreground">{S.subscription.free}</strong>.
                 </p>
-                <Button className="mt-4 bg-success text-success-foreground hover:bg-success/90">
+                <Button className="mt-4 font-display bg-success text-success-foreground hover:bg-success/90">
                   {S.subscription.upgrade}
                 </Button>
               </div>
@@ -323,19 +327,19 @@ function SettingsPage() {
           )}
 
           {activeTab === "privacy" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold">{S.privacy.title}</h3>
+            <div className="space-y-4">
+              <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+                <h3 className="font-serif text-[15px] font-medium text-foreground">{S.privacy.title}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{S.privacy.description}</p>
               </div>
 
               {/* Danger Zone */}
-              <div className="mt-8 rounded-xl border border-destructive/20 bg-destructive/5 relative overflow-hidden">
+              <div className="rounded-[18px] border border-destructive/30 bg-destructive/5 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
-                <div className="p-6">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="p-5 sm:p-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <h4 className="text-lg font-semibold text-destructive flex items-center gap-2">
+                      <h4 className="font-serif text-base font-medium text-destructive flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5" /> {S.privacy.dangerZone}
                       </h4>
                       <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
@@ -345,7 +349,7 @@ function SettingsPage() {
                     <Button
                       variant="destructive"
                       onClick={() => setIsDeleteModalOpen(true)}
-                      className="shrink-0"
+                      className="shrink-0 font-display"
                     >
                       {S.privacy.deleteAccount}
                     </Button>

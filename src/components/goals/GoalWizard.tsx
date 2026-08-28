@@ -70,7 +70,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
   return (
     <div className="space-y-4">
       {/* Card 1: Metas por classe de ativo */}
-      <div className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="rounded-[18px] border border-border/60 bg-card p-4 sm:p-5">
         <div className="mb-1 flex items-center justify-between gap-2">
           <h3 className="font-serif text-lg font-semibold text-foreground">
             {t.goalWizard.step1Question}
@@ -125,7 +125,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
       </div>
 
       {/* Card 2: Critérios de exclusão */}
-      <div className="rounded-xl border border-border/60 bg-card p-4">
+      <div className="rounded-[18px] border border-border/60 bg-card p-4 sm:p-5">
         <h3 className="mb-3.5 font-serif text-lg font-semibold text-foreground">
           {t.smartAllocation.exclusionCriteriaTitle}
         </h3>
@@ -176,7 +176,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
               "w-full rounded-2xl border p-3.5 text-left transition-colors",
               settings.excludeAboveCeiling
                 ? "border-accent bg-accent/10"
-                : "border-border/60 bg-background/40 hover:border-border",
+                : "border-border bg-card hover:border-accent/60",
             )}
           >
             <div className="text-[13.5px] font-display font-semibold text-foreground">
@@ -194,7 +194,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
               "w-full rounded-2xl border p-3.5 text-left transition-colors",
               settings.excludeYieldTraps
                 ? "border-accent bg-accent/10"
-                : "border-border/60 bg-background/40 hover:border-border",
+                : "border-border bg-card hover:border-accent/60",
             )}
           >
             <div className="text-[13.5px] font-display font-semibold text-foreground">
@@ -208,7 +208,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
           {/* Limite de concentração: input numérico (não um preset fixo em 40% como no
               protótipo) porque maxConcentrationPerAsset é configurável pelo usuário no modelo
               real de dados — ver nota de escopo no cabeçalho do componente. */}
-          <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/40 p-3.5">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5">
             <div className="flex-1">
               <div className="text-[13.5px] font-display font-semibold text-foreground">
                 {t.smartAllocation.maxConcentrationLabel}

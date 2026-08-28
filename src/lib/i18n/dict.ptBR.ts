@@ -881,6 +881,131 @@ export const ptBR = {
       tableYield: "Yield",
       tableConsensus: "Consenso",
     },
+    page: {
+      nav: {
+        questions: "Perguntas",
+        comparison: "Comparação",
+        pricing: "Preços",
+        guides: "Guias",
+        login: "Entrar",
+        cta: "Começar grátis",
+      },
+      hero: {
+        eyebrow: "Para investidores de dividendos · B3 + EUA",
+        title1: "Seu portfólio sabe responder",
+        title2: "o que fazer com o próximo aporte?",
+        sub: "Outras plataformas mostram indicadores de ativos. O Fuente calcula, a partir da carteira que você tem e dos critérios que você define, onde aportar, o que reinvestir e quanto sobra depois do imposto — no Brasil e nos EUA.",
+        ctaPrimary: "Criar conta grátis",
+        ctaSecondary: "Ver demonstração",
+        fine: "Grátis até 8 ativos · sem cartão de crédito",
+      },
+      heroCard: {
+        eyebrow: "Plano de aporte · exemplo",
+        question: "Tenho R$ 2.500. Onde ponho?",
+        tagStockBR: "Ações BR",
+        tagForeign: "ETF EUA",
+        noteLabel: "Sugestão de cálculo.",
+        noteText: "Baseada nos critérios que você configurou. A decisão de seguir ou não é sua.",
+      },
+      questions: {
+        title: "Perguntas que sua planilha responde em 40 minutos",
+        subtitle:
+          "E que o Fuente responde numa tela — porque conhece seu custo médio, seu histórico e as duas realidades fiscais da sua carteira.",
+        items: [
+          {
+            title: "Tenho R$ 2.500. Onde ponho?",
+            desc: "Considera suas metas por classe, sua margem contra o preço-teto de consenso e o que já está concentrado demais.",
+          },
+          {
+            title: "Caiu provento. Reinvisto em quê?",
+            desc: "Toda semana. Sem deixar dinheiro parado, sem abrir dez abas para decidir R$ 300.",
+          },
+          {
+            title: "Preciso sacar. De onde tiro?",
+            desc: "Considera isenção mensal, prejuízo acumulado e qual posição sacrifica menos sua renda futura.",
+          },
+          {
+            title: "O que mudou desde que olhei?",
+            desc: "Corte de dividendo, payout deteriorando, ativo entrando na sua zona de compra. Você não precisa vigiar.",
+          },
+          {
+            title: "Quanto sobra depois do imposto?",
+            desc: "30% retido nos EUA, JCP a 15%, FII isento. DY bruto é ficção — mostramos o líquido real.",
+          },
+          {
+            title: "Meus meses secos são quais?",
+            desc: "Se seus três maiores ativos pagam nos mesmos meses, você tem buracos no ano. A gente aponta.",
+          },
+        ],
+      },
+      comparison: {
+        title: "Por que não dá para fazer isso nas outras",
+        subtitle: "Não é questão de indicador. É que elas não sabem o que você tem.",
+        colFeature: "Recurso",
+        colFuente: "Fuente",
+        colStatusInvest: "Plataforma A",
+        colInvestidor10: "Plataforma B",
+        partialLabel: "parcial",
+        rows: [
+          { feature: "Indicadores e preço-teto Bazin", statusInvest: "yes", investidor10: "yes" },
+          { feature: "Consenso de 3 métodos com mediana", statusInvest: "no", investidor10: "no" },
+          {
+            feature: "Carteira com custo médio ponderado",
+            statusInvest: "partial",
+            investidor10: "partial",
+          },
+          { feature: "Import de nota de 14 corretoras", statusInvest: "partial", investidor10: "no" },
+          { feature: "Sugestão de aporte pela sua carteira", statusInvest: "no", investidor10: "no" },
+          { feature: "Renda líquida real BR + EUA", statusInvest: "no", investidor10: "no" },
+          { feature: "Alerta do que mudou na sua tese", statusInvest: "no", investidor10: "no" },
+        ],
+        legalNoteLabel: "Sobre a comparação:",
+        legalNoteText:
+          "baseada em recursos públicos das plataformas em ago/2026. Funcionalidades mudam — confira as fontes antes de decidir. O Fuente Price Pro é ferramenta de cálculo e organização; não substitui as demais em tudo, e cada investidor deve avaliar o que atende suas necessidades.",
+      },
+      pricing: {
+        title: "Preço",
+        subtitle: "Comece grátis. Assine quando a carteira crescer.",
+        priceSuffix: "/mês",
+        free: {
+          name: "Grátis",
+          tagline: "Para começar a organizar",
+          cta: "Criar conta",
+          features: [
+            "Até 8 ativos na carteira",
+            "Consenso de preço-teto",
+            "Reinvestir proventos",
+            "O que mudou (semanal)",
+            "Calendário de proventos",
+          ],
+        },
+        pro: {
+          badge: "Recomendado",
+          name: "Pro",
+          tagline: "Para quem vive de renda passiva",
+          cta: "Testar 14 dias",
+          features: [
+            "Ativos ilimitados",
+            "Tudo do plano grátis",
+            "Realidade fiscal BR + EUA",
+            "Plano de aporte com estratégias",
+            "Retirada com menor impacto",
+            "Auditoria de decisões",
+            "Import de nota de corretagem",
+          ],
+        },
+        legalNoteLabel: "Aviso importante:",
+        legalNoteText:
+          "o Fuente Price Pro é uma ferramenta de cálculo e organização de informações. Não constitui recomendação de investimento, consultoria de valores mobiliários (CVM) nem consultoria tributária. Todos os resultados derivam exclusivamente dos critérios configurados por você. Cálculos tributários são estimativas e não substituem seu contador. A decisão de seguir ou não qualquer sugestão é exclusivamente sua.",
+      },
+      footer: {
+        brand: "Fuente Price Pro",
+        madeIn: "Feito no Brasil",
+        col1: ["Guias", "Valuation de dividendos", "Documentação"],
+        col2: ["Termos de uso", "Privacidade", "Termos de assinatura"],
+        col3: ["Contato", "Feedback"],
+      },
+    },
   },
   settings: {
     title: "Configurações",

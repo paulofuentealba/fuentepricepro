@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { AssetFormValue } from "@/components/ceiling/AssetForm";
@@ -78,8 +78,18 @@ function ScreenerContent() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[380px_1fr] animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
-      <Card className="relative z-30 h-fit border-border/60 bg-card/60">
+    <div className="space-y-6">
+      <div>
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <Search className="h-3.5 w-3.5" />
+          <span>{t.nav.sections.analyze}</span>
+        </div>
+        <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {t.tabs.screener}
+        </h1>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-[380px_1fr] animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
+      <Card className="relative z-30 h-fit border-border">
         <CardContent className="pt-6">
           <AssetForm
             onSubmit={handleSubmit}
@@ -102,18 +112,19 @@ function ScreenerContent() {
           </ErrorBoundary>
         )}
         {!loading && !result && (
-          <Card className="border-dashed border-border/60 bg-card/30">
+          <Card className="border-dashed border-border bg-muted/20">
             <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/15 text-success ring-1 ring-success/30">
                 <Sparkles className="h-5 w-5" />
               </div>
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="font-serif text-lg font-medium text-foreground">
                 {error ?? t.result.emptyTitle}
               </h2>
               <p className="max-w-xs text-sm text-muted-foreground">{t.result.emptyBody}</p>
             </CardContent>
           </Card>
         )}
+      </div>
       </div>
     </div>
   );

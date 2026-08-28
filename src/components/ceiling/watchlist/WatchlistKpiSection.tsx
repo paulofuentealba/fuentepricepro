@@ -85,13 +85,13 @@ export function WatchlistKpiSection({
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col rounded-xl border border-primary/30 bg-background/60 backdrop-blur-md p-4 lg:p-6 transition-colors hover:bg-background/80">
+          <div className="flex flex-col rounded-xl border border-primary/30 bg-background p-4 lg:p-6 transition-colors hover:bg-background/80">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
               {t.watchlist.consolidatedNetWorth}
             </span>
             <div className="flex items-center gap-2 text-4xl lg:text-5xl font-bold tabular-nums">
               <Globe className="h-8 w-8 text-primary" />
-              <span className="bg-gradient-to-r from-white via-primary to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
+              <span className="bg-gradient-to-r from-white via-primary to-cyan-500 bg-clip-text text-transparent">
                 {formatCurrency(displayNetWorth, displayCurrency, locale)}
               </span>
             </div>
@@ -109,7 +109,7 @@ export function WatchlistKpiSection({
               </div>
             }
             subValue={t.watchlist.consolidatedIncomeSub}
-            className="bg-background/60 backdrop-blur-md border border-primary/20 py-4"
+            className="bg-background border border-primary/20 py-4"
           />
 
           <div className="grid grid-cols-2 gap-3">
@@ -122,7 +122,7 @@ export function WatchlistKpiSection({
                 </div>
               }
               subValue={`${totals.countUsd} ${t.watchlist.assets}`}
-              className="bg-card/40 backdrop-blur-md"
+              className="bg-card"
             />
             <MetricBox
               label={t.watchlist.totalBrlIncome}
@@ -133,7 +133,7 @@ export function WatchlistKpiSection({
                 </div>
               }
               subValue={`${totals.countBrl} ${t.watchlist.assets}`}
-              className="bg-card/40 backdrop-blur-md"
+              className="bg-card"
             />
 
             {topAndWorst.best ? (
@@ -151,7 +151,7 @@ export function WatchlistKpiSection({
                   locale,
                 )}
                 variant="default"
-                className="bg-card/40 backdrop-blur-md hover:border-success/30 overflow-hidden"
+                className="bg-card hover:border-success/30 overflow-hidden"
                 tooltip={<TrendingUp className="h-3 w-3 text-success/80" />}
               />
             ) : (
@@ -173,7 +173,7 @@ export function WatchlistKpiSection({
                   locale,
                 )}
                 variant="default"
-                className="bg-card/40 backdrop-blur-md hover:border-danger/30 overflow-hidden"
+                className="bg-card hover:border-danger/30 overflow-hidden"
                 tooltip={<TrendingDown className="h-3 w-3 text-danger/80" />}
               />
             ) : (

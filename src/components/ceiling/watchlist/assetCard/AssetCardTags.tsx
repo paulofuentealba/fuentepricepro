@@ -32,7 +32,7 @@ export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
         </span>
       )}
       {exDateFormatted && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-border/60">
+        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-border/60">
           <CalendarClock className="h-3 w-3" />
           <span className="uppercase tracking-wider">{t.watchlist.exDivShort}</span>
           <span className="tabular-nums text-foreground/90">{exDateFormatted}</span>
@@ -46,7 +46,7 @@ export function AssetCardTags({ meta, isConcentrationViolated }: Props) {
                 "inline-flex cursor-help items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1",
                 cagrNegative
                   ? "bg-danger/10 text-danger ring-danger/20"
-                  : "bg-background/60 text-muted-foreground ring-border/60",
+                  : "bg-background text-muted-foreground ring-border/60",
               )}
             >
               {cagrNegative ? (

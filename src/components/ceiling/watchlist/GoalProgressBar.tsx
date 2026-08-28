@@ -14,7 +14,7 @@ interface GoalProgressBarProps {
 const CONTAINER_BASE = "rounded-md border p-2.5";
 const TONE_ACTIVE = "border-primary/25 bg-primary/5";
 const TONE_REACHED = "border-warning/40 bg-warning/10";
-const BAR_TRACK = "mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-background/60";
+const BAR_TRACK = "mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted";
 const BAR_ACTIVE = "bg-primary";
 const BAR_REACHED = "bg-warning";
 

@@ -132,7 +132,7 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
         )}
       </div>
 
-      <div className="rounded-md border border-border/60 bg-card/40 overflow-x-auto">
+      <div className="rounded-md border border-border/60 bg-card overflow-x-auto">
         <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>

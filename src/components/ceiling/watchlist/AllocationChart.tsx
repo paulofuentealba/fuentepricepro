@@ -71,7 +71,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
   if (data.length === 0) return null;
 
   return (
-    <Card className="border border-border/50 bg-background/60 backdrop-blur-md shadow-lg h-full">
+    <Card className="border border-border/50 bg-background h-full">
       <CardContent className="flex flex-col md:flex-row items-center p-6 gap-6">
         <div className="w-full md:w-1/2 h-[200px] shrink-0">
           <ChartContainer config={{}} className="h-full w-full">

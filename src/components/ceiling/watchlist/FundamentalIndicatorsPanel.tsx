@@ -21,7 +21,7 @@ interface IndicatorItemProps {
 
 function IndicatorItem({ label, tooltip, value, valueClassName }: IndicatorItemProps) {
   return (
-    <div className="flex flex-col p-3 rounded-lg bg-background/50 border border-border/30 hover:border-border/60 transition-colors">
+    <div className="flex flex-col p-3 rounded-lg bg-background border border-border/30 hover:border-border/60 transition-colors">
       <div className="flex items-start justify-between gap-1 mb-1">
         <span className="text-xs text-muted-foreground leading-snug">{label}</span>
         <InfoTooltip content={tooltip} />
@@ -47,7 +47,7 @@ export function FundamentalIndicatorsPanel({ asset, valuation }: Props) {
   const metrics = asset.metrics;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm p-4 sm:p-5 shadow-sm space-y-5">
+    <div className="rounded-xl border border-border/50 bg-background p-4 sm:p-5 shadow-sm space-y-5">
       <div className="flex items-center gap-2">
         <BarChart3 className="h-4 w-4 text-primary" />
         <div>

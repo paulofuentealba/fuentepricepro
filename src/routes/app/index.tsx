@@ -48,7 +48,7 @@ function SummaryCard({
   isLoading: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-card border border-border shadow-sm p-5">
+    <div className="flex flex-col gap-2 rounded-2xl bg-card border border-border p-5">
       <span className="text-xs font-display font-medium uppercase tracking-widest text-muted-foreground">
         {label}
       </span>

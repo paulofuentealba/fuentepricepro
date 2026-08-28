@@ -38,7 +38,7 @@ export function RetrospectiveSimulatorCard({ asset }: Props) {
   const currency = asset.currency;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm p-4 sm:p-5 shadow-sm space-y-4">
+    <div className="rounded-xl border border-border/50 bg-background p-4 sm:p-5 shadow-sm space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-primary" />
@@ -135,7 +135,7 @@ export function RetrospectiveSimulatorCard({ asset }: Props) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-border/30 text-xs">
-          <div className="bg-background/40 p-2 rounded border border-border/30">
+          <div className="bg-background p-2 rounded border border-border/30">
             <span className="text-[10px] text-muted-foreground block">
               {t.retrospectiveSimulator.capitalAppreciation}
             </span>
@@ -144,7 +144,7 @@ export function RetrospectiveSimulatorCard({ asset }: Props) {
             </span>
           </div>
 
-          <div className="bg-background/40 p-2 rounded border border-border/30">
+          <div className="bg-background p-2 rounded border border-border/30">
             <span className="text-[10px] text-muted-foreground block">
               {t.retrospectiveSimulator.dividendsReinvested}
             </span>
@@ -153,7 +153,7 @@ export function RetrospectiveSimulatorCard({ asset }: Props) {
             </span>
           </div>
 
-          <div className="bg-background/40 p-2 rounded border border-border/30">
+          <div className="bg-background p-2 rounded border border-border/30">
             <span className="text-[10px] text-muted-foreground block">
               {t.retrospectiveSimulator.sharesAccumulated}
             </span>

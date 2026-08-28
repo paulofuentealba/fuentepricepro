@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
 import {
   BookOpen,
@@ -83,7 +83,7 @@ function DocsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in-0 slide-in-from-bottom-1 duration-300 pb-12">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
+        <h1 className="font-serif text-2xl font-medium tracking-tight mb-2 flex items-center gap-3 sm:text-[28px]">
           <BookOpen className="h-8 w-8 text-primary" />
           {t.docs.title}
         </h1>
@@ -119,7 +119,7 @@ function DocsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t.docs.searchPlaceholder}
-              className="pl-9 bg-background/60 backdrop-blur-md"
+              className="pl-9 bg-card"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -129,7 +129,7 @@ function DocsPage() {
             {filterCard(t.docs.consensus.title, t.docs.consensus.description) && (
               <Card
                 id="consensus"
-                className="bg-background/60 backdrop-blur-md border-primary/20 scroll-m-20"
+                className="bg-card border-primary/20 scroll-m-20"
               >
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
@@ -144,10 +144,10 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.bazin.title, t.docs.bazin.description) && (
-              <Card id="bazin" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="bazin" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <LineChart className="h-5 w-5 text-indigo-400" />
+                    <LineChart className="h-5 w-5 text-accent-foreground" />
                     {t.docs.bazin.title}
                   </CardTitle>
                 </CardHeader>
@@ -158,7 +158,7 @@ function DocsPage() {
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 border border-muted/50">
                     {t.docs.bazinFormula}
                   </div>
-                  <div className="bg-indigo-500/10 p-3 rounded-md text-xs text-indigo-200/80 border border-indigo-500/20">
+                  <div className="bg-accent/10 p-3 rounded-md text-xs text-accent-foreground/90 border border-accent/20">
                     {t.docs.bazin.example}
                   </div>
                 </CardContent>
@@ -166,15 +166,15 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.graham.title, t.docs.graham.description) && (
-              <Card id="graham" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="graham" className="bg-card scroll-m-20">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Calculator className="h-5 w-5 text-orange-400" />
+                    <Calculator className="h-5 w-5 text-warning" />
                     {t.docs.graham.title}
                   </CardTitle>
                   <Badge
                     variant="destructive"
-                    className="ml-2 font-medium bg-red-900/40 text-red-400 border-red-500/30"
+                    className="ml-2 font-medium bg-red-900/40 text-destructive border-red-500/30"
                   >
                     {t.docs.graham.notApplicableBadge}
                   </Badge>
@@ -183,7 +183,7 @@ function DocsPage() {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {t.docs.graham.description}
                   </p>
-                  <p className="text-xs text-red-400/80">* {t.docs.graham.notApplicableReason}</p>
+                  <p className="text-xs text-destructive/80">* {t.docs.graham.notApplicableReason}</p>
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 flex items-center gap-2 border border-muted/50">
                     <span className="text-muted-foreground">VI = </span>
                     <span>
@@ -193,7 +193,7 @@ function DocsPage() {
                       </span>
                     </span>
                   </div>
-                  <div className="bg-orange-500/10 p-3 rounded-md text-xs text-orange-200/80 border border-orange-500/20">
+                  <div className="bg-warning/10 p-3 rounded-md text-xs text-warning/90 border border-warning/20">
                     {t.docs.graham.example}
                   </div>
                 </CardContent>
@@ -201,10 +201,10 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.gordon.title, t.docs.gordon.description) && (
-              <Card id="gordon" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="gordon" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Building className="h-5 w-5 text-blue-400" />
+                    <Building className="h-5 w-5 text-accent-foreground" />
                     {t.docs.gordon.title}
                   </CardTitle>
                 </CardHeader>
@@ -215,7 +215,7 @@ function DocsPage() {
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 border border-muted/50">
                     {t.docs.gordonFormula}
                   </div>
-                  <div className="bg-blue-500/10 p-3 rounded-md text-xs text-blue-200/80 border border-blue-500/20">
+                  <div className="bg-accent/10 p-3 rounded-md text-xs text-accent-foreground/90 border border-accent/20">
                     {t.docs.gordon.example}
                   </div>
                 </CardContent>
@@ -223,7 +223,7 @@ function DocsPage() {
             )}
 
             {/* Metrics */}
-            <h2 className="text-2xl font-bold tracking-tight mt-8 mb-4 border-b border-border pb-2">
+            <h2 className="font-serif text-lg font-medium tracking-tight mt-8 mb-4 border-b border-border pb-2">
               {t.docs.metrics.title}
             </h2>
 
@@ -231,7 +231,7 @@ function DocsPage() {
               t.docs.metrics.safetyMargin.title,
               t.docs.metrics.safetyMargin.description,
             ) && (
-              <Card id="safety-margin" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="safety-margin" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <ShieldCheck className="h-5 w-5 text-primary" />
@@ -248,7 +248,7 @@ function DocsPage() {
               t.docs.metrics.yieldOnCost.title,
               t.docs.metrics.yieldOnCost.description,
             ) && (
-              <Card id="yield-on-cost" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="yield-on-cost" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Percent className="h-5 w-5 text-primary" />
@@ -262,10 +262,10 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.metrics.payout.title, t.docs.metrics.payout.description) && (
-              <Card id="payout" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="payout" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <AlertCircle className="h-5 w-5 text-orange-400" />
+                    <AlertCircle className="h-5 w-5 text-warning" />
                     {t.docs.metrics.payout.title}
                   </CardTitle>
                 </CardHeader>
@@ -276,10 +276,10 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.metrics.cagr.title, t.docs.metrics.cagr.description) && (
-              <Card id="cagr" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="cagr" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <TrendingUp className="h-5 w-5 text-blue-400" />
+                    <TrendingUp className="h-5 w-5 text-accent-foreground" />
                     {t.docs.metrics.cagr.title}
                   </CardTitle>
                 </CardHeader>
@@ -290,10 +290,10 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.metrics.dyVsYoc.title, t.docs.metrics.dyVsYoc.description) && (
-              <Card id="dy-vs-yoc" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="dy-vs-yoc" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Scale className="h-5 w-5 text-indigo-400" />
+                    <Scale className="h-5 w-5 text-accent-foreground" />
                     {t.docs.metrics.dyVsYoc.title}
                   </CardTitle>
                 </CardHeader>
@@ -304,12 +304,12 @@ function DocsPage() {
             )}
 
             {/* Concepts */}
-            <h2 className="text-2xl font-bold tracking-tight mt-8 mb-4 border-b border-border pb-2">
+            <h2 className="font-serif text-lg font-medium tracking-tight mt-8 mb-4 border-b border-border pb-2">
               {t.docs.concepts.title}
             </h2>
 
             {filterCard(t.docs.concepts.snowball.title, t.docs.concepts.snowball.description) && (
-              <Card id="snowball" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="snowball" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <LineChart className="h-5 w-5 text-primary" />
@@ -323,10 +323,10 @@ function DocsPage() {
             )}
 
             {filterCard(t.docs.concepts.taxes.title, t.docs.concepts.taxes.description) && (
-              <Card id="taxes" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="taxes" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Banknote className="h-5 w-5 text-red-400" />
+                    <Banknote className="h-5 w-5 text-destructive" />
                     {t.docs.concepts.taxes.title}
                   </CardTitle>
                 </CardHeader>
@@ -337,7 +337,7 @@ function DocsPage() {
             )}
 
             {/* Risk Radar */}
-            <h2 className="text-2xl font-bold tracking-tight mt-8 mb-4 border-b border-border pb-2">
+            <h2 className="font-serif text-lg font-medium tracking-tight mt-8 mb-4 border-b border-border pb-2">
               {t.docs.riskRadar.title}
             </h2>
 
@@ -347,10 +347,10 @@ function DocsPage() {
             ) && (
               <Card
                 id="sector-concentration"
-                className="bg-background/40 backdrop-blur-md scroll-m-20 border-orange-500/20"
+                className="bg-card scroll-m-20 border-warning/20"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base text-orange-400">
+                  <CardTitle className="flex items-center gap-2 text-base text-warning">
                     <AlertTriangle className="h-5 w-5" />
                     {t.docs.riskRadar.sectorConcentration.title}
                   </CardTitle>
@@ -367,10 +367,10 @@ function DocsPage() {
             ) && (
               <Card
                 id="asset-concentration"
-                className="bg-background/40 backdrop-blur-md scroll-m-20 border-orange-500/20"
+                className="bg-card scroll-m-20 border-warning/20"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base text-orange-400">
+                  <CardTitle className="flex items-center gap-2 text-base text-warning">
                     <AlertTriangle className="h-5 w-5" />
                     {t.docs.riskRadar.assetConcentration.title}
                   </CardTitle>
@@ -387,10 +387,10 @@ function DocsPage() {
             ) && (
               <Card
                 id="payout-risk"
-                className="bg-background/40 backdrop-blur-md scroll-m-20 border-red-500/20"
+                className="bg-card scroll-m-20 border-destructive/20"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base text-red-400">
+                  <CardTitle className="flex items-center gap-2 text-base text-destructive">
                     <AlertTriangle className="h-5 w-5" />
                     {t.docs.riskRadar.payoutRisk.title}
                   </CardTitle>
@@ -407,10 +407,10 @@ function DocsPage() {
             ) && (
               <Card
                 id="yield-trap"
-                className="bg-background/40 backdrop-blur-md scroll-m-20 border-red-500/20"
+                className="bg-card scroll-m-20 border-destructive/20"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base text-red-400">
+                  <CardTitle className="flex items-center gap-2 text-base text-destructive">
                     <AlertTriangle className="h-5 w-5" />
                     {t.docs.riskRadar.yieldTrap.title}
                   </CardTitle>
@@ -424,7 +424,7 @@ function DocsPage() {
             {/* Supported Brokers */}
             <h2
               id="supported-brokers"
-              className="text-2xl font-bold tracking-tight mt-8 mb-4 border-b border-border pb-2 scroll-m-20"
+              className="font-serif text-lg font-medium tracking-tight mt-8 mb-4 border-b border-border pb-2 scroll-m-20"
             >
               {t.docs.supportedBrokers.title}
             </h2>
@@ -435,7 +435,7 @@ function DocsPage() {
               Object.values(t.docs.supportedBrokers).join(" "),
             ) && (
               <div className="grid gap-6">
-                <Card className="bg-background/40 backdrop-blur-md border-primary/20">
+                <Card className="bg-card border-primary/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base text-primary">
                       <FileText className="h-5 w-5" />
@@ -505,9 +505,9 @@ function DocsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-background/40 backdrop-blur-md border-amber-500/20">
+                <Card className="bg-card border-warning/20">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base text-amber-400">
+                    <CardTitle className="flex items-center gap-2 text-base text-warning">
                       <AlertCircle className="h-5 w-5" />
                       {t.docs.supportedBrokers.fallbackTitle}
                     </CardTitle>
@@ -519,23 +519,23 @@ function DocsPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                       <Badge
                         variant="outline"
-                        className="justify-between p-2 font-normal border-amber-500/30 text-amber-500/80"
+                        className="justify-between p-2 font-normal border-warning/30 text-warning/90"
                       >
-                        <span className="font-semibold text-amber-500">Itaú</span>
+                        <span className="font-semibold text-warning">Itaú</span>
                         <span className="text-[10px]">61.194.353/0001-64</span>
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="justify-between p-2 font-normal border-amber-500/30 text-amber-500/80"
+                        className="justify-between p-2 font-normal border-warning/30 text-warning/90"
                       >
-                        <span className="font-semibold text-amber-500">Bradesco/Ágora</span>
+                        <span className="font-semibold text-warning">Bradesco/Ágora</span>
                         <span className="text-[10px]">74.014.747/0001-35</span>
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="justify-between p-2 font-normal border-amber-500/30 text-amber-500/80"
+                        className="justify-between p-2 font-normal border-warning/30 text-warning/90"
                       >
-                        <span className="font-semibold text-amber-500">Santander/Toro</span>
+                        <span className="font-semibold text-warning">Santander/Toro</span>
                         <span className="text-[10px]">51.014.223/0001-49</span>
                       </Badge>
                     </div>
@@ -545,15 +545,15 @@ function DocsPage() {
             )}
 
             {/* Glossary */}
-            <h2 className="text-2xl font-bold tracking-tight mt-8 mb-4 border-b border-border pb-2">
+            <h2 className="font-serif text-lg font-medium tracking-tight mt-8 mb-4 border-b border-border pb-2">
               {t.docs.glossary.title}
             </h2>
 
             {filterCard(t.docs.glossary.title, Object.values(t.docs.glossary).join(" ")) && (
-              <Card id="glossary" className="bg-background/40 backdrop-blur-md scroll-m-20">
+              <Card id="glossary" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <HelpCircle className="h-5 w-5 text-slate-400" />
+                    <HelpCircle className="h-5 w-5 text-muted-foreground" />
                     {t.docs.glossary.title}
                   </CardTitle>
                 </CardHeader>

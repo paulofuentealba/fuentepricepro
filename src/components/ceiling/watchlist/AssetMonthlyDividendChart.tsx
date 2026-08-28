@@ -37,7 +37,7 @@ export function AssetMonthlyDividendChart({ events, currency }: Props) {
     const receivableLabel = t.tabs.chart.receivableAnnounced || t.watchlist.receivableIncome;
 
     return (
-      <div className="rounded-lg border border-border/60 bg-background/95 px-3 py-2 shadow-xl backdrop-blur text-xs">
+      <div className="rounded-lg border border-border/60 bg-background px-3 py-2 text-xs">
         <p className="font-semibold text-foreground mb-0.5">{data.monthLabel}</p>
         {isMixed ? (
           <div className="space-y-1 my-1">

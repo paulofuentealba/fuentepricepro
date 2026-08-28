@@ -886,6 +886,131 @@ export const es = {
       tableYield: "Yield",
       tableConsensus: "Consenso",
     },
+    page: {
+      nav: {
+        questions: "Preguntas",
+        comparison: "Comparación",
+        pricing: "Precios",
+        guides: "Guías",
+        login: "Iniciar sesión",
+        cta: "Empezar gratis",
+      },
+      hero: {
+        eyebrow: "Para inversores en dividendos · B3 + EE.UU.",
+        title1: "¿Tu cartera sabe responder",
+        title2: "qué hacer con tu próximo aporte?",
+        sub: "Otras plataformas muestran indicadores de activos. Fuente calcula, a partir de la cartera que tú tienes y de los criterios que tú defines, dónde aportar, qué reinvertir y cuánto queda después del impuesto — en Brasil y en EE.UU.",
+        ctaPrimary: "Crear cuenta gratis",
+        ctaSecondary: "Ver demostración",
+        fine: "Gratis hasta 8 activos · sin tarjeta de crédito",
+      },
+      heroCard: {
+        eyebrow: "Plan de aporte · ejemplo",
+        question: "Tengo $2.500. ¿Dónde lo pongo?",
+        tagStockBR: "Acciones BR",
+        tagForeign: "ETF USA",
+        noteLabel: "Sugerencia de cálculo.",
+        noteText: "Basada en los criterios que configuraste. La decisión de seguirla o no es tuya.",
+      },
+      questions: {
+        title: "Preguntas que tu hoja de cálculo responde en 40 minutos",
+        subtitle:
+          "Y que Fuente responde en una sola pantalla — porque conoce tu costo promedio, tu historial y tus dos realidades fiscales.",
+        items: [
+          {
+            title: "Tengo $2.500. ¿Dónde lo pongo?",
+            desc: "Considera tus metas por clase de activo, tu margen frente al precio techo de consenso y lo que ya está demasiado concentrado.",
+          },
+          {
+            title: "Cayó un dividendo. ¿En qué lo reinvierto?",
+            desc: "Cada semana. Sin dejar dinero parado, sin abrir diez pestañas para decidir sobre $60.",
+          },
+          {
+            title: "Necesito retirar. ¿De dónde saco?",
+            desc: "Considera tu exención mensual, pérdidas acumuladas y qué posición sacrifica menos tu renta futura.",
+          },
+          {
+            title: "¿Qué cambió desde la última vez que miré?",
+            desc: "Un recorte de dividendo, un payout deteriorándose, un activo entrando en tu zona de compra. No necesitas vigilar.",
+          },
+          {
+            title: "¿Cuánto queda después del impuesto?",
+            desc: "30% retenido en EE.UU., JCP al 15%, FII exento. El yield bruto es ficción — mostramos el neto real.",
+          },
+          {
+            title: "¿Cuáles son mis meses secos?",
+            desc: "Si tus tres mayores posiciones pagan en los mismos meses, tienes huecos en el año. Te los señalamos.",
+          },
+        ],
+      },
+      comparison: {
+        title: "Por qué no puedes hacer esto en las otras",
+        subtitle: "No es cuestión de indicadores. Es que ellas no saben lo que tú tienes.",
+        colFeature: "Recurso",
+        colFuente: "Fuente",
+        colStatusInvest: "Plataforma A",
+        colInvestidor10: "Plataforma B",
+        partialLabel: "parcial",
+        rows: [
+          { feature: "Indicadores y precio techo Bazin", statusInvest: "yes", investidor10: "yes" },
+          { feature: "Consenso de 3 métodos con mediana", statusInvest: "no", investidor10: "no" },
+          {
+            feature: "Cartera con costo promedio ponderado",
+            statusInvest: "partial",
+            investidor10: "partial",
+          },
+          { feature: "Importación de notas de 14 corredoras", statusInvest: "partial", investidor10: "no" },
+          { feature: "Sugerencia de aporte según tu cartera", statusInvest: "no", investidor10: "no" },
+          { feature: "Renta líquida real BR + EE.UU.", statusInvest: "no", investidor10: "no" },
+          { feature: "Alerta de lo que cambió en tu tesis", statusInvest: "no", investidor10: "no" },
+        ],
+        legalNoteLabel: "Sobre esta comparación:",
+        legalNoteText:
+          "basada en recursos públicos de las plataformas en ago/2026. Las funcionalidades cambian — verifica las fuentes antes de decidir. Fuente Price Pro es una herramienta de cálculo y organización; no sustituye del todo a las demás, y cada inversor debe evaluar lo que se ajusta a sus necesidades.",
+      },
+      pricing: {
+        title: "Precio",
+        subtitle: "Empieza gratis. Suscríbete cuando tu cartera crezca.",
+        priceSuffix: "/mes",
+        free: {
+          name: "Gratis",
+          tagline: "Para empezar a organizarte",
+          cta: "Crear cuenta",
+          features: [
+            "Hasta 8 activos en la cartera",
+            "Consenso de precio techo",
+            "Reinvertir dividendos",
+            "Qué cambió (semanal)",
+            "Calendario de dividendos",
+          ],
+        },
+        pro: {
+          badge: "Recomendado",
+          name: "Pro",
+          tagline: "Para quien vive de renta pasiva",
+          cta: "Probar 14 días",
+          features: [
+            "Activos ilimitados",
+            "Todo lo del plan gratis",
+            "Realidad fiscal BR + EE.UU.",
+            "Plan de aporte con estrategias",
+            "Retiro con menor impacto",
+            "Auditoría de decisiones",
+            "Importación de notas de corretaje",
+          ],
+        },
+        legalNoteLabel: "Aviso importante:",
+        legalNoteText:
+          "Fuente Price Pro es una herramienta de cálculo y organización de información. No constituye recomendación de inversión, asesoría de valores mobiliarios (CVM) ni asesoría fiscal. Todos los resultados derivan exclusivamente de los criterios que tú configuras. Los cálculos fiscales son estimaciones y no sustituyen a tu contador. La decisión de seguir o no cualquier sugerencia es exclusivamente tuya.",
+      },
+      footer: {
+        brand: "Fuente Price Pro",
+        madeIn: "Hecho en Brasil",
+        col1: ["Guías", "Valoración de dividendos", "Documentación"],
+        col2: ["Términos de uso", "Privacidad", "Términos de suscripción"],
+        col3: ["Contacto", "Feedback"],
+      },
+    },
   },
   settings: {
     title: "Configuración",

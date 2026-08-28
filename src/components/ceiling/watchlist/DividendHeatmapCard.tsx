@@ -34,7 +34,7 @@ export function DividendHeatmapCard({ asset }: Props) {
   if (years.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm p-4 sm:p-5 shadow-sm space-y-4">
+    <div className="rounded-xl border border-border/50 bg-background p-4 sm:p-5 shadow-sm space-y-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <Flame className="h-4 w-4 text-primary" />
@@ -58,7 +58,7 @@ export function DividendHeatmapCard({ asset }: Props) {
       </div>
 
       {/* Heatmap Grid Matrix */}
-      <div className="overflow-x-auto rounded-lg border border-border/40 bg-background/40">
+      <div className="overflow-x-auto rounded-lg border border-border/40 bg-background">
         <table className="w-full text-xs text-center border-collapse">
           <thead>
             <tr className="border-b border-border/40 bg-muted/30 text-[11px] font-semibold text-muted-foreground">

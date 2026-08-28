@@ -11,7 +11,7 @@ interface Props {
 export function CashFlowEmptyState({ onNavigateToCalculator }: Props) {
   const { t } = useI18n();
   return (
-    <Card className="border-dashed border-border/60 bg-card/30">
+    <Card className="rounded-2xl border-dashed border-border bg-card">
       <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
         <SuccessIconBox icon={Sparkles} size="lg" />
         <div>

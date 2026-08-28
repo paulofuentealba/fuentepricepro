@@ -10,7 +10,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ValuationAssumptionsModal } from "./assetCard/ValuationAssumptionsModal";
+import { ValuationAssumptionsSheet } from "./assetCard/ValuationAssumptionsSheet";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -308,7 +308,8 @@ export function AssetDetailSheet({
   onUpdateInvestingSince,
 }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
-  const [isAssumptionsModalOpen, setIsAssumptionsModalOpen] = useState(false);
+  const [isAssumptionsSheetOpen, setIsAssumptionsSheetOpen] = useState(false);
+  const [isAssumptionsUpdating, setIsAssumptionsUpdating] = useState(false);
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { pendingEvent } = usePendingEvents(item);
@@ -426,7 +427,7 @@ export function AssetDetailSheet({
                           variant="outline"
                           size="sm"
                           className="h-8 text-xs flex items-center gap-1.5 border-primary/30 hover:bg-primary/5"
-                          onClick={() => setIsAssumptionsModalOpen(true)}
+                          onClick={() => setIsAssumptionsSheetOpen(true)}
                         >
                           <Sliders className="h-3.5 w-3.5 text-primary" />
                           {t.valuationAssumptions.viewAssumptions}
@@ -455,12 +456,13 @@ export function AssetDetailSheet({
                       <BuyAndHoldChecklistCard asset={asset} valuation={valuation} />
                       <AssetDynamicFaqAccordion asset={asset} valuation={valuation} />
                       <RetrospectiveSimulatorCard asset={asset} />
-                      <ValuationAssumptionsModal
-                        isOpen={isAssumptionsModalOpen}
-                        onClose={() => setIsAssumptionsModalOpen(false)}
+                      <ValuationAssumptionsSheet
+                        isOpen={isAssumptionsSheetOpen}
+                        onClose={() => setIsAssumptionsSheetOpen(false)}
                         ticker={item.ticker}
                         currency={asset.currency || item.currency}
                         valuation={valuation}
+                        isUpdating={isAssumptionsUpdating}
                       />
                     </>
                   ) : (

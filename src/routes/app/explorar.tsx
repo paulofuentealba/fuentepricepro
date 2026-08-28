@@ -76,7 +76,7 @@ export function ExplorarPage() {
           <Search className="h-3.5 w-3.5" />
           <span>{t.nav.sections.analyze}</span>
         </div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {t.nav.exploreAssets}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -85,14 +85,14 @@ export function ExplorarPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex w-full flex-wrap justify-start gap-1 bg-card/60 p-1 border border-border/50">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-0">
           {tools.map((tool) => {
             const Icon = tool.icon;
             return (
               <TabsTrigger
                 key={tool.id}
                 value={tool.id}
-                className="flex items-center gap-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
               >
                 <Icon className="h-3.5 w-3.5" />
                 <span>{tool.label}</span>
@@ -105,14 +105,14 @@ export function ExplorarPage() {
           const Icon = tool.icon;
           return (
             <TabsContent key={tool.id} value={tool.id} className="mt-6">
-              <Card className="border border-border/60 bg-card/40 backdrop-blur-sm">
+              <Card className="border-border">
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent-text">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{tool.label}</CardTitle>
+                      <CardTitle className="font-serif text-base font-medium">{tool.label}</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
                         {tool.description}
                       </CardDescription>
@@ -120,7 +120,7 @@ export function ExplorarPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="rounded-xl border border-dashed border-border/80 bg-background/50 p-8 text-center">
+                  <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
                     <p className="text-sm text-muted-foreground">
                       A visualização agregada desta ferramenta está em preparação para a interface unificada da v4.
                     </p>

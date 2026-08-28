@@ -23,6 +23,7 @@ export interface UserSettings {
   disclaimerAcceptedAt?: number;
   taxDisclaimerAcceptedVersion?: string;
   taxDisclaimerAcceptedAt?: number;
+  valuationAssumptionsMode?: "simple" | "advanced";
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -39,6 +40,7 @@ const DEFAULT_SETTINGS: UserSettings = {
     FIAGRO: 0,
     FIXED_INCOME: 0,
   },
+  valuationAssumptionsMode: "simple",
 };
 
 // Ler do localStorage para convidados ou migração
