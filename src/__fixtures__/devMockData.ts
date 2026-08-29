@@ -245,7 +245,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     sector: "Agriculture",
   },
 
-  // ── ETFs — NACIONAL E US (2) ─────────────────────────────────────────────
+  // ── ETFs — NACIONAL E US (4) ─────────────────────────────────────────────
 
   {
     id: "etf:IVVB11",
@@ -289,8 +289,53 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     customTaxRate: 30,
     sector: "Diversified",
   },
+  {
+    id: "etf:SCHD",
+    ticker: "SCHD",
+    name: "Schwab US Dividend Equity ETF",
+    type: "ETF",
+    currency: "USD",
+    currentPrice: 82.0,
+    annualDividend: 2.7,
+    targetYield: 3.3,
+    ceilingPrice: 81.82,
+    safetyMargin: -0.2,
+    quantity: 240,
+    averagePrice: 76.5,
+    paymentMonths: [3, 6, 9, 12],
+    payoutRatio: null,
+    targetMonthlyIncome: 54,
+    addedAt: Date.now(),
+    investingSince: new Date("2023-02-01T12:00:00Z").getTime(),
+    customTaxRate: 30,
+    sector: "Diversified",
+  },
+  {
+    // ETF de crescimento (Nasdaq-100) com yield baixo — o metodo de dividendo (Bazin) exagera
+    // a sobrevalorizacao aqui, mesmo padrao ja existente em MSFT; util para testar como a UI
+    // trata "overvalued" em ativos de crescimento vs. renda.
+    id: "etf:QQQ",
+    ticker: "QQQ",
+    name: "Invesco QQQ Trust",
+    type: "ETF",
+    currency: "USD",
+    currentPrice: 480.0,
+    annualDividend: 2.4,
+    targetYield: 1,
+    ceilingPrice: 240.0,
+    safetyMargin: -50.0,
+    quantity: 25,
+    averagePrice: 368.0,
+    paymentMonths: [3, 6, 9, 12],
+    payoutRatio: null,
+    targetMonthlyIncome: 5,
+    addedAt: Date.now(),
+    investingSince: new Date("2023-04-10T12:00:00Z").getTime(),
+    customTaxRate: 30,
+    sector: "Technology",
+  },
 
-  // ── STOCKS US (2) ────────────────────────────────────────────────────────
+  // ── STOCKS US (4) ────────────────────────────────────────────────────────
 
   {
     id: "us_stock:MSFT",
@@ -333,6 +378,50 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-01-15T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Healthcare",
+  },
+  {
+    // Yield baixo por design (payout real ~15%) — mesmo caso de "overvalued pelo Bazin" que
+    // MSFT/QQQ, mas em blue chip individual em vez de ETF.
+    id: "us_stock:AAPL",
+    ticker: "AAPL",
+    name: "Apple Inc.",
+    type: "STOCK_US",
+    currency: "USD",
+    currentPrice: 195.0,
+    annualDividend: 1.0,
+    targetYield: 1.5,
+    ceilingPrice: 66.67,
+    safetyMargin: -65.8,
+    quantity: 70,
+    averagePrice: 168.0,
+    paymentMonths: [2, 5, 8, 11],
+    payoutRatio: 15,
+    targetMonthlyIncome: 15,
+    addedAt: Date.now(),
+    investingSince: new Date("2022-02-10T12:00:00Z").getTime(),
+    customTaxRate: 30,
+    sector: "Technology",
+  },
+  {
+    id: "us_stock:KO",
+    ticker: "KO",
+    name: "The Coca-Cola Company",
+    type: "STOCK_US",
+    currency: "USD",
+    currentPrice: 63.0,
+    annualDividend: 1.94,
+    targetYield: 3,
+    ceilingPrice: 64.67,
+    safetyMargin: 2.6,
+    quantity: 140,
+    averagePrice: 61.29,
+    paymentMonths: [1, 4, 7, 10],
+    payoutRatio: 65,
+    targetMonthlyIncome: 40,
+    addedAt: Date.now(),
+    investingSince: new Date("2022-05-05T12:00:00Z").getTime(),
+    customTaxRate: 30,
+    sector: "Consumer Staples",
   },
 
   // ── REITs (3) ────────────────────────────────────────────────────────────
@@ -499,4 +588,22 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
 
   // TEST_IPO_RECENTE — ativo sintético de IPO recente, mantido com única transação (<3 anos)
   { id: "test-ipo-1", ticker: "TEST_IPO_RECENTE", type: "buy", date: new Date("2024-04-10T10:00:00Z").getTime(), quantity: 500, pricePerShare: 12.0, fees: 0, notes: "Oferta pública inicial" },
+
+  // AAPL — DCA desde 2022
+  { id: "aapl-1", ticker: "AAPL", type: "buy", date: new Date("2022-02-10T10:00:00Z").getTime(), quantity: 30, pricePerShare: 172.0, fees: 0, notes: "Tech core" },
+  { id: "aapl-2", ticker: "AAPL", type: "buy", date: new Date("2023-01-20T10:00:00Z").getTime(), quantity: 20, pricePerShare: 135.0, fees: 0, notes: "Aporte após correção" },
+  { id: "aapl-3", ticker: "AAPL", type: "buy", date: new Date("2024-06-10T10:00:00Z").getTime(), quantity: 20, pricePerShare: 195.0, fees: 0, notes: "Aporte" },
+
+  // KO — DCA desde 2022
+  { id: "ko-1", ticker: "KO", type: "buy", date: new Date("2022-05-05T10:00:00Z").getTime(), quantity: 80, pricePerShare: 63.0, fees: 0, notes: "Dividend Aristocrat" },
+  { id: "ko-2", ticker: "KO", type: "buy", date: new Date("2023-08-14T10:00:00Z").getTime(), quantity: 60, pricePerShare: 59.0, fees: 0, notes: "Dividend Aristocrat" },
+
+  // SCHD — DCA desde 2023
+  { id: "schd-1", ticker: "SCHD", type: "buy", date: new Date("2023-02-01T10:00:00Z").getTime(), quantity: 100, pricePerShare: 72.0, fees: 0, notes: "High Dividend Equity ETF" },
+  { id: "schd-2", ticker: "SCHD", type: "buy", date: new Date("2024-03-18T10:00:00Z").getTime(), quantity: 80, pricePerShare: 78.0, fees: 0, notes: "High Dividend Equity ETF" },
+  { id: "schd-3", ticker: "SCHD", type: "buy", date: new Date("2025-01-15T10:00:00Z").getTime(), quantity: 60, pricePerShare: 82.0, fees: 0, notes: "High Dividend Equity ETF" },
+
+  // QQQ — DCA desde 2023
+  { id: "qqq-1", ticker: "QQQ", type: "buy", date: new Date("2023-04-10T10:00:00Z").getTime(), quantity: 15, pricePerShare: 320.0, fees: 0, notes: "Nasdaq-100 ETF" },
+  { id: "qqq-2", ticker: "QQQ", type: "buy", date: new Date("2024-05-22T10:00:00Z").getTime(), quantity: 10, pricePerShare: 440.0, fees: 0, notes: "Nasdaq-100 ETF" },
 ];
