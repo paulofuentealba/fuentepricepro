@@ -147,7 +147,7 @@ function DocsPage() {
               <Card id="bazin" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <LineChart className="h-5 w-5 text-accent-foreground" />
+                    <LineChart className="h-5 w-5 text-accent-text" />
                     {t.docs.bazin.title}
                   </CardTitle>
                 </CardHeader>
@@ -158,7 +158,7 @@ function DocsPage() {
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 border border-muted/50">
                     {t.docs.bazinFormula}
                   </div>
-                  <div className="bg-accent/10 p-3 rounded-md text-xs text-accent-foreground/90 border border-accent/20">
+                  <div className="bg-accent/10 p-3 rounded-md text-xs text-accent-text/90 border border-accent/20">
                     {t.docs.bazin.example}
                   </div>
                 </CardContent>
@@ -204,7 +204,7 @@ function DocsPage() {
               <Card id="gordon" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Building className="h-5 w-5 text-accent-foreground" />
+                    <Building className="h-5 w-5 text-accent-text" />
                     {t.docs.gordon.title}
                   </CardTitle>
                 </CardHeader>
@@ -215,7 +215,7 @@ function DocsPage() {
                   <div className="bg-muted/30 p-4 rounded-md font-mono text-sm overflow-x-auto text-foreground/80 border border-muted/50">
                     {t.docs.gordonFormula}
                   </div>
-                  <div className="bg-accent/10 p-3 rounded-md text-xs text-accent-foreground/90 border border-accent/20">
+                  <div className="bg-accent/10 p-3 rounded-md text-xs text-accent-text/90 border border-accent/20">
                     {t.docs.gordon.example}
                   </div>
                 </CardContent>
@@ -279,7 +279,7 @@ function DocsPage() {
               <Card id="cagr" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <TrendingUp className="h-5 w-5 text-accent-foreground" />
+                    <TrendingUp className="h-5 w-5 text-accent-text" />
                     {t.docs.metrics.cagr.title}
                   </CardTitle>
                 </CardHeader>
@@ -293,7 +293,7 @@ function DocsPage() {
               <Card id="dy-vs-yoc" className="bg-card scroll-m-20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Scale className="h-5 w-5 text-accent-foreground" />
+                    <Scale className="h-5 w-5 text-accent-text" />
                     {t.docs.metrics.dyVsYoc.title}
                   </CardTitle>
                 </CardHeader>

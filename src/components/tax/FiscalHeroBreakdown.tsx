@@ -115,7 +115,7 @@ export function FiscalHeroBreakdown({
             <div className="text-[9px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
               {breakdown.jcp}
             </div>
-            <div className="mt-1 font-mono text-[15px] font-semibold text-accent-foreground">
+            <div className="mt-1 font-mono text-[15px] font-semibold text-accent-text">
               {formatCurrency(jcpWithheldTax, currency, locale)}
             </div>
             <div className="mt-0.5 text-[9px] text-muted-foreground">{breakdown.jcpNote}</div>
@@ -166,7 +166,7 @@ export function FiscalHeroBreakdown({
                     <td className="px-4 py-2 text-right font-mono text-muted-foreground line-through decoration-muted-foreground/50 sm:px-5">
                       {formatCurrency(row.gross, currency, locale)}
                     </td>
-                    <td className="px-4 py-2 text-right font-mono font-medium text-accent-foreground sm:px-5">
+                    <td className="px-4 py-2 text-right font-mono font-medium text-accent-text sm:px-5">
                       {formatCurrency(row.net, currency, locale)}
                     </td>
                     <td

@@ -19,7 +19,7 @@ export function StatusBadge({
     warning: "bg-warning/10 text-warning ring-warning/20",
     danger: "bg-danger/10 text-danger ring-danger/20",
     default: "bg-primary/10 text-primary ring-primary/20",
-    gold: "bg-accent/15 text-accent-foreground ring-accent/30",
+    gold: "bg-accent/15 text-accent-text ring-accent/30",
   };
 
   return (

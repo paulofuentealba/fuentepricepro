@@ -19,7 +19,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     targetYield: 6,
     ceilingPrice: 46.66,
     safetyMargin: 76.1,
-    quantity: 1500,
+    quantity: 1200,
     averagePrice: 26.94,
     paymentMonths: [2, 3, 5, 6, 8, 9, 11, 12],
     payoutRatio: 40,
@@ -63,7 +63,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     targetYield: 8,
     ceilingPrice: 97.5,
     safetyMargin: 57.3,
-    quantity: 800,
+    quantity: 600,
     averagePrice: 70.18,
     paymentMonths: [6, 12],
     payoutRatio: 55,
@@ -348,7 +348,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     targetYield: 2,
     ceilingPrice: 150.0,
     safetyMargin: -64.2,
-    quantity: 50,
+    quantity: 40,
     averagePrice: 337.5,
     paymentMonths: [3, 6, 9, 12],
     payoutRatio: 25,
@@ -392,7 +392,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     targetYield: 1.5,
     ceilingPrice: 66.67,
     safetyMargin: -65.8,
-    quantity: 70,
+    quantity: 55,
     averagePrice: 168.0,
     paymentMonths: [2, 5, 8, 11],
     payoutRatio: 15,
@@ -507,6 +507,7 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "bbas3-4", ticker: "BBAS3", type: "sell", date: new Date("2024-01-15T10:00:00Z").getTime(), quantity: 200, pricePerShare: 52.0, fees: 0, notes: "Realização parcial de lucro" },
   { id: "bbas3-5", ticker: "BBAS3", type: "buy", date: new Date("2024-08-10T10:00:00Z").getTime(), quantity: 500, pricePerShare: 24.0, fees: 0, notes: "Reinvestimento de dividendos + aporte" },
   { id: "bbas3-6", ticker: "BBAS3", type: "buy", date: new Date("2025-02-05T10:00:00Z").getTime(), quantity: 300, pricePerShare: 22.0, fees: 0, notes: "Aporte — preço atrativo" },
+  { id: "bbas3-7", ticker: "BBAS3", type: "sell", date: new Date("2026-04-15T10:00:00Z").getTime(), quantity: 300, pricePerShare: 30.0, fees: 0, notes: "Realização de lucro" },
 
   // VALE3 — DCA desde 2022, trim de posição em nov/2024
   { id: "vale3-1", ticker: "VALE3", type: "buy", date: new Date("2022-02-08T10:00:00Z").getTime(), quantity: 200, pricePerShare: 85.0, fees: 0, notes: "Aporte inicial" },
@@ -514,6 +515,7 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "vale3-3", ticker: "VALE3", type: "buy", date: new Date("2024-01-20T10:00:00Z").getTime(), quantity: 300, pricePerShare: 68.0, fees: 0, notes: "Aporte adicional" },
   { id: "vale3-4", ticker: "VALE3", type: "sell", date: new Date("2024-11-05T10:00:00Z").getTime(), quantity: 150, pricePerShare: 63.0, fees: 0, notes: "Rebalanceamento — reduz sobrepeso em Materials" },
   { id: "vale3-5", ticker: "VALE3", type: "buy", date: new Date("2025-03-15T10:00:00Z").getTime(), quantity: 250, pricePerShare: 58.0, fees: 0, notes: "Aporte" },
+  { id: "vale3-6", ticker: "VALE3", type: "sell", date: new Date("2026-05-20T10:00:00Z").getTime(), quantity: 200, pricePerShare: 66.0, fees: 0, notes: "Venda a prejuízo — testa compensação" },
 
   // ITUB4 — DCA desde 2023
   { id: "itub4-1", ticker: "ITUB4", type: "buy", date: new Date("2023-03-10T10:00:00Z").getTime(), quantity: 300, pricePerShare: 30.0, fees: 0, notes: "Aporte" },
@@ -573,6 +575,7 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "msft-2", ticker: "MSFT", type: "buy", date: new Date("2022-10-10T10:00:00Z").getTime(), quantity: 20, pricePerShare: 230.0, fees: 0, notes: "Aporte após correção do setor tech" },
   { id: "msft-3", ticker: "MSFT", type: "sell", date: new Date("2024-11-20T10:00:00Z").getTime(), quantity: 15, pricePerShare: 415.0, fees: 0, notes: "Realização parcial — posição esticada acima do teto" },
   { id: "msft-4", ticker: "MSFT", type: "buy", date: new Date("2025-02-10T10:00:00Z").getTime(), quantity: 25, pricePerShare: 410.0, fees: 0, notes: "Recompra parcial" },
+  { id: "msft-5", ticker: "MSFT", type: "sell", date: new Date("2026-06-10T10:00:00Z").getTime(), quantity: 10, pricePerShare: 460.0, fees: 0, notes: "Realização de lucro" },
 
   // JNJ — DCA desde 2023
   { id: "jnj-1", ticker: "JNJ", type: "buy", date: new Date("2023-01-15T10:00:00Z").getTime(), quantity: 20, pricePerShare: 135.0, fees: 0, notes: "Dividend Aristocrat" },
@@ -595,6 +598,7 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "aapl-1", ticker: "AAPL", type: "buy", date: new Date("2022-02-10T10:00:00Z").getTime(), quantity: 30, pricePerShare: 172.0, fees: 0, notes: "Tech core" },
   { id: "aapl-2", ticker: "AAPL", type: "buy", date: new Date("2023-01-20T10:00:00Z").getTime(), quantity: 20, pricePerShare: 135.0, fees: 0, notes: "Aporte após correção" },
   { id: "aapl-3", ticker: "AAPL", type: "buy", date: new Date("2024-06-10T10:00:00Z").getTime(), quantity: 20, pricePerShare: 195.0, fees: 0, notes: "Aporte" },
+  { id: "aapl-4", ticker: "AAPL", type: "sell", date: new Date("2026-07-05T10:00:00Z").getTime(), quantity: 15, pricePerShare: 230.0, fees: 0, notes: "Realização de lucro" },
 
   // KO — DCA desde 2022
   { id: "ko-1", ticker: "KO", type: "buy", date: new Date("2022-05-05T10:00:00Z").getTime(), quantity: 80, pricePerShare: 63.0, fees: 0, notes: "Dividend Aristocrat" },
