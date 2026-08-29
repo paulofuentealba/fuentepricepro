@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   RotateCcw,
@@ -113,7 +113,7 @@ export function Sidebar() {
     }
   };
 
-  const sections: NavSection[] = [
+  const sections: NavSection[] = useMemo(() => [
     {
       title: t.nav.sections.decide,
       items: [
@@ -200,7 +200,7 @@ export function Sidebar() {
         },
       ],
     },
-  ];
+  ], [t, reinvestBadge]);
 
   if (!isMounted) {
     return (
@@ -241,7 +241,7 @@ export function Sidebar() {
                   type="button"
                   onClick={toggleSidebar}
                   className="mx-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] hover:bg-sidebar-accent/10"
-                  title="Expandir Menu"
+                  title={t.nav.expandMenu}
                 >
                   <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="shrink-0">
                     <circle cx="20" cy="20" r="19" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".35" />
@@ -251,7 +251,7 @@ export function Sidebar() {
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={12}>
-                Expandir Menu
+                {t.nav.expandMenu}
               </TooltipContent>
             </Tooltip>
           )}
@@ -263,7 +263,7 @@ export function Sidebar() {
               "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/10 h-8 w-8",
               isCollapsed && "hidden",
             )}
-            title="Recolher Menu"
+            title={t.nav.collapseMenu}
           >
             <Menu className="h-4 w-4" />
           </Button>
@@ -403,7 +403,7 @@ export function Sidebar() {
                     {user?.photoURL ? (
                       <img
                         src={user.photoURL}
-                        alt="Avatar"
+                        alt={t.nav.avatarAlt}
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (
@@ -415,10 +415,10 @@ export function Sidebar() {
                   {!isCollapsed && (
                     <div className="flex flex-col min-w-0 flex-1">
                       <span className="truncate text-[12.5px] font-display font-semibold text-sidebar-foreground">
-                        {user.displayName || "Usuário"}
+                        {user.displayName || t.nav.userFallback}
                       </span>
                       <span className="text-[10px] font-display text-sidebar-accent">
-                        {isPro ? "Plano Pro" : "Plano Free"}
+                        {isPro ? t.nav.planPro : t.nav.planFree}
                       </span>
                     </div>
                   )}
@@ -427,7 +427,7 @@ export function Sidebar() {
               <DropdownMenuContent align="end" side="right" className="w-56 mb-2">
                 <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
                   <User className="h-3.5 w-3.5" />
-                  <span className="truncate">{user.displayName || "Usuário"}</span>
+                  <span className="truncate">{user.displayName || t.nav.userFallback}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {isAdmin && (

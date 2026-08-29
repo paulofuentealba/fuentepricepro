@@ -134,6 +134,8 @@ export function AskScreen({
   }, [initialAmount]);
 
   const parsedAmount = useMemo(() => {
+    // rawAmount is constrained on input to digits + at most one decimal comma (see onChange
+    // below), so there is never a "." to misread as a thousands separator here.
     const num = parseFloat(rawAmount.replace(",", "."));
     return Number.isFinite(num) && num > 0 ? num : 0;
   }, [rawAmount]);
@@ -244,7 +246,16 @@ export function AskScreen({
                     onFocus={() => setIsAmountFocused(true)}
                     onBlur={() => setIsAmountFocused(false)}
                     onChange={(e) => {
-                      const next = e.target.value.replace(/[^0-9.,]/g, "");
+                      // Digits + at most one decimal comma. No "." allowed while typing — it
+                      // would be ambiguous between a thousands separator and a decimal point
+                      // (e.g. "1.500" silently parsing to 1.5 instead of 1500).
+                      const digitsAndComma = e.target.value.replace(/[^0-9,]/g, "");
+                      const firstCommaIdx = digitsAndComma.indexOf(",");
+                      const next =
+                        firstCommaIdx === -1
+                          ? digitsAndComma
+                          : digitsAndComma.slice(0, firstCommaIdx + 1) +
+                            digitsAndComma.slice(firstCommaIdx + 1).replace(/,/g, "");
                       setRawAmount(next);
                     }}
                     className="h-auto w-28 border-0 bg-transparent p-0 font-serif text-xl font-medium text-foreground shadow-none focus-visible:ring-0 sm:text-2xl"
