@@ -105,7 +105,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     targetYield: 8,
     ceilingPrice: 52.5,
     safetyMargin: 19.3,
-    quantity: 600,
+    quantity: 400,
     averagePrice: 39.33,
     paymentMonths: [3, 9],
     payoutRatio: 60,
@@ -171,7 +171,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     targetYield: 13,
     ceilingPrice: 9.23,
     safetyMargin: 7.3,
-    quantity: 2500,
+    quantity: 2000,
     averagePrice: 8.2,
     paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     payoutRatio: null,
@@ -520,10 +520,11 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "itub4-2", ticker: "ITUB4", type: "buy", date: new Date("2023-09-05T10:00:00Z").getTime(), quantity: 300, pricePerShare: 34.0, fees: 0, notes: "Aporte" },
   { id: "itub4-3", ticker: "ITUB4", type: "buy", date: new Date("2025-01-10T10:00:00Z").getTime(), quantity: 300, pricePerShare: 33.0, fees: 0, notes: "Aporte" },
 
-  // EGIE3 — DCA desde 2022
+  // EGIE3 — DCA desde 2022, realização de lucro no ano corrente (testa ganho de capital em ações)
   { id: "egie3-1", ticker: "EGIE3", type: "buy", date: new Date("2022-05-12T10:00:00Z").getTime(), quantity: 200, pricePerShare: 42.0, fees: 0, notes: "Aporte setor elétrico" },
   { id: "egie3-2", ticker: "EGIE3", type: "buy", date: new Date("2023-04-18T10:00:00Z").getTime(), quantity: 200, pricePerShare: 36.0, fees: 0, notes: "Aporte setor elétrico" },
   { id: "egie3-3", ticker: "EGIE3", type: "buy", date: new Date("2024-10-18T10:00:00Z").getTime(), quantity: 200, pricePerShare: 40.0, fees: 0, notes: "Aporte setor elétrico" },
+  { id: "egie3-4", ticker: "EGIE3", type: "sell", date: new Date("2026-03-10T10:00:00Z").getTime(), quantity: 200, pricePerShare: 46.0, fees: 0, notes: "Realização de lucro" },
 
   // KNCR11 — DCA desde 2022, com venda parcial em jun/2024 (troca por CPTS11)
   { id: "kncr11-1", ticker: "KNCR11", type: "buy", date: new Date("2022-06-01T10:00:00Z").getTime(), quantity: 150, pricePerShare: 100.0, fees: 0, notes: "Alocação FII" },
@@ -536,9 +537,10 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "mxrf11-2", ticker: "MXRF11", type: "buy", date: new Date("2023-01-10T10:00:00Z").getTime(), quantity: 1000, pricePerShare: 9.6, fees: 0, notes: "Aporte mensal" },
   { id: "mxrf11-3", ticker: "MXRF11", type: "buy", date: new Date("2024-05-20T10:00:00Z").getTime(), quantity: 1000, pricePerShare: 10.0, fees: 0, notes: "Aporte mensal" },
 
-  // CPTS11 — DCA desde 2023
+  // CPTS11 — DCA desde 2023, venda parcial no ano corrente (testa ganho de capital em FII, 20% flat sem isenção)
   { id: "cpts11-1", ticker: "CPTS11", type: "buy", date: new Date("2023-03-15T10:00:00Z").getTime(), quantity: 1500, pricePerShare: 8.0, fees: 0, notes: "Aporte" },
   { id: "cpts11-2", ticker: "CPTS11", type: "buy", date: new Date("2023-08-22T10:00:00Z").getTime(), quantity: 1000, pricePerShare: 8.5, fees: 0, notes: "Aporte" },
+  { id: "cpts11-3", ticker: "CPTS11", type: "sell", date: new Date("2026-02-15T10:00:00Z").getTime(), quantity: 500, pricePerShare: 8.8, fees: 0, notes: "Rebalanceamento" },
 
   // BDIF11 — DCA desde 2023
   { id: "bdif11-1", ticker: "BDIF11", type: "buy", date: new Date("2023-02-10T10:00:00Z").getTime(), quantity: 150, pricePerShare: 88.0, fees: 0, notes: "Aporte Infra" },
