@@ -10,6 +10,8 @@ import {
   buildSparklinePath,
   computeCashFlowSummary,
   computeInvestedVsReceived,
+  MONTHS_EN_SHORT,
+  MONTHS_PT_SHORT,
   type DividendEventsMap,
 } from "@/lib/cashflow";
 import { useTransactions } from "@/lib/transactions";
@@ -19,34 +21,8 @@ import { CashFlowSummaryCards } from "./cashflow/CashFlowSummary";
 import { CashFlowChart } from "./cashflow/CashFlowChart";
 import { CashFlowEmptyState } from "./cashflow/CashFlowEmptyState";
 
-const MONTHS_EN = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-const MONTHS_PT = [
-  "Jan",
-  "Fev",
-  "Mar",
-  "Abr",
-  "Mai",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Set",
-  "Out",
-  "Nov",
-  "Dez",
-];
+const MONTHS_EN = MONTHS_EN_SHORT;
+const MONTHS_PT = MONTHS_PT_SHORT;
 
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";

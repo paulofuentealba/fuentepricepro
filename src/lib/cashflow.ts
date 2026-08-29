@@ -12,6 +12,11 @@ export { getFxMultiplier };
 export const QUARTERLY_MONTHS = [2, 5, 8, 11]; // Mar, Jun, Sep, Dec (0-indexed)
 export const MONTHLY_TYPES: WatchlistItem["type"][] = ["FII", "FII_INFRA", "FIAGRO", "ETF", "REIT"];
 
+/** Short month labels for buildMonthlyBuckets' `monthsLabels` param — SSOT, was previously
+ * duplicated inline in CashFlowCalendar.tsx. */
+export const MONTHS_EN_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const MONTHS_PT_SHORT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
 export interface MonthContributor {
   ticker: string;
   amount: number;

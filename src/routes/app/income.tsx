@@ -1,47 +1,362 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { BarChart, Bar, XAxis, CartesianGrid, Cell, LabelList } from "recharts";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BlurredPreviewOverlay } from "@/components/ceiling/BlurredPreviewOverlay";
+import { ChartContainer } from "@/components/ui/chart";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { InsightBanner } from "@/components/shared/InsightBanner";
+import { Lock } from "lucide-react";
 import { useFeatureGate } from "@/lib/useFeatureGate";
-import { useWatchlist } from "@/lib/watchlist";
+import { useI18n } from "@/lib/i18n-provider";
+import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
+import { useTransactions } from "@/lib/transactions";
+import { useUserSettings } from "@/lib/useUserSettings";
+import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
+import { buildMonthlyBuckets, MONTHS_EN_SHORT, MONTHS_PT_SHORT } from "@/lib/cashflow";
+import { buildConfirmedUpcoming, buildWeakMonths, buildAnnualDividends } from "@/lib/incomeGuaranteed";
+import { resolveReasonText } from "@/lib/askEngine";
+import { convertCurrency } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { formatCurrency } from "@/lib/formatters";
 
-const CashFlowCalendar = lazy(() =>
-  import("@/components/ceiling/CashFlowCalendar").then((m) => ({ default: m.CashFlowCalendar })),
-);
+const COLOR_RECEIVED = "var(--success)";
+const COLOR_PROJECTED_LEGACY = "var(--accent)";
+const COLOR_GRID = "var(--chart-grid)";
+const COLOR_MUTED = "var(--muted)";
+const UPCOMING_WINDOW_DAYS = 60;
 
 export const Route = createFileRoute("/app/income")({
-  component: CashFlow,
+  head: () => ({
+    meta: [
+      { title: "Renda Garantida | Fuente Price Pro" },
+      {
+        name: "description",
+        content: "Proventos já anunciados aguardando pagamento, sazonalidade de renda por mês e histórico de dividendos por ano.",
+      },
+    ],
+  }),
+  component: IncomePage,
 });
 
-function CashFlowSkeleton() {
-  return (
-    <div className="space-y-6 mx-auto max-w-4xl">
-      <Skeleton className="h-28 w-full rounded-2xl bg-muted/30" />
-      <Skeleton className="h-[380px] w-full rounded-2xl bg-muted/30" />
-    </div>
-  );
-}
+function IncomePage() {
+  const isUnlocked = useFeatureGate("cashflowUnlocked");
+  const { t, locale } = useI18n();
+  const { items, isAppLoading, fx, dividendEventsMap = {} } = useValuedPortfolio();
+  const { transactions = [] } = useTransactions();
+  const { settings } = useUserSettings();
+  const currency = settings?.displayCurrency || "BRL";
+  const { events } = useRealizedIncomeSummary(currency);
+  const fxRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
+  const monthsLabels = locale === "en" ? MONTHS_EN_SHORT : MONTHS_PT_SHORT;
 
-function CashFlow() {
-  const cashflowUnlocked = useFeatureGate("cashflowUnlocked") as boolean;
-  const { items } = useWatchlist();
-  const validItems = items.filter((i) => i.quantity > 0 && i.averagePrice && i.averagePrice > 0);
-
-  const calendarContent = (
-    <Suspense fallback={<CashFlowSkeleton />}>
-      <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-4xl">
-        <CashFlowCalendar items={validItems} />
-      </div>
-    </Suspense>
+  const calendarBuckets = useMemo(
+    () => buildMonthlyBuckets(items, currency, monthsLabels, dividendEventsMap, "calendar", transactions, fxRate),
+    [items, currency, monthsLabels, dividendEventsMap, transactions, fxRate],
   );
 
-  if (!cashflowUnlocked) {
+  const upcoming = useMemo(() => buildConfirmedUpcoming(events, undefined, UPCOMING_WINDOW_DAYS), [events]);
+  const upcomingTotal = useMemo(
+    () => Math.round(upcoming.reduce((sum, r) => sum + convertCurrency(r.amountNet, r.currency, currency, fxRate), 0) * 100) / 100,
+    [upcoming, currency, fxRate],
+  );
+
+  const weakMonths = useMemo(() => buildWeakMonths(calendarBuckets), [calendarBuckets]);
+  const annual = useMemo(
+    () => buildAnnualDividends(events, calendarBuckets, currency, fxRate, 5),
+    [events, calendarBuckets, currency, fxRate],
+  );
+
+  if (isAppLoading) {
     return (
-      <BlurredPreviewOverlay feature="cashflow">
-        {calendarContent}
-      </BlurredPreviewOverlay>
+      <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+        <Skeleton className="h-16 w-full rounded-2xl bg-muted/30" />
+        <Skeleton className="h-32 w-full rounded-2xl bg-muted/30" />
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <Skeleton className="h-64 w-full rounded-2xl bg-muted/30" />
+          <Skeleton className="h-64 w-full rounded-2xl bg-muted/30" />
+        </div>
+        <Skeleton className="h-80 w-full rounded-2xl bg-muted/30" />
+      </div>
     );
   }
 
-  return calendarContent;
+  if (isUnlocked === false) {
+    return (
+      <div className="mx-auto max-w-xl p-6 mt-12">
+        <Card className="border-border/60 text-center p-6">
+          <CardHeader className="space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <Lock className="h-6 w-6" />
+            </div>
+            <CardTitle>{t.incomeScreen?.featureGateBlockedTitle || "Income Screen Locked"}</CardTitle>
+            <CardDescription>
+              {t.incomeScreen?.featureGateBlockedDesc || "The guaranteed income screen is currently undergoing maintenance."}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const weakMonthLabels = weakMonths.weakMonthIndexes.map((i) => calendarBuckets[i]?.month).filter(Boolean).join(", ");
+
+  const oldYearsCount = Math.ceil(annual.years.length / 2);
+  const currentYearLabel = annual.years[annual.years.length - 1]?.year ?? new Date().getFullYear();
+  const firstYearLabel = annual.years[0]?.year ?? currentYearLabel;
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+      {/* Page header */}
+      <div>
+        <div className="text-xs font-display font-semibold uppercase tracking-wider text-success">
+          {t.incomeScreen?.eyebrow}
+        </div>
+        <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {t.incomeScreen?.title}
+        </h1>
+      </div>
+
+      {/* Insight banner */}
+      <InsightBanner
+        title={t.incomeScreen?.insightTitle}
+        description={t.incomeScreen?.insightDesc}
+        value={formatCurrency(upcomingTotal, currency, locale)}
+      />
+
+      {/* Two-column: Já garantido / Seus meses secos */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {/* Já garantido */}
+        <div className="overflow-hidden rounded-[22px] border border-border/60 bg-card">
+          <div className="flex items-center justify-between gap-3 p-5 pb-3 sm:p-6 sm:pb-3">
+            <h3 className="font-serif text-base font-medium text-foreground">
+              {resolveReasonText(t, "incomeScreen.upcomingCardTitle", { days: UPCOMING_WINDOW_DAYS })}
+            </h3>
+            <StatusBadge variant="success">{t.incomeScreen?.confirmedBadge}</StatusBadge>
+          </div>
+
+          {upcoming.length === 0 ? (
+            <div className="px-5 pb-6 sm:px-6">
+              <p className="text-sm font-medium text-foreground">
+                {resolveReasonText(t, "incomeScreen.upcomingEmptyTitle", { days: UPCOMING_WINDOW_DAYS })}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{t.incomeScreen?.upcomingEmptyDesc}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto px-5 sm:px-6">
+              <table className="w-full min-w-[360px] text-sm">
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.assetHeader}</th>
+                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.grossHeader}</th>
+                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.paymentHeader}</th>
+                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.netHeader}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcoming.map((row) => (
+                    <tr key={`${row.ticker}-${row.paymentDate}`} className="border-t border-dashed border-border/40">
+                      <td className="py-2.5 font-mono text-[13px] font-semibold text-foreground">{row.ticker}</td>
+                      <td className="py-2.5 font-mono text-[13px] text-foreground">
+                        {formatCurrency(row.amountGross, row.currency, locale)}
+                      </td>
+                      <td className="py-2.5 text-[12px] text-muted-foreground">
+                        {row.daysUntilPayment === 0
+                          ? t.incomeScreen?.todayLabel
+                          : resolveReasonText(t, "incomeScreen.daysUnit", { days: row.daysUntilPayment })}
+                      </td>
+                      <td className="py-2.5 font-mono text-[13px] font-semibold text-success">
+                        {formatCurrency(row.amountNet, row.currency, locale)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <p className="px-5 pb-5 pt-3 text-[11px] leading-relaxed text-muted-foreground sm:px-6">
+            {t.incomeScreen?.netFootnote}
+          </p>
+        </div>
+
+        {/* Seus meses secos */}
+        <div className="rounded-[22px] border border-border/60 bg-card p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-serif text-base font-medium text-foreground">{t.incomeScreen?.weakMonthsCardTitle}</h3>
+            {weakMonths.weakMonthIndexes.length > 0 && (
+              <StatusBadge variant="danger">
+                {weakMonths.weakMonthIndexes.length === 1
+                  ? t.incomeScreen?.weakMonthsBadgeSingle
+                  : resolveReasonText(t, "incomeScreen.weakMonthsBadge", { count: weakMonths.weakMonthIndexes.length })}
+              </StatusBadge>
+            )}
+          </div>
+
+          <div className="mt-4 h-[110px]">
+            <ChartContainer config={{}} className="h-full w-full">
+              <BarChart data={calendarBuckets} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                <Bar dataKey="amount" radius={[4, 4, 0, 0]} maxBarSize={22}>
+                  {calendarBuckets.map((_, i) => (
+                    <Cell key={i} fill={weakMonths.weakMonthIndexes.includes(i) ? COLOR_MUTED : COLOR_PROJECTED_LEGACY} />
+                  ))}
+                </Bar>
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                  tick={(props) => {
+                    const { x, y, payload, index } = props;
+                    const isWeak = weakMonths.weakMonthIndexes.includes(index);
+                    return (
+                      <text
+                        x={x}
+                        y={y + 10}
+                        textAnchor="middle"
+                        className="text-[9px]"
+                        fill={isWeak ? "var(--destructive)" : "var(--muted-foreground)"}
+                        fontWeight={isWeak ? 700 : 400}
+                      >
+                        {String(payload.value).charAt(0)}
+                      </text>
+                    );
+                  }}
+                />
+              </BarChart>
+            </ChartContainer>
+          </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            {weakMonths.topTickers.length === 0
+              ? t.incomeScreen?.weakMonthsEmpty
+              : weakMonths.weakMonthIndexes.length === 0
+                ? t.incomeScreen?.weakMonthsNone
+                : resolveReasonText(t, "incomeScreen.weakMonthsDesc", {
+                    count: weakMonths.topTickers.length,
+                    tickers: weakMonths.topTickers.join(", "),
+                    months: weakMonthLabels,
+                    amount: formatCurrency(weakMonths.weakMonthThreshold, currency, locale),
+                  })}
+          </p>
+
+          {weakMonths.weakMonthIndexes.length > 0 && (
+            <Link
+              to="/app/myportfolio"
+              className="mt-3 inline-block text-xs font-display font-semibold text-accent-text hover:underline"
+            >
+              {t.incomeScreen?.weakMonthsLink}
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Dividendos por ano */}
+      <div className="rounded-[22px] border border-border/60 bg-card p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="font-serif text-base font-medium text-foreground">{t.incomeScreen?.annualCardTitle}</h3>
+          {annual.years.some((y) => y.receivedAmount + y.projectedAmount > 0) && (
+            <StatusBadge variant="success">
+              {resolveReasonText(t, "incomeScreen.annualGrowthBadge", {
+                rate: annual.cagrPct,
+                years: annual.years.length - 1,
+              })}
+            </StatusBadge>
+          )}
+        </div>
+
+        {annual.years.every((y) => y.receivedAmount + y.projectedAmount === 0) ? (
+          <div className="mt-6 text-center">
+            <p className="text-sm font-medium text-foreground">{t.incomeScreen?.annualEmptyTitle}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t.incomeScreen?.annualEmptyDesc}</p>
+          </div>
+        ) : (
+          <>
+            <div className="mt-5 h-[260px]">
+              <ChartContainer config={{}} className="h-full w-full">
+                <BarChart data={annual.years} margin={{ top: 30, right: 8, left: 8, bottom: 0 }}>
+                  <defs>
+                    <pattern id="incomeProjectedHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect width="6" height="6" fill="var(--card)" fillOpacity={0.4} />
+                      <line x1="0" y1="0" x2="0" y2="6" stroke="var(--accent)" strokeWidth="2.5" strokeOpacity={0.85} />
+                    </pattern>
+                  </defs>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={COLOR_GRID} />
+                  <XAxis
+                    dataKey="year"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={({ x, y, payload }) => (
+                      <text
+                        x={x}
+                        y={y + 14}
+                        textAnchor="middle"
+                        className="text-[10px] sm:text-[11px]"
+                        fill={payload.value === currentYearLabel ? "var(--foreground)" : "var(--muted-foreground)"}
+                        fontWeight={payload.value === currentYearLabel ? 700 : 500}
+                      >
+                        {payload.value}
+                      </text>
+                    )}
+                  />
+                  <Bar dataKey="receivedAmount" stackId="a" radius={[6, 6, 0, 0]} maxBarSize={64}>
+                    {annual.years.map((y, i) => (
+                      <Cell key={i} fill={i < oldYearsCount ? COLOR_RECEIVED : "var(--accent)"} />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="projectedAmount" stackId="a" radius={[6, 6, 0, 0]} maxBarSize={64}>
+                    {annual.years.map((y, i) => (
+                      <Cell key={i} fill={y.projectedAmount > 0 ? "url(#incomeProjectedHatch)" : "transparent"} />
+                    ))}
+                    <LabelList
+                      dataKey="year"
+                      position="top"
+                      content={({ x, y, width, index }: any) => {
+                        const entry = annual.years[index as number];
+                        const total = entry.receivedAmount + entry.projectedAmount;
+                        const isCurrent = entry.year === currentYearLabel;
+                        return (
+                          <text
+                            x={(x as number) + (width as number) / 2}
+                            y={(y as number) - 8}
+                            textAnchor="middle"
+                            className={isCurrent ? "font-serif text-[15px] font-semibold" : "font-serif text-[12px] font-medium"}
+                            fill={isCurrent ? "var(--accent-text)" : "var(--muted-foreground)"}
+                          >
+                            {formatCurrency(total, currency, locale)}
+                          </text>
+                        );
+                      }}
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLOR_RECEIVED }} />
+                  {t.incomeScreen?.annualLegendReceived}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full border border-accent"
+                    style={{ background: "repeating-linear-gradient(45deg, var(--accent), var(--accent) 1px, transparent 1px, transparent 2px)" }}
+                  />
+                  {resolveReasonText(t, "incomeScreen.annualLegendProjected", { year: currentYearLabel })}
+                </span>
+              </div>
+              <div className="font-display font-semibold text-foreground">
+                {resolveReasonText(t, "incomeScreen.annualGrowthStat", {
+                  pct: annual.totalGrowthPct,
+                  year: firstYearLabel,
+                })}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
