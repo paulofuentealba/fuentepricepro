@@ -73,15 +73,34 @@ vi.mock("@/lib/useUserSettings", () => ({
 vi.mock("@/lib/useRealizedIncomeSummary", () => ({
   useRealizedIncomeSummary: () => ({
     summary: { currentMonth: 1130 },
+    events: [],
     isLoading: false,
   }),
 }));
 
 describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
+  let localStorageStore: Record<string, string> = {};
+
   beforeEach(() => {
     mockIsAdmin = false;
     mockUser = null;
     mockIsPro = false;
+    localStorageStore = {};
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: (key: string) => localStorageStore[key] ?? null,
+        setItem: (key: string, value: string) => {
+          localStorageStore[key] = value.toString();
+        },
+        removeItem: (key: string) => {
+          delete localStorageStore[key];
+        },
+        clear: () => {
+          localStorageStore = {};
+        },
+      },
+      writable: true,
+    });
   });
 
   afterEach(() => {
@@ -138,6 +157,19 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
     expect(screen.getByText(ptBR.nav.guaranteedIncome).closest("a")).toHaveAttribute("href", "/app/income");
     expect(screen.getByText(ptBR.nav.audit).closest("a")).toHaveAttribute("href", "/app/audit");
     expect(screen.queryByText(ptBR.nav.comingSoon)).not.toBeInTheDocument();
+  });
+
+  it("shows the Fiscal reality dot when the section was never visited", () => {
+    render(<Sidebar />);
+    const taxLink = screen.getByText(ptBR.nav.taxReality).closest("a");
+    expect(taxLink?.querySelector("span[aria-hidden='true']")).toBeInTheDocument();
+  });
+
+  it("hides the Fiscal reality dot once the section was visited this month", () => {
+    localStorageStore["fpp_last_seen_tax"] = new Date().toISOString();
+    render(<Sidebar />);
+    const taxLink = screen.getByText(ptBR.nav.taxReality).closest("a");
+    expect(taxLink?.querySelector("span[aria-hidden='true']")).not.toBeInTheDocument();
   });
 
   it("renders Admin link when isAdmin is true", () => {

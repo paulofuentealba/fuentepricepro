@@ -41,6 +41,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
+import { useLastSeen } from "@/lib/useLastSeen";
 import { formatNumber } from "@/lib/formatters";
 
 interface NavItem {
@@ -50,6 +51,8 @@ interface NavItem {
   path?: string;
   disabled?: boolean;
   badge?: string | number;
+  /** Small unread-style dot (no count), e.g. "new fiscal data since your last visit". */
+  dot?: boolean;
 }
 
 interface NavSection {
@@ -74,7 +77,7 @@ export function Sidebar() {
   const { theme, setTheme, isDark } = useTheme();
   const { settings } = useUserSettings();
   const currency = settings?.displayCurrency || "BRL";
-  const { summary } = useRealizedIncomeSummary(currency);
+  const { summary, events } = useRealizedIncomeSummary(currency);
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -86,6 +89,34 @@ export function Sidebar() {
   const reinvestAmount =
     summary?.currentMonth && summary.currentMonth > 0 ? summary.currentMonth : 1000;
   const reinvestBadge = `${currency === "USD" ? "US$" : "R$"}${formatNumber(reinvestAmount, locale, 0)}`;
+
+  // "What has changed" badge and "Fiscal reality" dot — both derived from real realized-income
+  // events (never a fake/hardcoded count), gated by a per-viewer localStorage "last seen"
+  // timestamp so they clear once the user actually opens the corresponding page.
+  const { lastSeen: lastSeenNews, isMounted: newsMounted, markSeenNow: markNewsSeen } =
+    useLastSeen("news");
+  const { lastSeen: lastSeenTax, isMounted: taxMounted, markSeenNow: markTaxSeen } =
+    useLastSeen("tax");
+
+  const startOfCurrentMonthISO = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  }, []);
+
+  const whatChangedCount = useMemo(() => {
+    if (!newsMounted) return 0;
+    const since = lastSeenNews ?? startOfCurrentMonthISO;
+    return (events ?? []).filter(
+      (e) => e.isPaid && e.paymentDate && `${e.paymentDate}T00:00:00.000Z` > since,
+    ).length;
+  }, [events, lastSeenNews, newsMounted, startOfCurrentMonthISO]);
+
+  const hasNewFiscalData = taxMounted && (!lastSeenTax || lastSeenTax < startOfCurrentMonthISO);
+
+  useEffect(() => {
+    if (location.pathname.startsWith("/app/news")) markNewsSeen();
+    if (location.pathname.startsWith("/app/tax")) markTaxSeen();
+  }, [location.pathname, markNewsSeen, markTaxSeen]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -157,6 +188,7 @@ export function Sidebar() {
           path: "/app/news",
           icon: Bell,
           disabled: false,
+          badge: whatChangedCount > 0 ? whatChangedCount : undefined,
         },
         {
           key: "renda-garantida",
@@ -171,6 +203,7 @@ export function Sidebar() {
           icon: FileText,
           path: "/app/tax",
           disabled: false,
+          dot: hasNewFiscalData,
         },
       ],
     },
@@ -200,7 +233,7 @@ export function Sidebar() {
         },
       ],
     },
-  ], [t, reinvestBadge]);
+  ], [t, reinvestBadge, whatChangedCount, hasNewFiscalData]);
 
   if (!isMounted) {
     return (
@@ -346,6 +379,12 @@ export function Sidebar() {
                       <Badge className="ml-auto rounded-full px-1.5 py-0 text-[9.5px] font-mono font-bold bg-sidebar-accent text-sidebar-accent-foreground border-transparent hover:bg-sidebar-accent">
                         {item.badge}
                       </Badge>
+                    )}
+                    {!isCollapsed && item.badge === undefined && item.dot && (
+                      <span
+                        aria-hidden="true"
+                        className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-sidebar-accent"
+                      />
                     )}
                   </Link>
                 );
