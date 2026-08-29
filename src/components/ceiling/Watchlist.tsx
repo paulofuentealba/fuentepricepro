@@ -161,6 +161,11 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
     [updateWatchlistItemAsync],
   );
 
+  const handleClearFilters = useCallback(() => {
+    setTypeFilter(null);
+    setOppFilter(null);
+  }, [setTypeFilter, setOppFilter]);
+
   if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center p-20 text-muted-foreground gap-4 w-full">
@@ -169,11 +174,6 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
       </div>
     );
   }
-
-  const handleClearFilters = useCallback(() => {
-    setTypeFilter(null);
-    setOppFilter(null);
-  }, [setTypeFilter, setOppFilter]);
 
   const handleConfirmDynamicImport = async (parseResult: ParseResult) => {
     const res = await persistTransactionsBatch(

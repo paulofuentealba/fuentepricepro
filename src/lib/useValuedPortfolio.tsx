@@ -13,6 +13,7 @@ import { useI18n } from "./i18n-provider";
 import { fetchValuedPortfolioFn } from "./api/portfolioBff.functions";
 import { SELIC_FALLBACK, EXCHANGE_RATE_FALLBACK } from "./macroDefaults";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "./queryOptions";
+import { useLiveQuotesAndMeta } from "@/components/ceiling/watchlist/useLiveQuotesAndMeta";
 
 export interface ValuedWatchlistItem extends WatchlistItem {
   // Live computed fields
@@ -153,6 +154,13 @@ function useValuedPortfolioBff(
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
   const { loading: isAuthLoading } = useAuth();
 
+  // Portfolio VALUATION itself comes exclusively from the BFF (fetchValuedPortfolioFn) per the
+  // Prompt 125 migration — this client-side fan-out is kept only for what that migration's own
+  // scope explicitly preserved: quotes/meta/dividendEventsMap consumed by non-valuation screens
+  // (Income, Tax Reality, the Reinvest "paid today" eyebrow) that the BFF payload doesn't carry.
+  const { quotes: liveQuotes, meta: liveMeta, dividendEventsMap: liveDividendEventsMap } =
+    useLiveQuotesAndMeta(items);
+
   const itemsWithYield = useMemo(
     () =>
       items.map((it) => ({
@@ -196,9 +204,9 @@ function useValuedPortfolioBff(
     items,
     valuedItems,
     totals,
-    quotes: {} as Record<string, any>,
-    meta: {} as Record<string, any>,
-    dividendEventsMap: {} as Record<string, any>,
+    quotes: liveQuotes,
+    meta: liveMeta,
+    dividendEventsMap: liveDividendEventsMap,
     isAppLoading: isAppLoading || bffQuery.isLoading,
     lastUpdatedAt: bffQuery.dataUpdatedAt ?? 0,
     macroRates,
