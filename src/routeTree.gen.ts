@@ -25,19 +25,22 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as OnboardingPersonalInfoRouteImport } from './routes/onboarding.personal-info'
 import { Route as OnboardingMetasRouteImport } from './routes/onboarding.metas'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
+import { Route as AppWithdrawRouteImport } from './routes/app/withdraw'
+import { Route as AppTaxRouteImport } from './routes/app/tax'
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
-import { Route as AppSmartallocationRouteImport } from './routes/app/smartallocation'
 import { Route as AppScreenerRouteImport } from './routes/app/screener'
 import { Route as AppRiskradarRouteImport } from './routes/app/riskradar'
 import { Route as AppReinvestirRouteImport } from './routes/app/reinvestir'
-import { Route as AppRealidadeFiscalRouteImport } from './routes/app/realidade-fiscal'
+import { Route as AppNewsRouteImport } from './routes/app/news'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
-import { Route as AppMetasRouteImport } from './routes/app/metas'
+import { Route as AppIncomeRouteImport } from './routes/app/income'
+import { Route as AppGoalsRouteImport } from './routes/app/goals'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
-import { Route as AppExplorarRouteImport } from './routes/app/explorar'
+import { Route as AppExploreRouteImport } from './routes/app/explore'
 import { Route as AppDocsRouteImport } from './routes/app/docs'
+import { Route as AppContributionplanRouteImport } from './routes/app/contributionplan'
 import { Route as AppComparatorRouteImport } from './routes/app.comparator'
-import { Route as AppCashflowRouteImport } from './routes/app/cashflow'
+import { Route as AppAuditRouteImport } from './routes/app/audit'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -119,17 +122,22 @@ const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   path: '/guides/dividend-valuation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWithdrawRoute = AppWithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTaxRoute = AppTaxRouteImport.update({
+  id: '/tax',
+  path: '/tax',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSnowballeffectsimulatorRoute =
   AppSnowballeffectsimulatorRouteImport.update({
     id: '/snowballeffectsimulator',
     path: '/snowballeffectsimulator',
     getParentRoute: () => AppRoute,
   } as any)
-const AppSmartallocationRoute = AppSmartallocationRouteImport.update({
-  id: '/smartallocation',
-  path: '/smartallocation',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppScreenerRoute = AppScreenerRouteImport.update({
   id: '/screener',
   path: '/screener',
@@ -145,9 +153,9 @@ const AppReinvestirRoute = AppReinvestirRouteImport.update({
   path: '/reinvestir',
   getParentRoute: () => AppRoute,
 } as any)
-const AppRealidadeFiscalRoute = AppRealidadeFiscalRouteImport.update({
-  id: '/realidade-fiscal',
-  path: '/realidade-fiscal',
+const AppNewsRoute = AppNewsRouteImport.update({
+  id: '/news',
+  path: '/news',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMyportfolioRoute = AppMyportfolioRouteImport.update({
@@ -155,9 +163,14 @@ const AppMyportfolioRoute = AppMyportfolioRouteImport.update({
   path: '/myportfolio',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMetasRoute = AppMetasRouteImport.update({
-  id: '/metas',
-  path: '/metas',
+const AppIncomeRoute = AppIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGoalsRoute = AppGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
@@ -165,9 +178,9 @@ const AppGlobalradarRoute = AppGlobalradarRouteImport.update({
   path: '/globalradar',
   getParentRoute: () => AppRoute,
 } as any)
-const AppExplorarRoute = AppExplorarRouteImport.update({
-  id: '/explorar',
-  path: '/explorar',
+const AppExploreRoute = AppExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDocsRoute = AppDocsRouteImport.update({
@@ -175,14 +188,19 @@ const AppDocsRoute = AppDocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContributionplanRoute = AppContributionplanRouteImport.update({
+  id: '/contributionplan',
+  path: '/contributionplan',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppComparatorRoute = AppComparatorRouteImport.update({
   id: '/comparator',
   path: '/comparator',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCashflowRoute = AppCashflowRouteImport.update({
-  id: '/cashflow',
-  path: '/cashflow',
+const AppAuditRoute = AppAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -198,19 +216,22 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
-  '/app/cashflow': typeof AppCashflowRoute
+  '/app/audit': typeof AppAuditRoute
   '/app/comparator': typeof AppComparatorRoute
+  '/app/contributionplan': typeof AppContributionplanRoute
   '/app/docs': typeof AppDocsRoute
-  '/app/explorar': typeof AppExplorarRoute
+  '/app/explore': typeof AppExploreRoute
   '/app/globalradar': typeof AppGlobalradarRoute
-  '/app/metas': typeof AppMetasRoute
+  '/app/goals': typeof AppGoalsRoute
+  '/app/income': typeof AppIncomeRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
-  '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
+  '/app/news': typeof AppNewsRoute
   '/app/reinvestir': typeof AppReinvestirRoute
   '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
-  '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
+  '/app/tax': typeof AppTaxRoute
+  '/app/withdraw': typeof AppWithdrawRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
@@ -227,19 +248,22 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
-  '/app/cashflow': typeof AppCashflowRoute
+  '/app/audit': typeof AppAuditRoute
   '/app/comparator': typeof AppComparatorRoute
+  '/app/contributionplan': typeof AppContributionplanRoute
   '/app/docs': typeof AppDocsRoute
-  '/app/explorar': typeof AppExplorarRoute
+  '/app/explore': typeof AppExploreRoute
   '/app/globalradar': typeof AppGlobalradarRoute
-  '/app/metas': typeof AppMetasRoute
+  '/app/goals': typeof AppGoalsRoute
+  '/app/income': typeof AppIncomeRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
-  '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
+  '/app/news': typeof AppNewsRoute
   '/app/reinvestir': typeof AppReinvestirRoute
   '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
-  '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
+  '/app/tax': typeof AppTaxRoute
+  '/app/withdraw': typeof AppWithdrawRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
@@ -259,19 +283,22 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
-  '/app/cashflow': typeof AppCashflowRoute
+  '/app/audit': typeof AppAuditRoute
   '/app/comparator': typeof AppComparatorRoute
+  '/app/contributionplan': typeof AppContributionplanRoute
   '/app/docs': typeof AppDocsRoute
-  '/app/explorar': typeof AppExplorarRoute
+  '/app/explore': typeof AppExploreRoute
   '/app/globalradar': typeof AppGlobalradarRoute
-  '/app/metas': typeof AppMetasRoute
+  '/app/goals': typeof AppGoalsRoute
+  '/app/income': typeof AppIncomeRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
-  '/app/realidade-fiscal': typeof AppRealidadeFiscalRoute
+  '/app/news': typeof AppNewsRoute
   '/app/reinvestir': typeof AppReinvestirRoute
   '/app/riskradar': typeof AppRiskradarRoute
   '/app/screener': typeof AppScreenerRoute
-  '/app/smartallocation': typeof AppSmartallocationRoute
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
+  '/app/tax': typeof AppTaxRoute
+  '/app/withdraw': typeof AppWithdrawRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
@@ -292,19 +319,22 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscription-terms'
     | '/terms'
-    | '/app/cashflow'
+    | '/app/audit'
     | '/app/comparator'
+    | '/app/contributionplan'
     | '/app/docs'
-    | '/app/explorar'
+    | '/app/explore'
     | '/app/globalradar'
-    | '/app/metas'
+    | '/app/goals'
+    | '/app/income'
     | '/app/myportfolio'
-    | '/app/realidade-fiscal'
+    | '/app/news'
     | '/app/reinvestir'
     | '/app/riskradar'
     | '/app/screener'
-    | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
+    | '/app/tax'
+    | '/app/withdraw'
     | '/guides/dividend-valuation'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
@@ -321,19 +351,22 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscription-terms'
     | '/terms'
-    | '/app/cashflow'
+    | '/app/audit'
     | '/app/comparator'
+    | '/app/contributionplan'
     | '/app/docs'
-    | '/app/explorar'
+    | '/app/explore'
     | '/app/globalradar'
-    | '/app/metas'
+    | '/app/goals'
+    | '/app/income'
     | '/app/myportfolio'
-    | '/app/realidade-fiscal'
+    | '/app/news'
     | '/app/reinvestir'
     | '/app/riskradar'
     | '/app/screener'
-    | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
+    | '/app/tax'
+    | '/app/withdraw'
     | '/guides/dividend-valuation'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
@@ -352,19 +385,22 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscription-terms'
     | '/terms'
-    | '/app/cashflow'
+    | '/app/audit'
     | '/app/comparator'
+    | '/app/contributionplan'
     | '/app/docs'
-    | '/app/explorar'
+    | '/app/explore'
     | '/app/globalradar'
-    | '/app/metas'
+    | '/app/goals'
+    | '/app/income'
     | '/app/myportfolio'
-    | '/app/realidade-fiscal'
+    | '/app/news'
     | '/app/reinvestir'
     | '/app/riskradar'
     | '/app/screener'
-    | '/app/smartallocation'
     | '/app/snowballeffectsimulator'
+    | '/app/tax'
+    | '/app/withdraw'
     | '/guides/dividend-valuation'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
@@ -501,18 +537,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesDividendValuationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/withdraw': {
+      id: '/app/withdraw'
+      path: '/withdraw'
+      fullPath: '/app/withdraw'
+      preLoaderRoute: typeof AppWithdrawRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/tax': {
+      id: '/app/tax'
+      path: '/tax'
+      fullPath: '/app/tax'
+      preLoaderRoute: typeof AppTaxRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/snowballeffectsimulator': {
       id: '/app/snowballeffectsimulator'
       path: '/snowballeffectsimulator'
       fullPath: '/app/snowballeffectsimulator'
       preLoaderRoute: typeof AppSnowballeffectsimulatorRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/smartallocation': {
-      id: '/app/smartallocation'
-      path: '/smartallocation'
-      fullPath: '/app/smartallocation'
-      preLoaderRoute: typeof AppSmartallocationRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/screener': {
@@ -536,11 +579,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReinvestirRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/realidade-fiscal': {
-      id: '/app/realidade-fiscal'
-      path: '/realidade-fiscal'
-      fullPath: '/app/realidade-fiscal'
-      preLoaderRoute: typeof AppRealidadeFiscalRouteImport
+    '/app/news': {
+      id: '/app/news'
+      path: '/news'
+      fullPath: '/app/news'
+      preLoaderRoute: typeof AppNewsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/myportfolio': {
@@ -550,11 +593,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMyportfolioRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/metas': {
-      id: '/app/metas'
-      path: '/metas'
-      fullPath: '/app/metas'
-      preLoaderRoute: typeof AppMetasRouteImport
+    '/app/income': {
+      id: '/app/income'
+      path: '/income'
+      fullPath: '/app/income'
+      preLoaderRoute: typeof AppIncomeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/goals': {
+      id: '/app/goals'
+      path: '/goals'
+      fullPath: '/app/goals'
+      preLoaderRoute: typeof AppGoalsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/globalradar': {
@@ -564,11 +614,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGlobalradarRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/explorar': {
-      id: '/app/explorar'
-      path: '/explorar'
-      fullPath: '/app/explorar'
-      preLoaderRoute: typeof AppExplorarRouteImport
+    '/app/explore': {
+      id: '/app/explore'
+      path: '/explore'
+      fullPath: '/app/explore'
+      preLoaderRoute: typeof AppExploreRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/docs': {
@@ -578,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDocsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/contributionplan': {
+      id: '/app/contributionplan'
+      path: '/contributionplan'
+      fullPath: '/app/contributionplan'
+      preLoaderRoute: typeof AppContributionplanRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/comparator': {
       id: '/app/comparator'
       path: '/comparator'
@@ -585,47 +642,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppComparatorRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/cashflow': {
-      id: '/app/cashflow'
-      path: '/cashflow'
-      fullPath: '/app/cashflow'
-      preLoaderRoute: typeof AppCashflowRouteImport
+    '/app/audit': {
+      id: '/app/audit'
+      path: '/audit'
+      fullPath: '/app/audit'
+      preLoaderRoute: typeof AppAuditRouteImport
       parentRoute: typeof AppRoute
     }
   }
 }
 
 interface AppRouteChildren {
-  AppCashflowRoute: typeof AppCashflowRoute
+  AppAuditRoute: typeof AppAuditRoute
   AppComparatorRoute: typeof AppComparatorRoute
+  AppContributionplanRoute: typeof AppContributionplanRoute
   AppDocsRoute: typeof AppDocsRoute
-  AppExplorarRoute: typeof AppExplorarRoute
+  AppExploreRoute: typeof AppExploreRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
-  AppMetasRoute: typeof AppMetasRoute
+  AppGoalsRoute: typeof AppGoalsRoute
+  AppIncomeRoute: typeof AppIncomeRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
-  AppRealidadeFiscalRoute: typeof AppRealidadeFiscalRoute
+  AppNewsRoute: typeof AppNewsRoute
   AppReinvestirRoute: typeof AppReinvestirRoute
   AppRiskradarRoute: typeof AppRiskradarRoute
   AppScreenerRoute: typeof AppScreenerRoute
-  AppSmartallocationRoute: typeof AppSmartallocationRoute
   AppSnowballeffectsimulatorRoute: typeof AppSnowballeffectsimulatorRoute
+  AppTaxRoute: typeof AppTaxRoute
+  AppWithdrawRoute: typeof AppWithdrawRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppCashflowRoute: AppCashflowRoute,
+  AppAuditRoute: AppAuditRoute,
   AppComparatorRoute: AppComparatorRoute,
+  AppContributionplanRoute: AppContributionplanRoute,
   AppDocsRoute: AppDocsRoute,
-  AppExplorarRoute: AppExplorarRoute,
+  AppExploreRoute: AppExploreRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
-  AppMetasRoute: AppMetasRoute,
+  AppGoalsRoute: AppGoalsRoute,
+  AppIncomeRoute: AppIncomeRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
-  AppRealidadeFiscalRoute: AppRealidadeFiscalRoute,
+  AppNewsRoute: AppNewsRoute,
   AppReinvestirRoute: AppReinvestirRoute,
   AppRiskradarRoute: AppRiskradarRoute,
   AppScreenerRoute: AppScreenerRoute,
-  AppSmartallocationRoute: AppSmartallocationRoute,
   AppSnowballeffectsimulatorRoute: AppSnowballeffectsimulatorRoute,
+  AppTaxRoute: AppTaxRoute,
+  AppWithdrawRoute: AppWithdrawRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

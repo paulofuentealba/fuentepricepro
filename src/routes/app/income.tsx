@@ -9,7 +9,7 @@ const CashFlowCalendar = lazy(() =>
   import("@/components/ceiling/CashFlowCalendar").then((m) => ({ default: m.CashFlowCalendar })),
 );
 
-export const Route = createFileRoute("/app/cashflow")({
+export const Route = createFileRoute("/app/income")({
   component: CashFlow,
 });
 

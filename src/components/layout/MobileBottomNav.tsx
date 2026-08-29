@@ -32,7 +32,7 @@ export function MobileBottomNav() {
     },
     {
       key: "smartallocation",
-      path: "/app/smartallocation",
+      path: "/app/contributionplan",
       label: t.nav.contributionPlan,
       icon: Sparkles,
       exact: false,
@@ -46,14 +46,14 @@ export function MobileBottomNav() {
     },
     {
       key: "cashflow",
-      path: "/app/cashflow",
+      path: "/app/income",
       label: t.tabs.cashFlow,
       icon: BarChart3,
       exact: false,
     },
     {
       key: "explorar",
-      path: "/app/explorar",
+      path: "/app/explore",
       label: t.nav.exploreAssets,
       icon: Search,
       exact: false,

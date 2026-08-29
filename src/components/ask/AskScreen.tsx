@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, formatNumber } from "@/lib/formatters";
 import type { Currency } from "@/lib/domain";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import {
@@ -11,7 +11,7 @@ import {
   type Strategy,
   type AskResult,
 } from "@/lib/askEngine";
-import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
+import { resolveDisclaimerText } from "@/lib/disclaimer";
 import { MetricBox } from "@/components/shared/MetricBox";
 import { InsightBanner } from "@/components/shared/InsightBanner";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
@@ -123,6 +123,9 @@ export function AskScreen({
   const [rawAmount, setRawAmount] = useState<string>(
     initialAmount > 0 ? String(initialAmount) : "1000",
   );
+  // While editing, the field shows the raw digits for easy typing; once blurred it displays
+  // grouped thousands (e.g. "1.130") matching the prototype's `.ask-amt .big` / masked input.
+  const [isAmountFocused, setIsAmountFocused] = useState(false);
 
   useEffect(() => {
     if (initialAmount > 0 && (rawAmount === "" || rawAmount === "0" || rawAmount === "1000")) {
@@ -134,6 +137,12 @@ export function AskScreen({
     const num = parseFloat(rawAmount.replace(",", "."));
     return Number.isFinite(num) && num > 0 ? num : 0;
   }, [rawAmount]);
+
+  const displayAmount = isAmountFocused
+    ? rawAmount
+    : parsedAmount > 0
+      ? formatNumber(parsedAmount, locale, 0)
+      : rawAmount;
 
   // Execute pure AskEngine decision
   const result: AskResult = useMemo(() => {
@@ -178,6 +187,17 @@ export function AskScreen({
 
   const firstConsequence = result.consequences[0];
 
+  // "Abaixo do teto: N de N" — allocations already passed the ceiling exclusion, so N is the
+  // count of successful allocations over allocations + assets excluded specifically for being
+  // above the user's ceiling price (matches the prototype's `.ask-foot` 3rd stat).
+  const belowCeilingCount = result.allocations.length;
+  const aboveCeilingExcludedCount = result.excluded.filter(
+    (item) => item.reasonKey === "askEngine.reasons.excludedAboveCeiling",
+  ).length;
+  const belowCeilingTotal = belowCeilingCount + aboveCeilingExcludedCount;
+
+  const disclaimerText = resolveDisclaimerText(t, "calculation");
+
   return (
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
       {/* Page header — .top equivalent, outside the .ask card */}
@@ -218,27 +238,20 @@ export function AskScreen({
                   <span className="font-serif text-xl font-medium text-foreground sm:text-2xl">R$</span>
                   <Input
                     id="available-amount-input"
-                    type="number"
-                    min="0"
-                    step="any"
-                    value={rawAmount}
-                    onChange={(e) => setRawAmount(e.target.value)}
+                    type="text"
+                    inputMode="decimal"
+                    value={displayAmount}
+                    onFocus={() => setIsAmountFocused(true)}
+                    onBlur={() => setIsAmountFocused(false)}
+                    onChange={(e) => {
+                      const next = e.target.value.replace(/[^0-9.,]/g, "");
+                      setRawAmount(next);
+                    }}
                     className="h-auto w-28 border-0 bg-transparent p-0 font-serif text-xl font-medium text-foreground shadow-none focus-visible:ring-0 sm:text-2xl"
                     aria-label={amountLabel}
                   />
                 </div>
               </div>
-              {onExport && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-2 shrink-0 gap-1.5 font-display"
-                  onClick={() => onExport(result, activeStrategy)}
-                >
-                  <Download className="h-4 w-4" />
-                  {t.askScreen?.exportBtn || "Exportar Plano"}
-                </Button>
-              )}
             </div>
             {amountHelperText && (
               <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -266,7 +279,7 @@ export function AskScreen({
                     "flex-1 px-3 py-3 text-center text-[12px] font-display font-medium transition-colors",
                     idx < strategies.length - 1 && "border-r border-border/50",
                     isActive
-                      ? "bg-accent/15 text-accent-foreground font-semibold"
+                      ? "bg-accent/15 text-accent-text font-semibold"
                       : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
                   )}
                 >
@@ -302,7 +315,7 @@ export function AskScreen({
                   "A estratégia Corrigir Desvio exige metas de alocação definidas por classe. Você pode configurá-las em Metas ou utilizar as outras abas acima."}
               </p>
               <div className="mt-5 flex justify-center gap-3">
-                <Link to="/app/metas">
+                <Link to="/app/goals">
                   <Button variant="default" size="sm" className="font-display">
                     {t.askScreen?.configureTargetsBtn || "Configurar Metas"}
                     <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -365,7 +378,7 @@ export function AskScreen({
                     key={alloc.ticker}
                     className="flex items-center gap-4 border-b border-dashed border-border/40 px-5 py-3.5 transition-colors last:border-b-0 hover:bg-muted/20 sm:px-6"
                   >
-                    <span className="flex h-[25px] w-[25px] shrink-0 items-center justify-center rounded-lg bg-accent/15 font-mono text-[11.5px] font-semibold text-accent-foreground">
+                    <span className="flex h-[25px] w-[25px] shrink-0 items-center justify-center rounded-lg bg-accent/15 font-mono text-[11.5px] font-semibold text-accent-text">
                       {idx + 1}
                     </span>
 
@@ -457,7 +470,7 @@ export function AskScreen({
                 {firstConsequence && (
                   <div>
                     <div className="text-[11px] text-muted-foreground">
-                      {resolveConsequenceLabel(t, firstConsequence.valueKey)}
+                      {t.askScreen?.addedIncomeLabel || "Renda adicionada"}
                     </div>
                     <div className="font-serif text-base font-medium text-success">
                       + {formatCurrency(Number(firstConsequence.value), currency, locale)}
@@ -466,18 +479,55 @@ export function AskScreen({
                 )}
                 <div>
                   <div className="text-[11px] text-muted-foreground">
-                    {t.askScreen?.leftoverLabel || "Sobra em caixa"}
+                    {t.askScreen?.leftoverLabel || "Sobra"}
                   </div>
                   <div className="font-serif text-base font-medium text-foreground">
                     {formatCurrency(result.leftover, currency, locale)}
                   </div>
                 </div>
+                {belowCeilingTotal > 0 && (
+                  <div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {t.askScreen?.belowCeilingLabel || "Abaixo do teto"}
+                    </div>
+                    <div className="font-serif text-base font-medium text-foreground">
+                      {belowCeilingCount} {t.askScreen?.belowCeilingOfLabel || "de"} {belowCeilingTotal}
+                    </div>
+                  </div>
+                )}
               </div>
+              {onExport && (
+                <Button
+                  size="sm"
+                  className="shrink-0 gap-1.5 font-display"
+                  onClick={() => onExport(result, activeStrategy)}
+                >
+                  {t.askScreen?.exportBtn || "Exportar Plano"}
+                  <Download className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
+
+        {/* .disc: in-card gold-tinted calculation disclaimer */}
+        {!isLoading &&
+          result.state !== "targets_not_configured" &&
+          result.state !== "no_eligible_assets" &&
+          !(activeStrategy.id === "reinforcePayer" && result.allocations.length === 0) && (
+            <div
+              role="note"
+              aria-label={disclaimerText}
+              className="flex items-start gap-2.5 border-t border-border/50 bg-accent/10 px-5 py-3 sm:px-6"
+            >
+              <span aria-hidden="true" className="shrink-0 font-bold text-accent-text">
+                ◆
+              </span>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">{disclaimerText}</p>
             </div>
           )}
       </div>
 
-      {/* Impact metrics beyond the first (kept as a grid — .ask-foot only fits 2 inline stats) */}
+      {/* Impact metrics beyond the first (kept as a grid — .ask-foot only fits 3 inline stats) */}
       {result.consequences.length > 1 && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {result.consequences.slice(1).map((c, i) => (
@@ -496,9 +546,6 @@ export function AskScreen({
       {insight && (
         <InsightBanner title={insight.title} description={insight.description} value={insight.value} />
       )}
-
-      {/* Persistent Regulatory Disclaimer */}
-      <RegulatoryDisclaimerBanner variant="calculation" forceShow />
     </div>
   );
 }

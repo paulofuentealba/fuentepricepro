@@ -16,7 +16,7 @@ import {
 } from "@/lib/askEngine";
 import { AskScreen } from "@/components/ask/AskScreen";
 
-export const Route = createFileRoute("/app/smartallocation")({
+export const Route = createFileRoute("/app/contributionplan")({
   component: SmartAllocationRoute,
 });
 

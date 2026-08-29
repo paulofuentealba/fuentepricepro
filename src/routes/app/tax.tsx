@@ -11,7 +11,7 @@ import { TaxRealityScreen } from "@/components/tax/TaxRealityScreen";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Lock } from "lucide-react";
 
-export const Route = createFileRoute("/app/realidade-fiscal")({
+export const Route = createFileRoute("/app/tax")({
   head: () => ({
     meta: [
       { title: "Realidade Fiscal | Fuente Price Pro" },

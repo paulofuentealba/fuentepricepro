@@ -13,7 +13,7 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
-  useLocation: () => ({ pathname: "/app/smartallocation" }),
+  useLocation: () => ({ pathname: "/app/contributionplan" }),
 }));
 
 // Mock hooks
@@ -95,10 +95,10 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
     expect(screen.getByText(ptBR.nav.sections.analyze)).toBeInTheDocument();
   });
 
-  it("renders Plano de Aporte pointing to /app/smartallocation", () => {
+  it("renders Plano de Aporte pointing to /app/contributionplan", () => {
     render(<Sidebar />);
     const link = screen.getByText(ptBR.nav.contributionPlan).closest("a");
-    expect(link).toHaveAttribute("href", "/app/smartallocation");
+    expect(link).toHaveAttribute("href", "/app/contributionplan");
   });
 
   it("renders Reinvestir pointing to /app/reinvestir with dynamic badge", () => {
@@ -107,10 +107,10 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
     expect(link).toHaveAttribute("href", "/app/reinvestir");
   });
 
-  it("renders Realidade Fiscal pointing to /app/realidade-fiscal", () => {
+  it("renders Realidade Fiscal pointing to /app/tax", () => {
     render(<Sidebar />);
     const link = screen.getByText(ptBR.nav.taxReality).closest("a");
-    expect(link).toHaveAttribute("href", "/app/realidade-fiscal");
+    expect(link).toHaveAttribute("href", "/app/tax");
   });
 
   it("renders Minha Carteira pointing to /app/myportfolio", () => {
@@ -119,21 +119,25 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
     expect(link).toHaveAttribute("href", "/app/myportfolio");
   });
 
-  it("renders Explorar Ativos pointing to /app/explorar", () => {
+  it("renders Explorar Ativos pointing to /app/explore", () => {
     render(<Sidebar />);
     const link = screen.getByText(ptBR.nav.exploreAssets).closest("a");
-    expect(link).toHaveAttribute("href", "/app/explorar");
+    expect(link).toHaveAttribute("href", "/app/explore");
   });
 
-  it("renders genuinely disabled items with 'Em breve' badges", () => {
+  it("renders Metas pointing to /app/goals", () => {
     render(<Sidebar />);
-    expect(screen.getByText(ptBR.nav.whatChanged)).toBeInTheDocument();
-    expect(screen.getByText(ptBR.nav.guaranteedIncome)).toBeInTheDocument();
-    expect(screen.getByText(ptBR.nav.withdraw)).toBeInTheDocument();
-    expect(screen.getByText(ptBR.nav.audit)).toBeInTheDocument();
+    const link = screen.getByText(ptBR.nav.goals).closest("a");
+    expect(link).toHaveAttribute("href", "/app/goals");
+  });
 
-    const badges = screen.getAllByText(ptBR.nav.comingSoon);
-    expect(badges.length).toBe(4);
+  it("renders the Phase 3 stub routes as enabled links, not 'coming soon'", () => {
+    render(<Sidebar />);
+    expect(screen.getByText(ptBR.nav.withdraw).closest("a")).toHaveAttribute("href", "/app/withdraw");
+    expect(screen.getByText(ptBR.nav.whatChanged).closest("a")).toHaveAttribute("href", "/app/news");
+    expect(screen.getByText(ptBR.nav.guaranteedIncome).closest("a")).toHaveAttribute("href", "/app/income");
+    expect(screen.getByText(ptBR.nav.audit).closest("a")).toHaveAttribute("href", "/app/audit");
+    expect(screen.queryByText(ptBR.nav.comingSoon)).not.toBeInTheDocument();
   });
 
   it("renders Admin link when isAdmin is true", () => {

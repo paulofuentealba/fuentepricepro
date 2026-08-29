@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 
-export const Route = createFileRoute("/app/explorar")({
+export const Route = createFileRoute("/app/explore")({
   head: () => ({
     meta: [
       { title: "Explorar Ativos | Fuente Price Pro" },

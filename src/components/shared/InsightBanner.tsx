@@ -22,11 +22,14 @@ export function InsightBanner({ title, description, value, className }: InsightB
         className,
       )}
     >
+      <div aria-hidden="true" className="text-2xl text-accent-text">
+        ◈
+      </div>
       <div className="min-w-[230px] flex-1">
         <h4 className="font-serif text-base font-semibold text-foreground">{title}</h4>
         <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
       </div>
-      <div className="font-serif text-2xl font-medium text-accent-foreground sm:text-3xl">
+      <div className="font-serif text-2xl font-medium text-accent-text sm:text-3xl">
         {value}
       </div>
     </div>

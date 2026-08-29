@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   RotateCcw,
-  Sparkles,
-  ArrowDownCircle,
+  ArrowUp,
+  ArrowDown,
   Bell,
   CalendarCheck,
   FileText,
-  FolderOpen,
+  TrendingUp,
   Search,
-  ShieldCheck,
+  Clock,
   Menu,
   Shield,
   User,
@@ -41,7 +41,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
-import { formatCurrency } from "@/lib/formatters";
+import { formatNumber } from "@/lib/formatters";
 
 interface NavItem {
   key: string;
@@ -79,10 +79,13 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  const reinvestBadge =
-    summary?.currentMonth && summary.currentMonth > 0
-      ? formatCurrency(summary.currentMonth, currency, locale)
-      : undefined;
+  // Compact pill badge — no space, no decimals (matches the prototype's "R$1.130"),
+  // unlike the full formatCurrency used elsewhere for real money figures. Falls back to the
+  // same default amount as the Reinvest screen itself (src/routes/app/reinvestir.tsx) so the
+  // badge never goes blank when nothing was paid yet this calendar month.
+  const reinvestAmount =
+    summary?.currentMonth && summary.currentMonth > 0 ? summary.currentMonth : 1000;
+  const reinvestBadge = `${currency === "USD" ? "US$" : "R$"}${formatNumber(reinvestAmount, locale, 0)}`;
 
   useEffect(() => {
     setIsMounted(true);
@@ -125,20 +128,21 @@ export function Sidebar() {
         {
           key: "plano-aporte",
           label: t.nav.contributionPlan,
-          path: "/app/smartallocation",
-          icon: Sparkles,
+          path: "/app/contributionplan",
+          icon: ArrowUp,
           disabled: false,
         },
         {
           key: "retirar",
           label: t.nav.withdraw,
-          icon: ArrowDownCircle,
-          disabled: true,
+          path: "/app/withdraw",
+          icon: ArrowDown,
+          disabled: false,
         },
         {
           key: "metas",
           label: t.nav.goals,
-          path: "/app/metas",
+          path: "/app/goals",
           icon: Target,
           disabled: false,
         },
@@ -150,20 +154,22 @@ export function Sidebar() {
         {
           key: "o-que-mudou",
           label: t.nav.whatChanged,
+          path: "/app/news",
           icon: Bell,
-          disabled: true,
+          disabled: false,
         },
         {
           key: "renda-garantida",
           label: t.nav.guaranteedIncome,
+          path: "/app/income",
           icon: CalendarCheck,
-          disabled: true,
+          disabled: false,
         },
         {
           key: "realidade-fiscal",
           label: t.nav.taxReality,
           icon: FileText,
-          path: "/app/realidade-fiscal",
+          path: "/app/tax",
           disabled: false,
         },
       ],
@@ -175,21 +181,22 @@ export function Sidebar() {
           key: "minha-carteira",
           label: t.nav.myPortfolio,
           path: "/app/myportfolio",
-          icon: FolderOpen,
+          icon: TrendingUp,
           disabled: false,
         },
         {
           key: "explorar-ativos",
           label: t.nav.exploreAssets,
-          path: "/app/explorar",
+          path: "/app/explore",
           icon: Search,
           disabled: false,
         },
         {
           key: "auditoria",
           label: t.nav.audit,
-          icon: ShieldCheck,
-          disabled: true,
+          path: "/app/audit",
+          icon: Clock,
+          disabled: false,
         },
       ],
     },
@@ -228,11 +235,25 @@ export function Sidebar() {
               </div>
             </div>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="mx-auto shrink-0">
-              <circle cx="20" cy="20" r="19" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".35" />
-              <circle cx="20" cy="20" r="13.5" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".6" />
-              <circle cx="20" cy="20" r="8" fill="var(--sidebar-accent)" />
-            </svg>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  className="mx-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] hover:bg-sidebar-accent/10"
+                  title="Expandir Menu"
+                >
+                  <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="shrink-0">
+                    <circle cx="20" cy="20" r="19" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".35" />
+                    <circle cx="20" cy="20" r="13.5" stroke="var(--sidebar-accent)" strokeWidth="1.4" opacity=".6" />
+                    <circle cx="20" cy="20" r="8" fill="var(--sidebar-accent)" />
+                  </svg>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={12}>
+                Expandir Menu
+              </TooltipContent>
+            </Tooltip>
           )}
           <Button
             variant="ghost"
@@ -242,7 +263,7 @@ export function Sidebar() {
               "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/10 h-8 w-8",
               isCollapsed && "hidden",
             )}
-            title={isCollapsed ? "Expandir Menu" : "Recolher Menu"}
+            title="Recolher Menu"
           >
             <Menu className="h-4 w-4" />
           </Button>

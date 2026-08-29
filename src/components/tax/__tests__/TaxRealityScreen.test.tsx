@@ -11,7 +11,7 @@ import type { AssetType } from "@/lib/domain";
 // Mock tanstack router Link and useLocation
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: any) => <a href={to}>{children}</a>,
-  useLocation: () => ({ pathname: "/app/realidade-fiscal" }),
+  useLocation: () => ({ pathname: "/app/tax" }),
 }));
 
 // Mock i18n

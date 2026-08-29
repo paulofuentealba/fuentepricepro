@@ -65,14 +65,14 @@ export function Header({ variant = "app" }: HeaderProps) {
     { key: "globalradar", path: "/app/globalradar", label: t.tabs.radar, icon: Sparkles },
     {
       key: "cashflow",
-      path: "/app/cashflow",
+      path: "/app/income",
       label: t.tabs.cashFlow,
       icon: BarChart3,
       locked: !user,
     },
     {
       key: "smartallocation",
-      path: "/app/smartallocation",
+      path: "/app/contributionplan",
       label: t.tabs.smartAllocation,
       icon: Sparkles,
       locked: !user,

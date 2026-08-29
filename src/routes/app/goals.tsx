@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n-provider";
 import { GoalWizard } from "@/components/goals/GoalWizard";
 
-export const Route = createFileRoute("/app/metas")({
+export const Route = createFileRoute("/app/goals")({
   head: () => ({
     meta: [
       { title: "Metas de Investimento | Fuente Price Pro" },
@@ -32,7 +32,7 @@ function MetasPage() {
       <GoalWizard
         onComplete={() => {
           toast.success(t.goalWizard.savedToast);
-          navigate({ to: "/app/smartallocation" });
+          navigate({ to: "/app/contributionplan" });
         }}
       />
     </div>
