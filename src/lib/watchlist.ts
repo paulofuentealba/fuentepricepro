@@ -53,6 +53,13 @@ export interface WatchlistItem {
   rate?: number | null;
   maturityDate?: string | null;
   startDate?: string | null;
+  /**
+   * When `type === "ETF"`, marks this ETF as fixed-income (e.g. LFTS11, IMAB11, B5P211)
+   * rather than equity (e.g. BOVA11, IVVB11). Drives which capital-gains tax module applies:
+   * equity ETFs use `br/etfCapitalGains.ts` (15% flat), fixed-income ETFs use
+   * `br/etfFixedIncomeCapitalGains.ts` (regressive table). Undefined/false = equity ETF.
+   */
+  isFixedIncomeEtf?: boolean | null;
   addedAt: number;
   /** When the user originally started investing in this asset. */
   investingSince: number;
@@ -396,7 +403,9 @@ export function useWatchlist() {
             patches.set(item.id, fresh.paymentMonths);
           }
         } catch (err) {
-          console.warn("[watchlist] heal failed for", item.ticker);
+          // Expected for tickers with no dividend/payment-schedule data available from the
+          // providers (e.g. fixed income ETFs like IMAB11) — not a bug, so debug-only.
+          console.debug("[watchlist] heal skipped (no data) for", item.ticker);
         }
       }
 

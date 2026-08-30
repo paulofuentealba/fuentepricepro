@@ -1,7 +1,7 @@
 import { getLocalDateISOString } from "@/lib/formatters";
-import type { AssetType } from "@/lib/domain";
+import type { AssetType, Currency } from "@/lib/domain";
 import type { RealizedGainEvent, MonthlyEtfCapitalGainsResult } from "../types";
-import { getEventAssetType } from "../utils";
+import { getEventAssetType, getEventCurrency } from "../utils";
 import { BR_STOCK_CAPITAL_GAINS_RATE } from "./monthlyExemption";
 
 // =========================================================================================
@@ -11,8 +11,12 @@ import { BR_STOCK_CAPITAL_GAINS_RATE } from "./monthlyExemption";
 // 2. Ausência de Isenção de Volume: Não se aplica o limite de isenção de R$ 20.000/mês
 //    (exclusivo para o mercado à vista de ações).
 // 3. Compensação de Prejuízos: Segregada em trilha própria (não compensa com ações nem FIIs).
-// 4. LIMITE DECLARADO: ETFs de Renda Fixa (IN RFB 1.585/2015, art. 31 - tabela regressiva)
-//    permanecem fora do escopo deste módulo.
+// 4. Escopo: apenas ETFs BRL-denominados (listados na B3). Um ETF em USD é um ETF listado
+//    no exterior (ex.: QQQ, SCHD) e é tratado por `exterior/foreignCapitalGains.ts` — NUNCA
+//    ambos, para evitar dupla contagem. Quando `currencyByTicker` não é informado, todo ETF
+//    é tratado como BR (comportamento anterior preservado).
+// 5. LIMITE DECLARADO: ETFs de Renda Fixa (IN RFB 1.585/2015, art. 31 - tabela regressiva)
+//    permanecem fora do escopo deste módulo — ver `br/etfFixedIncomeCapitalGains.ts`.
 // =========================================================================================
 
 /**
@@ -25,15 +29,20 @@ import { BR_STOCK_CAPITAL_GAINS_RATE } from "./monthlyExemption";
  * - ETF losses can ONLY offset ETF gains, NEVER stock gains or FII/FIAGRO gains (and vice-versa).
  * - Unclassified tickers (missing/unresolvable assetType) are NEVER assumed to be ETFs;
  *   they are excluded from the calculation and reported in `unclassifiedTickers`.
+ * - A USD-denominated ETF (resolved via `currencyByTicker`) is excluded — it belongs to the
+ *   foreign capital gains module instead, avoiding double taxation.
  *
  * @param events List of realized gain events from sell transactions.
  * @param priorLossCarryforward Initial accumulated ETF loss carryforward from prior periods.
  * @param assetTypeByTicker Optional map/dictionary of asset types to filter only ETFs.
+ * @param currencyByTicker Optional map/dictionary of trading currency, used to exclude
+ *   USD-denominated (foreign-listed) ETFs from this BR-only module.
  */
 export function calculateEtfCapitalGainsTax(
   events: RealizedGainEvent[],
   priorLossCarryforward: number = 0,
   assetTypeByTicker?: Record<string, AssetType | undefined> | Map<string, AssetType>,
+  currencyByTicker?: Record<string, Currency | undefined> | Map<string, Currency>,
 ): MonthlyEtfCapitalGainsResult[] {
   if (!events || events.length === 0) {
     return [];
@@ -57,12 +66,16 @@ export function calculateEtfCapitalGainsTax(
       continue;
     }
 
-    if (resolvedType === "ETF") {
+    const resolvedCurrency = getEventCurrency(ev, currencyByTicker);
+    const isForeignEtf = resolvedType === "ETF" && resolvedCurrency === "USD";
+
+    if (resolvedType === "ETF" && !isForeignEtf) {
       const list = etfEventsByMonth.get(monthKey) || [];
       list.push(ev);
       etfEventsByMonth.set(monthKey, list);
     }
-    // Note: STOCK_BR, STOCK_US, REIT, FII, FIAGRO, FII_INFRA are excluded from this module.
+    // Note: STOCK_BR, STOCK_US, REIT, FII, FIAGRO, FII_INFRA, and USD-denominated ETF are
+    // excluded from this module.
   }
 
   // Collect all months that have either ETF events or unclassified events

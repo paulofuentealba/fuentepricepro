@@ -31,7 +31,13 @@ export function assetQueryOptions(ticker: string) {
   const key = ticker.toUpperCase();
   return queryOptions({
     queryKey: ["asset", key] as const,
-    queryFn: ({ signal }): Promise<Asset> => fetchAssetFn({ data: { ticker: key }, signal }),
+    // Deliberately NOT forwarding React Query's cancellation `signal` here: this query is
+    // fanned out per-ticker (e.g. useLiveQuotesAndMeta) and superseded requests are common
+    // as the watchlist loads progressively. The response is cheap/cached, so letting a
+    // superseded request finish is harmless — but aborting it isn't: TanStack Start's
+    // server-fn client logs every fetch rejection (including benign AbortError) as a
+    // console.error, so forwarding the signal here just produces console noise for no gain.
+    queryFn: (): Promise<Asset> => fetchAssetFn({ data: { ticker: key } }),
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
   });
@@ -41,8 +47,8 @@ export function quoteQueryOptions(ticker: string) {
   const key = ticker.toUpperCase();
   return queryOptions({
     queryKey: ["quote", key] as const,
-    queryFn: ({ signal }): Promise<LiveQuote | null> =>
-      fetchQuoteFn({ data: { ticker: key }, signal }),
+    // See assetQueryOptions above — signal intentionally not forwarded, same rationale.
+    queryFn: (): Promise<LiveQuote | null> => fetchQuoteFn({ data: { ticker: key } }),
     staleTime: 30_000,
     gcTime: 5 * 60_000,
   });

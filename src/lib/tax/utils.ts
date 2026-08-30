@@ -1,4 +1,4 @@
-import type { AssetType } from "@/lib/domain";
+import type { AssetType, Currency } from "@/lib/domain";
 import type { RealizedGainEvent } from "./types";
 
 /**
@@ -19,4 +19,22 @@ export function getEventAssetType(
     return assetTypeByTicker.get(ev.ticker);
   }
   return assetTypeByTicker[ev.ticker];
+}
+
+/**
+ * Resolves the trading Currency for a RealizedGainEvent's ticker from an optional
+ * ticker-to-currency dictionary/map (e.g. sourced from WatchlistItem.currency).
+ * RealizedGainEvent itself carries no currency field, so this always relies on the map.
+ */
+export function getEventCurrency(
+  ev: RealizedGainEvent,
+  currencyByTicker?: Record<string, Currency | undefined> | Map<string, Currency>,
+): Currency | undefined {
+  if (!currencyByTicker) {
+    return undefined;
+  }
+  if (currencyByTicker instanceof Map) {
+    return currencyByTicker.get(ev.ticker);
+  }
+  return currencyByTicker[ev.ticker];
 }

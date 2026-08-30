@@ -8,12 +8,15 @@ import {
   calculateFiiCapitalGainsTax,
   calculateEtfCapitalGainsTax,
   calculateFiInfraCapitalGainsTax,
+  calculateEtfFixedIncomeCapitalGainsTax,
 } from "@/lib/tax";
 import type {
   MonthlyCapitalGainsResult,
   MonthlyFiiCapitalGainsResult,
   MonthlyEtfCapitalGainsResult,
   MonthlyFiInfraCapitalGainsResult,
+  MonthlyEtfFixedIncomeCapitalGainsResult,
+  AnnualForeignCapitalGainsResult,
   RealizedGainEvent,
 } from "@/lib/tax/types";
 import { BR_MONTHLY_SALES_EXEMPTION_THRESHOLD } from "@/lib/tax/br/monthlyExemption";
@@ -57,6 +60,8 @@ type MonthlyStockRow = MonthlyCapitalGainsResult & { isCurrentYear: boolean };
 type MonthlyFiiRow = MonthlyFiiCapitalGainsResult & { isCurrentYear: boolean };
 type MonthlyEtfRow = MonthlyEtfCapitalGainsResult & { isCurrentYear: boolean };
 type MonthlyFiInfraRow = MonthlyFiInfraCapitalGainsResult & { isCurrentYear: boolean };
+type MonthlyEtfFixedIncomeRow = MonthlyEtfFixedIncomeCapitalGainsResult & { isCurrentYear: boolean };
+type AnnualForeignRow = AnnualForeignCapitalGainsResult;
 
 export function TaxRealityScreen({
   context,
@@ -69,9 +74,14 @@ export function TaxRealityScreen({
   // ---- Pure calculations from the tax modules (no new tax logic here) ----
   const {
     assetTypeByTicker,
+    currencyByTicker,
+    isFixedIncomeEtfByTicker,
+    transactions,
     realizedGainEvents,
     currentYear,
     currentMonthKey,
+    foreignCapitalGainsResults,
+    fxRate,
   } = context;
 
   // 1. Stock Capital Gains (monthly) — current year only
@@ -107,11 +117,12 @@ export function TaxRealityScreen({
       realizedGainEvents,
       0, // priorLossCarryforward — ideally from persisted state; 0 for now
       assetTypeByTicker,
+      currencyByTicker,
     );
     return results
       .filter((r) => r.month.startsWith(String(currentYear)))
       .map((r) => ({ ...r, isCurrentYear: true }));
-  }, [realizedGainEvents, assetTypeByTicker, currentYear]);
+  }, [realizedGainEvents, assetTypeByTicker, currencyByTicker, currentYear]);
 
   // 4. FI-Infra Capital Gains (monthly) — current year only (100% isento, taxDue = 0)
   const fiInfraMonthly = useMemo((): MonthlyFiInfraRow[] => {
@@ -125,6 +136,25 @@ export function TaxRealityScreen({
       .filter((r) => r.month.startsWith(String(currentYear)))
       .map((r) => ({ ...r, isCurrentYear: true }));
   }, [realizedGainEvents, assetTypeByTicker, currentYear]);
+
+  // 4b. Foreign Stocks & REITs Capital Gains (annual) — current year only
+  const foreignAnnual = useMemo((): AnnualForeignRow[] => {
+    return foreignCapitalGainsResults.filter((r) => r.year === String(currentYear));
+  }, [foreignCapitalGainsResults, currentYear]);
+
+  // 4c. Fixed Income ETF Capital Gains (monthly, regressive table) — current year only
+  const etfFixedIncomeMonthly = useMemo((): MonthlyEtfFixedIncomeRow[] => {
+    if (!transactions.length) return [];
+    const results = calculateEtfFixedIncomeCapitalGainsTax(
+      transactions,
+      0, // priorLossCarryforward — ideally from persisted state; 0 for now
+      assetTypeByTicker,
+      isFixedIncomeEtfByTicker,
+    );
+    return results
+      .filter((r) => r.month.startsWith(String(currentYear)))
+      .map((r) => ({ ...r, isCurrentYear: true }));
+  }, [transactions, assetTypeByTicker, isFixedIncomeEtfByTicker, currentYear]);
 
   // 5. Aggregated totals for current year
   const stockYearTotals = useMemo(() => {
@@ -177,6 +207,32 @@ export function TaxRealityScreen({
     );
   }, [fiInfraMonthly]);
 
+  const foreignYearTotals = useMemo(() => {
+    const totals = foreignAnnual.reduce(
+      (acc, r) => {
+        acc.totalSales += r.totalSales;
+        acc.totalGain += r.totalGain;
+        acc.totalTaxDue += r.taxDue;
+        return acc;
+      },
+      { totalSales: 0, totalGain: 0, totalTaxDue: 0 },
+    );
+    return { ...totals, totalTaxDueBrl: totals.totalTaxDue * fxRate };
+  }, [foreignAnnual, fxRate]);
+
+  const etfFixedIncomeYearTotals = useMemo(() => {
+    return etfFixedIncomeMonthly.reduce(
+      (acc, m) => {
+        acc.totalSales += m.totalSales;
+        acc.totalGain += m.totalGain;
+        acc.totalTaxDue += m.taxDue;
+        acc.finalCarryforward = m.lossCarryforwardRemaining;
+        return acc;
+      },
+      { totalSales: 0, totalGain: 0, totalTaxDue: 0, finalCarryforward: 0 },
+    );
+  }, [etfFixedIncomeMonthly]);
+
   // Fiscal hero: current-month stock sales vs. the BRL 20k monthly exemption threshold
   const currentMonthStockRow = useMemo(
     () => stockMonthly.find((m) => m.month === currentMonthKey),
@@ -216,11 +272,21 @@ export function TaxRealityScreen({
     for (const m of fiInfraMonthly) {
       m.unclassifiedTickers?.forEach((t) => set.add(t));
     }
+    for (const r of foreignAnnual) {
+      r.unclassifiedTickers?.forEach((t) => set.add(t));
+    }
+    for (const m of etfFixedIncomeMonthly) {
+      m.unclassifiedTickers?.forEach((t) => set.add(t));
+    }
     return Array.from(set).sort();
-  }, [stockMonthly, fiiMonthly, etfMonthly, fiInfraMonthly]);
+  }, [stockMonthly, fiiMonthly, etfMonthly, fiInfraMonthly, foreignAnnual, etfFixedIncomeMonthly]);
 
   const totalEstimatedTax =
-    stockYearTotals.totalTaxDue + fiiYearTotals.totalTaxDue + etfYearTotals.totalTaxDue;
+    stockYearTotals.totalTaxDue +
+    fiiYearTotals.totalTaxDue +
+    etfYearTotals.totalTaxDue +
+    foreignYearTotals.totalTaxDueBrl +
+    etfFixedIncomeYearTotals.totalTaxDue;
 
   // ---- Loading State ----
   if (isLoading) {
@@ -237,7 +303,9 @@ export function TaxRealityScreen({
     stockMonthly.length > 0 ||
     fiiMonthly.length > 0 ||
     etfMonthly.length > 0 ||
-    fiInfraMonthly.length > 0;
+    fiInfraMonthly.length > 0 ||
+    foreignAnnual.length > 0 ||
+    etfFixedIncomeMonthly.length > 0;
   if (!hasAnySales) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -319,11 +387,26 @@ export function TaxRealityScreen({
           <div
             className={cn(
               "grid gap-4 sm:grid-cols-2",
-              [etfMonthly.length > 0, fiInfraMonthly.length > 0].filter(Boolean).length === 2
-                ? "lg:grid-cols-6"
-                : etfMonthly.length > 0 || fiInfraMonthly.length > 0
-                  ? "lg:grid-cols-5"
-                  : "lg:grid-cols-4",
+              (() => {
+                const extraCards = [
+                  etfMonthly.length > 0,
+                  fiInfraMonthly.length > 0,
+                  foreignAnnual.length > 0,
+                  etfFixedIncomeMonthly.length > 0,
+                ].filter(Boolean).length;
+                switch (extraCards) {
+                  case 4:
+                    return "lg:grid-cols-8";
+                  case 3:
+                    return "lg:grid-cols-7";
+                  case 2:
+                    return "lg:grid-cols-6";
+                  case 1:
+                    return "lg:grid-cols-5";
+                  default:
+                    return "lg:grid-cols-4";
+                }
+              })(),
             )}
           >
             <MetricBox
@@ -363,6 +446,24 @@ export function TaxRealityScreen({
                 variant="success"
                 trend="up"
                 subValue={tScreen.summary.fiInfraCgHelper}
+              />
+            )}
+            {foreignAnnual.length > 0 && (
+              <MetricBox
+                label={tScreen.summary.foreignCgLabel}
+                value={formatCurrency(foreignYearTotals.totalTaxDueBrl, "BRL", locale)}
+                variant="warning"
+                trend="neutral"
+                subValue={tScreen.summary.foreignCgHelper}
+              />
+            )}
+            {etfFixedIncomeMonthly.length > 0 && (
+              <MetricBox
+                label={tScreen.summary.etfFixedIncomeCgLabel}
+                value={formatCurrency(etfFixedIncomeYearTotals.totalTaxDue, "BRL", locale)}
+                variant="warning"
+                trend="neutral"
+                subValue={tScreen.summary.etfFixedIncomeCgHelper}
               />
             )}
             <MetricBox
@@ -512,6 +613,93 @@ export function TaxRealityScreen({
                         </TableCell>
                         <TableCell className="text-right font-mono text-muted-foreground">
                           {formatCurrency(month.lossCarryforwardRemaining, "BRL", locale)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+
+          {/* Monthly Detail — Fixed Income ETFs */}
+          {etfFixedIncomeMonthly.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
+                {tScreen.monthlyDetail.etfFixedIncomeTitle}
+              </h3>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.carryforwardHeader}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {etfFixedIncomeMonthly.map((month) => (
+                      <TableRow key={month.month}>
+                        <TableCell className="font-medium">{month.month}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(month.totalSales, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(month.totalGain, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(month.taxableGain, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-destructive">
+                          {formatCurrency(month.taxDue, "BRL", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-muted-foreground">
+                          {formatCurrency(month.lossCarryforwardRemaining, "BRL", locale)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <p className="text-xs text-muted-foreground">{tScreen.monthlyDetail.etfFixedIncomeNote}</p>
+            </div>
+          )}
+
+          {/* Annual Detail — Foreign Stocks & REITs */}
+          {foreignAnnual.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
+                {tScreen.monthlyDetail.foreignTitle}
+              </h3>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.yearHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
+                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxDueHeader}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {foreignAnnual.map((row) => (
+                      <TableRow key={row.year}>
+                        <TableCell className="font-medium">{row.year}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(row.totalSales, "USD", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(row.totalGain, "USD", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(row.taxableGain, "USD", locale)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-destructive">
+                          {formatCurrency(row.taxDue, "USD", locale)}
                         </TableCell>
                       </TableRow>
                     ))}

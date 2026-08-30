@@ -36,12 +36,17 @@ function createMockTaxContext(overrides: Partial<TaxRealityContext> = {}): TaxRe
 
   return {
     assetTypeByTicker: new Map(),
+    currencyByTicker: new Map(),
+    isFixedIncomeEtfByTicker: new Map(),
+    transactions: [],
     realizedGainEvents: [],
     currentYear: 2026,
     currentMonthKey: "2026-08",
     brDividendsTaxResult: emptyTaxResult,
     jcpTaxResult: emptyTaxResult,
     usWithholdingTaxResult: { ...emptyTaxResult, jurisdiction: "US" },
+    foreignCapitalGainsResults: [],
+    fxRate: 1,
     totalNetDividends: 0,
     totalNetJcp: 0,
     totalNetUsBrl: 0,

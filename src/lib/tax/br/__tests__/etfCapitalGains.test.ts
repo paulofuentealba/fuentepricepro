@@ -207,4 +207,59 @@ describe("calculateEtfCapitalGainsTax (Prompt 143 / Item 2.1e)", () => {
     expect(results[0].totalSales).toBe(6000);
     expect(results[0].unclassifiedTickers).toEqual(["UNKNOWN_ETF"]);
   });
+
+  it("excludes a USD-denominated ETF (foreign-listed, e.g. QQQ) to avoid double taxation with the foreign module", () => {
+    const events: RealizedGainEvent[] = [
+      {
+        ticker: "QQQ",
+        saleDate: makeDate("2026-08-01"),
+        quantity: 5,
+        salePrice: 500,
+        proceeds: 2500,
+        costBasis: 2000,
+        gain: 500,
+        assetType: "ETF",
+      },
+      {
+        ticker: "BOVA11",
+        saleDate: makeDate("2026-08-01"),
+        quantity: 50,
+        salePrice: 120,
+        proceeds: 6000,
+        costBasis: 5000,
+        gain: 1000,
+        assetType: "ETF",
+      },
+    ];
+    const currencyByTicker = new Map([
+      ["QQQ", "USD" as const],
+      ["BOVA11", "BRL" as const],
+    ]);
+
+    const results = calculateEtfCapitalGainsTax(events, 0, undefined, currencyByTicker);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].totalSales).toBe(6000); // Only BOVA11 — QQQ excluded
+    expect(results[0].totalGain).toBe(1000);
+  });
+
+  it("treats every ETF as BR when currencyByTicker is not provided (backward compatible)", () => {
+    const events: RealizedGainEvent[] = [
+      {
+        ticker: "QQQ",
+        saleDate: makeDate("2026-08-01"),
+        quantity: 5,
+        salePrice: 500,
+        proceeds: 2500,
+        costBasis: 2000,
+        gain: 500,
+        assetType: "ETF",
+      },
+    ];
+
+    const results = calculateEtfCapitalGainsTax(events);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].totalSales).toBe(2500);
+  });
 });

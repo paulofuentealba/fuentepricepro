@@ -5,3 +5,4 @@ export * from "./monthlyExemption";
 export * from "./fiiCapitalGains";
 export * from "./fiInfraCapitalGains";
 export * from "./etfCapitalGains";
+export * from "./etfFixedIncomeCapitalGains";

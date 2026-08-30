@@ -128,6 +128,27 @@ export interface MonthlyFiInfraCapitalGainsResult {
 }
 
 /**
+ * Result of the annual capital gains tax calculation for foreign-held stocks and REITs
+ * (Lei 14.754/2023, em vigor desde 1º/jan/2024 — "aplicações financeiras no exterior").
+ *
+ * Differs from the BR stock/FII regime in three ways:
+ * - Apuração ANUAL (na Declaração de Ajuste Anual), não mensal.
+ * - Alíquota única de 15% sobre o ganho líquido, sem faixas progressivas.
+ * - SEM isenção de pequeno valor (a antiga isenção foi extinta para este tipo de ativo).
+ * - Prejuízo compensa apenas ganhos do MESMO ano-calendário; não há carryforward entre anos.
+ *
+ * Amounts are expressed in the transaction's native currency (USD for US-listed assets).
+ */
+export interface AnnualForeignCapitalGainsResult {
+  year: string; // "YYYY"
+  totalSales: number;
+  totalGain: number; // net gain/loss for the year, before flooring at zero
+  taxableGain: number; // max(0, totalGain) — losses never carry to other years
+  taxDue: number; // 15% flat on taxableGain
+  unclassifiedTickers?: string[]; // Tickers excluded due to missing/unresolvable assetType
+}
+
+/**
  * Result of the monthly capital gains tax calculation for Equity Exchange Traded Funds (ETFs) (Prompt 143 / Item 2.1e).
  * Equity ETFs are taxed at 15% flat without sales volume exemption (Lei 13.043/2014 / IN RFB 1.585/2015).
  * Carryforward is tracked in a dedicated track separate from stocks and FIIs.
@@ -140,5 +161,42 @@ export interface MonthlyEtfCapitalGainsResult {
   lossCarryforwardRemaining: number;
   taxableGain: number;
   taxDue: number; // 15% on taxableGain
+  unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
+}
+
+/**
+ * A single FIFO lot-sale slice: the portion of one sell transaction matched against one
+ * specific buy lot (oldest lot first), carrying its own acquisition date and holding period.
+ * Foundation for regressive-table tax calculations that depend on holding period, not just
+ * weighted-average cost basis (Item "ETFs de Renda Fixa").
+ */
+export interface LotSaleSlice {
+  ticker: string;
+  saleDate: number; // Timestamp (ms), matches Transaction.date
+  acquisitionDate: number; // Timestamp (ms) of the specific buy lot consumed
+  quantity: number;
+  proceeds: number;
+  costBasis: number;
+  gain: number;
+  holdingDays: number; // (saleDate - acquisitionDate) in whole days
+}
+
+/**
+ * Result of the monthly capital gains tax calculation for Fixed Income ETFs (ETFs de Renda
+ * Fixa, e.g. LFTS11, IMAB11, B5P211) — IN RFB 1.585/2015, art. 31 (tabela regressiva).
+ *
+ * Unlike equity ETFs (flat 15%), each FIFO lot-sale slice is taxed at the rate matching its
+ * own holding period (22.5% / 20% / 17.5% / 15%), so `taxDue` is a blended sum across slices
+ * rather than `taxableGain * one rate`. `lossCarryforwardUsed/Remaining` track a single
+ * currency-amount carryforward (not bracket-specific), applied before each slice's own rate.
+ */
+export interface MonthlyEtfFixedIncomeCapitalGainsResult {
+  month: string; // "YYYY-MM"
+  totalSales: number;
+  totalGain: number;
+  lossCarryforwardUsed: number;
+  lossCarryforwardRemaining: number;
+  taxableGain: number;
+  taxDue: number; // Sum of each lot-sale slice's gain (after carryforward) × its own bracket rate
   unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
 }

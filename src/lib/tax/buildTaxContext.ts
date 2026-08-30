@@ -1,27 +1,34 @@
 import type { Transaction } from "@/lib/transactionsLogic";
 import type { WatchlistItem } from "@/lib/watchlist";
-import type { AssetType } from "@/lib/domain";
+import type { AssetType, Currency } from "@/lib/domain";
 import type { RealizedIncomeEvent } from "@/lib/realizedIncome";
 import { isUsAsset } from "@/lib/calculations";
 import { calculateRealizedGains } from "./br/capitalGains";
 import { simulateBrDividendTax } from "./br/dividends";
 import { simulateBrJcpTax } from "./br/jcp";
 import { simulateUsWithholdingTax } from "./us/withholding";
+import { simulateForeignCapitalGainsTax } from "./exterior/foreignCapitalGains";
 import type {
   RealizedGainEvent,
   TaxSimulationResult,
   TaxSimulationPositionInput,
+  AnnualForeignCapitalGainsResult,
 } from "./types";
 import { getLocalDateISOString } from "@/lib/formatters";
 
 export interface TaxRealityContext {
   assetTypeByTicker: Map<string, AssetType>;
+  currencyByTicker: Map<string, Currency>;
+  isFixedIncomeEtfByTicker: Map<string, boolean>;
+  transactions: Transaction[];
   realizedGainEvents: RealizedGainEvent[];
   currentYear: number;
   currentMonthKey: string; // "YYYY-MM"
   brDividendsTaxResult: TaxSimulationResult;
   jcpTaxResult: TaxSimulationResult;
   usWithholdingTaxResult: TaxSimulationResult;
+  foreignCapitalGainsResults: AnnualForeignCapitalGainsResult[];
+  fxRate: number;
   totalNetDividends: number;
   totalNetJcp: number;
   totalNetUsBrl: number;
@@ -43,12 +50,17 @@ export function buildTaxContext(
   realizedIncomeEvents: RealizedIncomeEvent[] = [],
   fxRate: number = 1,
 ): TaxRealityContext {
-  // 1. assetTypeByTicker & customTaxRateByTicker derived from WatchlistItem
+  // 1. assetTypeByTicker, currencyByTicker, isFixedIncomeEtfByTicker & customTaxRateByTicker
+  //    derived from WatchlistItem
   const assetTypeByTicker = new Map<string, AssetType>();
+  const currencyByTicker = new Map<string, Currency>();
+  const isFixedIncomeEtfByTicker = new Map<string, boolean>();
   const customTaxRateByTicker = new Map<string, number | null | undefined>();
   for (const item of watchlistItems) {
     const ticker = item.ticker.toUpperCase();
     assetTypeByTicker.set(ticker, item.type);
+    currencyByTicker.set(ticker, item.currency);
+    isFixedIncomeEtfByTicker.set(ticker, !!item.isFixedIncomeEtf);
     customTaxRateByTicker.set(ticker, item.customTaxRate);
   }
 
@@ -99,6 +111,11 @@ export function buildTaxContext(
   const brDividendsTaxResult = simulateBrDividendTax(brPositions);
   const jcpTaxResult = simulateBrJcpTax(jcpPositions);
   const usWithholdingTaxResult = simulateUsWithholdingTax(usPositions);
+  const foreignCapitalGainsResults = simulateForeignCapitalGainsTax(
+    realizedGainEvents,
+    assetTypeByTicker,
+    currencyByTicker,
+  );
 
   const totalNetDividends = brDividendsTaxResult.totalNet;
   const totalNetJcp = jcpTaxResult.totalNet;
@@ -109,12 +126,17 @@ export function buildTaxContext(
 
   return {
     assetTypeByTicker,
+    currencyByTicker,
+    isFixedIncomeEtfByTicker,
+    transactions,
     realizedGainEvents,
     currentYear,
     currentMonthKey,
     brDividendsTaxResult,
     jcpTaxResult,
     usWithholdingTaxResult,
+    foreignCapitalGainsResults,
+    fxRate: effectiveFx,
     totalNetDividends: Math.round(totalNetDividends * 100) / 100,
     totalNetJcp: Math.round(totalNetJcp * 100) / 100,
     totalNetUsBrl: Math.round(totalNetUsBrl * 100) / 100,

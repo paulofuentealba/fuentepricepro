@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
 import { UA, fetchWithRetry } from "./api/http.server";
-import { classifyBr, classifyBrAsync, classifyYahoo } from "./api/classify.server";
+import { classifyBrAsync, classifyYahoo } from "./api/classify.server";
 import { fetchFromBrapi } from "./api/brapi.server";
 import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
 import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker } from "./api/secEdgar.server";
@@ -66,6 +66,12 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
     ]);
 
     if (brRes.status === "fulfilled" && brRes.value?.stocks) {
+      // Collect BR candidates first, then resolve their AssetType via classifyBrAsync in
+      // parallel (HG Brasil canonical classification, falling back to the local heuristic).
+      // This avoids misclassifying ETFs/funds ending in "11" (e.g. IMAB11) as FII, which the
+      // synchronous classifyBr() alone cannot distinguish without HG Brasil's `kind` field.
+      const brCandidates: { ticker: string; name: string; sector: string | null; apiType?: string }[] = [];
+
       for (const s of brRes.value.stocks.slice(0, 10)) {
         if (typeof s === "string") {
           const t = String(s).toUpperCase();
@@ -73,7 +79,7 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
           if (seen.has(cleaned)) continue;
           if (t.endsWith("F") && seen.has(t.slice(0, -1))) continue;
           seen.add(cleaned);
-          results.push({ ticker: cleaned, name: t, type: classifyBr(t), sector: null });
+          brCandidates.push({ ticker: cleaned, name: t, sector: null });
         } else if (s.stock) {
           const t = String(s.stock).toUpperCase();
           const cleaned = cleanTicker(t);
@@ -83,14 +89,16 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
           if (seen.has(cleaned)) continue;
           if (t.endsWith("F") && seen.has(t.slice(0, -1))) continue;
           seen.add(cleaned);
-          results.push({
-            ticker: cleaned,
-            name: s.name || t,
-            type: classifyBr(t, s.type),
-            sector: s.sector || null,
-          });
+          brCandidates.push({ ticker: cleaned, name: s.name || t, sector: s.sector || null, apiType: s.type });
         }
       }
+
+      const brTypes = await Promise.all(
+        brCandidates.map((c) => classifyBrAsync(c.ticker, c.apiType)),
+      );
+      brCandidates.forEach((c, i) => {
+        results.push({ ticker: c.ticker, name: c.name, type: brTypes[i], sector: c.sector });
+      });
     }
 
     if (yhRes.status === "fulfilled" && yhRes.value?.quotes) {
