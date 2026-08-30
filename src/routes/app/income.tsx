@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { BarChart, Bar, XAxis, CartesianGrid, Cell, LabelList } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChartContainer } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { InsightBanner } from "@/components/shared/InsightBanner";
 import { Lock } from "lucide-react";
@@ -13,17 +13,19 @@ import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useTransactions } from "@/lib/transactions";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
-import { buildMonthlyBuckets, MONTHS_EN_SHORT, MONTHS_PT_SHORT } from "@/lib/cashflow";
+import { buildMonthlyBuckets, computeInvestedVsReceived, MONTHS_EN_SHORT, MONTHS_PT_SHORT } from "@/lib/cashflow";
 import { buildConfirmedUpcoming, buildWeakMonths, buildAnnualDividends } from "@/lib/incomeGuaranteed";
 import { resolveReasonText } from "@/lib/askEngine";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
-import { formatCurrency } from "@/lib/formatters";
+import { formatCurrency, displayTicker } from "@/lib/formatters";
+import { compactWithSymbol } from "@/components/ceiling/cashflow/CashFlowSummary";
 
 const COLOR_RECEIVED = "var(--success)";
 const COLOR_PROJECTED_LEGACY = "var(--accent)";
 const COLOR_GRID = "var(--chart-grid)";
 const COLOR_MUTED = "var(--muted)";
+const COLOR_INVESTED = "var(--chart-1)";
 const UPCOMING_WINDOW_DAYS = 60;
 
 export const Route = createFileRoute("/app/income")({
@@ -66,6 +68,10 @@ function IncomePage() {
     () => buildAnnualDividends(events, calendarBuckets, currency, fxRate, 5),
     [events, calendarBuckets, currency, fxRate],
   );
+  const investedVsReceived = useMemo(
+    () => computeInvestedVsReceived(items, dividendEventsMap, transactions, fxRate),
+    [items, dividendEventsMap, transactions, fxRate],
+  );
 
   if (isAppLoading) {
     return (
@@ -104,6 +110,30 @@ function IncomePage() {
   const oldYearsCount = Math.ceil(annual.years.length / 2);
   const currentYearLabel = annual.years[annual.years.length - 1]?.year ?? new Date().getFullYear();
   const firstYearLabel = annual.years[0]?.year ?? currentYearLabel;
+
+  const InvestedVsReceivedTooltip = ({ active, payload }: any) => {
+    if (!active || !payload || !payload.length) return null;
+    const item = payload[0].payload as { ticker: string; invested: number; received: number; currency: typeof currency };
+    return (
+      <div className="min-w-[150px] rounded-md border border-border bg-popover px-3 py-2 shadow-md">
+        <p className="mb-1 whitespace-nowrap text-xs font-semibold text-foreground">{displayTicker(item.ticker)}</p>
+        <div className="flex flex-col gap-0.5 text-[11px]">
+          <span className="flex items-center justify-between gap-4">
+            <span className="whitespace-nowrap text-muted-foreground">{t.tabs.chart.invested}</span>
+            <span className="whitespace-nowrap font-semibold tabular-nums" style={{ color: COLOR_INVESTED }}>
+              {compactWithSymbol(item.invested, item.currency, locale)}
+            </span>
+          </span>
+          <span className="flex items-center justify-between gap-4">
+            <span className="whitespace-nowrap text-muted-foreground">{t.tabs.chart.received}</span>
+            <span className="whitespace-nowrap font-semibold tabular-nums text-success">
+              {compactWithSymbol(item.received, item.currency, locale)}
+            </span>
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
@@ -357,6 +387,53 @@ function IncomePage() {
           </>
         )}
       </div>
+
+      {/* Investido vs. Recebido, por ativo */}
+      {investedVsReceived.length > 0 && (
+        <div className="rounded-[22px] border border-border/60 bg-card p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-serif text-base font-medium text-foreground">{t.tabs.chart.investedVsReceived}</h3>
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLOR_INVESTED }} />
+                {t.tabs.chart.invested}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLOR_RECEIVED }} />
+                {t.tabs.chart.received}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-5 h-[220px]">
+            <ChartContainer config={{}} className="h-full w-full">
+              <BarChart
+                data={investedVsReceived}
+                margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                barCategoryGap="20%"
+                barGap={2}
+              >
+                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={COLOR_GRID} />
+                <XAxis
+                  dataKey="ticker"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={({ x, y, payload }) => (
+                    <text x={x} y={y + 12} textAnchor="middle" className="text-[10px]" fill="var(--muted-foreground)">
+                      {displayTicker(payload.value)}
+                    </text>
+                  )}
+                />
+                <ChartTooltip cursor={{ fill: "var(--muted)" }} content={<InvestedVsReceivedTooltip />} />
+                <Bar dataKey="invested" fill={COLOR_INVESTED} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.85} />
+                <Bar dataKey="received" fill={COLOR_RECEIVED} radius={[4, 4, 0, 0]} maxBarSize={28} />
+              </BarChart>
+            </ChartContainer>
+          </div>
+
+          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{t.tabs.chart.quantityNote}</p>
+        </div>
+      )}
     </div>
   );
 }

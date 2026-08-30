@@ -48,7 +48,7 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
       },
     ];
 
-    const result = computeInvestedVsReceived([item], "BRL", { AFHI11: events }, txs);
+    const result = computeInvestedVsReceived([item], { AFHI11: events }, txs);
 
     expect(result).toHaveLength(1);
     expect(result[0].ticker).toBe("AFHI11");
@@ -75,7 +75,7 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
       },
     ];
 
-    const result = computeInvestedVsReceived([item], "BRL", { BBAS3: events }, txs);
+    const result = computeInvestedVsReceived([item], { BBAS3: events }, txs);
 
     expect(result).toHaveLength(1);
     expect(result[0].ticker).toBe("BBAS3");
@@ -102,7 +102,7 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
       },
     ];
 
-    const result = computeInvestedVsReceived([item], "USD", { AAPL: events }, txs);
+    const result = computeInvestedVsReceived([item], { AAPL: events }, txs);
 
     expect(result).toHaveLength(1);
     expect(result[0].ticker).toBe("AAPL");
@@ -139,7 +139,7 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
       },
     ];
 
-    const result = computeInvestedVsReceived([item], "BRL", { AFHI11: events }, txs);
+    const result = computeInvestedVsReceived([item], { AFHI11: events }, txs);
 
     expect(result).toHaveLength(1);
     expect(result[0].ticker).toBe("AFHI11");
@@ -163,11 +163,39 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
     ];
 
     // Passing empty transactions array
-    const result = computeInvestedVsReceived([item], "BRL", { AFHI11: events }, []);
+    const result = computeInvestedVsReceived([item], { AFHI11: events }, []);
 
     expect(result).toHaveLength(1);
     expect(result[0].ticker).toBe("AFHI11");
     expect(result[0].invested).toBe(10000);
     expect(result[0].received).toBe(100);
+  });
+
+  it("never converts a mixed BRL/USD portfolio — each item stays in its own native currency", () => {
+    const brlItem = createItem({ ticker: "BBAS3", type: "STOCK_BR", currency: "BRL", quantity: 100, averagePrice: 25 });
+    const usdItem = createItem({ ticker: "AAPL", type: "STOCK_US", currency: "USD", quantity: 10, averagePrice: 150 });
+
+    const result = computeInvestedVsReceived([brlItem, usdItem], {}, []);
+
+    const bbas3 = result.find((r) => r.ticker === "BBAS3")!;
+    const aapl = result.find((r) => r.ticker === "AAPL")!;
+    expect(bbas3.currency).toBe("BRL");
+    expect(bbas3.invested).toBe(2500); // 100 * 25, no fx applied
+    expect(aapl.currency).toBe("USD");
+    expect(aapl.invested).toBe(1500); // 10 * 150, no fx applied — NOT multiplied by fxRate
+  });
+
+  it("ranks top-10 fairly across currencies instead of favoring BRL's structurally larger raw numbers", () => {
+    // Economically, this USD position (10 * 300 = US$3,000 ≈ R$16,500 at the 5.5 fallback rate)
+    // is worth far more than the BRL position (100 * 25 = R$2,500) — a raw-BRL-amount comparison
+    // would wrongly rank the BRL position higher just because "2500 > 1500" in raw digits.
+    const smallBrlItem = createItem({ ticker: "BBAS3", type: "STOCK_BR", currency: "BRL", quantity: 100, averagePrice: 25 });
+    const largeUsdItem = createItem({ ticker: "AAPL", type: "STOCK_US", currency: "USD", quantity: 10, averagePrice: 300 });
+
+    const result = computeInvestedVsReceived([smallBrlItem, largeUsdItem], {}, []);
+
+    expect(result[0].ticker).toBe("AAPL"); // Ranked first — genuinely the larger position
+    expect(result[0].invested).toBe(3000); // Still reported natively in USD, not the BRL ranking value
+    expect(result[0].currency).toBe("USD");
   });
 });

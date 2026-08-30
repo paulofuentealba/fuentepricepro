@@ -57,10 +57,12 @@ export type DividendEventsMap = Record<string, DividendEvent[]>;
 
 export interface InvestedVsReceivedItem {
   ticker: string;
-  /** averagePrice × quantity */
+  /** averagePrice × quantity, in the asset's OWN currency — never converted (see computeInvestedVsReceived). */
   invested: number;
-  /** Sum of all historical dividend events × current quantity (constant quantity assumption). */
+  /** Sum of all historical dividend events × current quantity (constant quantity assumption), in the asset's OWN currency. */
   received: number;
+  /** The asset's native trading currency — the value above is expressed in THIS currency, not a display currency. */
+  currency: Currency;
 }
 
 function fallbackMonthsForType(type: WatchlistItem["type"]): number[] {
@@ -375,10 +377,16 @@ export function computeCashFlowSummary(data: MonthBucket[]): CashFlowSummary {
  * Computes invested vs. received amounts per asset, for the third chart.
  * Limited to top 10 by invested value.
  * Uses SSOT calculateRealizedIncome with effective transaction history and tax deductions.
+ *
+ * IMPORTANT: `invested`/`received` are returned in the asset's OWN currency (`it.currency`),
+ * never converted to a display currency — an asset's value belongs in its native currency
+ * everywhere in the app. `fxRate` is used ONLY internally, to rank "top 10 by invested value"
+ * on a comparable basis across BRL/USD positions (a raw-BRL-amount comparison would
+ * structurally favor BRL positions, since 1 USD ≈ several BRL) — it never leaks into the
+ * displayed numbers.
  */
 export function computeInvestedVsReceived(
   items: WatchlistItem[],
-  currency: Currency,
   dividendEventsMap: DividendEventsMap,
   transactions: Transaction[] = [],
   fxRate: number = EXCHANGE_RATE_FALLBACK
@@ -401,36 +409,33 @@ export function computeInvestedVsReceived(
   const receivedByTicker = new Map<string, number>();
   for (const ev of realizedEvents) {
     const norm = ev.ticker.toUpperCase();
-    const item = items.find(
-      (it) =>
-        it.ticker.toUpperCase() === norm ||
-        it.ticker.toUpperCase() === `${norm}.SA` ||
-        `${it.ticker.toUpperCase()}.SA` === norm
-    );
-    const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
-    receivedByTicker.set(norm, (receivedByTicker.get(norm) ?? 0) + ev.amountNet * fx);
+    receivedByTicker.set(norm, (receivedByTicker.get(norm) ?? 0) + ev.amountNet);
   }
 
   return items
     .filter((it) => it.quantity > 0)
     .map((it) => {
-      const fx = getFxMultiplier(it.currency, currency, fxRate);
       const normTicker = it.ticker.toUpperCase();
       const received =
         receivedByTicker.get(normTicker) ??
         receivedByTicker.get(normTicker.replace(/\.SA$/, "")) ??
         0;
-      const invested = (it.averagePrice ?? 0) * it.quantity * fx;
+      const invested = (it.averagePrice ?? 0) * it.quantity;
+      // Ranking-only comparable value (never displayed) — see doc comment above.
+      const rankingValueBrl = invested * getFxMultiplier(it.currency, "BRL", fxRate);
 
       return {
         ticker: it.ticker,
         invested: Math.round(invested * 100) / 100,
         received: Math.round(received * 100) / 100,
+        currency: it.currency,
+        rankingValueBrl,
       };
     })
     .filter((r) => r.invested > 0 || r.received > 0)
-    .sort((a, b) => b.invested - a.invested)
-    .slice(0, 10);
+    .sort((a, b) => b.rankingValueBrl - a.rankingValueBrl)
+    .slice(0, 10)
+    .map(({ rankingValueBrl, ...rest }) => rest);
 }
 
 export function buildSparklinePath(values: number[]): string {

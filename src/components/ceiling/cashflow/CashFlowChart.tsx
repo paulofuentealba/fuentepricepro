@@ -281,19 +281,19 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
     if (!active || !payload || !payload.length) return null;
     const item = payload[0].payload as InvestedVsReceivedItem;
     return (
-      <div className="rounded-md border border-border bg-popover px-3 py-2 shadow-md">
-        <p className="mb-1 text-xs font-semibold text-foreground">{displayTicker(item.ticker)}</p>
+      <div className="min-w-[150px] rounded-md border border-border bg-popover px-3 py-2 shadow-md">
+        <p className="mb-1 whitespace-nowrap text-xs font-semibold text-foreground">{displayTicker(item.ticker)}</p>
         <div className="flex flex-col gap-0.5 text-[11px]">
-          <span className="flex justify-between gap-4">
-            <span className="text-muted-foreground">{t.tabs.chart.invested}</span>
-            <span className="font-semibold tabular-nums text-success">
-              {compactWithSymbol(item.invested, activeCurrency, locale)}
+          <span className="flex items-center justify-between gap-4">
+            <span className="whitespace-nowrap text-muted-foreground">{t.tabs.chart.invested}</span>
+            <span className="whitespace-nowrap font-semibold tabular-nums text-success">
+              {compactWithSymbol(item.invested, item.currency, locale)}
             </span>
           </span>
-          <span className="flex justify-between gap-4">
-            <span className="text-muted-foreground">{t.tabs.chart.received}</span>
-            <span className="font-semibold tabular-nums text-comparison">
-              {compactWithSymbol(item.received, activeCurrency, locale)}
+          <span className="flex items-center justify-between gap-4">
+            <span className="whitespace-nowrap text-muted-foreground">{t.tabs.chart.received}</span>
+            <span className="whitespace-nowrap font-semibold tabular-nums text-comparison">
+              {compactWithSymbol(item.received, item.currency, locale)}
             </span>
           </span>
         </div>
@@ -667,13 +667,6 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                       {payload.value}
                     </text>
                   )}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  width={50}
-                  tick={{ fill: COLOR_MUTED_FG, fontSize: 10 }}
-                  tickFormatter={(v: number) => compactWithSymbol(v, activeCurrency, locale)}
                 />
                 <ChartTooltip
                   cursor={{ fill: COLOR_CURSOR }}

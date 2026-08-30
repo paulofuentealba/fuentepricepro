@@ -82,8 +82,8 @@ export function CashFlowCalendar({ items, onNavigateToCalculator }: Props) {
   );
 
   const investedVsReceived = useMemo(
-    () => computeInvestedVsReceived(items, activeCurrency, dividendEventsMap, transactions, fxRate),
-    [items, activeCurrency, dividendEventsMap, transactions, fxRate],
+    () => computeInvestedVsReceived(items, dividendEventsMap, transactions, fxRate),
+    [items, dividendEventsMap, transactions, fxRate],
   );
 
   const { totals } = useValuedPortfolio();

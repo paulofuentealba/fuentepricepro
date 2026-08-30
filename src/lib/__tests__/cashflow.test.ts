@@ -366,16 +366,16 @@ describe("Cashflow logic", () => {
       expect(buckets[0].amount).toBe(660);
     });
 
-    it("computeInvestedVsReceived defaults to EXCHANGE_RATE_FALLBACK (5.5) when fxRate parameter is omitted", () => {
+    it("computeInvestedVsReceived never converts — invested/received stay in the asset's own currency", () => {
       const items = [
         mkItem({ ticker: "AAPL", currency: "USD", averagePrice: 150, quantity: 10 }),
       ];
-      // Omit fxRate parameter (default = EXCHANGE_RATE_FALLBACK)
-      const result = computeInvestedVsReceived(items, "BRL", {});
+      // fxRate is accepted (used only internally for top-10 ranking across currencies),
+      // but must NEVER leak into the displayed invested/received amounts.
+      const result = computeInvestedVsReceived(items, {});
       expect(result).toHaveLength(1);
-      // 150 USD * 10 * 5.5 = 8250 BRL
-      expect(result[0].invested).toBe(150 * 10 * EXCHANGE_RATE_FALLBACK);
-      expect(result[0].invested).toBe(8250);
+      expect(result[0].invested).toBe(1500); // 150 USD * 10, native, no fx applied
+      expect(result[0].currency).toBe("USD");
     });
   });
 
