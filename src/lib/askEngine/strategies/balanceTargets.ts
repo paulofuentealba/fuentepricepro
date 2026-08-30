@@ -1,4 +1,5 @@
 import type { AssetType } from "@/lib/domain";
+import { getDisplayAssetType } from "@/lib/formatters";
 import type { AskStrategyContext, Strategy, StrategyCandidate } from "../types";
 
 /**
@@ -25,7 +26,9 @@ export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] 
     const livePrice = pos.livePrice ?? pos.currentPrice ?? 0;
     const qty = pos.quantity ?? 0;
     const value = qty * livePrice;
-    const type = pos.type;
+    // FII_INFRA/FIAGRO are grouped into FII for allocation-target purposes (same SSOT grouping
+    // as usePortfolioRisk); AssetType itself stays distinct for Watchlist/Realidade Fiscal.
+    const type = getDisplayAssetType(pos.type);
 
     classCurrentValue[type] = (classCurrentValue[type] || 0) + value;
     totalCurrentValue += value;
@@ -89,7 +92,9 @@ export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] 
   for (const classDeficit of deficits) {
     if (remainingBudget <= 0) break;
 
-    const classPositions = eligiblePositions.filter((p) => p.type === classDeficit.type);
+    const classPositions = eligiblePositions.filter(
+      (p) => getDisplayAssetType(p.type) === classDeficit.type,
+    );
     if (classPositions.length === 0) continue;
 
     // Rank assets within the class by highest safety margin first, breaking ties by ticker alphabetically

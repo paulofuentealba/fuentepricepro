@@ -1,6 +1,7 @@
 import type { Asset, AssetType } from "./domain";
 import type { WatchlistItem } from "./watchlist";
 import type { BenchmarkPoint } from "./benchmark";
+import { getDisplayAssetType } from "./formatters";
 import {
   SELIC_FALLBACK,
   SELIC_DECIMAL,
@@ -94,7 +95,8 @@ export function resolveTargetYield(
   }
 
   // 2º Nível (Classe do Ativo): classTargetYields[item.type] se configurado (> 0)
-  const classYield = settings?.classTargetYields?.[item.type];
+  // FII_INFRA/FIAGRO are grouped into FII here (same SSOT grouping used across the app).
+  const classYield = settings?.classTargetYields?.[getDisplayAssetType(item.type)];
   if (typeof classYield === "number" && classYield > 0 && Number.isFinite(classYield)) {
     return { effectiveYield: classYield, source: "class" };
   }

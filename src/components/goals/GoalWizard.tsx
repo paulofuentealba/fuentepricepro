@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n-provider";
 import { useUserSettings } from "@/lib/useUserSettings";
 import type { AssetType } from "@/lib/domain";
@@ -11,8 +12,6 @@ import { cn } from "@/lib/utils";
 const ASSET_TYPES: AssetType[] = [
   "STOCK_BR",
   "FII",
-  "FII_INFRA",
-  "FIAGRO",
   "STOCK_US",
   "REIT",
   "ETF",
@@ -37,10 +36,16 @@ export interface GoalWizardProps {
  * nova: substitui o antigo TargetAllocationPanel (accordion) reutilizando os mesmos textos i18n
  * de t.smartAllocation.*.
  *
- * Mantém as 8 classes reais de AssetType (STOCK_BR, FII, FII_INFRA, FIAGRO, STOCK_US, REIT, ETF,
- * FIXED_INCOME) em vez dos 4 buckets agrupados do protótipo ("Exterior" = STOCK_US+REIT+ETF) —
- * decisão deliberada para não inventar uma regra de distribuição interna sem validação de
- * produto; consistente com a granularidade já usada em Watchlist e Realidade Fiscal.
+ * Mantém 6 classes de AssetType (STOCK_BR, FII, STOCK_US, REIT, ETF, FIXED_INCOME) em vez dos
+ * 4 buckets agrupados do protótipo ("Exterior" = STOCK_US+REIT+ETF) — decisão deliberada para
+ * não inventar uma regra de distribuição interna sem validação de produto; consistente com a
+ * granularidade já usada em Watchlist e Realidade Fiscal.
+ *
+ * FII_INFRA e FIAGRO NÃO aparecem como classes separadas aqui: são agrupados em "FII" via
+ * `getDisplayAssetType` (mesmo SSOT já usado por usePortfolioRisk/useAssetFilterSort) — o
+ * AssetType em si continua distinguindo os três em Watchlist e Realidade Fiscal (FII_INFRA é
+ * isento de IR, FIAGRO segue regra de FII a 20%); só a camada de metas/yield-alvo agrupa.
+ * `useUserSettings.ts` migra silenciosamente valores legados de FII_INFRA/FIAGRO para FII.
  */
 export function GoalWizard({ onComplete }: GoalWizardProps) {
   const { t } = useI18n();
@@ -92,8 +97,11 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
 
         {ASSET_TYPES.map((type) => (
           <div key={type} className="mb-3 flex items-center gap-3.5 last:mb-0">
-            <span className="w-[110px] shrink-0 text-[12.5px] font-display font-medium text-foreground sm:w-[130px]">
+            <span className="flex w-[110px] shrink-0 items-center gap-1 text-[12.5px] font-display font-medium text-foreground sm:w-[130px]">
               {t.types[type] || type}
+              {t.smartAllocation.assetClassExplainers[type] && (
+                <InfoTooltip content={t.smartAllocation.assetClassExplainers[type]} />
+              )}
             </span>
             <input
               type="range"

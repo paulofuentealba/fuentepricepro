@@ -10,7 +10,7 @@ const STORAGE_KEY = "ceilingPricePro.settings.v1";
 export interface UserSettings {
   targetYield: number;
   displayCurrency: Currency;
-  smartAllocationTargets: Record<AssetType, number>;
+  smartAllocationTargets: Partial<Record<AssetType, number>>;
   classTargetYields?: Partial<Record<AssetType, number>>;
   excludeAboveCeiling?: boolean;
   excludeYieldTraps?: boolean;
@@ -36,12 +36,58 @@ const DEFAULT_SETTINGS: UserSettings = {
     FII: 0,
     REIT: 0,
     ETF: 0,
-    FII_INFRA: 0,
-    FIAGRO: 0,
     FIXED_INCOME: 0,
   },
   valuationAssumptionsMode: "simple",
 };
+
+/**
+ * One-time migration: FII_INFRA and FIAGRO used to be configurable as separate classes in
+ * `smartAllocationTargets`/`classTargetYields`. They are now grouped under FII everywhere via
+ * `getDisplayAssetType` (the same SSOT already used by usePortfolioRisk/useAssetFilterSort) —
+ * AssetType itself still distinguishes them for Watchlist/Realidade Fiscal, only the goals/
+ * allocation-targets layer groups them. Merges any pre-existing values into FII and drops the
+ * old keys. Returns the same object reference if nothing needed migrating (no-op fast path).
+ */
+export function migrateLegacyAllocationKeys(settings: UserSettings): UserSettings {
+  const targets = settings.smartAllocationTargets;
+  const yields = settings.classTargetYields;
+
+  const targetsHasLegacy = targets && ("FII_INFRA" in targets || "FIAGRO" in targets);
+  const yieldsHasLegacy = yields && ("FII_INFRA" in yields || "FIAGRO" in yields);
+
+  if (!targetsHasLegacy && !yieldsHasLegacy) {
+    return settings;
+  }
+
+  let nextTargets = targets;
+  if (targetsHasLegacy) {
+    const merged = { ...targets };
+    const legacySum =
+      (merged.FII_INFRA && merged.FII_INFRA > 0 ? merged.FII_INFRA : 0) +
+      (merged.FIAGRO && merged.FIAGRO > 0 ? merged.FIAGRO : 0);
+    merged.FII = (merged.FII || 0) + legacySum;
+    delete merged.FII_INFRA;
+    delete merged.FIAGRO;
+    nextTargets = merged;
+  }
+
+  let nextYields = yields;
+  if (yieldsHasLegacy) {
+    const merged = { ...yields };
+    // classTargetYields is a target rate (%), not additive — keep FII's own value if already
+    // set, otherwise adopt whichever legacy class had one (FII_INFRA takes precedence).
+    if (merged.FII === undefined || merged.FII === null) {
+      const legacyYield = merged.FII_INFRA ?? merged.FIAGRO;
+      if (legacyYield !== undefined) merged.FII = legacyYield;
+    }
+    delete merged.FII_INFRA;
+    delete merged.FIAGRO;
+    nextYields = merged;
+  }
+
+  return { ...settings, smartAllocationTargets: nextTargets, classTargetYields: nextYields };
+}
 
 // Ler do localStorage para convidados ou migração
 function readLocalSettings(): UserSettings {
@@ -78,7 +124,10 @@ function readLocalSettings(): UserSettings {
       writeLocalSettings(settings);
       return settings;
     }
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const merged = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const migrated = migrateLegacyAllocationKeys(merged);
+    if (migrated !== merged) writeLocalSettings(migrated);
+    return migrated;
   } catch {
     return DEFAULT_SETTINGS;
   }
@@ -116,7 +165,12 @@ export function useUserSettings() {
           }
 
           // Merge with defaults in case of missing fields
-          return { ...DEFAULT_SETTINGS, ...settings } as UserSettings;
+          const mergedSettings = { ...DEFAULT_SETTINGS, ...settings } as UserSettings;
+          const migratedSettings = migrateLegacyAllocationKeys(mergedSettings);
+          if (migratedSettings !== mergedSettings) {
+            await setDoc(ref, { settings: migratedSettings }, { merge: true });
+          }
+          return migratedSettings;
         } else {
           // First time cloud user: migrate local to cloud
           const local = readLocalSettings();

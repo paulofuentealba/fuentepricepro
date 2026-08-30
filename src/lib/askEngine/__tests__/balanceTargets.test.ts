@@ -222,4 +222,49 @@ describe("AskEngine: balanceTargets Strategy", () => {
       value: 84,
     });
   });
+
+  it("groups FII_INFRA and FIAGRO positions into the FII target (getDisplayAssetType SSOT)", () => {
+    // Current portfolio: only a FII_INFRA position, 0 in FII/FIAGRO.
+    // Target: FII 100%. Since FII_INFRA/FIAGRO are grouped into FII, the FII_INFRA position's
+    // value must count toward the FII deficit — a pure exact-type match would see FII at 0%
+    // and never converge (deficit always == full projected total).
+    const fiiInfra = createMockPosition({
+      ticker: "KDIF11",
+      type: "FII_INFRA",
+      livePrice: 100,
+      quantity: 10, // 1000 BRL already held
+      safetyMargin: 10,
+    });
+    const fiagro = createMockPosition({
+      ticker: "VCJR11",
+      type: "FIAGRO",
+      livePrice: 100,
+      quantity: 0,
+      safetyMargin: 30, // Higher margin — should be picked first within the FII group
+    });
+
+    const strategyCtx: AskStrategyContext = {
+      eligiblePositions: [fiiInfra, fiagro],
+      availableAmount: 1000,
+      settings: {
+        smartAllocationTargets: {
+          STOCK_BR: 0,
+          STOCK_US: 0,
+          FII: 100,
+          REIT: 0,
+          ETF: 0,
+          FIXED_INCOME: 0,
+        },
+      },
+      asOf: "2026-08-26T10:00:00.000Z",
+    };
+
+    const candidates = runBalanceTargets(strategyCtx);
+
+    // Projected total = 1000 (FII_INFRA held) + 1000 (available) = 2000. Target FII = 2000
+    // (100% of group). Deficit = 2000 - 1000 = 1000 — fully allocatable within budget.
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0].ticker).toBe("VCJR11"); // Highest margin within the FII group
+    expect(candidates[0].suggestedQuantity).toBe(10); // 1000 / 100
+  });
 });
