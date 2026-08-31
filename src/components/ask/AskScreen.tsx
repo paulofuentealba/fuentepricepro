@@ -179,6 +179,15 @@ export function AskScreen({
     return map;
   }, [positions]);
 
+  // Ticker -> native currency lookup. Per-asset amounts are always shown in the asset's own
+  // currency (no conversion, no relabeling) — only aggregate values use `currency` (the
+  // display-currency toggle).
+  const tickerCurrencyMap = useMemo(() => {
+    const map: Record<string, Currency> = {};
+    for (const p of positions) map[p.ticker] = p.currency;
+    return map;
+  }, [positions]);
+
   // Resolved titles and question
   const title = resolveReasonText(t, titleKey);
   const subtitle = subtitleKey ? resolveReasonText(t, subtitleKey) : "";
@@ -416,7 +425,7 @@ export function AskScreen({
 
                     <div className="w-[92px] shrink-0 text-right sm:w-[115px]">
                       <div className="font-serif text-[17px] font-medium text-foreground sm:text-[18px]">
-                        {formatCurrency(alloc.amountBRL, currency, locale)}
+                        {formatCurrency(alloc.amountBRL, tickerCurrencyMap[alloc.ticker] ?? currency, locale)}
                       </div>
                       <div className="font-mono text-[10px] text-muted-foreground">
                         {alloc.quantity} {t.askScreen?.sharesUnit || "cotas"}
