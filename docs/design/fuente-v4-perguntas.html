@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>Fuente Price Pro — v4 · As perguntas</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+[data-theme="light"]{--paper:#f6f2ea;--paper2:#efe9dc;--card:#fffdf8;--ink:#14201a;--muted:rgba(20,32,26,.52);--line:rgba(20,32,26,.12);--line2:rgba(20,32,26,.07);--nav:#0e2a1f;--navfg:#f6f2ea;--moss-700:#1c4a34;--moss-500:#2f6b4c;--moss-300:#8fb59d;--gold-600:#a97a1f;--gold-500:#c99a3a;--gold-300:#e9c877;--pos:#2f6b4c;--neg:#b5533a;--posbg:rgba(47,107,76,.1);--negbg:rgba(181,83,58,.1);--goldbg:rgba(201,154,58,.14);}
+[data-theme="dark"]{--paper:#0a1410;--paper2:#101d16;--card:#131f18;--ink:#e9e3d5;--muted:rgba(233,227,213,.52);--line:rgba(233,227,213,.13);--line2:rgba(233,227,213,.07);--nav:#08110d;--navfg:#e9e3d5;--moss-700:#245c40;--moss-500:#57a97b;--moss-300:#8fb59d;--gold-600:#e9c877;--gold-500:#e9c877;--gold-300:#f0d792;--pos:#57a97b;--neg:#e2795e;--posbg:rgba(87,169,123,.13);--negbg:rgba(226,121,94,.13);--goldbg:rgba(233,200,119,.14);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;transition:background .4s,color .3s;}
+.serif{font-family:'Fraunces',serif;}.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(rgba(120,120,120,.035) 1px,transparent 1px);background-size:3px 3px;z-index:0;}
+.shell{display:grid;grid-template-columns:238px 1fr;min-height:100vh;position:relative;z-index:1;}
+nav{background:var(--nav);color:var(--navfg);padding:24px 16px;display:flex;flex-direction:column;gap:3px;}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;padding:0 6px;}
+.brand .w{font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--gold-300);}
+.brand .w span{color:var(--navfg);opacity:.5;font-weight:400;font-size:9.5px;display:block;letter-spacing:.14em;text-transform:uppercase;}
+.nl{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;color:color-mix(in srgb,var(--navfg) 60%,transparent);cursor:pointer;font-size:12.5px;font-weight:500;border:0;background:none;width:100%;text-align:left;font-family:inherit;transition:.15s;}
+.nl svg{width:16px;height:16px;flex-shrink:0;}
+.nl:hover{background:color-mix(in srgb,var(--navfg) 7%,transparent);color:var(--navfg);}
+.nl.active{background:var(--moss-700);color:var(--gold-300);}
+.nl .dot{margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--gold-300);}
+.nl .cnt{margin-left:auto;font-size:10px;font-weight:700;background:var(--gold-500);color:#0e2a1f;padding:1px 6px;border-radius:99px;}
+.nsec{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--navfg) 33%,transparent);margin:15px 11px 5px;}
+.tt{margin-top:auto;display:flex;gap:4px;background:color-mix(in srgb,var(--navfg) 7%,transparent);padding:4px;border-radius:9px;}
+.tt button{flex:1;border:0;background:none;color:color-mix(in srgb,var(--navfg) 55%,transparent);padding:6px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;}
+.tt button.on{background:var(--moss-700);color:var(--gold-300);}
+main{padding:28px 34px 70px;max-width:1120px;}
+.top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;flex-wrap:wrap;gap:14px;}
+.eye{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--moss-500);font-weight:600;margin-bottom:5px;}
+h1.pg{font-family:'Fraunces',serif;font-size:29px;font-weight:500;letter-spacing:-.01em;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;}
+.rt{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.rt h3{font-family:'Fraunces',serif;font-weight:500;font-size:15px;}
+.pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;}
+.pill.pos{background:var(--posbg);color:var(--pos);}.pill.neg{background:var(--negbg);color:var(--neg);}.pill.gold{background:var(--goldbg);color:var(--gold-600);}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px 18px;}
+.kl{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;}
+.kv{font-family:'Fraunces',serif;font-size:24px;margin-top:5px;font-weight:500;}
+.kd{font-size:11.5px;margin-top:3px;font-weight:600;}.kd.up{color:var(--pos);}.kd.down{color:var(--neg);}
+.screen{display:none;}.screen.active{display:block;animation:f .3s ease;}
+@keyframes f{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--line);}
+td{padding:11px 0;border-bottom:1px dashed var(--line2);}
+td.num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;}
+.btn{background:var(--moss-700);color:var(--gold-300);border:0;padding:11px 22px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+
+/* ASK HERO — o padrão que unifica todas as perguntas */
+.ask{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:20px;}
+.ask-top{padding:24px 28px 20px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;}
+.ask-q{font-family:'Fraunces',serif;font-size:20px;font-weight:500;line-height:1.35;}
+.ask-q b{color:var(--gold-600);font-weight:600;}
+.ask-amt{display:flex;align-items:center;gap:12px;background:var(--paper2);border-radius:14px;padding:12px 18px;}
+.ask-amt .lb{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;}
+.ask-amt .big{font-family:'Fraunces',serif;font-size:28px;font-weight:500;}
+.ask-amt input{border:0;background:none;font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:var(--ink);width:130px;outline:none;}
+.strat{display:flex;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);}
+.st{flex:1;padding:13px 16px;text-align:center;cursor:pointer;border-right:1px solid var(--line2);font-size:12px;font-weight:500;color:var(--muted);transition:.15s;}
+.st:last-child{border-right:0;}.st:hover{background:var(--paper2);}
+.st.on{background:var(--goldbg);color:var(--gold-600);font-weight:600;}
+.st .sn{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;margin-top:2px;}
+.alloc{display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px dashed var(--line2);}
+.alloc:last-child{border-bottom:0;}
+.alloc:hover{background:var(--paper2);}
+.rank{width:26px;height:26px;border-radius:8px;background:var(--goldbg);color:var(--gold-600);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;flex-shrink:0;}
+.tkr{width:120px;flex-shrink:0;}
+.tkr .t{font-weight:600;font-size:14px;}.tkr .s{font-size:10.5px;color:var(--muted);}
+.bar-wrap{flex:1;min-width:100px;}
+.bar-bg{height:24px;border-radius:7px;background:var(--paper2);overflow:hidden;}
+.bar{height:100%;background:linear-gradient(90deg,var(--moss-500),var(--gold-500));border-radius:7px;transition:width .5s cubic-bezier(.2,.7,.2,1);}
+.reason{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4;}
+.reason b{color:var(--moss-500);font-weight:600;}
+.money{width:120px;text-align:right;flex-shrink:0;}
+.money .m{font-family:'Fraunces',serif;font-size:19px;font-weight:500;}
+.money .q{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.ask-foot{padding:18px 28px;background:var(--paper2);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.pf{font-size:11.5px;color:var(--muted);}
+.pf b{font-family:'Fraunces',serif;font-size:17px;color:var(--ink);display:block;font-weight:500;}
+
+/* DIGEST — o que mudou */
+.dg{display:flex;gap:15px;padding:16px 20px;border-bottom:1px dashed var(--line2);align-items:flex-start;}
+.dg:last-child{border:0;}
+.dg .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;font-weight:700;}
+.dg .ic.bad{background:var(--negbg);color:var(--neg);}
+.dg .ic.good{background:var(--posbg);color:var(--pos);}
+.dg .ic.warn{background:var(--goldbg);color:var(--gold-600);}
+.dg .body{flex:1;}
+.dg .h{font-size:13.5px;font-weight:600;margin-bottom:3px;}
+.dg .d{font-size:11.5px;color:var(--muted);line-height:1.5;}
+.dg .d b{color:var(--ink);font-weight:600;}
+.dg .act{font-size:11px;color:var(--gold-600);font-weight:600;margin-top:6px;cursor:pointer;}
+.dg .when{font-size:10px;color:var(--muted);white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+
+/* insight banner — o "eureca" */
+.insight{background:linear-gradient(135deg,var(--goldbg),transparent);border:1px solid var(--gold-500);border-radius:18px;padding:22px 26px;margin-bottom:20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.insight .ii{font-size:26px;}
+.insight .it{flex:1;min-width:240px;}
+.insight .it h4{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin-bottom:5px;}
+.insight .it p{font-size:12.5px;color:var(--muted);line-height:1.5;}
+.insight .it p b{color:var(--ink);}
+.insight .iv{font-family:'Fraunces',serif;font-size:34px;font-weight:500;color:var(--gold-600);}
+
+/* meses secos */
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-top:6px;}
+.mo{text-align:center;}
+.mo .mb{height:60px;border-radius:6px;background:var(--paper2);display:flex;align-items:flex-end;overflow:hidden;}
+.mo .mf{width:100%;background:linear-gradient(180deg,var(--gold-300),var(--gold-500));border-radius:5px;}
+.mo.dry .mf{background:var(--negbg);}
+.mo .ml2{font-size:9px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.mo.dry .ml2{color:var(--neg);font-weight:600;}
+
+/* fiscal */
+.fiscal-hero{display:flex;align-items:center;gap:24px;padding:26px 28px;flex-wrap:wrap;}
+.fh-big{font-family:'Fraunces',serif;font-size:46px;font-weight:500;line-height:1;}
+.fh-l{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;}
+.gauge{flex:1;min-width:200px;}
+.gtrack{height:10px;border-radius:99px;background:var(--paper2);position:relative;overflow:hidden;}
+.gfill{height:100%;background:linear-gradient(90deg,var(--moss-500),var(--gold-500));border-radius:99px;}
+.glbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace;}
+.brk{display:flex;border-top:1px solid var(--line2);flex-wrap:wrap;}
+.brk .b2{flex:1;min-width:120px;padding:15px 18px;border-right:1px solid var(--line2);}
+.brk .b2:last-child{border-right:0;}
+.brk .b2 .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;}
+.brk .b2 .v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;margin-top:4px;}
+.brk .b2 .n{font-size:9.5px;color:var(--muted);margin-top:2px;}
+.strike{text-decoration:line-through;opacity:.5;}
+@media(max-width:900px){.shell{grid-template-columns:1fr;}nav{flex-direction:row;overflow-x:auto;}.kpis,.grid2{grid-template-columns:1fr;}.alloc{flex-wrap:wrap;}.months{grid-template-columns:repeat(6,1fr);}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav>
+  <div class="brand"><svg width="32" height="32" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#e9c877" stroke-width="1.4" opacity=".35"/><circle cx="20" cy="20" r="13.5" stroke="#e9c877" stroke-width="1.4" opacity=".6"/><circle cx="20" cy="20" r="8" fill="#e9c877"/></svg><div class="w">Fuente<span>Price Pro</span></div></div>
+
+  <div class="nsec">Decidir</div>
+  <button class="nl active" data-s="reinvestir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 11-3-6.7M21 3v6h-6"/></svg> Reinvestir proventos <span class="cnt">R$1.130</span></button>
+  <button class="nl" data-s="aporte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M5 9l7-7 7 7"/></svg> Plano de aporte</button>
+  <button class="nl" data-s="retirar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22V2M5 15l7 7 7-7"/></svg> Retirar com menos dano</button>
+
+  <div class="nsec">Acompanhar</div>
+  <button class="nl" data-s="mudou"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg> O que mudou <span class="cnt">4</span></button>
+  <button class="nl" data-s="garantido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg> Renda garantida</button>
+  <button class="nl" data-s="fiscal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15h6"/></svg> Realidade fiscal <span class="dot"></span></button>
+
+  <div class="nsec">Analisar</div>
+  <button class="nl" data-s="carteira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Minha carteira</button>
+  <button class="nl" data-s="auditoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Auditoria de decisões</button>
+
+  <div class="tt"><button id="bl" class="on" onclick="setTheme('light')">☀ Claro</button><button id="bd" onclick="setTheme('dark')">☾ Escuro</button></div>
+</nav>
+
+<main>
+<!-- ===== REINVESTIR ===== -->
+<div class="screen active" id="reinvestir">
+  <div class="top"><div><div class="eye">TAEE11 pagou hoje · 3 pagamentos esta semana</div><h1 class="pg">Reinvestir proventos</h1></div></div>
+  <div class="ask">
+    <div class="ask-top">
+      <div class="ask-q">Caiu provento na conta.<br><b>Reinvisto em quê, sem deixar parado?</b></div>
+      <div class="ask-amt"><div><div class="lb">Disponível</div><div class="big serif">R$ 1.130</div></div></div>
+    </div>
+    <div class="strat">
+      <div class="st on" data-k="bola">Acelerar bola de neve<span class="sn">maior DY abaixo do teto</span></div>
+      <div class="st" data-k="equil">Corrigir desvio<span class="sn">volta pra meta</span></div>
+      <div class="st" data-k="mesmo">Reforçar quem pagou<span class="sn">compõe a mesma posição</span></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="ask-foot">
+      <div class="pf">Renda mensal adicionada<b>+ R$ 8,20</b></div>
+      <div class="pf">Sobra sem alocar<b id="rv-sobra">R$ 34</b></div>
+      <div class="pf">Todos abaixo do teto<b>3 de 3</b></div>
+      <button class="btn">Exportar ordens →</button>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="ii">◈</div>
+    <div class="it"><h4>Dinheiro parado custa caro</h4><p>Você deixou <b>R$ 4.280</b> em proventos sem reinvestir nos últimos 12 meses. Reinvestidos ao seu DY médio, seriam <b>R$ 31/mês</b> de renda extra — para sempre.</p></div>
+    <div class="iv">R$ 4.280</div>
+  </div>
+</div>
+
+<!-- ===== PLANO DE APORTE ===== -->
+<div class="screen" id="aporte">
+  <div class="top"><div><div class="eye">Dia 5 · seu salário caiu</div><h1 class="pg">Plano de aporte</h1></div></div>
+  <div class="ask">
+    <div class="ask-top">
+      <div class="ask-q">Tenho este valor para investir.<br><b>Onde ponho, considerando o que já tenho?</b></div>
+      <div class="ask-amt"><div><div class="lb">Aporte</div><input id="amt" type="text" value="R$ 2.500"></div></div>
+    </div>
+    <div class="strat">
+      <div class="st on" data-k="equilibrio">Equilibrar carteira<span class="sn">corrige desvios</span></div>
+      <div class="st" data-k="renda">Maximizar renda<span class="sn">maior DY hoje</span></div>
+      <div class="st" data-k="desconto">Comprar desconto<span class="sn">maior margem</span></div>
+    </div>
+    <div id="aplist"></div>
+    <div class="ask-foot">
+      <div class="pf">Renda adicionada<b id="ap-r">+ R$ 18,40</b></div>
+      <div class="pf">Desvio da meta<b id="ap-d">3,1% → 1,2%</b></div>
+      <div class="pf">Abaixo do teto<b>4 de 4</b></div>
+      <button class="btn">Exportar ordens →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RETIRAR ===== -->
+<div class="screen" id="retirar">
+  <div class="top"><div><div class="eye">Ninguém mais responde isso</div><h1 class="pg">Retirar com menos dano</h1></div></div>
+  <div class="ask">
+    <div class="ask-top">
+      <div class="ask-q">Preciso tirar dinheiro.<br><b>De onde tiro perdendo o mínimo?</b></div>
+      <div class="ask-amt"><div><div class="lb">Preciso de</div><input id="wamt" type="text" value="R$ 30.000"></div></div>
+    </div>
+    <div class="strat">
+      <div class="st on" data-k="fiscal">Menor imposto<span class="sn">usa isenção e prejuízo</span></div>
+      <div class="st" data-k="renda2">Menor perda de renda<span class="sn">preserva proventos</span></div>
+      <div class="st" data-k="caro">Vender o que está caro<span class="sn">acima do teto</span></div>
+    </div>
+    <div id="wlist"></div>
+    <div class="ask-foot">
+      <div class="pf">Imposto devido<b style="color:var(--pos)">R$ 0</b></div>
+      <div class="pf">Renda mensal perdida<b>− R$ 96</b></div>
+      <div class="pf">Prejuízo compensado<b>R$ 3.100</b></div>
+      <button class="btn">Exportar ordens →</button>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="ii">◈</div>
+    <div class="it"><h4>A ordem de venda importa mais que o valor</h4><p>Vendendo nesta ordem você fica <b>abaixo da isenção de R$ 20 mil/mês</b> em ações e usa <b>R$ 3.100</b> de prejuízo acumulado. Na ordem errada, o mesmo saque geraria <b>R$ 1.240</b> de DARF.</p></div>
+    <div class="iv">R$ 1.240</div>
+  </div>
+</div>
+
+<!-- ===== O QUE MUDOU ===== -->
+<div class="screen" id="mudou">
+  <div class="top"><div><div class="eye">Desde sua última visita · há 6 dias</div><h1 class="pg">O que mudou</h1></div><button class="btn ghost">Receber por e-mail toda segunda</button></div>
+  <div class="kpis">
+    <div class="kpi"><div class="kl">Precisam de atenção</div><div class="kv serif" style="color:var(--neg)">2</div><div class="kd down">tese pode ter mudado</div></div>
+    <div class="kpi"><div class="kl">Oportunidades novas</div><div class="kv serif" style="color:var(--pos)">1</div><div class="kd up">entrou abaixo do teto</div></div>
+    <div class="kpi"><div class="kl">Proventos anunciados</div><div class="kv serif">R$ 1.910</div><div class="kd up">3 novos anúncios</div></div>
+    <div class="kpi"><div class="kl">Patrimônio</div><div class="kv serif">+1,8%</div><div class="kd up">na semana</div></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:18px 20px 6px;"><div class="rt"><h3>Mudanças que exigem decisão</h3><span class="pill gold">ordenado por impacto</span></div></div>
+    <div class="dg">
+      <div class="ic bad">!</div>
+      <div class="body"><div class="h">MXRF11 cortou o rendimento em 18%</div>
+        <div class="d">Distribuição caiu de <b>R$ 0,10</b> para <b>R$ 0,082</b> por cota. O DY que parecia 12,6% era sustentado por ganho de capital não recorrente — o sinal de <b>yield-trap</b> que apontamos em março se confirmou.</div>
+        <div class="act">Ver impacto na sua renda →</div></div>
+      <div class="when">há 2 dias</div>
+    </div>
+    <div class="dg">
+      <div class="ic warn">▲</div>
+      <div class="body"><div class="h">TAEE11 não é mais o ativo que você comprou</div>
+        <div class="d">Payout subiu de <b>72% → 96%</b> desde sua compra em jan/2024. A empresa está distribuindo quase todo o lucro — margem menor para crescer o provento. Sua tese de compra era <b>"CAGR 9% sustentável"</b>.</div>
+        <div class="act">Comparar tese original vs. hoje →</div></div>
+      <div class="when">há 4 dias</div>
+    </div>
+    <div class="dg">
+      <div class="ic good">↓</div>
+      <div class="body"><div class="h">BBAS3 entrou na sua zona de compra</div>
+        <div class="d">Caiu para <b>R$ 26,15</b>, agora <b>18,9% abaixo</b> do consenso dos 3 métodos. É a maior margem de segurança da sua watchlist. Piotroski 8/9, payout saudável de 40%.</div>
+        <div class="act">Incluir no próximo aporte →</div></div>
+      <div class="when">há 5 dias</div>
+    </div>
+    <div class="dg">
+      <div class="ic good">✓</div>
+      <div class="body"><div class="h">Realty Income anunciou o 111º aumento consecutivo</div>
+        <div class="d">Dividendo mensal subiu para <b>US$ 0,2695</b>. Sua posição de 120 cotas passa a render <b>US$ 32,34/mês</b> — R$ 175 líquidos após os 30% de IR retido na fonte.</div></div>
+      <div class="when">há 6 dias</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RENDA GARANTIDA ===== -->
+<div class="screen" id="garantido">
+  <div class="top"><div><div class="eye">Data-com já passou · valor anunciado</div><h1 class="pg">Renda garantida</h1></div></div>
+  <div class="insight">
+    <div class="ii">◈</div>
+    <div class="it"><h4>Isto não é projeção. É dinheiro já contratado.</h4><p>Você já garantiu o direito a estes proventos — a data-com passou e o valor foi anunciado. Só falta a data de pagamento chegar. <b>Nenhuma outra ferramenta separa fato de previsão.</b></p></div>
+    <div class="iv">R$ 1.910</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="rt"><h3>Já garantido · próximos 60 dias</h3><span class="pill pos">confirmado</span></div>
+      <table><thead><tr><th>Ativo</th><th>Valor</th><th>Pagamento</th><th>Líquido</th></tr></thead><tbody>
+        <tr><td><b>TAEE11</b></td><td class="num">R$ 596</td><td class="num">em 4 dias</td><td class="num" style="color:var(--pos)">R$ 596</td></tr>
+        <tr><td><b>HGLG11</b></td><td class="num">R$ 97</td><td class="num">em 9 dias</td><td class="num" style="color:var(--pos)">R$ 97</td></tr>
+        <tr><td><b>O</b></td><td class="num">US$ 32</td><td class="num">em 15 dias</td><td class="num" style="color:var(--gold-600)">US$ 22</td></tr>
+        <tr><td><b>BBAS3</b> (JCP)</td><td class="num">R$ 412</td><td class="num">em 21 dias</td><td class="num" style="color:var(--gold-600)">R$ 350</td></tr>
+        <tr><td><b>SCHD</b></td><td class="num">US$ 59</td><td class="num">em 22 dias</td><td class="num" style="color:var(--gold-600)">US$ 41</td></tr>
+      </tbody></table>
+      <div style="margin-top:12px;font-size:11px;color:var(--muted);">Líquido já considera 30% de IR retido nos EUA e 15% sobre JCP.</div>
+    </div>
+    <div class="card">
+      <div class="rt"><h3>Seus meses secos</h3><span class="pill neg">4 meses fracos</span></div>
+      <div class="months">
+        <div class="mo"><div class="mb"><div class="mf" style="height:55%"></div></div><div class="ml2">J</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:88%"></div></div><div class="ml2">F</div></div>
+        <div class="mo dry"><div class="mb"><div class="mf" style="height:14%"></div></div><div class="ml2">M</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:62%"></div></div><div class="ml2">A</div></div>
+        <div class="mo dry"><div class="mb"><div class="mf" style="height:18%"></div></div><div class="ml2">M</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:70%"></div></div><div class="ml2">J</div></div>
+        <div class="mo dry"><div class="mb"><div class="mf" style="height:16%"></div></div><div class="ml2">J</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:80%"></div></div><div class="ml2">A</div></div>
+        <div class="mo dry"><div class="mb"><div class="mf" style="height:12%"></div></div><div class="ml2">S</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:58%"></div></div><div class="ml2">O</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:66%"></div></div><div class="ml2">N</div></div>
+        <div class="mo"><div class="mb"><div class="mf" style="height:95%"></div></div><div class="ml2">D</div></div>
+      </div>
+      <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5;">Seus 3 maiores ativos pagam nos mesmos meses. <b style="color:var(--ink)">Março, maio, julho e setembro</b> rendem menos de R$ 250. Um FII com pagamento nesses meses suavizaria o ano.</div>
+      <div style="margin-top:12px;font-size:11.5px;color:var(--gold-600);font-weight:600;cursor:pointer;">Ver ativos que pagam nos meses secos →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FISCAL ===== -->
+<div class="screen" id="fiscal">
+  <div class="top"><div><div class="eye">Agosto/2026 · atualizado hoje</div><h1 class="pg">Realidade fiscal</h1></div></div>
+  <div class="ask" style="margin-bottom:20px;">
+    <div class="fiscal-hero">
+      <div>
+        <div class="fh-l">DARF deste mês</div>
+        <div class="fh-big" style="color:var(--pos)">R$ 0,00</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;">Você está dentro da isenção</div>
+      </div>
+      <div class="gauge">
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;">Vendas de ações no mês vs. isenção de R$ 20.000</div>
+        <div class="gtrack"><div class="gfill" style="width:41%"></div></div>
+        <div class="glbl"><span>R$ 8.200 vendidos</span><span>faltam R$ 11.800</span></div>
+      </div>
+    </div>
+    <div class="brk">
+      <div class="b2"><div class="l">Prejuízo acumulado</div><div class="v" style="color:var(--pos)">R$ 3.100</div><div class="n">disponível p/ compensar</div></div>
+      <div class="b2"><div class="l">IR retido nos EUA</div><div class="v" style="color:var(--neg)">R$ 88</div><div class="n">30% · não recuperável</div></div>
+      <div class="b2"><div class="l">JCP recebido</div><div class="v" style="color:var(--gold-600)">R$ 412</div><div class="n">15% já retido na fonte</div></div>
+      <div class="b2"><div class="l">Dividendos BR</div><div class="v" style="color:var(--pos)">R$ 693</div><div class="n">isentos</div></div>
+      <div class="b2"><div class="l">FII</div><div class="v" style="color:var(--pos)">R$ 97</div><div class="n">isento p/ pessoa física</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="rt"><h3>Bruto × líquido real</h3><span class="pill gold">todo mundo mostra o bruto</span></div>
+      <table><thead><tr><th>Ativo</th><th>DY anunciado</th><th>DY líquido real</th><th>Perda</th></tr></thead><tbody>
+        <tr><td><b>SCHD</b></td><td class="num strike">3,80%</td><td class="num" style="color:var(--gold-600)">2,66%</td><td class="num" style="color:var(--neg)">−30%</td></tr>
+        <tr><td><b>O</b></td><td class="num strike">5,90%</td><td class="num" style="color:var(--gold-600)">4,13%</td><td class="num" style="color:var(--neg)">−30%</td></tr>
+        <tr><td><b>BBAS3</b> (JCP)</td><td class="num strike">9,80%</td><td class="num" style="color:var(--gold-600)">8,33%</td><td class="num" style="color:var(--neg)">−15%</td></tr>
+        <tr><td><b>TAEE11</b></td><td class="num">8,40%</td><td class="num" style="color:var(--pos)">8,40%</td><td class="num" style="color:var(--pos)">0%</td></tr>
+        <tr><td><b>HGLG11</b></td><td class="num">8,10%</td><td class="num" style="color:var(--pos)">8,10%</td><td class="num" style="color:var(--pos)">0%</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="rt"><h3>Dólar ou real?</h3><span class="pill gold">comparação líquida</span></div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:16px;">Para o mesmo DY anunciado, o ativo brasileiro entrega mais no seu bolso — mas o americano diversifica moeda. A conta só fecha com os dois lados calculados.</div>
+      <div style="display:flex;gap:14px;">
+        <div style="flex:1;background:var(--paper2);border-radius:13px;padding:16px;">
+          <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;">REIT · O</div>
+          <div class="serif" style="font-size:24px;margin-top:6px;">4,13%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">líquido · 30% retido</div>
+        </div>
+        <div style="flex:1;background:var(--paper2);border-radius:13px;padding:16px;">
+          <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;">FII · HGLG11</div>
+          <div class="serif" style="font-size:24px;margin-top:6px;color:var(--pos);">8,10%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">líquido · isento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CARTEIRA ===== -->
+<div class="screen" id="carteira">
+  <div class="top"><div><div class="eye">Estado salvo</div><h1 class="pg">Minha carteira</h1></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="kl">Patrimônio</div><div class="kv serif">R$ 284.910</div><div class="kd up">↑ 17,9%</div></div>
+    <div class="kpi"><div class="kl">Renda líquida real</div><div class="kv serif">R$ 1.428</div><div class="kd up">após IR</div></div>
+    <div class="kpi"><div class="kl">Yield on cost</div><div class="kv serif">9,7%</div><div class="kd up">acima da meta</div></div>
+    <div class="kpi"><div class="kl">Abaixo do teto</div><div class="kv serif">26 / 34</div><div class="kd up">boa margem</div></div>
+  </div>
+  <div class="card">
+    <div class="rt"><h3>Posições</h3><span class="pill gold">BR + US · IR cross-border</span></div>
+    <table><thead><tr><th>Ativo</th><th>Qtd</th><th>PM</th><th>Atual</th><th>Consenso</th><th>Margem</th><th>DY líquido</th></tr></thead><tbody>
+      <tr><td><b>TAEE11</b></td><td class="num">420</td><td class="num">31,10</td><td class="num">34,00</td><td class="num">38,20</td><td class="num" style="color:var(--pos)">+12,4%</td><td class="num">8,40%</td></tr>
+      <tr><td><b>BBAS3</b></td><td class="num">600</td><td class="num">24,80</td><td class="num">26,15</td><td class="num">31,10</td><td class="num" style="color:var(--pos)">+18,9%</td><td class="num">8,33%</td></tr>
+      <tr><td><b>HGLG11</b></td><td class="num">90</td><td class="num">158,00</td><td class="num">176,10</td><td class="num">172,40</td><td class="num" style="color:var(--neg)">−2,1%</td><td class="num">8,10%</td></tr>
+      <tr><td><b>O</b></td><td class="num">120</td><td class="num">54,20</td><td class="num">57,90</td><td class="num">61,00</td><td class="num" style="color:var(--pos)">+5,4%</td><td class="num">4,13%</td></tr>
+      <tr><td><b>SCHD</b></td><td class="num">80</td><td class="num">26,10</td><td class="num">27,40</td><td class="num">29,50</td><td class="num" style="color:var(--pos)">+7,7%</td><td class="num">2,66%</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ===== AUDITORIA ===== -->
+<div class="screen" id="auditoria">
+  <div class="top"><div><div class="eye">Só nós sabemos seu histórico</div><h1 class="pg">Auditoria de decisões</h1></div></div>
+  <div class="insight">
+    <div class="ii">◈</div>
+    <div class="it"><h4>O que suas compras acima do teto custaram</h4><p>Em 24 meses você fez <b>7 compras</b> acima do consenso. Se tivesse esperado o preço voltar à zona de compra, teria <b>2.140 cotas a mais</b> pelo mesmo dinheiro — e <b>R$ 174/mês</b> de renda extra.</p></div>
+    <div class="iv">R$ 2.088</div>
+  </div>
+  <div class="card">
+    <div class="rt"><h3>Suas compras, revisitadas</h3><span class="pill gold">aprendizado, não julgamento</span></div>
+    <table><thead><tr><th>Data</th><th>Ativo</th><th>Preço pago</th><th>Consenso na data</th><th>Veredito</th><th>Custo</th></tr></thead><tbody>
+      <tr><td class="num">12/03/25</td><td><b>HGLG11</b></td><td class="num">R$ 181,00</td><td class="num">R$ 168,20</td><td><span class="pill neg">Acima do teto</span></td><td class="num" style="color:var(--neg)">−R$ 640</td></tr>
+      <tr><td class="num">08/01/25</td><td><b>MXRF11</b></td><td class="num">R$ 10,90</td><td class="num">R$ 10,10</td><td><span class="pill neg">Yield-trap</span></td><td class="num" style="color:var(--neg)">−R$ 412</td></tr>
+      <tr><td class="num">22/11/24</td><td><b>BBAS3</b></td><td class="num">R$ 24,80</td><td class="num">R$ 30,40</td><td><span class="pill pos">Ótima entrada</span></td><td class="num" style="color:var(--pos)">+R$ 3.360</td></tr>
+      <tr><td class="num">15/08/24</td><td><b>TAEE11</b></td><td class="num">R$ 31,10</td><td class="num">R$ 36,90</td><td><span class="pill pos">Ótima entrada</span></td><td class="num" style="color:var(--pos)">+R$ 2.436</td></tr>
+    </tbody></table>
+  </div>
+</div>
+</main>
+</div>
+
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('bl').classList.toggle('on',t==='light');document.getElementById('bd').classList.toggle('on',t==='dark');}
+document.querySelectorAll('.nl[data-s]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.nl').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(b.dataset.s).classList.add('active');window.scrollTo(0,0);}));
+
+function row(a,i,total){const val=Math.round(total*a.pct/100);
+return `<div class="alloc"><div class="rank">${i+1}</div>
+<div class="tkr"><div class="t">${a.tk}</div><div class="s">${a.nm}</div></div>
+<div class="bar-wrap"><div class="bar-bg"><div class="bar" style="width:${Math.min(100,a.pct*2.3)}%"></div></div><div class="reason">${a.r}</div></div>
+<div class="money"><div class="m serif">R$ ${val.toLocaleString('pt-BR')}</div><div class="q">${a.q}</div></div></div>`;}
+
+const RV={bola:[{tk:'BBAS3',nm:'Banco do Brasil',pct:45,r:'<b>DY 9,8%</b> e 18,9% abaixo do consenso · melhor composição',q:'19 cotas'},{tk:'KNIP11',nm:'Kinea Índices',pct:33,r:'<b>DY 11,2%</b> sem sinal de armadilha · paga mensal',q:'4 cotas'},{tk:'TAEE11',nm:'Taesa',pct:22,r:'CAGR 9,1% sustenta crescimento do provento',q:'7 units'}],
+equil:[{tk:'SCHD',nm:'Schwab US Dividend',pct:52,r:'Exterior <b>4pp abaixo</b> da meta · diversifica moeda',q:'2 cotas'},{tk:'BBAS3',nm:'Banco do Brasil',pct:33,r:'Ações BR <b>4pp abaixo</b> da meta',q:'14 cotas'},{tk:'TAEE11',nm:'Taesa',pct:15,r:'Completa o arredondamento sem gerar sobra',q:'5 units'}],
+mesmo:[{tk:'TAEE11',nm:'Taesa',pct:100,r:'Reinveste no próprio pagador · <b>juros sobre juros</b> puro',q:'33 units'}]};
+const AP={equilibrio:[{tk:'BBAS3',nm:'Banco do Brasil',pct:34,r:'Ações BR <b>4pp abaixo</b> da meta · margem +18,9%',q:'32 cotas'},{tk:'SCHD',nm:'Schwab US Dividend',pct:28,r:'Exterior <b>4pp abaixo</b> da meta',q:'4 cotas'},{tk:'TAEE11',nm:'Taesa',pct:22,r:'Abaixo do teto · CAGR 9,1%',q:'16 units'},{tk:'KNIP11',nm:'Kinea Índices',pct:16,r:'Único FII sem excesso de concentração',q:'4 cotas'}],
+renda:[{tk:'KNIP11',nm:'Kinea Índices',pct:38,r:'<b>DY 11,2%</b> · maior yield sem armadilha',q:'10 cotas'},{tk:'BBAS3',nm:'Banco do Brasil',pct:32,r:'<b>DY 9,8%</b> com payout de 40%',q:'30 cotas'},{tk:'TAEE11',nm:'Taesa',pct:20,r:'DY 8,4% acima do CDI',q:'14 units'},{tk:'O',nm:'Realty Income',pct:10,r:'DY mensal · previsibilidade',q:'1 cota'}],
+desconto:[{tk:'BBAS3',nm:'Banco do Brasil',pct:42,r:'<b>+18,9%</b> até o consenso · maior margem',q:'40 cotas'},{tk:'TAEE11',nm:'Taesa',pct:30,r:'<b>+12,4%</b> · 3 métodos concordam',q:'22 units'},{tk:'SCHD',nm:'Schwab US Dividend',pct:18,r:'+7,7% · desconto em dólar',q:'3 cotas'},{tk:'KNIP11',nm:'Kinea Índices',pct:10,r:'+7,2% até o consenso',q:'2 cotas'}]};
+const WD={fiscal:[{tk:'HGLG11',nm:'FII · isento de IR',pct:48,r:'FII para pessoa física é <b>isento</b> · e está acima do teto',q:'82 cotas'},{tk:'VALE3',nm:'Prejuízo acumulado',pct:32,r:'Usa <b>R$ 3.100</b> de prejuízo acumulado para compensar',q:'156 cotas'},{tk:'TAEE11',nm:'Dentro da isenção',pct:20,r:'Mantém venda de ações <b>abaixo de R$ 20 mil</b> no mês',q:'176 units'}],
+renda2:[{tk:'VALE3',nm:'Menor DY da carteira',pct:55,r:'DY 7,1% · <b>menor perda de renda</b> por real vendido',q:'268 cotas'},{tk:'HGLG11',nm:'Acima do teto',pct:30,r:'Está caro · vender aqui não sacrifica margem',q:'51 cotas'},{tk:'SCHD',nm:'DY líquido 2,66%',pct:15,r:'Após 30% de IR, é seu ativo de menor renda real',q:'30 cotas'}],
+caro:[{tk:'HGLG11',nm:'−2,1% vs. consenso',pct:60,r:'Único ativo <b>acima do teto</b> · realiza no melhor momento',q:'102 cotas'},{tk:'VALE3',nm:'−5,5% vs. consenso',pct:40,r:'Também acima do consenso dos 3 métodos',q:'195 cotas'}]};
+
+function amtOf(id,def){const e=document.getElementById(id);if(!e)return def;const v=e.value.replace(/[^\d]/g,'');return +v||def;}
+function draw(listId,data,key,total){document.getElementById(listId).innerHTML=data[key].map((a,i)=>row(a,i,total)).join('');}
+
+draw('rvlist',RV,'bola',1130);
+draw('aplist',AP,'equilibrio',2500);
+draw('wlist',WD,'fiscal',30000);
+
+document.querySelectorAll('#reinvestir .st').forEach(s=>s.addEventListener('click',()=>{
+  document.querySelectorAll('#reinvestir .st').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+  draw('rvlist',RV,s.dataset.k,1130);
+  document.getElementById('rv-sobra').textContent=s.dataset.k==='mesmo'?'R$ 8':'R$ 34';}));
+document.querySelectorAll('#aporte .st').forEach(s=>s.addEventListener('click',()=>{
+  document.querySelectorAll('#aporte .st').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+  draw('aplist',AP,s.dataset.k,amtOf('amt',2500));}));
+document.querySelectorAll('#retirar .st').forEach(s=>s.addEventListener('click',()=>{
+  document.querySelectorAll('#retirar .st').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+  draw('wlist',WD,s.dataset.k,amtOf('wamt',30000));}));
+const amt=document.getElementById('amt');
+amt.addEventListener('input',()=>draw('aplist',AP,document.querySelector('#aporte .st.on').dataset.k,amtOf('amt',2500)));
+amt.addEventListener('blur',()=>{amt.value='R$ '+amtOf('amt',2500).toLocaleString('pt-BR');});
+const wamt=document.getElementById('wamt');
+wamt.addEventListener('input',()=>draw('wlist',WD,document.querySelector('#retirar .st.on').dataset.k,amtOf('wamt',30000)));
+wamt.addEventListener('blur',()=>{wamt.value='R$ '+amtOf('wamt',30000).toLocaleString('pt-BR');});
+</script>
+</body>
+</html>
