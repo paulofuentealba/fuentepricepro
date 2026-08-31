@@ -50,3 +50,10 @@ export const SEC_EDGAR_FAILURE_TTL_MS = 5 * 60 * 1000;
  * Yahoo crumbs expire periodically and require renegotiation.
  */
 export const YAHOO_AUTH_TTL_MS = 30 * 60 * 1000;
+
+/**
+ * In-memory cache TTL for the HG Brasil USD/BRL exchange rate quote (5 minutes).
+ * Kept short like ASSET_CACHE_TTL_MS — FX fluctuates during market hours, unlike the
+ * once-a-day dividend records HG Brasil's dividends endpoint serves.
+ */
+export const HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS = 5 * 60 * 1000;

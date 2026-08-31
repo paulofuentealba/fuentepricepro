@@ -4,6 +4,7 @@ import {
   formatHgTicker,
   fetchHgBrasilDividends,
   enrichDividendPaymentDates,
+  fetchHgBrasilExchangeRate,
 } from "../hgBrasil.server";
 import * as httpModule from "../http.server";
 
@@ -168,6 +169,66 @@ describe("HG Brasil API Integration (hgBrasil.server.ts)", () => {
       const enriched = enrichDividendPaymentDates(existing, hgDividends);
       expect(enriched[0].paymentDate).toBe("2024-05-20");
       expect(enriched[1].paymentDate).toBe("2024-06-10"); // preserved
+    });
+  });
+
+  describe("fetchHgBrasilExchangeRate", () => {
+    // Ordered so only the LAST test populates the module-level cache — every earlier test
+    // exercises a failure path that never writes to it, avoiding cross-test cache pollution.
+    it("returns null gracefully when no API key is provided", async () => {
+      const result = await fetchHgBrasilExchangeRate("");
+      expect(result).toBeNull();
+    });
+
+    it("handles HTTP errors gracefully without throwing", async () => {
+      vi.spyOn(httpModule, "fetchWithTimeout").mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+      } as any);
+
+      const result = await fetchHgBrasilExchangeRate("invalid_key");
+      expect(result).toBeNull();
+    });
+
+    it("handles network errors gracefully without crashing", async () => {
+      vi.spyOn(httpModule, "fetchWithTimeout").mockRejectedValueOnce(
+        new Error("Network timeout after 4000ms"),
+      );
+
+      const result = await fetchHgBrasilExchangeRate("test_key");
+      expect(result).toBeNull();
+    });
+
+    it("returns null when the USDBRL entry or its quote.value is missing", async () => {
+      vi.spyOn(httpModule, "fetchWithTimeout").mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ results: [{ symbol: "EURBRL", quote: { value: 6.01 } }] }),
+      } as any);
+
+      const result = await fetchHgBrasilExchangeRate("test_key");
+      expect(result).toBeNull();
+    });
+
+    it("parses quote.value from the FOREX:USDBRL entry", async () => {
+      const mockResponse = {
+        results: [
+          {
+            ticker: "FOREX:USDBRL",
+            symbol: "USDBRL",
+            quote: { value: 5.1499, change_value: 0, change_percent: -0.0795 },
+          },
+        ],
+      };
+
+      vi.spyOn(httpModule, "fetchWithTimeout").mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockResponse,
+      } as any);
+
+      const result = await fetchHgBrasilExchangeRate("test_key");
+      expect(result).toBe(5.1499);
     });
   });
 });

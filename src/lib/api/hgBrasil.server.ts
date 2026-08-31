@@ -1,6 +1,6 @@
 import { fetchWithTimeout, UA } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
-import { HG_BRASIL_QUOTA_CACHE_TTL_MS } from "./cacheConfig.server";
+import { HG_BRASIL_QUOTA_CACHE_TTL_MS, HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS } from "./cacheConfig.server";
 
 export interface HgBrasilDividendItem {
   type: "Dividendo" | "JCP" | "Rendimento" | string;
@@ -205,4 +205,81 @@ export function enrichDividendPaymentDates<T extends { paymentDate?: string | nu
 
     return item;
   });
+}
+
+// -------- Exchange Rate (USD/BRL) --------
+
+interface ExchangeRateCacheEntry {
+  rate: number;
+  timestamp: number;
+}
+
+let exchangeRateCache: ExchangeRateCacheEntry | null = null;
+
+/**
+ * Fetches the live USD/BRL quote from HG Brasil's Finance v2 quotes endpoint
+ * (https://hgbrasil.com/docs/finance/currencies), using the FOREX:USDBRL ticker.
+ * Replaces the previous Yahoo Finance ("BRL=X") source, which was failing silently and
+ * falling back to a stale hardcoded constant with no visible warning.
+ *
+ * Returns null on any failure — the caller (fetchExchangeRatesFn) is responsible for
+ * falling back to EXCHANGE_RATE_FALLBACK, never this module.
+ */
+export async function fetchHgBrasilExchangeRate(apiKey?: string): Promise<number | null> {
+  const now = Date.now();
+  if (exchangeRateCache && now - exchangeRateCache.timestamp < HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS) {
+    return exchangeRateCache.rate;
+  }
+
+  const key = apiKey || (typeof process !== "undefined" ? process.env?.HGBRASIL_API_KEY : undefined);
+  if (!key) {
+    reportIngestionStatus("hgBrasil", "SKIPPED", "No HGBRASIL_API_KEY configured", "USDBRL");
+    return null;
+  }
+
+  const url = `https://api.hgbrasil.com/v2/finance/quotes?tickers=${encodeURIComponent("FOREX:USDBRL")}&key=${encodeURIComponent(key)}`;
+
+  try {
+    const res = await fetchWithTimeout(
+      url,
+      { headers: { "User-Agent": UA, Accept: "application/json" } },
+      4000,
+    );
+
+    if (!res.ok) {
+      reportIngestionStatus("hgBrasil", "FAILED", `HTTP ${res.status}`, "USDBRL");
+      return null;
+    }
+
+    const json = await res.json();
+
+    if (json.errors && Array.isArray(json.errors) && json.errors.length > 0) {
+      const firstError = json.errors[0];
+      reportIngestionStatus(
+        "hgBrasil",
+        "WARNING",
+        `API Error ${firstError.code || ""}: ${firstError.message || ""}`,
+        "USDBRL",
+      );
+      return null;
+    }
+
+    const results = json.results;
+    const usdEntry = Array.isArray(results)
+      ? results.find((r: any) => r?.symbol === "USDBRL" || r?.ticker === "FOREX:USDBRL")
+      : null;
+    const rate = usdEntry ? Number(usdEntry.quote?.value) : NaN;
+
+    if (!Number.isFinite(rate) || rate <= 0) {
+      reportIngestionStatus("hgBrasil", "WARNING", "Missing or invalid quote.value for USDBRL", "USDBRL");
+      return null;
+    }
+
+    exchangeRateCache = { rate, timestamp: now };
+    reportIngestionStatus("hgBrasil", "PASSED", `USDBRL quote: ${rate}`, "USDBRL");
+    return rate;
+  } catch (err: any) {
+    reportIngestionStatus("hgBrasil", "ERROR", err?.message || String(err), "USDBRL");
+    return null;
+  }
 }

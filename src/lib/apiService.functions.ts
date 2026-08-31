@@ -8,7 +8,7 @@ import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker } from "
 import { calculatePiotroskiFScore, type PiotroskiResult } from "./calculations";
 import { fetchCvmEnrichedFacts } from "./api/cvm.server";
 import { fetchNasdaqDividends } from "./api/nasdaq.server";
-import { fetchHgBrasilDividends } from "./api/hgBrasil.server";
+import { fetchHgBrasilDividends, fetchHgBrasilExchangeRate } from "./api/hgBrasil.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
 import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 
@@ -344,9 +344,9 @@ export const fetchExchangeRatesFn = createServerFn({ method: "GET" }).handler(
     // Fallback default in case of failure to prevent UI crashing
     const fallback = { USDBRL: EXCHANGE_RATE_FALLBACK };
     try {
-      const q = await fetchYahooQuote("BRL=X");
-      if (q && q.price > 0) {
-        return { USDBRL: q.price };
+      const rate = await fetchHgBrasilExchangeRate();
+      if (rate != null && rate > 0) {
+        return { USDBRL: rate };
       }
       return fallback;
     } catch {
