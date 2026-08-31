@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
+import { SnowballScenarioPanel } from "@/components/explore/SnowballScenarioPanel";
 
 export const Route = createFileRoute("/app/explore")({
   head: () => ({
@@ -103,6 +104,24 @@ export function ExplorarPage() {
 
         {tools.map((tool) => {
           const Icon = tool.icon;
+
+          if (tool.id === "snowball") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent-text">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-serif text-base font-medium text-foreground">{tool.label}</p>
+                    <p className="text-xs text-muted-foreground sm:text-sm">{tool.description}</p>
+                  </div>
+                </div>
+                <SnowballScenarioPanel />
+              </TabsContent>
+            );
+          }
+
           return (
             <TabsContent key={tool.id} value={tool.id} className="mt-6">
               <Card className="border-border">

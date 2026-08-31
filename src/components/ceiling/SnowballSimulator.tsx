@@ -6,10 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
-import type { Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
 import {
   ChartContainer,
@@ -21,21 +19,13 @@ import {
 import type { ChartConfig } from "@/components/ui/chart";
 import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
-import { useQuery } from "@tanstack/react-query";
-import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOptions";
-import { getPositionValue } from "@/lib/calculations";
-import { convertCurrency } from "@/lib/currency";
-import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { useSnowballBase } from "@/lib/useSnowballBase";
 
 const SNOWBALL_CHART_MARGIN = { top: 20, right: 10, left: -20, bottom: 0 };
 
 // chartConfig moved inside component to support translations
 
 export function SnowballSimulator() {
-  const { valuedItems: items } = useValuedPortfolio();
-  const { data: fx } = useQuery(exchangeRateQueryOptions());
-  const { data: macroRates } = useQuery(macroRatesQueryOptions());
-  const usdRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const { t, locale } = useI18n();
 
   const chartConfig = {
@@ -50,29 +40,10 @@ export function SnowballSimulator() {
   } satisfies ChartConfig;
 
   const { settings, updateSettings } = useUserSettings();
-  const currency = settings.displayCurrency;
+  const { currentTotal, blendedYield, currency } = useSnowballBase();
   const [monthlyContribution, setMonthlyContribution] = useState<number>(1000);
   const [years, setYears] = useState<number>(10);
   const [reinvest, setReinvest] = useState<boolean>(true);
-
-  const { currentTotal, blendedYield } = useMemo(() => {
-    let totalValue = 0;
-    let totalAnnualDividend = 0;
-
-    for (const item of items) {
-      if (item.isClosedPosition || !item.quantity || item.quantity <= 0) continue;
-      const itemValue = getPositionValue(item, macroRates);
-      const convertedValue = convertCurrency(itemValue, item.currency, currency, usdRate);
-      const itemDividend = (item.annualDividend || 0) * item.quantity;
-      const convertedDividend = convertCurrency(itemDividend, item.currency, currency, usdRate);
-
-      totalValue += convertedValue;
-      totalAnnualDividend += convertedDividend;
-    }
-
-    const yieldPct = totalValue > 0 ? totalAnnualDividend / totalValue : 0.08; // Default to 8% if empty
-    return { currentTotal: totalValue, blendedYield: yieldPct };
-  }, [items, currency, macroRates, usdRate]);
 
   const projection = useMemo(() => {
     let balance = currentTotal;
