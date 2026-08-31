@@ -22,9 +22,7 @@ import { formatCurrency, displayTicker } from "@/lib/formatters";
 import { compactWithSymbol } from "@/components/ceiling/cashflow/CashFlowSummary";
 
 const COLOR_RECEIVED = "var(--success)";
-const COLOR_PROJECTED_LEGACY = "var(--accent)";
 const COLOR_GRID = "var(--chart-grid)";
-const COLOR_MUTED = "var(--muted)";
 const COLOR_INVESTED = "var(--chart-1)";
 const UPCOMING_WINDOW_DAYS = 60;
 
@@ -241,9 +239,22 @@ function IncomePage() {
           <div className="mt-4 h-[110px]">
             <ChartContainer config={{}} className="h-full w-full">
               <BarChart data={calendarBuckets} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="weakMonthsBarFill" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="var(--accent)" />
+                    <stop offset="100%" stopColor="var(--accent-text)" />
+                  </linearGradient>
+                  <linearGradient id="weakMonthsBarFillDry" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="var(--destructive)" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="var(--destructive)" />
+                  </linearGradient>
+                </defs>
                 <Bar dataKey="amount" radius={[4, 4, 0, 0]} maxBarSize={22}>
                   {calendarBuckets.map((_, i) => (
-                    <Cell key={i} fill={weakMonths.weakMonthIndexes.includes(i) ? COLOR_MUTED : COLOR_PROJECTED_LEGACY} />
+                    <Cell
+                      key={i}
+                      fill={weakMonths.weakMonthIndexes.includes(i) ? "url(#weakMonthsBarFillDry)" : "url(#weakMonthsBarFill)"}
+                    />
                   ))}
                 </Bar>
                 <XAxis
