@@ -1,3 +1,4 @@
+export { resolveReasonText } from "@/lib/askEngine/resolveReasonText";
 export * from "./types";
 export * from "./simulateSaleTax";
 export * from "./engine";
