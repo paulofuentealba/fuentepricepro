@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { PlusCircle } from "lucide-react";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
@@ -13,7 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { convertCurrency } from "@/lib/currency";
 import { useI18n } from "@/lib/i18n-provider";
-import { NewContributionDialog } from "./NewContributionDialog";
 
 /**
  * "Horizonte FI" — elemento hero de assinatura da v2 (Horizonte).
@@ -182,7 +181,7 @@ export function HorizonteHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const [, forceRedraw] = useState(0);
-  const [showContributionDialog, setShowContributionDialog] = useState(false);
+  const navigate = useNavigate();
 
   // Quando a meta de gastos mensais não está configurada, coveragePercent
   // é forçado a 0 por definição (não há meta para comparar a renda) — isso
@@ -310,16 +309,6 @@ export function HorizonteHero() {
       ? t.home.ariaConfigureGoal.replace("{{capital}}", capitalLabel)
       : t.home.ariaProgress.replace("{{percent}}", coveragePercent.toFixed(0));
 
-  // NewContributionDialog is rendered exactly once, at a stable position in
-  // the tree, regardless of which branch below is active. Adding the first
-  // asset flips `hasNoAssets` mid-flow (the ticker search step already
-  // creates the watchlist item) — if the dialog lived inside each
-  // conditional branch it would unmount/remount when that flip happens,
-  // losing its in-progress state and dropping back to the search step.
-  const contributionDialog = (
-    <NewContributionDialog open={showContributionDialog} onOpenChange={setShowContributionDialog} />
-  );
-
   const content = hasNoAssets ? (
     <div className="w-full flex flex-col gap-2 rounded-xl bg-card border border-border p-6">
       <span className="text-xs font-display font-medium uppercase tracking-widest text-muted-foreground">
@@ -335,7 +324,7 @@ export function HorizonteHero() {
         <Button
           size="sm"
           className="mt-2 gap-1.5"
-          onClick={() => setShowContributionDialog(true)}
+          onClick={() => navigate({ to: "/app/add-asset" })}
         >
           <PlusCircle className="h-4 w-4" />
           {t.home.registerContribution}
@@ -392,7 +381,7 @@ export function HorizonteHero() {
           <Button
             size="sm"
             className="gap-1.5"
-            onClick={() => setShowContributionDialog(true)}
+            onClick={() => navigate({ to: "/app/add-asset" })}
           >
             <PlusCircle className="h-4 w-4" />
             {t.home.registerContribution}
@@ -434,10 +423,5 @@ export function HorizonteHero() {
     </div>
   );
 
-  return (
-    <>
-      {content}
-      {contributionDialog}
-    </>
-  );
+  return <>{content}</>;
 }

@@ -21,16 +21,13 @@ vi.mock("@/lib/transactions", () => ({
   useTransactions: () => mockUseTransactions(),
 }));
 
-vi.mock("@/components/horizonte/NewContributionDialog", () => ({
-  NewContributionDialog: () => null,
-}));
-
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to, ...props }: any) => (
     <a href={to} {...props}>
       {children}
     </a>
   ),
+  useNavigate: () => vi.fn(),
 }));
 
 function renderHero() {
