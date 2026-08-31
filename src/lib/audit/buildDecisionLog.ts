@@ -1,0 +1,183 @@
+import type { Transaction } from "@/lib/transactions";
+import type { WatchlistItem } from "@/lib/watchlist";
+import type { AssetType, Currency } from "@/lib/domain";
+import { calculateRealizedGains } from "@/lib/tax/br/capitalGains";
+import { computeMarginalTaxBRL, resolveWithdrawTaxTrack } from "@/lib/withdrawEngine";
+import type { WithdrawTaxTrack } from "@/lib/withdrawEngine";
+import type { DecisionLogEntry, DecisionLogSummary, DecisionVerdict } from "./types";
+
+const GREAT_ENTRY_MARGIN_THRESHOLD = 10; // % — matches the prototype's BBAS3/TAEE11 examples
+
+function resolveBuyVerdict(marginAtDecision: number | null, yieldTrapAtDecision: boolean): DecisionVerdict {
+  if (marginAtDecision == null) return "no_data";
+  if (yieldTrapAtDecision) return "yield_trap";
+  if (marginAtDecision < 0) return "above_ceiling";
+  if (marginAtDecision >= GREAT_ENTRY_MARGIN_THRESHOLD) return "great_entry";
+  return "fair_entry";
+}
+
+function resolveSellVerdict(gain: number | null): DecisionVerdict {
+  if (gain == null || Math.abs(gain) < 0.005) return "neutral";
+  return gain > 0 ? "realized_gain" : "realized_loss";
+}
+
+/**
+ * Pure function building the full Decision Log from real transaction history — no separate
+ * write path. Buys reuse the ThesisSnapshot already frozen at confirmation time (by
+ * TransactionsPanel.tsx / transactionPersistence.ts); sells reconstruct their exact marginal
+ * capital-gains tax by replaying the whole history chronologically per tax track, reusing
+ * `computeMarginalTaxBRL` from the Withdraw Engine (Regra 1 — never a second tax implementation).
+ *
+ * FX caveat: historical exchange rates at each transaction's own date aren't tracked anywhere in
+ * this app, so USD amounts are converted to BRL at the CURRENT rate for every entry, matching the
+ * same simplification already used elsewhere (buildTaxContext.totalNetUsBrl). Older USD entries'
+ * BRL totals will drift from what was actually paid/received in BRL terms on that day.
+ */
+export function buildDecisionLog(
+  transactions: Transaction[],
+  watchlistItems: WatchlistItem[],
+  fxRate: number,
+): DecisionLogSummary {
+  const assetTypeByTicker = new Map<string, AssetType>();
+  const currencyByTicker = new Map<string, Currency>();
+  const nameByTicker = new Map<string, string>();
+  for (const item of watchlistItems) {
+    const ticker = item.ticker.toUpperCase();
+    assetTypeByTicker.set(ticker, item.type);
+    currencyByTicker.set(ticker, item.currency);
+    nameByTicker.set(ticker, item.name);
+  }
+
+  const sortedTxs = [...transactions]
+    .filter((tx) => tx.type === "buy" || tx.type === "sell")
+    .sort((a, b) => a.date - b.date);
+
+  // calculateRealizedGains iterates transactions in this exact sorted order and pushes exactly
+  // one RealizedGainEvent per "sell" tx, in order — safe to zip 1:1 with the sorted sell txs.
+  const realizedEvents = calculateRealizedGains(sortedTxs);
+  const sellTxs = sortedTxs.filter((tx) => tx.type === "sell");
+
+  const eventsByTrack = new Map<WithdrawTaxTrack, typeof realizedEvents>();
+  const entries: DecisionLogEntry[] = [];
+
+  for (let i = 0; i < sellTxs.length; i++) {
+    const tx = sellTxs[i];
+    const event = realizedEvents[i];
+    if (!event) continue;
+
+    const ticker = tx.ticker.toUpperCase();
+    const assetType = assetTypeByTicker.get(ticker);
+    const currency = currencyByTicker.get(ticker) ?? "BRL";
+    const track = resolveWithdrawTaxTrack(assetType, currency);
+
+    let taxBRL = 0;
+    if (track) {
+      const priorEventsInTrack = eventsByTrack.get(track) || [];
+      taxBRL = computeMarginalTaxBRL(track, { ...event, assetType }, priorEventsInTrack, {
+        realizedGainEvents: [],
+        assetTypeByTicker,
+        currencyByTicker,
+        fxRate,
+      });
+      eventsByTrack.set(track, [...priorEventsInTrack, { ...event, assetType }]);
+    }
+
+    const feesNative = tx.fees ?? 0;
+    const amountNative = tx.pricePerShare * tx.quantity;
+    const isUsd = currency === "USD";
+    const amountBRL = isUsd ? amountNative * fxRate : amountNative;
+    const feesBRL = isUsd ? feesNative * fxRate : feesNative;
+
+    entries.push({
+      id: tx.id,
+      ticker,
+      name: nameByTicker.get(ticker) || ticker,
+      assetType: assetType || "STOCK_BR",
+      currency,
+      kind: "sell",
+      date: tx.date,
+      quantity: tx.quantity,
+      pricePerShare: tx.pricePerShare,
+      consensusAtDecision: null,
+      marginAtDecision: null,
+      yieldTrapAtDecision: false,
+      realizedGainNative: event.gain,
+      verdict: resolveSellVerdict(event.gain),
+      effectNative: event.gain,
+      feesNative,
+      taxBRL,
+      feesBRL,
+      totalBRL: Number((amountBRL - feesBRL - taxBRL).toFixed(2)),
+    });
+  }
+
+  for (const tx of sortedTxs) {
+    if (tx.type !== "buy") continue;
+    const ticker = tx.ticker.toUpperCase();
+    const assetType = assetTypeByTicker.get(ticker);
+    const currency = currencyByTicker.get(ticker) ?? "BRL";
+    const snapshot = tx.thesisSnapshot;
+    const consensusAtDecision = snapshot?.consensusPrice ?? null;
+    const marginAtDecision = snapshot?.safetyMarginVsConsensus ?? null;
+    const yieldTrapAtDecision = snapshot?.isYieldTrap === true;
+
+    const effectNative =
+      consensusAtDecision != null ? (consensusAtDecision - tx.pricePerShare) * tx.quantity : 0;
+
+    const feesNative = tx.fees ?? 0;
+    const amountNative = tx.pricePerShare * tx.quantity;
+    const isUsd = currency === "USD";
+    const amountBRL = isUsd ? amountNative * fxRate : amountNative;
+    const feesBRL = isUsd ? feesNative * fxRate : feesNative;
+
+    entries.push({
+      id: tx.id,
+      ticker,
+      name: nameByTicker.get(ticker) || ticker,
+      assetType: assetType || "STOCK_BR",
+      currency,
+      kind: "buy",
+      date: tx.date,
+      quantity: tx.quantity,
+      pricePerShare: tx.pricePerShare,
+      consensusAtDecision,
+      marginAtDecision,
+      yieldTrapAtDecision,
+      realizedGainNative: null,
+      verdict: resolveBuyVerdict(marginAtDecision, yieldTrapAtDecision),
+      effectNative,
+      feesNative,
+      taxBRL: 0,
+      feesBRL,
+      totalBRL: Number((amountBRL + feesBRL).toFixed(2)),
+    });
+  }
+
+  entries.sort((a, b) => b.date - a.date);
+
+  const overpaid = entries.filter(
+    (e) => e.kind === "buy" && (e.verdict === "above_ceiling" || e.verdict === "yield_trap"),
+  );
+  const overpaidTotalBRL = Number(
+    overpaid.reduce((sum, e) => sum + Math.max(0, -(e.currency === "USD" ? e.effectNative * fxRate : e.effectNative)), 0).toFixed(2),
+  );
+
+  const totalFeesBRL = Number(entries.reduce((sum, e) => sum + e.feesBRL, 0).toFixed(2));
+  const totalTaxBRL = Number(entries.reduce((sum, e) => sum + e.taxBRL, 0).toFixed(2));
+  const totalBoughtBRL = Number(
+    entries.filter((e) => e.kind === "buy").reduce((sum, e) => sum + e.totalBRL, 0).toFixed(2),
+  );
+  const totalSoldNetBRL = Number(
+    entries.filter((e) => e.kind === "sell").reduce((sum, e) => sum + e.totalBRL, 0).toFixed(2),
+  );
+
+  return {
+    entries,
+    overpaidCount: overpaid.length,
+    overpaidTotalBRL,
+    totalFeesBRL,
+    totalTaxBRL,
+    totalBoughtBRL,
+    totalSoldNetBRL,
+  };
+}
