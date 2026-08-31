@@ -25,6 +25,48 @@ function makeWatchlistItem(overrides: Partial<WatchlistItem>): WatchlistItem {
   };
 }
 
+describe("buildDecisionLog: per-row currency stays native (never auto-converted to BRL)", () => {
+  it("keeps a USD stock's price/fee/tax/total entirely in USD regardless of fxRate", () => {
+    const tx: Transaction = {
+      id: "tx-aapl",
+      ticker: "AAPL",
+      type: "buy",
+      date: new Date(2025, 4, 1).getTime(),
+      quantity: 10,
+      pricePerShare: 180,
+      fees: 1.5,
+      thesisSnapshot: {
+        consensusPrice: 190,
+        bazinPrice: null,
+        grahamPrice: null,
+        gordonPrice: null,
+        purchasePrice: 180,
+        safetyMarginVsConsensus: ((190 - 180) / 180) * 100,
+        payoutRatio: 15,
+        dividendYield: 0.5,
+        dividendCagr5y: null,
+        piotroskiScore: null,
+        isYieldTrap: false,
+        valuationVersion: "fuente-v1",
+        capturedAt: Date.now(),
+      },
+    };
+    const watchlist = [
+      makeWatchlistItem({ ticker: "AAPL", type: "STOCK_US", currency: "USD", name: "Apple Inc." }),
+    ];
+
+    // fxRate is deliberately large (5.4) — if a per-row value were wrongly multiplied by it,
+    // these assertions would fail loudly.
+    const summary = buildDecisionLog([tx], watchlist, 5.4);
+    const entry = summary.entries[0];
+
+    expect(entry.currency).toBe("USD");
+    expect(entry.pricePerShare).toBe(180);
+    expect(entry.feesNative).toBe(1.5);
+    expect(entry.totalNative).toBeCloseTo(180 * 10 + 1.5, 2); // still USD, not R$-scaled
+  });
+});
+
 describe("buildDecisionLog: buys (reads Transaction.thesisSnapshot)", () => {
   it("marks a purchase above consensus as above_ceiling with a negative effect", () => {
     const tx: Transaction = {
@@ -58,9 +100,9 @@ describe("buildDecisionLog: buys (reads Transaction.thesisSnapshot)", () => {
 
     expect(entry.verdict).toBe("above_ceiling");
     expect(entry.effectNative).toBeCloseTo((168.2 - 181.0) * 50, 2); // -640
-    expect(entry.taxBRL).toBe(0);
-    expect(entry.feesBRL).toBe(5);
-    expect(entry.totalBRL).toBeCloseTo(181.0 * 50 + 5, 2);
+    expect(entry.taxNative).toBe(0);
+    expect(entry.feesNative).toBe(5);
+    expect(entry.totalNative).toBeCloseTo(181.0 * 50 + 5, 2);
     expect(summary.overpaidCount).toBe(1);
     expect(summary.overpaidTotalBRL).toBeCloseTo(640, 2);
   });
@@ -173,8 +215,8 @@ describe("buildDecisionLog: sells (real marginal tax, chronological replay)", ()
     const summary = buildDecisionLog([buy, sell1, sell2], [makeWatchlistItem({ ticker: "BBAS3" })], 5);
     const sellEntries = summary.entries.filter((e) => e.kind === "sell").sort((a, b) => a.date - b.date);
 
-    expect(sellEntries[0].taxBRL).toBe(0); // alone, within exemption
-    expect(sellEntries[1].taxBRL).toBeGreaterThan(0); // this one tips the month over 20k
+    expect(sellEntries[0].taxNative).toBe(0); // alone, within exemption
+    expect(sellEntries[1].taxNative).toBeGreaterThan(0); // this one tips the month over 20k
   });
 
   it("realized gain/loss verdict reflects the actual sale outcome", () => {

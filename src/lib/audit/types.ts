@@ -38,14 +38,17 @@ export interface DecisionLogEntry {
    * the position's native currency. */
   effectNative: number;
   feesNative: number;
-  /** Marginal capital-gains tax attributable to this specific sale (BRL), computed via the same
-   * SSOT engine as the Withdraw screen replayed across full transaction history. Always 0 for
-   * buys — no capital-gains/purchase tax on BR equity/fund purchases (IOF de câmbio on USD buys
-   * is out of scope for v1, see plan notes). */
-  taxBRL: number;
-  feesBRL: number;
-  /** All-in total in BRL: cost desembolsado (buy) or líquido recebido (sell). */
-  totalBRL: number;
+  /** Marginal capital-gains tax attributable to this specific sale, in the position's OWN
+   * currency (never converted for per-row display — matches AskScreen's convention: per-asset
+   * amounts stay native, only aggregate summaries convert). Computed via the same SSOT engine as
+   * the Withdraw screen replayed across full transaction history, then converted back from its
+   * internal BRL unit to native currency for display. Always 0 for buys — no capital-gains/
+   * purchase tax on BR equity/fund purchases (IOF de câmbio on USD buys is out of scope for v1).
+   */
+  taxNative: number;
+  /** All-in total in the position's OWN currency: cost desembolsado (buy) or líquido recebido
+   * (sell). Never converted — a USD position's total stays in USD. */
+  totalNative: number;
 }
 
 export interface DecisionLogSummary {

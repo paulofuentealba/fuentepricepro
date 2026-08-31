@@ -47,40 +47,42 @@ function EffectValue({ value, currency }: { value: number; currency: "BRL" | "US
 function DecisionRow({ entry, t, locale }: { entry: DecisionLogEntry; t: any; locale: Locale }) {
   return (
     <tr className="border-b border-dashed border-border/40 last:border-b-0">
-      <td className="whitespace-nowrap py-2.5 pr-4 font-mono text-[12px] text-muted-foreground">
+      <td className="whitespace-nowrap py-2.5 pr-3 font-mono text-[11px] text-muted-foreground">
         {new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "short" }).format(entry.date)}
       </td>
-      <td className="py-2.5 pr-4">
-        <div className="font-mono text-[13px] font-semibold text-foreground">{displayTicker(entry.ticker)}</div>
+      <td className="py-2.5 pr-3">
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[12.5px] font-semibold text-foreground">{displayTicker(entry.ticker)}</span>
+          <StatusBadge variant={entry.kind === "buy" ? "default" : "gold"} className="px-1.5 py-0 text-[9px]">
+            {entry.kind === "buy" ? t.auditScreen?.buyLabel || "Compra" : t.auditScreen?.sellLabel || "Venda"}
+          </StatusBadge>
+        </div>
         <div className="truncate text-[10px] text-muted-foreground">{entry.name}</div>
       </td>
-      <td className="py-2.5 pr-4">
-        <StatusBadge variant={entry.kind === "buy" ? "default" : "gold"}>
-          {entry.kind === "buy" ? t.auditScreen?.buyLabel || "Compra" : t.auditScreen?.sellLabel || "Venda"}
-        </StatusBadge>
+      <td className="whitespace-nowrap py-2.5 pr-3 text-right font-mono text-[12px]">
+        <div className="text-foreground">{formatCurrency(entry.pricePerShare, entry.currency, locale)}</div>
+        {entry.consensusAtDecision != null && (
+          <div className="text-[10px] text-muted-foreground">
+            {t.auditScreen?.consensusInline || "consenso"} {formatCurrency(entry.consensusAtDecision, entry.currency, locale)}
+          </div>
+        )}
       </td>
-      <td className="whitespace-nowrap py-2.5 pr-4 text-right font-mono text-[12.5px] text-foreground">
-        {formatCurrency(entry.pricePerShare, entry.currency, locale)}
-      </td>
-      <td className="whitespace-nowrap py-2.5 pr-4 text-right font-mono text-[12.5px] text-muted-foreground">
-        {entry.consensusAtDecision != null
-          ? formatCurrency(entry.consensusAtDecision, entry.currency, locale)
-          : "—"}
-      </td>
-      <td className="whitespace-nowrap py-2.5 pr-4">
+      <td className="whitespace-nowrap py-2.5 pr-3">
         <VerdictPill verdict={entry.verdict} t={t} />
       </td>
-      <td className="whitespace-nowrap py-2.5 pr-4 text-right font-mono text-[12.5px]">
+      <td className="whitespace-nowrap py-2.5 pr-3 text-right font-mono text-[12px]">
         <EffectValue value={entry.effectNative} currency={entry.currency} />
       </td>
-      <td className="whitespace-nowrap py-2.5 pr-4 text-right font-mono text-[12.5px] text-muted-foreground">
-        {formatCurrency(entry.feesBRL, "BRL", locale)}
+      <td className="whitespace-nowrap py-2.5 pr-3 text-right font-mono text-[11px] text-muted-foreground">
+        <div>{formatCurrency(entry.feesNative, entry.currency, locale)}</div>
+        {entry.taxNative > 0 && (
+          <div>
+            {t.auditScreen?.taxInline || "imp."} {formatCurrency(entry.taxNative, entry.currency, locale)}
+          </div>
+        )}
       </td>
-      <td className="whitespace-nowrap py-2.5 pr-4 text-right font-mono text-[12.5px] text-muted-foreground">
-        {entry.taxBRL > 0 ? formatCurrency(entry.taxBRL, "BRL", locale) : "—"}
-      </td>
-      <td className="whitespace-nowrap py-2.5 text-right font-mono text-[12.5px] font-semibold text-foreground">
-        {formatCurrency(entry.totalBRL, "BRL", locale)}
+      <td className="whitespace-nowrap py-2.5 text-right font-mono text-[12px] font-semibold text-foreground">
+        {formatCurrency(entry.totalNative, entry.currency, locale)}
       </td>
     </tr>
   );
@@ -177,18 +179,15 @@ export function AuditScreen({ summary, isLoading = false }: AuditScreenProps) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-[12.5px]">
+            <table className="w-full min-w-[600px] text-[12.5px]">
               <thead>
                 <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <th className="pb-2 pr-4 text-left font-display font-semibold">{t.auditScreen?.dateHeader || "Data"}</th>
-                  <th className="pb-2 pr-4 text-left font-display font-semibold">{t.auditScreen?.assetHeader || "Ativo"}</th>
-                  <th className="pb-2 pr-4 text-left font-display font-semibold">{t.auditScreen?.operationHeader || "Operação"}</th>
-                  <th className="pb-2 pr-4 text-right font-display font-semibold">{t.auditScreen?.priceHeader || "Preço"}</th>
-                  <th className="pb-2 pr-4 text-right font-display font-semibold">{t.auditScreen?.consensusHeader || "Consenso na data"}</th>
-                  <th className="pb-2 pr-4 text-left font-display font-semibold">{t.auditScreen?.verdictHeader || "Veredito"}</th>
-                  <th className="pb-2 pr-4 text-right font-display font-semibold">{t.auditScreen?.effectHeader || "Efeito"}</th>
-                  <th className="pb-2 pr-4 text-right font-display font-semibold">{t.auditScreen?.feesHeader || "Taxa"}</th>
-                  <th className="pb-2 pr-4 text-right font-display font-semibold">{t.auditScreen?.taxHeader || "Imposto"}</th>
+                  <th className="pb-2 pr-3 text-left font-display font-semibold">{t.auditScreen?.dateHeader || "Data"}</th>
+                  <th className="pb-2 pr-3 text-left font-display font-semibold">{t.auditScreen?.assetHeader || "Ativo"}</th>
+                  <th className="pb-2 pr-3 text-right font-display font-semibold">{t.auditScreen?.priceHeader || "Preço"}</th>
+                  <th className="pb-2 pr-3 text-left font-display font-semibold">{t.auditScreen?.verdictHeader || "Veredito"}</th>
+                  <th className="pb-2 pr-3 text-right font-display font-semibold">{t.auditScreen?.effectHeader || "Efeito"}</th>
+                  <th className="pb-2 pr-3 text-right font-display font-semibold">{t.auditScreen?.feesTaxHeader || "Taxa/Imp."}</th>
                   <th className="pb-2 text-right font-display font-semibold">{t.auditScreen?.totalHeader || "Total"}</th>
                 </tr>
               </thead>
