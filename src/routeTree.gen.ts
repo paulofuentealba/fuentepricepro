@@ -34,6 +34,7 @@ import { Route as AppReinvestirRouteImport } from './routes/app/reinvestir'
 import { Route as AppNewsRouteImport } from './routes/app/news'
 import { Route as AppMyportfolioRouteImport } from './routes/app/myportfolio'
 import { Route as AppIncomeRouteImport } from './routes/app/income'
+import { Route as AppImportBrokerNoteRouteImport } from './routes/app/import-broker-note'
 import { Route as AppGoalsRouteImport } from './routes/app/goals'
 import { Route as AppGlobalradarRouteImport } from './routes/app/globalradar'
 import { Route as AppExploreRouteImport } from './routes/app/explore'
@@ -41,6 +42,7 @@ import { Route as AppDocsRouteImport } from './routes/app/docs'
 import { Route as AppContributionplanRouteImport } from './routes/app/contributionplan'
 import { Route as AppComparatorRouteImport } from './routes/app.comparator'
 import { Route as AppAuditRouteImport } from './routes/app/audit'
+import { Route as AppAddAssetRouteImport } from './routes/app/add-asset'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -168,6 +170,11 @@ const AppIncomeRoute = AppIncomeRouteImport.update({
   path: '/income',
   getParentRoute: () => AppRoute,
 } as any)
+const AppImportBrokerNoteRoute = AppImportBrokerNoteRouteImport.update({
+  id: '/import-broker-note',
+  path: '/import-broker-note',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGoalsRoute = AppGoalsRouteImport.update({
   id: '/goals',
   path: '/goals',
@@ -203,6 +210,11 @@ const AppAuditRoute = AppAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAddAssetRoute = AppAddAssetRouteImport.update({
+  id: '/add-asset',
+  path: '/add-asset',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -216,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
+  '/app/add-asset': typeof AppAddAssetRoute
   '/app/audit': typeof AppAuditRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/contributionplan': typeof AppContributionplanRoute
@@ -223,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/app/explore': typeof AppExploreRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/goals': typeof AppGoalsRoute
+  '/app/import-broker-note': typeof AppImportBrokerNoteRoute
   '/app/income': typeof AppIncomeRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/news': typeof AppNewsRoute
@@ -248,6 +262,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
+  '/app/add-asset': typeof AppAddAssetRoute
   '/app/audit': typeof AppAuditRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/contributionplan': typeof AppContributionplanRoute
@@ -255,6 +270,7 @@ export interface FileRoutesByTo {
   '/app/explore': typeof AppExploreRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/goals': typeof AppGoalsRoute
+  '/app/import-broker-note': typeof AppImportBrokerNoteRoute
   '/app/income': typeof AppIncomeRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/news': typeof AppNewsRoute
@@ -283,6 +299,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/subscription-terms': typeof SubscriptionTermsRoute
   '/terms': typeof TermsRoute
+  '/app/add-asset': typeof AppAddAssetRoute
   '/app/audit': typeof AppAuditRoute
   '/app/comparator': typeof AppComparatorRoute
   '/app/contributionplan': typeof AppContributionplanRoute
@@ -290,6 +307,7 @@ export interface FileRoutesById {
   '/app/explore': typeof AppExploreRoute
   '/app/globalradar': typeof AppGlobalradarRoute
   '/app/goals': typeof AppGoalsRoute
+  '/app/import-broker-note': typeof AppImportBrokerNoteRoute
   '/app/income': typeof AppIncomeRoute
   '/app/myportfolio': typeof AppMyportfolioRoute
   '/app/news': typeof AppNewsRoute
@@ -319,6 +337,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscription-terms'
     | '/terms'
+    | '/app/add-asset'
     | '/app/audit'
     | '/app/comparator'
     | '/app/contributionplan'
@@ -326,6 +345,7 @@ export interface FileRouteTypes {
     | '/app/explore'
     | '/app/globalradar'
     | '/app/goals'
+    | '/app/import-broker-note'
     | '/app/income'
     | '/app/myportfolio'
     | '/app/news'
@@ -351,6 +371,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscription-terms'
     | '/terms'
+    | '/app/add-asset'
     | '/app/audit'
     | '/app/comparator'
     | '/app/contributionplan'
@@ -358,6 +379,7 @@ export interface FileRouteTypes {
     | '/app/explore'
     | '/app/globalradar'
     | '/app/goals'
+    | '/app/import-broker-note'
     | '/app/income'
     | '/app/myportfolio'
     | '/app/news'
@@ -385,6 +407,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/subscription-terms'
     | '/terms'
+    | '/app/add-asset'
     | '/app/audit'
     | '/app/comparator'
     | '/app/contributionplan'
@@ -392,6 +415,7 @@ export interface FileRouteTypes {
     | '/app/explore'
     | '/app/globalradar'
     | '/app/goals'
+    | '/app/import-broker-note'
     | '/app/income'
     | '/app/myportfolio'
     | '/app/news'
@@ -600,6 +624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIncomeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/import-broker-note': {
+      id: '/app/import-broker-note'
+      path: '/import-broker-note'
+      fullPath: '/app/import-broker-note'
+      preLoaderRoute: typeof AppImportBrokerNoteRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/goals': {
       id: '/app/goals'
       path: '/goals'
@@ -649,10 +680,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/add-asset': {
+      id: '/app/add-asset'
+      path: '/add-asset'
+      fullPath: '/app/add-asset'
+      preLoaderRoute: typeof AppAddAssetRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAddAssetRoute: typeof AppAddAssetRoute
   AppAuditRoute: typeof AppAuditRoute
   AppComparatorRoute: typeof AppComparatorRoute
   AppContributionplanRoute: typeof AppContributionplanRoute
@@ -660,6 +699,7 @@ interface AppRouteChildren {
   AppExploreRoute: typeof AppExploreRoute
   AppGlobalradarRoute: typeof AppGlobalradarRoute
   AppGoalsRoute: typeof AppGoalsRoute
+  AppImportBrokerNoteRoute: typeof AppImportBrokerNoteRoute
   AppIncomeRoute: typeof AppIncomeRoute
   AppMyportfolioRoute: typeof AppMyportfolioRoute
   AppNewsRoute: typeof AppNewsRoute
@@ -673,6 +713,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAddAssetRoute: AppAddAssetRoute,
   AppAuditRoute: AppAuditRoute,
   AppComparatorRoute: AppComparatorRoute,
   AppContributionplanRoute: AppContributionplanRoute,
@@ -680,6 +721,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExploreRoute: AppExploreRoute,
   AppGlobalradarRoute: AppGlobalradarRoute,
   AppGoalsRoute: AppGoalsRoute,
+  AppImportBrokerNoteRoute: AppImportBrokerNoteRoute,
   AppIncomeRoute: AppIncomeRoute,
   AppMyportfolioRoute: AppMyportfolioRoute,
   AppNewsRoute: AppNewsRoute,

@@ -136,6 +136,45 @@ export function parseB3Float(value: string): number {
   return num;
 }
 
+export interface PdfTextItem {
+  str: string;
+  transform?: number[];
+}
+
+/**
+ * Reconstructs visual line breaks from a pdfjs-dist TextContent items array. pdfjs returns
+ * items in reading order with no inherent newlines; grouping by each item's baseline Y
+ * coordinate (transform[5]) recovers table rows so the line-based SINACOR parser below sees
+ * one broker-note trade per line instead of an entire multi-row table flattened into one line
+ * (which made it only ever capture the first ticker's first two numbers).
+ */
+export function reconstructRowsFromTextItems(items: PdfTextItem[]): string {
+  const rows: { y: number; parts: { x: number; str: string }[] }[] = [];
+  const Y_TOLERANCE = 2;
+
+  for (const item of items) {
+    if (!item.str) continue;
+    const x = item.transform?.[4] ?? 0;
+    const y = item.transform?.[5] ?? 0;
+    let row = rows.find((r) => Math.abs(r.y - y) <= Y_TOLERANCE);
+    if (!row) {
+      row = { y, parts: [] };
+      rows.push(row);
+    }
+    row.parts.push({ x, str: item.str });
+  }
+
+  rows.sort((a, b) => b.y - a.y);
+  return rows
+    .map((r) =>
+      r.parts
+        .sort((a, b) => a.x - b.x)
+        .map((p) => p.str)
+        .join(" "),
+    )
+    .join("\n");
+}
+
 export function detectBroker(rawText: string): BrokerType | null {
   // Grupo XP
   if (rawText.includes("02.332.886/0001-04") || rawText.includes("XP INVESTIMENTOS")) return "XP";

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,7 +20,6 @@ import { WatchlistAssetGrid } from "./watchlist/WatchlistAssetGrid";
 import { WatchlistDialogs } from "./watchlist/WatchlistDialogs";
 import { DataManagement } from "./watchlist/DataManagement";
 import { WatchlistActionsProvider } from "./watchlist/WatchlistActionsContext";
-import { NewContributionDialog } from "../horizonte/NewContributionDialog";
 import { persistTransactionsBatch } from "@/lib/transactionPersistence";
 import { useTransactions } from "@/lib/transactions";
 import { useWatchlist } from "@/lib/watchlist";
@@ -32,9 +32,8 @@ interface WatchlistProps {
 }
 
 export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
-  const [showNewContribution, setShowNewContribution] = useState(false);
+  const navigate = useNavigate();
   const [showFIWizard, setShowFIWizard] = useState(false);
-  const [showBrokerNoteUploader, setShowBrokerNoteUploader] = useState(false);
   const [showCsvImporter, setShowCsvImporter] = useState(false);
   const [showDynamicImporter, setShowDynamicImporter] = useState(false);
   const { t, locale } = useI18n();
@@ -211,9 +210,9 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
             <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <p className="text-sm text-muted-foreground">{t.watchlist.empty}</p>
               <AddAssetDropdown
-                onOpenNewContribution={() => setShowNewContribution(true)}
+                onOpenNewContribution={() => navigate({ to: "/app/add-asset" })}
                 onOpenFIWizard={() => setShowFIWizard(true)}
-                onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
+                onOpenBrokerUploader={() => navigate({ to: "/app/import-broker-note" })}
                 onOpenCsvImporter={() => setShowDynamicImporter(true)}
               />
               <div className="mt-4 flex justify-center w-full">
@@ -246,9 +245,9 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
               onSetSortOption={setSortOption}
               viewMode={viewMode}
               setViewMode={setViewMode}
-              onOpenNewContribution={() => setShowNewContribution(true)}
+              onOpenNewContribution={() => navigate({ to: "/app/add-asset" })}
               onOpenFIWizard={() => setShowFIWizard(true)}
-              onOpenBrokerUploader={() => setShowBrokerNoteUploader(true)}
+              onOpenBrokerUploader={() => navigate({ to: "/app/import-broker-note" })}
               onOpenCsvImporter={() => setShowDynamicImporter(true)}
             />
 
@@ -281,20 +280,16 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
           detailInitialTab={detailInitialTab}
           showPaywall={showPaywall}
           showFIWizard={showFIWizard}
-          showBrokerNoteUploader={showBrokerNoteUploader}
           showCsvImporter={showCsvImporter}
           showDynamicImporter={showDynamicImporter}
           onCloseDetail={handleCloseDetail}
           onPaywallOpenChange={setShowPaywall}
           onFIWizardOpenChange={setShowFIWizard}
-          onBrokerUploaderOpenChange={setShowBrokerNoteUploader}
           onCsvImporterOpenChange={setShowCsvImporter}
           onDynamicImporterOpenChange={setShowDynamicImporter}
           onConfirmDynamicImport={handleConfirmDynamicImport}
           onUpdateInvestingSince={handleUpdateInvestingSince}
         />
-
-        <NewContributionDialog open={showNewContribution} onOpenChange={setShowNewContribution} />
       </section>
     </TooltipProvider>
   );

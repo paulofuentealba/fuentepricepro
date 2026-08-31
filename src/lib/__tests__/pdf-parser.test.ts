@@ -4,6 +4,7 @@ import {
   parseB3BrokerNote,
   normalizeIssuerSpecification,
   extractSinacorTotalFees,
+  reconstructRowsFromTextItems,
 } from "../dataIngestion/b3Parser";
 import { ptBR } from "@/lib/i18n/dict.ptBR";
 import { en } from "@/lib/i18n/dict.en";
@@ -11,7 +12,7 @@ import { es } from "@/lib/i18n/dict.es";
 import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
-} from "@/components/ceiling/watchlist/BrokerNoteUploader";
+} from "@/lib/dataIngestion/brokerNoteImport";
 import type { Transaction } from "@/lib/transactionsLogic";
 
 describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
@@ -20,6 +21,59 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(normalizeIssuerSpecification("OI ON N1")).toBe("OI ON");
       expect(normalizeIssuerSpecification("PETROBRAS PN ED")).toBe("PETROBRAS PN");
       expect(normalizeIssuerSpecification("KLABIN S/A UNT N2")).toBe("KLABIN S/A UNT");
+    });
+  });
+
+  describe("reconstructRowsFromTextItems", () => {
+    it("splits pdfjs text items into one line per table row using their Y coordinate, so a note with multiple trades on the same table doesn't collapse into a single flattened line", () => {
+      // Regression for a real BTG Pactual note: three trade rows (two CDII11 buys, one XPML11
+      // buy) each sit at a distinct Y baseline. Before this fix, all items were joined with a
+      // single space regardless of row, so the SINACOR line parser only ever saw the first
+      // ticker and its first two numbers (losing the other two trades entirely).
+      const items = [
+        { str: "1-BOVESPA", transform: [1, 0, 0, 1, 10, 300] },
+        { str: "C", transform: [1, 0, 0, 1, 60, 300] },
+        { str: "VISTA", transform: [1, 0, 0, 1, 80, 300] },
+        { str: "CDII11", transform: [1, 0, 0, 1, 120, 300] },
+        { str: "4", transform: [1, 0, 0, 1, 180, 300] },
+        { str: "94,90", transform: [1, 0, 0, 1, 200, 300] },
+        { str: "379,60", transform: [1, 0, 0, 1, 240, 300] },
+        { str: "1-BOVESPA", transform: [1, 0, 0, 1, 10, 288] },
+        { str: "C", transform: [1, 0, 0, 1, 60, 288] },
+        { str: "VISTA", transform: [1, 0, 0, 1, 80, 288] },
+        { str: "CDII11", transform: [1, 0, 0, 1, 120, 288] },
+        { str: "6", transform: [1, 0, 0, 1, 180, 288] },
+        { str: "94,90", transform: [1, 0, 0, 1, 200, 288] },
+        { str: "569,40", transform: [1, 0, 0, 1, 240, 288] },
+        { str: "1-BOVESPA", transform: [1, 0, 0, 1, 10, 276] },
+        { str: "C", transform: [1, 0, 0, 1, 60, 276] },
+        { str: "VISTA", transform: [1, 0, 0, 1, 80, 276] },
+        { str: "XPML11", transform: [1, 0, 0, 1, 120, 276] },
+        { str: "5", transform: [1, 0, 0, 1, 180, 276] },
+        { str: "98,40", transform: [1, 0, 0, 1, 200, 276] },
+        { str: "492,00", transform: [1, 0, 0, 1, 240, 276] },
+      ];
+
+      const text = reconstructRowsFromTextItems(items);
+      const lines = text.split("\n");
+
+      expect(lines).toHaveLength(3);
+      expect(lines[0]).toBe("1-BOVESPA C VISTA CDII11 4 94,90 379,60");
+      expect(lines[1]).toBe("1-BOVESPA C VISTA CDII11 6 94,90 569,40");
+      expect(lines[2]).toBe("1-BOVESPA C VISTA XPML11 5 98,40 492,00");
+
+      const result = parseB3BrokerNote(`43.815.158/0001-22 BTG PACTUAL\n${text}`);
+      expect(result.success).toBe(true);
+      expect(result.broker).toBe("BTG");
+      expect(result.trades).toHaveLength(3);
+      expect(result.trades?.[0]).toMatchObject({ ticker: "CDII11", quantity: 4, price: 94.9 });
+      expect(result.trades?.[1]).toMatchObject({ ticker: "CDII11", quantity: 6, price: 94.9 });
+      expect(result.trades?.[2]).toMatchObject({ ticker: "XPML11", quantity: 5, price: 98.4 });
+    });
+
+    it("gracefully defaults to x=0/y=0 when items have no transform (defensive against mocked or malformed pdfjs output)", () => {
+      const items = [{ str: "hello" }, { str: "world" }];
+      expect(reconstructRowsFromTextItems(items as any)).toBe("hello world");
     });
   });
 
