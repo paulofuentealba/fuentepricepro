@@ -7,13 +7,14 @@ import { Sidebar } from "../Sidebar";
 import { ptBR } from "@/lib/i18n/dict.ptBR";
 
 // Mock @tanstack/react-router
+let mockPathname = "/app/contributionplan";
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => (
     <a href={to} className={className}>
       {children}
     </a>
   ),
-  useLocation: () => ({ pathname: "/app/contributionplan" }),
+  useLocation: () => ({ pathname: mockPathname }),
 }));
 
 // Mock hooks
@@ -78,6 +79,32 @@ vi.mock("@/lib/useRealizedIncomeSummary", () => ({
   }),
 }));
 
+let mockCountry: "BR" | "US" | null = "BR";
+let mockHasUSDAssets = true;
+
+vi.mock("@/lib/useInvestorProfile", () => ({
+  useInvestorProfile: () => ({
+    profile: { country: mockCountry },
+    updateProfile: vi.fn(),
+    isPending: false,
+  }),
+}));
+
+vi.mock("@/lib/useHasUSDAssets", () => ({
+  useHasUSDAssets: () => ({
+    hasUSDAssets: mockHasUSDAssets,
+    loading: false,
+  }),
+}));
+
+vi.mock("@tanstack/react-query", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
+  return {
+    ...actual,
+    useQuery: () => ({ data: { USDBRL: 5.4321 }, isLoading: false }),
+  };
+});
+
 describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
   let localStorageStore: Record<string, string> = {};
 
@@ -85,6 +112,9 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
     mockIsAdmin = false;
     mockUser = null;
     mockIsPro = false;
+    mockCountry = "BR";
+    mockHasUSDAssets = true;
+    mockPathname = "/app/contributionplan";
     localStorageStore = {};
     Object.defineProperty(window, "localStorage", {
       value: {
@@ -183,5 +213,50 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
     mockIsAdmin = false;
     render(<Sidebar />);
     expect(screen.queryByText(ptBR.nav.admin)).not.toBeInTheDocument();
+  });
+
+  it("renders Financial Independence pointing to /app/, active only on that exact page", () => {
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.tabs.financialIndependence).closest("a");
+    expect(link).toHaveAttribute("href", "/app/");
+    // mockPathname is "/app/contributionplan" — a nested route starting with "/app/" — the bug
+    // being regression-tested is this item lighting up as active on every /app/* page.
+    expect(link).not.toHaveClass("bg-sidebar-primary");
+  });
+
+  it("marks Financial Independence active only when pathname is exactly /app/", () => {
+    mockPathname = "/app/";
+    render(<Sidebar />);
+    const link = screen.getByText(ptBR.tabs.financialIndependence).closest("a");
+    expect(link).toHaveClass("bg-sidebar-primary");
+
+    cleanup();
+    mockPathname = "/app/income";
+    render(<Sidebar />);
+    const otherLink = screen.getByText(ptBR.tabs.financialIndependence).closest("a");
+    expect(otherLink).not.toHaveClass("bg-sidebar-primary");
+  });
+
+  describe("USD/BRL exchange rate footer row", () => {
+    it("shows the rate for a BR investor holding USD assets", () => {
+      mockCountry = "BR";
+      mockHasUSDAssets = true;
+      render(<Sidebar />);
+      expect(screen.getByText("USD/BRL")).toBeInTheDocument();
+    });
+
+    it("hides the rate for a US investor (no BRL exposure to hedge)", () => {
+      mockCountry = "US";
+      mockHasUSDAssets = true;
+      render(<Sidebar />);
+      expect(screen.queryByText("USD/BRL")).not.toBeInTheDocument();
+    });
+
+    it("hides the rate when the investor holds no USD-denominated assets", () => {
+      mockCountry = "BR";
+      mockHasUSDAssets = false;
+      render(<Sidebar />);
+      expect(screen.queryByText("USD/BRL")).not.toBeInTheDocument();
+    });
   });
 });

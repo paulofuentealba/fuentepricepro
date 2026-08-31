@@ -40,44 +40,47 @@ vi.mock("@/lib/subscription", () => ({
   }),
 }));
 
-vi.mock("@/lib/useHasUSDAssets", () => ({
-  useHasUSDAssets: () => ({
-    hasUSDAssets: true,
-    loading: false,
+vi.mock("@/lib/useUserSettings", () => ({
+  useUserSettings: () => ({
+    settings: { displayCurrency: "BRL" },
   }),
 }));
 
-vi.mock("@tanstack/react-query", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
-  return {
-    ...actual,
-    useQuery: () => ({
-      data: { USDBRL: 5.4321 },
-      isLoading: false,
-    }),
-  };
-});
+vi.mock("@/lib/useRealizedIncomeSummary", () => ({
+  useRealizedIncomeSummary: () => ({
+    summary: { currentMonth: 1130 },
+    events: [],
+    isLoading: false,
+  }),
+}));
+
+vi.mock("@/lib/useLastSeen", () => ({
+  useLastSeen: () => ({
+    lastSeen: null,
+    isMounted: true,
+    markSeenNow: vi.fn(),
+  }),
+}));
 
 function renderWithLocale(locale: Locale) {
   currentLocale = locale;
   return render(<Header variant="app" />);
 }
 
-describe("Header — USD/BRL Exchange Rate Badge", () => {
+describe("Header — app variant is desktop-hidden (Sidebar covers desktop chrome)", () => {
   beforeEach(() => {
     cleanup();
     vi.clearAllMocks();
   });
 
-  it("formats USD/BRL exchange rate canonically with formatCurrency in ptBR", () => {
-    renderWithLocale("ptBR");
-    // In ptBR, 5.4321 -> R$ 5,43
-    expect(screen.getByText(/USD\/BRL\s+R\$\s*5,43/i)).toBeInTheDocument();
+  it("hides the whole bar on desktop, leaving only the mobile nav trigger reachable", () => {
+    const { container } = renderWithLocale("ptBR");
+    const header = container.querySelector("header");
+    expect(header).toHaveClass("md:hidden");
   });
 
-  it("formats USD/BRL exchange rate canonically with formatCurrency in en", () => {
-    renderWithLocale("en");
-    // In en, 5.4321 BRL -> R$ 5,43 (or standard BRL representation)
-    expect(screen.getByText(/USD\/BRL\s+R\$\s*5,43/i)).toBeInTheDocument();
+  it("no longer renders a USD/BRL exchange rate badge (moved to Sidebar)", () => {
+    renderWithLocale("ptBR");
+    expect(screen.queryByText(/USD\/BRL/i)).not.toBeInTheDocument();
   });
 });

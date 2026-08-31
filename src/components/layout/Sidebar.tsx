@@ -1,15 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
-  RotateCcw,
-  ArrowUp,
-  ArrowDown,
-  Bell,
-  CalendarCheck,
-  FileText,
-  TrendingUp,
-  Search,
-  Clock,
   Menu,
   Shield,
   User,
@@ -18,7 +9,6 @@ import {
   Sun,
   Moon,
   Globe,
-  Target,
 } from "lucide-react";
 import { useAuthModal } from "@/lib/auth-modal";
 import { useSubscription } from "@/lib/subscription";
@@ -39,26 +29,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
-import { useUserSettings } from "@/lib/useUserSettings";
-import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
-import { useLastSeen } from "@/lib/useLastSeen";
-import { formatNumber } from "@/lib/formatters";
-
-interface NavItem {
-  key: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path?: string;
-  disabled?: boolean;
-  badge?: string | number;
-  /** Small unread-style dot (no count), e.g. "new fiscal data since your last visit". */
-  dot?: boolean;
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
+import { useNavSections, isNavItemActive } from "@/lib/useNavSections";
+import { useQuery } from "@tanstack/react-query";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { formatCurrency } from "@/lib/i18n";
+import { useHasUSDAssets } from "@/lib/useHasUSDAssets";
+import { useInvestorProfile } from "@/lib/useInvestorProfile";
 
 /** Up to 2 initials from a display name, e.g. "Paulo Fuentealba" -> "PF". */
 function getInitials(name?: string | null): string {
@@ -75,48 +51,17 @@ export function Sidebar() {
   const { openAuthModal } = useAuthModal();
   const { isPro } = useSubscription();
   const { theme, setTheme, isDark } = useTheme();
-  const { settings } = useUserSettings();
-  const currency = settings?.displayCurrency || "BRL";
-  const { summary, events } = useRealizedIncomeSummary(currency);
   const location = useLocation();
+  const { sections } = useNavSections();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Compact pill badge — no space, no decimals (matches the prototype's "R$1.130"),
-  // unlike the full formatCurrency used elsewhere for real money figures. Falls back to the
-  // same default amount as the Reinvest screen itself (src/routes/app/reinvestir.tsx) so the
-  // badge never goes blank when nothing was paid yet this calendar month.
-  const reinvestAmount =
-    summary?.currentMonth && summary.currentMonth > 0 ? summary.currentMonth : 1000;
-  const reinvestBadge = `${currency === "USD" ? "US$" : "R$"}${formatNumber(reinvestAmount, locale, 0)}`;
-
-  // "What has changed" badge and "Fiscal reality" dot — both derived from real realized-income
-  // events (never a fake/hardcoded count), gated by a per-viewer localStorage "last seen"
-  // timestamp so they clear once the user actually opens the corresponding page.
-  const { lastSeen: lastSeenNews, isMounted: newsMounted, markSeenNow: markNewsSeen } =
-    useLastSeen("news");
-  const { lastSeen: lastSeenTax, isMounted: taxMounted, markSeenNow: markTaxSeen } =
-    useLastSeen("tax");
-
-  const startOfCurrentMonthISO = useMemo(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  }, []);
-
-  const whatChangedCount = useMemo(() => {
-    if (!newsMounted) return 0;
-    const since = lastSeenNews ?? startOfCurrentMonthISO;
-    return (events ?? []).filter(
-      (e) => e.isPaid && e.paymentDate && `${e.paymentDate}T00:00:00.000Z` > since,
-    ).length;
-  }, [events, lastSeenNews, newsMounted, startOfCurrentMonthISO]);
-
-  const hasNewFiscalData = taxMounted && (!lastSeenTax || lastSeenTax < startOfCurrentMonthISO);
-
-  useEffect(() => {
-    if (location.pathname.startsWith("/app/news")) markNewsSeen();
-    if (location.pathname.startsWith("/app/tax")) markTaxSeen();
-  }, [location.pathname, markNewsSeen, markTaxSeen]);
+  // USD/BRL quote — only meaningful for investors based in Brazil (a US-based investor has no
+  // BRL exposure to hedge) who actually hold a USD-denominated asset in their watchlist.
+  const { profile: investorProfile } = useInvestorProfile();
+  const { hasUSDAssets } = useHasUSDAssets();
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
+  const showExchangeRate = investorProfile.country !== "US" && hasUSDAssets && !!fx?.USDBRL;
 
   useEffect(() => {
     setIsMounted(true);
@@ -143,97 +88,6 @@ export function Sidebar() {
       // Ignore storage access errors
     }
   };
-
-  const sections: NavSection[] = useMemo(() => [
-    {
-      title: t.nav.sections.decide,
-      items: [
-        {
-          key: "reinvestir",
-          label: t.nav.reinvest,
-          path: "/app/reinvestir",
-          icon: RotateCcw,
-          disabled: false,
-          badge: reinvestBadge,
-        },
-        {
-          key: "plano-aporte",
-          label: t.nav.contributionPlan,
-          path: "/app/contributionplan",
-          icon: ArrowUp,
-          disabled: false,
-        },
-        {
-          key: "retirar",
-          label: t.nav.withdraw,
-          path: "/app/withdraw",
-          icon: ArrowDown,
-          disabled: false,
-        },
-        {
-          key: "metas",
-          label: t.nav.goals,
-          path: "/app/goals",
-          icon: Target,
-          disabled: false,
-        },
-      ],
-    },
-    {
-      title: t.nav.sections.track,
-      items: [
-        {
-          key: "o-que-mudou",
-          label: t.nav.whatChanged,
-          path: "/app/news",
-          icon: Bell,
-          disabled: false,
-          badge: whatChangedCount > 0 ? whatChangedCount : undefined,
-        },
-        {
-          key: "renda-garantida",
-          label: t.nav.guaranteedIncome,
-          path: "/app/income",
-          icon: CalendarCheck,
-          disabled: false,
-        },
-        {
-          key: "realidade-fiscal",
-          label: t.nav.taxReality,
-          icon: FileText,
-          path: "/app/tax",
-          disabled: false,
-          dot: hasNewFiscalData,
-        },
-      ],
-    },
-    {
-      title: t.nav.sections.analyze,
-      items: [
-        {
-          key: "minha-carteira",
-          label: t.nav.myPortfolio,
-          path: "/app/myportfolio",
-          icon: TrendingUp,
-          disabled: false,
-        },
-        {
-          key: "explorar-ativos",
-          label: t.nav.exploreAssets,
-          path: "/app/explore",
-          icon: Search,
-          disabled: false,
-        },
-        {
-          key: "auditoria",
-          label: t.nav.audit,
-          path: "/app/audit",
-          icon: Clock,
-          disabled: false,
-        },
-      ],
-    },
-  ], [t, reinvestBadge, whatChangedCount, hasNewFiscalData]);
 
   if (!isMounted) {
     return (
@@ -313,7 +167,7 @@ export function Sidebar() {
               )}
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = item.path ? location.pathname.startsWith(item.path) : false;
+                const isActive = isNavItemActive(location.pathname, item);
 
                 if (item.disabled) {
                   const disabledContent = (
@@ -520,6 +374,16 @@ export function Sidebar() {
               <Shield className="h-4 w-4 shrink-0" />
               {!isCollapsed && <span>{t.nav.admin}</span>}
             </Link>
+          )}
+
+          {/* USD/BRL exchange rate — expanded state only, room needed for the label */}
+          {!isCollapsed && showExchangeRate && (
+            <div className="flex items-center justify-between rounded-[9px] bg-sidebar-foreground/[0.07] px-[11px] py-[7px] text-[11px] font-display font-medium text-sidebar-foreground/70">
+              <span>USD/BRL</span>
+              <span className="tabular-nums text-sidebar-accent">
+                {formatCurrency(fx!.USDBRL, "BRL", locale)}
+              </span>
+            </div>
           )}
 
           {/* Theme & Language Controls */}
