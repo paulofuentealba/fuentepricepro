@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n-provider";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -103,15 +104,14 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
                 <InfoTooltip content={t.smartAllocation.assetClassExplainers[type]} />
               )}
             </span>
-            <input
-              type="range"
+            <Slider
               min={0}
               max={100}
               step={1}
-              value={targets[type] || 0}
-              onChange={(e) => handleTargetChange(type, e.target.value)}
+              value={[targets[type] || 0]}
+              onValueChange={(val) => handleTargetChange(type, val[0])}
               aria-label={t.smartAllocation.adjustTargetAllocation}
-              className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-primary"
+              className="flex-1"
             />
             <span className="w-[52px] shrink-0 text-right font-mono text-sm font-semibold text-foreground">
               {targets[type] || 0}%
