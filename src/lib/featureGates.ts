@@ -20,6 +20,7 @@ export interface FeatureGatesConfig {
   reinvestUnlocked?: boolean;
   taxRealityUnlocked?: boolean;
   withdrawUnlocked?: boolean;
+  auditUnlocked?: boolean;
   USE_BFF_PORTFOLIO_VALUATION?: boolean;
   [key: string]: boolean | number | undefined;
 }
@@ -34,6 +35,7 @@ export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: numbe
   reinvestUnlocked: true,
   taxRealityUnlocked: true,
   withdrawUnlocked: true,
+  auditUnlocked: true,
   USE_BFF_PORTFOLIO_VALUATION: false,
 };
 
