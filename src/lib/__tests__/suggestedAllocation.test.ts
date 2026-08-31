@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   computeSuggestedAllocation,
   computeMarginBiasMultipliers,
+  restrictAllocationToCountry,
+  US_INELIGIBLE_CLASSES,
   PROFILE_BASE_ALLOCATION,
   STRATEGY_BIAS_MULTIPLIERS,
   ASSET_TYPES_ORDER,
@@ -140,6 +142,41 @@ describe("suggestedAllocation", () => {
       const sum = Object.values(result).reduce((a, b) => a + b, 0);
       expect(sum).toBe(100);
       expect(result.STOCK_BR).toBeGreaterThan(0);
+    });
+  });
+
+  describe("restrictAllocationToCountry", () => {
+    it("leaves the allocation unchanged for BR (and null/undefined) country", () => {
+      const allocation = computeSuggestedAllocation({ reaction: "hold", goal: "income" });
+      expect(restrictAllocationToCountry(allocation, "BR")).toEqual(allocation);
+      expect(restrictAllocationToCountry(allocation, null)).toEqual(allocation);
+      expect(restrictAllocationToCountry(allocation, undefined)).toEqual(allocation);
+    });
+
+    it("zeroes Brazil-only classes for US and redistributes their share, keeping sum 100", () => {
+      const allocation = computeSuggestedAllocation({ reaction: "hold", goal: "income" });
+      const restricted = restrictAllocationToCountry(allocation, "US");
+
+      for (const type of US_INELIGIBLE_CLASSES) {
+        expect(restricted[type]).toBe(0);
+      }
+      const sum = Object.values(restricted).reduce((a, b) => a + b, 0);
+      expect(sum).toBe(100);
+      // The freed-up percentage must land somewhere among the eligible classes.
+      expect(restricted.FIXED_INCOME + restricted.STOCK_US + restricted.REIT + restricted.ETF).toBe(100);
+    });
+
+    it("keeps summing to 100 across every tier/sublabel combination for US", () => {
+      const reactions: ProfileReaction[] = ["sell", "hold", "buy"];
+      const goals: ProfileGoal[] = ["income", "growth", "both"];
+      for (const reaction of reactions) {
+        for (const goal of goals) {
+          const allocation = computeSuggestedAllocation({ reaction, goal });
+          const restricted = restrictAllocationToCountry(allocation, "US");
+          const sum = Object.values(restricted).reduce((a, b) => a + b, 0);
+          expect(sum, `reaction=${reaction} goal=${goal}`).toBe(100);
+        }
+      }
     });
   });
 

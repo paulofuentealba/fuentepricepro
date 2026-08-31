@@ -1,7 +1,7 @@
 import type { AssetType } from "./domain";
 import type { StrategyKey } from "./allocation";
 import type { WatchlistItem } from "./watchlist";
-import { calculateProfileTier, type InvestorProfile } from "./investor-profile";
+import { calculateProfileTier, type InvestorProfile, type ProfileCountry } from "./investor-profile";
 
 export const ASSET_TYPES_ORDER: AssetType[] = [
   "STOCK_BR",
@@ -296,4 +296,70 @@ export function computeSuggestedAllocation(
   }
 
   return rounded;
+}
+
+/**
+ * Asset classes with no equivalent for a US-based investor: FII, FII_INFRA and FIAGRO are
+ * B3-listed real estate/agribusiness funds with Brazil-specific tax treatment, and STOCK_BR is
+ * the B3 equity market itself — none of these are something a US onboarding flow should suggest.
+ */
+export const US_INELIGIBLE_CLASSES: AssetType[] = ["STOCK_BR", "FII", "FII_INFRA", "FIAGRO"];
+
+/**
+ * Country-aware post-processing for the onboarding "suggested allocation" preview only — does
+ * NOT alter computeSuggestedAllocation()/PROFILE_BASE_ALLOCATION themselves, which stay the
+ * single SSOT matrix consumed by GoalWizard/AskEngine for real (implicitly Brazil-eligible)
+ * portfolios regardless of the investor's country.
+ *
+ * For country === 'US': zeroes out the 4 Brazil-only classes and redistributes their combined
+ * percentage proportionally across the remaining eligible classes, using the same Largest
+ * Remainder rounding as computeSuggestedAllocation so the result still sums to exactly 100.
+ * For any other country (or null/undefined): returns the allocation unchanged.
+ */
+export function restrictAllocationToCountry(
+  allocation: Record<AssetType, number>,
+  country: ProfileCountry | null | undefined,
+): Record<AssetType, number> {
+  if (country !== "US") return allocation;
+
+  const eligibleTypes = ASSET_TYPES_ORDER.filter((type) => !US_INELIGIBLE_CLASSES.includes(type));
+  const eligibleSum = eligibleTypes.reduce((sum, type) => sum + (allocation[type] || 0), 0);
+
+  const result = { ...allocation };
+  for (const type of US_INELIGIBLE_CLASSES) result[type] = 0;
+
+  if (eligibleSum <= 0) {
+    // Degenerate case (shouldn't happen — every base template keeps FIXED_INCOME/STOCK_US
+    // above 0): fall back to an equal split across eligible classes.
+    const equalShare = Math.floor(100 / eligibleTypes.length);
+    eligibleTypes.forEach((type, i) => {
+      result[type] = i === 0 ? 100 - equalShare * (eligibleTypes.length - 1) : equalShare;
+    });
+    return result;
+  }
+
+  let sumFloors = 0;
+  const remainders: { type: AssetType; remainder: number; orderIndex: number }[] = [];
+
+  eligibleTypes.forEach((type, orderIndex) => {
+    const exact = ((allocation[type] || 0) / eligibleSum) * 100;
+    const floor = Math.floor(exact);
+    result[type] = floor;
+    sumFloors += floor;
+    remainders.push({ type, remainder: exact - floor, orderIndex });
+  });
+
+  const remainderCount = 100 - sumFloors;
+  if (remainderCount > 0) {
+    remainders.sort((a, b) => {
+      const diff = b.remainder - a.remainder;
+      if (Math.abs(diff) > 1e-9) return diff;
+      return a.orderIndex - b.orderIndex;
+    });
+    for (let i = 0; i < remainderCount && i < remainders.length; i++) {
+      result[remainders[i].type] += 1;
+    }
+  }
+
+  return result;
 }
