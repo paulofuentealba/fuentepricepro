@@ -31,7 +31,7 @@ export function MetricBox({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl border p-3 transition-colors",
+        "flex flex-col rounded-[15px] border px-[17px] py-[15px] transition-colors",
         {
           "border-border/40 bg-background/40 hover:bg-background/60":
             variant === "default" && !isSuccess && !isDanger && !isWarning,
