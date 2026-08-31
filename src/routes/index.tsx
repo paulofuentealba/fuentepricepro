@@ -262,7 +262,7 @@ function LandingPage() {
             <div className="text-xs text-muted-foreground mb-2.5">{P.pricing.free.tagline}</div>
             <div className="font-serif text-4xl font-medium mb-1">
               {formatCurrency(0, "BRL", locale)}
-              <span className="text-sm text-muted-foreground font-sans">{P.pricing.priceSuffix}</span>
+              <span className="text-sm text-muted-foreground">{P.pricing.priceSuffix}</span>
             </div>
             <ul className="my-4 space-y-1.5">
               {P.pricing.free.features.map((f) => (
@@ -293,7 +293,7 @@ function LandingPage() {
             <div className="text-xs text-muted-foreground mb-2.5">{P.pricing.pro.tagline}</div>
             <div className="font-serif text-4xl font-medium mb-1">
               {formatCurrency(9.9, "BRL", locale)}
-              <span className="text-sm text-muted-foreground font-sans">{P.pricing.priceSuffix}</span>
+              <span className="text-sm text-muted-foreground">{P.pricing.priceSuffix}</span>
             </div>
             <ul className="my-4 space-y-1.5">
               {P.pricing.pro.features.map((f) => (
