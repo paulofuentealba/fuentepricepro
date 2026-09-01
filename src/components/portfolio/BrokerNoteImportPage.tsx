@@ -10,12 +10,12 @@ import { formatCurrency } from "@/lib/formatters";
 import { resolveReasonText } from "@/lib/askEngine";
 import { cn } from "@/lib/utils";
 import {
-  parseB3BrokerNote,
+  parseBrokerNote,
   reconstructRowsFromTextItems,
-  ALL_SINACOR_BROKERS,
-  type BrokerType,
+  ALL_SUPPORTED_BROKERS,
+  type SupportedBroker,
   type TradeRecord,
-} from "@/lib/dataIngestion/b3Parser";
+} from "@/lib/dataIngestion/brokerNoteParser";
 import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
@@ -28,7 +28,7 @@ import { toast } from "sonner";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
-const BROKER_LABELS: Record<BrokerType, string> = {
+const BROKER_LABELS: Record<SupportedBroker, string> = {
   XP: "XP Investimentos",
   CLEAR: "Clear Corretora",
   RICO: "Rico Investimentos",
@@ -43,6 +43,7 @@ const BROKER_LABELS: Record<BrokerType, string> = {
   SANTANDER: "Santander / Toro",
   BB: "Banco do Brasil",
   CAIXA: "Caixa Econômica Federal",
+  SCHWAB: "Charles Schwab",
 };
 
 interface ReviewRow {
@@ -61,7 +62,7 @@ interface ReviewRow {
 
 /**
  * Full-page "Importar nota de corretagem" flow — replaces the old BrokerNoteUploader modal.
- * Reuses parseB3BrokerNote (all 14 supported brokers) and the moved-out
+ * Reuses parseBrokerNote (all supported Brazilian + international brokers) and the moved-out
  * parseDdMmYyyyToTimestamp/consolidateTradesToWatchlistItems helpers unchanged — the only new
  * behavior is a review step: every detected trade (resolved or not) lands in a checklist the
  * user confirms before anything is written, instead of writing immediately on parse success.
@@ -81,11 +82,11 @@ export function BrokerNoteImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fileName, setFileName] = useState<string | null>(null);
-  const [detectedBroker, setDetectedBroker] = useState<BrokerType | null>(null);
+  const [detectedBroker, setDetectedBroker] = useState<SupportedBroker | null>(null);
   const [rows, setRows] = useState<ReviewRow[]>([]);
 
   const supportedBrokerLabels = useMemo(
-    () => ALL_SINACOR_BROKERS.map((b) => BROKER_LABELS[b]),
+    () => ALL_SUPPORTED_BROKERS.map((b) => BROKER_LABELS[b]),
     [],
   );
 
@@ -122,7 +123,7 @@ export function BrokerNoteImportPage() {
         rawText += pageText + "\n";
       }
 
-      const result = parseB3BrokerNote(rawText, "AUTO", mappings);
+      const result = parseBrokerNote(rawText, "AUTO", mappings);
 
       if (!result.success) {
         if (result.error === "broker_layout_unsupported") {
@@ -280,7 +281,7 @@ export function BrokerNoteImportPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xs font-display font-semibold uppercase tracking-widest text-success">
-            {resolveReasonText(t, "brokerNoteImportPage.eyebrow", { count: ALL_SINACOR_BROKERS.length })}
+            {resolveReasonText(t, "brokerNoteImportPage.eyebrow", { count: ALL_SUPPORTED_BROKERS.length })}
           </div>
           <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {t.brokerNoteImportPage?.title}

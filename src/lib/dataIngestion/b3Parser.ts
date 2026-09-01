@@ -39,7 +39,9 @@ export interface ParseResult {
   trades?: TradeRecord[];
   unresolvedTrades?: UnresolvedTradeRecord[];
   error?: string;
-  broker?: BrokerType;
+  /** "SCHWAB" (or any future non-SINACOR broker) is accepted here too — this type stays broker-
+   * layout-agnostic so brokerNoteParser.ts's international dispatch doesn't need an unsafe cast. */
+  broker?: BrokerType | "SCHWAB";
   brokerDivergence?: {
     selected: BrokerType;
     detected: BrokerType;

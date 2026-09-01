@@ -212,6 +212,46 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(petr?.quantity).toBe(200);
       expect(petr?.averagePrice).toBe(30.0);
     });
+
+    it("uses assetData.currency instead of hardcoding BRL — regression for USD tickers (e.g. imported from a Schwab confirmation) being mislabeled", () => {
+      const trades = [{ ticker: "SCM", quantity: 5, price: 8.6, date: "21/08/2026" }];
+      const newlyCreatedTx: Transaction[] = [
+        {
+          id: "tx-scm",
+          ticker: "SCM",
+          type: "buy",
+          date: parseDdMmYyyyToTimestamp("21/08/2026")!,
+          quantity: 5,
+          pricePerShare: 8.6,
+        },
+      ];
+
+      const items = consolidateTradesToWatchlistItems(trades, [], newlyCreatedTx, {
+        SCM: { type: "STOCK_US", currency: "USD", name: "Stellus Capital Investment Corp" },
+      });
+
+      expect(items).toHaveLength(1);
+      expect(items[0].currency).toBe("USD");
+      expect(items[0].type).toBe("STOCK_US");
+    });
+
+    it("falls back to the BRL/USD ticker-suffix heuristic when no assetData was fetched", () => {
+      const trades = [{ ticker: "SCM", quantity: 5, price: 8.6, date: "21/08/2026" }];
+      const newlyCreatedTx: Transaction[] = [
+        {
+          id: "tx-scm-2",
+          ticker: "SCM",
+          type: "buy",
+          date: parseDdMmYyyyToTimestamp("21/08/2026")!,
+          quantity: 5,
+          pricePerShare: 8.6,
+        },
+      ];
+
+      // No assetDataMap entry — SCM doesn't end in 3/4/11, so the heuristic should still land on USD.
+      const items = consolidateTradesToWatchlistItems(trades, [], newlyCreatedTx);
+      expect(items[0].currency).toBe("USD");
+    });
   });
 
   describe("parseB3Float (Type Mapping)", () => {

@@ -66,6 +66,12 @@ export function consolidateTradesToWatchlistItems(
     const type = assetData?.type || classifyBr(ticker);
     const annualDiv = assetData ? getCanonicalAnnualDividend(assetData, 3) : 0;
     const target = 6;
+    // Single inference used for BOTH the valuation call and the WatchlistItem written below —
+    // previously the WatchlistItem hardcoded "BRL" regardless of this, silently mislabeling every
+    // imported USD position (e.g. a Schwab confirmation for a NYSE ticker) as Brazilian Reais.
+    const currency =
+      assetData?.currency ||
+      (ticker.endsWith("3") || ticker.endsWith("4") || ticker.endsWith("11") ? "BRL" : "USD");
     const val = getAssetValuation({
       targetYield: target,
       currentPrice: lastTrade.price,
@@ -73,7 +79,7 @@ export function consolidateTradesToWatchlistItems(
       eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
       bvps: assetData?.metrics?.bvps ?? null,
       dividendCagr: assetData?.metrics?.dividendCagr5y ?? null,
-      currency: assetData?.currency || (ticker.endsWith("3") || ticker.endsWith("4") || ticker.endsWith("11") ? "BRL" : "USD"),
+      currency,
       type,
     });
     const ceil = val.activeCeiling;
@@ -95,7 +101,7 @@ export function consolidateTradesToWatchlistItems(
       ticker: ticker,
       name: assetData?.name || ticker,
       type,
-      currency: "BRL",
+      currency,
       currentPrice: lastTrade.price,
       annualDividend: annualDiv,
       targetYield: target,
