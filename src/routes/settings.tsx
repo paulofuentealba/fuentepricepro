@@ -46,6 +46,7 @@ import { useUserSettings } from "@/lib/useUserSettings";
 import { useWatchlist } from "@/lib/watchlist";
 import { buildWatchlistFullCsv, downloadCsv } from "@/lib/csv";
 import { toIntlLocale } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: async () => {
@@ -133,7 +134,7 @@ function SettingsPage() {
   const { user, loading } = useAuth();
   const { t, locale } = useI18n();
   const S = t.settings;
-  const { settings } = useUserSettings();
+  const { settings, updateSettings } = useUserSettings();
   const { items: watchlistItems } = useWatchlist();
   const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "privacy">("profile");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -472,6 +473,67 @@ function SettingsPage() {
                     <FileSpreadsheet className="mr-2 h-4 w-4" />
                     {S.privacy.exportCsvBtn}
                   </Button>
+                </div>
+              </div>
+
+              {/* Consentimentos — replica o card "Consentimentos" do protótipo (3 toggles no
+                  estilo .opt, mesmo padrão já usado em GoalWizard.tsx) */}
+              <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+                <h3 className="mb-3 font-serif text-[15px] font-medium text-foreground">
+                  {S.privacy.consents.title}
+                </h3>
+                <div className="space-y-2.5">
+                  <div
+                    aria-disabled="true"
+                    className="w-full cursor-not-allowed rounded-2xl border border-accent bg-accent/10 p-3.5 text-left opacity-90"
+                  >
+                    <div className="text-[13.5px] font-display font-semibold text-foreground">
+                      {S.privacy.consents.essentialLabel}
+                    </div>
+                    <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
+                      {S.privacy.consents.essentialDesc}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateSettings({ usageAnalyticsConsent: !settings.usageAnalyticsConsent })
+                    }
+                    className={cn(
+                      "w-full rounded-2xl border p-3.5 text-left transition-colors",
+                      settings.usageAnalyticsConsent
+                        ? "border-accent bg-accent/10"
+                        : "border-border bg-card hover:border-accent/60",
+                    )}
+                  >
+                    <div className="text-[13.5px] font-display font-semibold text-foreground">
+                      {S.privacy.consents.analyticsLabel}
+                    </div>
+                    <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
+                      {S.privacy.consents.analyticsDesc}
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateSettings({ weeklyDigestEmailConsent: !settings.weeklyDigestEmailConsent })
+                    }
+                    className={cn(
+                      "w-full rounded-2xl border p-3.5 text-left transition-colors",
+                      settings.weeklyDigestEmailConsent
+                        ? "border-accent bg-accent/10"
+                        : "border-border bg-card hover:border-accent/60",
+                    )}
+                  >
+                    <div className="text-[13.5px] font-display font-semibold text-foreground">
+                      {S.privacy.consents.digestLabel}
+                    </div>
+                    <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
+                      {S.privacy.consents.digestDesc}
+                    </div>
+                  </button>
                 </div>
               </div>
 

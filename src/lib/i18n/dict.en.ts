@@ -1181,6 +1181,15 @@ export const en = {
       disclaimerVersionText: "version {{version}}",
       disclaimerAcceptedOnText: "accepted on {{date}} at {{time}}",
       disclaimerNotAccepted: "No acceptance recorded yet.",
+      consents: {
+        title: "Consent",
+        essentialLabel: "Essential cookies",
+        essentialDesc: "Required for authentication. Cannot be disabled.",
+        analyticsLabel: "Usage analytics",
+        analyticsDesc: "Helps improve the product. Aggregated data.",
+        digestLabel: "Weekly email digest",
+        digestDesc: "Summary of what changed in your portfolio every Monday.",
+      },
     },
     deleteWizard: {
       step1Title: "Before you go, take your data.",

@@ -24,6 +24,10 @@ export interface UserSettings {
   taxDisclaimerAcceptedVersion?: string;
   taxDisclaimerAcceptedAt?: number;
   valuationAssumptionsMode?: "simple" | "advanced";
+  /** LGPD/GDPR consent toggles shown in Configurações > Privacidade > Consentimentos. Essential
+   * cookies aren't a stored field — they're mandatory for auth and always shown as locked-on. */
+  usageAnalyticsConsent?: boolean;
+  weeklyDigestEmailConsent?: boolean;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -39,6 +43,8 @@ const DEFAULT_SETTINGS: UserSettings = {
     FIXED_INCOME: 0,
   },
   valuationAssumptionsMode: "simple",
+  usageAnalyticsConsent: true,
+  weeklyDigestEmailConsent: false,
 };
 
 /**

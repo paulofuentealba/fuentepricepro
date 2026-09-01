@@ -1194,6 +1194,15 @@ export const es = {
       disclaimerVersionText: "versión {{version}}",
       disclaimerAcceptedOnText: "aceptado el {{date}} a las {{time}}",
       disclaimerNotAccepted: "Ningún aceite registrado todavía.",
+      consents: {
+        title: "Consentimientos",
+        essentialLabel: "Cookies esenciales",
+        essentialDesc: "Necesarias para la autenticación. No se pueden desactivar.",
+        analyticsLabel: "Análisis de uso",
+        analyticsDesc: "Ayuda a mejorar el producto. Datos agregados.",
+        digestLabel: "Resumen semanal por correo",
+        digestDesc: "Resumen de lo que cambió en su cartera cada lunes.",
+      },
     },
     deleteWizard: {
       step1Title: "Antes de irte, llévate tus datos.",

@@ -1189,6 +1189,15 @@ export const ptBR = {
       disclaimerVersionText: "versão {{version}}",
       disclaimerAcceptedOnText: "aceito em {{date}} às {{time}}",
       disclaimerNotAccepted: "Nenhum aceite registrado ainda.",
+      consents: {
+        title: "Consentimentos",
+        essentialLabel: "Cookies essenciais",
+        essentialDesc: "Necessários para autenticação. Não podem ser desativados.",
+        analyticsLabel: "Análise de uso",
+        analyticsDesc: "Ajuda a melhorar o produto. Dados agregados.",
+        digestLabel: "Digest semanal por e-mail",
+        digestDesc: "Resumo do que mudou na sua carteira toda segunda.",
+      },
     },
     deleteWizard: {
       step1Title: "Antes de ir, leve seus dados.",
