@@ -44,6 +44,9 @@ import {
 import { useI18n } from "@/lib/i18n-provider";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useWatchlist } from "@/lib/watchlist";
+import { useSubscription } from "@/lib/subscription";
+import { useFeatureGate } from "@/lib/useFeatureGate";
+import { CheckCircle2, Lock as LockIcon } from "lucide-react";
 import { buildWatchlistFullCsv, downloadCsv } from "@/lib/csv";
 import { toIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -136,6 +139,11 @@ function SettingsPage() {
   const S = t.settings;
   const { settings, updateSettings } = useUserSettings();
   const { items: watchlistItems } = useWatchlist();
+  const { isPro } = useSubscription();
+  const taxRealityUnlocked = useFeatureGate("taxRealityUnlocked");
+  const withdrawUnlocked = useFeatureGate("withdrawUnlocked");
+  const auditUnlocked = useFeatureGate("auditUnlocked");
+  const freeAssetLimit = useFeatureGate("freeAssetLimit");
   const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "privacy">("profile");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isExportingJson, setIsExportingJson] = useState(false);
@@ -416,15 +424,97 @@ function SettingsPage() {
           )}
 
           {activeTab === "subscription" && (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
+              {/* Seu plano — só campos com dado real (tier, features via feature gates); sem
+                  preço/renovação/cartão/faturas, que exigiriam uma integração de billing que
+                  ainda não existe no app (ver decisão registrada com o Paulo). */}
               <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
-                <h3 className="font-serif text-[15px] font-medium text-foreground mb-3">{S.subscription.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {S.subscription.currentPlan} <strong className="text-foreground">{S.subscription.free}</strong>.
-                </p>
-                <Button className="mt-4 font-display bg-success text-success-foreground hover:bg-success/90">
-                  {S.subscription.upgrade}
-                </Button>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="font-serif text-[15px] font-medium text-foreground">
+                    {S.subscription.planCardTitle}
+                  </h3>
+                  <span className="inline-flex items-center rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-display font-semibold text-accent-text">
+                    {isPro ? S.subscription.pro : S.subscription.free}
+                  </span>
+                </div>
+
+                <div className="text-[12.5px]">
+                  {[
+                    [
+                      S.subscription.featureAssets,
+                      Number.isFinite(freeAssetLimit) && !isPro
+                        ? `${watchlistItems.length} / ${freeAssetLimit}`
+                        : S.subscription.featureAssetsUnlimited,
+                      true,
+                    ],
+                    [S.subscription.featureTaxReality, null, !!taxRealityUnlocked],
+                    [S.subscription.featureWithdraw, null, !!withdrawUnlocked],
+                    [S.subscription.featureAudit, null, !!auditUnlocked],
+                    [S.subscription.featureImport, null, true],
+                  ].map(([label, customValue, active]: any) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between border-b border-dashed border-border/40 py-2 last:border-b-0"
+                    >
+                      <span className="text-muted-foreground">{label}</span>
+                      {customValue ? (
+                        <span className="font-mono font-semibold text-foreground">{customValue}</span>
+                      ) : (
+                        <span
+                          className={cn(
+                            "flex items-center gap-1.5 font-semibold",
+                            active ? "text-success" : "text-muted-foreground",
+                          )}
+                        >
+                          {active ? (
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          ) : (
+                            <LockIcon className="h-3.5 w-3.5" />
+                          )}
+                          {active ? S.subscription.featureActive : S.subscription.featureInactive}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {!isPro && (
+                  <Button className="mt-4 w-full font-display bg-success text-success-foreground hover:bg-success/90">
+                    {S.subscription.upgrade}
+                  </Button>
+                )}
+              </div>
+
+              {/* Uso — só a métrica que o app realmente rastreia (ativos na carteira). O
+                  protótipo também mostra "notas importadas no mês", que não é uma métrica
+                  guardada em nenhum lugar hoje — omitida em vez de inventada. */}
+              <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+                <h3 className="mb-3 font-serif text-[15px] font-medium text-foreground">
+                  {S.subscription.usageCardTitle}
+                </h3>
+                <div className="mb-1.5 flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{S.subscription.usageAssetsLabel}</span>
+                  <span className="font-mono font-semibold text-foreground">
+                    {watchlistItems.length} / {Number.isFinite(freeAssetLimit) ? freeAssetLimit : "∞"}
+                  </span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted/50">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                    style={{
+                      width: `${
+                        Number.isFinite(freeAssetLimit) && (freeAssetLimit as number) > 0
+                          ? Math.min(100, (watchlistItems.length / (freeAssetLimit as number)) * 100)
+                          : 100
+                      }%`,
+                    }}
+                  />
+                </div>
+                {!isPro && Number.isFinite(freeAssetLimit) && (
+                  <p className="mt-3 text-[11.5px] leading-relaxed text-muted-foreground">
+                    {S.subscription.usageFreeLimitNote.replace("{{limit}}", String(freeAssetLimit))}
+                  </p>
+                )}
               </div>
             </div>
           )}
