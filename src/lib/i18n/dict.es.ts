@@ -2209,6 +2209,7 @@ export const es = {
     title: "Auditoría",
     insightTitle: "Lo que costaron las compras por encima del techo",
     insightDesc: "En {{count}} compras usted pagó por encima del consenso, {{amount}} más de lo necesario.",
+    insightDescWithExtras: "En {{count}} compras usted pagó por encima del consenso. Si hubiera esperado a que el precio volviera a la zona de compra, tendría {{extraShares}} cuotas más por el mismo dinero — y {{extraIncome}}/mes de ingreso extra.",
     totalBoughtLabel: "Total comprado",
     totalSoldLabel: "Total neto vendido",
     totalFeesLabel: "Comisiones pagadas",

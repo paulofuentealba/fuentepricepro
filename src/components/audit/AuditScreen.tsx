@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency } from "@/lib/formatters";
+import { formatCurrency, formatNumber } from "@/lib/formatters";
 import { displayTicker, toIntlLocale, type Locale } from "@/lib/i18n";
 import type { DecisionLogEntry, DecisionLogSummary, DecisionVerdict } from "@/lib/audit/types";
 import { InsightBanner } from "@/components/shared/InsightBanner";
@@ -118,9 +118,20 @@ export function AuditScreen({ summary, isLoading = false }: AuditScreenProps) {
         <InsightBanner
           title={t.auditScreen?.insightTitle || "O que as compras acima do teto custaram"}
           description={
-            (t.auditScreen?.insightDesc || "Em {{count}} compras você pagou acima do consenso, {{amount}} a mais do que precisava.")
-              .replace("{{count}}", String(summary.overpaidCount))
-              .replace("{{amount}}", formatCurrency(summary.overpaidTotalBRL, "BRL", locale))
+            summary.overpaidExtraShares > 0
+              ? (
+                  t.auditScreen?.insightDescWithExtras ||
+                  "Em {{count}} compras você pagou acima do consenso. Se tivesse esperado o preço voltar à zona de compra, teria {{extraShares}} cotas a mais pelo mesmo dinheiro — e {{extraIncome}}/mês de renda extra."
+                )
+                  .replace("{{count}}", String(summary.overpaidCount))
+                  .replace("{{extraShares}}", formatNumber(summary.overpaidExtraShares, locale, 0))
+                  .replace("{{extraIncome}}", formatCurrency(summary.overpaidExtraMonthlyIncomeBRL, "BRL", locale))
+              : (
+                  t.auditScreen?.insightDesc ||
+                  "Em {{count}} compras você pagou acima do consenso, {{amount}} a mais do que precisava."
+                )
+                  .replace("{{count}}", String(summary.overpaidCount))
+                  .replace("{{amount}}", formatCurrency(summary.overpaidTotalBRL, "BRL", locale))
           }
           value={formatCurrency(summary.overpaidTotalBRL, "BRL", locale)}
         />

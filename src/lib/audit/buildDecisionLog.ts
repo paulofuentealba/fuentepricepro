@@ -50,11 +50,13 @@ export function buildDecisionLog(
   const assetTypeByTicker = new Map<string, AssetType>();
   const currencyByTicker = new Map<string, Currency>();
   const nameByTicker = new Map<string, string>();
+  const annualDividendByTicker = new Map<string, number>();
   for (const item of watchlistItems) {
     const ticker = item.ticker.toUpperCase();
     assetTypeByTicker.set(ticker, item.type);
     currencyByTicker.set(ticker, item.currency);
     nameByTicker.set(ticker, item.name);
+    annualDividendByTicker.set(ticker, item.annualDividend || 0);
   }
 
   const sortedTxs = [...transactions]
@@ -169,6 +171,25 @@ export function buildDecisionLog(
       .toFixed(2),
   );
 
+  // "Se tivesse esperado o preço voltar à zona de compra, teria N cotas a mais pelo mesmo
+  // dinheiro" — same money (quantity * pricePaid) buys (quantity * pricePaid / consensus) shares
+  // at the consensus price instead; the difference is only positive when price actually exceeded
+  // consensus (a yield-trap entry paid AT/below consensus contributes 0, not a negative number).
+  let overpaidExtraShares = 0;
+  let overpaidExtraMonthlyIncomeBRL = 0;
+  for (const e of overpaid) {
+    if (!e.consensusAtDecision || e.consensusAtDecision <= 0 || e.pricePerShare <= e.consensusAtDecision) {
+      continue;
+    }
+    const extraShares = e.quantity * (e.pricePerShare / e.consensusAtDecision - 1);
+    overpaidExtraShares += extraShares;
+    const annualDividendPerShare = annualDividendByTicker.get(e.ticker) || 0;
+    const extraMonthlyIncomeNative = (extraShares * annualDividendPerShare) / 12;
+    overpaidExtraMonthlyIncomeBRL += toBRL(extraMonthlyIncomeNative, e.currency, fxRate);
+  }
+  overpaidExtraShares = Number(overpaidExtraShares.toFixed(2));
+  overpaidExtraMonthlyIncomeBRL = Number(overpaidExtraMonthlyIncomeBRL.toFixed(2));
+
   const totalFeesBRL = Number(
     entries.reduce((sum, e) => sum + toBRL(e.feesNative, e.currency, fxRate), 0).toFixed(2),
   );
@@ -192,6 +213,8 @@ export function buildDecisionLog(
     entries,
     overpaidCount: overpaid.length,
     overpaidTotalBRL,
+    overpaidExtraShares,
+    overpaidExtraMonthlyIncomeBRL,
     totalFeesBRL,
     totalTaxBRL,
     totalBoughtBRL,

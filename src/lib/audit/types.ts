@@ -56,6 +56,15 @@ export interface DecisionLogSummary {
   /** Buys with verdict "above_ceiling" or "yield_trap" — what paying above consensus cost. */
   overpaidCount: number;
   overpaidTotalBRL: number;
+  /** Sum, across overpaid buys, of how many extra shares the same money would have bought at
+   * that decision's consensus price instead of the price actually paid — the prototype's "2.140
+   * cotas a mais" framing. Only accrues for entries where price > consensus (an actual overpay;
+   * a yield-trap flagged entry that happened to be paid AT or below consensus contributes 0). */
+  overpaidExtraShares: number;
+  /** overpaidExtraShares × the ticker's CURRENT annual dividend/share ÷ 12, converted to BRL.
+   * Uses today's dividend rate, not the rate at the time of purchase (untracked historically) —
+   * same simplification already used across the app for anything dividend-rate-dependent. */
+  overpaidExtraMonthlyIncomeBRL: number;
   totalFeesBRL: number;
   totalTaxBRL: number;
   totalBoughtBRL: number;

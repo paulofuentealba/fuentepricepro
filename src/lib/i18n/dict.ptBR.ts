@@ -2205,6 +2205,7 @@ export const ptBR = {
     title: "Auditoria",
     insightTitle: "O que as compras acima do teto custaram",
     insightDesc: "Em {{count}} compras você pagou acima do consenso, {{amount}} a mais do que precisava.",
+    insightDescWithExtras: "Em {{count}} compras você pagou acima do consenso. Se tivesse esperado o preço voltar à zona de compra, teria {{extraShares}} cotas a mais pelo mesmo dinheiro — e {{extraIncome}}/mês de renda extra.",
     totalBoughtLabel: "Total comprado",
     totalSoldLabel: "Total líquido vendido",
     totalFeesLabel: "Taxas pagas",

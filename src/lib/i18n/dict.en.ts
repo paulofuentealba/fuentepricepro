@@ -2193,6 +2193,7 @@ export const en = {
     title: "Audit",
     insightTitle: "What buying above the ceiling cost you",
     insightDesc: "In {{count}} purchases you paid above consensus, {{amount}} more than you needed to.",
+    insightDescWithExtras: "In {{count}} purchases you paid above consensus. Had you waited for the price to return to the buy zone, the same money would have bought {{extraShares}} more shares — and {{extraIncome}}/month in extra income.",
     totalBoughtLabel: "Total bought",
     totalSoldLabel: "Total net sold",
     totalFeesLabel: "Fees paid",

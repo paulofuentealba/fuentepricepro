@@ -105,6 +105,41 @@ describe("buildDecisionLog: buys (reads Transaction.thesisSnapshot)", () => {
     expect(entry.totalNative).toBeCloseTo(181.0 * 50 + 5, 2);
     expect(summary.overpaidCount).toBe(1);
     expect(summary.overpaidTotalBRL).toBeCloseTo(640, 2);
+    // Same R$2,405 (50 * 181 -paid) buys 50 * (181/168.2 - 1) = ~3.81 extra shares at consensus,
+    // at HGLG11's default annualDividend (2.5, from makeWatchlistItem) -> ~R$0.79/month extra.
+    expect(summary.overpaidExtraShares).toBeCloseTo(3.81, 1);
+    expect(summary.overpaidExtraMonthlyIncomeBRL).toBeCloseTo(0.79, 1);
+  });
+
+  it("contributes 0 extra shares for a yield-trap buy paid AT or below consensus (no real overpay)", () => {
+    const tx: Transaction = {
+      id: "tx-trap",
+      ticker: "MXRF11",
+      type: "buy",
+      date: new Date(2025, 0, 8).getTime(),
+      quantity: 100,
+      pricePerShare: 10.0,
+      fees: 0,
+      thesisSnapshot: {
+        consensusPrice: 10.5, // paid BELOW consensus, but still flagged a yield trap
+        bazinPrice: 9.8,
+        grahamPrice: null,
+        gordonPrice: null,
+        purchasePrice: 10.0,
+        safetyMarginVsConsensus: ((10.5 - 10.0) / 10.0) * 100,
+        payoutRatio: 130,
+        dividendYield: 12.6,
+        dividendCagr5y: null,
+        piotroskiScore: null,
+        isYieldTrap: true,
+        valuationVersion: "fuente-v1",
+        capturedAt: Date.now(),
+      },
+    };
+    const summary = buildDecisionLog([tx], [makeWatchlistItem({ ticker: "MXRF11", type: "FII" })], 5);
+    expect(summary.entries[0].verdict).toBe("yield_trap");
+    expect(summary.overpaidExtraShares).toBe(0);
+    expect(summary.overpaidExtraMonthlyIncomeBRL).toBe(0);
   });
 
   it("marks a purchase well below consensus as great_entry", () => {
