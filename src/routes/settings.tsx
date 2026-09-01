@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-provider";
 import { auth, db } from "@/integrations/firebase/client";
@@ -27,9 +27,11 @@ import {
   Target,
   Rocket,
   Scale,
+  FileJson,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
-import { calculateProfileTier } from "@/lib/investor-profile";
+import { calculateProfileTier, type ProfileTier, type ProfileSublabel } from "@/lib/investor-profile";
 import { buildUserDataExport } from "@/lib/dataExport";
 import { buildAccountDeletionPaths } from "@/lib/accountDeletion";
 import {
@@ -40,6 +42,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n-provider";
+import { useUserSettings } from "@/lib/useUserSettings";
+import { useWatchlist } from "@/lib/watchlist";
+import { buildWatchlistFullCsv, downloadCsv } from "@/lib/csv";
+import { toIntlLocale } from "@/lib/i18n";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: async () => {
@@ -59,12 +65,109 @@ export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 });
 
+/**
+ * Fetches every Firestore collection under users/{uid}, builds the LGPD/GDPR export payload via
+ * buildUserDataExport (the SSOT for what "your data" means), and triggers a browser download.
+ * Shared by the standalone "Exportar meus dados (JSON)" button (Privacidade tab, matching the
+ * prototype) and DeleteAccountWizard's backup-before-delete step — one implementation, not two.
+ */
+async function exportUserDataJsonBackup(user: { uid: string; email: string | null }): Promise<void> {
+  const userDocRef = doc(db, "users", user.uid);
+  const assetsRef = collection(db, "users", user.uid, "assets");
+  const txRef = collection(db, "users", user.uid, "transactions");
+  const snapshotsRef = collection(db, "users", user.uid, "portfolioSnapshots");
+  const feedbacksRef = collection(db, "users", user.uid, "feedbacks");
+
+  const [userDocSnap, assetsSnap, txSnap, snapshotsSnap, feedbacksSnap] = await Promise.all([
+    getDoc(userDocRef),
+    getDocs(assetsRef),
+    getDocs(txRef),
+    getDocs(snapshotsRef),
+    getDocs(feedbacksRef),
+  ]);
+
+  const userDocData = userDocSnap.exists() ? userDocSnap.data() : null;
+  const assetsData = assetsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const txData = txSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const snapshotsData = snapshotsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const feedbacksData = feedbacksSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  let localMappings: Record<string, string> = {};
+  try {
+    const rawLocal = window.localStorage.getItem("ceilingPricePro.issuerTickerMappings.v1");
+    if (rawLocal) {
+      const parsed = JSON.parse(rawLocal);
+      if (parsed && typeof parsed === "object") {
+        localMappings = parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to read local issuerTickerMappings for export", e);
+  }
+
+  const payload = buildUserDataExport({
+    userDoc: userDocData,
+    localIssuerTickerMappings: localMappings,
+    assets: assetsData,
+    transactions: txData,
+    portfolioSnapshots: snapshotsData,
+    feedbacks: feedbacksData,
+    metadata: {
+      userId: user.uid,
+      email: user.email,
+      exportedAt: new Date().toISOString(),
+    },
+  });
+
+  const dataStr = JSON.stringify(payload, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `fuentepricepro_backup_${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function SettingsPage() {
   const { user, loading } = useAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const S = t.settings;
+  const { settings } = useUserSettings();
+  const { items: watchlistItems } = useWatchlist();
   const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "privacy">("profile");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isExportingJson, setIsExportingJson] = useState(false);
+
+  const handleExportJson = async () => {
+    if (!user?.uid) return;
+    setIsExportingJson(true);
+    try {
+      await exportUserDataJsonBackup(user);
+      toast.success(S.privacy.exportJsonSuccess);
+    } catch (error) {
+      console.error("Export JSON failed", error);
+      toast.error(t.errors.saveProfileFailed);
+    } finally {
+      setIsExportingJson(false);
+    }
+  };
+
+  const handleExportCsv = () => {
+    if (watchlistItems.length === 0) {
+      toast.info(t.toasts.emptyWatchlist);
+      return;
+    }
+    try {
+      const csv = buildWatchlistFullCsv(watchlistItems);
+      const date = new Date().toISOString().slice(0, 10);
+      downloadCsv(`carteira-${date}.csv`, csv);
+      toast.success(S.privacy.exportCsvSuccess);
+    } catch (error) {
+      console.error("Export CSV failed", error);
+      toast.error(t.toasts.exportFailed);
+    }
+  };
 
   // Determinar se a conta é Google (fonte da verdade para o nome)
   const isGoogle = user?.providerData?.some((p: any) => p.providerId === "google.com") ?? false;
@@ -248,7 +351,7 @@ function SettingsPage() {
         {/* Content Area */}
         <section className="space-y-4">
           {activeTab === "profile" && (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
               <form
                 onSubmit={handleSaveProfile}
                 className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6 space-y-6"
@@ -332,6 +435,46 @@ function SettingsPage() {
                 <p className="text-sm text-muted-foreground mt-1">{S.privacy.description}</p>
               </div>
 
+              {/* Seus dados — replica o card "Seus dados" do protótipo (LGPD pill + export) */}
+              <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="font-serif text-[15px] font-medium text-foreground">
+                    {S.privacy.dataCardTitle}
+                  </h3>
+                  <span className="inline-flex items-center rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-display font-semibold text-accent-text">
+                    {S.privacy.dataCardPill}
+                  </span>
+                </div>
+                <p className="mb-4 text-[12.5px] leading-relaxed text-muted-foreground">
+                  {S.privacy.dataCardDesc}
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleExportJson}
+                    disabled={isExportingJson}
+                    className="w-full font-display"
+                  >
+                    {isExportingJson ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileJson className="mr-2 h-4 w-4" />
+                    )}
+                    {S.privacy.exportJsonBtn}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleExportCsv}
+                    className="w-full font-display"
+                  >
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    {S.privacy.exportCsvBtn}
+                  </Button>
+                </div>
+              </div>
+
               {/* Danger Zone */}
               <div className="rounded-[18px] border border-destructive/30 bg-destructive/5 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
@@ -354,6 +497,42 @@ function SettingsPage() {
                     </Button>
                   </div>
                 </div>
+              </div>
+
+              {/* Legalnote — replica o rodapé do protótipo mostrando o aceite do disclaimer */}
+              <div className="rounded-xl bg-muted/40 px-5 py-4 text-[11px] leading-relaxed text-muted-foreground">
+                {settings?.disclaimerAcceptedVersion ? (
+                  <>
+                    <span className="font-medium text-foreground">{S.privacy.disclaimerAcceptanceLabel}</span>{" "}
+                    <strong className="text-foreground">
+                      {S.privacy.disclaimerVersionText.replace(
+                        "{{version}}",
+                        settings.disclaimerAcceptedVersion,
+                      )}
+                    </strong>
+                    {settings.disclaimerAcceptedAt && (
+                      <>
+                        ,{" "}
+                        {S.privacy.disclaimerAcceptedOnText
+                          .replace(
+                            "{{date}}",
+                            new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "short" }).format(
+                              settings.disclaimerAcceptedAt,
+                            ),
+                          )
+                          .replace(
+                            "{{time}}",
+                            new Intl.DateTimeFormat(toIntlLocale(locale), { timeStyle: "short" }).format(
+                              settings.disclaimerAcceptedAt,
+                            ),
+                          )}
+                        .
+                      </>
+                    )}
+                  </>
+                ) : (
+                  S.privacy.disclaimerNotAccepted
+                )}
               </div>
             </div>
           )}
@@ -399,64 +578,8 @@ function DeleteAccountWizard({
   const handleExport = async () => {
     if (!user?.uid) return;
     setIsExporting(true);
-
     try {
-      const userDocRef = doc(db, "users", user.uid);
-      const assetsRef = collection(db, "users", user.uid, "assets");
-      const txRef = collection(db, "users", user.uid, "transactions");
-      const snapshotsRef = collection(db, "users", user.uid, "portfolioSnapshots");
-      const feedbacksRef = collection(db, "users", user.uid, "feedbacks");
-
-      const [userDocSnap, assetsSnap, txSnap, snapshotsSnap, feedbacksSnap] = await Promise.all([
-        getDoc(userDocRef),
-        getDocs(assetsRef),
-        getDocs(txRef),
-        getDocs(snapshotsRef),
-        getDocs(feedbacksRef),
-      ]);
-
-      const userDocData = userDocSnap.exists() ? userDocSnap.data() : null;
-      const assetsData = assetsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const txData = txSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const snapshotsData = snapshotsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const feedbacksData = feedbacksSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      let localMappings: Record<string, string> = {};
-      try {
-        const rawLocal = window.localStorage.getItem("ceilingPricePro.issuerTickerMappings.v1");
-        if (rawLocal) {
-          const parsed = JSON.parse(rawLocal);
-          if (parsed && typeof parsed === "object") {
-            localMappings = parsed;
-          }
-        }
-      } catch (e) {
-        console.warn("Failed to read local issuerTickerMappings for export", e);
-      }
-
-      const payload = buildUserDataExport({
-        userDoc: userDocData,
-        localIssuerTickerMappings: localMappings,
-        assets: assetsData,
-        transactions: txData,
-        portfolioSnapshots: snapshotsData,
-        feedbacks: feedbacksData,
-        metadata: {
-          userId: user.uid,
-          email: user.email,
-          exportedAt: new Date().toISOString(),
-        },
-      });
-
-      const dataStr = JSON.stringify(payload, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `fuentepricepro_backup_${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-
+      await exportUserDataJsonBackup(user);
       toast.success(S.backupSuccess);
       setStep(2);
     } catch (error) {
@@ -664,54 +787,98 @@ function DeleteAccountWizard({
   );
 }
 
+/**
+ * Replicates the prototype's "Seu perfil de investidor" card exactly
+ * (fuente-v6-completo.html:866-878): gold tier pill, a highlighted narrative-title box, a
+ * key/value table (Objetivo/Tolerância a risco/Horizonte/Respondido em), and a full-width ghost
+ * "Refazer Questionário" button.
+ */
 function InvestorProfileSettingsCard() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const { profile } = useInvestorProfile();
+  const IC = t.settings.profile.investorCard;
+
+  const hasAnsweredProfile = !!profile.completedAt && !!profile.goal && !!profile.horizon;
+
+  if (!hasAnsweredProfile) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 rounded-[18px] border border-border/60 bg-card p-5 text-center sm:p-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary/10">
+          <Target className="h-5 w-5 text-primary" />
+        </div>
+        <h3 className="font-serif text-[15px] font-medium text-foreground">{IC.noProfileTitle}</h3>
+        <p className="max-w-xs text-xs text-muted-foreground">{IC.noProfileDesc}</p>
+        <Button
+          type="button"
+          onClick={() => navigate({ to: "/profile", search: { returnTo: "/settings" } })}
+          className="mt-1 font-display"
+        >
+          {IC.startBtn}
+        </Button>
+      </div>
+    );
+  }
 
   const { tier, sublabel } = calculateProfileTier(profile);
+  const narrativeTitle = IC.narrativeTitles[tier as ProfileTier][sublabel as ProfileSublabel];
+  const goalKey = profile.goal === "income" ? "protect" : (profile.goal as "preserve" | "protect" | "both" | "growth");
+  const objectiveValue = t.onboarding.questions.goal.options[goalKey]?.title ?? "—";
+  const horizonValue = profile.horizon ? t.onboarding.questions.horizon.options[profile.horizon]?.title : "—";
+  const answeredOnValue = profile.completedAt
+    ? new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "short" }).format(profile.completedAt)
+    : "—";
 
-  const getTierIcon = () => {
-    if (tier === "conservative") return Shield;
-    if (tier === "aggressive") return Rocket;
-    return Scale;
-  };
-
-  const TierIcon = getTierIcon();
+  const rows: [string, string][] = [
+    [IC.objectiveLabel, objectiveValue],
+    [IC.riskLabel, IC.riskToleranceLabels[tier as ProfileTier]],
+    [IC.horizonLabel, horizonValue ?? "—"],
+    [IC.answeredOnLabel, answeredOnValue],
+  ];
 
   return (
-    <>
-      <div className="p-6 rounded-xl border border-border/50 bg-card space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <TierIcon className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-base">{t.onboarding.result.profileLabel}</h4>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-semibold uppercase tracking-wider">
-                  {t.onboarding.result.tiers[tier]}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  • {t.onboarding.result.sublabels[sublabel]}
-                </span>
-              </div>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate({ to: "/profile", search: { returnTo: "/settings" } })}
-            className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary self-start sm:self-auto"
-          >
-            {t.onboarding.result.retakeBtn}
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+    <div className="flex h-full flex-col rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="font-serif text-[15px] font-medium text-foreground">{IC.title}</h3>
+        <span className="inline-flex items-center rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-display font-semibold text-accent-text">
+          {t.onboarding.result.tiers[tier]}
+        </span>
+      </div>
+
+      <div className="mb-4 rounded-[14px] bg-muted/40 p-[18px]">
+        <div className="mb-1.5 font-serif text-[21px] font-semibold text-foreground">{narrativeTitle}</div>
+        <p className="text-[12.5px] leading-relaxed text-muted-foreground">
           {t.onboarding.result.descriptions[tier]}
         </p>
       </div>
-    </>
+
+      <div className="text-[12.5px]">
+        {rows.map(([label, value]) => (
+          <div
+            key={label}
+            className="flex items-center justify-between border-b border-dashed border-border/40 py-2 last:border-b-0"
+          >
+            <span className="text-muted-foreground">{label}</span>
+            <span className="font-mono font-semibold text-foreground">{value}</span>
+          </div>
+        ))}
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => navigate({ to: "/profile", search: { returnTo: "/settings" } })}
+        className="mt-3.5 w-full font-display"
+      >
+        {t.onboarding.result.retakeBtn}
+      </Button>
+
+      <Link
+        to="/app/goals"
+        className="mt-3 self-center text-xs font-display font-semibold text-accent-text hover:underline"
+      >
+        {IC.goalsLink}
+      </Link>
+    </div>
   );
 }
