@@ -16,7 +16,6 @@ import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { SearchHit } from "@/lib/apiService.functions";
-import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const VERDICT_VARIANT = {
@@ -27,6 +26,23 @@ const VERDICT_VARIANT = {
   no_data: "default",
 } as const;
 
+const VERDICT_DOT_CLASS: Record<keyof typeof VERDICT_VARIANT, string> = {
+  above_ceiling: "bg-danger",
+  yield_trap: "bg-danger",
+  great_entry: "bg-success",
+  fair_entry: "bg-accent",
+  no_data: "bg-muted-foreground",
+};
+
+function computeCardVerdict(c: ValuedWatchlistItem): keyof typeof VERDICT_VARIANT {
+  const margin = c.valuation?.margin ?? c.safetyMargin ?? null;
+  const yieldTrap = c.valuation?.yieldTrapWarning === true;
+  if (margin == null) return "no_data";
+  if (yieldTrap) return "yield_trap";
+  if (margin < 0) return "above_ceiling";
+  return margin >= 10 ? "great_entry" : "fair_entry";
+}
+
 export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}) {
   const { t, locale } = useI18n();
   const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
@@ -35,17 +51,24 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
 
   const [extraCandidates, setExtraCandidates] = useState<ValuedWatchlistItem[]>([]);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
   const [isFetchingCandidate, setIsFetchingCandidate] = useState(false);
   const [rawAmount, setRawAmount] = useState("1.000");
   const [isAmountFocused, setIsAmountFocused] = useState(false);
 
   const fxRate = fx?.USDBRL ?? 5;
 
+  // Suggestion pills are trimmed to positive-margin holdings only (auto-suggestion = green dot
+  // only). A ticker the user searches manually is added regardless of its verdict — that's a
+  // deliberate look-up, not a suggestion — and keeps its real (possibly red/gold) color.
+  const manualTickers = useMemo(() => new Set(extraCandidates.map((c) => c.ticker)), [extraCandidates]);
+
   const candidates = useMemo(() => {
     const byTicker = new Map<string, ValuedWatchlistItem>();
-    for (const item of valuedItems) byTicker.set(item.ticker, item);
-    for (const item of extraCandidates) if (!byTicker.has(item.ticker)) byTicker.set(item.ticker, item);
+    for (const item of valuedItems) {
+      const verdict = computeCardVerdict(item);
+      if (verdict === "great_entry" || verdict === "fair_entry") byTicker.set(item.ticker, item);
+    }
+    for (const item of extraCandidates) byTicker.set(item.ticker, item);
     return Array.from(byTicker.values());
   }, [valuedItems, extraCandidates]);
 
@@ -72,7 +95,6 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   }, [result, t]);
 
   async function handlePickNewTicker(hit: SearchHit) {
-    setShowSearch(false);
     setIsFetchingCandidate(true);
     try {
       const asset = await queryClient.ensureQueryData(assetQueryOptions(hit.ticker));
@@ -115,55 +137,40 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
         </div>
       )}
 
-      {/* Candidate rail */}
-      <div className="relative">
-        <div className="scrollbar-none flex snap-x gap-2 overflow-x-auto scroll-smooth pb-1">
-          {candidates.map((c) => {
-            const margin = c.valuation?.margin ?? c.safetyMargin ?? null;
-            const yieldTrap = c.valuation?.yieldTrapWarning === true;
-            const cardVerdict =
-              margin == null ? "no_data" : yieldTrap ? "yield_trap" : margin < 0 ? "above_ceiling" : margin >= 10 ? "great_entry" : "fair_entry";
-            const isActive = c.ticker === activeTicker;
-            return (
-              <button
-                key={c.ticker}
-                type="button"
-                onClick={() => setSelectedTicker(c.ticker)}
-                className={cn(
-                  "w-[128px] shrink-0 snap-start overflow-hidden rounded-xl border p-2.5 text-left transition-colors",
-                  isActive ? "border-accent bg-accent/10" : "border-border/60 bg-card hover:border-accent/50",
-                )}
-              >
-                <div className="truncate font-mono text-[13px] font-bold text-foreground">{displayTicker(c.ticker)}</div>
-                <div className="mb-1.5 truncate text-[9.5px] text-muted-foreground">{c.name}</div>
-                <StatusBadge variant={VERDICT_VARIANT[cardVerdict]} className="px-1.5 py-0.5 text-[9px]">
-                  {t.auditScreen?.verdicts?.[cardVerdict]}
-                </StatusBadge>
-              </button>
-            );
-          })}
+      {/* Candidate picker: pills (suggestions, always positive-margin) + a fixed search field */}
+      <div className="space-y-2.5">
+        {candidates.length > 0 && (
+          <div className="scrollbar-none flex snap-x gap-2 overflow-x-auto scroll-smooth pb-0.5">
+            {candidates.map((c) => {
+              const verdict = computeCardVerdict(c);
+              const isManual = manualTickers.has(c.ticker);
+              const isActive = c.ticker === activeTicker;
+              return (
+                <button
+                  key={c.ticker}
+                  type="button"
+                  onClick={() => setSelectedTicker(c.ticker)}
+                  className={cn(
+                    "inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full border px-3 py-2 font-mono text-[12.5px] font-bold transition-colors",
+                    isActive ? "border-accent bg-accent/10 text-foreground" : "border-border/60 bg-card text-foreground hover:border-accent/50",
+                  )}
+                >
+                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", isManual ? VERDICT_DOT_CLASS[verdict] : "bg-success")} />
+                  {displayTicker(c.ticker)}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-          {showSearch ? (
-            <div className="w-[220px] shrink-0 snap-start rounded-xl border border-dashed border-accent bg-card p-2">
-              <TickerSearchField
-                onPick={handlePickNewTicker}
-                placeholder={t.screenerScreen?.searchPlaceholder}
-                autoFocus
-                hideSelectError
-              />
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowSearch(true)}
-              disabled={isFetchingCandidate}
-              className="flex w-[128px] shrink-0 snap-start items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/60 p-2.5 text-[11px] font-display font-medium text-muted-foreground transition-colors hover:border-accent/60 hover:text-accent-text"
-            >
-              <Search className="h-3.5 w-3.5" />
-              {t.screenerScreen?.addNewCard}
-            </button>
-          )}
-        </div>
+        <TickerSearchField
+          onPick={handlePickNewTicker}
+          placeholder={t.screenerScreen?.searchPlaceholder}
+          hideSelectError
+        />
+        {isFetchingCandidate && (
+          <p className="text-[11px] text-muted-foreground">{t.common.loading}</p>
+        )}
       </div>
 
       {/* Hero simulation */}

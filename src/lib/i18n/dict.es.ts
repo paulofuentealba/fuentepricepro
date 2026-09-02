@@ -2025,7 +2025,6 @@ export const es = {
     eyebrow: "Fuente Price Pro · Screener",
     title: "No es \"mira este activo\" — es \"mira lo que hace por ti\"",
     subtitle: "Elija un candidato, indique cuánto piensa colocar, y el resultado — no la lista — se convierte en el centro de la pantalla.",
-    addNewCard: "+ Buscar otro ticker",
     searchPlaceholder: "Buscar ticker…",
     amountLabel: "Voy a colocar",
     vsConsensus: "vs. consenso",

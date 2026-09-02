@@ -2021,7 +2021,6 @@ export const ptBR = {
     eyebrow: "Fuente Price Pro · Screener",
     title: "Não é \"olha esse ativo\" — é \"olha o que ele faz por você\"",
     subtitle: "Escolha um candidato, digite quanto pretende colocar, e o resultado — não a lista — vira o centro da tela.",
-    addNewCard: "+ Buscar outro ticker",
     searchPlaceholder: "Buscar ticker…",
     amountLabel: "Vou colocar",
     vsConsensus: "vs. consenso",

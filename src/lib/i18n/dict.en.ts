@@ -2009,7 +2009,6 @@ export const en = {
     eyebrow: "Fuente Price Pro · Screener",
     title: "It's not \"look at this asset\" — it's \"look what it does for you\"",
     subtitle: "Pick a candidate, type how much you plan to put in, and the result — not the list — becomes the center of the screen.",
-    addNewCard: "+ Search another ticker",
     searchPlaceholder: "Search ticker…",
     amountLabel: "I'm putting in",
     vsConsensus: "vs. consensus",
