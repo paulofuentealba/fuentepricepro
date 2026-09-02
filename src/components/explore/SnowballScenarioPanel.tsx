@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Area, AreaChart, CartesianGrid, Line, ReferenceLine, XAxis, YAxis } from "recharts";
+import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, XAxis, YAxis } from "recharts";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -159,7 +159,7 @@ export function SnowballScenarioPanel() {
 
         <div className="mt-5 h-[220px] w-full">
           <ChartContainer config={chartConfig} className="h-full w-full">
-            <AreaChart data={chartData} margin={CHART_MARGIN}>
+            <ComposedChart data={chartData} margin={CHART_MARGIN}>
               <defs>
                 <ChartGlowDef id="snowballGlowArea" blur={6} />
                 <linearGradient id="snowballColorPatrimonio" x1="0" y1="0" x2="0" y2="1">
@@ -248,7 +248,7 @@ export function SnowballScenarioPanel() {
                 activeDot={{ r: 3.5 }}
               />
               <ChartLegend content={<ChartLegendContent />} className="pt-2" />
-            </AreaChart>
+            </ComposedChart>
           </ChartContainer>
         </div>
 
