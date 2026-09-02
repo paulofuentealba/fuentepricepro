@@ -1,6 +1,7 @@
 import type { AssetType } from "@/lib/domain";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { getDisplayAssetType } from "@/lib/formatters";
+import { convertCurrency } from "@/lib/currency";
 
 export interface ClassAllocationState {
   type: AssetType;
@@ -25,6 +26,10 @@ export interface ClassAllocationState {
 export function computeClassAllocationState(
   positions: ValuedWatchlistItem[],
   targets: Partial<Record<AssetType, number>> | undefined,
+  /** When provided, converts each position's value to BRL before summing (the correct behavior
+   * — matches useFIProgress's canonical totalCapitalBRL). Omitted here to keep balanceTargets.ts
+   * byte-for-byte behavior-identical to before this extraction; the Screener passes a real rate. */
+  fxRate?: number,
 ): Map<AssetType, ClassAllocationState> {
   const classCurrentValue: Partial<Record<AssetType, number>> = {};
   let totalCurrentValue = 0;
@@ -32,7 +37,8 @@ export function computeClassAllocationState(
   for (const pos of positions) {
     const livePrice = pos.livePrice ?? pos.currentPrice ?? 0;
     const qty = pos.quantity ?? 0;
-    const value = qty * livePrice;
+    const rawValue = qty * livePrice;
+    const value = fxRate != null ? convertCurrency(rawValue, pos.currency, "BRL", fxRate) : rawValue;
     const type = getDisplayAssetType(pos.type);
     classCurrentValue[type] = (classCurrentValue[type] || 0) + value;
     totalCurrentValue += value;
