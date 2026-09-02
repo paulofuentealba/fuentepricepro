@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, useState } from "react";
 import {
   Calculator as CalculatorIcon,
   Scale,
@@ -7,14 +7,32 @@ import {
   Sparkles,
   TrendingUp,
   Search,
-  ExternalLink,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n-provider";
 import { SnowballScenarioPanel } from "@/components/explore/SnowballScenarioPanel";
 import { ScreenerScreen } from "@/components/screener/ScreenerScreen";
+import { AuditPanel } from "@/components/audit/AuditPanel";
+
+const RiskRadar = lazy(() =>
+  import("@/components/ceiling/RiskRadar").then((m) => ({ default: m.RiskRadar })),
+);
+const DividendRadar = lazy(() =>
+  import("@/components/ceiling/DividendRadar").then((m) => ({ default: m.DividendRadar })),
+);
+
+function ToolSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-44 w-full rounded-2xl bg-muted/30" />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Skeleton className="h-64 rounded-2xl bg-muted/30" />
+        <Skeleton className="h-64 rounded-2xl bg-muted/30" />
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/app/explore")({
   head: () => ({
@@ -38,35 +56,30 @@ export function ExplorarPage() {
       id: "screener",
       label: t.tabs.screener,
       icon: CalculatorIcon,
-      path: "/app/screener",
       description: "Calculadora de Preço Teto, Margem de Segurança Bazin/Graham e consenso Fuente.",
     },
     {
       id: "comparator",
       label: t.tabs.comparator,
       icon: Scale,
-      path: "/app/comparator",
-      description: "Compare múltiplos ativos lado a lado com métricas de valuation e dividendos.",
+      description: "Histórico de decisões de compra e venda, com o consenso da época e o imposto real pago.",
     },
     {
       id: "riskradar",
       label: t.tabs.riskRadar,
       icon: ShieldAlert,
-      path: "/app/riskradar",
       description: "Matriz de risco, concentração de carteira e alertas de saúde financeira.",
     },
     {
       id: "globalradar",
       label: t.tabs.radar,
       icon: Sparkles,
-      path: "/app/globalradar",
       description: "Oportunidades de entrada em ativos abaixo do Preço Teto no Brasil e no exterior.",
     },
     {
       id: "snowball",
       label: t.snowball?.title || "Efeito Bola de Neve",
       icon: TrendingUp,
-      path: "/app/snowballeffectsimulator",
       description: "Simulador de reinvestimento de dividendos e aceleração patrimonial.",
     },
   ];
@@ -104,9 +117,8 @@ export function ExplorarPage() {
         </TabsList>
 
         {tools.map((tool) => {
-          const Icon = tool.icon;
-
           if (tool.id === "snowball") {
+            const Icon = tool.icon;
             return (
               <TabsContent key={tool.id} value={tool.id} className="mt-6">
                 <div className="flex items-center gap-3">
@@ -131,38 +143,29 @@ export function ExplorarPage() {
             );
           }
 
+          if (tool.id === "comparator") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <AuditPanel />
+              </TabsContent>
+            );
+          }
+
+          if (tool.id === "riskradar") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <Suspense fallback={<ToolSkeleton />}>
+                  <RiskRadar />
+                </Suspense>
+              </TabsContent>
+            );
+          }
+
           return (
             <TabsContent key={tool.id} value={tool.id} className="mt-6">
-              <Card className="border-border">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent-text">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <CardTitle className="font-serif text-base font-medium">{tool.label}</CardTitle>
-                      <CardDescription className="text-xs sm:text-sm">
-                        {tool.description}
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      A visualização agregada desta ferramenta está em preparação para a interface unificada da v4.
-                    </p>
-                    <div className="mt-4 flex justify-center">
-                      <Button asChild variant="outline" className="gap-2">
-                        <Link to={tool.path}>
-                          <span>Abrir {tool.label} em tela cheia</span>
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <Suspense fallback={<ToolSkeleton />}>
+                <DividendRadar />
+              </Suspense>
             </TabsContent>
           );
         })}
