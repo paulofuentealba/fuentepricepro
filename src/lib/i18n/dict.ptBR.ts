@@ -908,6 +908,17 @@ export const ptBR = {
     growthUnit: "{{pct}}% a.a.",
     horizonUnit: "{{years}} anos",
     disclaimer: "Dividendo-base vem da função canônica; só os parâmetros acima são hipotéticos.",
+    presetLabel: "Cenário",
+    presetConservative: "Conservador",
+    presetModerate: "Moderado",
+    presetAggressive: "Arrojado",
+    presetHint: "Pré-selecionado com base no seu perfil de investidor — ajuste os controles à vontade.",
+    fiBridgeLabel: "Independência financeira",
+    fiBridgeReachedAt: "Estimada no ano {{year}}",
+    fiBridgeNotReached: "Não alcançada em {{years}} anos — aumente o aporte ou o horizonte.",
+    fiBridgeNotSet: "Configure sua meta de gastos mensais para ver quando a atinge.",
+    fiBridgeCta: "Configurar meta →",
+    fiBridgeChartLabel: "Meta",
   },
 
   disclaimer:

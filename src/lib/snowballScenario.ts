@@ -18,6 +18,9 @@ export interface SnowballScenarioInput {
 export interface SnowballScenarioYearPoint {
   year: number;
   balance: number;
+  /** Base equity plus cumulative contributions, uncompounded — same "Principal" the interest
+   * (balance - principal) is measured against for the crossover point. */
+  principal: number;
 }
 
 export interface SnowballScenarioResult {
@@ -26,6 +29,9 @@ export interface SnowballScenarioResult {
   finalMonthlyIncome: number;
   /** One point per completed year, 1..years. */
   yearPoints: SnowballScenarioYearPoint[];
+  /** First year where compounded interest overtakes contributed principal, or null if it never
+   * does within the horizon. */
+  crossoverYear: number | null;
 }
 
 export function simulateSnowballScenario(input: SnowballScenarioInput): SnowballScenarioResult {
@@ -36,19 +42,27 @@ export function simulateSnowballScenario(input: SnowballScenarioInput): Snowball
   const totalMonths = Math.max(1, Math.round(input.years)) * 12;
 
   let balance = baseEquity;
+  let principal = baseEquity;
   const yearPoints: SnowballScenarioYearPoint[] = [];
 
   for (let m = 1; m <= totalMonths; m++) {
     balance += balance * monthlyYield; // dividends reinvested
     balance += balance * monthlyGrowth; // price appreciation
     balance += monthlyContribution;
+    principal += monthlyContribution;
     if (m % 12 === 0) {
-      yearPoints.push({ year: m / 12, balance });
+      yearPoints.push({ year: m / 12, balance, principal });
     }
   }
 
   const finalBalance = yearPoints.length > 0 ? yearPoints[yearPoints.length - 1].balance : balance;
   const finalMonthlyIncome = (finalBalance * (input.yieldPct / 100)) / 12;
+  const crossoverPoint = yearPoints.find((p) => p.balance - p.principal > p.principal);
 
-  return { finalBalance, finalMonthlyIncome, yearPoints };
+  return {
+    finalBalance,
+    finalMonthlyIncome,
+    yearPoints,
+    crossoverYear: crossoverPoint?.year ?? null,
+  };
 }

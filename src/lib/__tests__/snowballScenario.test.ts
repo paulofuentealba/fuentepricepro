@@ -62,4 +62,40 @@ describe("simulateSnowballScenario", () => {
     });
     expect(result.finalBalance).toBe(0);
   });
+
+  it("tracks principal as base equity plus cumulative contributions, uncompounded", () => {
+    const result = simulateSnowballScenario({
+      baseEquity: 10000,
+      monthlyContribution: 500,
+      yieldPct: 8,
+      growthPct: 0,
+      years: 2,
+    });
+    expect(result.yearPoints[0].principal).toBeCloseTo(10000 + 500 * 12, 6);
+    expect(result.yearPoints[1].principal).toBeCloseTo(10000 + 500 * 24, 6);
+  });
+
+  it("finds the crossover year where interest overtakes principal", () => {
+    const result = simulateSnowballScenario({
+      baseEquity: 100000,
+      monthlyContribution: 500,
+      yieldPct: 12,
+      growthPct: 6,
+      years: 15,
+    });
+    expect(result.crossoverYear).not.toBeNull();
+    const crossoverPoint = result.yearPoints.find((p) => p.year === result.crossoverYear)!;
+    expect(crossoverPoint.balance - crossoverPoint.principal).toBeGreaterThan(crossoverPoint.principal);
+  });
+
+  it("returns a null crossover year when interest never overtakes principal within the horizon", () => {
+    const result = simulateSnowballScenario({
+      baseEquity: 0,
+      monthlyContribution: 1000,
+      yieldPct: 0.1,
+      growthPct: 0,
+      years: 1,
+    });
+    expect(result.crossoverYear).toBeNull();
+  });
 });

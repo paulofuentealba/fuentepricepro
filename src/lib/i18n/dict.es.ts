@@ -913,6 +913,17 @@ export const es = {
     growthUnit: "{{pct}}% anual",
     horizonUnit: "{{years}} años",
     disclaimer: "El dividendo base viene de la función canónica; solo los parámetros de arriba son hipotéticos.",
+    presetLabel: "Escenario",
+    presetConservative: "Conservador",
+    presetModerate: "Moderado",
+    presetAggressive: "Agresivo",
+    presetHint: "Preseleccionado según su perfil de inversor — ajuste los controles libremente.",
+    fiBridgeLabel: "Independencia financiera",
+    fiBridgeReachedAt: "Estimada en el año {{year}}",
+    fiBridgeNotReached: "No alcanzada en {{years}} años — aumente el aporte o el horizonte.",
+    fiBridgeNotSet: "Configure su meta de gastos mensuales para ver cuándo la alcanza.",
+    fiBridgeCta: "Configurar meta →",
+    fiBridgeChartLabel: "Meta",
   },
 
   disclaimer:

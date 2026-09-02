@@ -901,6 +901,17 @@ export const en = {
     growthUnit: "{{pct}}%/yr",
     horizonUnit: "{{years}} years",
     disclaimer: "The base dividend comes from the canonical function; only the parameters above are hypothetical.",
+    presetLabel: "Scenario",
+    presetConservative: "Conservative",
+    presetModerate: "Moderate",
+    presetAggressive: "Aggressive",
+    presetHint: "Pre-selected from your investor profile — adjust the controls freely.",
+    fiBridgeLabel: "Financial independence",
+    fiBridgeReachedAt: "Estimated in year {{year}}",
+    fiBridgeNotReached: "Not reached within {{years}} years — increase the contribution or horizon.",
+    fiBridgeNotSet: "Set your monthly living cost goal to see when you'll reach it.",
+    fiBridgeCta: "Set up goal →",
+    fiBridgeChartLabel: "Goal",
   },
 
   disclaimer:

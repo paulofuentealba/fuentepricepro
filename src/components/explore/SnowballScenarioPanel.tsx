@@ -1,11 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Slider } from "@/components/ui/slider";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
+import { ChartGlowDef } from "@/components/ui/ChartGlowDef";
 import { useI18n } from "@/lib/i18n-provider";
 import { useSnowballBase } from "@/lib/useSnowballBase";
+import { useFIProgress } from "@/lib/useFIProgress";
+import { useInvestorProfile } from "@/lib/useInvestorProfile";
+import { calculateProfileTier, type ProfileTier } from "@/lib/investor-profile";
 import { simulateSnowballScenario } from "@/lib/snowballScenario";
 import { formatCurrency } from "@/lib/i18n";
 import { resolveReasonText } from "@/lib/askEngine";
+import { cn } from "@/lib/utils";
+
+const CHART_MARGIN = { top: 20, right: 10, left: -20, bottom: 0 };
+
+const PRESETS: Record<ProfileTier, { yieldPct: number; growthPct: number }> = {
+  conservative: { yieldPct: 6, growthPct: 3 },
+  moderate: { yieldPct: 8, growthPct: 6 },
+  aggressive: { yieldPct: 11, growthPct: 9 },
+};
 
 interface ParamRowProps {
   label: string;
@@ -26,23 +49,46 @@ function ParamRow({ label, value, children }: ParamRowProps) {
 }
 
 /**
- * "Bola de neve" scenario panel — reproduces the Projeção/Parâmetros two-card layout from the
- * v6 prototype (docs/design/v6/prototipo-v6.html, tabpane#e5), wired to real data instead of
- * the prototype's hardcoded numbers: base equity and blended yield come from useSnowballBase
- * (the same canonical calc SnowballSimulator uses), and the yield/growth/contribution/horizon
- * sliders drive simulateSnowballScenario. Growth and yield-override have no equivalent in
- * SnowballSimulator — this is a distinct, explicitly hypothetical "what-if" tool, per the
- * panel's own disclaimer.
+ * "Bola de neve" scenario panel — Projeção/Parâmetros two-card layout from the v6 prototype,
+ * wired to real data: base equity and blended yield come from useSnowballBase (the same
+ * canonical calc SnowballSimulator uses). The "cenário" preset default is derived from the
+ * user's investor profile tier (calculateProfileTier, same SSOT the allocation matrix uses) —
+ * once the user touches any control manually, that auto-pick stops overriding their choice.
  */
 export function SnowballScenarioPanel() {
   const { t, locale } = useI18n();
   const base = useSnowballBase();
+  const fi = useFIProgress();
+  const { profile, isPending: profilePending } = useInvestorProfile();
+
+  const derivedTier = useMemo(() => calculateProfileTier(profile).tier, [profile]);
+  const hasUserAdjusted = useRef(false);
 
   const [monthlyContribution, setMonthlyContribution] = useState(2500);
-  const [growthPct, setGrowthPct] = useState(6);
+  const [growthPct, setGrowthPct] = useState(PRESETS.moderate.growthPct);
   const [years, setYears] = useState(20);
-  const [yieldOverride, setYieldOverride] = useState<number | null>(null);
-  const yieldPct = yieldOverride ?? Math.round(base.blendedYield * 1000) / 10;
+  const [yieldOverride, setYieldOverride] = useState<number>(PRESETS.moderate.yieldPct);
+
+  // Apply the profile-derived preset once the profile resolves — but only while the user hasn't
+  // touched any control yet, so a late-arriving profile never clobbers a manual choice.
+  useEffect(() => {
+    if (hasUserAdjusted.current || profilePending) return;
+    const preset = PRESETS[derivedTier];
+    setYieldOverride(preset.yieldPct);
+    setGrowthPct(preset.growthPct);
+  }, [derivedTier, profilePending]);
+
+  const yieldPct = yieldOverride;
+
+  const selectedPreset = (Object.keys(PRESETS) as ProfileTier[]).find(
+    (tier) => PRESETS[tier].yieldPct === yieldPct && PRESETS[tier].growthPct === growthPct,
+  );
+
+  function applyPreset(tier: ProfileTier) {
+    hasUserAdjusted.current = true;
+    setYieldOverride(PRESETS[tier].yieldPct);
+    setGrowthPct(PRESETS[tier].growthPct);
+  }
 
   const result = useMemo(
     () =>
@@ -56,15 +102,33 @@ export function SnowballScenarioPanel() {
     [base.currentTotal, monthlyContribution, yieldPct, growthPct, years],
   );
 
-  const barPoints = useMemo(() => {
-    const pts = result.yearPoints;
-    if (pts.length <= 6) return pts;
-    const step = (pts.length - 1) / 5;
-    return Array.from({ length: 6 }, (_, i) => pts[Math.round(i * step)]);
-  }, [result.yearPoints]);
+  const chartConfig = {
+    Juros: { label: t.snowball.interest, color: "var(--success)" },
+    Principal: { label: t.snowball.principal, color: "var(--comparison)" },
+  } satisfies ChartConfig;
 
-  const maxBar = Math.max(...barPoints.map((p) => p.balance), 1);
-  const splitIndex = Math.ceil(barPoints.length / 2);
+  const chartData = useMemo(
+    () =>
+      result.yearPoints.map((p) => ({
+        year: resolveReasonText(t, "snowball.year", { year: p.year }),
+        Principal: p.principal,
+        Juros: Math.max(0, p.balance - p.principal),
+      })),
+    [result.yearPoints, t],
+  );
+
+  const crossoverLabel = result.crossoverYear
+    ? resolveReasonText(t, "snowball.year", { year: result.crossoverYear })
+    : null;
+
+  // Financial-independence bridge: first year the projected monthly income covers the goal
+  // configured in Metas e Critérios (useFIProgress — same SSOT the dashboard's FI card uses).
+  const fiYearPoint = fi.isSetup
+    ? result.yearPoints.find((p) => (p.balance * (yieldPct / 100)) / 12 >= fi.monthlyCostGoal)
+    : undefined;
+  const fiYearLabel = fiYearPoint
+    ? resolveReasonText(t, "snowball.year", { year: fiYearPoint.year })
+    : null;
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -87,24 +151,119 @@ export function SnowballScenarioPanel() {
           })}
         </div>
 
-        <div className="mt-5 flex h-[130px] items-end gap-2">
-          {barPoints.map((p, i) => {
-            const heightPct = Math.max((p.balance / maxBar) * 100, 4);
-            const isGold = i >= splitIndex;
-            return (
-              <div
-                key={p.year}
-                className="flex-1 rounded-[5px]"
-                style={{
-                  height: `${heightPct}%`,
-                  background: isGold
-                    ? "linear-gradient(180deg, color-mix(in oklch, var(--accent) 55%, transparent), var(--accent))"
-                    : "linear-gradient(180deg, color-mix(in oklch, var(--success) 55%, transparent), var(--success))",
-                }}
-                title={`${resolveReasonText(t, "snowball.year", { year: p.year })}: ${formatCurrency(p.balance, base.currency, locale)}`}
+        <div className="mt-5 h-[220px] w-full">
+          <ChartContainer config={chartConfig} className="h-full w-full">
+            <AreaChart data={chartData} margin={CHART_MARGIN}>
+              <defs>
+                <ChartGlowDef id="snowballGlowArea" blur={6} />
+                <linearGradient id="snowballColorPrincipal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-Principal)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="var(--color-Principal)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="snowballColorJuros" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-Juros)" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="var(--color-Juros)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                stroke="color-mix(in oklab, var(--border) 40%, transparent)"
               />
-            );
-          })}
+              <XAxis
+                dataKey="year"
+                interval="preserveStartEnd"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "var(--muted-foreground)" }}
+                dy={10}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                fontSize={11}
+                tick={{ fill: "var(--muted-foreground)" }}
+                tickFormatter={(v: number) =>
+                  new Intl.NumberFormat(locale, { notation: "compact" }).format(v)
+                }
+              />
+              <ChartTooltip
+                cursor={{
+                  stroke: "color-mix(in oklab, var(--border) 60%, transparent)",
+                  strokeWidth: 1,
+                  strokeDasharray: "4 4",
+                }}
+                content={
+                  <ChartTooltipContent
+                    valueFormatter={(value: any) => formatCurrency(value, base.currency, locale)}
+                  />
+                }
+              />
+              {crossoverLabel && (
+                <ReferenceLine
+                  x={crossoverLabel}
+                  stroke="var(--color-Juros)"
+                  strokeDasharray="3 3"
+                  label={{
+                    position: "top",
+                    value: t.snowball.crossover,
+                    fill: "var(--color-Juros)",
+                    fontSize: 10,
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+              {fiYearLabel && (
+                <ReferenceLine
+                  x={fiYearLabel}
+                  stroke="var(--primary)"
+                  strokeDasharray="3 3"
+                  label={{
+                    position: "insideTopRight",
+                    value: t.snowballScenario?.fiBridgeChartLabel,
+                    fill: "var(--primary)",
+                    fontSize: 10,
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+              <Area
+                type="monotone"
+                dataKey="Principal"
+                stackId="1"
+                stroke="var(--color-Principal)"
+                strokeWidth={2}
+                fill="url(#snowballColorPrincipal)"
+              />
+              <Area
+                type="monotone"
+                dataKey="Juros"
+                stackId="1"
+                stroke="var(--color-Juros)"
+                strokeWidth={3}
+                fill="url(#snowballColorJuros)"
+                filter="url(#snowballGlowArea)"
+              />
+              <ChartLegend content={<ChartLegendContent />} className="pt-2" />
+            </AreaChart>
+          </ChartContainer>
+        </div>
+
+        <div className="mt-3 rounded-xl bg-muted/30 p-3 text-[11.5px] leading-relaxed text-muted-foreground">
+          <span className="font-semibold text-foreground">{t.snowballScenario?.fiBridgeLabel}: </span>
+          {!fi.isSetup ? (
+            <>
+              {t.snowballScenario?.fiBridgeNotSet}{" "}
+              <Link to="/app/goals" className="font-semibold text-accent-text hover:underline">
+                {t.snowballScenario?.fiBridgeCta}
+              </Link>
+            </>
+          ) : fiYearLabel ? (
+            resolveReasonText(t, "snowballScenario.fiBridgeReachedAt", { year: fiYearPoint?.year })
+          ) : (
+            resolveReasonText(t, "snowballScenario.fiBridgeNotReached", { years })
+          )}
         </div>
       </div>
 
@@ -113,7 +272,38 @@ export function SnowballScenarioPanel() {
           <h3 className="font-serif text-base font-medium text-foreground">
             {t.snowballScenario?.parametersTitle}
           </h3>
-          <StatusBadge variant="gold">{t.snowballScenario?.scenarioBadge}</StatusBadge>
+        </div>
+
+        <div className="mt-4">
+          <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t.snowballScenario?.presetLabel}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(Object.keys(PRESETS) as ProfileTier[]).map((tier) => {
+              const presetLabel =
+                tier === "conservative"
+                  ? t.snowballScenario?.presetConservative
+                  : tier === "moderate"
+                    ? t.snowballScenario?.presetModerate
+                    : t.snowballScenario?.presetAggressive;
+              return (
+                <button
+                  key={tier}
+                  type="button"
+                  onClick={() => applyPreset(tier)}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    selectedPreset === tier
+                      ? "border-accent bg-accent/15 text-accent-text"
+                      : "border-border/60 text-muted-foreground hover:border-accent/50 hover:text-foreground",
+                  )}
+                >
+                  {presetLabel}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-[10.5px] text-muted-foreground">{t.snowballScenario?.presetHint}</p>
         </div>
 
         <div className="mt-5 flex flex-col gap-4">
@@ -126,7 +316,10 @@ export function SnowballScenarioPanel() {
               max={10000}
               step={100}
               value={[monthlyContribution]}
-              onValueChange={(v) => setMonthlyContribution(v[0])}
+              onValueChange={(v) => {
+                hasUserAdjusted.current = true;
+                setMonthlyContribution(v[0]);
+              }}
               aria-label={t.snowballScenario?.monthlyContribution}
             />
           </ParamRow>
@@ -137,7 +330,10 @@ export function SnowballScenarioPanel() {
               max={15}
               step={0.1}
               value={[yieldPct]}
-              onValueChange={(v) => setYieldOverride(v[0])}
+              onValueChange={(v) => {
+                hasUserAdjusted.current = true;
+                setYieldOverride(v[0]);
+              }}
               aria-label={t.snowballScenario?.dividendYield}
             />
           </ParamRow>
@@ -151,7 +347,10 @@ export function SnowballScenarioPanel() {
               max={15}
               step={0.5}
               value={[growthPct]}
-              onValueChange={(v) => setGrowthPct(v[0])}
+              onValueChange={(v) => {
+                hasUserAdjusted.current = true;
+                setGrowthPct(v[0]);
+              }}
               aria-label={t.snowballScenario?.growth}
             />
           </ParamRow>
@@ -165,7 +364,10 @@ export function SnowballScenarioPanel() {
               max={35}
               step={1}
               value={[years]}
-              onValueChange={(v) => setYears(v[0])}
+              onValueChange={(v) => {
+                hasUserAdjusted.current = true;
+                setYears(v[0]);
+              }}
               aria-label={t.snowballScenario?.horizon}
             />
           </ParamRow>
