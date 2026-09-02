@@ -22,7 +22,7 @@ import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { resolveReasonText } from "@/lib/askEngine";
 import { cn } from "@/lib/utils";
 
-const CHART_MARGIN = { top: 20, right: 10, left: -20, bottom: 0 };
+const CHART_MARGIN = { top: 20, right: 10, left: 0, bottom: 0 };
 
 const PRESETS: Record<ProfileTier, { yieldPct: number; growthPct: number }> = {
   conservative: { yieldPct: 6, growthPct: 3 },
@@ -180,6 +180,7 @@ export function SnowballScenarioPanel() {
                 dy={10}
               />
               <YAxis
+                width={52}
                 tickLine={false}
                 axisLine={false}
                 fontSize={11}
