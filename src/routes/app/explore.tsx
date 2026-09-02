@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 import { SnowballScenarioPanel } from "@/components/explore/SnowballScenarioPanel";
+import { ScreenerScreen } from "@/components/screener/ScreenerScreen";
 
 export const Route = createFileRoute("/app/explore")({
   head: () => ({
@@ -118,6 +119,14 @@ export function ExplorarPage() {
                   </div>
                 </div>
                 <SnowballScenarioPanel />
+              </TabsContent>
+            );
+          }
+
+          if (tool.id === "screener") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <ScreenerScreen embedded />
               </TabsContent>
             );
           }
