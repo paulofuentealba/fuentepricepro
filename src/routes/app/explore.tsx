@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n-provider";
 import { SnowballScenarioPanel } from "@/components/explore/SnowballScenarioPanel";
 import { ScreenerScreen } from "@/components/screener/ScreenerScreen";
-import { AuditPanel } from "@/components/audit/AuditPanel";
+import { AssetComparator } from "@/components/ceiling/AssetComparator";
 
 const RiskRadar = lazy(() =>
   import("@/components/ceiling/RiskRadar").then((m) => ({ default: m.RiskRadar })),
@@ -62,7 +62,7 @@ export function ExplorarPage() {
       id: "comparator",
       label: t.tabs.comparator,
       icon: Scale,
-      description: "Histórico de decisões de compra e venda, com o consenso da época e o imposto real pago.",
+      description: "Compare múltiplos ativos lado a lado com métricas de valuation e dividendos.",
     },
     {
       id: "riskradar",
@@ -146,7 +146,7 @@ export function ExplorarPage() {
           if (tool.id === "comparator") {
             return (
               <TabsContent key={tool.id} value={tool.id} className="mt-6">
-                <AuditPanel />
+                <AssetComparator />
               </TabsContent>
             );
           }
