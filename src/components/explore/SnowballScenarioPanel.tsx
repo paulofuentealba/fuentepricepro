@@ -102,14 +102,15 @@ export function SnowballScenarioPanel() {
     [base.currentTotal, monthlyContribution, yieldPct, growthPct, years],
   );
 
-  // Aporte (Principal) gets the app's neutral gold — same hue already used for "cenário" and
-  // consensus values, distinct from Juros' green so the two bands read apart at a glance.
-  // Patrimônio rides on top as its own line (same tone as the big number above the chart) so
-  // total wealth growth is an explicit, undeniable line — not just implied by the stack's top.
+  // Classic compound-interest chart pattern (Bankrate/NerdWallet), not a stacked area: Principal
+  // grows linearly and gets dwarfed on any shared axis with the exponential total — as a thin
+  // stacked band it reads as flat. Drawn as its own traceable line (unstacked, true absolute
+  // values) instead, its real slope is visible on its own merits; the widening gap between the
+  // gold line and the green total area tells the "juros compostos" story better than a squished
+  // filled band ever could.
   const chartConfig = {
-    Juros: { label: t.snowball.interest, color: "var(--success)" },
+    Patrimonio: { label: t.snowball.totalWealth, color: "var(--success)" },
     Principal: { label: t.snowball.principal, color: "var(--accent)" },
-    Patrimonio: { label: t.snowball.totalWealth, color: "var(--foreground)" },
   } satisfies ChartConfig;
 
   const chartData = useMemo(
@@ -117,7 +118,6 @@ export function SnowballScenarioPanel() {
       result.yearPoints.map((p) => ({
         year: resolveReasonText(t, "snowball.year", { year: p.year }),
         Principal: p.principal,
-        Juros: Math.max(0, p.balance - p.principal),
         Patrimonio: p.balance,
       })),
     [result.yearPoints, t],
@@ -162,13 +162,9 @@ export function SnowballScenarioPanel() {
             <AreaChart data={chartData} margin={CHART_MARGIN}>
               <defs>
                 <ChartGlowDef id="snowballGlowArea" blur={6} />
-                <linearGradient id="snowballColorPrincipal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-Principal)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="var(--color-Principal)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="snowballColorJuros" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-Juros)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-Juros)" stopOpacity={0} />
+                <linearGradient id="snowballColorPatrimonio" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-Patrimonio)" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="var(--color-Patrimonio)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -210,12 +206,12 @@ export function SnowballScenarioPanel() {
               {crossoverLabel && (
                 <ReferenceLine
                   x={crossoverLabel}
-                  stroke="var(--color-Juros)"
+                  stroke="var(--color-Patrimonio)"
                   strokeDasharray="3 3"
                   label={{
                     position: "top",
                     value: t.snowball.crossover,
-                    fill: "var(--color-Juros)",
+                    fill: "var(--color-Patrimonio)",
                     fontSize: 10,
                     fontWeight: 600,
                   }}
@@ -237,25 +233,16 @@ export function SnowballScenarioPanel() {
               )}
               <Area
                 type="monotone"
-                dataKey="Principal"
-                stackId="1"
-                stroke="var(--color-Principal)"
-                strokeWidth={2}
-                fill="url(#snowballColorPrincipal)"
-              />
-              <Area
-                type="monotone"
-                dataKey="Juros"
-                stackId="1"
-                stroke="var(--color-Juros)"
+                dataKey="Patrimonio"
+                stroke="var(--color-Patrimonio)"
                 strokeWidth={3}
-                fill="url(#snowballColorJuros)"
+                fill="url(#snowballColorPatrimonio)"
                 filter="url(#snowballGlowArea)"
               />
               <Line
                 type="monotone"
-                dataKey="Patrimonio"
-                stroke="var(--color-Patrimonio)"
+                dataKey="Principal"
+                stroke="var(--color-Principal)"
                 strokeWidth={2.5}
                 dot={false}
                 activeDot={{ r: 3.5 }}
