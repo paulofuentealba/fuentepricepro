@@ -182,8 +182,8 @@ export function TickerSearchField({
                       type="button"
                       onClick={() => pick(a)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
-                        highlightedIndex === idx && "bg-accent text-accent-foreground",
+                        "flex w-full items-center justify-between gap-3 border-l-2 border-transparent px-3 py-2 text-left text-sm hover:bg-accent/10",
+                        highlightedIndex === idx && "border-l-accent bg-accent/10",
                       )}
                     >
                       <span className="flex flex-col">

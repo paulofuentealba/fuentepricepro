@@ -26,14 +26,6 @@ const VERDICT_VARIANT = {
   no_data: "default",
 } as const;
 
-const VERDICT_DOT_CLASS: Record<keyof typeof VERDICT_VARIANT, string> = {
-  above_ceiling: "bg-danger",
-  yield_trap: "bg-danger",
-  great_entry: "bg-success",
-  fair_entry: "bg-accent",
-  no_data: "bg-muted-foreground",
-};
-
 function computeCardVerdict(c: ValuedWatchlistItem): keyof typeof VERDICT_VARIANT {
   const margin = c.valuation?.margin ?? c.safetyMargin ?? null;
   const yieldTrap = c.valuation?.yieldTrapWarning === true;
@@ -49,31 +41,32 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   const { settings } = useUserSettings();
   const queryClient = useQueryClient();
 
-  const [extraCandidates, setExtraCandidates] = useState<ValuedWatchlistItem[]>([]);
-  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [pickedCandidate, setPickedCandidate] = useState<ValuedWatchlistItem | null>(null);
   const [isFetchingCandidate, setIsFetchingCandidate] = useState(false);
   const [rawAmount, setRawAmount] = useState("1.000");
   const [isAmountFocused, setIsAmountFocused] = useState(false);
 
   const fxRate = fx?.USDBRL ?? 5;
 
-  // Suggestion pills are trimmed to positive-margin holdings only (auto-suggestion = green dot
-  // only). A ticker the user searches manually is added regardless of its verdict — that's a
-  // deliberate look-up, not a suggestion — and keeps its real (possibly red/gold) color.
-  const manualTickers = useMemo(() => new Set(extraCandidates.map((c) => c.ticker)), [extraCandidates]);
-
-  const candidates = useMemo(() => {
-    const byTicker = new Map<string, ValuedWatchlistItem>();
+  // Default candidate: the best positive-margin holding in the watchlist (Regra: a tela abre
+  // com algo relevante, sem exigir que o usuario busque antes de ver o simulador funcionando).
+  // Once the user searches a ticker, that pick takes over — regardless of its own verdict.
+  const bestHoldingCandidate = useMemo(() => {
+    let best: ValuedWatchlistItem | null = null;
+    let bestMargin = -Infinity;
     for (const item of valuedItems) {
       const verdict = computeCardVerdict(item);
-      if (verdict === "great_entry" || verdict === "fair_entry") byTicker.set(item.ticker, item);
+      if (verdict !== "great_entry" && verdict !== "fair_entry") continue;
+      const margin = item.valuation?.margin ?? item.safetyMargin ?? -Infinity;
+      if (margin > bestMargin) {
+        best = item;
+        bestMargin = margin;
+      }
     }
-    for (const item of extraCandidates) byTicker.set(item.ticker, item);
-    return Array.from(byTicker.values());
-  }, [valuedItems, extraCandidates]);
+    return best;
+  }, [valuedItems]);
 
-  const activeTicker = selectedTicker ?? candidates[0]?.ticker ?? null;
-  const activeCandidate = candidates.find((c) => c.ticker === activeTicker) ?? null;
+  const activeCandidate = pickedCandidate ?? bestHoldingCandidate;
 
   const parsedAmount = useMemo(() => {
     const num = parseFloat(rawAmount.replace(/\./g, "").replace(",", "."));
@@ -100,8 +93,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
       const asset = await queryClient.ensureQueryData(assetQueryOptions(hit.ticker));
       const targetYield = settings?.classTargetYields?.[asset.type] ?? settings?.targetYield ?? 6;
       const candidate = buildScreenerCandidate(asset, targetYield);
-      setExtraCandidates((prev) => [...prev.filter((c) => c.ticker !== candidate.ticker), candidate]);
-      setSelectedTicker(candidate.ticker);
+      setPickedCandidate(candidate);
     } catch {
       toast.error(t.errors.notFound);
     } finally {
@@ -137,32 +129,8 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
         </div>
       )}
 
-      {/* Candidate picker: pills (suggestions, always positive-margin) + a fixed search field */}
-      <div className="space-y-2.5">
-        {candidates.length > 0 && (
-          <div className="scrollbar-none flex snap-x gap-2 overflow-x-auto scroll-smooth pb-0.5">
-            {candidates.map((c) => {
-              const verdict = computeCardVerdict(c);
-              const isManual = manualTickers.has(c.ticker);
-              const isActive = c.ticker === activeTicker;
-              return (
-                <button
-                  key={c.ticker}
-                  type="button"
-                  onClick={() => setSelectedTicker(c.ticker)}
-                  className={cn(
-                    "inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full border px-3 py-2 font-mono text-[12.5px] font-bold transition-colors",
-                    isActive ? "border-accent bg-accent/10 text-foreground" : "border-border/60 bg-card text-foreground hover:border-accent/50",
-                  )}
-                >
-                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", isManual ? VERDICT_DOT_CLASS[verdict] : "bg-success")} />
-                  {displayTicker(c.ticker)}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
+      {/* Candidate picker: a single always-visible search field, no extra step */}
+      <div className="space-y-2">
         <TickerSearchField
           onPick={handlePickNewTicker}
           placeholder={t.screenerScreen?.searchPlaceholder}
