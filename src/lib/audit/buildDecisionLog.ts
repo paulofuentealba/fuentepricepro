@@ -8,7 +8,12 @@ import type { DecisionLogEntry, DecisionLogSummary, DecisionVerdict } from "./ty
 
 const GREAT_ENTRY_MARGIN_THRESHOLD = 10; // % — matches the prototype's BBAS3/TAEE11 examples
 
-function resolveBuyVerdict(marginAtDecision: number | null, yieldTrapAtDecision: boolean): DecisionVerdict {
+/**
+ * Exported (not just internal to the buy-decision log) so the Screener can reuse the exact same
+ * verdict taxonomy prospectively — Regra 1: one verdict vocabulary, not a second one invented for
+ * "would this be a good buy right now" vs. "was this a good buy historically".
+ */
+export function resolveBuyVerdict(marginAtDecision: number | null, yieldTrapAtDecision: boolean): DecisionVerdict {
   if (marginAtDecision == null) return "no_data";
   if (yieldTrapAtDecision) return "yield_trap";
   if (marginAtDecision < 0) return "above_ceiling";

@@ -1,5 +1,6 @@
 import type { AssetType } from "@/lib/domain";
 import { getDisplayAssetType } from "@/lib/formatters";
+import { computeClassAllocationState } from "@/lib/portfolioAllocationState";
 import type { AskStrategyContext, Strategy, StrategyCandidate } from "../types";
 
 /**
@@ -16,37 +17,16 @@ export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] 
     return [];
   }
 
-  const targets = settings.smartAllocationTargets || ({} as Record<AssetType, number>);
-
-  // 1. Calculate current portfolio value and current allocation per class
-  const classCurrentValue: Partial<Record<AssetType, number>> = {};
-  let totalCurrentValue = 0;
-
-  for (const pos of eligiblePositions) {
-    const livePrice = pos.livePrice ?? pos.currentPrice ?? 0;
-    const qty = pos.quantity ?? 0;
-    const value = qty * livePrice;
-    // FII_INFRA/FIAGRO are grouped into FII for allocation-target purposes (same SSOT grouping
-    // as usePortfolioRisk); AssetType itself stays distinct for Watchlist/Realidade Fiscal.
-    const type = getDisplayAssetType(pos.type);
-
-    classCurrentValue[type] = (classCurrentValue[type] || 0) + value;
-    totalCurrentValue += value;
-  }
-
-  // 2. Compute target deficit per class
-  // Projected total portfolio value after current investment
-  const projectedTotal = totalCurrentValue + availableAmount;
-
-  // Sum of target weights (typically 100)
-  const totalTargetWeight = Object.values(targets).reduce(
-    (sum: number, w) => sum + (typeof w === "number" && w > 0 ? w : 0),
-    0,
+  // 1-2. Current allocation state per class + projected deficit (SSOT, shared with the Screener).
+  const allocationState = computeClassAllocationState(
+    eligiblePositions,
+    settings.smartAllocationTargets,
   );
-
-  if (totalTargetWeight <= 0) {
+  if (allocationState.size === 0) {
     return [];
   }
+
+  const projectedTotal = (allocationState.values().next().value?.totalCurrentValue ?? 0) + availableAmount;
 
   interface ClassDeficit {
     type: AssetType;
@@ -58,22 +38,14 @@ export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] 
 
   const deficits: ClassDeficit[] = [];
 
-  for (const [typeKey, weight] of Object.entries(targets)) {
-    const type = typeKey as AssetType;
-    const w = typeof weight === "number" && weight > 0 ? weight : 0;
-    if (w <= 0) continue;
-
-    const targetPct = w / totalTargetWeight;
-    const targetValue = projectedTotal * targetPct;
-    const currentValue = classCurrentValue[type] || 0;
-    const deficit = targetValue - currentValue;
-
+  for (const state of allocationState.values()) {
+    const targetValue = projectedTotal * state.targetPct;
     deficits.push({
-      type,
-      targetPct,
-      currentValue,
+      type: state.type,
+      targetPct: state.targetPct,
+      currentValue: state.currentValue,
       targetValue,
-      deficit,
+      deficit: targetValue - state.currentValue,
     });
   }
 
