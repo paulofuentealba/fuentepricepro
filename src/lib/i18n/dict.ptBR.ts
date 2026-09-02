@@ -893,6 +893,7 @@ export const ptBR = {
     principal: "Principal",
     interest: "Juros",
     crossover: "Ponto de Virada",
+    totalWealth: "Patrimônio Total",
   },
 
   snowballScenario: {

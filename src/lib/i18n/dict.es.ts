@@ -898,6 +898,7 @@ export const es = {
     principal: "Principal",
     interest: "Interés",
     crossover: "Punto de Inflexión",
+    totalWealth: "Patrimonio Total",
   },
 
   snowballScenario: {

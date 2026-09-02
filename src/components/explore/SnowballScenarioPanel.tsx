@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Line, ReferenceLine, XAxis, YAxis } from "recharts";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -102,9 +102,14 @@ export function SnowballScenarioPanel() {
     [base.currentTotal, monthlyContribution, yieldPct, growthPct, years],
   );
 
+  // Aporte (Principal) gets the app's neutral gold — same hue already used for "cenário" and
+  // consensus values, distinct from Juros' green so the two bands read apart at a glance.
+  // Patrimônio rides on top as its own line (same tone as the big number above the chart) so
+  // total wealth growth is an explicit, undeniable line — not just implied by the stack's top.
   const chartConfig = {
     Juros: { label: t.snowball.interest, color: "var(--success)" },
-    Principal: { label: t.snowball.principal, color: "var(--comparison)" },
+    Principal: { label: t.snowball.principal, color: "var(--accent)" },
+    Patrimonio: { label: t.snowball.totalWealth, color: "var(--foreground)" },
   } satisfies ChartConfig;
 
   const chartData = useMemo(
@@ -113,6 +118,7 @@ export function SnowballScenarioPanel() {
         year: resolveReasonText(t, "snowball.year", { year: p.year }),
         Principal: p.principal,
         Juros: Math.max(0, p.balance - p.principal),
+        Patrimonio: p.balance,
       })),
     [result.yearPoints, t],
   );
@@ -245,6 +251,14 @@ export function SnowballScenarioPanel() {
                 strokeWidth={3}
                 fill="url(#snowballColorJuros)"
                 filter="url(#snowballGlowArea)"
+              />
+              <Line
+                type="monotone"
+                dataKey="Patrimonio"
+                stroke="var(--color-Patrimonio)"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 3.5 }}
               />
               <ChartLegend content={<ChartLegendContent />} className="pt-2" />
             </AreaChart>
