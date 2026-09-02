@@ -105,11 +105,14 @@ export function SnowballScenarioPanel() {
   // Classic compound-interest chart pattern (Bankrate/NerdWallet), not a stacked area: Principal
   // grows linearly and gets dwarfed on any shared axis with the exponential total — as a thin
   // stacked band it reads as flat. Drawn as its own traceable line (unstacked, true absolute
-  // values) instead, its real slope is visible on its own merits; the widening gap between the
-  // gold line and the green total area tells the "juros compostos" story better than a squished
-  // filled band ever could.
+  // values) instead, its real slope is visible on its own merits. Juros rides as a third,
+  // unstacked line (also its true absolute value, not a stacked delta) so it has its own visible
+  // curve — styled with --comparison (a muted green already reserved for "secondary metric" in
+  // this design system) PLUS a dashed stroke, so it reads apart from Patrimônio's solid --success
+  // even though both are greens: color and line style both differ, not just hue.
   const chartConfig = {
     Patrimonio: { label: t.snowball.totalWealth, color: "var(--success)" },
+    Juros: { label: t.snowball.interest, color: "var(--comparison)" },
     Principal: { label: t.snowball.principal, color: "var(--accent)" },
   } satisfies ChartConfig;
 
@@ -118,6 +121,7 @@ export function SnowballScenarioPanel() {
       result.yearPoints.map((p) => ({
         year: resolveReasonText(t, "snowball.year", { year: p.year }),
         Principal: p.principal,
+        Juros: Math.max(0, p.balance - p.principal),
         Patrimonio: p.balance,
       })),
     [result.yearPoints, t],
@@ -206,12 +210,12 @@ export function SnowballScenarioPanel() {
               {crossoverLabel && (
                 <ReferenceLine
                   x={crossoverLabel}
-                  stroke="var(--color-Patrimonio)"
+                  stroke="var(--color-Juros)"
                   strokeDasharray="3 3"
                   label={{
                     position: "top",
                     value: t.snowball.crossover,
-                    fill: "var(--color-Patrimonio)",
+                    fill: "var(--color-Juros)",
                     fontSize: 10,
                     fontWeight: 600,
                   }}
@@ -238,6 +242,15 @@ export function SnowballScenarioPanel() {
                 strokeWidth={3}
                 fill="url(#snowballColorPatrimonio)"
                 filter="url(#snowballGlowArea)"
+              />
+              <Line
+                type="monotone"
+                dataKey="Juros"
+                stroke="var(--color-Juros)"
+                strokeWidth={2}
+                strokeDasharray="5 3"
+                dot={false}
+                activeDot={{ r: 3.5 }}
               />
               <Line
                 type="monotone"
