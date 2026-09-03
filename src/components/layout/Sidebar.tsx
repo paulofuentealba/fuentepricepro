@@ -127,7 +127,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   onClick={toggleSidebar}
-                  className="mx-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] hover:bg-sidebar-accent/10"
+                  className="mx-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-sidebar-accent/10"
                   title={t.nav.expandMenu}
                 >
                   <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="shrink-0">
@@ -173,7 +173,7 @@ export function Sidebar() {
                   const disabledContent = (
                     <div
                       className={cn(
-                        "group relative flex items-center rounded-[9px] px-[11px] py-[8.5px] text-[12.5px] font-display font-medium opacity-50 cursor-not-allowed text-sidebar-foreground/60",
+                        "group relative flex items-center rounded-md px-[11px] py-[8.5px] text-[12.5px] font-display font-medium opacity-50 cursor-not-allowed text-sidebar-foreground/60",
                         isCollapsed ? "justify-center" : "justify-start gap-2.5",
                       )}
                     >
@@ -214,7 +214,7 @@ export function Sidebar() {
                     key={item.key}
                     to={item.path!}
                     className={cn(
-                      "group relative flex items-center rounded-[9px] px-[11px] py-[8.5px] transition-colors text-[12.5px] font-display font-medium",
+                      "group relative flex items-center rounded-md px-[11px] py-[8.5px] transition-colors text-[12.5px] font-display font-medium",
                       isCollapsed ? "justify-center" : "justify-start gap-2.5",
                       isActive
                         ? "bg-sidebar-primary text-sidebar-accent"
@@ -266,7 +266,7 @@ export function Sidebar() {
           {loading ? (
             <div
               className={cn(
-                "flex items-center rounded-[10px] p-2 w-full",
+                "flex items-center rounded-md p-2 w-full",
                 isCollapsed ? "justify-center" : "justify-start gap-2.5",
               )}
             >
@@ -288,7 +288,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   className={cn(
-                    "flex items-center rounded-[10px] p-2 transition-colors hover:bg-sidebar-foreground/[0.06] w-full text-left",
+                    "flex items-center rounded-md p-2 transition-colors hover:bg-sidebar-foreground/[0.06] w-full text-left",
                     isCollapsed ? "justify-center" : "justify-start gap-2.5",
                   )}
                 >
@@ -367,7 +367,7 @@ export function Sidebar() {
             <Link
               to="/admin"
               className={cn(
-                "flex items-center rounded-[9px] px-[11px] py-[7px] text-[11.5px] font-display font-medium text-sidebar-foreground/60 hover:bg-sidebar-foreground/[0.06] hover:text-sidebar-foreground transition-colors",
+                "flex items-center rounded-md px-[11px] py-[7px] text-[11.5px] font-display font-medium text-sidebar-foreground/60 hover:bg-sidebar-foreground/[0.06] hover:text-sidebar-foreground transition-colors",
                 isCollapsed ? "justify-center" : "gap-2.5",
               )}
             >
@@ -378,7 +378,7 @@ export function Sidebar() {
 
           {/* USD/BRL exchange rate — expanded state only, room needed for the label */}
           {!isCollapsed && showExchangeRate && (
-            <div className="flex items-center justify-between rounded-[9px] bg-sidebar-foreground/[0.07] px-[11px] py-[7px] text-[11px] font-display font-medium text-sidebar-foreground/70">
+            <div className="flex items-center justify-between rounded-md bg-sidebar-foreground/[0.07] px-[11px] py-[7px] text-[11px] font-display font-medium text-sidebar-foreground/70">
               <span>USD/BRL</span>
               <span className="tabular-nums text-sidebar-accent">
                 {formatCurrency(fx!.USDBRL, "BRL", locale)}
@@ -390,7 +390,7 @@ export function Sidebar() {
           {!isCollapsed ? (
             <div className="flex flex-col gap-1.5 pt-1">
               {/* Theme switch */}
-              <div className="flex items-center gap-1 bg-sidebar-foreground/[0.07] p-1 rounded-[9px]">
+              <div className="flex items-center gap-1 bg-sidebar-foreground/[0.07] p-1 rounded-md">
                 <button
                   type="button"
                   onClick={() => setTheme("light")}
