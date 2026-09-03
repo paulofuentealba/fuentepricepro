@@ -179,7 +179,7 @@ export function SnowballSimulator() {
                     <CartesianGrid
                       vertical={false}
                       strokeDasharray="3 3"
-                      stroke="color-mix(in oklab, var(--border) 40%, transparent)"
+                      stroke="var(--chart-grid)"
                     />
                     <XAxis
                       dataKey="year"

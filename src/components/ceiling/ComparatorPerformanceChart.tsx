@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 const ASSET_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)"];
 const BENCHMARK_IBOV_COLOR = "var(--warning)";
 const BENCHMARK_SPX_COLOR = "var(--muted-foreground)";
-const COLOR_GRID = "color-mix(in oklab, var(--border) 40%, transparent)";
+const COLOR_GRID = "var(--chart-grid)";
 const COLOR_MUTED_FG = "var(--muted-foreground)";
 const COLOR_CURSOR = "color-mix(in oklab, var(--primary) 12%, transparent)";
 
