@@ -69,13 +69,16 @@ function SummaryCard({
 function AppHome() {
   const { locale, t } = useI18n();
   const { user } = useAuth();
-  const { valuedItems, totals, isAppLoading, quotes } = useValuedPortfolio();
+  const { valuedItems, totals, isAppLoading, quotes, fx, macroRates } = useValuedPortfolio();
   const { summary: realizedSummary, isLoading: isRealizedLoading } = useRealizedIncomeSummary("BRL");
   const { coveragePercent } = useFIProgress();
   const [previousSnapshot, setPreviousSnapshot] = useState<LastVisitSnapshot | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
 
-  const largestPosition = useMemo(() => getLargestPosition(valuedItems), [valuedItems]);
+  const largestPosition = useMemo(
+    () => getLargestPosition(valuedItems, fx?.USDBRL, macroRates),
+    [valuedItems, fx, macroRates],
+  );
 
   const netWorthLabel = formatCurrency(totals.consolidatedNetWorth, "BRL", locale);
   const incomeLabel = formatCurrency(realizedSummary.currentYear, "BRL", locale);

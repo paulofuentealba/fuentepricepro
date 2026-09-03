@@ -64,4 +64,26 @@ describe("getLargestPosition", () => {
 
     expect(getLargestPosition([zero, negative])).toBeNull();
   });
+
+  it("ranks mixed-currency positions by converted value, not raw magnitude", () => {
+    // 500 USD at rate 5 = 2500 BRL, which is larger than a raw 2000 BRL position —
+    // comparing raw currentPrice*quantity across currencies would wrongly pick BRL_BIG.
+    const usdSmallRaw = makeItem({
+      ticker: "USD_POS",
+      currency: "USD",
+      currentPrice: 50,
+      quantity: 10, // raw 500
+    });
+    const brlBigRaw = makeItem({
+      ticker: "BRL_BIG",
+      currency: "BRL",
+      currentPrice: 100,
+      quantity: 20, // raw 2000
+    });
+
+    const result = getLargestPosition([usdSmallRaw, brlBigRaw], 5);
+
+    expect(result!.item.ticker).toBe("USD_POS");
+    expect(result!.marketValue).toBe(500); // native currency, unconverted
+  });
 });
