@@ -35,7 +35,7 @@ const CASHFLOW_MAIN_BAR_MARGIN = { top: 24, right: 0, left: 0, bottom: 0 };
 const CASHFLOW_BREAKDOWN_BAR_MARGIN = { top: 24, right: 80, left: 0, bottom: 0 };
 
 const COLOR_LINE = "var(--primary)";
-const COLOR_INVESTED = "var(--comparison)";
+const COLOR_RECEIVED_BAR = "var(--comparison)";
 const COLOR_MUTED_FG = "var(--muted-foreground)";
 const COLOR_FOREGROUND = "var(--foreground)";
 const COLOR_CURSOR = "color-mix(in oklab, var(--primary) 8%, transparent)";
@@ -635,7 +635,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
             <span className="flex items-center gap-2">
               <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: COLOR_BAR }} />
               {t.tabs.chart.invested}
-              <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: COLOR_INVESTED }} />
+              <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: COLOR_RECEIVED_BAR }} />
               {t.tabs.chart.received}
             </span>
           </div>
@@ -673,7 +673,7 @@ export function CashFlowChart({ data, activeCurrency, bestMonth, finalCumulative
                   content={<InvestedVsReceivedTooltip />}
                 />
                 <Bar dataKey="invested" fill={COLOR_BAR} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.75} />
-                <Bar dataKey="received" fill={COLOR_INVESTED} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.9} />
+                <Bar dataKey="received" fill={COLOR_RECEIVED_BAR} radius={[4, 4, 0, 0]} maxBarSize={28} fillOpacity={0.9} />
               </BarChart>
             </ChartContainer>
           </div>
