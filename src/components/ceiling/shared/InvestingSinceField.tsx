@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useI18n } from "@/lib/i18n-provider";
-import { toIntlLocale } from "@/lib/i18n";
+import { formatDate } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
 export interface InvestingSinceFieldProps {
@@ -31,7 +31,7 @@ export function InvestingSinceField({
   const formattedFirstTxDate = useMemo(() => {
     if (!firstTxDateObj) return "";
     try {
-      const monthStr = new Intl.DateTimeFormat(toIntlLocale(locale), { month: "short" }).format(firstTxDateObj);
+      const monthStr = formatDate(firstTxDateObj, locale, { month: "short" });
       const yearStr = firstTxDateObj.getFullYear();
       const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1);
       return `${capitalizedMonth}/${yearStr}`;

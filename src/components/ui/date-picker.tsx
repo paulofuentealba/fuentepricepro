@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useI18n } from "@/lib/i18n-provider";
-import { toIntlLocale } from "@/lib/i18n";
+import { formatDate } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
 export type DatePickerRangeMode = "past" | "future" | "custom";
@@ -94,9 +94,7 @@ export function DatePicker({
   const formattedDisplay = React.useMemo(() => {
     if (!selectedDate) return null;
     try {
-      return new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" }).format(
-        selectedDate
-      );
+      return formatDate(selectedDate, locale, { dateStyle: "medium" });
     } catch {
       return selectedDate.toLocaleDateString();
     }

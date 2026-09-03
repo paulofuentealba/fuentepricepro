@@ -7,15 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/lib/i18n-provider";
-import { toIntlLocale } from "@/lib/formatters";
+import { formatDate as formatDateTime } from "@/lib/formatters";
 import { useAdminIdToken } from "@/lib/admin/useAdminIdToken";
 import { listUsersFn, type AdminUserRow } from "@/lib/api/admin";
 
 function formatDate(iso: string | null, locale: ReturnType<typeof useI18n>["locale"]): string {
   if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "short", timeStyle: "short" }).format(d);
+  return formatDateTime(iso, locale, { dateStyle: "short", timeStyle: "short" }) || "—";
 }
 
 export function UsersTab() {

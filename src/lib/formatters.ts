@@ -127,6 +127,21 @@ export function formatMonthsAsYearsMonths(months: number, labels: DurationLabels
  * - new Date().toISOString().split("T")[0] -> "2026-08-22" (ERRADO / UTC)
  * - getLocalDateISOString(new Date())      -> "2026-08-21" (CORRETO / Local)
  */
+/**
+ * SSOT for locale-aware date display formatting (day/month/year, no time).
+ * Use this instead of calling `.toLocaleDateString()` directly so every
+ * screen renders dates the same way in every locale.
+ */
+export function formatDate(
+  input: Date | number | string,
+  locale: Locale,
+  options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "2-digit", year: "numeric" },
+): string {
+  const d = input instanceof Date ? input : new Date(input);
+  if (isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat(toIntlLocale(locale), options).format(d);
+}
+
 export function getLocalDateISOString(input?: Date | number | string | null): string {
   if (input === null || input === undefined || input === "") {
     const d = new Date();
