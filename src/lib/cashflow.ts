@@ -189,27 +189,50 @@ export function buildMonthlyBuckets(
     ? calculateRealizedIncome(transactions, dividendEventsMap, assetMetaMap)
     : [];
 
+  // Aggregate every realized/announced event into its calendar-month bucket
+  // ONCE (instead of each of the two passes below re-filtering
+  // allRealizedEvents per bucket with its own copy of the same fx/isPaid
+  // logic) — a single source of truth both passes read from, so they can't
+  // silently drift apart.
+  interface BucketAggregate {
+    monthRealized: number;
+    monthAnnounced: number;
+    tickerEventsMap: Record<string, { paid: number; announced: number; payDate: string | null }>;
+  }
+  const bucketKey = (month: number, year: number) => `${year}-${month}`;
+  const aggregatesByBucket = new Map<string, BucketAggregate>();
+  for (const ev of allRealizedEvents) {
+    const dateStr = ev.paymentDate || ev.exDate;
+    const d = new Date(dateStr);
+    const key = bucketKey(d.getUTCMonth(), d.getUTCFullYear());
+    const item = items.find((it) => it.ticker === ev.ticker);
+    const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
+    const netConverted = ev.amountNet * fx;
+
+    let agg = aggregatesByBucket.get(key);
+    if (!agg) {
+      agg = { monthRealized: 0, monthAnnounced: 0, tickerEventsMap: {} };
+      aggregatesByBucket.set(key, agg);
+    }
+    if (!agg.tickerEventsMap[ev.ticker]) {
+      agg.tickerEventsMap[ev.ticker] = { paid: 0, announced: 0, payDate: ev.paymentDate };
+    }
+    if (ev.isPaid) {
+      agg.monthRealized += netConverted;
+      agg.tickerEventsMap[ev.ticker].paid += netConverted;
+    } else {
+      agg.monthAnnounced += netConverted;
+      agg.tickerEventsMap[ev.ticker].announced += netConverted;
+      if (ev.paymentDate) {
+        agg.tickerEventsMap[ev.ticker].payDate = ev.paymentDate;
+      }
+    }
+  }
+
   // 4. --- PASS 1: compute the effective displayed value per month ---
   const effectiveAmounts: number[] = bucketTemplates.map((b) => {
     const isPast = b.calendarYear < currentYear || (b.calendarYear === currentYear && b.calendarMonth < currentMonthIndex);
-
-    // Calculate events for this month bucket
-    let monthRealized = 0;
-    let monthAnnounced = 0;
-
-    for (const ev of allRealizedEvents) {
-      const dateStr = ev.paymentDate || ev.exDate;
-      const d = new Date(dateStr);
-      if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
-        const item = items.find((it) => it.ticker === ev.ticker);
-        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
-        if (ev.isPaid) {
-          monthRealized += ev.amountNet * fx;
-        } else {
-          monthAnnounced += ev.amountNet * fx;
-        }
-      }
-    }
+    const monthRealized = aggregatesByBucket.get(bucketKey(b.calendarMonth, b.calendarYear))?.monthRealized ?? 0;
 
     if (isPast) {
       if (transactions.length > 0) {
@@ -248,35 +271,11 @@ export function buildMonthlyBuckets(
     running += b.amount;
     const isPast = b.calendarYear < currentYear || (b.calendarYear === currentYear && b.calendarMonth < currentMonthIndex);
 
-    // Filter events for this month bucket
-    let monthRealized = 0;
-    let monthAnnounced = 0;
-    const tickerEventsMap: Record<string, { paid: number; announced: number; payDate: string | null }> = {};
-
-    for (const ev of allRealizedEvents) {
-      const dateStr = ev.paymentDate || ev.exDate;
-      const d = new Date(dateStr);
-      if (d.getUTCMonth() === b.calendarMonth && d.getUTCFullYear() === b.calendarYear) {
-        const item = items.find((it) => it.ticker === ev.ticker);
-        const fx = item ? getFxMultiplier(item.currency, currency, fxRate) : 1;
-        const netConverted = ev.amountNet * fx;
-
-        if (!tickerEventsMap[ev.ticker]) {
-          tickerEventsMap[ev.ticker] = { paid: 0, announced: 0, payDate: ev.paymentDate };
-        }
-
-        if (ev.isPaid) {
-          monthRealized += netConverted;
-          tickerEventsMap[ev.ticker].paid += netConverted;
-        } else {
-          monthAnnounced += netConverted;
-          tickerEventsMap[ev.ticker].announced += netConverted;
-          if (ev.paymentDate) {
-            tickerEventsMap[ev.ticker].payDate = ev.paymentDate;
-          }
-        }
-      }
-    }
+    // Events for this month bucket, from the single shared aggregation above.
+    const agg = aggregatesByBucket.get(bucketKey(b.calendarMonth, b.calendarYear));
+    const monthRealized = agg?.monthRealized ?? 0;
+    const monthAnnounced = agg?.monthAnnounced ?? 0;
+    const tickerEventsMap = agg?.tickerEventsMap ?? {};
 
     // Populate contributor paidAmount, announcedAmount, and paymentDate
     for (const contrib of b.contributors) {
