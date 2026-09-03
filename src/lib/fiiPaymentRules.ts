@@ -2,6 +2,7 @@ import {
   nthBusinessDayOfMonth,
   nthCalendarDayPostponed,
 } from "./br-business-calendar";
+import { normalizeTicker } from "./ticker";
 
 export interface FiiPaymentRule {
   rule: "nth_business_day" | "nth_calendar_day_postponed";
@@ -33,7 +34,7 @@ export const FII_PAYMENT_RULES: Record<string, FiiPaymentRule> = {
  * @param referenceDate Date of the reference month (e.g. Data-Com date or reference month date)
  */
 export function estimatePaymentDate(ticker: string, referenceDate: Date): string | null {
-  const clean = ticker.toUpperCase().replace(".SA", "").trim();
+  const clean = normalizeTicker(ticker);
   const ruleObj = FII_PAYMENT_RULES[clean];
   if (!ruleObj) return null;
 

@@ -1,6 +1,7 @@
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import cvmLocalCache from "./data/cvm_enriched.json";
+import { normalizeTicker } from "../ticker";
 
 export interface CvmEnrichedData {
   vpa: number | null;
@@ -10,7 +11,7 @@ export interface CvmEnrichedData {
 }
 
 export async function fetchCvmEnrichedFacts(ticker: string): Promise<CvmEnrichedData> {
-  const cleanKey = ticker.toUpperCase().replace(/\.SA$/, "").trim();
+  const cleanKey = normalizeTicker(ticker);
 
   // 1. Try reading from Firestore via Admin SDK (server-to-server)
   try {

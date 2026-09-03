@@ -1,4 +1,5 @@
 import { isBrTicker } from "./classify";
+import { normalizeTicker } from "./ticker";
 
 export interface ParsedTransaction {
   lineIndex: number;
@@ -356,7 +357,7 @@ export function isSupportedAsset(ticker: string): {
     return { isSupported: false, reason: "Ticker vazio ou inválido" };
   }
 
-  const clean = ticker.trim().toUpperCase().replace(/\.SA$/, "");
+  const clean = normalizeTicker(ticker);
 
   // 1. Detect B3 Options: 4 letters + option series letter (A-L call, M-X put) + strike numbers (e.g. PETRL300, VALEA60)
   if (/^[A-Z]{4}[A-X]\d+$/.test(clean)) {
@@ -457,7 +458,7 @@ export function parseFile(
       continue;
     }
 
-    const ticker = rawTicker.toUpperCase().replace(/\.SA$/, "");
+    const ticker = normalizeTicker(rawTicker);
 
     // 2. Quantity extraction and validation
     const rawQty = qtyIdx !== -1 ? row[qtyIdx] : null;

@@ -4,6 +4,7 @@ import type { ApiAsset } from "./types";
 import { dedupeInFlight, fetchWithRetry } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { classifyBrAsync } from "./classify.server";
+import { normalizeTicker } from "../ticker";
 import {
   dividendCagrPct,
   historyFromMap,
@@ -14,7 +15,7 @@ import {
 
 
 export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
-  const clean = ticker.toUpperCase().replace(".SA", "");
+  const clean = normalizeTicker(ticker);
   return dedupeInFlight(`brapi:asset:${clean}`, async () => {
     const token = process.env.BRAPI_TOKEN;
     // `fundamental=true` only returns basic P/L + LPA (EPS) at the root of the

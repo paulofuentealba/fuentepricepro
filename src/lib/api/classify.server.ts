@@ -2,6 +2,7 @@ import type { AssetType } from "../domain";
 
 import { isBrTicker, classifyBr } from "../classify";
 import { fetchHgBrasilClassification } from "./hgBrasilClassification.server";
+import { normalizeTicker } from "../ticker";
 
 export { isBrTicker, classifyBr };
 
@@ -13,7 +14,7 @@ export async function classifyBrAsync(
   symbol: string,
   apiType?: string,
 ): Promise<AssetType> {
-  const clean = symbol.toUpperCase().replace(/\.SA$/, "").trim();
+  const clean = normalizeTicker(symbol);
   if (!clean) return "STOCK_BR";
 
   try {

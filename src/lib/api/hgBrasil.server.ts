@@ -1,6 +1,7 @@
 import { fetchWithTimeout, UA } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { HG_BRASIL_QUOTA_CACHE_TTL_MS, HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS } from "./cacheConfig.server";
+import { normalizeTicker } from "../ticker";
 
 export interface HgBrasilDividendItem {
   type: "Dividendo" | "JCP" | "Rendimento" | string;
@@ -58,7 +59,7 @@ export function normalizeHgDate(rawDate?: string | null): string | null {
  * Formats Brazilian ticker to HG Brasil format (e.g., "PETR4.SA" -> "B3:PETR4", "VALE3" -> "B3:VALE3").
  */
 export function formatHgTicker(ticker: string): string {
-  const clean = ticker.trim().toUpperCase().replace(/\.SA$/, "");
+  const clean = normalizeTicker(ticker);
   return `B3:${clean}`;
 }
 
@@ -70,7 +71,7 @@ export async function fetchHgBrasilDividends(
   ticker: string,
   apiKey?: string,
 ): Promise<HgBrasilDividendsResult | null> {
-  const cleanTicker = ticker.trim().toUpperCase().replace(/\.SA$/, "");
+  const cleanTicker = normalizeTicker(ticker);
   if (!cleanTicker) return null;
 
   const now = Date.now();

@@ -1,9 +1,10 @@
 import type { AssetType } from "./domain";
+import { normalizeTicker } from "./ticker";
 
 const BR_TICKER_RE = /^[A-Z]{4}\d{1,2}$/;
 
 export function isBrTicker(t: string): boolean {
-  return BR_TICKER_RE.test(t.toUpperCase().replace(/\.SA$/, ""));
+  return BR_TICKER_RE.test(normalizeTicker(t));
 }
 
 /**
@@ -59,7 +60,7 @@ export function classifyBr(symbol: string, apiType?: string): AssetType {
     if (t === "bdr") return "STOCK_US";
   }
 
-  const s = symbol.toUpperCase().replace(/\.SA$/, "");
+  const s = normalizeTicker(symbol);
 
   if (s.endsWith("39")) {
     return "ETF";
@@ -79,7 +80,7 @@ export function getShareClassBadge(
   ticker: string,
   type?: string,
 ): { label: string; className: string } | null {
-  const clean = ticker.trim().toUpperCase().replace(/\.SA$/, "");
+  const clean = normalizeTicker(ticker);
   if (!clean) return null;
 
   // BDRs (34 or 35) → chart-1 (orange/brown in light, purple/blue in dark)

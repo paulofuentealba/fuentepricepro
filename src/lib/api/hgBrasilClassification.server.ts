@@ -3,6 +3,7 @@ import { dedupeInFlight, fetchWithTimeout, UA } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import { ASSET_CLASSIFICATION_CACHE_TTL_MS } from "./cacheConfig.server";
+import { normalizeTicker } from "../ticker";
 
 export { ASSET_CLASSIFICATION_CACHE_TTL_MS };
 
@@ -92,7 +93,7 @@ export async function fetchHgBrasilClassification(
   ticker: string,
   apiKey?: string,
 ): Promise<AssetType | null> {
-  const clean = ticker.trim().toUpperCase().replace(/\.SA$/, "");
+  const clean = normalizeTicker(ticker);
   if (!clean) return null;
 
   return dedupeInFlight(`hgBrasil:classification:${clean}`, async () => {
