@@ -7,6 +7,8 @@ import { useTransactions } from "@/lib/transactions";
 import { useFeatureGate } from "@/lib/useFeatureGate";
 import { useI18n } from "@/lib/i18n-provider";
 import { buildTaxContext, type TaxRealityContext } from "@/lib/tax/buildTaxContext";
+import { computeTaxRealityRows, buildTaxRealityCsv } from "@/lib/tax/taxRealityRows";
+import { downloadCsv } from "@/lib/csv";
 import { TaxRealityScreen } from "@/components/tax/TaxRealityScreen";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Lock } from "lucide-react";
@@ -64,19 +66,10 @@ export function RealidadeFiscalPage() {
       context={context}
       isLoading={isLoading}
       onExport={() => {
-        // TODO: implement CSV export for tax reality
         const date = new Date().toISOString().split("T")[0];
-        // Build CSV content
-        const csvLines = [
-          ["Seção", "Mês", "Vendas (R$)", "Ganho/Prejuízo (R$)", "Isento", "Ganho Tributável (R$)", "Imposto Devido (R$)", "Prejuízo a Compensar (R$)"],
-        ];
-        // This would be expanded with actual data from context
-        const csv = csvLines.map((row) => row.join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `realidade-fiscal-${date}.csv`;
-        link.click();
+        const rows = computeTaxRealityRows(context);
+        const csv = buildTaxRealityCsv(context, rows);
+        downloadCsv(`realidade-fiscal-${date}.csv`, csv);
       }}
     />
   );

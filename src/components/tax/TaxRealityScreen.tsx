@@ -3,13 +3,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency } from "@/lib/formatters";
 import type { Currency } from "@/lib/domain";
 import type { TaxRealityContext } from "@/lib/tax/buildTaxContext";
-import {
-  calculateMonthlyCapitalGainsTax,
-  calculateFiiCapitalGainsTax,
-  calculateEtfCapitalGainsTax,
-  calculateFiInfraCapitalGainsTax,
-  calculateEtfFixedIncomeCapitalGainsTax,
-} from "@/lib/tax";
+import { computeTaxRealityRows } from "@/lib/tax/taxRealityRows";
 import type {
   MonthlyCapitalGainsResult,
   MonthlyFiiCapitalGainsResult,
@@ -84,77 +78,30 @@ export function TaxRealityScreen({
     fxRate,
   } = context;
 
-  // 1. Stock Capital Gains (monthly) — current year only
-  const stockMonthly = useMemo((): MonthlyStockRow[] => {
-    if (!realizedGainEvents.length) return [];
-    const results = calculateMonthlyCapitalGainsTax(
-      realizedGainEvents,
-      0, // priorLossCarryforward — ideally from persisted state; 0 for now
-      assetTypeByTicker,
-    );
-    return results
-      .filter((r) => r.month.startsWith(String(currentYear)))
-      .map((r) => ({ ...r, isCurrentYear: true }));
-  }, [realizedGainEvents, assetTypeByTicker, currentYear]);
-
-  // 2. FII & FIAGRO Capital Gains (monthly) — current year only
-  const fiiMonthly = useMemo((): MonthlyFiiRow[] => {
-    if (!realizedGainEvents.length) return [];
-    const results = calculateFiiCapitalGainsTax(
-      realizedGainEvents,
-      0, // priorLossCarryforward — ideally from persisted state; 0 for now
-      assetTypeByTicker,
-    );
-    return results
-      .filter((r) => r.month.startsWith(String(currentYear)))
-      .map((r) => ({ ...r, isCurrentYear: true }));
-  }, [realizedGainEvents, assetTypeByTicker, currentYear]);
-
-  // 3. ETF Capital Gains (monthly) — current year only
-  const etfMonthly = useMemo((): MonthlyEtfRow[] => {
-    if (!realizedGainEvents.length) return [];
-    const results = calculateEtfCapitalGainsTax(
-      realizedGainEvents,
-      0, // priorLossCarryforward — ideally from persisted state; 0 for now
-      assetTypeByTicker,
-      currencyByTicker,
-    );
-    return results
-      .filter((r) => r.month.startsWith(String(currentYear)))
-      .map((r) => ({ ...r, isCurrentYear: true }));
-  }, [realizedGainEvents, assetTypeByTicker, currencyByTicker, currentYear]);
-
-  // 4. FI-Infra Capital Gains (monthly) — current year only (100% isento, taxDue = 0)
-  const fiInfraMonthly = useMemo((): MonthlyFiInfraRow[] => {
-    if (!realizedGainEvents.length) return [];
-    const results = calculateFiInfraCapitalGainsTax(
-      realizedGainEvents,
-      0,
-      assetTypeByTicker,
-    );
-    return results
-      .filter((r) => r.month.startsWith(String(currentYear)))
-      .map((r) => ({ ...r, isCurrentYear: true }));
-  }, [realizedGainEvents, assetTypeByTicker, currentYear]);
-
-  // 4b. Foreign Stocks & REITs Capital Gains (annual) — current year only
-  const foreignAnnual = useMemo((): AnnualForeignRow[] => {
-    return foreignCapitalGainsResults.filter((r) => r.year === String(currentYear));
-  }, [foreignCapitalGainsResults, currentYear]);
-
-  // 4c. Fixed Income ETF Capital Gains (monthly, regressive table) — current year only
-  const etfFixedIncomeMonthly = useMemo((): MonthlyEtfFixedIncomeRow[] => {
-    if (!transactions.length) return [];
-    const results = calculateEtfFixedIncomeCapitalGainsTax(
-      transactions,
-      0, // priorLossCarryforward — ideally from persisted state; 0 for now
-      assetTypeByTicker,
-      isFixedIncomeEtfByTicker,
-    );
-    return results
-      .filter((r) => r.month.startsWith(String(currentYear)))
-      .map((r) => ({ ...r, isCurrentYear: true }));
-  }, [transactions, assetTypeByTicker, isFixedIncomeEtfByTicker, currentYear]);
+  // Current-year monthly/annual capital-gains rows — SSOT shared with the
+  // CSV export in tax.tsx, so the file downloaded always matches the screen.
+  const rows = useMemo(() => computeTaxRealityRows(context), [context]);
+  const stockMonthly = useMemo(
+    (): MonthlyStockRow[] => rows.stockMonthly.map((r) => ({ ...r, isCurrentYear: true })),
+    [rows.stockMonthly],
+  );
+  const fiiMonthly = useMemo(
+    (): MonthlyFiiRow[] => rows.fiiMonthly.map((r) => ({ ...r, isCurrentYear: true })),
+    [rows.fiiMonthly],
+  );
+  const etfMonthly = useMemo(
+    (): MonthlyEtfRow[] => rows.etfMonthly.map((r) => ({ ...r, isCurrentYear: true })),
+    [rows.etfMonthly],
+  );
+  const fiInfraMonthly = useMemo(
+    (): MonthlyFiInfraRow[] => rows.fiInfraMonthly.map((r) => ({ ...r, isCurrentYear: true })),
+    [rows.fiInfraMonthly],
+  );
+  const foreignAnnual = useMemo((): AnnualForeignRow[] => rows.foreignAnnual, [rows.foreignAnnual]);
+  const etfFixedIncomeMonthly = useMemo(
+    (): MonthlyEtfFixedIncomeRow[] => rows.etfFixedIncomeMonthly.map((r) => ({ ...r, isCurrentYear: true })),
+    [rows.etfFixedIncomeMonthly],
+  );
 
   // 5. Aggregated totals for current year
   const stockYearTotals = useMemo(() => {
