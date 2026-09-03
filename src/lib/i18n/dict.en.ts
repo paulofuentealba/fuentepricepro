@@ -108,6 +108,7 @@ export const en = {
     watchlistCleared: "Watchlist cleared successfully.",
     imageGenerated: "Image generated successfully!",
     mockDataRestored: "Mock data restored successfully!",
+    confirmRestoreMockData: "This will erase ALL assets and transactions in your account and restore the full DEV mock dataset. Continue?",
     emptyWatchlist: "Your watchlist is empty.",
     emptyTransactionsExport: "No transactions recorded to export.",
     exportSuccess: "Exported {{count}} asset(s).",

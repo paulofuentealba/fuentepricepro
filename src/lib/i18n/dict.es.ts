@@ -110,6 +110,7 @@ export const es = {
     watchlistCleared: "¡Lista de seguimiento limpiada con éxito!",
     imageGenerated: "¡Imagen generada con éxito!",
     mockDataRestored: "¡Datos de prueba restaurados con éxito!",
+    confirmRestoreMockData: "Esto borrará TODOS los activos y transacciones de tu cuenta y restaurará el conjunto de datos DEV completo. ¿Continuar?",
     emptyWatchlist: "Tu lista de seguimiento está vacía.",
     emptyTransactionsExport: "No hay transacciones registradas para exportar.",
     exportSuccess: "Exportado(s) {{count}} activo(s).",

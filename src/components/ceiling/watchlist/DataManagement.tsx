@@ -23,9 +23,7 @@ export function DataManagement() {
           className="h-8 w-8 text-muted-foreground"
           onClick={() => {
             if (
-              !window.confirm(
-                "Isso vai apagar TODOS os ativos e transações da sua conta e restaurar a massa de dados DEV completa. Continuar?",
-              )
+              !window.confirm(t.toasts.confirmRestoreMockData)
             )
               return;
 

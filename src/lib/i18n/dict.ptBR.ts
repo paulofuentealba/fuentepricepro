@@ -110,6 +110,7 @@ export const ptBR = {
     watchlistCleared: "Watchlist limpa com sucesso!",
     imageGenerated: "Imagem gerada com sucesso!",
     mockDataRestored: "Massa de dados restaurada com sucesso!",
+    confirmRestoreMockData: "Isso vai apagar TODOS os ativos e transações da sua conta e restaurar a massa de dados DEV completa. Continuar?",
     emptyWatchlist: "Sua watchlist está vazia.",
     emptyTransactionsExport: "Nenhuma transação registrada para exportar.",
     exportSuccess: "Exportado(s) {{count}} ativo(s).",
