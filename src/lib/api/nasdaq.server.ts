@@ -54,8 +54,16 @@ export async function fetchNasdaqDividends(
           map.set(exIso, payIso);
         }
       }
-    } catch {
-      // Graceful fallback on any network/parse error
+    } catch (error) {
+      // Graceful fallback on any network/parse error — still surfaced via
+      // ingestion telemetry so failures aren't invisible, unlike every other
+      // caller which returns an empty Map silently.
+      reportIngestionStatus(
+        "nasdaq",
+        "ERROR",
+        error instanceof Error ? error.message : String(error),
+        clean,
+      );
     }
     return map;
   });
