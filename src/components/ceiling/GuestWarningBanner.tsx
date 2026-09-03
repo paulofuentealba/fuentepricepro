@@ -1,12 +1,17 @@
 import { Sparkles } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-provider";
-import { useAuthModal } from "@/lib/auth-modal";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
 
+/**
+ * /app now requires auth or an active "See demo" session (see routes/app.tsx
+ * beforeLoad) — so `!user` here only ever means demo mode. Copy reflects
+ * that explicitly instead of the old generic "guest" framing.
+ */
 export function GuestWarningBanner() {
   const { user, loading } = useAuth();
-  const { openAuthModal } = useAuthModal();
+  const navigate = useNavigate();
   const { t } = useI18n();
 
   if (loading || user) return null;
@@ -16,15 +21,15 @@ export function GuestWarningBanner() {
       <div className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 shrink-0" />
         <span>
-          <strong>{t.guestBanner.messagePart1}</strong> {t.guestBanner.messagePart2}
+          <strong>{t.demoBanner.message}</strong>
         </span>
       </div>
       <Button
         variant="link"
         className="h-auto p-0 font-bold text-warning hover:text-warning/80 underline underline-offset-2"
-        onClick={() => openAuthModal()}
+        onClick={() => navigate({ to: "/auth", search: { returnTo: "/app" } })}
       >
-        {t.guestBanner.cta}
+        {t.demoBanner.cta}
       </Button>
     </div>
   );

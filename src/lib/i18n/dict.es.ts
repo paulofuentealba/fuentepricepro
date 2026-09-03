@@ -140,6 +140,19 @@ export const es = {
     messagePart2: "Guarda estos activos en tu Watchlist y accede desde cualquier dispositivo.",
     cta: "Crea una cuenta gratis",
   },
+  demoBanner: {
+    message: "Estás explorando una cartera de demostración simulada — nada aquí se guarda.",
+    cta: "Inicia sesión para empezar tu cartera real",
+  },
+  demoPage: {
+    eyebrow: "Vista previa de 1 minuto",
+    title: "Mira Fuente Price Pro en acción",
+    subtitle: "Mira un recorrido rápido y luego explora una cartera simulada tú mismo — sin necesidad de cuenta.",
+    videoPlaceholderLabel: "Video de demostración próximamente",
+    startExploring: "Empezar a explorar",
+    skip: "Saltar y empezar a explorar",
+    backHome: "Volver al inicio",
+  },
   authModal: {
     title: "Domina tu portafolio.",
     description:

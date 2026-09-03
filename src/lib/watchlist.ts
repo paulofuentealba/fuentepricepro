@@ -18,8 +18,10 @@ import { useI18n } from "./i18n-provider";
 import type { AssetType, Currency } from "./domain";
 import { assetQueryOptions } from "./queryOptions";
 import { cleanTicker } from "./formatters";
+import { WATCHLIST_STORAGE_KEY } from "./localStorageKeys";
+import { blockWriteInDemoMode } from "./demoMode";
 
-const STORAGE_KEY = "ceilingPricePro.watchlist.v1";
+const STORAGE_KEY = WATCHLIST_STORAGE_KEY;
 const ONBOARDED_KEY = "ceilingPricePro.onboarded.v1";
 const USE_LOCAL_ONLY = import.meta.env.DEV; // Local-only só no dev server (npm run dev); build de produção sempre usa Firestore automaticamente, sem depender de lembrar de trocar antes do commit
 
@@ -445,6 +447,7 @@ export function useWatchlist() {
 
   const upsertMutation = useMutation({
     mutationFn: async (item: WatchlistItem) => {
+      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -486,6 +489,7 @@ export function useWatchlist() {
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
+      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -525,6 +529,7 @@ export function useWatchlist() {
 
   const clearMutation = useMutation({
     mutationFn: async () => {
+      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -565,6 +570,7 @@ export function useWatchlist() {
 
   const upsertManyMutation = useMutation({
     mutationFn: async (newItems: WatchlistItem[]) => {
+      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -624,6 +630,7 @@ export function useWatchlist() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<WatchlistItem> }) => {
+      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       const existing = items.find((i) => i.id === id);
       if (!existing) throw new Error("Item not found");
       const merged = { ...existing, ...patch };

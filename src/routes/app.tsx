@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Outlet, Link } from "@tanstack/react-router";
 import {
   FolderOpen,
   BarChart3,
@@ -15,9 +15,27 @@ import { GuestWarningBanner } from "@/components/ceiling/GuestWarningBanner";
 import { FeedbackWidget } from "@/components/ceiling/FeedbackWidget";
 import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
 import { useAuth } from "@/lib/auth-provider";
+import { auth } from "@/integrations/firebase/client";
+import { isDemoModeActive } from "@/lib/demoMode";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 
 export const Route = createFileRoute("/app")({
+  beforeLoad: async ({ location }) => {
+    // Waits for Firebase to resolve the persisted session (same pattern as
+    // /settings and /profile) before deciding — avoids a false redirect on
+    // a hard refresh while the SDK is still rehydrating auth state.
+    await new Promise<void>((resolve) => {
+      const unsubscribe = auth.onAuthStateChanged(() => {
+        unsubscribe();
+        resolve();
+      });
+    });
+
+    if (auth.currentUser) return;
+    if (isDemoModeActive()) return;
+
+    throw redirect({ to: "/auth", search: { returnTo: location.href } });
+  },
   head: () => ({
     meta: [
       { title: "Portfolio Dashboard — Fuente Price Pro" },

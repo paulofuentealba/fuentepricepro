@@ -138,6 +138,19 @@ export const en = {
     messagePart2: "Save these assets to your Watchlist and access them from any device.",
     cta: "Create a free account",
   },
+  demoBanner: {
+    message: "You're exploring a simulated demo portfolio — nothing here is saved.",
+    cta: "Sign in to start your real portfolio",
+  },
+  demoPage: {
+    eyebrow: "1-minute preview",
+    title: "See Fuente Price Pro in action",
+    subtitle: "Watch a quick walkthrough, then explore a simulated portfolio yourself — no account needed.",
+    videoPlaceholderLabel: "Product walkthrough video coming soon",
+    startExploring: "Start exploring",
+    skip: "Skip and start exploring",
+    backHome: "Back to home",
+  },
   authModal: {
     title: "Master your portfolio.",
     description:

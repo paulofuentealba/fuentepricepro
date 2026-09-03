@@ -16,8 +16,10 @@ import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
 import { type Transaction } from "./transactionsLogic";
 export * from "./transactionsLogic";
+import { TRANSACTIONS_STORAGE_KEY } from "./localStorageKeys";
+import { blockWriteInDemoMode } from "./demoMode";
 
-const STORAGE_KEY = "ceilingPricePro.transactions.v1";
+const STORAGE_KEY = TRANSACTIONS_STORAGE_KEY;
 const USE_LOCAL_ONLY = import.meta.env.DEV; // Local-only só no dev server (npm run dev); build de produção sempre usa Firestore automaticamente, sem depender de lembrar de trocar antes do commit
 
 async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
@@ -158,6 +160,7 @@ export function useTransactions() {
   const upsert = useMutation({
     mutationFn: async (item: Transaction) => {
       if (USE_LOCAL_ONLY || !user) {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         const current = readLocal();
         const existingIdx = current.findIndex((it) => it.id === item.id);
         const next = [...current];
@@ -195,6 +198,7 @@ export function useTransactions() {
   const remove = useMutation({
     mutationFn: async (id: string) => {
       if (USE_LOCAL_ONLY || !user) {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         const current = readLocal();
         writeLocal(current.filter((it) => it.id !== id));
         return id;

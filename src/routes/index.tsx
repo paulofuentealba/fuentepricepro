@@ -126,15 +126,9 @@ function LandingPage() {
             >
               <Link to="/onboarding">{P.hero.ctaPrimary}</Link>
             </Button>
-            {user ? (
-              <Button asChild size="lg" variant="outline" className="rounded-lg font-semibold">
-                <Link to="/app">{P.hero.ctaSecondary}</Link>
-              </Button>
-            ) : (
-              <Button size="lg" variant="outline" onClick={() => openAuthModal()} className="rounded-lg font-semibold">
-                {P.hero.ctaSecondary}
-              </Button>
-            )}
+            <Button asChild size="lg" variant="outline" className="rounded-lg font-semibold">
+              <Link to={user ? "/app" : "/demo"}>{P.hero.ctaSecondary}</Link>
+            </Button>
           </div>
           <div className="text-[11.5px] text-muted-foreground">{P.hero.fine}</div>
         </div>
