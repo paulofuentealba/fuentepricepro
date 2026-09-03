@@ -25,6 +25,15 @@ export interface FeatureGatesConfig {
   [key: string]: boolean | number | undefined;
 }
 
+/**
+ * FAIL-OPEN BY DESIGN: if `config/featureGates` is missing, malformed, or the
+ * Firestore read errors out, every gate defaults to unlocked and
+ * `freeAssetLimit` defaults to Infinity (see `useFeatureGates` below). This
+ * is a deliberate product decision, not an oversight — a config outage means
+ * free users may briefly get Pro-level access (lost revenue), but no
+ * legitimate paying user is ever incorrectly locked out. Do not change this
+ * to a restrictive default without confirming with product first.
+ */
 export const DEFAULT_FEATURE_GATES: FeatureGatesConfig & { freeAssetLimit: number } = {
   freeAssetLimit: Number.POSITIVE_INFINITY,
   cashflowUnlocked: true,
@@ -74,7 +83,9 @@ export function resolveFeatureGate(
     return true;
   }
 
-  // Free tier receives the configured limit or flag from Firestore config or fail-open fallback
+  // Free tier receives the configured limit/flag from Firestore config, or the
+  // fail-open DEFAULT_FEATURE_GATES value (unlocked) if config is unavailable —
+  // intentional, see the doc comment on DEFAULT_FEATURE_GATES.
   return defaultValue;
 }
 
