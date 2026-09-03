@@ -18,7 +18,7 @@ import { useFIProgress } from "@/lib/useFIProgress";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { calculateProfileTier, type ProfileTier } from "@/lib/investor-profile";
 import { simulateSnowballScenario } from "@/lib/snowballScenario";
-import { formatCurrency, toIntlLocale } from "@/lib/i18n";
+import { formatCurrency, formatCompactNumber } from "@/lib/i18n";
 import { resolveReasonText } from "@/lib/askEngine";
 import { cn } from "@/lib/utils";
 
@@ -192,7 +192,7 @@ export function SnowballScenarioPanel() {
                 fontSize={11}
                 tick={{ fill: "var(--muted-foreground)" }}
                 tickFormatter={(v: number) =>
-                  new Intl.NumberFormat(toIntlLocale(locale), { notation: "compact" }).format(v)
+                  formatCompactNumber(v, locale)
                 }
               />
               <ChartTooltip

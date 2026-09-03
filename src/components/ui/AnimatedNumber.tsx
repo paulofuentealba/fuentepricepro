@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useInView, useSpring, useTransform, motion, useMotionValue } from "framer-motion";
+import { formatNumber, type Locale } from "@/lib/formatters";
 
 interface AnimatedNumberProps {
   value: number;
@@ -9,6 +10,8 @@ interface AnimatedNumberProps {
   decimals?: number;
   delay?: number;
   className?: string;
+  /** Locale used by the default (non-`format`) number formatting. Defaults to "ptBR". */
+  locale?: Locale;
 }
 
 export function AnimatedNumber({
@@ -19,6 +22,7 @@ export function AnimatedNumber({
   decimals = 0,
   delay = 0,
   className,
+  locale = "ptBR",
 }: AnimatedNumberProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px" });
@@ -44,14 +48,7 @@ export function AnimatedNumber({
     if (format) {
       return format(latest);
     }
-    return (
-      prefix +
-      Intl.NumberFormat("pt-BR", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      }).format(latest) +
-      suffix
-    );
+    return prefix + formatNumber(latest, locale, decimals) + suffix;
   });
 
   return (

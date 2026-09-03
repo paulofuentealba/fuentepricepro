@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
-import { toIntlLocale } from "@/lib/i18n";
+import { toIntlLocale, formatNumber } from "@/lib/i18n";
 
 interface CurrencyToggleProps {
   value: "BR" | "US";
@@ -59,10 +59,7 @@ export function CurrencyToggle({ value, onChange, className }: CurrencyTogglePro
       {fx?.USDBRL && (
         <div className="text-[10px] text-muted-foreground mt-2 text-center opacity-70">
           USD/BRL{" "}
-          {new Intl.NumberFormat(toIntlLocale(locale), {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(fx.USDBRL)}
+          {formatNumber(fx.USDBRL, locale, 2)}
           {formattedTime ? ` — ${t.common.quoteAsOf.replace("{{time}}", formattedTime)}` : ""}
         </div>
       )}

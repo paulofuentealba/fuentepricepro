@@ -40,6 +40,10 @@ export function formatNumber(value: number, locale: Locale, digits = 2): string 
   }).format(value);
 }
 
+export function formatCompactNumber(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(toIntlLocale(locale), { notation: "compact" }).format(value);
+}
+
 export function formatCompactCurrency(
   valueMillions: number,
   currency: Currency,

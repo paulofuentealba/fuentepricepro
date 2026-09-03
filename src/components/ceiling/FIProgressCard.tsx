@@ -178,6 +178,7 @@ export function FIProgressCard() {
                       prefix={currency === "BRL" ? "R$ " : "US$ "}
                       decimals={0}
                       delay={100}
+                      locale={locale}
                     />
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -203,7 +204,7 @@ export function FIProgressCard() {
                   <span
                     className={`text-xl font-bold ${isReached ? "text-warning" : "text-success"}`}
                   >
-                    <AnimatedNumber value={coveragePercent} suffix="%" decimals={1} delay={300} />
+                    <AnimatedNumber value={coveragePercent} suffix="%" decimals={1} delay={300} locale={locale} />
                   </span>
                   <span className="text-xs text-muted-foreground ml-1">{t.fiMode.covered}</span>
                 </div>

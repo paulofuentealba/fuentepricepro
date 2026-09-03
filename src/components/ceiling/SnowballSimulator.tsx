@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { formatCurrency, toIntlLocale } from "@/lib/i18n";
+import { formatCurrency, formatCompactNumber } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 import {
@@ -196,7 +196,7 @@ export function SnowballSimulator() {
                       fontSize={11}
                       tick={{ fill: "var(--muted-foreground)" }}
                       tickFormatter={(v: number) =>
-                        new Intl.NumberFormat(toIntlLocale(locale), { notation: "compact" }).format(v)
+                        formatCompactNumber(v, locale)
                       }
                     />
                     <ChartTooltip

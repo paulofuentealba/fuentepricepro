@@ -8,6 +8,7 @@ export {
   formatPercent,
   formatNumber,
   formatCompactCurrency,
+  formatCompactNumber,
   displayTicker,
   getDisplayAssetType,
   toIntlLocale,
