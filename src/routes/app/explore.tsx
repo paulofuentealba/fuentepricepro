@@ -56,31 +56,31 @@ export function ExplorarPage() {
       id: "screener",
       label: t.tabs.screener,
       icon: CalculatorIcon,
-      description: "Calculadora de Preço Teto, Margem de Segurança Bazin/Graham e consenso Fuente.",
+      description: t.explore.descriptions.screener,
     },
     {
       id: "comparator",
       label: t.tabs.comparator,
       icon: Scale,
-      description: "Compare múltiplos ativos lado a lado com métricas de valuation e dividendos.",
+      description: t.explore.descriptions.comparator,
     },
     {
       id: "riskradar",
       label: t.tabs.riskRadar,
       icon: ShieldAlert,
-      description: "Matriz de risco, concentração de carteira e alertas de saúde financeira.",
+      description: t.explore.descriptions.riskRadar,
     },
     {
       id: "globalradar",
       label: t.tabs.radar,
       icon: Sparkles,
-      description: "Oportunidades de entrada em ativos abaixo do Preço Teto no Brasil e no exterior.",
+      description: t.explore.descriptions.globalRadar,
     },
     {
       id: "snowball",
       label: t.snowball?.title || "Efeito Bola de Neve",
       icon: TrendingUp,
-      description: "Simulador de reinvestimento de dividendos e aceleração patrimonial.",
+      description: t.explore.descriptions.snowball,
     },
   ];
 
@@ -95,7 +95,7 @@ export function ExplorarPage() {
           {t.nav.exploreAssets}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Hub integrado de análise, valuation e inteligência quantitativa para suas decisões de investimento.
+          {t.explore.subtitle}
         </p>
       </div>
 

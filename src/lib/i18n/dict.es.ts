@@ -111,6 +111,7 @@ export const es = {
     imageGenerated: "¡Imagen generada con éxito!",
     mockDataRestored: "¡Datos de prueba restaurados con éxito!",
     emptyWatchlist: "Tu lista de seguimiento está vacía.",
+    emptyTransactionsExport: "No hay transacciones registradas para exportar.",
     exportSuccess: "Exportado(s) {{count}} activo(s).",
     exportFailed: "Error al exportar. Por favor, inténtalo de nuevo.",
     noValidRowsCsv: "No se encontraron filas válidas en el CSV.",
@@ -663,6 +664,17 @@ export const es = {
       light: "Modo Claro",
       dark: "Modo Oscuro",
       toggle: "Cambiar tema",
+    },
+  },
+
+  explore: {
+    subtitle: "Hub integrado de análisis, valuation e inteligencia cuantitativa para tus decisiones de inversión.",
+    descriptions: {
+      screener: "Calculadora de Precio Techo, Margen de Seguridad Bazin/Graham y consenso Fuente.",
+      comparator: "Compara múltiples activos lado a lado con métricas de valuation y dividendos.",
+      riskRadar: "Matriz de riesgo, concentración de cartera y alertas de salud financiera.",
+      globalRadar: "Oportunidades de entrada en activos por debajo del Precio Techo en Brasil y en el exterior.",
+      snowball: "Simulador de reinversión de dividendos y aceleración patrimonial.",
     },
   },
 

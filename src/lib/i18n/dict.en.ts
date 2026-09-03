@@ -109,6 +109,7 @@ export const en = {
     imageGenerated: "Image generated successfully!",
     mockDataRestored: "Mock data restored successfully!",
     emptyWatchlist: "Your watchlist is empty.",
+    emptyTransactionsExport: "No transactions recorded to export.",
     exportSuccess: "Exported {{count}} asset(s).",
     exportFailed: "Export failed. Please try again.",
     noValidRowsCsv: "No valid rows found in CSV.",
@@ -653,6 +654,17 @@ export const en = {
       light: "Light Mode",
       dark: "Dark Mode",
       toggle: "Toggle theme",
+    },
+  },
+
+  explore: {
+    subtitle: "Integrated hub for analysis, valuation and quantitative intelligence for your investment decisions.",
+    descriptions: {
+      screener: "Ceiling Price calculator, Bazin/Graham margin of safety and Fuente consensus.",
+      comparator: "Compare multiple assets side by side with valuation and dividend metrics.",
+      riskRadar: "Risk matrix, portfolio concentration and financial health alerts.",
+      globalRadar: "Entry opportunities in assets below the Ceiling Price in Brazil and abroad.",
+      snowball: "Dividend reinvestment simulator and wealth-compounding acceleration.",
     },
   },
 

@@ -111,6 +111,7 @@ export const ptBR = {
     imageGenerated: "Imagem gerada com sucesso!",
     mockDataRestored: "Massa de dados restaurada com sucesso!",
     emptyWatchlist: "Sua watchlist está vazia.",
+    emptyTransactionsExport: "Nenhuma transação registrada para exportar.",
     exportSuccess: "Exportado(s) {{count}} ativo(s).",
     exportFailed: "Falha na exportação. Tente novamente.",
     noValidRowsCsv: "Nenhuma linha válida encontrada no CSV.",
@@ -658,6 +659,17 @@ export const ptBR = {
       light: "Modo Claro",
       dark: "Modo Escuro",
       toggle: "Alternar tema",
+    },
+  },
+
+  explore: {
+    subtitle: "Hub integrado de análise, valuation e inteligência quantitativa para suas decisões de investimento.",
+    descriptions: {
+      screener: "Calculadora de Preço Teto, Margem de Segurança Bazin/Graham e consenso Fuente.",
+      comparator: "Compare múltiplos ativos lado a lado com métricas de valuation e dividendos.",
+      riskRadar: "Matriz de risco, concentração de carteira e alertas de saúde financeira.",
+      globalRadar: "Oportunidades de entrada em ativos abaixo do Preço Teto no Brasil e no exterior.",
+      snowball: "Simulador de reinvestimento de dividendos e aceleração patrimonial.",
     },
   },
 

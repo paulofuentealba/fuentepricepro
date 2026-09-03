@@ -63,7 +63,7 @@ export function WatchlistIO({ items }: Props) {
 
   const handleExportTransactions = useCallback(() => {
     if (!transactions || transactions.length === 0) {
-      toast.info("Nenhuma transação registrada para exportar.");
+      toast.info(t.toasts.emptyTransactionsExport);
       return;
     }
     try {
