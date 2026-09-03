@@ -260,6 +260,7 @@ export function computeSmartAllocation(
 
   const getMaxSharesAllowed = (ticker: string, currentPrice: number, alreadyBought: number) => {
     if (!maxConcentration || maxConcentration >= 100) return Infinity;
+    if (!(currentPrice > 0)) return 0;
     const maxVal = ((totalPortfolioTargetCurrency + capital) * maxConcentration) / 100;
     const currentVal = (currentAssetValueTargetCurrency[ticker] || 0) + (alreadyBought * currentPrice);
     const allowedToBuy = Math.max(0, maxVal - currentVal);
