@@ -4,7 +4,7 @@ import type { WatchlistItem } from "@/lib/watchlist";
 import { type Transaction, getQuantityAtDate, recalculateInvestingSinceFromTransactions } from "@/lib/transactionsLogic";
 import { calculateRealizedIncome, type AssetTaxMeta } from "@/lib/realizedIncome";
 import { getEffectiveTransactions } from "@/lib/portfolioIrr";
-import { getFxMultiplier } from "@/lib/currency";
+import { getFxMultiplier, roundCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 
 export { getFxMultiplier };
@@ -282,8 +282,8 @@ export function buildMonthlyBuckets(
     for (const contrib of b.contributors) {
       const evData = tickerEventsMap[contrib.ticker];
       if (evData) {
-        contrib.paidAmount = Math.round(evData.paid * 100) / 100;
-        contrib.announcedAmount = Math.round(evData.announced * 100) / 100;
+        contrib.paidAmount = roundCurrency(evData.paid);
+        contrib.announcedAmount = roundCurrency(evData.announced);
         contrib.paymentDate = evData.payDate;
       }
     }
@@ -302,8 +302,8 @@ export function buildMonthlyBuckets(
     const topShare =
       b.amount > 0 && sortedContribs.length > 0 ? sortedContribs[0].amount / b.amount : 0;
 
-    const roundedRealized = Math.round(monthRealized * 100) / 100;
-    const roundedAnnounced = Math.round(monthAnnounced * 100) / 100;
+    const roundedRealized = roundCurrency(monthRealized);
+    const roundedAnnounced = roundCurrency(monthAnnounced);
     const realizedAmount = isPast ? (roundedRealized > 0 ? roundedRealized : effectiveAmounts[i]) : roundedRealized;
     const announcedAmount = roundedAnnounced;
     const projectedAmount = isPast
@@ -426,8 +426,8 @@ export function computeInvestedVsReceived(
 
       return {
         ticker: it.ticker,
-        invested: Math.round(invested * 100) / 100,
-        received: Math.round(received * 100) / 100,
+        invested: roundCurrency(invested),
+        received: roundCurrency(received),
         currency: it.currency,
         rankingValueBrl,
       };

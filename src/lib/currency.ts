@@ -36,3 +36,13 @@ export function getFxMultiplier(
 ): number {
   return convertCurrency(1, assetCurrency, targetCurrency, fxRate);
 }
+
+/**
+ * SSOT for rounding a currency AMOUNT to cents (2 decimals). Use this instead
+ * of the ad hoc `Math.round(x * 100) / 100` pattern scattered across
+ * aggregators (cashflow.ts, realizedIncome.ts, etc.) so every call site picks
+ * the same precision.
+ */
+export function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}

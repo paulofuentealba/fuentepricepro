@@ -1,7 +1,7 @@
 import { type Transaction, getQuantityAtDate } from "./transactionsLogic";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
-import { convertCurrency } from "./currency";
+import { convertCurrency, roundCurrency } from "./currency";
 import { toIntlLocale, getLocalDateISOString } from "./formatters";
 import { type Locale } from "./i18n";
 
@@ -253,13 +253,13 @@ export function computeRealizedIncomeSummary(
   }
 
   return {
-    currentMonth: Math.round(currentMonth * 100) / 100,
-    currentYear: Math.round(currentYear * 100) / 100,
-    allTimeTotal: Math.round(allTimeTotal * 100) / 100,
+    currentMonth: roundCurrency(currentMonth),
+    currentYear: roundCurrency(currentYear),
+    allTimeTotal: roundCurrency(allTimeTotal),
     eventsCount: events.filter((e) => e.isPaid).length,
-    dividendTotal: Math.round(dividendTotal * 100) / 100,
-    jcpTotal: Math.round(jcpTotal * 100) / 100,
-    announcedTotal: Math.round(announcedTotal * 100) / 100,
+    dividendTotal: roundCurrency(dividendTotal),
+    jcpTotal: roundCurrency(jcpTotal),
+    announcedTotal: roundCurrency(announcedTotal),
     announcedCount,
   };
 }
@@ -335,7 +335,7 @@ export function sumReceivedInWindow(
     if (day < windowStartISO || day > windowEndISO) continue;
     total += convertCurrency(ev.amountNet, ev.currency, currency, fxRate);
   }
-  return Math.round(total * 100) / 100;
+  return roundCurrency(total);
 }
 
 export interface MonthlyDividendBucket {
@@ -398,9 +398,9 @@ export function groupRealizedIncomeByMonth(
     const yearShort = yearStr.slice(-2);
     const monthLabel = `${monthName}/${yearShort}`;
     const data = monthMap[monthKey];
-    const paidAmount = Math.round(data.paid * 100) / 100;
-    const announcedAmount = Math.round(data.announced * 100) / 100;
-    const totalNet = Math.round(data.total * 100) / 100;
+    const paidAmount = roundCurrency(data.paid);
+    const announcedAmount = roundCurrency(data.announced);
+    const totalNet = roundCurrency(data.total);
 
     return {
       monthKey,
