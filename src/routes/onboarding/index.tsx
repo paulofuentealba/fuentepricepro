@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/integrations/firebase/client";
+import { verifySessionFn } from "@/lib/verifySession.functions";
 
 export const Route = createFileRoute("/onboarding/")({
   beforeLoad: async () => {
@@ -11,7 +12,10 @@ export const Route = createFileRoute("/onboarding/")({
     });
 
     if (!auth.currentUser) {
-      throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/metas" } });
+      const { authenticated } = await verifySessionFn();
+      if (!authenticated) {
+        throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/metas" } });
+      }
     }
 
     throw redirect({ to: "/profile", search: { returnTo: "/onboarding/metas" } });

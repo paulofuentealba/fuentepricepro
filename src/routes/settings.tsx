@@ -50,9 +50,10 @@ import { CheckCircle2, Lock as LockIcon } from "lucide-react";
 import { buildWatchlistFullCsv, downloadCsv } from "@/lib/csv";
 import { toIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { verifySessionFn } from "@/lib/verifySession.functions";
 
 export const Route = createFileRoute("/settings")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     // Wait for auth to be initialized
     await new Promise<void>((resolve) => {
       const unsubscribe = auth.onAuthStateChanged(() => {
@@ -61,10 +62,16 @@ export const Route = createFileRoute("/settings")({
       });
     });
 
-    const user = auth.currentUser;
-    if (!user) {
-      throw redirect({ to: "/auth" });
-    }
+    if (auth.currentUser) return;
+
+    // Client check only ever sees a session on a SPA transition — a hard
+    // navigation/reload has no client-side Firebase session to read, so
+    // cross-check the session cookie server-side before redirecting (see
+    // verifySession.functions.ts).
+    const { authenticated } = await verifySessionFn();
+    if (authenticated) return;
+
+    throw redirect({ to: "/auth", search: { returnTo: location.href } });
   },
   component: SettingsPage,
 });

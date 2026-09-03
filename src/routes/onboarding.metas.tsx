@@ -3,6 +3,7 @@ import { auth } from "@/integrations/firebase/client";
 import { useI18n } from "@/lib/i18n-provider";
 import { GoalWizard } from "@/components/goals/GoalWizard";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
+import { verifySessionFn } from "@/lib/verifySession.functions";
 
 export const Route = createFileRoute("/onboarding/metas")({
   beforeLoad: async () => {
@@ -13,9 +14,12 @@ export const Route = createFileRoute("/onboarding/metas")({
       });
     });
 
-    if (!auth.currentUser) {
-      throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/metas" } });
-    }
+    if (auth.currentUser) return;
+
+    const { authenticated } = await verifySessionFn();
+    if (authenticated) return;
+
+    throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/metas" } });
   },
   component: OnboardingMetasPage,
 });

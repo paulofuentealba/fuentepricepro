@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { User, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
+import { User, onIdTokenChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/integrations/firebase/client";
+import { setSessionCookie, clearSessionCookie } from "@/lib/sessionCookie";
 
 interface AuthCtx {
   user: User | null;
@@ -17,17 +18,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    // onIdTokenChanged (superset of onAuthStateChanged: also fires on the
+    // SDK's automatic hourly token refresh) keeps the session cookie fresh
+    // so the server can verify a real session on a hard navigation/reload
+    // — see verifySession.functions.ts for why this cookie exists at all.
+    const unsubscribe = onIdTokenChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         try {
           const tokenResult = await currentUser.getIdTokenResult();
           setIsAdmin(tokenResult.claims?.isAdmin === true);
+          setSessionCookie(tokenResult.token);
         } catch {
           setIsAdmin(false);
         }
       } else {
         setIsAdmin(false);
+        clearSessionCookie();
       }
       setLoading(false);
     });

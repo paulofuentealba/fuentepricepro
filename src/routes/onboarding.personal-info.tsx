@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { auth, db } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { useI18n } from "@/lib/i18n-provider";
+import { verifySessionFn } from "@/lib/verifySession.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,9 +29,12 @@ export const Route = createFileRoute("/onboarding/personal-info")({
       });
     });
 
-    if (!auth.currentUser) {
-      throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/personal-info" } });
-    }
+    if (auth.currentUser) return;
+
+    const { authenticated } = await verifySessionFn();
+    if (authenticated) return;
+
+    throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/personal-info" } });
   },
   component: OnboardingPersonalInfoPage,
 });

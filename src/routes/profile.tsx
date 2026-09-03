@@ -2,6 +2,7 @@ import { createFileRoute, redirect, useNavigate, useSearch } from "@tanstack/rea
 import { auth } from "@/integrations/firebase/client";
 import { InvestorProfileFlow } from "@/components/onboarding/InvestorProfileFlow";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
+import { verifySessionFn } from "@/lib/verifySession.functions";
 
 export const Route = createFileRoute("/profile")({
   validateSearch: (search: Record<string, unknown>): { returnTo?: string } => ({
@@ -15,9 +16,15 @@ export const Route = createFileRoute("/profile")({
       });
     });
 
-    if (!auth.currentUser) {
-      throw redirect({ to: "/auth", search: { returnTo: search.returnTo } });
-    }
+    if (auth.currentUser) return;
+
+    // See verifySession.functions.ts — a hard navigation/reload has no
+    // client-side Firebase session to read, so cross-check the cookie
+    // server-side before redirecting.
+    const { authenticated } = await verifySessionFn();
+    if (authenticated) return;
+
+    throw redirect({ to: "/auth", search: { returnTo: search.returnTo } });
   },
   component: ProfilePage,
   errorComponent: RouteErrorComponent,
