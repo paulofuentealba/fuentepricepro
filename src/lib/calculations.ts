@@ -416,6 +416,11 @@ export interface ValuationResult {
     shareholderYield?: number | null;
     affoYield?: number | null;
     bogleModel?: number | null;
+    /** Modified Peter Lynch fair value (STOCK_US only). `graham`/`methods.graham` also
+     * carries this same number for STOCK_US for backward compatibility with older
+     * consumers, but new code should read `lynch` — it is NOT the Benjamin Graham
+     * LPA/VPA formula, which STOCK_US never computes. */
+    lynch?: number | null;
   };
   assumptions: ValuationAssumption[];
   investorProfile: "conservative" | "moderate" | "aggressive" | "custom";
@@ -773,9 +778,10 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     fuenteConsensus: consensus,
     methods: {
       bazin,
-      graham: lynchPrice,
+      graham: lynchPrice, // backward compat: STOCK_US has no Graham LPA/VPA model, see `lynch`
       gordon,
       shareholderYield: shareholderYieldPrice,
+      lynch: lynchPrice,
     },
     assumptions,
     investorProfile: "moderate",
