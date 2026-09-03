@@ -389,6 +389,40 @@ export function gordonPrice(
 }
 
 /**
+ * SSOT for the Fuente Consensus: the strict median across whichever
+ * valuation models are applicable for a given asset type/currency (each
+ * `valuateXxx` function passes its own subset — e.g. [bazin, graham, gordon]
+ * for STOCK_BR, [bazin, gordon, pvpCeiling] for FII). Only positive, non-null
+ * model outputs count; returns null when no model produced a usable value.
+ */
+export function medianConsensus(models: (number | null)[]): number | null {
+  const validModels = models.filter((v): v is number => v !== null && v > 0);
+  if (validModels.length === 0) return null;
+  const sorted = [...validModels].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0
+    ? sorted[mid]
+    : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+/**
+ * SSOT for Gordon-model confidence: "low" when the asset's dividend growth
+ * history is too volatile for the perpetuity-growth assumption to be
+ * trustworthy, "high" otherwise, and null whenever Gordon itself is null
+ * (nothing to have confidence about).
+ */
+export function resolveGordonConfidence(
+  gordon: number | null,
+  dividendHistory: Parameters<typeof calculateDividendGrowthVolatility>[0],
+): "high" | "low" | null {
+  if (gordon === null) return null;
+  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
+  return growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
+    ? "low"
+    : "high";
+}
+
+/**
  * Universal valuation engine.
  * Calculates all models and the consensus margin of safety in one place.
  */
@@ -534,26 +568,10 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
   const gTerminal = terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE;
   const gordon = gordonPrice(netAvgDividend, k, gInitial, gTerminal);
 
-  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
-  let gordonConfidence: "high" | "low" | null = null;
-  if (gordon !== null) {
-    gordonConfidence =
-      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
-        ? "low"
-        : "high";
-  }
+  const gordonConfidence = resolveGordonConfidence(gordon, dividendHistory);
 
   // 4. Fuente Consensus (Strict Median of Applicable Methods for STOCK_BR)
-  const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
-  let consensus: number | null = null;
-  if (validModels.length > 0) {
-    const sorted = [...validModels].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    consensus =
-      sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
+  const consensus = medianConsensus([bazin, graham, gordon]);
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
@@ -703,28 +721,10 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
   const gTerminal = terminalGrowthRate ?? US_TERMINAL_GROWTH_FALLBACK;
   const gordon = gordonPrice(netAvgDividend, usDiscountRate, gInitial, gTerminal);
 
-  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
-  let gordonConfidence: "high" | "low" | null = null;
-  if (gordon !== null) {
-    gordonConfidence =
-      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
-        ? "low"
-        : "high";
-  }
+  const gordonConfidence = resolveGordonConfidence(gordon, dividendHistory);
 
   // 6. Fuente Consensus (Strict Median across valid STOCK_US methods)
-  const validModels = [bazin, shareholderYieldPrice, lynchPrice, gordon].filter(
-    (v): v is number => v !== null && v > 0,
-  );
-  let consensus: number | null = null;
-  if (validModels.length > 0) {
-    const sorted = [...validModels].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    consensus =
-      sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
+  const consensus = medianConsensus([bazin, shareholderYieldPrice, lynchPrice, gordon]);
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
@@ -869,29 +869,13 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
   const gTerminal = terminalGrowthRate ?? GORDON_TERMINAL_GROWTH_RATE;
   const gordon = gordonPrice(avgDividend, k, gInitial, gTerminal);
 
-  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
-  let gordonConfidence: "high" | "low" | null = null;
-  if (gordon !== null) {
-    gordonConfidence =
-      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
-        ? "low"
-        : "high";
-  }
+  const gordonConfidence = resolveGordonConfidence(gordon, dividendHistory);
 
   // 4. Dynamic P/VP Asset Ceiling (Max 2% premium over Net Asset Value to guard against credit agio)
   const pvpCeiling = bvps != null && bvps > 0 ? bvps * 1.02 : null;
 
   // 5. Fuente Consensus (Median across fund-applicable methods; Graham is strictly null)
-  const validModels = [bazin, gordon, pvpCeiling].filter((v): v is number => v !== null && v > 0);
-  let consensus: number | null = null;
-  if (validModels.length > 0) {
-    const sorted = [...validModels].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    consensus =
-      sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
+  const consensus = medianConsensus([bazin, gordon, pvpCeiling]);
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
@@ -1026,14 +1010,7 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   const effectiveK = Math.max(k, g + GORDON_MIN_DISCOUNT_MARGIN);
   const gordon = (netAvgDividend * (1 + g)) / (effectiveK - g);
 
-  const growthVolatility = calculateDividendGrowthVolatility(dividendHistory);
-  let gordonConfidence: "high" | "low" | null = null;
-  if (gordon !== null) {
-    gordonConfidence =
-      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
-        ? "low"
-        : "high";
-  }
+  const gordonConfidence = resolveGordonConfidence(gordon, dividendHistory);
 
   // 4. AFFO Yield Ceiling (when AFFO per share is provided)
   let affoCeiling: number | null = null;
@@ -1043,16 +1020,7 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   }
 
   // 5. Fuente Consensus (Strict Median of REIT-specific methods; Graham is strictly null)
-  const validModels = [bazin, gordon, affoCeiling].filter((v): v is number => v !== null && v > 0);
-  let consensus: number | null = null;
-  if (validModels.length > 0) {
-    const sorted = [...validModels].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    consensus =
-      sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
+  const consensus = medianConsensus([bazin, gordon, affoCeiling]);
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
@@ -1211,16 +1179,7 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
   }
 
   // 4. Fuente Consensus (Strict Median of ETF-applicable methods; Graham is strictly null)
-  const validModels = [bazinCeiling, bogleModelCeiling].filter((v): v is number => v !== null && v > 0);
-  let consensus: number | null = null;
-  if (validModels.length > 0) {
-    const sorted = [...validModels].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    consensus =
-      sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
+  const consensus = medianConsensus([bazinCeiling, bogleModelCeiling]);
 
   const activeCeiling = consensus !== null ? consensus : bogleModelCeiling;
   const margin = currentPrice > 0 ? (activeCeiling / currentPrice - 1) * 100 : 0;
@@ -1361,25 +1320,9 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
     gTerminal,
   );
 
-  const growthVolatility = calculateDividendGrowthVolatility(params.dividendHistory);
-  let gordonConfidence: "high" | "low" | null = null;
-  if (gordon !== null) {
-    gordonConfidence =
-      growthVolatility != null && growthVolatility > GORDON_MAX_GROWTH_VOLATILITY
-        ? "low"
-        : "high";
-  }
+  const gordonConfidence = resolveGordonConfidence(gordon, params.dividendHistory);
 
-  const validModels = [bazin, graham, gordon].filter((v): v is number => v !== null && v > 0);
-  let consensus: number | null = null;
-  if (validModels.length > 0) {
-    const sorted = [...validModels].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    consensus =
-      sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
+  const consensus = medianConsensus([bazin, graham, gordon]);
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
