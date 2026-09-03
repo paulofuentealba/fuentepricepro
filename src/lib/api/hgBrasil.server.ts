@@ -1,7 +1,9 @@
-import { fetchWithTimeout, UA } from "./http.server";
+import { fetchWithTimeout, UA, boundedCacheSet } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { HG_BRASIL_QUOTA_CACHE_TTL_MS, HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS } from "./cacheConfig.server";
 import { normalizeTicker } from "../ticker";
+
+const MAX_MEMORY_CACHE_ENTRIES = 5000;
 
 export interface HgBrasilDividendItem {
   type: "Dividendo" | "JCP" | "Rendimento" | string;
@@ -159,7 +161,7 @@ export async function fetchHgBrasilDividends(
       dividends,
     };
 
-    cache.set(cleanTicker, { result, timestamp: now });
+    boundedCacheSet(cache, cleanTicker, { result, timestamp: now }, MAX_MEMORY_CACHE_ENTRIES);
     reportIngestionStatus("hgBrasil", "PASSED", `Parsed ${dividends.length} dividends`, cleanTicker);
     return result;
   } catch (err: any) {

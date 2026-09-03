@@ -1,10 +1,11 @@
-import { UA, fetchWithRetry } from "./http.server";
+import { UA, fetchWithRetry, boundedCacheSet } from "./http.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import type { DividendEvent } from "../domain";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { DADOS_DE_MERCADO_CACHE_TTL_MS } from "./cacheConfig.server";
 
 const CACHE_TTL_MS = DADOS_DE_MERCADO_CACHE_TTL_MS;
+const MAX_MEMORY_CACHE_ENTRIES = 5000;
 
 export interface DadosDeMercadoFundamentals {
   pvp?: number;
@@ -44,7 +45,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
       if (doc.exists) {
         const data = doc.data() as DadosDeMercadoResult;
         if (data.cachedAt && Date.now() - data.cachedAt < CACHE_TTL_MS) {
-          memoryCache.set(cleanTicker, data);
+          boundedCacheSet(memoryCache, cleanTicker, data, MAX_MEMORY_CACHE_ENTRIES);
           return data;
         }
       }
@@ -168,7 +169,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
   }
 
   result.cachedAt = Date.now();
-  memoryCache.set(cleanTicker, result);
+  boundedCacheSet(memoryCache, cleanTicker, result, MAX_MEMORY_CACHE_ENTRIES);
 
   if (adminDb) {
     try {

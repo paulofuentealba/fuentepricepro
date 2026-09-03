@@ -1,5 +1,8 @@
 import type { ApiAsset } from "./types";
 import { ASSET_CACHE_TTL_MS } from "./cacheConfig.server";
+import { boundedCacheSet } from "./http.server";
+
+const MAX_MEMORY_CACHE_ENTRIES = 5000;
 
 export { ASSET_CACHE_TTL_MS };
 
@@ -37,10 +40,7 @@ export function saveAssetToMemoryCache(
   now: number = Date.now(),
 ): void {
   const normalizedTicker = ticker.trim().toUpperCase();
-  memoryCache.set(normalizedTicker, {
-    asset,
-    cachedAt: now,
-  });
+  boundedCacheSet(memoryCache, normalizedTicker, { asset, cachedAt: now }, MAX_MEMORY_CACHE_ENTRIES);
 }
 
 /**

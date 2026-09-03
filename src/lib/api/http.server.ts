@@ -19,6 +19,27 @@ export async function fetchWithTimeout(
   }
 }
 
+/**
+ * Inserts into a plain `Map` used as an in-memory cache layer, evicting the
+ * oldest entry (insertion order) once size exceeds `maxSize`. Several
+ * providers (asset/classification/HG Brasil/Dados de Mercado caches) keep an
+ * unbounded `Map` as their fast layer in front of Firestore — in a
+ * long-running server instance tracking thousands of distinct tickers over
+ * weeks, that grows without bound. This is a simple FIFO cap, not a true
+ * LRU (re-setting an existing key does bump it to "most recent" via the
+ * delete+set below, but a plain read/hit does not) — good enough to bound
+ * memory without adding a dependency.
+ */
+export function boundedCacheSet<K, V>(map: Map<K, V>, key: K, value: V, maxSize: number): void {
+  map.delete(key);
+  map.set(key, value);
+  while (map.size > maxSize) {
+    const oldestKey = map.keys().next().value;
+    if (oldestKey === undefined) break;
+    map.delete(oldestKey);
+  }
+}
+
 export const num = (v: unknown): number | null => {
   if (v && typeof v === "object" && "raw" in v) v = (v as { raw: unknown }).raw;
   return typeof v === "number" && Number.isFinite(v) ? v : null;

@@ -1,9 +1,11 @@
 import type { AssetType } from "../domain";
-import { dedupeInFlight, fetchWithTimeout, UA } from "./http.server";
+import { dedupeInFlight, fetchWithTimeout, UA, boundedCacheSet } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import { ASSET_CLASSIFICATION_CACHE_TTL_MS } from "./cacheConfig.server";
 import { normalizeTicker } from "../ticker";
+
+const MAX_MEMORY_CACHE_ENTRIES = 5000;
 
 export { ASSET_CLASSIFICATION_CACHE_TTL_MS };
 
@@ -114,11 +116,12 @@ export async function fetchHgBrasilClassification(
           const data = docSnap.data();
           if (data && typeof data.cachedAt === "number" && typeof data.type === "string") {
             if (now - data.cachedAt < ASSET_CLASSIFICATION_CACHE_TTL_MS) {
-              memoryClassificationCache.set(clean, {
-                type: data.type as AssetType,
-                kind: data.kind || "",
-                cachedAt: data.cachedAt,
-              });
+              boundedCacheSet(
+                memoryClassificationCache,
+                clean,
+                { type: data.type as AssetType, kind: data.kind || "", cachedAt: data.cachedAt },
+                MAX_MEMORY_CACHE_ENTRIES,
+              );
               return data.type as AssetType;
             }
           }
@@ -181,11 +184,12 @@ export async function fetchHgBrasilClassification(
       }
 
       // Populate Memory Cache
-      memoryClassificationCache.set(clean, {
-        type: mappedType,
-        kind: matched.kind,
-        cachedAt: now,
-      });
+      boundedCacheSet(
+        memoryClassificationCache,
+        clean,
+        { type: mappedType, kind: matched.kind, cachedAt: now },
+        MAX_MEMORY_CACHE_ENTRIES,
+      );
 
       // Populate Firestore Cache (Admin SDK)
       if (adminDb) {
