@@ -2,6 +2,7 @@ import type { WatchlistItem } from "./watchlist";
 import type { AssetType, Currency } from "./domain";
 
 import { netAfterTax } from "./calculations";
+import { convertCurrency } from "./currency";
 
 export type StrategyKey = "yield" | "margin" | "snowball" | "gapFiller" | "defensive";
 
@@ -176,18 +177,11 @@ export function computeSmartAllocation(
   for (const it of items) {
     const val = it.currentPrice * it.quantity;
     if (val <= 0) continue;
-    const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+    const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
     totalPortfolioBRL += inBrl;
     currentAllocationBRL[it.type] = (currentAllocationBRL[it.type] || 0) + inBrl;
 
-    let inTargetCurrency = val;
-    if (it.currency !== currency) {
-      if (currency === "BRL" && it.currency === "USD") {
-        inTargetCurrency = val * exchangeRate;
-      } else if (currency === "USD" && it.currency === "BRL") {
-        inTargetCurrency = val / exchangeRate;
-      }
-    }
+    const inTargetCurrency = convertCurrency(val, it.currency, currency, exchangeRate);
     totalPortfolioTargetCurrency += inTargetCurrency;
     currentAssetValueTargetCurrency[it.ticker] = (currentAssetValueTargetCurrency[it.ticker] || 0) + inTargetCurrency;
   }
@@ -200,7 +194,7 @@ export function computeSmartAllocation(
     if (!it.sector) continue;
     const val = it.currentPrice * it.quantity;
     if (val <= 0) continue;
-    const inBrl = it.currency === "USD" ? val * exchangeRate : val;
+    const inBrl = convertCurrency(val, it.currency, "BRL", exchangeRate);
     sectorAllocationBRL[it.sector] = (sectorAllocationBRL[it.sector] || 0) + inBrl;
   }
 
