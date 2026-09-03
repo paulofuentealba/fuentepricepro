@@ -66,24 +66,42 @@ export async function computeValuedPortfolioInternal(
 
   const positionsMap = reconcileAllPositions(safeTransactions, now);
 
+  const validItems = safeItems.filter(
+    (item): item is WatchlistItem => !!item && typeof item.ticker === "string" && item.ticker.trim() !== "",
+  );
+
+  // Fetch (cache-first, falling back to fetchAssetFn) in bounded-concurrency
+  // batches instead of one ticker at a time — this loop was the dominant
+  // latency source for large portfolios (up to MAX_PORTFOLIO_BFF_ITEMS).
+  const BFF_FETCH_CONCURRENCY = 20;
+  const assetByTicker = new Map<string, Asset | null>();
+  for (let i = 0; i < validItems.length; i += BFF_FETCH_CONCURRENCY) {
+    const batch = validItems.slice(i, i + BFF_FETCH_CONCURRENCY);
+    const results = await Promise.all(
+      batch.map(async (item) => {
+        const ticker = item.ticker.trim().toUpperCase();
+        let asset: Asset | null = (await getCachedAsset(ticker)) as unknown as Asset | null;
+        if (!asset && fetchAssetFn) {
+          try {
+            asset = await fetchAssetFn(ticker);
+            if (asset) {
+              await setCachedAsset(ticker, asset as any);
+            }
+          } catch {
+            asset = null;
+          }
+        }
+        return [ticker, asset] as const;
+      }),
+    );
+    for (const [ticker, asset] of results) assetByTicker.set(ticker, asset);
+  }
+
   const valuedItems: ValuedPortfolioResponse["items"] = [];
 
-  for (const item of safeItems) {
-    if (!item || typeof item.ticker !== "string") continue;
+  for (const item of validItems) {
     const ticker = item.ticker.trim().toUpperCase();
-    if (!ticker) continue;
-    let asset: Asset | null = (await getCachedAsset(ticker)) as unknown as Asset | null;
-
-    if (!asset && fetchAssetFn) {
-      try {
-        asset = await fetchAssetFn(ticker);
-        if (asset) {
-          await setCachedAsset(ticker, asset as any);
-        }
-      } catch {
-        asset = null;
-      }
-    }
+    const asset = assetByTicker.get(ticker) ?? null;
 
     const pos = positionsMap.get(ticker);
     const quantity = pos ? pos.quantity : item.quantity || 0;
