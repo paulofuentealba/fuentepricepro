@@ -100,28 +100,13 @@ export function recalculateHoldingFromTransactions(transactions: Transaction[]):
 
 /**
  * Returns the quantity of an asset held at a specific point in time in the past.
+ * Delegates to `recalculateHoldingFromTransactions` (the SSOT holding reducer)
+ * over the subset of transactions up to `date`, so buy/sell/corporate_action
+ * rules never drift between "current holding" and "holding as of a date".
  */
 export function getQuantityAtDate(transactions: Transaction[], date: number): number {
   const pastTx = transactions.filter((tx) => tx.date <= date);
-  const sorted = [...pastTx].sort((a, b) => a.date - b.date);
-
-  let quantity = 0;
-  for (const tx of sorted) {
-    if (tx.type === "buy") {
-      quantity += tx.quantity;
-    } else if (tx.type === "sell") {
-      quantity -= tx.quantity;
-      if (quantity < 0) quantity = 0;
-    } else if (tx.type === "corporate_action") {
-      const factor = tx.factor ?? 1;
-      if (Number.isFinite(factor) && factor > 0) {
-        quantity *= factor;
-        if (quantity < 0) quantity = 0;
-      }
-    }
-  }
-
-  return quantity;
+  return recalculateHoldingFromTransactions(pastTx).quantity;
 }
 
 /**
