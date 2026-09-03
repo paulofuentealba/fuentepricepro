@@ -30,6 +30,9 @@ export const NTN_B_FLOOR_FALLBACK = 5.5;
 /** Spread de risco padrão de REITs sobre o US Treasury 10Y em pontos percentuais (2.75 para 2,75% a.a.) */
 export const REIT_TREASURY_SPREAD_FALLBACK = 2.75;
 
+/** Yield anual médio assumido (formato decimal, 0.08 = 8% a.a.) quando o portfólio ainda não tem valor/dividendo suficiente para calcular um blended yield real (ex.: Snowball com carteira vazia). */
+export const DEFAULT_SNOWBALL_YIELD_FALLBACK = 0.08;
+
 export interface MacroRates {
   cdi: number;
   ipca: number;

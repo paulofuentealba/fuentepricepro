@@ -5,7 +5,7 @@ import { useUserSettings } from "@/lib/useUserSettings";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOptions";
 import { getPositionValue } from "@/lib/calculations";
 import { convertCurrency } from "@/lib/currency";
-import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { EXCHANGE_RATE_FALLBACK, DEFAULT_SNOWBALL_YIELD_FALLBACK } from "@/lib/macroDefaults";
 import type { Currency } from "@/lib/domain";
 
 export interface SnowballBase {
@@ -45,7 +45,7 @@ export function useSnowballBase(): SnowballBase {
       totalAnnualDividend += convertedDividend;
     }
 
-    const yieldPct = totalValue > 0 ? totalAnnualDividend / totalValue : 0.08; // Default to 8% if empty
+    const yieldPct = totalValue > 0 ? totalAnnualDividend / totalValue : DEFAULT_SNOWBALL_YIELD_FALLBACK;
     return { currentTotal: totalValue, blendedYield: yieldPct, currency };
   }, [items, currency, macroRates, usdRate]);
 }
