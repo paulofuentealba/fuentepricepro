@@ -21,7 +21,7 @@ const STORAGE_KEY = "ceilingPricePro.transactions.v1";
 const USE_LOCAL_ONLY = import.meta.env.DEV; // Local-only só no dev server (npm run dev); build de produção sempre usa Firestore automaticamente, sem depender de lembrar de trocar antes do commit
 
 async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
-  let timeoutId: any;
+  let timeoutId: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<T>((_, reject) => {
     timeoutId = setTimeout(() => {
       reject(new Error("A operação demorou muito. Verifique sua conexão ou permissões."));
@@ -74,23 +74,23 @@ function clearLocal() {
 }
 
 // ---------- Firestore conversions ----------
-function rowToItem(row: any): Transaction {
+function rowToItem(row: Record<string, unknown>): Transaction {
   return {
-    id: row.id,
-    ticker: row.ticker,
-    type: row.type,
+    id: row.id as string,
+    ticker: row.ticker as string,
+    type: row.type as Transaction["type"],
     date: typeof row.date === "number" ? row.date : 0,
     quantity: typeof row.quantity === "number" ? row.quantity : 0,
     pricePerShare: typeof row.pricePerShare === "number" ? row.pricePerShare : 0,
-    factor: row.factor ?? null,
-    fees: row.fees ?? null,
-    notes: row.notes ?? null,
-    thesisSnapshot: row.thesisSnapshot ?? null,
+    factor: (row.factor as number | null | undefined) ?? null,
+    fees: (row.fees as number | null | undefined) ?? null,
+    notes: (row.notes as string | null | undefined) ?? null,
+    thesisSnapshot: (row.thesisSnapshot as Transaction["thesisSnapshot"] | undefined) ?? null,
   };
 }
 
-function itemToRow(item: Transaction, userId: string) {
-  const row: Record<string, any> = {
+function itemToRow(item: Transaction, userId: string): Record<string, unknown> {
+  const row: Record<string, unknown> = {
     ...item,
     user_id: userId,
   };

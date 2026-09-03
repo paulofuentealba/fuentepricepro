@@ -7,6 +7,20 @@ import {
 import type { ParsedTransaction } from "./dynamicCsvParser";
 import { classifyBr } from "./classify";
 import { getCanonicalAnnualDividend, getAssetValuation } from "./calculations";
+import type { Asset } from "./domain";
+
+/**
+ * `fetchAssetData` callers (e.g. tests, and some lighter-weight lookups) may
+ * pass a partial asset-like object carrying a simple `annualDividend` total
+ * instead of the full `dividendHistory`/`dividends3y` arrays `Asset` expects
+ * — `getCanonicalAnnualDividend` needs the latter, so `annualDividend` is
+ * kept as an explicit fallback below rather than assumed dead.
+ */
+type FetchedAssetLike = Partial<Asset> & {
+  ticker: string;
+  type: Asset["type"];
+  annualDividend?: number;
+};
 
 export interface BatchPersistenceProgress {
   total: number;
@@ -36,7 +50,7 @@ export async function persistTransactionsBatch(
   existingTransactions: Transaction[],
   upsertTransaction: (tx: Transaction) => Promise<unknown> | void,
   upsertWatchlistItem: (item: WatchlistItem) => Promise<unknown> | void,
-  fetchAssetData?: (ticker: string) => Promise<any> | any,
+  fetchAssetData?: (ticker: string) => Promise<FetchedAssetLike | null> | FetchedAssetLike | null,
   onProgress?: (progress: BatchPersistenceProgress) => void,
 ): Promise<BatchPersistenceResult> {
   const persistedTransactions: Transaction[] = [];
@@ -71,7 +85,7 @@ export async function persistTransactionsBatch(
       (it) => it.ticker.toUpperCase() === ticker,
     );
 
-    let assetData: any = null;
+    let assetData: FetchedAssetLike | null = null;
     let valuationUnavailableReason: string | null = null;
     if (fetchAssetData) {
       try {
@@ -87,7 +101,7 @@ export async function persistTransactionsBatch(
       assetData?.currency ||
       (["STOCK_US", "REIT"].includes(type) ? "USD" : "BRL");
     const annualDiv = assetData
-      ? (getCanonicalAnnualDividend(assetData, 3) || assetData?.annualDividend || 0)
+      ? getCanonicalAnnualDividend(assetData as Asset, 3) || assetData.annualDividend || 0
       : existingItem?.annualDividend ?? 0;
     const target = existingItem?.targetYield ?? 6;
 
@@ -107,19 +121,11 @@ export async function persistTransactionsBatch(
       valuationUnavailableReason = "VALUATION_CALCULATION_FAILED";
     }
 
-    const payoutRatio =
-      existingItem?.payoutRatio ??
-      assetData?.metrics?.payoutRatio ??
-      assetData?.payoutRatio ??
-      null;
-    const dividendCagr5y =
-      assetData?.metrics?.dividendCagr5y ??
-      (existingItem as any)?.dividendCagr5y ??
-      null;
-    const piotroskiScore =
-      assetData?.metrics?.piotroskiScore ??
-      assetData?.piotroskiScore ??
-      null;
+    const payoutRatio = existingItem?.payoutRatio ?? assetData?.metrics?.payoutRatio ?? null;
+    const dividendCagr5y = assetData?.metrics?.dividendCagr5y ?? null;
+    // Piotroski F-Score is not carried on Asset/AssetMetrics — always null here
+    // (neither prior fallback source ever populated it either).
+    const piotroskiScore: number | null = null;
 
     for (const parsed of tickerParsedList) {
       current++;
