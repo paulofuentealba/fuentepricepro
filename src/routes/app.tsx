@@ -7,6 +7,7 @@ import {
   Calculator as CalculatorIcon,
   TrendingUp,
   Scale,
+  Loader2,
 } from "lucide-react";
 import { Header } from "@/components/ceiling/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -56,7 +57,7 @@ function AppLayout() {
       <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
         <Header />
         <div className="flex flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <Loader2 className="h-10 w-10 text-primary animate-spin" />
         </div>
       </div>
     );

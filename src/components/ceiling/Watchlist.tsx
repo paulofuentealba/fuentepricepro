@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -168,7 +169,7 @@ export function Watchlist({ onNavigateToCalculator }: WatchlistProps) {
   if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center p-20 text-muted-foreground gap-4 w-full">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
         <p>{t.watchlist.loading}</p>
       </div>
     );
