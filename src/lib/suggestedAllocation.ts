@@ -14,6 +14,17 @@ export const ASSET_TYPES_ORDER: AssetType[] = [
   "FIXED_INCOME",
 ];
 
+/** Builds a `Record<AssetType, number>` with every type set to `fill` (default 0). */
+function zeroedByType(fill: number = 0): Record<AssetType, number> {
+  return ASSET_TYPES_ORDER.reduce(
+    (acc, type) => {
+      acc[type] = fill;
+      return acc;
+    },
+    {} as Record<AssetType, number>,
+  );
+}
+
 /**
  * Base allocation templates per profile tier & sublabel (in percentage points).
  * Sum of each template is exactly 100%.
@@ -142,26 +153,8 @@ export const STRATEGY_BIAS_MULTIPLIERS: Record<StrategyKey, Record<AssetType, nu
  * based on the average safety margin per asset type in the watchlist.
  */
 export function computeMarginBiasMultipliers(items: WatchlistItem[]): Record<AssetType, number> {
-  const sums: Record<AssetType, number> = {
-    STOCK_BR: 0,
-    STOCK_US: 0,
-    FII: 0,
-    REIT: 0,
-    ETF: 0,
-    FII_INFRA: 0,
-    FIAGRO: 0,
-    FIXED_INCOME: 0,
-  };
-  const counts: Record<AssetType, number> = {
-    STOCK_BR: 0,
-    STOCK_US: 0,
-    FII: 0,
-    REIT: 0,
-    ETF: 0,
-    FII_INFRA: 0,
-    FIAGRO: 0,
-    FIXED_INCOME: 0,
-  };
+  const sums: Record<AssetType, number> = zeroedByType();
+  const counts: Record<AssetType, number> = zeroedByType();
 
   for (const item of items) {
     if (typeof item.safetyMargin === "number" && item.safetyMargin > 0) {
@@ -170,16 +163,7 @@ export function computeMarginBiasMultipliers(items: WatchlistItem[]): Record<Ass
     }
   }
 
-  const result: Record<AssetType, number> = {
-    STOCK_BR: 1.0,
-    STOCK_US: 1.0,
-    FII: 1.0,
-    REIT: 1.0,
-    ETF: 1.0,
-    FII_INFRA: 1.0,
-    FIAGRO: 1.0,
-    FIXED_INCOME: 1.0,
-  };
+  const result: Record<AssetType, number> = zeroedByType(1.0);
 
   for (const type of ASSET_TYPES_ORDER) {
     if (counts[type] > 0) {
@@ -207,16 +191,7 @@ export function computeSuggestedAllocation(
 
   const marginMultipliers = computeMarginBiasMultipliers(items);
 
-  const combinedMultiplier: Record<AssetType, number> = {
-    STOCK_BR: 1.0,
-    STOCK_US: 1.0,
-    FII: 1.0,
-    REIT: 1.0,
-    ETF: 1.0,
-    FII_INFRA: 1.0,
-    FIAGRO: 1.0,
-    FIXED_INCOME: 1.0,
-  };
+  const combinedMultiplier: Record<AssetType, number> = zeroedByType(1.0);
 
   if (strategies.length > 0) {
     for (const type of ASSET_TYPES_ORDER) {
@@ -232,16 +207,7 @@ export function computeSuggestedAllocation(
     }
   }
 
-  const weighted: Record<AssetType, number> = {
-    STOCK_BR: 0,
-    STOCK_US: 0,
-    FII: 0,
-    REIT: 0,
-    ETF: 0,
-    FII_INFRA: 0,
-    FIAGRO: 0,
-    FIXED_INCOME: 0,
-  };
+  const weighted: Record<AssetType, number> = zeroedByType();
 
   let totalWeight = 0;
   for (const type of ASSET_TYPES_ORDER) {
@@ -254,16 +220,7 @@ export function computeSuggestedAllocation(
     return { ...base };
   }
 
-  const rounded: Record<AssetType, number> = {
-    STOCK_BR: 0,
-    STOCK_US: 0,
-    FII: 0,
-    REIT: 0,
-    ETF: 0,
-    FII_INFRA: 0,
-    FIAGRO: 0,
-    FIXED_INCOME: 0,
-  };
+  const rounded: Record<AssetType, number> = zeroedByType();
 
   // Largest Remainder Method (Hare-Niemeyer Algorithm)
   // Guarantees exact sum of 100% while strictly minimizing rounding distortion across buckets.
