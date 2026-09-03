@@ -6,14 +6,29 @@ import fs from "node:fs";
 let adminDbInstance: Firestore | null = null;
 let adminAuthInstance: Auth | null = null;
 
+function isDevEnvironment(): boolean {
+  return process.env.NODE_ENV !== "production";
+}
+
 function ensureAppInitialized(): boolean {
   if (getApps().length > 0) return true;
-  if (!isFirebaseAdminConfigured()) return false;
 
   const projectId =
     process.env.VITE_FIREBASE_PROJECT_ID ||
     process.env.FIREBASE_PROJECT_ID ||
     "fuente-price-pro";
+
+  if (isDevEnvironment()) {
+    // Dev must never touch production data: force the Admin SDK onto the
+    // local emulators (see firebase.json), ignoring any real service-account
+    // credentials that happen to be in the environment.
+    process.env.FIRESTORE_EMULATOR_HOST ||= "localhost:8080";
+    process.env.FIREBASE_AUTH_EMULATOR_HOST ||= "localhost:9099";
+    initializeApp({ projectId });
+    return true;
+  }
+
+  if (!isFirebaseAdminConfigured()) return false;
 
   const serviceAccountVar =
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
@@ -41,6 +56,7 @@ function ensureAppInitialized(): boolean {
 }
 
 export function isFirebaseAdminConfigured(): boolean {
+  if (isDevEnvironment()) return true; // always available in dev, against the local emulator
   return Boolean(
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
       process.env.GOOGLE_APPLICATION_CREDENTIALS ||

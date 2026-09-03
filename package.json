@@ -10,6 +10,7 @@
     "check-tagline": "node scripts/forbid-legacy-tagline.js",
     "check-ssot-leaks": "node scripts/check-ssot-leaks.js",
     "dev": "vite dev",
+    "emulators": "npx firebase-tools emulators:start --only firestore,auth",
     "build": "npm run check-tagline && npm run check-ssot-leaks && vite build",
     "build:dev": "npm run check-tagline && npm run check-ssot-leaks && vite build --mode development",
     "test": "vitest run",
