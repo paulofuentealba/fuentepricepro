@@ -32,26 +32,16 @@ async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
   });
 }
 
-import { DEV_MOCK_TRANSACTIONS } from "@/__fixtures__/devMockData";
-
 // ---------- Local storage helpers (guest mode) ----------
 function readLocal(): Transaction[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      if (import.meta.env.DEV) {
-        writeLocal(DEV_MOCK_TRANSACTIONS);
-        return DEV_MOCK_TRANSACTIONS;
-      }
       return [];
     }
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    if (parsed.length === 0 && import.meta.env.DEV) {
-      writeLocal(DEV_MOCK_TRANSACTIONS);
-      return DEV_MOCK_TRANSACTIONS;
-    }
     return parsed;
   } catch (e) {
     console.error("Failed to read local transactions", e);
