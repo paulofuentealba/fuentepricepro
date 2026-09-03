@@ -1,4 +1,4 @@
-import { fetchWithRetry } from "./http.server";
+import { fetchWithRetry, dedupeInFlight } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { SEC_EDGAR_CIK_CACHE_TTL_MS, SEC_EDGAR_FAILURE_TTL_MS } from "./cacheConfig.server";
 
@@ -90,30 +90,32 @@ export async function getCikForTicker(ticker: string): Promise<string | null> {
     }
 
     try {
-      const response = await fetchWithRetry(
-        'https://www.sec.gov/files/company_tickers.json',
-        "secEdgar",
-        { headers: { 'User-Agent': SEC_USER_AGENT } },
-        { timeoutMs: 5000, retries: 1 }
-      );
+      await dedupeInFlight("secEdgar:cikCache", async () => {
+        const response = await fetchWithRetry(
+          'https://www.sec.gov/files/company_tickers.json',
+          "secEdgar",
+          { headers: { 'User-Agent': SEC_USER_AGENT } },
+          { timeoutMs: 5000, retries: 1 }
+        );
 
-      if (!response.ok) {
-        console.warn(`[SEC EDGAR] Failed to fetch company tickers. Status: ${response.status}`);
-        lastFailureTimestamp = now;
-        return cikCache ? (cikCache[ticker.toUpperCase()] || null) : null;
-      }
+        if (!response.ok) {
+          console.warn(`[SEC EDGAR] Failed to fetch company tickers. Status: ${response.status}`);
+          lastFailureTimestamp = now;
+          return;
+        }
 
-      const data = await response.json() as Record<string, { cik_str: number, ticker: string }>;
-      const newCache: Record<string, string> = {};
+        const data = await response.json() as Record<string, { cik_str: number, ticker: string }>;
+        const newCache: Record<string, string> = {};
 
-      for (const key in data) {
-        const item = data[key];
-        newCache[item.ticker.toUpperCase()] = String(item.cik_str).padStart(10, '0');
-      }
+        for (const key in data) {
+          const item = data[key];
+          newCache[item.ticker.toUpperCase()] = String(item.cik_str).padStart(10, '0');
+        }
 
-      cikCache = newCache;
-      cikCacheTimestamp = now;
-      lastFailureTimestamp = 0;
+        cikCache = newCache;
+        cikCacheTimestamp = now;
+        lastFailureTimestamp = 0;
+      });
     } catch (error) {
       console.error('[SEC EDGAR] Error fetching company tickers:', error);
       lastFailureTimestamp = now;
