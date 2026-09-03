@@ -214,16 +214,20 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
       dividendEvents: asset.dividendEvents.map((e) => ({ ...e }))
     };
 
-    // Enrich BR dividends & financials via HG Brasil + Dados de Mercado
+    // Enrich BR dividends & financials via HG Brasil + Dados de Mercado + CVM.
+    // All four lookups only depend on `raw` (the ticker), not on each other's
+    // output, so they run concurrently instead of adding up their latencies.
     if (looksBr) {
-      const canonicalType = await classifyBrAsync(raw).catch(() => null);
+      const [canonicalType, hgRes, dmRes, cvmData] = await Promise.all([
+        classifyBrAsync(raw).catch(() => null),
+        fetchHgBrasilDividends(raw).catch(() => null),
+        import("./api/dadosDeMercadoScraper.server").then((m) => m.fetchDadosDeMercado(raw)).catch(() => null),
+        fetchCvmEnrichedFacts(raw).catch(() => null),
+      ]);
+
       if (canonicalType) {
         asset.type = canonicalType;
       }
-
-      const hgRes = await fetchHgBrasilDividends(raw).catch(() => null);
-      const { fetchDadosDeMercado } = await import("./api/dadosDeMercadoScraper.server");
-      const dmRes = await fetchDadosDeMercado(raw).catch(() => null);
 
       if (hgRes && hgRes.dividends && hgRes.dividends.length > 0) {
         asset.dividendEvents = hgRes.dividends
@@ -244,19 +248,7 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
         if (asset.metrics.peRatio === null && dmRes.fundamentals.pl) asset.metrics.peRatio = dmRes.fundamentals.pl;
         if (asset.metrics.pbRatio === null && dmRes.fundamentals.pvp) asset.metrics.pbRatio = dmRes.fundamentals.pvp;
       }
-    }
 
-    // Enrich with SEC EDGAR for US stocks/REITs when Yahoo doesn't have BVPS
-    if (!looksBr && (asset.metrics.bvps == null || asset.metrics.bvps === undefined)) {
-      const secData = await fetchSecEdgarFacts(raw).catch(() => null);
-      if (secData?.bvps != null) {
-        asset.metrics.bvps = secData.bvps;
-      }
-    }
-
-    // Enrich with CVM Dados Abertos for BR assets (VPA/LPA & Vacancy)
-    if (looksBr) {
-      const cvmData = await fetchCvmEnrichedFacts(raw).catch(() => null);
       if (cvmData) {
         if (asset.metrics.bvps == null && cvmData.vpa != null) {
           asset.metrics.bvps = cvmData.vpa;
@@ -268,6 +260,14 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
         if (asset.metrics.vacancy == null && cvmData.vacancy != null) {
           asset.metrics.vacancy = cvmData.vacancy;
         }
+      }
+    }
+
+    // Enrich with SEC EDGAR for US stocks/REITs when Yahoo doesn't have BVPS
+    if (!looksBr && (asset.metrics.bvps == null || asset.metrics.bvps === undefined)) {
+      const secData = await fetchSecEdgarFacts(raw).catch(() => null);
+      if (secData?.bvps != null) {
+        asset.metrics.bvps = secData.bvps;
       }
     }
 
