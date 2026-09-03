@@ -63,14 +63,14 @@ export async function fetchFromBrapi(ticker: string): Promise<ApiAsset | null> {
         : typeof res.defaultKeyStatistics?.trailingEps === "number"
           ? res.defaultKeyStatistics.trailingEps
           : null;
-    let pe: number | null = typeof res.priceEarnings === "number" ? res.priceEarnings : null;
+    const pe: number | null = typeof res.priceEarnings === "number" ? res.priceEarnings : null;
     // Prefer the direct Book Value per Share when available (defaultKeyStatistics.bookValue) —
     // more precise than deriving it downstream from currentPrice / pbRatio.
     const bvps: number | null =
       typeof res.defaultKeyStatistics?.bookValue === "number"
         ? res.defaultKeyStatistics.bookValue
         : null;
-    let pb: number | null =
+    const pb: number | null =
       typeof res.priceToBookRatio === "number"
         ? res.priceToBookRatio
         : typeof res.defaultKeyStatistics?.priceToBook === "number"

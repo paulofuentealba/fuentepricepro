@@ -23,7 +23,10 @@ export function getAssetPnL(item: ValuedWatchlistItem): AssetPnL {
   const quantity = item.quantity;
 
   const pnlAbsolute = (currentPrice - averagePrice) * quantity;
-  const pnlPercent = averagePrice === 0 ? 0 : (currentPrice - averagePrice) / averagePrice;
+  const pnlPercent =
+    !Number.isFinite(averagePrice) || averagePrice <= 0
+      ? 0
+      : (currentPrice - averagePrice) / averagePrice;
 
   return { pnlAbsolute, pnlPercent };
 }

@@ -372,7 +372,7 @@ export function gordonPrice(
 
   // Single-stage fallback if gInitial is null or undefined
   if (gInitial == null) {
-    if (k - 0 < GORDON_MIN_DISCOUNT_MARGIN) return null;
+    if (k < GORDON_MIN_DISCOUNT_MARGIN) return null;
     const price = d0 / k;
     return price > 0 ? price : null;
   }
