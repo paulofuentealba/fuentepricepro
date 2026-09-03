@@ -4,6 +4,7 @@ import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
 import { convertCurrency, roundCurrency } from "./currency";
 import { toIntlLocale, getLocalDateISOString } from "./formatters";
 import { type Locale } from "./i18n";
+import { isBrTicker } from "./classify";
 
 export type TaxType = "dividend" | "jcp" | "rendimento_fii" | "us_dividend";
 
@@ -101,14 +102,14 @@ export function calculateRealizedIncome(
       return (
         assetMetaByTicker.get(ticker) || {
           ticker,
-          type: ticker.endsWith(".SA") || /^[A-Z]{4}\d{1,2}$/.test(ticker) ? "STOCK_BR" : "STOCK_US",
+          type: isBrTicker(ticker) ? "STOCK_BR" : "STOCK_US",
         }
       );
     }
     if (assetMetaByTicker && assetMetaByTicker[ticker]) {
       return assetMetaByTicker[ticker]!;
     }
-    const isBr = ticker.endsWith(".SA") || /^[A-Z]{4}\d{1,2}$/.test(ticker);
+    const isBr = isBrTicker(ticker);
     return {
       ticker,
       type: isBr ? "STOCK_BR" : "STOCK_US",
