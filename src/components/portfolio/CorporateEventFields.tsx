@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n-provider";
-import { toIntlLocale } from "@/lib/i18n";
+import { formatCurrency as formatCurrencySSOT } from "@/lib/formatters";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useTransactions } from "@/lib/transactions";
 import {
@@ -122,8 +122,7 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
     }
   };
 
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat(toIntlLocale(locale), { style: "currency", currency: item.currency }).format(val);
+  const formatCurrency = (val: number) => formatCurrencySSOT(val, item.currency, locale);
 
   return (
     <div className="grid gap-6">
