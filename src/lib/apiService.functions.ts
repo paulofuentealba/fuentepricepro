@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
-import { UA, fetchWithRetry } from "./api/http.server";
+import { UA, fetchWithRetry, dedupeInFlight } from "./api/http.server";
+import { reportIngestionStatus } from "./api/ingestionLog.server";
+import { MACRO_RATES_CACHE_TTL_MS } from "./api/cacheConfig.server";
 import { classifyBrAsync, classifyYahoo } from "./api/classify.server";
 import { fetchFromBrapi } from "./api/brapi.server";
 import { fetchFromYahoo, fetchYahooQuote } from "./api/yahoo.server";
@@ -446,7 +448,11 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
   .validator((data: { ticker: string; sinceTimestamp: number }) => {
     const ticker = sanitizeTicker(data?.ticker);
     if (!ticker) throw new Error("INVALID_TICKER");
-    return { ticker, sinceTimestamp: data.sinceTimestamp };
+    const sinceTimestamp =
+      typeof data?.sinceTimestamp === "number" && Number.isFinite(data.sinceTimestamp) && data.sinceTimestamp >= 0
+        ? data.sinceTimestamp
+        : 0;
+    return { ticker, sinceTimestamp };
   })
   .handler(async ({ data }) => {
     const ticker = data.ticker;
@@ -488,59 +494,84 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
 
 // -------- Macro Rates Oracle --------
 
+interface MacroRatesCacheEntry {
+  rates: MacroRates;
+  cachedAt: number;
+}
+let macroRatesMemoryCache: MacroRatesCacheEntry | null = null;
+
+async function fetchMacroRatesUncached(): Promise<MacroRates> {
+  const fallback = MACRO_RATES_FALLBACK;
+
+  try {
+    const [selicRes, cdiRes, ipcaRes] = await Promise.all([
+      fetchWithRetry(
+        "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json",
+        "macroRates",
+        {},
+        { timeoutMs: 5000, retries: 1 },
+      ),
+      fetchWithRetry(
+        "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json",
+        "macroRates",
+        {},
+        { timeoutMs: 5000, retries: 1 },
+      ),
+      fetchWithRetry(
+        "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/1?formato=json",
+        "macroRates",
+        {},
+        { timeoutMs: 5000, retries: 1 },
+      ),
+    ]);
+
+    let selic = fallback.selic;
+    let cdi = fallback.cdi;
+    let ipca = fallback.ipca;
+
+    if (selicRes.ok) {
+      const selicData = await selicRes.json();
+      if (selicData && selicData.length > 0 && selicData[0].valor) {
+        selic = parseFloat(selicData[0].valor);
+      }
+    }
+
+    if (cdiRes.ok) {
+      const cdiData = await cdiRes.json();
+      if (cdiData && cdiData.length > 0 && cdiData[0].valor) {
+        cdi = parseFloat(cdiData[0].valor);
+      }
+    }
+
+    if (ipcaRes.ok) {
+      const ipcaData = await ipcaRes.json();
+      if (ipcaData && ipcaData.length > 0 && ipcaData[0].valor) {
+        ipca = parseFloat(ipcaData[0].valor);
+      }
+    }
+
+    return { selic, cdi, ipca };
+  } catch (err) {
+    reportIngestionStatus(
+      "macroRates",
+      "ERROR",
+      err instanceof Error ? err.message : String(err),
+    );
+    return fallback;
+  }
+}
+
 export const fetchMacroRatesFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<MacroRates> => {
-    const fallback = MACRO_RATES_FALLBACK;
-
-    try {
-      const fetchWithTimeout = (url: string) => {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), 5000);
-        return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
-      };
-
-      const [selicRes, cdiRes, ipcaRes] = await Promise.all([
-        fetchWithTimeout(
-          "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json",
-        ),
-        fetchWithTimeout(
-          "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json",
-        ),
-        fetchWithTimeout(
-          "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/1?formato=json",
-        ),
-      ]);
-
-      let selic = fallback.selic;
-      let cdi = fallback.cdi;
-      let ipca = fallback.ipca;
-
-      if (selicRes.ok) {
-        const selicData = await selicRes.json();
-        if (selicData && selicData.length > 0 && selicData[0].valor) {
-          selic = parseFloat(selicData[0].valor);
-        }
-      }
-
-      if (cdiRes.ok) {
-        const cdiData = await cdiRes.json();
-        if (cdiData && cdiData.length > 0 && cdiData[0].valor) {
-          cdi = parseFloat(cdiData[0].valor);
-        }
-      }
-
-      if (ipcaRes.ok) {
-        const ipcaData = await ipcaRes.json();
-        if (ipcaData && ipcaData.length > 0 && ipcaData[0].valor) {
-          ipca = parseFloat(ipcaData[0].valor);
-        }
-      }
-
-      return { selic, cdi, ipca };
-    } catch (err) {
-      console.warn("[MacroRates] BACEN SGS error:", err);
-      return fallback;
+    const now = Date.now();
+    if (macroRatesMemoryCache && now - macroRatesMemoryCache.cachedAt < MACRO_RATES_CACHE_TTL_MS) {
+      return macroRatesMemoryCache.rates;
     }
+    return dedupeInFlight("macroRates:bacenSgs", async () => {
+      const rates = await fetchMacroRatesUncached();
+      macroRatesMemoryCache = { rates, cachedAt: now };
+      return rates;
+    });
   },
 );
 

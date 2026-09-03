@@ -57,3 +57,12 @@ export const YAHOO_AUTH_TTL_MS = 30 * 60 * 1000;
  * once-a-day dividend records HG Brasil's dividends endpoint serves.
  */
 export const HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * In-memory cache TTL for BACEN SGS macro rates (Selic/CDI/IPCA) (1 hour).
+ * These series publish at most once per business day, but a shorter TTL than
+ * FRED_CACHE_TTL_MS is used since fetchMacroRatesFn has no persistent
+ * (Firestore) layer — an hour bounds how long a stale value survives a
+ * server restart while still cutting BACEN request volume drastically.
+ */
+export const MACRO_RATES_CACHE_TTL_MS = 60 * 60 * 1000;
