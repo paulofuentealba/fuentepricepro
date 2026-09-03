@@ -1,5 +1,5 @@
 import type { AssetType } from "../domain";
-import { dedupeInFlight, fetchWithTimeout, UA, boundedCacheSet } from "./http.server";
+import { dedupeInFlight, fetchWithTimeout, UA, createTtlMemoryCache } from "./http.server";
 import { reportIngestionStatus } from "./ingestionLog.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import { ASSET_CLASSIFICATION_CACHE_TTL_MS } from "./cacheConfig.server";
@@ -39,7 +39,10 @@ export interface CachedClassificationEntry {
   cachedAt: number;
 }
 
-const memoryClassificationCache = new Map<string, CachedClassificationEntry>();
+const memoryClassificationCache = createTtlMemoryCache<CachedClassificationEntry>(
+  ASSET_CLASSIFICATION_CACHE_TTL_MS,
+  MAX_MEMORY_CACHE_ENTRIES,
+);
 
 /**
  * Clears the in-memory classification cache (primarily for unit tests).
@@ -102,8 +105,8 @@ export async function fetchHgBrasilClassification(
     const now = Date.now();
 
     // 1. Layer 1: Memory Cache
-    const mem = memoryClassificationCache.get(clean);
-    if (mem && now - mem.cachedAt < ASSET_CLASSIFICATION_CACHE_TTL_MS) {
+    const mem = memoryClassificationCache.get(clean, now);
+    if (mem) {
       return mem.type;
     }
 
@@ -116,12 +119,11 @@ export async function fetchHgBrasilClassification(
           const data = docSnap.data();
           if (data && typeof data.cachedAt === "number" && typeof data.type === "string") {
             if (now - data.cachedAt < ASSET_CLASSIFICATION_CACHE_TTL_MS) {
-              boundedCacheSet(
-                memoryClassificationCache,
-                clean,
-                { type: data.type as AssetType, kind: data.kind || "", cachedAt: data.cachedAt },
-                MAX_MEMORY_CACHE_ENTRIES,
-              );
+              memoryClassificationCache.set(clean, {
+                type: data.type as AssetType,
+                kind: data.kind || "",
+                cachedAt: data.cachedAt,
+              });
               return data.type as AssetType;
             }
           }
@@ -184,12 +186,7 @@ export async function fetchHgBrasilClassification(
       }
 
       // Populate Memory Cache
-      boundedCacheSet(
-        memoryClassificationCache,
-        clean,
-        { type: mappedType, kind: matched.kind, cachedAt: now },
-        MAX_MEMORY_CACHE_ENTRIES,
-      );
+      memoryClassificationCache.set(clean, { type: mappedType, kind: matched.kind, cachedAt: now });
 
       // Populate Firestore Cache (Admin SDK)
       if (adminDb) {

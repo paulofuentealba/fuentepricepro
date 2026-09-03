@@ -1,4 +1,4 @@
-import { UA, fetchWithRetry, boundedCacheSet } from "./http.server";
+import { UA, fetchWithRetry, createTtlMemoryCache } from "./http.server";
 import { getAdminFirestore } from "../../integrations/firebase/admin";
 import type { DividendEvent } from "../domain";
 import { reportIngestionStatus } from "./ingestionLog.server";
@@ -20,8 +20,10 @@ export interface DadosDeMercadoResult {
   cachedAt?: number;
 }
 
+type CachedDadosDeMercadoResult = DadosDeMercadoResult & { cachedAt: number };
+
 // Memory cache
-const memoryCache = new Map<string, DadosDeMercadoResult>();
+const memoryCache = createTtlMemoryCache<CachedDadosDeMercadoResult>(CACHE_TTL_MS, MAX_MEMORY_CACHE_ENTRIES);
 
 export function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -33,7 +35,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
 
   // 1. Try memory
   const mem = memoryCache.get(cleanTicker);
-  if (mem && mem.cachedAt && Date.now() - mem.cachedAt < CACHE_TTL_MS) {
+  if (mem) {
     return mem;
   }
 
@@ -45,7 +47,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
       if (doc.exists) {
         const data = doc.data() as DadosDeMercadoResult;
         if (data.cachedAt && Date.now() - data.cachedAt < CACHE_TTL_MS) {
-          boundedCacheSet(memoryCache, cleanTicker, data, MAX_MEMORY_CACHE_ENTRIES);
+          memoryCache.set(cleanTicker, data as CachedDadosDeMercadoResult);
           return data;
         }
       }
@@ -169,7 +171,7 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
   }
 
   result.cachedAt = Date.now();
-  boundedCacheSet(memoryCache, cleanTicker, result, MAX_MEMORY_CACHE_ENTRIES);
+  memoryCache.set(cleanTicker, result as CachedDadosDeMercadoResult);
 
   if (adminDb) {
     try {

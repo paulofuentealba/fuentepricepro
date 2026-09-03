@@ -1,6 +1,6 @@
 import type { ApiAsset } from "./types";
 import { ASSET_CACHE_TTL_MS } from "./cacheConfig.server";
-import { boundedCacheSet } from "./http.server";
+import { createTtlMemoryCache } from "./http.server";
 
 const MAX_MEMORY_CACHE_ENTRIES = 5000;
 
@@ -12,23 +12,15 @@ interface CacheEntry {
 }
 
 /** In-memory fast layer cache (per Cloud Run instance / server process) */
-const memoryCache = new Map<string, CacheEntry>();
+const memoryCache = createTtlMemoryCache<CacheEntry>(ASSET_CACHE_TTL_MS, MAX_MEMORY_CACHE_ENTRIES);
 
 /**
  * Retrieves an asset from memory cache if present and fresh (age < ASSET_CACHE_TTL_MS).
  */
 export function getAssetFromMemoryCache(ticker: string, now: number = Date.now()): ApiAsset | null {
   const normalizedTicker = ticker.trim().toUpperCase();
-  const entry = memoryCache.get(normalizedTicker);
-  if (!entry) return null;
-
-  const isExpired = now - entry.cachedAt > ASSET_CACHE_TTL_MS;
-  if (isExpired) {
-    memoryCache.delete(normalizedTicker);
-    return null;
-  }
-
-  return entry.asset;
+  const entry = memoryCache.get(normalizedTicker, now);
+  return entry ? entry.asset : null;
 }
 
 /**
@@ -40,7 +32,7 @@ export function saveAssetToMemoryCache(
   now: number = Date.now(),
 ): void {
   const normalizedTicker = ticker.trim().toUpperCase();
-  boundedCacheSet(memoryCache, normalizedTicker, { asset, cachedAt: now }, MAX_MEMORY_CACHE_ENTRIES);
+  memoryCache.set(normalizedTicker, { asset, cachedAt: now });
 }
 
 /**

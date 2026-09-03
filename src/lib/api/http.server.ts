@@ -40,6 +40,43 @@ export function boundedCacheSet<K, V>(map: Map<K, V>, key: K, value: V, maxSize:
   }
 }
 
+/**
+ * A bounded, TTL-expiring in-memory Map cache — the "fast layer" shape
+ * duplicated across assetCache/hgBrasilClassification/dadosDeMercadoScraper
+ * (each: Map lookup, expire-if-stale, bounded insert). `V` must carry its
+ * own `cachedAt` since each caller's Firestore layer already persists that
+ * field on the same shape it stores in memory.
+ */
+export interface TtlMemoryCache<V extends { cachedAt: number }> {
+  get(key: string, now?: number): V | null;
+  set(key: string, value: V): void;
+  clear(): void;
+}
+
+export function createTtlMemoryCache<V extends { cachedAt: number }>(
+  ttlMs: number,
+  maxEntries = 5000,
+): TtlMemoryCache<V> {
+  const map = new Map<string, V>();
+  return {
+    get(key, now = Date.now()) {
+      const entry = map.get(key);
+      if (!entry) return null;
+      if (now - entry.cachedAt > ttlMs) {
+        map.delete(key);
+        return null;
+      }
+      return entry;
+    },
+    set(key, value) {
+      boundedCacheSet(map, key, value, maxEntries);
+    },
+    clear() {
+      map.clear();
+    },
+  };
+}
+
 export const num = (v: unknown): number | null => {
   if (v && typeof v === "object" && "raw" in v) v = (v as { raw: unknown }).raw;
   return typeof v === "number" && Number.isFinite(v) ? v : null;
