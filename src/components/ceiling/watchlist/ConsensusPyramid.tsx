@@ -32,16 +32,18 @@ type DiamondSlot = "top" | "left" | "right" | "bottom";
 
 const SLOT_POSITION_CLASS: Record<DiamondSlot, string> = {
   top: "top-0 left-1/2 -translate-x-1/2",
-  left: "bottom-0 left-4",
-  right: "bottom-0 right-4",
+  left: "top-1/2 -translate-y-1/2 left-0",
+  right: "top-1/2 -translate-y-1/2 right-0",
   bottom: "bottom-0 left-1/2 -translate-x-1/2",
 };
 
+// True diamond (rhombus): 4 points equidistant (110px) from the center (160,140),
+// so the polygon path top -> left -> bottom -> right -> top never self-intersects.
 const SLOT_COORDS: Record<DiamondSlot, { x: number; y: number }> = {
-  top: { x: 160, y: 40 },
-  left: { x: 50, y: 220 },
-  right: { x: 270, y: 220 },
-  bottom: { x: 160, y: 240 },
+  top: { x: 160, y: 30 },
+  left: { x: 50, y: 140 },
+  right: { x: 270, y: 140 },
+  bottom: { x: 160, y: 250 },
 };
 
 interface VertexConfig {
@@ -173,8 +175,12 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
   };
 
   const activeSlots = vertices.map((v) => v.slot);
-  const points = activeSlots.map((slot) => `${SLOT_COORDS[slot].x},${SLOT_COORDS[slot].y}`).join(" ");
-  const center = { x: 160, y: 150 };
+  // The polygon must be traced around the diamond's perimeter (top -> right -> bottom -> left),
+  // not in vertex-config order, or the closing edge cuts back through the center (bowtie shape).
+  const DIAMOND_WINDING_ORDER: DiamondSlot[] = ["top", "right", "bottom", "left"];
+  const orderedSlots = DIAMOND_WINDING_ORDER.filter((slot) => activeSlots.includes(slot));
+  const points = orderedSlots.map((slot) => `${SLOT_COORDS[slot].x},${SLOT_COORDS[slot].y}`).join(" ");
+  const center = { x: 160, y: 140 };
 
   return (
     <>
@@ -216,7 +222,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
 
           {vertices.map(renderVertex)}
 
-          <div className="absolute top-[150px] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10">
+          <div className="absolute top-[140px] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
             <div className="relative rounded-full border border-primary/50 bg-black px-5 py-2.5 shadow-primary/20 backdrop-blur-xl">
               <span className="flex items-center justify-center gap-1 text-[10px] font-bold text-primary uppercase tracking-widest text-center mb-0.5 drop-shadow-md">

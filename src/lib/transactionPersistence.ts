@@ -149,7 +149,7 @@ export async function persistTransactionsBatch(
         thesisSnapshot = {
           consensusPrice,
           bazinPrice: baseValuation?.methods?.bazin ?? null,
-          grahamPrice: baseValuation?.methods?.graham ?? null,
+          grahamPrice: baseValuation?.methods?.graham ?? baseValuation?.methods?.lynch ?? null,
           gordonPrice: baseValuation?.methods?.gordon ?? null,
           purchasePrice,
           safetyMarginVsConsensus,
