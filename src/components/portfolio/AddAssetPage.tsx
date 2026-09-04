@@ -229,7 +229,7 @@ export function AddAssetPage() {
           const snapshot: ThesisSnapshot = {
             consensusPrice,
             bazinPrice: val.methods.bazin,
-            grahamPrice: val.methods.graham,
+            grahamPrice: val.methods.graham ?? val.methods.lynch ?? null,
             gordonPrice: val.methods.gordon,
             purchasePrice: priceNum,
             safetyMarginVsConsensus,

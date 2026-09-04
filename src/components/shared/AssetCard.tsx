@@ -341,7 +341,7 @@ function WatchlistVariant(props: AssetCardProps) {
           currentPrice={item.currentPrice}
           currency={item.currency}
           bazin={valuation.bazin}
-          graham={valuation.graham}
+          graham={valuation.graham ?? valuation.lynch}
           gordon={valuation.gordon}
           consensus={valuation.consensus}
           className="w-full relative z-10"
@@ -575,7 +575,7 @@ function SearchVariant({
           currentPrice={asset.currentPrice}
           currency={asset.currency}
           bazin={valuation.bazin}
-          graham={valuation.graham}
+          graham={valuation.graham ?? valuation.lynch}
           gordon={valuation.gordon}
           consensus={valuation.consensus}
         />

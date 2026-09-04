@@ -247,7 +247,7 @@ function ComparatorCards({
           peRatio: data.metrics?.peRatio ?? null,
           pbRatio: data.metrics?.pbRatio ?? null,
           bazin: val.bazin,
-          graham: val.graham,
+          graham: val.graham ?? val.lynch,
           gordon: val.gordon,
           consensus: val.consensus,
         };
