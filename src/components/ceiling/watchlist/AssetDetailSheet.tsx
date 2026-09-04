@@ -443,7 +443,13 @@ export function AssetDetailSheet({
                           </div>
                         </div>
                       )}
-                      <ConsensusPyramid valuation={valuation} currency={asset.currency} />
+                      <ConsensusPyramid
+                        valuation={{
+                          ...valuation,
+                          lynch: asset.type === "STOCK_BR" || asset.type === "STOCK_US" ? valuation.lynch : undefined,
+                        }}
+                        currency={asset.currency}
+                      />
                       <FundamentalIndicatorsPanel asset={asset} valuation={valuation} />
                       {(asset.dividendHistory ?? []).filter((p: any) => p.amount > 0).length > 1 && (
                         <DividendHistoryChart

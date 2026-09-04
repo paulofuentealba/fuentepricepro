@@ -1,22 +1,24 @@
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
-import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { MethodDetailSheet } from "./MethodDetailSheet";
 
+type MethodType = "gordon" | "bazin" | "graham" | "lynch" | "consensus";
+
 interface ValuationData {
   bazin: number | null;
   graham: number | null;
   gordon: number | null;
+  lynch?: number | null;
   consensus: number | null;
-  // Optional method detail data from backend
   methodDetails?: {
     gordon?: { formula: string; rate: number; growth: number; source: string; date: string; growthSource: string };
     bazin?: { formula: string; yieldTarget: number; isNetJcp: boolean; source: string; date: string };
     graham?: { formula: string; margin: number; source: string; date: string };
+    lynch?: { formula: string; growth: number; dividendYield: number; source: string; date: string };
     consensus?: { methods: string[]; excluded: string[] };
   };
 }
@@ -26,27 +28,87 @@ interface ConsensusPyramidProps {
   currency: Currency;
 }
 
+type DiamondSlot = "top" | "left" | "right" | "bottom";
+
+const SLOT_POSITION_CLASS: Record<DiamondSlot, string> = {
+  top: "top-0 left-1/2 -translate-x-1/2",
+  left: "bottom-0 left-4",
+  right: "bottom-0 right-4",
+  bottom: "bottom-0 left-1/2 -translate-x-1/2",
+};
+
+const SLOT_COORDS: Record<DiamondSlot, { x: number; y: number }> = {
+  top: { x: 160, y: 40 },
+  left: { x: 50, y: 220 },
+  right: { x: 270, y: 220 },
+  bottom: { x: 160, y: 240 },
+};
+
+interface VertexConfig {
+  key: MethodType;
+  label: string;
+  value: number | null;
+  slot: DiamondSlot;
+  conceptTooltip?: string;
+  notApplicableTooltip?: string;
+}
+
 export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps) {
   const { locale, t } = useI18n();
-  const [mobileMethodOpen, setMobileMethodOpen] = useState<"gordon" | "bazin" | "graham" | "consensus" | null>(null);
+  const [mobileMethodOpen, setMobileMethodOpen] = useState<MethodType | null>(null);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 375;
 
-  const renderVertex = (
-    label: string,
-    value: number | null,
-    positionClass: string,
-    conceptTooltip?: string,
-    notApplicableTooltip?: string,
-    methodType?: "gordon" | "bazin" | "graham" | "consensus",
-  ) => {
+  const gordonTooltip = valuation.methodDetails?.gordon
+    ? `${t.valuationAssumptions.gordonTooltipFormula}. ${t.valuationAssumptions.gordonTooltipRate.replace("{{rate}}", valuation.methodDetails.gordon.rate.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", valuation.methodDetails.gordon.growth.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowthSource}. ${t.valuationAssumptions.gordonTooltipSource.replace("{{source}}", valuation.methodDetails.gordon.source).replace("{{date}}", valuation.methodDetails.gordon.date)}`
+    : t.tooltips?.gordon;
+
+  const bazinTooltip = valuation.methodDetails?.bazin
+    ? `${t.valuationAssumptions.bazinTooltipFormula}. ${t.valuationAssumptions.bazinTooltipYieldTarget.replace("{{yieldTarget}}", valuation.methodDetails.bazin.yieldTarget.toFixed(2))}. ${valuation.methodDetails.bazin.isNetJcp ? t.valuationAssumptions.bazinTooltipNetJcp : t.valuationAssumptions.bazinTooltipDividend}. ${t.valuationAssumptions.bazinTooltipSource.replace("{{source}}", valuation.methodDetails.bazin.source).replace("{{date}}", valuation.methodDetails.bazin.date)}`
+    : t.tooltips?.bazin;
+
+  const grahamTooltip = valuation.methodDetails?.graham
+    ? `${t.valuationAssumptions.grahamTooltipFormula}. ${t.valuationAssumptions.grahamTooltipMargin.replace("{{margin}}", valuation.methodDetails.graham.margin.toFixed(1))}. ${t.valuationAssumptions.grahamTooltipSource.replace("{{source}}", valuation.methodDetails.graham.source).replace("{{date}}", valuation.methodDetails.graham.date)}`
+    : t.tooltips?.graham;
+
+  const lynchTooltip = valuation.methodDetails?.lynch
+    ? `${t.valuationAssumptions.lynchTooltipFormula}. ${t.valuationAssumptions.lynchTooltipGrowth.replace("{{growth}}", valuation.methodDetails.lynch.growth.toFixed(2))}. ${t.valuationAssumptions.lynchTooltipDividendYield.replace("{{dividendYield}}", valuation.methodDetails.lynch.dividendYield.toFixed(2))}. ${t.valuationAssumptions.lynchTooltipSource.replace("{{source}}", valuation.methodDetails.lynch.source).replace("{{date}}", valuation.methodDetails.lynch.date)}`
+    : t.tooltips?.lynch;
+
+  const consensusTooltip = valuation.methodDetails?.consensus
+    ? `${t.valuationAssumptions.consensusTooltipMethods.replace("{{methods}}", valuation.methodDetails.consensus.methods.join(", "))}. ${valuation.methodDetails.consensus.excluded.length > 0 ? t.valuationAssumptions.consensusTooltipExcluded.replace("{{excluded}}", valuation.methodDetails.consensus.excluded.join(", ")) : ""}`
+    : t.tooltips?.consensus;
+
+  // Lynch only occupies a slot when the caller passes it explicitly (a number, or
+  // null for "applicable but no data"). FII/REIT/ETF callers omit the key entirely
+  // (or pass undefined) because Lynch is structurally not computed for those classes.
+  const hasLynchSlot = valuation.lynch !== undefined;
+
+  const vertices: VertexConfig[] = [
+    { key: "gordon", label: "Gordon", value: valuation.gordon, slot: "top", conceptTooltip: gordonTooltip, notApplicableTooltip: t.tooltips?.gordonNotApplicable },
+    { key: "bazin", label: "Bazin", value: valuation.bazin, slot: "left", conceptTooltip: bazinTooltip, notApplicableTooltip: t.tooltips?.bazinNotApplicable },
+    { key: "graham", label: "Graham", value: valuation.graham, slot: "right", conceptTooltip: grahamTooltip, notApplicableTooltip: t.tooltips?.grahamNotApplicable },
+  ];
+
+  if (hasLynchSlot) {
+    vertices.push({
+      key: "lynch",
+      label: "Lynch",
+      value: valuation.lynch ?? null,
+      slot: "bottom",
+      conceptTooltip: lynchTooltip,
+      notApplicableTooltip: t.tooltips?.lynchNotApplicable,
+    });
+  }
+
+  const renderVertex = (vertex: VertexConfig) => {
+    const { key, label, value, slot, conceptTooltip, notApplicableTooltip } = vertex;
     const isNull = value === null || value <= 0;
     const tooltipContent = isNull ? notApplicableTooltip : conceptTooltip;
+    const positionClass = SLOT_POSITION_CLASS[slot];
 
-    // Desktop: use Tooltip with directional positioning
-    // Mobile: use bottom sheet (MethodDetailSheet)
     const renderTooltipTrigger = () => {
-      if (!tooltipContent || !methodType) {
+      if (!tooltipContent) {
         return <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{label}</span>;
       }
 
@@ -58,7 +120,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
                 <button
                   type="button"
                   className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5 flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
-                  onClick={() => setMobileMethodOpen(methodType)}
+                  onClick={() => setMobileMethodOpen(key)}
                 >
                   {label}
                   <HelpCircle className="h-3.5 w-3.5" />
@@ -72,9 +134,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
         );
       }
 
-      // Desktop: directional tooltip
-      const side = methodType === "gordon" || methodType === "consensus" ? "bottom" : "top";
-      const align = methodType === "consensus" ? "center" : "start";
+      const side = slot === "top" ? "bottom" : slot === "bottom" ? "top" : "top";
 
       return (
         <TooltipProvider delayDuration={150}>
@@ -87,7 +147,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
             </TooltipTrigger>
             <TooltipContent
               side={side as any}
-              align={align as any}
+              align="start"
               className="max-w-[280px] p-2.5 text-xs text-center border bg-popover text-popover-foreground shadow-md font-normal leading-relaxed"
             >
               {tooltipContent}
@@ -99,6 +159,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
 
     return (
       <div
+        key={key}
         className={`absolute flex flex-col items-center justify-center ${positionClass} ${isNull ? "opacity-60" : ""}`}
       >
         <div className="rounded-md border border-white/10 bg-black/60 px-3 py-1.5 backdrop-blur-md shadow-lg flex flex-col items-center">
@@ -111,27 +172,13 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
     );
   };
 
-  // Build tooltip content from backend data
-  const gordonTooltip = valuation.methodDetails?.gordon
-    ? `${t.valuationAssumptions.gordonTooltipFormula}. ${t.valuationAssumptions.gordonTooltipRate.replace("{{rate}}", valuation.methodDetails.gordon.rate.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", valuation.methodDetails.gordon.growth.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowthSource}. ${t.valuationAssumptions.gordonTooltipSource.replace("{{source}}", valuation.methodDetails.gordon.source).replace("{{date}}", valuation.methodDetails.gordon.date)}`
-    : t.tooltips?.gordon;
-
-  const bazinTooltip = valuation.methodDetails?.bazin
-    ? `${t.valuationAssumptions.bazinTooltipFormula}. ${t.valuationAssumptions.bazinTooltipYieldTarget.replace("{{yieldTarget}}", valuation.methodDetails.bazin.yieldTarget.toFixed(2))}. ${valuation.methodDetails.bazin.isNetJcp ? t.valuationAssumptions.bazinTooltipNetJcp : t.valuationAssumptions.bazinTooltipDividend}. ${t.valuationAssumptions.bazinTooltipSource.replace("{{source}}", valuation.methodDetails.bazin.source).replace("{{date}}", valuation.methodDetails.bazin.date)}`
-    : t.tooltips?.bazin;
-
-  const grahamTooltip = valuation.methodDetails?.graham
-    ? `${t.valuationAssumptions.grahamTooltipFormula}. ${t.valuationAssumptions.grahamTooltipMargin.replace("{{margin}}", valuation.methodDetails.graham.margin.toFixed(1))}. ${t.valuationAssumptions.grahamTooltipSource.replace("{{source}}", valuation.methodDetails.graham.source).replace("{{date}}", valuation.methodDetails.graham.date)}`
-    : t.tooltips?.graham;
-
-  const consensusTooltip = valuation.methodDetails?.consensus
-    ? `${t.valuationAssumptions.consensusTooltipMethods.replace("{{methods}}", valuation.methodDetails.consensus.methods.join(", "))}. ${valuation.methodDetails.consensus.excluded.length > 0 ? t.valuationAssumptions.consensusTooltipExcluded.replace("{{excluded}}", valuation.methodDetails.consensus.excluded.join(", ")) : ""}`
-    : t.tooltips?.consensus;
+  const activeSlots = vertices.map((v) => v.slot);
+  const points = activeSlots.map((slot) => `${SLOT_COORDS[slot].x},${SLOT_COORDS[slot].y}`).join(" ");
+  const center = { x: 160, y: 150 };
 
   return (
     <>
       <div className="mb-6 rounded-xl border border-white/5 bg-[#0a0a0c] p-6 shadow-2xl relative overflow-hidden">
-        {/* Background glowing effects */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-primary/5 pointer-events-none" />
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/20 blur-[60px] rounded-full pointer-events-none" />
 
@@ -140,77 +187,35 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
         </h3>
 
         <div className="relative w-full max-w-[320px] mx-auto h-[260px]">
-          {/* SVG Triangle connecting the vertices */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none"
             preserveAspectRatio="none"
             viewBox="0 0 320 260"
           >
             <polygon
-              points="160,40 50,220 270,220"
+              points={points}
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeDasharray="4 6"
               className="text-primary/30"
             />
-            {/* Inner connections to center */}
-            <line
-              x1="160"
-              y1="40"
-              x2="160"
-              y2="150"
-              stroke="currentColor"
-              strokeWidth="1"
-              className="text-primary/30"
-            />
-            <line
-              x1="50"
-              y1="220"
-              x2="160"
-              y2="150"
-              stroke="currentColor"
-              strokeWidth="1"
-              className="text-primary/30"
-            />
-            <line
-              x1="270"
-              y1="220"
-              x2="160"
-              y2="150"
-              stroke="currentColor"
-              strokeWidth="1"
-              className="text-primary/30"
-            />
+            {activeSlots.map((slot) => (
+              <line
+                key={slot}
+                x1={SLOT_COORDS[slot].x}
+                y1={SLOT_COORDS[slot].y}
+                x2={center.x}
+                y2={center.y}
+                stroke="currentColor"
+                strokeWidth="1"
+                className="text-primary/30"
+              />
+            ))}
           </svg>
 
-          {/* Vertices */}
-          {renderVertex(
-            "Gordon",
-            valuation.gordon,
-            "top-0 left-1/2 -translate-x-1/2",
-            gordonTooltip,
-            t.tooltips?.gordonNotApplicable,
-            "gordon",
-          )}
-          {renderVertex(
-            "Bazin",
-            valuation.bazin,
-            "bottom-0 left-4",
-            bazinTooltip,
-            t.tooltips?.bazinNotApplicable,
-            "bazin",
-          )}
-          {renderVertex(
-            "Graham",
-            valuation.graham,
-            "bottom-0 right-4",
-            grahamTooltip,
-            t.tooltips?.grahamNotApplicable,
-            "graham",
-          )}
+          {vertices.map(renderVertex)}
 
-          {/* Center Consensus */}
           <div className="absolute top-[150px] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
             <div className="relative rounded-full border border-primary/50 bg-black px-5 py-2.5 shadow-primary/20 backdrop-blur-xl">
@@ -255,7 +260,6 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
         </div>
       </div>
 
-      {/* Mobile bottom sheets for method details */}
       {isMobile && (
         <>
           <MethodDetailSheet
@@ -307,6 +311,24 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
                 <>
                   <p>{t.valuationAssumptions.grahamTooltipMargin.replace("{{margin}}", valuation.methodDetails.graham.margin.toFixed(1))}</p>
                   <p className="text-muted-foreground">{t.valuationAssumptions.grahamTooltipSource.replace("{{source}}", valuation.methodDetails.graham.source).replace("{{date}}", valuation.methodDetails.graham.date)}</p>
+                </>
+              )}
+            </div>
+          </MethodDetailSheet>
+
+          <MethodDetailSheet
+            isOpen={mobileMethodOpen === "lynch"}
+            onClose={() => setMobileMethodOpen(null)}
+            title={t.valuationAssumptions.lynchTooltipTitle}
+            methodType="lynch"
+          >
+            <div className="space-y-2 text-sm">
+              <p className="font-medium">{t.valuationAssumptions.lynchTooltipFormula}</p>
+              {valuation.methodDetails?.lynch && (
+                <>
+                  <p>{t.valuationAssumptions.lynchTooltipGrowth.replace("{{growth}}", valuation.methodDetails.lynch.growth.toFixed(2))}</p>
+                  <p>{t.valuationAssumptions.lynchTooltipDividendYield.replace("{{dividendYield}}", valuation.methodDetails.lynch.dividendYield.toFixed(2))}</p>
+                  <p className="text-muted-foreground">{t.valuationAssumptions.lynchTooltipSource.replace("{{source}}", valuation.methodDetails.lynch.source).replace("{{date}}", valuation.methodDetails.lynch.date)}</p>
                 </>
               )}
             </div>

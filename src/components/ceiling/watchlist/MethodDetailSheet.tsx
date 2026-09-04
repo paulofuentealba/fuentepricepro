@@ -17,8 +17,8 @@ interface MethodDetailSheetProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  /** Method type for icon: 'gordon' | 'bazin' | 'graham' | 'consensus' */
-  methodType: "gordon" | "bazin" | "graham" | "consensus";
+  /** Method type for icon: 'gordon' | 'bazin' | 'graham' | 'lynch' | 'consensus' */
+  methodType: "gordon" | "bazin" | "graham" | "lynch" | "consensus";
 }
 
 export function MethodDetailSheet({
@@ -38,6 +38,8 @@ export function MethodDetailSheet({
         return "📊";
       case "graham":
         return "🔍";
+      case "lynch":
+        return "🚀";
       case "consensus":
         return "✨";
     }

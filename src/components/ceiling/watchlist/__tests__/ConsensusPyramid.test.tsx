@@ -24,25 +24,44 @@ describe("ConsensusPyramid (Tier 1 / Item 4)", () => {
     cleanup();
   });
 
-  it("exibe tooltips conceituais quando todos os modelos de valuation são válidos", () => {
+  it("exibe 3 vértices quando lynch não é aplicável (ex: FII/REIT/ETF)", () => {
     const valuation = {
       bazin: 45.5,
       graham: 50.0,
       gordon: 42.0,
+      lynch: undefined,
       consensus: 45.5,
     };
 
     render(<ConsensusPyramid valuation={valuation} currency="BRL" />);
 
-    // 4 tooltip triggers devem estar presentes (Gordon, Bazin, Graham + Consenso central)
-    // Cada trigger tem um botão/span com ícone HelpCircle (lucide-circle-question-mark)
+    // 3 vértices de método (Gordon, Bazin, Graham) + Consenso central = 4 triggers
     const lucideIcons = document.querySelectorAll(".lucide-circle-question-mark");
     expect(lucideIcons.length).toBe(4);
 
-    // Valores formatados
     expect(screen.getAllByText("R$ 45,50").length).toBe(2); // Bazin e Consenso
     expect(screen.getByText("R$ 50,00")).toBeDefined();
     expect(screen.getByText("R$ 42,00")).toBeDefined();
+    expect(screen.queryByText("Lynch")).toBeNull();
+  });
+
+  it("exibe 4 vértices quando lynch é aplicável (STOCK_BR/STOCK_US)", () => {
+    const valuation = {
+      bazin: 45.5,
+      graham: 50.0,
+      gordon: 42.0,
+      lynch: 60.0,
+      consensus: 47.75,
+    };
+
+    render(<ConsensusPyramid valuation={valuation} currency="BRL" />);
+
+    // 4 vértices de método (Gordon, Bazin, Graham, Lynch) + Consenso central = 5 triggers
+    const lucideIcons = document.querySelectorAll(".lucide-circle-question-mark");
+    expect(lucideIcons.length).toBe(5);
+
+    expect(screen.getByText("Lynch")).toBeDefined();
+    expect(screen.getByText("R$ 60,00")).toBeDefined();
   });
 
   it("exibe tooltips de não-aplicabilidade quando os modelos são nulos ou inválidos", () => {
@@ -50,16 +69,15 @@ describe("ConsensusPyramid (Tier 1 / Item 4)", () => {
       bazin: null,
       graham: 0,
       gordon: null,
+      lynch: undefined,
       consensus: null,
     };
 
     render(<ConsensusPyramid valuation={valuation} currency="BRL" />);
 
-    // Tooltip triggers continuam presentes
     const lucideIcons = document.querySelectorAll(".lucide-circle-question-mark");
     expect(lucideIcons.length).toBe(4);
 
-    // Vértices mostram N/A
     const naElements = screen.getAllByText("N/A");
     expect(naElements.length).toBe(4); // Gordon, Bazin, Graham e Consenso
   });
