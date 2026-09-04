@@ -1316,7 +1316,7 @@ export const es = {
     searchPlaceholder: "Buscar en Wiki...",
     navLink: "Wiki",
     index: "Índice",
-    bazinFormula: "Precio Techo = Dividendo Promedio (Últimos Años) / 0.06",
+    bazinFormula: "Precio Techo = Dividendo Promedio (Últimos Años) ÷ Yield Objetivo",
     gordonFormula: "Precio Justo = (Dividendo Actual × (1 + Crecimiento)) / (Tasa de Descuento - Crecimiento)",
     consensus: {
       title: "Consenso Fuente",
@@ -1343,9 +1343,37 @@ export const es = {
     gordon: {
       title: "Modelo de Gordon",
       description:
-        "Un modelo de descuento de dividendos que asume crecimiento perpetuo. Es ideal para REITs debido a la previsibilidad de distribución y ajustes de inflación.",
+        "Un modelo de descuento de dividendos que asume crecimiento perpetuo. Es ideal para REITs debido a la previsibilidad de distribución y ajustes de inflación. Fuente usa un refinamiento de 2 etapas (H-Model): una transición de 5 años entre la tasa de crecimiento del propio activo y una tasa terminal de largo plazo anclada a la inflación, en lugar de asumir un único crecimiento fijo para siempre.",
       example:
-        "Ejemplo Ilustrativo (no usar como recomendación): Asumiendo un dividendo de $1.00, crecimiento del 2% y descuento del 6%, el precio justo sería $25.50 [(1.00 * 1.02) / (0.06 - 0.02)].",
+        "Ejemplo Ilustrativo (no usar como recomendación) — fórmula clásica de 1 etapa: Asumiendo un dividendo de $1.00, crecimiento del 2% y descuento del 6%, el precio justo sería $25.50 [(1.00 * 1.02) / (0.06 - 0.02)]. El cálculo real de Fuente combina esto con una transición de 5 años, así que el número mostrado en la app puede diferir levemente.",
+    },
+    dividendValuation: {
+      title: "Guía de Valuation por Dividendos",
+      intro:
+        "Un paso a paso de la fórmula de dividend yield y la fórmula de precio techo de Bazin — los dos pilares detrás de cada valuation en Fuente.",
+      yieldFormulaTitle: "La fórmula del dividend yield",
+      yieldFormula: "Dividend Yield = (Dividendo Anual por Acción ÷ Precio Actual de la Acción) × 100",
+      yieldFormulaBody:
+        "Si una acción cotiza a $50 y pagó $2.50 en dividendos en los últimos 12 meses, su dividend yield es 5%. El yield cambia cada vez que el precio se mueve — por eso los inversores de largo plazo siguen por separado el yield on cost (dividendo ÷ tu precio promedio de compra).",
+      ceilingFormulaTitle: "La fórmula del precio techo de Bazin",
+      ceilingFormulaBody:
+        "Décio Bazin invirtió la ecuación del yield. En vez de preguntar \"¿qué yield me da el precio de hoy?\", preguntó \"¿qué precio me da el yield que exijo?\". El resultado es tu precio justo máximo: por encima, la acción está cara para tu meta; por debajo, hay margen de seguridad.",
+      exampleTitle: "Ejemplo práctico",
+      exampleIntro:
+        "Una acción pagó los siguientes dividendos por acción en los últimos cinco años: $1.80, $2.00, $2.10, $2.20 y $1.90.",
+      exampleStep1: "Dividendo promedio = (1.80 + 2.00 + 2.10 + 2.20 + 1.90) ÷ 5 = $2.00",
+      exampleStep2: "Yield objetivo = 6% (tu retorno mínimo aceptable)",
+      exampleStep3: "Precio techo = $2.00 ÷ 0.06 = $33.33",
+      exampleNote:
+        "A $28, tendrías un margen de seguridad de ~19% y un yield on cost proyectado de 7.1%. A $40, pagarías 20% por encima del techo por solo 5% de yield.",
+      chartCurrentLabel: "Precio A ($28)",
+      chartOverLabel: "Precio B ($40)",
+      chartCeilingLabel: "Techo ($33.33)",
+      edgeCasesTitle: "Casos a tener en cuenta",
+      edgeCaseCuts: "Recortes de dividendos — el promedio de 5 años suaviza un año malo, pero un recorte permanente rompe el modelo. Revisa el payout ratio y el flujo de caja libre antes de confiar en el precio techo.",
+      edgeCaseTax: "Retención de impuestos — acciones, REITs y ETFs domiciliados en EE.UU. retienen 30% de los dividendos a inversores extranjeros. Aplica el impuesto al dividendo antes de correr la fórmula, o sobreestimarás el techo.",
+      edgeCaseCurrency: "Moneda — compara dividendos en BRL con yield objetivo en BRL y dividendos en USD con yield objetivo en USD. Nunca los mezcles.",
+      edgeCaseMonthly: "REITs, FIIs y ETFs — estos pagan mensualmente. Multiplica las 12 distribuciones mensuales más recientes para obtener la cifra anual antes de promediar.",
     },
     metrics: {
       title: "Métricas Esenciales",

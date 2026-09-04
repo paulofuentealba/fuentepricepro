@@ -1302,7 +1302,7 @@ export const en = {
     searchPlaceholder: "Search Wiki...",
     navLink: "Wiki",
     index: "Index",
-    bazinFormula: "Ceiling Price = Average Dividend (Last Years) / 0.06",
+    bazinFormula: "Ceiling Price = Average Dividend (Last Years) ÷ Target Yield",
     gordonFormula: "Fair Price = (Current Dividend × (1 + Growth)) / (Discount Rate - Growth)",
     consensus: {
       title: "Fuente Consensus",
@@ -1329,9 +1329,37 @@ export const en = {
     gordon: {
       title: "Gordon Model",
       description:
-        "A dividend discount model assuming perpetual growth. It's the ideal mathematical model for Real Estate Funds (REITs) due to distribution predictability and constant inflation adjustments.",
+        "A dividend discount model assuming perpetual growth. It's the ideal mathematical model for Real Estate Funds (REITs) due to distribution predictability and constant inflation adjustments. Fuente uses a 2-stage refinement (H-Model): a 5-year transition from the asset's own growth rate down to a long-term terminal rate anchored to inflation, rather than a single flat growth assumption forever.",
       example:
-        "Illustrative Example (not a recommendation): Assuming a $1.00 dividend, 2% growth, and 6% discount rate, the fair price would be $25.50 [(1.00 * 1.02) / (0.06 - 0.02)].",
+        "Illustrative Example (not a recommendation) — textbook single-stage formula: Assuming a $1.00 dividend, 2% growth, and 6% discount rate, the fair price would be $25.50 [(1.00 * 1.02) / (0.06 - 0.02)]. Fuente's actual calculation blends this with a 5-year transition, so the number you see in the app may differ slightly.",
+    },
+    dividendValuation: {
+      title: "Dividend Valuation Walkthrough",
+      intro:
+        "A step-by-step look at the dividend yield formula and the Bazin ceiling price formula — the two building blocks behind every valuation in Fuente.",
+      yieldFormulaTitle: "The dividend yield formula",
+      yieldFormula: "Dividend Yield = (Annual Dividend per Share ÷ Current Share Price) × 100",
+      yieldFormulaBody:
+        "If a stock trades at $50 and paid $2.50 in dividends over the last 12 months, its dividend yield is 5%. Yield changes every time the price moves — which is why long-term investors track yield on cost (dividend ÷ your purchase price) separately.",
+      ceilingFormulaTitle: "The Bazin ceiling price formula",
+      ceilingFormulaBody:
+        "Décio Bazin flipped the yield equation. Instead of asking \"what yield does today's price give me?\", he asked \"what price gives me the yield I require?\" The result is your maximum fair price: above it, the stock is too expensive for your target; below it, there's a margin of safety.",
+      exampleTitle: "Worked example",
+      exampleIntro:
+        "A stock paid the following dividends per share over the last five years: $1.80, $2.00, $2.10, $2.20, and $1.90.",
+      exampleStep1: "Average dividend = (1.80 + 2.00 + 2.10 + 2.20 + 1.90) ÷ 5 = $2.00",
+      exampleStep2: "Target yield = 6% (your minimum acceptable return)",
+      exampleStep3: "Ceiling price = $2.00 ÷ 0.06 = $33.33",
+      exampleNote:
+        "At $28, you'd have a ~19% margin of safety and a projected 7.1% yield on cost. At $40, you'd be paying 20% above ceiling for only a 5% yield.",
+      chartCurrentLabel: "Price A ($28)",
+      chartOverLabel: "Price B ($40)",
+      chartCeilingLabel: "Ceiling ($33.33)",
+      edgeCasesTitle: "Edge cases to watch",
+      edgeCaseCuts: "Dividend cuts — the 5-year average smooths one bad year, but a permanent cut breaks the model. Check the payout ratio and free cash flow before trusting the ceiling price.",
+      edgeCaseTax: "Withholding tax — US-domiciled stocks, REITs, and ETFs withhold 30% of dividends for foreign investors. Apply the tax to the dividend before running the formula, or you'll overestimate the ceiling.",
+      edgeCaseCurrency: "Currency — compare BRL dividends to a BRL target yield and USD dividends to a USD target yield. Never mix them.",
+      edgeCaseMonthly: "REITs, FIIs, and ETFs — these pay monthly. Multiply the trailing 12 monthly distributions to get the annual figure before averaging.",
     },
     metrics: {
       title: "Essential Metrics",

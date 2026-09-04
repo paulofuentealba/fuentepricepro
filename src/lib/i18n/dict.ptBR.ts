@@ -1311,7 +1311,7 @@ export const ptBR = {
     searchPlaceholder: "Buscar na Wiki...",
     navLink: "Wiki",
     index: "Índice",
-    bazinFormula: "Preço Teto = Dividendo Médio (Últimos Anos) / 0.06",
+    bazinFormula: "Preço Teto = Dividendo Médio (Últimos Anos) ÷ Yield Alvo",
     gordonFormula: "Preço Justo = (Dividendo Atual × (1 + Crescimento)) / (Taxa de Desconto - Crescimento)",
     consensus: {
       title: "O Consenso Fuente",
@@ -1338,9 +1338,37 @@ export const ptBR = {
     gordon: {
       title: "O Modelo de Gordon",
       description:
-        "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação.",
+        "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação. O Fuente usa um refinamento em 2 estágios (H-Model): uma transição de 5 anos entre a taxa de crescimento do próprio ativo e uma taxa terminal de longo prazo ancorada na inflação, em vez de assumir um único crescimento fixo para sempre.",
       example:
-        "Exemplo Ilustrativo (não use como recomendação): Assumindo um dividendo de R$ 1,00, crescimento de 2% e desconto de 6%, o preço justo seria R$ 25,50 [(1,00 * 1,02) / (0,06 - 0,02)].",
+        "Exemplo Ilustrativo (não use como recomendação) — fórmula clássica de 1 estágio: Assumindo um dividendo de R$ 1,00, crescimento de 2% e desconto de 6%, o preço justo seria R$ 25,50 [(1,00 * 1,02) / (0,06 - 0,02)]. O cálculo real do Fuente combina isso com uma transição de 5 anos, então o número exibido no app pode divergir levemente.",
+    },
+    dividendValuation: {
+      title: "Guia de Valuation por Dividendos",
+      intro:
+        "Um passo a passo da fórmula de dividend yield e da fórmula de preço-teto de Bazin — os dois blocos por trás de toda valuation no Fuente.",
+      yieldFormulaTitle: "A fórmula do dividend yield",
+      yieldFormula: "Dividend Yield = (Dividendo Anual por Ação ÷ Preço Atual da Ação) × 100",
+      yieldFormulaBody:
+        "Se uma ação é negociada a R$ 50 e pagou R$ 2,50 em dividendos nos últimos 12 meses, o dividend yield é 5%. O yield muda toda vez que o preço se mexe — por isso investidores de longo prazo acompanham separadamente o yield on cost (dividendo ÷ seu preço médio de compra).",
+      ceilingFormulaTitle: "A fórmula do preço-teto de Bazin",
+      ceilingFormulaBody:
+        "Décio Bazin inverteu a equação do yield. Em vez de perguntar \"que yield o preço de hoje me dá?\", ele perguntou \"que preço me dá o yield que eu exijo?\". O resultado é seu preço-teto máximo: acima dele, o ativo está caro demais para sua meta; abaixo, existe margem de segurança.",
+      exampleTitle: "Exemplo prático",
+      exampleIntro:
+        "Uma ação pagou os seguintes dividendos por cota nos últimos cinco anos: R$ 1,80, R$ 2,00, R$ 2,10, R$ 2,20 e R$ 1,90.",
+      exampleStep1: "Dividendo médio = (1,80 + 2,00 + 2,10 + 2,20 + 1,90) ÷ 5 = R$ 2,00",
+      exampleStep2: "Yield alvo = 6% (seu retorno mínimo aceitável)",
+      exampleStep3: "Preço-teto = R$ 2,00 ÷ 0,06 = R$ 33,33",
+      exampleNote:
+        "A R$ 28, você teria uma margem de segurança de ~19% e um yield on cost projetado de 7,1%. A R$ 40, você pagaria 20% acima do teto por apenas 5% de yield.",
+      chartCurrentLabel: "Preço A (R$ 28)",
+      chartOverLabel: "Preço B (R$ 40)",
+      chartCeilingLabel: "Teto (R$ 33,33)",
+      edgeCasesTitle: "Casos de atenção",
+      edgeCaseCuts: "Corte de dividendos — a média de 5 anos suaviza um ano ruim, mas um corte permanente quebra o modelo. Confira payout ratio e fluxo de caixa livre antes de confiar no preço-teto.",
+      edgeCaseTax: "Imposto retido na fonte — ações, REITs e ETFs americanos retêm 30% dos dividendos de investidores estrangeiros. Aplique o imposto ao dividendo antes de rodar a fórmula, ou você vai superestimar o teto.",
+      edgeCaseCurrency: "Moeda — compare dividendos em BRL com yield alvo em BRL e dividendos em USD com yield alvo em USD. Nunca misture.",
+      edgeCaseMonthly: "REITs, FIIs e ETFs — esses pagam mensalmente. Multiplique as 12 distribuições mensais mais recentes para obter o valor anual antes de tirar a média.",
     },
     metrics: {
       title: "Métricas Essenciais",

@@ -88,7 +88,7 @@ function LandingPage() {
               <a href="#precos" className="hover:text-foreground transition-colors">
                 {P.nav.pricing}
               </a>
-              <Link to="/guides/dividend-valuation" className="hover:text-foreground transition-colors">
+              <Link to="/guides" className="hover:text-foreground transition-colors">
                 {P.nav.guides}
               </Link>
             </nav>
@@ -323,10 +323,10 @@ function LandingPage() {
             &copy; {currentYear} &middot; {P.footer.madeIn}
           </div>
           <div className="flex flex-col gap-1">
-            <Link to="/guides/dividend-valuation" className="hover:text-foreground transition-colors">
+            <Link to="/guides" className="hover:text-foreground transition-colors">
               {P.footer.col1[0]}
             </Link>
-            <Link to="/guides/dividend-valuation" className="hover:text-foreground transition-colors">
+            <Link to="/guides" className="hover:text-foreground transition-colors">
               {P.footer.col1[1]}
             </Link>
             <Link to="/app/docs" className="hover:text-foreground transition-colors">

@@ -16,6 +16,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as GuidesRouteImport } from './routes/guides'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
@@ -80,6 +81,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesRoute = GuidesRouteImport.update({
+  id: '/guides',
+  path: '/guides',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
@@ -126,9 +132,9 @@ const OnboardingMetasRoute = OnboardingMetasRouteImport.update({
   getParentRoute: () => OnboardingRoute,
 } as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
-  id: '/guides/dividend-valuation',
-  path: '/guides/dividend-valuation',
-  getParentRoute: () => rootRouteImport,
+  id: '/dividend-valuation',
+  path: '/dividend-valuation',
+  getParentRoute: () => GuidesRoute,
 } as any)
 const AppWithdrawRoute = AppWithdrawRouteImport.update({
   id: '/withdraw',
@@ -228,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/guides': typeof GuidesRouteWithChildren
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/guides': typeof GuidesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/guides': typeof GuidesRouteWithChildren
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -340,6 +349,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/demo'
+    | '/guides'
     | '/onboarding'
     | '/privacy'
     | '/profile'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/demo'
+    | '/guides'
     | '/privacy'
     | '/profile'
     | '/settings'
@@ -412,6 +423,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/demo'
+    | '/guides'
     | '/onboarding'
     | '/privacy'
     | '/profile'
@@ -450,6 +462,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
   DemoRoute: typeof DemoRoute
+  GuidesRoute: typeof GuidesRouteWithChildren
   OnboardingRoute: typeof OnboardingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
@@ -457,7 +470,6 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubscriptionTermsRoute: typeof SubscriptionTermsRoute
   TermsRoute: typeof TermsRoute
-  GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -509,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides': {
+      id: '/guides'
+      path: '/guides'
+      fullPath: '/guides'
+      preLoaderRoute: typeof GuidesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo': {
@@ -576,10 +595,10 @@ declare module '@tanstack/react-router' {
     }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
-      path: '/guides/dividend-valuation'
+      path: '/dividend-valuation'
       fullPath: '/guides/dividend-valuation'
       preLoaderRoute: typeof GuidesDividendValuationRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GuidesRoute
     }
     '/app/withdraw': {
       id: '/app/withdraw'
@@ -756,6 +775,17 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface GuidesRouteChildren {
+  GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
+}
+
+const GuidesRouteChildren: GuidesRouteChildren = {
+  GuidesDividendValuationRoute: GuidesDividendValuationRoute,
+}
+
+const GuidesRouteWithChildren =
+  GuidesRoute._addFileChildren(GuidesRouteChildren)
+
 interface OnboardingRouteChildren {
   OnboardingMetasRoute: typeof OnboardingMetasRoute
   OnboardingPersonalInfoRoute: typeof OnboardingPersonalInfoRoute
@@ -778,6 +808,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
   DemoRoute: DemoRoute,
+  GuidesRoute: GuidesRouteWithChildren,
   OnboardingRoute: OnboardingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
@@ -785,7 +816,6 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubscriptionTermsRoute: SubscriptionTermsRoute,
   TermsRoute: TermsRoute,
-  GuidesDividendValuationRoute: GuidesDividendValuationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
