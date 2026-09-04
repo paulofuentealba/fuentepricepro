@@ -1446,6 +1446,9 @@ export const es = {
       sinacorTitle: "Extracción Completa (Estándar SINACOR)",
       sinacorDesc:
         "Corredores digitales que adoptan el diseño estandarizado, permitiendo la extracción completa de compras y ventas.",
+      internationalTitle: "Corredoras Internacionales",
+      internationalDesc:
+        "Las confirmaciones de operación (PDF) de Charles Schwab International Account también se detectan automáticamente — la primera corredora no brasileña compatible. A diferencia de las notas B3, Schwab imprime el ticker exacto en cada línea, así que la importación nunca necesita coincidencia manual de emisor.",
       fallbackTitle: "Rechazo Controlado (Bancos Tradicionales)",
       fallbackDesc:
         "Los bancos suelen alterar el diseño de sus notas. Son reconocidos para evitar fallas en el sistema, devolviendo una alerta amigable de formato inválido si la nota no cumple con el estándar.",

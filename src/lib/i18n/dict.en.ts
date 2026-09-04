@@ -1432,6 +1432,9 @@ export const en = {
       sinacorTitle: "Full Extraction (SINACOR Standard)",
       sinacorDesc:
         "Digital brokers using the standard layout, allowing full extraction of your buys and sells.",
+      internationalTitle: "International Brokers",
+      internationalDesc:
+        "Charles Schwab International Account trade confirmations (PDF) are also auto-detected — the first non-Brazilian broker supported. Unlike B3 notes, Schwab prints the exact ticker symbol on each row, so imports never need manual issuer matching.",
       fallbackTitle: "Graceful Fallback (Traditional Banks)",
       fallbackDesc:
         "Traditional banks often alter their note layouts. They are recognized to avoid parser crashes, returning a friendly invalid format alert if the note deviates from the standard.",

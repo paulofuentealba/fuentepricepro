@@ -1441,6 +1441,9 @@ export const ptBR = {
       sinacorTitle: "Extração Completa (Padrão SINACOR)",
       sinacorDesc:
         "Corretoras digitais que adotam o layout padronizado, permitindo extração integral das suas compras e vendas.",
+      internationalTitle: "Corretoras Internacionais",
+      internationalDesc:
+        "Confirmações de negociação (PDF) da Charles Schwab International Account também são detectadas automaticamente — a primeira corretora não-brasileira suportada. Diferente das notas B3, a Schwab imprime o ticker exato em cada linha, então a importação nunca precisa de matching manual de emissor.",
       fallbackTitle: "Fallback Gracioso (Bancos Tradicionais)",
       fallbackDesc:
         "Bancos costumam alterar o layout de suas notas. Eles são reconhecidos para evitar crashes no parser, retornando um alerta amigável de formato inválido se a nota fugir do padrão.",
