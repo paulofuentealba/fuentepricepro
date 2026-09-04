@@ -530,6 +530,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
         bazin: null,
         graham: null,
         gordon: null,
+        lynch: null,
       },
       assumptions: [],
       investorProfile: "moderate",
@@ -555,6 +556,15 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
   const hasCvmAudit = eps != null && bvps != null && eps > 0 && bvps > 0;
   const graham = hasCvmAudit ? Math.sqrt(grahamMultiplier * eps * bvps) : null;
 
+  // 2b. Modified Peter Lynch Fair Value: EPS * (Growth Rate + Dividend Yield)
+  let lynch: number | null = null;
+  if (eps != null && eps > 0 && currentPrice > 0) {
+    const rawDy = (netAvgDividend / currentPrice) * 100;
+    const effectiveGrowth = dividendCagr != null && dividendCagr > 0 ? dividendCagr : 6.0;
+    const lynchMultiplier = Math.min(25, Math.max(5, effectiveGrowth + rawDy));
+    lynch = eps * lynchMultiplier;
+  }
+
   // 3. Gordon Model (2-Stage H-Model with ROE Retention Growth)
   const k = selicPct / 100;
   let gInitial: number | null = null;
@@ -571,7 +581,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
   const gordonConfidence = resolveGordonConfidence(gordon, dividendHistory);
 
   // 4. Fuente Consensus (Strict Median of Applicable Methods for STOCK_BR)
-  const consensus = medianConsensus([bazin, graham, gordon]);
+  const consensus = medianConsensus([bazin, graham, gordon, lynch]);
 
   const isUnavailable = consensus === null && bazin === null;
   const activeCeiling = consensus !== null ? consensus : bazin || 0;
@@ -628,13 +638,14 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
       bazin,
       graham,
       gordon,
+      lynch,
     },
     assumptions,
     investorProfile: "moderate",
     bazin,
     graham,
     gordon,
-    lynch: null,
+    lynch,
     gordonConfidence,
     consensus,
     dividendYield,
@@ -833,6 +844,7 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
         bazin: null,
         graham: null,
         gordon: null,
+        lynch: null,
       },
       assumptions: [],
       investorProfile: "moderate",
@@ -935,14 +947,15 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
     methods: {
       bazin,
       graham: null, // Corporate Graham explicitly forbidden for funds
+      lynch: null, // Peter Lynch requires per-share EPS, which FIIs do not report
       gordon,
     },
     assumptions,
     investorProfile: "moderate",
     bazin,
     graham: null,
+    lynch: null, // Peter Lynch requires per-share EPS, which FIIs do not report
     gordon,
-    lynch: null,
     gordonConfidence,
     consensus,
     dividendYield,
@@ -1085,14 +1098,14 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
       graham: null, // Corporate Graham explicitly forbidden for REITs
       gordon,
       affoYield: affoCeiling,
-      lynch: null,
+      lynch: null, // Peter Lynch requires per-share EPS, which REITs do not report
     },
     assumptions,
     investorProfile: "moderate",
     bazin,
     graham: null,
     gordon,
-    lynch: null,
+    lynch: null, // Peter Lynch requires per-share EPS, which REITs do not report
     gordonConfidence,
     consensus,
     dividendYield,
@@ -1246,14 +1259,14 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
       graham: null, // Corporate Graham strictly forbidden for ETFs
       gordon: null, // Single-stock Gordon strictly forbidden for ETFs
       bogleModel: bogleModelCeiling,
-      lynch: null,
+      lynch: null, // Peter Lynch requires per-share EPS, which ETFs (index/strategy baskets) do not have
     },
     assumptions,
     investorProfile: "moderate",
     bazin: bazinCeiling,
     graham: null,
     gordon: null,
-    lynch: null,
+    lynch: null, // Peter Lynch requires per-share EPS, which ETFs (index/strategy baskets) do not have
     gordonConfidence: null,
     consensus,
     dividendYield: currentDy,

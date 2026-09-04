@@ -96,7 +96,8 @@ describe("getAssetValuation — Gordon Guard & Robust Consensus", () => {
   });
 
   it("uses median consensus to prevent single outlier from distorting active ceiling", () => {
-    // bazin = 40, graham = 30, gordon = 33.96 => sorted [30, 33.96, 40] => median = 33.96
+    // bazin = 40, graham = 30, gordon = 33.96, lynch = 20.5
+    // => sorted [20.5, 30, 33.96, 40] => median = (30 + 33.96) / 2 = 31.98
     const result = getAssetValuation({
       targetYield: 6,
       currentPrice: 40,
@@ -112,9 +113,11 @@ describe("getAssetValuation — Gordon Guard & Robust Consensus", () => {
     expect(result.bazin).toBeCloseTo(40);
     expect(result.graham).toBeCloseTo(30);
     expect(result.gordon).toBeCloseTo(33.96, 1);
-    // Median of [30, 33.96, 40] is 33.96
-    expect(result.consensus).toBeCloseTo(33.96, 1);
-    expect(result.activeCeiling).toBeCloseTo(33.96, 1);
+    // Lynch: rawDy = (2.4/40)*100 = 6; multiplier = clamp(4.25+6,5,25) = 10.25; lynch = 2*10.25 = 20.5
+    expect(result.lynch).toBeCloseTo(20.5, 1);
+    // Median of [20.5, 30, 33.96, 40] is 31.98
+    expect(result.consensus).toBeCloseTo(31.98, 1);
+    expect(result.activeCeiling).toBeCloseTo(31.98, 1);
   });
 
   it("verifies VALE3 @ 6% target yield has matching activeCeiling and consensus", () => {
