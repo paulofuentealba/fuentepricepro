@@ -450,10 +450,8 @@ export interface ValuationResult {
     shareholderYield?: number | null;
     affoYield?: number | null;
     bogleModel?: number | null;
-    /** Modified Peter Lynch fair value (STOCK_US only). `graham`/`methods.graham` also
-     * carries this same number for STOCK_US for backward compatibility with older
-     * consumers, but new code should read `lynch` — it is NOT the Benjamin Graham
-     * LPA/VPA formula, which STOCK_US never computes. */
+    /** Modified Peter Lynch fair value. Populated for STOCK_US and STOCK_BR;
+     * null for FII/REIT/ETF, which have no per-share/per-quota EPS to feed the formula. */
     lynch?: number | null;
   };
   assumptions: ValuationAssumption[];
@@ -462,6 +460,7 @@ export interface ValuationResult {
   bazin: number | null;
   graham: number | null;
   gordon: number | null;
+  lynch: number | null;
   gordonConfidence: "high" | "low" | null;
   consensus: number | null;
   dividendYield: number;
@@ -537,6 +536,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
       bazin: null,
       graham: null,
       gordon: null,
+      lynch: null,
       gordonConfidence: null,
       consensus: null,
       dividendYield: 0,
@@ -634,6 +634,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
     bazin,
     graham,
     gordon,
+    lynch: null,
     gordonConfidence,
     consensus,
     dividendYield,
@@ -676,12 +677,14 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
         graham: null,
         gordon: null,
         shareholderYield: null,
+        lynch: null,
       },
       assumptions: [],
       investorProfile: "moderate",
       bazin: null,
       graham: null,
       gordon: null,
+      lynch: null,
       gordonConfidence: null,
       consensus: null,
       dividendYield: 0,
@@ -778,7 +781,7 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     fuenteConsensus: consensus,
     methods: {
       bazin,
-      graham: lynchPrice, // backward compat: STOCK_US has no Graham LPA/VPA model, see `lynch`
+      graham: null, // STOCK_US never computes the corporate Graham LPA/VPA formula
       gordon,
       shareholderYield: shareholderYieldPrice,
       lynch: lynchPrice,
@@ -786,8 +789,9 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     assumptions,
     investorProfile: "moderate",
     bazin,
-    graham: lynchPrice,
+    graham: null,
     gordon,
+    lynch: lynchPrice,
     gordonConfidence,
     consensus,
     dividendYield,
@@ -835,6 +839,7 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
       bazin: null,
       graham: null,
       gordon: null,
+      lynch: null,
       gordonConfidence: null,
       consensus: null,
       dividendYield: 0,
@@ -937,6 +942,7 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
     bazin,
     graham: null,
     gordon,
+    lynch: null,
     gordonConfidence,
     consensus,
     dividendYield,
@@ -978,12 +984,14 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
         graham: null,
         gordon: null,
         affoYield: null,
+        lynch: null,
       },
       assumptions: [],
       investorProfile: "moderate",
       bazin: null,
       graham: null,
       gordon: null,
+      lynch: null,
       gordonConfidence: null,
       consensus: null,
       dividendYield: 0,
@@ -1077,12 +1085,14 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
       graham: null, // Corporate Graham explicitly forbidden for REITs
       gordon,
       affoYield: affoCeiling,
+      lynch: null,
     },
     assumptions,
     investorProfile: "moderate",
     bazin,
     graham: null,
     gordon,
+    lynch: null,
     gordonConfidence,
     consensus,
     dividendYield,
@@ -1124,12 +1134,14 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
         graham: null,
         gordon: null,
         bogleModel: null,
+        lynch: null,
       },
       assumptions: [],
       investorProfile: "moderate",
       bazin: null,
       graham: null,
       gordon: null,
+      lynch: null,
       gordonConfidence: null,
       consensus: null,
       dividendYield: 0,
@@ -1234,12 +1246,14 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
       graham: null, // Corporate Graham strictly forbidden for ETFs
       gordon: null, // Single-stock Gordon strictly forbidden for ETFs
       bogleModel: bogleModelCeiling,
+      lynch: null,
     },
     assumptions,
     investorProfile: "moderate",
     bazin: bazinCeiling,
     graham: null,
     gordon: null,
+    lynch: null,
     gordonConfidence: null,
     consensus,
     dividendYield: currentDy,
@@ -1268,12 +1282,14 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
         bazin: null,
         graham: null,
         gordon: null,
+        lynch: null,
       },
       assumptions: [],
       investorProfile: "conservative",
       bazin: null,
       graham: null,
       gordon: null,
+      lynch: null,
       gordonConfidence: null,
       consensus: null,
       dividendYield: 0,
@@ -1340,12 +1356,14 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
       graham,
       gordon,
       shareholderYield: params.shareholderYield ?? null,
+      lynch: null,
     },
     assumptions: [],
     investorProfile: "moderate",
     bazin,
     graham,
     gordon,
+    lynch: null,
     gordonConfidence,
     consensus,
     dividendYield,

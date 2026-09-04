@@ -23,12 +23,17 @@ describe("valuateStockUS - Ações Norte-Americanas Especializadas", () => {
     expect(result.methods.shareholderYield).toBeCloseTo(301.71, 1);
 
     // 3. Peter Lynch Price: EPS * (growth + DY) = 6.6 * (7.5 + 0.318) = 51.6
-    expect(result.methods.graham).toBeGreaterThan(40);
+    expect(result.methods.lynch).toBeGreaterThan(40);
+    expect(result.lynch).toBeGreaterThan(40);
 
-    // 4. Fuente Consensus should be positive
+    // 4. STOCK_US never computes the corporate Graham LPA/VPA formula
+    expect(result.methods.graham).toBeNull();
+    expect(result.graham).toBeNull();
+
+    // 5. Fuente Consensus should be positive
     expect(result.fuenteConsensus).toBeGreaterThan(0);
 
-    // 5. Assumptions array contains 4 resolved items
+    // 6. Assumptions array contains 4 resolved items
     expect(result.assumptions).toHaveLength(4);
     const whtAssumption = result.assumptions.find((a) => a.key === "withholdingTax");
     expect(whtAssumption?.value).toBe(30);

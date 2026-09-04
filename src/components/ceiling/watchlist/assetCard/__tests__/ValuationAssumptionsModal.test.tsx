@@ -43,6 +43,7 @@ describe("ValuationAssumptionsModal", () => {
       bazin: 50.0,
       graham: 40.0,
       gordon: 45.0,
+      lynch: null,
     },
     assumptions: [
       {
@@ -68,6 +69,7 @@ describe("ValuationAssumptionsModal", () => {
     bazin: 50.0,
     graham: 40.0,
     gordon: 45.0,
+    lynch: null,
     gordonConfidence: "high",
     consensus: 45.0,
     dividendYield: 7.5,
