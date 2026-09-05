@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
-import { FIProgressCard } from "@/components/ceiling/FIProgressCard";
 import { PortfolioSummaryHeader } from "@/components/portfolio/PortfolioSummaryHeader";
 import { BrokerCustodyCards } from "@/components/portfolio/BrokerCustodyCards";
+import { FxDecompositionPanel } from "@/components/portfolio/FxDecompositionPanel";
 import { PortfolioPositionsTable } from "@/components/portfolio/PortfolioPositionsTable";
 import { PortfolioEmptyState } from "@/components/portfolio/PortfolioEmptyState";
 import { AssetDetailSheet } from "@/components/ceiling/watchlist/AssetDetailSheet";
@@ -15,11 +15,9 @@ export const Route = createFileRoute("/app/myportfolio")({
 });
 
 /**
- * Portfólio Global — reescrita baseada na seção "VIEW 2: PORTFÓLIO GLOBAL" do protótipo
- * aprovado (ver docs/superpowers/specs/2026-09-04-portfolio-global-redesign-design.md).
- * Substitui o antigo Watchlist.tsx (grid/tabela + dialogs inline de add/edit/CSV) por uma
- * página read-only; editar uma posição existente continua possível via clique na linha,
- * que abre o mesmo AssetDetailSheet de sempre.
+ * Portfólio Global — alinhado à seção "VIEW 2: PORTFÓLIO GLOBAL" do protótipo
+ * interativo: Resumo Global (Header), Custódia por Corretora com classes,
+ * Painel de Decomposição Cambial de ativos US e Tabela de Posições com Status vs Teto.
  */
 function MyPortfolio() {
   const { valuedItems, totals, isAppLoading, macroRates, fx } = useValuedPortfolio();
@@ -32,8 +30,6 @@ function MyPortfolio() {
 
   return (
     <div className="flex flex-col gap-6">
-      <FIProgressCard />
-
       <PortfolioSummaryHeader
         valuedItems={valuedItems}
         totals={totals}
@@ -52,6 +48,13 @@ function MyPortfolio() {
             usdBrlRate={usdBrlRate}
             macroRates={macroRates}
             isLoading={isAppLoading}
+          />
+
+          <FxDecompositionPanel
+            valuedItems={valuedItems}
+            usdBrlRate={usdBrlRate}
+            isLoading={isAppLoading}
+            onSelectItem={setSelectedItem}
           />
 
           <PortfolioPositionsTable
