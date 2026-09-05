@@ -27,24 +27,7 @@ import { assetQueryOptions } from "@/lib/queryOptions";
 import { toast } from "sonner";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-
-const BROKER_LABELS: Record<SupportedBroker, string> = {
-  XP: "XP Investimentos",
-  CLEAR: "Clear Corretora",
-  RICO: "Rico Investimentos",
-  MODAL: "ModalMais",
-  BTG: "BTG Pactual",
-  INTER: "Banco Inter",
-  NUINVEST: "NuInvest",
-  ORAMA: "Órama",
-  GENIAL: "Genial Investimentos",
-  ITAU: "Itaú Corretora",
-  BRADESCO: "Bradesco / Ágora",
-  SANTANDER: "Santander / Toro",
-  BB: "Banco do Brasil",
-  CAIXA: "Caixa Econômica Federal",
-  SCHWAB: "Charles Schwab",
-};
+import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
 
 interface ReviewRow {
   key: string;
@@ -86,7 +69,7 @@ export function BrokerNoteImportPage() {
   const [rows, setRows] = useState<ReviewRow[]>([]);
 
   const supportedBrokerLabels = useMemo(
-    () => ALL_SUPPORTED_BROKERS.map((b) => BROKER_LABELS[b]),
+    () => ALL_SUPPORTED_BROKERS.map((b) => KNOWN_BROKER_LABELS[b]),
     [],
   );
 
@@ -127,7 +110,7 @@ export function BrokerNoteImportPage() {
 
       if (!result.success) {
         if (result.error === "broker_layout_unsupported") {
-          const bName = result.broker ? BROKER_LABELS[result.broker] || result.broker : "";
+          const bName = result.broker ? KNOWN_BROKER_LABELS[result.broker] || result.broker : "";
           throw new Error(t.brokerNote.brokerLayoutUnsupported.replace("{broker}", bName));
         }
         if (result.error === "unknown_broker") {
@@ -382,7 +365,7 @@ export function BrokerNoteImportPage() {
                 <div className="mt-4 flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 px-4 py-3 text-sm">
                   <span className="text-muted-foreground">{t.brokerNoteImportPage?.detectedBroker}</span>
                   <span className="font-semibold text-foreground">
-                    {BROKER_LABELS[detectedBroker]}
+                    {KNOWN_BROKER_LABELS[detectedBroker]}
                     {detectedDate ? ` · ${detectedDate}` : ""}
                   </span>
                 </div>

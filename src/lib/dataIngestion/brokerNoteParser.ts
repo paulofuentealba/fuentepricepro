@@ -1,5 +1,6 @@
-import { parseB3BrokerNote, ALL_SINACOR_BROKERS, type BrokerType, type ParseResult } from "./b3Parser";
+import { parseB3BrokerNote, type BrokerType, type ParseResult } from "./b3Parser";
 import { detectSchwab, parseSchwabTradeConfirmation } from "./schwabParser";
+import { KNOWN_BROKER_LABELS, type SupportedBroker } from "@/lib/brokers";
 
 export * from "./b3Parser";
 export * from "./schwabParser";
@@ -9,8 +10,8 @@ export * from "./schwabParser";
  * international brokers (currently just Schwab; each new international broker gets its own
  * parser module here and one line in this list, keeping b3Parser.ts B3-only).
  */
-export type SupportedBroker = BrokerType | "SCHWAB";
-export const ALL_SUPPORTED_BROKERS: SupportedBroker[] = [...ALL_SINACOR_BROKERS, "SCHWAB"];
+export type { SupportedBroker };
+export const ALL_SUPPORTED_BROKERS: SupportedBroker[] = Object.keys(KNOWN_BROKER_LABELS) as SupportedBroker[];
 
 /**
  * Broker-agnostic entry point for the import flow. Tries international broker detectors first
