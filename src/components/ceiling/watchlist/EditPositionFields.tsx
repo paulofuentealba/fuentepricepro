@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { useWatchlist } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
+import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
 import { MaskedInput } from "../shared/MaskedInput";
 import { Target, TrendingUp } from "lucide-react";
 
@@ -25,13 +26,15 @@ export function EditPositionFields({ item }: EditPositionFieldsProps) {
 
   const [dy, setDy] = useState("");
   const [goal, setGoal] = useState("");
+  const [broker, setBroker] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setDy(item.targetYield != null ? String(item.targetYield) : "6");
     setGoal(item.targetMonthlyIncome != null ? String(item.targetMonthlyIncome) : "");
+    setBroker((item as WatchlistItem).broker ?? "");
     setIsSaving(false);
-  }, [item.id, item.targetYield, item.targetMonthlyIncome]);
+  }, [item.id, item.targetYield, item.targetMonthlyIncome, (item as WatchlistItem).broker]);
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -49,6 +52,7 @@ export function EditPositionFields({ item }: EditPositionFieldsProps) {
       } else if (goal.trim() === "") {
         patch.targetMonthlyIncome = null;
       }
+      patch.broker = broker.trim() || null;
 
       await updateAsync(item.id, patch);
       toast.success(t.toasts.assetUpdated);
@@ -92,6 +96,25 @@ export function EditPositionFields({ item }: EditPositionFieldsProps) {
             placeholder="0,00"
             className="h-11 sm:h-9 text-xs font-semibold"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="wl-edit-broker" className="text-xs font-semibold text-foreground">
+            {t.portfolio.brokerLabel}
+          </Label>
+          <input
+            id="wl-edit-broker"
+            list="wl-edit-known-brokers"
+            value={broker}
+            onChange={(e) => setBroker(e.target.value)}
+            placeholder={t.portfolio.brokerPlaceholder}
+            className="h-11 sm:h-9 w-full rounded-md border border-input bg-background px-3 text-xs font-semibold"
+          />
+          <datalist id="wl-edit-known-brokers">
+            {Object.values(KNOWN_BROKER_LABELS).map((label) => (
+              <option key={label} value={label} />
+            ))}
+          </datalist>
         </div>
       </div>
 

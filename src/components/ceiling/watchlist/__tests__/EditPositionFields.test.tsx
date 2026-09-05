@@ -104,4 +104,18 @@ describe("EditPositionFields — Metas & Premissas (Proposta 1)", () => {
     expect(id).toBe("1");
     expect(patch.targetMonthlyIncome).toBeNull();
   });
+
+  it("saves the broker field via updateAsync", async () => {
+    renderFields({ ...baseItem, broker: null } as any);
+
+    const brokerInput = screen.getByLabelText(/corretora/i);
+    fireEvent.change(brokerInput, { target: { value: "BTG Pactual" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /salvar metas/i }));
+
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalledTimes(1));
+    const [id, patch] = mockUpdateAsync.mock.calls[0];
+    expect(id).toBe("1");
+    expect(patch).toEqual(expect.objectContaining({ broker: "BTG Pactual" }));
+  });
 });
