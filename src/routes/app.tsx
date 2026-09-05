@@ -9,6 +9,7 @@ import {
   Scale,
   Loader2,
 } from "lucide-react";
+import { useEffect } from "react";
 import { Header } from "@/components/ceiling/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { GuestWarningBanner } from "@/components/ceiling/GuestWarningBanner";
@@ -16,7 +17,7 @@ import { FeedbackWidget } from "@/components/ceiling/FeedbackWidget";
 import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
 import { useAuth } from "@/lib/auth-provider";
 import { auth } from "@/integrations/firebase/client";
-import { isDemoModeActive } from "@/lib/demoMode";
+import { isDemoModeActive, syncDemoModeVersion } from "@/lib/demoMode";
 import { verifySessionFn } from "@/lib/verifySession.functions";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 
@@ -33,7 +34,10 @@ export const Route = createFileRoute("/app")({
     });
 
     if (auth.currentUser) return;
-    if (isDemoModeActive()) return;
+    if (isDemoModeActive()) {
+      syncDemoModeVersion();
+      return;
+    }
 
     // The checks above only ever see a session on a client-side SPA
     // transition — Firebase's client session lives in IndexedDB, which the
@@ -80,6 +84,10 @@ export const Route = createFileRoute("/app")({
 function AppLayout() {
   const { user, loading } = useAuth();
 
+  useEffect(() => {
+    syncDemoModeVersion();
+  }, []);
+
   if (loading) {
     return (
       <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
@@ -99,7 +107,7 @@ function AppLayout() {
         <Sidebar />
         <main className="flex-1 overflow-y-auto pb-6 md:pb-0">
           <div className="min-h-screen bg-background text-foreground">
-            <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+            <div className="mx-auto max-w-6xl xl:max-w-7xl px-4 py-8 sm:px-6 sm:py-10 transition-all duration-200">
               <Outlet />
             </div>
           </div>
