@@ -35,6 +35,8 @@ import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency } from "@/lib/i18n";
 import { useHasUSDAssets } from "@/lib/useHasUSDAssets";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
+import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
+import { useUserSettings } from "@/lib/useUserSettings";
 
 /** Up to 2 initials from a display name, e.g. "Paulo Fuentealba" -> "PF". */
 function getInitials(name?: string | null): string {
@@ -53,6 +55,8 @@ export function Sidebar() {
   const { theme, setTheme, isDark } = useTheme();
   const location = useLocation();
   const { sections } = useNavSections();
+  const { settings, updateSettings } = useUserSettings();
+  const currentCurrency = settings?.displayCurrency || "BRL";
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -386,46 +390,78 @@ export function Sidebar() {
             </div>
           )}
 
-          {/* Theme & Language Controls */}
+          {/* Currency, Theme & Language Controls */}
           {!isCollapsed ? (
             <div className="flex flex-col gap-1.5 pt-1">
-              {/* Theme switch */}
-              <div className="flex items-center gap-1 bg-sidebar-foreground/[0.07] p-1 rounded-md">
-                <button
-                  type="button"
-                  onClick={() => setTheme("light")}
-                  className={cn(
-                    "flex-1 h-7 rounded-md flex items-center justify-center text-[11px] font-display font-semibold transition-colors",
-                    !isDark
-                      ? "bg-sidebar-primary text-sidebar-accent"
-                      : "text-sidebar-foreground/55 hover:text-sidebar-foreground",
-                  )}
-                  title={t.nav.theme.light}
-                >
-                  <Sun className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("dark")}
-                  className={cn(
-                    "flex-1 h-7 rounded-md flex items-center justify-center text-[11px] font-display font-semibold transition-colors",
-                    isDark
-                      ? "bg-sidebar-primary text-sidebar-accent"
-                      : "text-sidebar-foreground/55 hover:text-sidebar-foreground",
-                  )}
-                  title={t.nav.theme.dark}
-                >
-                  <Moon className="h-3.5 w-3.5" />
-                </button>
+              {/* Currency switcher (BRL | USD) */}
+              <div className="w-full">
+                <CurrencyToggle
+                  value={currentCurrency === "USD" ? "US" : "BR"}
+                  onChange={(val) => updateSettings({ displayCurrency: val === "US" ? "USD" : "BRL" })}
+                  compact
+                  hideQuote
+                  variant="sidebar"
+                  className="w-full"
+                />
               </div>
 
-              {/* Language switcher */}
-              <div className="w-full">
-                <LanguageSwitcher className="w-full justify-between h-8 text-xs" />
+              {/* Theme & Language Controls in a single harmonious row */}
+              <div className="flex items-center gap-1.5 w-full">
+                {/* Theme switch (Sun / Moon) */}
+                <div className="flex items-center gap-0.5 bg-sidebar-foreground/[0.07] border border-sidebar-border/30 p-0.5 rounded-lg shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setTheme("light")}
+                    className={cn(
+                      "h-7 w-7 rounded-md flex items-center justify-center text-[11px] font-display font-semibold transition-colors",
+                      !isDark
+                        ? "bg-sidebar-primary text-sidebar-accent shadow-sm border border-sidebar-accent/20"
+                        : "text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-foreground/[0.05]",
+                    )}
+                    title={t.nav.theme.light}
+                  >
+                    <Sun className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme("dark")}
+                    className={cn(
+                      "h-7 w-7 rounded-md flex items-center justify-center text-[11px] font-display font-semibold transition-colors",
+                      isDark
+                        ? "bg-sidebar-primary text-sidebar-accent shadow-sm border border-sidebar-accent/20"
+                        : "text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-foreground/[0.05]",
+                    )}
+                    title={t.nav.theme.dark}
+                  >
+                    <Moon className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Language switcher (PT / EN / ES) */}
+                <div className="flex-1 min-w-0">
+                  <LanguageSwitcher variant="sidebar" className="w-full" />
+                </div>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-1 pt-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => updateSettings({ displayCurrency: currentCurrency === "USD" ? "BRL" : "USD" })}
+                    className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/10 font-bold text-xs"
+                    title={`Moeda: ${currentCurrency}`}
+                  >
+                    {currentCurrency === "USD" ? "$" : "R$"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={12}>
+                  {currentCurrency === "USD" ? "USD (Dólar)" : "BRL (Real)"}
+                </TooltipContent>
+              </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

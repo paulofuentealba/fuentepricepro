@@ -128,6 +128,10 @@
   --color-realized-foreground: var(--realized-foreground);
   --color-projected: var(--projected);
   --color-chart-grid: var(--chart-grid);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-bright: var(--accent-gold-bright);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-accent-emerald-light: var(--accent-emerald-light);
   --font-sans: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Space Grotesk", sans-serif;
   --font-serif: "Fraunces", Georgia, serif;
@@ -195,6 +199,23 @@
   --asset-fii-infra: 188 95% 36%;
   --asset-fiagro: 349 89% 60%;
   --asset-other: 160 84% 39%;
+
+  /* Palette Tokens for LIGHT mode */
+  --bg-master: oklch(0.962 0.011 84.6);
+  --surface-1: oklch(0.994 0.007 88.6);
+  --surface-2: oklch(0.940 0.014 84.6);
+  --surface-3: oklch(0.910 0.018 84.6);
+  --surface-hover: oklch(0.925 0.016 84.6);
+  --border-subtle: oklch(0.230 0.021 162.5 / 0.10);
+  --border-focus: oklch(0.370 0.064 160.1);
+  --accent-gold: #a97a1f;
+  --accent-gold-bright: #8c6214;
+  --accent-gold-glow: rgba(169, 122, 31, 0.15);
+  --accent-emerald: #1b6348;
+  --accent-emerald-light: #15803d;
+  --accent-emerald-subtle: rgba(21, 128, 61, 0.10);
+  --accent-red: #dc2626;
+  --accent-red-subtle: rgba(220, 38, 38, 0.10);
 }
 
 .dark {
@@ -254,6 +275,22 @@
   --asset-fii-infra: 188 95% 36%;
   --asset-fiagro: 349 89% 60%;
   --asset-other: 160 84% 39%;
+
+  --bg-master: #070e0b;
+  --surface-1: #0d1714;
+  --surface-2: #12211c;
+  --surface-3: #182c25;
+  --surface-hover: #1a342b;
+  --border-subtle: #1b2f27;
+  --border-focus: #2e5646;
+  --accent-gold: #dfc38a;
+  --accent-gold-bright: #f5e3b8;
+  --accent-gold-glow: rgba(223, 195, 138, 0.15);
+  --accent-emerald: #2a7f5f;
+  --accent-emerald-light: #34d399;
+  --accent-emerald-subtle: rgba(52, 211, 153, 0.12);
+  --accent-red: #f87171;
+  --accent-red-subtle: rgba(248, 113, 113, 0.12);
 }
 
 @layer base {

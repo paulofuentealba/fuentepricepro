@@ -31,6 +31,8 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavSections, isNavItemActive } from "@/lib/useNavSections";
 import { Badge } from "@/components/ui/badge";
+import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
+import { useUserSettings } from "@/lib/useUserSettings";
 
 interface HeaderProps {
   variant?: "app" | "landing";
@@ -45,6 +47,8 @@ export function Header({ variant = "app" }: HeaderProps) {
   const location = useLocation();
   const pathname = location.pathname;
   const { sections: navSections } = useNavSections();
+  const { settings, updateSettings } = useUserSettings();
+  const currentCurrency = settings?.displayCurrency || "BRL";
 
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
   const L = t.landing;
@@ -351,6 +355,16 @@ export function Header({ variant = "app" }: HeaderProps) {
                   )}
 
                   <div className="mt-auto flex flex-col gap-3 pt-4 border-t border-border/30">
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-xs text-muted-foreground">{t.header.currency ?? "Moeda"}</span>
+                      <CurrencyToggle
+                        value={currentCurrency === "USD" ? "US" : "BR"}
+                        onChange={(val) => updateSettings({ displayCurrency: val === "US" ? "USD" : "BRL" })}
+                        compact
+                        hideQuote
+                        className="w-32"
+                      />
+                    </div>
                     <div className="flex items-center justify-between px-1">
                       <span className="text-xs text-muted-foreground">{t.header.language}</span>
                       <LanguageSwitcher className="inline-flex" />
