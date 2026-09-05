@@ -1838,6 +1838,9 @@ export const ptBR = {
     brokerLabel: "Corretora",
     brokerPlaceholder: "Selecione ou digite a corretora",
     brokerOther: "Outra corretora",
+    custodyEyebrow: "Custódia por Corretora",
+    custodyTitle: "Onde seus ativos estão guardados",
+    unassignedBroker: "Não informado",
   },
   admin: {
     title: "Painel Administrativo",

@@ -1826,6 +1826,9 @@ export const en = {
     brokerLabel: "Broker",
     brokerPlaceholder: "Select or type the broker",
     brokerOther: "Other broker",
+    custodyEyebrow: "Custody by Broker",
+    custodyTitle: "Where your assets are held",
+    unassignedBroker: "Not set",
   },
   admin: {
     title: "Admin Dashboard",

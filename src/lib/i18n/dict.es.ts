@@ -1842,6 +1842,9 @@ export const es = {
     brokerLabel: "Corretora",
     brokerPlaceholder: "Selecciona o escribe la corretora",
     brokerOther: "Otra corretora",
+    custodyEyebrow: "Custodia por Corretora",
+    custodyTitle: "Dónde están tus activos",
+    unassignedBroker: "No informado",
   },
   admin: {
     title: "Panel de Administración",
