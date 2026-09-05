@@ -242,6 +242,7 @@ export function BrokerNoteImportPage() {
         transactions,
         newlyCreatedTransactions,
         assetDataMap,
+        detectedBroker,
       );
 
       await upsertManyAsync(itemsToImport);

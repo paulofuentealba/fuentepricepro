@@ -1,6 +1,7 @@
 import { getCanonicalAnnualDividend, getAssetValuation } from "@/lib/calculations";
 import { classifyBr } from "@/lib/classify";
 import { makeId, type WatchlistItem } from "@/lib/watchlist";
+import { KNOWN_BROKER_LABELS, type SupportedBroker } from "@/lib/brokers";
 import {
   recalculateHoldingFromTransactions,
   recalculateInvestingSinceFromTransactions,
@@ -48,6 +49,7 @@ export function consolidateTradesToWatchlistItems(
   existingTransactions: Transaction[],
   newlyCreatedTransactions: Transaction[],
   assetDataMap: Record<string, any> = {},
+  detectedBroker?: SupportedBroker | null,
 ): WatchlistItem[] {
   const tradesByTicker = new Map<string, typeof trades>();
   for (const trade of trades) {
@@ -116,6 +118,7 @@ export function consolidateTradesToWatchlistItems(
       sector: assetData?.sector || null,
       addedAt: Date.now(),
       investingSince: recalculateInvestingSinceFromTransactions(allTickerTransactions) ?? Date.now(),
+      broker: detectedBroker ? KNOWN_BROKER_LABELS[detectedBroker] : null,
     } as WatchlistItem);
   }
 
