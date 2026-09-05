@@ -165,7 +165,7 @@ export function useNavSections(): { sections: NavSection[] } {
         items: [
           {
             key: "independencia-financeira",
-            label: t.tabs.financialIndependence,
+            label: t.nav.dashboard,
             path: "/app/",
             icon: Home,
             disabled: false,

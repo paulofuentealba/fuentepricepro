@@ -1,31 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { HorizonteHero } from "@/components/horizonte/HorizonteHero";
-import { PortfolioTableV2 } from "@/components/horizonte/PortfolioTableV2";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useFIProgress } from "@/lib/useFIProgress";
-import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
-import { getLargestPosition } from "@/lib/selectors/largestPosition";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
-import { useI18n } from "@/lib/i18n-provider";
+import { useUserSettings } from "@/lib/useUserSettings";
+import { computeClassAllocationState } from "@/lib/portfolioAllocationState";
+import { computeWeightedYieldOnCost } from "@/lib/selectors/weightedYieldOnCost";
+import { convertCurrency } from "@/lib/currency";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import type { AskEngineSettings } from "@/lib/askEngine";
+import { DashboardKpiGrid } from "@/components/dashboard/DashboardKpiGrid";
+import { FireEngineCard } from "@/components/dashboard/FireEngineCard";
+import { ContributionEngineCard } from "@/components/dashboard/ContributionEngineCard";
+import { AllocationOverviewCard } from "@/components/dashboard/AllocationOverviewCard";
+import { OpportunityMatrixTable } from "@/components/dashboard/OpportunityMatrixTable";
 
 /**
- * Home real de `/app` (rota sem redirect). Substitui a antiga rota
- * paralela `/app-v2` (ver Prompt "Correção Mover Horizonte FI para
- * Produção"): hero "Horizonte FI" (que já inclui "Aporte deste mês" e
- * "Renda passiva atual" no cabeçalho — ver
- * `components/horizonte/HorizonteHero.tsx`) + grid de 3 cards de resumo
- * (patrimônio total, proventos do ano, maior posição) + prévia da tabela de
- * carteira (4 primeiras linhas, link "Ver tudo").
- *
- * `useRealizedIncomeSummary()` é o SSOT de proventos realizados,
- * compartilhado com `CashFlowCalendar.tsx` — não há mais lógica de
- * dividendEventsMap/realizedEvents duplicada aqui.
+ * Home real de `/app`. Reescrita para a nova Dashboard (ver
+ * docs/superpowers/specs/2026-09-04-app-home-dashboard-redesign-design.md),
+ * baseada na seção "Dashboard" do protótipo interativo aprovado com o
+ * usuário: KPIs, Termômetro FIRE, Motor de Aportes, Alocação por Classe e
+ * Matriz de Oportunidades — todos compondo hooks/lib já existentes
+ * (useFIProgress, useValuedPortfolio, askEngine, portfolioAllocationState).
  */
 export const Route = createFileRoute("/app/")({
   component: AppHome,
@@ -36,80 +34,47 @@ interface LastVisitSnapshot {
   capturedAt: number;
 }
 
-function SummaryCard({
-  label,
-  value,
-  delta,
-  isLoading,
-}: {
-  label: string;
-  value: string;
-  delta?: { label: string; positive: boolean } | null;
-  isLoading: boolean;
-}) {
-  return (
-    <div className="flex flex-col gap-2 rounded-2xl bg-card border border-border p-5">
-      <span className="text-xs font-display font-medium uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
-      {isLoading ? (
-        <Skeleton className="h-8 w-32" />
-      ) : (
-        <span className="text-2xl font-semibold font-serif text-foreground">{value}</span>
-      )}
-      {!isLoading && delta && (
-        <span className={`text-xs font-mono font-medium ${delta.positive ? "text-success" : "text-danger"}`}>
-          {delta.label}
-        </span>
-      )}
-    </div>
-  );
-}
-
 function AppHome() {
-  const { locale, t } = useI18n();
   const { user } = useAuth();
-  const { valuedItems, totals, isAppLoading, quotes, fx, macroRates } = useValuedPortfolio();
-  const { summary: realizedSummary, isLoading: isRealizedLoading } = useRealizedIncomeSummary("BRL");
-  const { coveragePercent } = useFIProgress();
+  const { valuedItems, totals, isAppLoading, fx, macroRates } = useValuedPortfolio();
+  const { settings, updateSettings } = useUserSettings();
+  const fi = useFIProgress();
+
   const [previousSnapshot, setPreviousSnapshot] = useState<LastVisitSnapshot | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
 
-  const largestPosition = useMemo(
-    () => getLargestPosition(valuedItems, fx?.USDBRL, macroRates),
-    [valuedItems, fx, macroRates],
+  const usdRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
+  const currency = settings.displayCurrency;
+
+  const weightedYoc = useMemo(
+    () => computeWeightedYieldOnCost(valuedItems, macroRates),
+    [valuedItems, macroRates],
   );
 
-  const netWorthLabel = formatCurrency(totals.consolidatedNetWorth, "BRL", locale);
-  const incomeLabel = formatCurrency(realizedSummary.currentYear, "BRL", locale);
-  const largestPositionLabel = largestPosition
-    ? `${largestPosition.item.ticker} · ${formatCurrency(
-        largestPosition.marketValue,
-        largestPosition.item.currency,
-        locale,
-      )}`
-    : "—";
+  const allocationState = useMemo(
+    () => computeClassAllocationState(valuedItems, settings.smartAllocationTargets, usdRate),
+    [valuedItems, settings.smartAllocationTargets, usdRate],
+  );
 
-  const largestPositionChangePct = largestPosition
-    ? quotes[largestPosition.item.ticker]?.changePct ?? null
-    : null;
-  const largestPositionDelta =
-    typeof largestPositionChangePct === "number"
-      ? {
-          label: `${largestPositionChangePct >= 0 ? "+" : ""}${formatPercent(
-            largestPositionChangePct,
-            locale,
-            1,
-          )} ${t.home.today}`,
-          positive: largestPositionChangePct >= 0,
-        }
-      : null;
+  const availableContributionBRL = useMemo(() => {
+    const contribCurrency = settings.monthlyLivingCostGoalCurrency ?? currency;
+    return convertCurrency(settings.estimatedMonthlyContribution || 0, contribCurrency, "BRL", usdRate);
+  }, [settings.estimatedMonthlyContribution, settings.monthlyLivingCostGoalCurrency, currency, usdRate]);
 
-  // Snapshot leve de "última visita" — users/{uid}.lastVisitSnapshot,
-  // sobrescrito a cada carregamento, sem histórico (Parte 5 da spec). Lê o
-  // snapshot anterior (para calcular o delta exibido nesta visita), depois
-  // sobrescreve com o valor atual. Roda uma única vez por sessão de
-  // usuário/carregamento (guard `snapshotSaved`), não a cada re-render.
+  const askSettings: AskEngineSettings = useMemo(
+    () => ({
+      smartAllocationTargets: settings.smartAllocationTargets,
+      excludeAboveCeiling: settings.excludeAboveCeiling,
+      excludeYieldTraps: settings.excludeYieldTraps,
+      maxConcentrationPerAsset: settings.maxConcentrationPerAsset,
+      maxConcentrationPerClass: settings.maxConcentrationPerClass,
+    }),
+    [settings],
+  );
+
+  // Snapshot leve de "última visita" — users/{uid}.lastVisitSnapshot, sobrescrito a cada
+  // carregamento, sem histórico. Comportamento preservado da home anterior; o delta calculado
+  // agora é exibido dentro do FireEngineCard em vez de isolado acima do hero.
   useEffect(() => {
     if (!user?.uid || isAppLoading || snapshotSaved) return;
     const ref = doc(db, "users", user.uid);
@@ -126,7 +91,7 @@ function AppHome() {
         ref,
         {
           lastVisitSnapshot: {
-            coveragePercent,
+            coveragePercent: fi.coveragePercent,
             capturedAt: Date.now(),
           } satisfies LastVisitSnapshot,
         },
@@ -141,50 +106,44 @@ function AppHome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid, isAppLoading, snapshotSaved]);
 
-  // Omite a linha de progresso na primeira visita (sem snapshot anterior) e
-  // quando o delta é exatamente zero. Delta negativo é sempre exibido — não
-  // deve ser escondido.
-  const coverageDeltaLabel = useMemo(() => {
+  const deltaSinceLastVisit = useMemo(() => {
     if (!previousSnapshot) return null;
-    const delta = coveragePercent - previousSnapshot.coveragePercent;
-    if (delta === 0) return null;
-    const sign = delta > 0 ? "+" : "";
-    return t.home.ppSinceLastVisit.replace("{{delta}}", `${sign}${delta.toFixed(1)}`);
-  }, [previousSnapshot, coveragePercent, t]);
+    const delta = fi.coveragePercent - previousSnapshot.coveragePercent;
+    return delta === 0 ? null : delta;
+  }, [previousSnapshot, fi.coveragePercent]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <HorizonteHero />
-      {coverageDeltaLabel && (
-        <p className="-mt-6 text-xs text-muted-foreground">{coverageDeltaLabel}</p>
-      )}
+    <div className="flex flex-col gap-6">
+      <DashboardKpiGrid
+        netWorth={totals.consolidatedNetWorth}
+        weightedYoc={weightedYoc}
+        monthlyIncome={fi.monthlyIncomeBRL}
+        availableContribution={availableContributionBRL}
+        currency="BRL"
+        isLoading={isAppLoading}
+      />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <SummaryCard label={t.home.netWorth} value={netWorthLabel} isLoading={isAppLoading} />
-        <SummaryCard
-          label={t.home.incomeYear}
-          value={incomeLabel}
-          isLoading={isAppLoading || isRealizedLoading}
-        />
-        <SummaryCard
-          label={t.home.largestPosition}
-          value={largestPositionLabel}
-          delta={largestPositionDelta}
-          isLoading={isAppLoading}
-        />
+      <FireEngineCard
+        coveragePercent={fi.coveragePercent}
+        monthlyIncome={fi.currentMonthlyIncome}
+        monthlyCostGoal={fi.monthlyCostGoal}
+        monthsToFI={fi.monthsToFI}
+        isReached={fi.isReached}
+        isSetup={fi.isSetup}
+        currency={currency}
+        deltaSinceLastVisit={deltaSinceLastVisit}
+        onSetMonthlyCostGoal={(value) =>
+          updateSettings({ monthlyLivingCostGoal: value, monthlyLivingCostGoalCurrency: currency })
+        }
+        isLoading={isAppLoading}
+      />
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ContributionEngineCard valuedItems={valuedItems} settings={askSettings} isLoading={isAppLoading} />
+        <AllocationOverviewCard allocationState={allocationState} isLoading={isAppLoading} />
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold font-serif text-foreground">{t.home.yourPortfolio}</h2>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="gap-1.5" asChild>
-              <Link to="/app/myportfolio">{t.home.viewAll}</Link>
-            </Button>
-          </div>
-        </div>
-        <PortfolioTableV2 limit={4} />
-      </div>
+      <OpportunityMatrixTable valuedItems={valuedItems} isLoading={isAppLoading} />
     </div>
   );
 }

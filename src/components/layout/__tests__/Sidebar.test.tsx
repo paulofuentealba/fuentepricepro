@@ -217,7 +217,7 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
 
   it("renders Financial Independence pointing to /app/, active only on that exact page", () => {
     render(<Sidebar />);
-    const link = screen.getByText(ptBR.tabs.financialIndependence).closest("a");
+    const link = screen.getByText(ptBR.nav.dashboard).closest("a");
     expect(link).toHaveAttribute("href", "/app/");
     // mockPathname is "/app/contributionplan" — a nested route starting with "/app/" — the bug
     // being regression-tested is this item lighting up as active on every /app/* page.
@@ -227,13 +227,13 @@ describe("Sidebar Navigation (Prompt 130 & Prompt 144)", () => {
   it("marks Financial Independence active only when pathname is exactly /app/", () => {
     mockPathname = "/app/";
     render(<Sidebar />);
-    const link = screen.getByText(ptBR.tabs.financialIndependence).closest("a");
+    const link = screen.getByText(ptBR.nav.dashboard).closest("a");
     expect(link).toHaveClass("bg-sidebar-primary");
 
     cleanup();
     mockPathname = "/app/income";
     render(<Sidebar />);
-    const otherLink = screen.getByText(ptBR.tabs.financialIndependence).closest("a");
+    const otherLink = screen.getByText(ptBR.nav.dashboard).closest("a");
     expect(otherLink).not.toHaveClass("bg-sidebar-primary");
   });
 
