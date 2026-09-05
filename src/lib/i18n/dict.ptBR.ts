@@ -1851,6 +1851,10 @@ export const ptBR = {
     columnYoc: "Yield on Cost",
     columnStatus: "Status vs Teto",
     emptyPositions: "Nenhuma posição ainda",
+    emptyStateTitle: "Nenhuma posição ainda",
+    emptyStateDesc: "Adicione um ativo manualmente ou importe sua nota de corretagem para começar.",
+    emptyStateAddAsset: "Adicionar Ativo",
+    emptyStateImportNote: "Importar Nota de Corretagem",
   },
   admin: {
     title: "Painel Administrativo",

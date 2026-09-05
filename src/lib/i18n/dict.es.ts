@@ -1855,6 +1855,10 @@ export const es = {
     columnYoc: "Yield on Cost",
     columnStatus: "Estado vs Techo",
     emptyPositions: "Ninguna posición todavía",
+    emptyStateTitle: "Ninguna posición todavía",
+    emptyStateDesc: "Agrega un activo manualmente o importa tu nota de corretaje para empezar.",
+    emptyStateAddAsset: "Agregar Activo",
+    emptyStateImportNote: "Importar Nota de Corretaje",
   },
   admin: {
     title: "Panel de Administración",

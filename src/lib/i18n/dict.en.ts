@@ -1839,6 +1839,10 @@ export const en = {
     columnYoc: "Yield on Cost",
     columnStatus: "Ceiling Status",
     emptyPositions: "No positions yet",
+    emptyStateTitle: "No positions yet",
+    emptyStateDesc: "Add an asset manually or import your broker note to get started.",
+    emptyStateAddAsset: "Add Asset",
+    emptyStateImportNote: "Import Broker Note",
   },
   admin: {
     title: "Admin Dashboard",
