@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
@@ -18,6 +19,7 @@ import {
   type ThesisSnapshot,
 } from "@/lib/transactions";
 import { buildWatchlistItem } from "@/lib/buildWatchlistItem";
+import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
 import { getAssetValuation } from "@/lib/calculations";
 import { useSettings } from "@/lib/settings";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -59,6 +61,7 @@ export function AddAssetPage() {
   const [quantity, setQuantity] = useState<string>("");
   const [pricePerShare, setPricePerShare] = useState<string>("");
   const [fees, setFees] = useState<string>("");
+  const [broker, setBroker] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
 
   const assetResult = useQuery({
@@ -79,6 +82,7 @@ export function AddAssetPage() {
     if (!pickedHit || !assetResult.data) return;
     if (existingItem) {
       setWorkingItem(existingItem);
+      setBroker(existingItem.broker ?? "");
       return;
     }
     const draft = buildWatchlistItem(assetResult.data, {
@@ -255,7 +259,7 @@ export function AddAssetPage() {
       const { quantity: finalQty, averagePrice: finalAvg } = recalculateHoldingFromTransactions(
         newTxs.sort((a, b) => b.date - a.date),
       );
-      upsertWatchlistItem({ ...workingItem, quantity: finalQty, averagePrice: finalAvg });
+      upsertWatchlistItem({ ...workingItem, quantity: finalQty, averagePrice: finalAvg, broker: broker.trim() || null });
       navigate({ to: "/app/myportfolio" });
     } finally {
       setIsSaving(false);
@@ -380,6 +384,26 @@ export function AddAssetPage() {
                 disabled={!workingItem}
               />
             </div>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            <Label htmlFor="add-asset-broker" className="text-xs font-semibold text-foreground">
+              {t.portfolio.brokerLabel}
+            </Label>
+            <Input
+              id="add-asset-broker"
+              list="known-brokers"
+              value={broker}
+              onChange={(e) => setBroker(e.target.value)}
+              placeholder={t.portfolio.brokerPlaceholder}
+              className="h-11 sm:h-9"
+              disabled={!workingItem}
+            />
+            <datalist id="known-brokers">
+              {Object.values(KNOWN_BROKER_LABELS).map((label) => (
+                <option key={label} value={label} />
+              ))}
+            </datalist>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-4">
