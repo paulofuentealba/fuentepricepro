@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPositionValue } from "@/lib/calculations";
+import { convertCurrency } from "@/lib/currency";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
@@ -9,6 +10,7 @@ import type { Currency } from "@/lib/domain";
 interface BrokerCustodyCardsProps {
   valuedItems: ValuedWatchlistItem[];
   currency: Currency;
+  usdBrlRate: number;
   macroRates?: { cdi: number; ipca: number };
   isLoading: boolean;
 }
@@ -16,6 +18,7 @@ interface BrokerCustodyCardsProps {
 export function BrokerCustodyCards({
   valuedItems,
   currency,
+  usdBrlRate,
   macroRates,
   isLoading,
 }: BrokerCustodyCardsProps) {
@@ -26,13 +29,17 @@ export function BrokerCustodyCards({
     for (const item of valuedItems) {
       if (item.isClosedPosition) continue;
       const key = item.broker?.trim() || t.portfolio.unassignedBroker;
-      const value = getPositionValue(item, macroRates);
+      // getPositionValue returns the value in the ASSET's own currency, so each
+      // position must be converted to the display currency before accumulating —
+      // otherwise a broker holding both BRL and USD assets yields a mixed sum.
+      const rawValue = getPositionValue(item, macroRates);
+      const value = convertCurrency(rawValue, item.currency, currency, usdBrlRate);
       byBroker.set(key, (byBroker.get(key) ?? 0) + value);
     }
     return Array.from(byBroker.entries())
       .filter(([, value]) => value > 0)
       .sort((a, b) => b[1] - a[1]);
-  }, [valuedItems, macroRates, t.portfolio.unassignedBroker]);
+  }, [valuedItems, macroRates, currency, usdBrlRate, t.portfolio.unassignedBroker]);
 
   return (
     <div className="rounded-2xl bg-card border border-border p-6">

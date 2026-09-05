@@ -1,6 +1,7 @@
 import { Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AllocationChart } from "@/components/ceiling/watchlist/AllocationChart";
+import { convertCurrency } from "@/lib/currency";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
@@ -10,6 +11,7 @@ interface PortfolioSummaryHeaderProps {
   valuedItems: ValuedWatchlistItem[];
   totals: { consolidatedNetWorth: number; consolidatedIncome: number };
   currency: Currency;
+  usdBrlRate: number;
   isLoading: boolean;
 }
 
@@ -17,9 +19,16 @@ export function PortfolioSummaryHeader({
   valuedItems,
   totals,
   currency,
+  usdBrlRate,
   isLoading,
 }: PortfolioSummaryHeaderProps) {
   const { locale, t } = useI18n();
+
+  // `totals` from useValuedPortfolio is ALWAYS in BRL (computeTotals consolidates
+  // brlWorth + usdWorth * rate), so it must be converted to the display currency
+  // before formatting — otherwise a USD-display user sees a BRL figure with a $ sign.
+  const displayNetWorth = convertCurrency(totals.consolidatedNetWorth, "BRL", currency, usdBrlRate);
+  const displayIncome = convertCurrency(totals.consolidatedIncome, "BRL", currency, usdBrlRate);
 
   return (
     <div className="grid gap-3 lg:grid-cols-2">
@@ -36,7 +45,7 @@ export function PortfolioSummaryHeader({
             <div className="flex items-center gap-2 text-4xl lg:text-5xl font-bold tabular-nums">
               <Globe className="h-8 w-8 text-primary" />
               <span className="bg-gradient-to-r from-white via-primary to-cyan-500 bg-clip-text text-transparent">
-                {formatCurrency(totals.consolidatedNetWorth, currency, locale)}
+                {formatCurrency(displayNetWorth, currency, locale)}
               </span>
             </div>
           )}
@@ -54,7 +63,7 @@ export function PortfolioSummaryHeader({
           ) : (
             <div className="flex items-center gap-2 text-2xl font-bold">
               <Globe className="h-5 w-5 text-primary" />
-              {formatCurrency(totals.consolidatedIncome, currency, locale)}
+              {formatCurrency(displayIncome, currency, locale)}
             </div>
           )}
           <div className="mt-1 text-xs text-muted-foreground/80">

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { FIProgressCard } from "@/components/ceiling/FIProgressCard";
 import { PortfolioSummaryHeader } from "@/components/portfolio/PortfolioSummaryHeader";
 import { BrokerCustodyCards } from "@/components/portfolio/BrokerCustodyCards";
 import { PortfolioPositionsTable } from "@/components/portfolio/PortfolioPositionsTable";
@@ -20,7 +22,8 @@ export const Route = createFileRoute("/app/myportfolio")({
  * que abre o mesmo AssetDetailSheet de sempre.
  */
 function MyPortfolio() {
-  const { valuedItems, totals, isAppLoading, macroRates } = useValuedPortfolio();
+  const { valuedItems, totals, isAppLoading, macroRates, fx } = useValuedPortfolio();
+  const usdBrlRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const { settings } = useUserSettings();
   const [selectedItem, setSelectedItem] = useState<ValuedWatchlistItem | null>(null);
 
@@ -29,10 +32,13 @@ function MyPortfolio() {
 
   return (
     <div className="flex flex-col gap-6">
+      <FIProgressCard />
+
       <PortfolioSummaryHeader
         valuedItems={valuedItems}
         totals={totals}
         currency={settings.displayCurrency}
+        usdBrlRate={usdBrlRate}
         isLoading={isAppLoading}
       />
 
@@ -43,6 +49,7 @@ function MyPortfolio() {
           <BrokerCustodyCards
             valuedItems={valuedItems}
             currency={settings.displayCurrency}
+            usdBrlRate={usdBrlRate}
             macroRates={macroRates}
             isLoading={isAppLoading}
           />

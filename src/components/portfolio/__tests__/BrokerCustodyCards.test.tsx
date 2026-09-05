@@ -54,7 +54,7 @@ describe("BrokerCustodyCards", () => {
       makeItem({ id: "3", ticker: "AAPL", broker: null }),
     ];
 
-    render(<BrokerCustodyCards valuedItems={items} currency="BRL" isLoading={false} />);
+    render(<BrokerCustodyCards valuedItems={items} currency="BRL" usdBrlRate={5} isLoading={false} />);
 
     expect(screen.getByText("BTG Pactual")).toBeInTheDocument();
     expect(screen.getByText("Não informado")).toBeInTheDocument();

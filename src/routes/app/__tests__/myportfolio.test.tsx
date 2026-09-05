@@ -24,6 +24,9 @@ vi.mock("@/lib/useUserSettings", () => ({
   useUserSettings: () => ({ settings: { displayCurrency: "BRL" } }),
 }));
 
+vi.mock("@/components/ceiling/FIProgressCard", () => ({
+  FIProgressCard: () => <div data-testid="fi-progress-card" />,
+}));
 vi.mock("@/components/portfolio/PortfolioSummaryHeader", () => ({
   PortfolioSummaryHeader: () => <div data-testid="summary-header" />,
 }));

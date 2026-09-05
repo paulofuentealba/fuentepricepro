@@ -35,6 +35,7 @@ describe("PortfolioSummaryHeader", () => {
         valuedItems={mockItems}
         totals={{ consolidatedNetWorth: 872405.05, consolidatedIncome: 34605.4 }}
         currency="BRL"
+        usdBrlRate={5}
         isLoading={false}
       />,
     );
@@ -51,6 +52,7 @@ describe("PortfolioSummaryHeader", () => {
         valuedItems={mockItems}
         totals={{ consolidatedNetWorth: 0, consolidatedIncome: 0 }}
         currency="BRL"
+        usdBrlRate={5}
         isLoading={true}
       />,
     );
