@@ -28,6 +28,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-03-10T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Financials",
+    broker: "BTG Pactual",
   },
   {
     // Ação BR de IPO sintético recente (<3 anos), preserva a proteção contra deflação de
@@ -51,6 +52,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2024-04-10T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Utilities",
+    broker: "XP Investimentos",
   },
   {
     id: "brazilian_stock:VALE3",
@@ -72,6 +74,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-02-08T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Materials",
+    broker: "BTG Pactual",
   },
   {
     id: "brazilian_stock:ITUB4",
@@ -93,6 +96,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-03-10T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Financials",
+    broker: "Itaú Corretora",
   },
   {
     id: "brazilian_stock:EGIE3",
@@ -114,10 +118,33 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-05-12T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Utilities",
+    broker: "BTG Pactual",
   },
 
-  // ── FIIs (papel/tijolo), FII-INFRA E FIAGRO (6) ─────────────────────────────
+  // ── FIIs (papel/tijolo), FII-INFRA E FIAGRO (9) ─────────────────────────────
 
+  {
+    id: "fii:HGLG11",
+    ticker: "HGLG11",
+    name: "CSHG Logística FII",
+    type: "FII",
+    currency: "BRL",
+    currentPrice: 161.2,
+    annualDividend: 13.2,
+    targetYield: 7.8,
+    ceilingPrice: 169.23,
+    safetyMargin: 5.0,
+    quantity: 440,
+    averagePrice: 152.0,
+    paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    payoutRatio: null,
+    targetMonthlyIncome: 500,
+    addedAt: Date.now(),
+    investingSince: new Date("2022-04-15T12:00:00Z").getTime(),
+    customTaxRate: null,
+    sector: "Real Estate",
+    broker: "BTG Pactual",
+  },
   {
     id: "fii:KNCR11",
     ticker: "KNCR11",
@@ -138,6 +165,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-06-01T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Real Estate",
+    broker: "BTG Pactual",
   },
   {
     id: "fii:MXRF11",
@@ -159,6 +187,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-01-10T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Real Estate",
+    broker: "XP Investimentos",
   },
   {
     id: "fii:CPTS11",
@@ -180,6 +209,29 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-03-15T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Real Estate",
+    broker: "BTG Pactual",
+  },
+  {
+    id: "fii_infra:JURO11",
+    ticker: "JURO11",
+    name: "Sparta Infra FI-Infra",
+    type: "FII_INFRA",
+    currency: "BRL",
+    currentPrice: 97.5,
+    annualDividend: 12.4,
+    targetYield: 11.5,
+    ceilingPrice: 107.83,
+    safetyMargin: 10.6,
+    quantity: 500,
+    averagePrice: 92.4,
+    paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    payoutRatio: null,
+    targetMonthlyIncome: 500,
+    addedAt: Date.now(),
+    investingSince: new Date("2023-06-10T12:00:00Z").getTime(),
+    customTaxRate: null,
+    sector: "Infrastructure",
+    broker: "BTG Pactual",
   },
   {
     id: "fii_infra:BDIF11",
@@ -201,6 +253,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-02-10T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Infrastructure",
+    broker: "BTG Pactual",
   },
   {
     id: "fii_infra:IFRA11",
@@ -222,6 +275,29 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2024-04-05T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Infrastructure",
+    broker: "BTG Pactual",
+  },
+  {
+    id: "fiagro:RURA11",
+    ticker: "RURA11",
+    name: "Itaú Agro Crédito Fiagro",
+    type: "FIAGRO",
+    currency: "BRL",
+    currentPrice: 9.85,
+    annualDividend: 1.25,
+    targetYield: 12.0,
+    ceilingPrice: 10.42,
+    safetyMargin: 5.8,
+    quantity: 4000,
+    averagePrice: 9.9,
+    paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    payoutRatio: null,
+    targetMonthlyIncome: 400,
+    addedAt: Date.now(),
+    investingSince: new Date("2023-01-20T12:00:00Z").getTime(),
+    customTaxRate: null,
+    sector: "Agriculture",
+    broker: "BTG Pactual",
   },
   {
     id: "fiagro:SNAG11",
@@ -243,6 +319,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2024-03-20T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Agriculture",
+    broker: "XP Investimentos",
   },
 
   // ── ETFs — NACIONAL E US (4) ─────────────────────────────────────────────
@@ -267,6 +344,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-03-01T12:00:00Z").getTime(),
     customTaxRate: null,
     sector: "Financials",
+    broker: "BTG Pactual",
   },
   {
     id: "etf:VYM",
@@ -288,6 +366,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-04-10T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Diversified",
+    broker: "Avenue",
   },
   {
     id: "etf:SCHD",
@@ -309,6 +388,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-02-01T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Diversified",
+    broker: "Avenue",
   },
   {
     // ETF de crescimento (Nasdaq-100) com yield baixo — o metodo de dividendo (Bazin) exagera
@@ -333,6 +413,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-04-10T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Technology",
+    broker: "Avenue",
   },
 
   // ── STOCKS US (4) ────────────────────────────────────────────────────────
@@ -357,6 +438,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-01-15T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Technology",
+    broker: "Charles Schwab",
   },
   {
     id: "us_stock:JNJ",
@@ -378,6 +460,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2023-01-15T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Healthcare",
+    broker: "Charles Schwab",
   },
   {
     // Yield baixo por design (payout real ~15%) — mesmo caso de "overvalued pelo Bazin" que
@@ -401,6 +484,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-02-10T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Technology",
+    broker: "Charles Schwab",
   },
   {
     id: "us_stock:KO",
@@ -422,6 +506,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-05-05T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Consumer Staples",
+    broker: "Charles Schwab",
   },
 
   // ── REITs (3) ────────────────────────────────────────────────────────────
@@ -446,6 +531,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-02-15T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Real Estate",
+    broker: "Avenue",
   },
   {
     id: "reit:STAG",
@@ -467,6 +553,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2024-03-12T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Real Estate",
+    broker: "Avenue",
   },
   {
     // Posição com venda parcial a prejuízo em 2023 (crash real de MPW) — bom caso de teste
@@ -490,6 +577,7 @@ export const DEV_MOCK_DATA: WatchlistItem[] = [
     investingSince: new Date("2022-06-20T12:00:00Z").getTime(),
     customTaxRate: 30,
     sector: "Real Estate",
+    broker: "Avenue",
   },
 ];
 
@@ -544,6 +632,11 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   { id: "cpts11-2", ticker: "CPTS11", type: "buy", date: new Date("2023-08-22T10:00:00Z").getTime(), quantity: 1000, pricePerShare: 8.5, fees: 0, notes: "Aporte" },
   { id: "cpts11-3", ticker: "CPTS11", type: "sell", date: new Date("2026-02-15T10:00:00Z").getTime(), quantity: 500, pricePerShare: 8.8, fees: 0, notes: "Rebalanceamento" },
 
+  // HGLG11 — DCA desde 2022
+  { id: "hglg11-1", ticker: "HGLG11", type: "buy", date: new Date("2022-04-15T10:00:00Z").getTime(), quantity: 200, pricePerShare: 150.0, fees: 0, notes: "Aporte inicial galpões logísticos" },
+  { id: "hglg11-2", ticker: "HGLG11", type: "buy", date: new Date("2023-05-20T10:00:00Z").getTime(), quantity: 140, pricePerShare: 153.0, fees: 0, notes: "Aporte regular" },
+  { id: "hglg11-3", ticker: "HGLG11", type: "buy", date: new Date("2024-08-10T10:00:00Z").getTime(), quantity: 100, pricePerShare: 154.6, fees: 0, notes: "Aporte regular" },
+
   // BDIF11 — DCA desde 2023
   { id: "bdif11-1", ticker: "BDIF11", type: "buy", date: new Date("2023-02-10T10:00:00Z").getTime(), quantity: 150, pricePerShare: 88.0, fees: 0, notes: "Aporte Infra" },
   { id: "bdif11-2", ticker: "BDIF11", type: "buy", date: new Date("2024-07-20T10:00:00Z").getTime(), quantity: 150, pricePerShare: 92.0, fees: 0, notes: "Aporte Infra" },
@@ -551,6 +644,14 @@ export const DEV_MOCK_TRANSACTIONS: Transaction[] = [
   // IFRA11 — DCA desde 2024
   { id: "ifra11-1", ticker: "IFRA11", type: "buy", date: new Date("2024-04-05T10:00:00Z").getTime(), quantity: 100, pricePerShare: 108.0, fees: 0, notes: "Aporte Infra" },
   { id: "ifra11-2", ticker: "IFRA11", type: "buy", date: new Date("2024-09-12T10:00:00Z").getTime(), quantity: 50, pricePerShare: 114.0, fees: 0, notes: "Aporte Infra" },
+
+  // JURO11 — DCA desde 2023
+  { id: "juro11-1", ticker: "JURO11", type: "buy", date: new Date("2023-06-10T10:00:00Z").getTime(), quantity: 300, pricePerShare: 90.0, fees: 0, notes: "Aporte debêntures incentivadas" },
+  { id: "juro11-2", ticker: "JURO11", type: "buy", date: new Date("2024-04-12T10:00:00Z").getTime(), quantity: 200, pricePerShare: 96.0, fees: 0, notes: "Aporte debêntures incentivadas" },
+
+  // RURA11 — DCA desde 2023
+  { id: "rura11-1", ticker: "RURA11", type: "buy", date: new Date("2023-01-20T10:00:00Z").getTime(), quantity: 2000, pricePerShare: 9.8, fees: 0, notes: "Aporte CRA crédito agro" },
+  { id: "rura11-2", ticker: "RURA11", type: "buy", date: new Date("2024-02-15T10:00:00Z").getTime(), quantity: 2000, pricePerShare: 10.0, fees: 0, notes: "Aporte CRA crédito agro" },
 
   // SNAG11 — DCA desde 2024
   { id: "snag11-1", ticker: "SNAG11", type: "buy", date: new Date("2024-03-20T10:00:00Z").getTime(), quantity: 500, pricePerShare: 9.9, fees: 0, notes: "Aporte Fiagro" },

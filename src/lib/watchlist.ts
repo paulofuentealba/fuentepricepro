@@ -20,6 +20,7 @@ import { assetQueryOptions } from "./queryOptions";
 import { cleanTicker } from "./formatters";
 import { WATCHLIST_STORAGE_KEY } from "./localStorageKeys";
 import { blockWriteInDemoMode } from "./demoMode";
+import { DEV_MOCK_DATA } from "@/__fixtures__/devMockData";
 
 const STORAGE_KEY = WATCHLIST_STORAGE_KEY;
 const ONBOARDED_KEY = "ceilingPricePro.onboarded.v1";
@@ -145,6 +146,10 @@ function readLocal(): WatchlistItem[] {
           typeof item.investingSince === "number" && !isNaN(item.investingSince)
             ? item.investingSince
             : item.addedAt,
+        broker:
+          item.broker?.trim() ||
+          DEV_MOCK_DATA.find((m) => m.ticker === clean)?.broker ||
+          null,
       };
     }) as WatchlistItem[];
   } catch {

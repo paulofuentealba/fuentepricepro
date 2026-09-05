@@ -10,6 +10,26 @@ import { setDemoCookie, clearDemoCookie } from "./sessionCookie";
  * unrequested) so demo entry stays a single, explicit, user-initiated action.
  */
 const DEMO_MODE_KEY = "fuente.demoMode.v1";
+const DEMO_VERSION_KEY = "fuente.demoVersion.v2";
+const SETTINGS_STORAGE_KEY = "ceilingPricePro.settings.v1";
+
+export const DEMO_DEFAULT_SETTINGS = {
+  targetYield: 6,
+  displayCurrency: "BRL",
+  monthlyLivingCostGoal: 8000,
+  monthlyLivingCostGoalCurrency: "BRL",
+  estimatedMonthlyContribution: 5000,
+  smartAllocationTargets: {
+    STOCK_BR: 25,
+    FII: 35,
+    REIT: 10,
+    ETF: 25,
+    STOCK_US: 5,
+  },
+  valuationAssumptionsMode: "simple" as const,
+  usageAnalyticsConsent: true,
+  weeklyDigestEmailConsent: false,
+};
 
 export function isDemoModeActive(): boolean {
   if (typeof window === "undefined") return false;
@@ -21,11 +41,22 @@ export function startDemoMode(): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(DEMO_WATCHLIST_DATA));
   window.localStorage.setItem(TRANSACTIONS_STORAGE_KEY, JSON.stringify(DEMO_TRANSACTIONS));
+  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(DEMO_DEFAULT_SETTINGS));
   window.localStorage.setItem(DEMO_MODE_KEY, "true");
+  window.localStorage.setItem(DEMO_VERSION_KEY, "true");
   // Also mirrored into a cookie so the server can see it on a hard
   // navigation/reload — localStorage never reaches the server (see
   // verifySession.functions.ts).
   setDemoCookie();
+}
+
+/** Ensures existing demo sessions are automatically upgraded to the latest mock dataset (v2). */
+export function syncDemoModeVersion(): void {
+  if (typeof window === "undefined") return;
+  if (!isDemoModeActive()) return;
+  if (window.localStorage.getItem(DEMO_VERSION_KEY) !== "true") {
+    startDemoMode();
+  }
 }
 
 /** Clears demo data and the demo flag — called once the visitor authenticates for real. */
@@ -33,7 +64,9 @@ export function endDemoMode(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
   window.localStorage.removeItem(TRANSACTIONS_STORAGE_KEY);
+  window.localStorage.removeItem(SETTINGS_STORAGE_KEY);
   window.localStorage.removeItem(DEMO_MODE_KEY);
+  window.localStorage.removeItem(DEMO_VERSION_KEY);
   clearDemoCookie();
 }
 
