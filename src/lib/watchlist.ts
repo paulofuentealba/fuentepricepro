@@ -56,6 +56,9 @@ export interface WatchlistItem {
   addedAt: number;
   /** When the user originally started investing in this asset. */
   investingSince: number;
+  /** Custody institution (free text; suggestions come from src/lib/brokers.ts). Null/undefined
+   * for positions created before this field existed, or never assigned one manually. */
+  broker?: string | null;
 }
 
 export function makeId(ticker: string, type: AssetType) {
@@ -187,6 +190,7 @@ interface Row {
   start_date?: string | null;
   added_at: string;
   investing_since?: string | null;
+  broker?: string | null;
 }
 
 function rowToItem(r: Row): WatchlistItem {
@@ -235,6 +239,7 @@ function rowToItem(r: Row): WatchlistItem {
     startDate: r.start_date ?? null,
     addedAt: safeNumber(new Date(r.added_at).getTime(), Date.now()),
     investingSince: r.investing_since ? safeNumber(new Date(r.investing_since).getTime(), safeNumber(new Date(r.added_at).getTime(), Date.now())) : safeNumber(new Date(r.added_at).getTime(), Date.now()),
+    broker: r.broker ?? null,
   };
 }
 
@@ -286,6 +291,7 @@ function itemToRow(item: WatchlistItem, userId: string): Row {
     start_date: item.startDate ?? null,
     added_at: safeToISOString(item.addedAt, Date.now()),
     investing_since: safeToISOString(item.investingSince ?? item.addedAt, Date.now()),
+    broker: item.broker ?? null,
   };
 }
 
