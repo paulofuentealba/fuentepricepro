@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth-provider";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useUserSettings } from "@/lib/useUserSettings";
-import { computeClassAllocationState } from "@/lib/portfolioAllocationState";
 import { computeWeightedYieldOnCost } from "@/lib/selectors/weightedYieldOnCost";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
@@ -49,11 +48,6 @@ function AppHome() {
   const weightedYoc = useMemo(
     () => computeWeightedYieldOnCost(valuedItems, macroRates),
     [valuedItems, macroRates],
-  );
-
-  const allocationState = useMemo(
-    () => computeClassAllocationState(valuedItems, settings.smartAllocationTargets, usdRate),
-    [valuedItems, settings.smartAllocationTargets, usdRate],
   );
 
   const availableContributionBRL = useMemo(() => {
@@ -115,11 +109,11 @@ function AppHome() {
   return (
     <div className="flex flex-col gap-6">
       <DashboardKpiGrid
-        netWorth={totals.consolidatedNetWorth}
+        netWorth={convertCurrency(totals.consolidatedNetWorth, "BRL", currency, usdRate)}
         weightedYoc={weightedYoc}
-        monthlyIncome={fi.monthlyIncomeBRL}
-        availableContribution={availableContributionBRL}
-        currency="BRL"
+        monthlyIncome={convertCurrency(fi.monthlyIncomeBRL, "BRL", currency, usdRate)}
+        availableContribution={convertCurrency(availableContributionBRL, "BRL", currency, usdRate)}
+        currency={currency}
         isLoading={isAppLoading}
       />
 
@@ -139,8 +133,19 @@ function AppHome() {
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ContributionEngineCard valuedItems={valuedItems} settings={askSettings} isLoading={isAppLoading} />
-        <AllocationOverviewCard allocationState={allocationState} isLoading={isAppLoading} />
+        <ContributionEngineCard
+          valuedItems={valuedItems}
+          settings={askSettings}
+          isLoading={isAppLoading}
+          currency={currency}
+          usdRate={usdRate}
+        />
+        <AllocationOverviewCard
+          valuedItems={valuedItems}
+          smartAllocationTargets={settings.smartAllocationTargets}
+          usdRate={usdRate}
+          isLoading={isAppLoading}
+        />
       </div>
 
       <OpportunityMatrixTable valuedItems={valuedItems} isLoading={isAppLoading} />
