@@ -213,7 +213,10 @@ export function Header({ variant = "app" }: HeaderProps) {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="flex flex-col gap-4 pt-8 overflow-y-auto">
+              <SheetContent
+                side="right"
+                className="flex flex-col gap-3 sm:gap-4 pt-6 sm:pt-8 px-4 sm:px-6 w-[280px] xs:w-[320px] sm:max-w-sm max-w-[88vw] overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]"
+              >
                 <SheetHeader>
                   <SheetTitle className="text-left">{t.appTitle}</SheetTitle>
                 </SheetHeader>
@@ -256,7 +259,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                                 to={item.path!}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className={cn(
-                                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                  "flex items-center gap-2.5 sm:gap-3 rounded-lg px-2.5 sm:px-3 py-2 text-sm font-medium transition-colors min-h-[40px]",
                                   isActive
                                     ? "bg-primary/10 text-primary font-semibold"
                                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -354,7 +357,7 @@ export function Header({ variant = "app" }: HeaderProps) {
                     </div>
                   )}
 
-                  <div className="mt-auto flex flex-col gap-3 pt-4 border-t border-border/30">
+                  <div className="mt-auto shrink-0 flex flex-col gap-3 pt-3 sm:pt-4 border-t border-border/30">
                     <div className="flex items-center justify-between px-1">
                       <span className="text-xs text-muted-foreground">{t.header.currency ?? "Moeda"}</span>
                       <CurrencyToggle

@@ -100,13 +100,13 @@ function AppLayout() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-background text-foreground">
       <Header />
       <GuestWarningBanner />
-      <div className="flex flex-1 overflow-hidden flex-row">
+      <div className="flex flex-1 overflow-hidden flex-row min-h-0">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto pb-6 md:pb-0">
-          <div className="min-h-screen bg-background text-foreground">
+        <main className="flex-1 min-w-0 overflow-y-auto pb-6 md:pb-0">
+          <div className="min-h-full bg-background text-foreground">
             <div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 lg:py-9 transition-all duration-200">
               <Outlet />
             </div>

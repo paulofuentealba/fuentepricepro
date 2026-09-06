@@ -95,7 +95,7 @@ export function Sidebar() {
 
   if (!isMounted) {
     return (
-      <div className="w-16 md:w-64 border-r border-border/60 bg-background/60 h-full hidden md:block" />
+      <div className="w-16 md:w-64 border-r border-border/60 bg-background/60 h-full hidden md:block shrink-0" />
     );
   }
 
@@ -103,12 +103,12 @@ export function Sidebar() {
     <TooltipProvider delayDuration={100}>
       <aside
         className={cn(
-          "h-full border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-md transition-all duration-300 ease-in-out hidden md:flex flex-col z-20 select-none",
+          "h-full shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-md transition-all duration-300 ease-in-out hidden md:flex flex-col z-20 select-none",
           isCollapsed ? "w-16" : "w-64",
         )}
       >
         {/* Header / Brand */}
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border h-[72px]">
+        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-sidebar-border h-16 lg:h-[72px] shrink-0">
           {!isCollapsed ? (
             <div className="flex items-center gap-2.5 overflow-hidden pl-1">
               <svg width="24" height="24" viewBox="0 0 40 40" fill="none" className="shrink-0">
@@ -161,7 +161,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation Sections */}
-        <nav className="flex-1 py-3 flex flex-col gap-4 overflow-y-auto overflow-x-hidden px-2 [&::-webkit-scrollbar]:hidden">
+        <nav className="flex-1 min-h-0 py-2.5 sm:py-3 flex flex-col gap-3 sm:gap-4 overflow-y-auto overflow-x-hidden px-2 [&::-webkit-scrollbar]:hidden">
           {sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-1">
               {!isCollapsed && (
@@ -265,7 +265,7 @@ export function Sidebar() {
         </nav>
 
         {/* Footer Block */}
-        <div className="mt-auto border-t border-sidebar-border p-2 space-y-1">
+        <div className="mt-auto shrink-0 border-t border-sidebar-border p-2 space-y-1">
           {/* User Profile Chip */}
           {loading ? (
             <div
