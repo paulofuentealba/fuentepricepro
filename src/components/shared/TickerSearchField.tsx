@@ -97,7 +97,7 @@ export function TickerSearchField({
   const searchResult = useQuery(searchQueryOptions(debouncedQuery));
 
   const suggestions: SearchHit[] = useMemo(() => {
-    const raw = searchResult.data ?? [];
+    const raw = Array.isArray(searchResult.data) ? searchResult.data : [];
     const validRaw = raw.filter((item) => ALL_TYPES.includes(item.type));
     return Array.from(new Map(validRaw.map((item) => [item.ticker, item])).values());
   }, [searchResult.data]);

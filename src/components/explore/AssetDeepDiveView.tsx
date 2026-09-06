@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
-import { formatCurrency, formatNumber, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatNumber, formatPercent, formatDate } from "@/lib/formatters";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ValuationConsensusMatrix } from "@/components/shared/ValuationConsensusMatrix";
@@ -691,7 +691,7 @@ export function AssetDeepDiveView({
                 </div>
                 <div className="text-lg font-bold text-accent-text font-display mt-0.5">
                   {asset?.exDividendDate
-                    ? new Date(asset.exDividendDate).toLocaleDateString(locale)
+                    ? formatDate(asset.exDividendDate, locale) || repData?.nextCom || "—"
                     : repData?.nextCom || "18/SET/2026"}
                 </div>
               </div>

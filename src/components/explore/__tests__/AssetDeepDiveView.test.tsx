@@ -61,12 +61,14 @@ vi.mock("@/lib/useUserSettings", () => ({
   }),
 }));
 
+let mockAssetData: any = null;
+
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
     useQuery: () => ({
-      data: null,
+      data: mockAssetData,
       isLoading: false,
       isPending: false,
       isError: false,
@@ -77,6 +79,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 describe("AssetDeepDiveView (Raio-X Aprofundado do Ativo)", () => {
   beforeEach(() => {
     mockValuedItems = [];
+    mockAssetData = null;
   });
 
   afterEach(() => {
@@ -196,5 +199,25 @@ describe("AssetDeepDiveView (Raio-X Aprofundado do Ativo)", () => {
     expect(screen.getAllByText(/BBAS3/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Preço Teto Fuente/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Minha Posição em Carteira/i)).toBeInTheDocument();
+  });
+
+  it("renders non-representative asset like ITSA4 with exDividendDate without throwing (ptBR date formatting regression)", () => {
+    mockAssetData = {
+      ticker: "ITSA4",
+      name: "Itaúsa S.A.",
+      currentPrice: 10.45,
+      exDividendDate: "2024-04-15",
+      type: "STOCK_BR",
+      currency: "BRL",
+    };
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="ITSA4" />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getAllByText(/ITSA4/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/\/04\/2024/)).toBeInTheDocument();
   });
 });
