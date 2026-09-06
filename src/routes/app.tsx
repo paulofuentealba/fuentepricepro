@@ -107,7 +107,7 @@ function AppLayout() {
         <Sidebar />
         <main className="flex-1 overflow-y-auto pb-6 md:pb-0">
           <div className="min-h-screen bg-background text-foreground">
-            <div className="mx-auto max-w-6xl xl:max-w-7xl px-4 py-8 sm:px-6 sm:py-10 transition-all duration-200">
+            <div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px] px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 lg:py-9 transition-all duration-200">
               <Outlet />
             </div>
           </div>

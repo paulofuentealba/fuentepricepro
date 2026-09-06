@@ -426,9 +426,9 @@ export function AssetDeepDiveView({
       )}
 
       {/* ASSET HERO CARD (App Look & Feel) */}
-      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 shadow-sm">
+      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
                 {repData?.classLabel ?? asset?.type ?? "Ações"}
@@ -454,9 +454,9 @@ export function AssetDeepDiveView({
                 </span>
               ) : null}
             </div>
-            <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground">
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
               {currentTicker}{" "}
-              <span className="text-muted-foreground font-sans font-normal text-xl">
+              <span className="text-muted-foreground font-sans font-normal text-base sm:text-xl">
                 • {asset?.name || repData?.name || currentTicker}
               </span>
             </h2>
@@ -466,32 +466,32 @@ export function AssetDeepDiveView({
           </div>
 
           {/* KPIS */}
-          <div className="flex items-center gap-6 sm:gap-8 flex-wrap">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-3 lg:pt-0 lg:border-l lg:border-border/70 lg:pl-8 shrink-0">
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {t.deepDive?.currentPrice || "Cotação Atual"}
               </div>
-              <div className="font-serif text-2xl font-bold text-foreground font-display">
+              <div className="font-serif text-xl sm:text-2xl font-bold text-foreground font-display">
                 {formatCurrency(livePrice, currency, locale)}
               </div>
             </div>
 
-            <div className="border-l border-border/70 pl-6 sm:pl-8">
+            <div className="border-l border-border/40 pl-4 sm:border-0 sm:pl-0">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {t.deepDive?.fuenteCeiling || "Preço Teto Fuente"}
               </div>
-              <div className="font-serif text-2xl font-bold text-accent-text font-display">
+              <div className="font-serif text-xl sm:text-2xl font-bold text-accent-text font-display">
                 {formatCurrency(tetoConsensus, currency, locale)}
               </div>
             </div>
 
-            <div className="border-l border-border/70 pl-6 sm:pl-8">
+            <div>
               <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {t.deepDive?.safetyMargin || "Margem de Segurança"}
               </div>
               <div
                 className={cn(
-                  "text-2xl font-bold font-display",
+                  "text-xl sm:text-2xl font-bold font-display",
                   marginConsensus >= 0 ? "text-success" : "text-danger",
                 )}
               >
@@ -500,7 +500,7 @@ export function AssetDeepDiveView({
               </div>
             </div>
 
-            <div className="border-l border-border/70 pl-6 sm:pl-8">
+            <div className="border-l border-border/40 pl-4 sm:border-0 sm:pl-0 flex items-center">
               <StatusBadge
                 variant={
                   actionVerdict.type === "strong" || actionVerdict.type === "ok"
@@ -509,7 +509,7 @@ export function AssetDeepDiveView({
                       ? "warning"
                       : "danger"
                 }
-                className="px-4 py-1.5 text-xs font-bold"
+                className="px-3.5 sm:px-4 py-1.5 text-xs font-bold w-full justify-center"
               >
                 {actionVerdict.label}
               </StatusBadge>
@@ -617,7 +617,7 @@ export function AssetDeepDiveView({
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-muted/40 p-3 text-xs border border-border/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg bg-muted/40 p-3 text-xs border border-border/50">
             <span className="text-muted-foreground">
               {t.deepDive?.yieldOnCost || "Yield on Cost (YoC) Real"}:{" "}
               <strong className="text-success font-semibold">

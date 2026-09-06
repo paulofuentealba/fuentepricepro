@@ -240,12 +240,12 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
             })}
           </div>
 
-          {/* Desktop View (>= md): Fluid Table (Zero Scrollbar) */}
+          {/* Desktop View (>= md): Fluid Table with Sticky Asset Column */}
           <div className="hidden md:block overflow-hidden rounded-xl border border-border/60 dark:border-[#1B2F27]">
-            <Table containerClassName="overflow-x-hidden" className="w-full">
+            <Table containerClassName="overflow-x-auto scrollbar-thin" className="w-full min-w-[760px]">
               <TableHeader className="bg-surface-1 dark:bg-[#0D1714]">
                 <TableRow className="border-border/60 dark:border-[#1B2F27] hover:bg-transparent">
-                  <TableHead className="py-3 pl-3 pr-2 lg:pl-4 lg:pr-3 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
+                  <TableHead className="sticky left-0 z-20 bg-surface-1 dark:bg-[#0D1714] py-3 pl-3 pr-2 lg:pl-4 lg:pr-3 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.4)]">
                     {t.dashboard.matrix.columnAsset}
                   </TableHead>
                   <TableHead className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
@@ -289,13 +289,13 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
                     <TableRow
                       key={item.id}
                       onClick={() => onSelectTicker?.(item.ticker)}
-                      className="border-b border-border/40 dark:border-white/5 hover:bg-surface-hover/80 dark:hover:bg-[#1A342B] cursor-pointer transition-colors"
+                      className="group border-b border-border/40 dark:border-white/5 hover:bg-surface-hover/80 dark:hover:bg-[#1A342B] cursor-pointer transition-colors"
                     >
-                      <TableCell className="py-3.5 pl-3 pr-2 lg:pl-4 lg:pr-3 whitespace-nowrap">
+                      <TableCell className="sticky left-0 z-10 bg-card group-hover:bg-surface-hover/80 dark:bg-[#0D1714] dark:group-hover:bg-[#1A342B] py-3.5 pl-3 pr-2 lg:pl-4 lg:pr-3 whitespace-nowrap shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.4)] transition-colors">
                         <div className="font-bold text-accent-gold dark:text-[#DFC38A] text-base leading-tight font-sans">
                           {item.ticker}
                         </div>
-                        <div className="text-[0.74rem] text-muted-foreground dark:text-[#64748B] font-normal leading-tight mt-0.5 whitespace-nowrap">
+                        <div className="text-[0.74rem] text-muted-foreground dark:text-[#64748B] font-normal leading-tight mt-0.5 whitespace-nowrap max-w-[170px] truncate">
                           {item.name}
                         </div>
                       </TableCell>
