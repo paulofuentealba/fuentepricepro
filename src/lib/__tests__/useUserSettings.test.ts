@@ -111,5 +111,35 @@ describe("migrateLegacyAllocationKeys", () => {
     const migrated = migrateLegacyAllocationKeys(settings);
 
     expect(migrated.smartAllocationTargets.FII).toBe(30); // 20 + 0 (ignored) + 10
+    expect(migrated.allocationKeysMigrated).toBe(true);
+  });
+
+  it("never re-sums legacy weights on subsequent passes if allocationKeysMigrated is true", () => {
+    // Pass 1: Initial migration
+    const initial = makeSettings({
+      smartAllocationTargets: {
+        FII: 20,
+        FII_INFRA: 10,
+        FIAGRO: 5,
+      },
+    });
+    const pass1 = migrateLegacyAllocationKeys(initial);
+    expect(pass1.smartAllocationTargets.FII).toBe(35); // 20 + 10 + 5
+    expect(pass1.allocationKeysMigrated).toBe(true);
+
+    // Pass 2: Suppose Firestore or a stale cache re-injected legacy keys
+    const reInjected = {
+      ...pass1,
+      smartAllocationTargets: {
+        ...pass1.smartAllocationTargets,
+        FII_INFRA: 10,
+        FIAGRO: 5,
+      },
+    };
+    const pass2 = migrateLegacyAllocationKeys(reInjected);
+    // FII MUST stay 35, NOT increase to 50!
+    expect(pass2.smartAllocationTargets.FII).toBe(35);
+    expect(pass2.smartAllocationTargets).not.toHaveProperty("FII_INFRA");
+    expect(pass2.smartAllocationTargets).not.toHaveProperty("FIAGRO");
   });
 });

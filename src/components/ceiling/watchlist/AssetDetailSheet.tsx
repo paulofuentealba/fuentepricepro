@@ -14,8 +14,10 @@ import { ValuationAssumptionsSheet } from "./assetCard/ValuationAssumptionsSheet
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
 import { DividendsHistoryPanel } from "./DividendsHistoryPanel";
 import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
 import { FundamentalIndicatorsPanel } from "./FundamentalIndicatorsPanel";
@@ -239,7 +241,7 @@ function ScrollableTabsList({
   const handleClick = useCallback((e: React.MouseEvent) => {
     const trigger = (e.target as HTMLElement).closest("[role='tab']");
     if (trigger) {
-      trigger.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      trigger.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "center" });
     }
   }, []);
 
@@ -347,9 +349,10 @@ export function AssetDetailSheet({
       <SheetContent
         closeLabel={t.common.close}
         side="right"
-        className="w-full overflow-y-auto border-border/50 bg-background/95 backdrop-blur-xl p-0 sm:max-w-2xl"
+        className="w-full overflow-y-auto border-border/50 bg-background/95 backdrop-blur-xl p-0 sm:max-w-5xl"
       >
-        <SheetHeader className="border-b border-border/60 px-6 py-4">
+        <TooltipProvider delayDuration={150}>
+          <SheetHeader className="border-b border-border/60 px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="flex items-baseline gap-2.5 flex-wrap">
@@ -392,93 +395,48 @@ export function AssetDetailSheet({
             </div>
           )}
           {!loading && asset && item && valuation && (
-            <ErrorBoundary label="asset_detail_sheet">
-              <Tabs
-                key={`${item.id}-${initialTab ?? ""}`}
-                defaultValue={
-                  !hidePositionTabs && (initialTab === "myPosition" || item.type === "FIXED_INCOME")
-                    ? "myPosition"
-                    : "highlights"
-                }
-                className="w-full"
-              >
-                <ScrollableTabsList cols={item.type === "FIXED_INCOME" || hidePositionTabs ? 2 : 4}>
-                  <TabsTrigger value="highlights" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.highlights}</TabsTrigger>
-                  {!hidePositionTabs && (
-                    <TabsTrigger value="myPosition" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.myPosition}</TabsTrigger>
-                  )}
-                  {item.type !== "FIXED_INCOME" && (
-                    <TabsTrigger value="dividends" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.dividends}</TabsTrigger>
-                  )}
-                  {item.type !== "FIXED_INCOME" && (
-                    <TabsTrigger value="projection" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.projection}</TabsTrigger>
-                  )}
-                </ScrollableTabsList>
+            <Tabs
+              key={`${item.id}-${initialTab ?? ""}`}
+              defaultValue={
+                !hidePositionTabs && (initialTab === "myPosition" || item.type === "FIXED_INCOME")
+                  ? "myPosition"
+                  : "highlights"
+              }
+              className="w-full"
+            >
+              <ScrollableTabsList cols={item.type === "FIXED_INCOME" || hidePositionTabs ? 2 : 4}>
+                <TabsTrigger value="highlights" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">
+                  {t.tabs?.deepDive || t.watchlist.tabs.highlights}
+                </TabsTrigger>
+                {!hidePositionTabs && (
+                  <TabsTrigger value="myPosition" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.myPosition}</TabsTrigger>
+                )}
+                {item.type !== "FIXED_INCOME" && (
+                  <TabsTrigger value="dividends" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.dividends}</TabsTrigger>
+                )}
+                {item.type !== "FIXED_INCOME" && (
+                  <TabsTrigger value="projection" className="shrink-0 text-xs sm:text-sm px-3 py-1.5">{t.watchlist.tabs.projection}</TabsTrigger>
+                )}
+              </ScrollableTabsList>
 
-                <TabsContent value="highlights" className="space-y-6 mt-0">
+              <TabsContent value="highlights" className="space-y-6 mt-0">
+                <ErrorBoundary label="asset_detail_highlights">
                   {item.type !== "FIXED_INCOME" ? (
-                    <>
-                      <div className="flex items-center justify-between pb-1">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          {t.watchlist.tabs.highlights}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs flex items-center gap-1.5 border-primary/30 hover:bg-primary/5"
-                          onClick={() => setIsAssumptionsSheetOpen(true)}
-                        >
-                          <Sliders className="h-3.5 w-3.5 text-primary" />
-                          {t.valuationAssumptions.viewAssumptions}
-                        </Button>
-                      </div>
-                      <WowInsights item={item} asset={asset} valuation={valuation} />
-                      {valuation.yieldTrapWarning && (
-                        <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs text-warning flex items-start gap-2.5">
-                          <AlertTriangle className="h-4 w-4 shrink-0 text-warning mt-0.5" />
-                          <div className="flex-1">
-                            <p className="font-semibold">{t.result.yieldTrapWarning}</p>
-                            <p className="text-[11px] text-warning/80 mt-0.5">{t.result.yieldTrapWarningTip}</p>
-                          </div>
-                        </div>
-                      )}
-                      <ConsensusPyramid
-                        valuation={{
-                          ...valuation,
-                          lynch: asset.type === "STOCK_BR" || asset.type === "STOCK_US" ? valuation.lynch : undefined,
-                        }}
-                        currency={asset.currency}
-                      />
-                      <FundamentalIndicatorsPanel asset={asset} valuation={valuation} />
-                      {(asset.dividendHistory ?? []).filter((p: any) => p.amount > 0).length > 1 && (
-                        <DividendHistoryChart
-                          data={asset.dividendHistory}
-                          currency={asset.currency}
-                          locale={locale}
-                          title={t.result.dividendHistory}
-                        />
-                      )}
-                      <BuyAndHoldChecklistCard asset={asset} valuation={valuation} />
-                      <AssetDynamicFaqAccordion asset={asset} valuation={valuation} />
-                      <RetrospectiveSimulatorCard asset={asset} />
-                      <ValuationAssumptionsSheet
-                        isOpen={isAssumptionsSheetOpen}
-                        onClose={() => setIsAssumptionsSheetOpen(false)}
-                        ticker={item.ticker}
-                        currency={asset.currency || item.currency}
-                        valuation={valuation}
-                        isUpdating={isAssumptionsUpdating}
-                      />
-                    </>
+                    <AssetDeepDiveView
+                      initialTicker={item.ticker}
+                      mode="modal"
+                      onCloseModal={onClose}
+                    />
                   ) : (
                     <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg border-border/50 bg-background/50">
                       <p className="text-sm text-muted-foreground">{t.watchlist.highlightsNotApplicableFI}</p>
                     </div>
                   )}
-                </TabsContent>
+                </ErrorBoundary>
+              </TabsContent>
 
-                <TabsContent value="myPosition" className="space-y-6 mt-0">
+              <TabsContent value="myPosition" className="space-y-6 mt-0">
+                <ErrorBoundary label="asset_detail_my_position">
                   {!hidePositionTabs && (
                     <>
                        <AssetHoldings
@@ -515,32 +473,37 @@ export function AssetDetailSheet({
                       )}
                     </>
                   )}
-                </TabsContent>
+                </ErrorBoundary>
+              </TabsContent>
 
-                {item.type !== "FIXED_INCOME" && (
-                  <TabsContent value="dividends" className="space-y-6 mt-0">
+              {item.type !== "FIXED_INCOME" && (
+                <TabsContent value="dividends" className="space-y-6 mt-0">
+                  <ErrorBoundary label="asset_detail_dividends">
                     <DividendsHistoryPanel
                       item={item}
                       events={asset.dividendEvents ?? []}
                       currency={asset.currency}
                       asset={asset}
                     />
-                  </TabsContent>
-                )}
+                  </ErrorBoundary>
+                </TabsContent>
+              )}
 
-                {item.type !== "FIXED_INCOME" && (
-                  <TabsContent value="projection" className="space-y-6 mt-0">
+              {item.type !== "FIXED_INCOME" && (
+                <TabsContent value="projection" className="space-y-6 mt-0">
+                  <ErrorBoundary label="asset_detail_projection">
                     <AssetProjectionPanel
                       item={item}
                       asset={asset}
                       currency={asset.currency}
                     />
-                  </TabsContent>
-                )}
-              </Tabs>
-            </ErrorBoundary>
+                  </ErrorBoundary>
+                </TabsContent>
+              )}
+            </Tabs>
           )}
         </div>
+        </TooltipProvider>
       </SheetContent>
     </Sheet>
   );

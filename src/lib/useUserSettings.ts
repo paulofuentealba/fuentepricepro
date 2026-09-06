@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/integrations/firebase/client";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, deleteField } from "firebase/firestore";
 import { useAuth } from "./auth-provider";
 import type { AssetType, Currency } from "./domain";
 import { useEffect } from "react";
@@ -28,6 +28,7 @@ export interface UserSettings {
    * cookies aren't a stored field — they're mandatory for auth and always shown as locked-on. */
   usageAnalyticsConsent?: boolean;
   weeklyDigestEmailConsent?: boolean;
+  allocationKeysMigrated?: boolean;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -66,6 +67,29 @@ export function migrateLegacyAllocationKeys(settings: UserSettings): UserSetting
     return settings;
   }
 
+  // If already marked as migrated, strip any lingering legacy keys without re-adding their weights!
+  if (settings.allocationKeysMigrated) {
+    let cleanedTargets = targets;
+    if (targetsHasLegacy) {
+      const merged = { ...targets };
+      delete merged.FII_INFRA;
+      delete merged.FIAGRO;
+      cleanedTargets = merged;
+    }
+    let cleanedYields = yields;
+    if (yieldsHasLegacy) {
+      const merged = { ...yields };
+      delete merged.FII_INFRA;
+      delete merged.FIAGRO;
+      cleanedYields = merged;
+    }
+    return {
+      ...settings,
+      smartAllocationTargets: cleanedTargets,
+      classTargetYields: cleanedYields,
+    };
+  }
+
   let nextTargets = targets;
   if (targetsHasLegacy) {
     const merged = { ...targets };
@@ -92,7 +116,12 @@ export function migrateLegacyAllocationKeys(settings: UserSettings): UserSetting
     nextYields = merged;
   }
 
-  return { ...settings, smartAllocationTargets: nextTargets, classTargetYields: nextYields };
+  return {
+    ...settings,
+    smartAllocationTargets: nextTargets,
+    classTargetYields: nextYields,
+    allocationKeysMigrated: true,
+  };
 }
 
 // Ler do localStorage para convidados ou migração
@@ -167,14 +196,34 @@ export function useUserSettings() {
           if (settings.smartAllocationCurrency && !settings.displayCurrency) {
             settings.displayCurrency = settings.smartAllocationCurrency;
             delete settings.smartAllocationCurrency;
-            await setDoc(ref, { settings }, { merge: true });
+          }
+
+          // Explicitly delete legacy FII_INFRA/FIAGRO fields in Firestore to prevent recursive merge re-injection
+          const rawTargets = settings?.smartAllocationTargets;
+          const rawYields = settings?.classTargetYields;
+          if (
+            rawTargets?.FII_INFRA !== undefined ||
+            rawTargets?.FIAGRO !== undefined ||
+            rawYields?.FII_INFRA !== undefined ||
+            rawYields?.FIAGRO !== undefined
+          ) {
+            try {
+              await updateDoc(ref, {
+                "settings.smartAllocationTargets.FII_INFRA": deleteField(),
+                "settings.smartAllocationTargets.FIAGRO": deleteField(),
+                "settings.classTargetYields.FII_INFRA": deleteField(),
+                "settings.classTargetYields.FIAGRO": deleteField(),
+              });
+            } catch {
+              // Non-blocking
+            }
           }
 
           // Merge with defaults in case of missing fields
           const mergedSettings = { ...DEFAULT_SETTINGS, ...settings } as UserSettings;
           const migratedSettings = migrateLegacyAllocationKeys(mergedSettings);
           if (migratedSettings !== mergedSettings) {
-            await setDoc(ref, { settings: migratedSettings }, { merge: true });
+            await setDoc(ref, { settings: migratedSettings }, { mergeFields: ["settings"] });
           }
           return migratedSettings;
         } else {
@@ -197,7 +246,7 @@ export function useUserSettings() {
 
       if (userId) {
         const ref = doc(db, "users", userId);
-        await setDoc(ref, { settings: merged }, { merge: true });
+        await setDoc(ref, { settings: merged }, { mergeFields: ["settings"] });
       } else {
         writeLocalSettings(merged);
       }

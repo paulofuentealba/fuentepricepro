@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
-import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
+import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { computeWeightedYieldOnCost } from "@/lib/selectors/weightedYieldOnCost";
@@ -15,6 +15,7 @@ import { FireEngineCard } from "@/components/dashboard/FireEngineCard";
 import { ContributionEngineCard } from "@/components/dashboard/ContributionEngineCard";
 import { AllocationOverviewCard } from "@/components/dashboard/AllocationOverviewCard";
 import { OpportunityMatrixTable } from "@/components/dashboard/OpportunityMatrixTable";
+import { AssetDetailSheet } from "@/components/ceiling/watchlist/AssetDetailSheet";
 
 /**
  * Home real de `/app`. Reescrita para a nova Dashboard (ver
@@ -41,6 +42,16 @@ function AppHome() {
 
   const [previousSnapshot, setPreviousSnapshot] = useState<LastVisitSnapshot | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<ValuedWatchlistItem | null>(null);
+
+  const handleSelectTicker = (ticker: string) => {
+    const item = valuedItems.find(
+      (v) => v.ticker.toUpperCase() === ticker.toUpperCase(),
+    );
+    if (item) {
+      setSelectedItem(item);
+    }
+  };
 
   const usdRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const currency = settings.displayCurrency;
@@ -139,6 +150,7 @@ function AppHome() {
           isLoading={isAppLoading}
           currency={currency}
           usdRate={usdRate}
+          onSelectTicker={handleSelectTicker}
         />
         <AllocationOverviewCard
           valuedItems={valuedItems}
@@ -148,7 +160,13 @@ function AppHome() {
         />
       </div>
 
-      <OpportunityMatrixTable valuedItems={valuedItems} isLoading={isAppLoading} />
+      <OpportunityMatrixTable
+        valuedItems={valuedItems}
+        isLoading={isAppLoading}
+        onSelectTicker={handleSelectTicker}
+      />
+
+      <AssetDetailSheet item={selectedItem} onClose={() => setSelectedItem(null)} />
     </div>
   );
 }

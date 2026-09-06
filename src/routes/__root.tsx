@@ -20,6 +20,7 @@ import { SettingsProvider } from "../lib/settings";
 import { ValuedPortfolioProvider } from "../lib/useValuedPortfolio";
 import { ThemeProvider } from "../lib/theme-provider";
 import { CookieConsentBanner } from "../components/shared/CookieConsentBanner";
+import { TooltipProvider } from "../components/ui/tooltip";
 
 function NotFoundComponent() {
   return (
@@ -163,10 +164,12 @@ function RootComponent() {
               <SettingsProvider>
                 <AuthModalProvider>
                   <ValuedPortfolioProvider>
-                    {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                    <Outlet />
-                    <Toaster theme="dark" richColors position="top-right" />
-                    <CookieConsentBanner />
+                    <TooltipProvider delayDuration={150}>
+                      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                      <Outlet />
+                      <Toaster theme="dark" richColors position="top-right" />
+                      <CookieConsentBanner />
+                    </TooltipProvider>
                   </ValuedPortfolioProvider>
                 </AuthModalProvider>
               </SettingsProvider>

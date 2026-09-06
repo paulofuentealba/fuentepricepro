@@ -86,6 +86,7 @@ vi.mock("../AssetProjectionPanel", () => ({ AssetProjectionPanel: () => <div /> 
 vi.mock("../EditPositionFields", () => ({ EditPositionFields: () => <div /> }));
 vi.mock("@/components/portfolio/CorporateEventFields", () => ({ CorporateEventFields: () => <div /> }));
 vi.mock("@/components/shared/AssetCard", () => ({ AssetCard: () => <div /> }));
+vi.mock("@/components/explore/AssetDeepDiveView", () => ({ AssetDeepDiveView: () => <div data-testid="asset-deep-dive-view" /> }));
 
 const mockItem: ValuedWatchlistItem = {
   id: "test-asset-1",
@@ -142,6 +143,21 @@ describe("AssetDetailSheet (Tier 1 / Item 5)", () => {
     );
 
     expect(screen.getByText("Investindo desde:")).toBeDefined();
+  });
+
+  it("renderiza a aba myPosition com segurança sem depender de TooltipProvider externo", () => {
+    // Renderiza DIRETAMENTE sem TooltipProvider externo para garantir que o SheetContent
+    // encapsula seu próprio TooltipProvider e não quebra com 'Tooltip must be used within TooltipProvider'
+    render(
+      <AssetDetailSheet
+        item={mockItem}
+        onClose={vi.fn()}
+        initialTab="myPosition"
+      />
+    );
+
+    expect(screen.getByText("Investindo desde:")).toBeDefined();
+    expect(screen.queryByText(/Tooltip.*must be used within.*TooltipProvider/i)).toBeNull();
   });
 
   describe("Currency conversion header SSOT (Tier 1 / Item 7)", () => {

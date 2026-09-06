@@ -16,6 +16,7 @@ interface ContributionEngineCardProps {
   isLoading: boolean;
   currency?: Currency;
   usdRate?: number;
+  onSelectTicker?: (ticker: string) => void;
 }
 
 export function ContributionEngineCard({
@@ -24,6 +25,7 @@ export function ContributionEngineCard({
   isLoading,
   currency = "BRL",
   usdRate,
+  onSelectTicker,
 }: ContributionEngineCardProps) {
   const { locale, t } = useI18n();
   const [amount, setAmount] = useState("5000");
@@ -116,7 +118,8 @@ export function ContributionEngineCard({
               return (
                 <div
                   key={alloc.ticker}
-                  className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                  onClick={() => onSelectTicker?.(alloc.ticker)}
+                  className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 cursor-pointer hover:bg-muted/40 transition-colors rounded-lg px-2"
                 >
                   <div className="w-7 h-7 rounded-full bg-surface-3 border border-border/80 flex items-center justify-center text-xs font-bold text-accent-gold shrink-0">
                     {idx + 1}

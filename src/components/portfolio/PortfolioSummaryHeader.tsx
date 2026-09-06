@@ -1,6 +1,10 @@
-import { Globe } from "lucide-react";
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Globe, PlusCircle, FileText, FileSpreadsheet } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { AllocationChart } from "@/components/ceiling/watchlist/AllocationChart";
+import { CsvImportUploader } from "@/components/ceiling/watchlist/CsvImportUploader";
 import { convertCurrency } from "@/lib/currency";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
@@ -9,7 +13,7 @@ import type { Currency } from "@/lib/domain";
 
 interface PortfolioSummaryHeaderProps {
   valuedItems: ValuedWatchlistItem[];
-  totals: { consolidatedNetWorth: number; consolidatedIncome: number };
+  totals: { consolidatedNetWorth: number; consolidatedIncome?: number };
   currency: Currency;
   usdBrlRate: number;
   isLoading: boolean;
@@ -23,12 +27,12 @@ export function PortfolioSummaryHeader({
   isLoading,
 }: PortfolioSummaryHeaderProps) {
   const { locale, t } = useI18n();
+  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
 
   // `totals` from useValuedPortfolio is ALWAYS in BRL (computeTotals consolidates
   // brlWorth + usdWorth * rate), so it must be converted to the display currency
   // before formatting — otherwise a USD-display user sees a BRL figure with a $ sign.
   const displayNetWorth = convertCurrency(totals.consolidatedNetWorth, "BRL", currency, usdBrlRate);
-  const displayIncome = convertCurrency(totals.consolidatedIncome, "BRL", currency, usdBrlRate);
 
   return (
     <div className="grid gap-3 lg:grid-cols-2">
@@ -54,23 +58,44 @@ export function PortfolioSummaryHeader({
           </div>
         </div>
 
-        <div className="flex flex-col rounded-xl border border-primary/20 bg-background py-4 px-4 lg:px-6">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-            {t.watchlist.consolidatedIncome}
+        <div className="flex flex-col justify-center rounded-xl border border-border/70 bg-card p-4 lg:p-5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
+            {t.portfolio.quickActions}
           </span>
-          {isLoading ? (
-            <Skeleton className="h-7 w-36" />
-          ) : (
-            <div className="flex items-center gap-2 text-2xl font-bold">
-              <Globe className="h-5 w-5 text-primary" />
-              {formatCurrency(displayIncome, currency, locale)}
-            </div>
-          )}
-          <div className="mt-1 text-xs text-muted-foreground/80">
-            {t.watchlist.consolidatedIncomeSub}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <Button
+              asChild
+              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-white hover:bg-primary/90 shadow-sm border-0 transition-all"
+            >
+              <Link to="/app/add-asset">
+                <PlusCircle className="h-4 w-4 text-white" />
+                <span className="truncate">{t.portfolio.emptyStateAddAsset}</span>
+              </Link>
+            </Button>
+
+            <Button
+              asChild
+              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-white hover:bg-primary/90 shadow-sm border-0 transition-all"
+            >
+              <Link to="/app/import-broker-note">
+                <FileText className="h-4 w-4 text-white" />
+                <span className="truncate">{t.portfolio.emptyStateImportNote}</span>
+              </Link>
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setIsCsvModalOpen(true)}
+              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-white hover:bg-primary/90 shadow-sm border-0 transition-all"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-white" />
+              <span className="truncate">{t.watchlist.addAssetDropdownImportFile}</span>
+            </Button>
           </div>
         </div>
       </div>
+
+      <CsvImportUploader open={isCsvModalOpen} onOpenChange={setIsCsvModalOpen} />
     </div>
   );
 }

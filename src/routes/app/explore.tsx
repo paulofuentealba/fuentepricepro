@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import {
+  Activity,
   Calculator as CalculatorIcon,
   Scale,
   ShieldAlert,
@@ -14,6 +15,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { SnowballScenarioPanel } from "@/components/explore/SnowballScenarioPanel";
 import { ScreenerScreen } from "@/components/screener/ScreenerScreen";
 import { AssetComparator } from "@/components/ceiling/AssetComparator";
+import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
 
 const RiskRadar = lazy(() =>
   import("@/components/ceiling/RiskRadar").then((m) => ({ default: m.RiskRadar })),
@@ -34,7 +36,16 @@ function ToolSkeleton() {
   );
 }
 
+export interface ExploreSearch {
+  tab?: string;
+  ticker?: string;
+}
+
 export const Route = createFileRoute("/app/explore")({
+  validateSearch: (search: Record<string, unknown>): ExploreSearch => ({
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+    ticker: typeof search.ticker === "string" ? search.ticker : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Explorar Ativos | Fuente Price Pro" },
@@ -49,9 +60,26 @@ export const Route = createFileRoute("/app/explore")({
 
 export function ExplorarPage() {
   const { t } = useI18n();
-  const [activeTab, setActiveTab] = useState<string>("screener");
+  const search = Route.useSearch();
+  const [activeTab, setActiveTab] = useState<string>(
+    search.tab || (search.ticker ? "deepdive" : "deepdive"),
+  );
+
+  useEffect(() => {
+    if (search.tab) {
+      setActiveTab(search.tab);
+    } else if (search.ticker) {
+      setActiveTab("deepdive");
+    }
+  }, [search.tab, search.ticker]);
 
   const tools = [
+    {
+      id: "deepdive",
+      label: t.tabs?.deepDive || "Raio-X do Ativo",
+      icon: Activity,
+      description: t.explore?.descriptions?.deepDive || "Análise fundamentalista e consenso 360° do ativo",
+    },
     {
       id: "screener",
       label: t.tabs.screener,
@@ -117,6 +145,14 @@ export function ExplorarPage() {
         </TabsList>
 
         {tools.map((tool) => {
+          if (tool.id === "deepdive") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <AssetDeepDiveView initialTicker={search.ticker} />
+              </TabsContent>
+            );
+          }
+
           if (tool.id === "snowball") {
             const Icon = tool.icon;
             return (

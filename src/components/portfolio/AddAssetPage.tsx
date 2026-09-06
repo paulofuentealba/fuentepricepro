@@ -58,11 +58,12 @@ export function AddAssetPage() {
   const [workingItem, setWorkingItem] = useState<WatchlistItem | null>(null);
   const [type, setType] = useState<OperationType>("buy");
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [quantity, setQuantity] = useState<string>("");
+  const [quantity, setQuantity] = useState<string>("100");
   const [pricePerShare, setPricePerShare] = useState<string>("");
   const [fees, setFees] = useState<string>("");
   const [broker, setBroker] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [lastPricedTicker, setLastPricedTicker] = useState<string | null>(null);
 
   const assetResult = useQuery({
     ...assetQueryOptions(pickedHit?.ticker ?? ""),
@@ -78,29 +79,86 @@ export function AddAssetPage() {
     [items, pickedHit],
   );
 
+  function handlePick(hit: SearchHit) {
+    setPickedHit(hit);
+    const existing = items.find((i) => i.ticker === hit.ticker) ?? null;
+    if (existing) {
+      setWorkingItem(existing);
+      setBroker(existing.broker ?? "");
+      if (existing.currentPrice && existing.currentPrice > 0) {
+        setPricePerShare(String(existing.currentPrice));
+        setLastPricedTicker(hit.ticker);
+      } else {
+        setPricePerShare("");
+        setLastPricedTicker(null);
+      }
+    } else {
+      const isUs = hit.type === "STOCK_US" || hit.type === "REIT";
+      const initialDraft: WatchlistItem = {
+        id: hit.ticker,
+        ticker: hit.ticker,
+        name: hit.name,
+        type: hit.type,
+        currency: isUs ? "USD" : "BRL",
+        currentPrice: 0,
+        annualDividend: 0,
+        targetYield: globalYield,
+        ceilingPrice: 0,
+        safetyMargin: 0,
+        quantity: 0,
+        averagePrice: null,
+        paymentMonths: [],
+        targetMonthlyIncome: null,
+        payoutRatio: null,
+        addedAt: Date.now(),
+        investingSince: Date.now(),
+      };
+      setWorkingItem(initialDraft);
+      setBroker("");
+      setPricePerShare("");
+      setLastPricedTicker(null);
+    }
+  }
+
   useEffect(() => {
-    if (!pickedHit || !assetResult.data) return;
+    if (!pickedHit) return;
     if (existingItem) {
       setWorkingItem(existingItem);
       setBroker(existingItem.broker ?? "");
       return;
     }
-    const draft = buildWatchlistItem(assetResult.data, {
-      targetYield: globalYield,
-      quantity: 0,
-      averagePrice: null,
-    });
-    setWorkingItem(draft);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickedHit, assetResult.data, existingItem]);
+    if (assetResult.data && assetResult.data.ticker === pickedHit.ticker) {
+      const draft = buildWatchlistItem(assetResult.data, {
+        targetYield: globalYield,
+        quantity: 0,
+        averagePrice: null,
+      });
+      setWorkingItem(draft);
+    }
+  }, [pickedHit, assetResult.data, existingItem, globalYield]);
 
   useEffect(() => {
-    if (workingItem && !pricePerShare) {
-      const livePrice = quoteResult.data?.price ?? workingItem.currentPrice;
-      if (livePrice) setPricePerShare(String(livePrice));
+    if (!workingItem) return;
+    const isNewTicker = lastPricedTicker !== workingItem.ticker;
+    if (isNewTicker || !pricePerShare) {
+      const quotePrice = quoteResult.data?.ticker === workingItem.ticker ? quoteResult.data.price : null;
+      const assetPrice = assetResult.data?.ticker === workingItem.ticker ? assetResult.data.currentPrice : null;
+      const livePrice =
+        quotePrice ??
+        assetPrice ??
+        (workingItem.currentPrice > 0 ? workingItem.currentPrice : null);
+      if (livePrice != null && livePrice > 0) {
+        setPricePerShare(String(livePrice));
+        setLastPricedTicker(workingItem.ticker);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workingItem]);
+  }, [
+    workingItem,
+    lastPricedTicker,
+    pricePerShare,
+    quoteResult.data,
+    assetResult.data,
+  ]);
 
   const tickerTxs = useMemo(
     () => (workingItem ? transactions.filter((tx) => tx.ticker === workingItem.ticker) : []),
@@ -138,7 +196,13 @@ export function AddAssetPage() {
     const perShareDividend = workingItem.annualDividend ?? 0;
     const estimatedMonthlyIncome = (deltaQty * perShareDividend) / 12;
 
-    const livePriceForValuation = quoteResult.data?.price ?? workingItem.currentPrice ?? priceNum;
+    const liveQuote = quoteResult.data?.ticker === workingItem.ticker ? quoteResult.data : null;
+    const assetData = assetResult.data?.ticker === workingItem.ticker ? assetResult.data : null;
+    const livePriceForValuation =
+      liveQuote?.price ??
+      assetData?.currentPrice ??
+      (workingItem.currentPrice > 0 ? workingItem.currentPrice : null) ??
+      priceNum;
     const thisItemNewValue = convertCurrency(
       newQuantity * livePriceForValuation,
       workingItem.currency,
@@ -175,6 +239,7 @@ export function AddAssetPage() {
     tickerTxs,
     existingItem,
     quoteResult.data,
+    assetResult.data,
     priceNum,
     valuedItems,
     displayCurrency,
@@ -184,22 +249,31 @@ export function AddAssetPage() {
 
   // --- "Consenso na data" preview -------------------------------------------------------
   const consensus = useMemo(() => {
-    if (!workingItem || !assetResult.data || priceNum <= 0) return null;
+    if (!workingItem || priceNum <= 0) return null;
+    const assetData = assetResult.data?.ticker === workingItem.ticker ? assetResult.data : null;
     try {
       const val = getAssetValuation({
         targetYield: workingItem.targetYield,
         currentPrice: priceNum,
         avgDividend: workingItem.annualDividend,
-        eps: assetResult.data.epsCurrent ?? assetResult.data.metrics?.eps ?? null,
-        bvps: assetResult.data.metrics?.bvps ?? null,
-        dividendCagr: assetResult.data.metrics?.dividendCagr5y ?? null,
+        eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
+        bvps: assetData?.metrics?.bvps ?? null,
+        dividendCagr: assetData?.metrics?.dividendCagr5y ?? null,
         currency: workingItem.currency,
         type: workingItem.type,
       });
-      const consensusPrice = val.fuenteConsensus;
-      const margin = consensusPrice != null ? ((consensusPrice - priceNum) / priceNum) * 100 : null;
-      return { consensusPrice, margin, payoutRatio: workingItem.payoutRatio ?? null };
+      const consensusPrice = val.fuenteConsensus ?? workingItem.ceilingPrice ?? null;
+      const margin = consensusPrice != null && priceNum > 0 ? ((consensusPrice - priceNum) / priceNum) * 100 : null;
+      return {
+        consensusPrice,
+        margin,
+        payoutRatio: workingItem.payoutRatio ?? assetData?.metrics?.payoutRatio ?? null,
+      };
     } catch {
+      if (workingItem.ceilingPrice != null && priceNum > 0) {
+        const margin = ((workingItem.ceilingPrice - priceNum) / priceNum) * 100;
+        return { consensusPrice: workingItem.ceilingPrice, margin, payoutRatio: workingItem.payoutRatio ?? null };
+      }
       return null;
     }
   }, [workingItem, assetResult.data, priceNum]);
@@ -210,19 +284,20 @@ export function AddAssetPage() {
     try {
       let finalTx: Transaction = { ...draftTx, id: crypto.randomUUID() };
 
-      if (type === "buy" && assetResult.data) {
+      if (type === "buy") {
+        const assetData = assetResult.data?.ticker === workingItem.ticker ? assetResult.data : null;
         try {
           const val = getAssetValuation({
             targetYield: workingItem.targetYield,
             currentPrice: priceNum,
             avgDividend: workingItem.annualDividend,
-            eps: assetResult.data.epsCurrent ?? assetResult.data.metrics?.eps ?? null,
-            bvps: assetResult.data.metrics?.bvps ?? null,
-            dividendCagr: assetResult.data.metrics?.dividendCagr5y ?? null,
+            eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
+            bvps: assetData?.metrics?.bvps ?? null,
+            dividendCagr: assetData?.metrics?.dividendCagr5y ?? null,
             currency: workingItem.currency,
             type: workingItem.type,
           });
-          const consensusPrice = val.fuenteConsensus;
+          const consensusPrice = val.fuenteConsensus ?? workingItem.ceilingPrice ?? null;
           const safetyMarginVsConsensus =
             consensusPrice != null && priceNum > 0 ? ((consensusPrice - priceNum) / priceNum) * 100 : null;
           const dy =
@@ -237,10 +312,10 @@ export function AddAssetPage() {
             gordonPrice: val.methods.gordon,
             purchasePrice: priceNum,
             safetyMarginVsConsensus,
-            payoutRatio: workingItem.payoutRatio ?? null,
+            payoutRatio: workingItem.payoutRatio ?? assetData?.metrics?.payoutRatio ?? null,
             dividendYield: dy,
-            dividendCagr5y: assetResult.data.metrics?.dividendCagr5y ?? null,
-            piotroskiScore: (assetResult.data.metrics as any)?.piotroskiScore ?? null,
+            dividendCagr5y: assetData?.metrics?.dividendCagr5y ?? null,
+            piotroskiScore: (assetData?.metrics as any)?.piotroskiScore ?? null,
             isYieldTrap: !!val.yieldTrapWarning,
             valuationVersion: "fuente-v1",
             capturedAt: Date.now(),
@@ -266,8 +341,13 @@ export function AddAssetPage() {
     }
   }
 
-  const assetPrice = quoteResult.data?.price ?? workingItem?.currentPrice ?? null;
-  const changePct = quoteResult.data?.changePct ?? null;
+  const liveQuote = quoteResult.data?.ticker === workingItem?.ticker ? quoteResult.data : null;
+  const assetDataForWorkingItem = assetResult.data?.ticker === workingItem?.ticker ? assetResult.data : null;
+  const assetPrice =
+    liveQuote?.price ??
+    assetDataForWorkingItem?.currentPrice ??
+    (workingItem && workingItem.currentPrice > 0 ? workingItem.currentPrice : null);
+  const changePct = liveQuote?.changePct ?? null;
   const currencySymbol = workingItem?.currency === "USD" ? "US$" : "R$";
 
   return (
@@ -293,7 +373,7 @@ export function AddAssetPage() {
           <h3 className="font-serif text-base font-medium text-foreground">{t.addAssetPage?.searchCardTitle}</h3>
 
           <div className="mt-4">
-            <TickerSearchField onPick={setPickedHit} label={t.addAssetPage?.searchLabel} autoFocus />
+            <TickerSearchField onPick={handlePick} label={t.addAssetPage?.searchLabel} autoFocus />
           </div>
 
           {workingItem && (
@@ -304,7 +384,7 @@ export function AddAssetPage() {
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-foreground">{displayTicker(workingItem.ticker)}</div>
                 <div className="truncate text-xs text-muted-foreground">
-                  {[workingItem.name, assetResult.data?.sector].filter(Boolean).join(" · ")}
+                  {[workingItem.name, assetDataForWorkingItem?.sector].filter(Boolean).join(" · ")}
                 </div>
               </div>
               {assetPrice != null && (
@@ -364,7 +444,7 @@ export function AddAssetPage() {
 
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t.transactions.qty}</Label>
+              <Label htmlFor="add-asset-qty">{t.transactions.qty}</Label>
               <MaskedInput
                 id="add-asset-qty"
                 formatMode="numeric"
@@ -374,7 +454,7 @@ export function AddAssetPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>{t.transactions.price}</Label>
+              <Label htmlFor="add-asset-price">{t.transactions.price}</Label>
               <MaskedInput
                 id="add-asset-price"
                 formatMode="currency"
@@ -418,7 +498,7 @@ export function AddAssetPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>{t.transactions.fees}</Label>
+              <Label htmlFor="add-asset-fees">{t.transactions.fees}</Label>
               <MaskedInput
                 id="add-asset-fees"
                 formatMode="currency"
