@@ -71,7 +71,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
-import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import type { SearchHit } from "@/lib/apiService.functions";
 import type { AssetType, Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
@@ -101,12 +100,10 @@ export interface ScreenerItem {
 export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}) {
   const { t, locale } = useI18n();
   const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
-  const { settings, updateSettings } = useUserSettings();
+  const { settings } = useUserSettings();
   const queryClient = useQueryClient();
 
-  const [market, setMarket] = useState<"BR" | "US">(
-    settings.displayCurrency === "USD" ? "US" : "BR",
-  );
+  const [marketFilter, setMarketFilter] = useState<"ALL" | "BR" | "US">("ALL");
   const [classFilter, setClassFilter] = useState<string>("ALL");
   const [marginFilter, setMarginFilter] = useState<string>("ALL");
   const [dyFilter, setDyFilter] = useState<string>("ALL");
@@ -137,24 +134,29 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   );
 
   const rawUniverse = useMemo(() => {
-    const defaultList = (market === "BR" ? radarData?.br : radarData?.us) || [];
-    const combined = [...defaultList];
+    const brList = radarData?.br || [];
+    const usList = radarData?.us || [];
+    const combined = [...brList, ...usList];
     for (const custom of customAssets) {
-      const isBr = market === "BR";
-      const customIsBr = custom.currency === "BRL" || (!custom.currency && !custom.ticker.includes("."));
-      if (customIsBr === isBr && !combined.some((a: any) => a.ticker === custom.ticker)) {
+      if (!combined.some((a: any) => a.ticker === custom.ticker)) {
         combined.unshift(custom);
       }
     }
     return combined;
-  }, [market, radarData, customAssets]);
+  }, [radarData, customAssets]);
 
   const items = useMemo<ScreenerItem[]>(() => {
     return rawUniverse.map((asset: any) => {
       const canonicalDiv = getCanonicalAnnualDividend(asset, 3);
+      const isBr =
+        asset.currency === "BRL" ||
+        (asset.currency !== "USD" &&
+          (asset.ticker.endsWith(".SA") ||
+            /^[A-Z]{4}(3|4|11)$/.test(asset.ticker) ||
+            classifyBr(asset.ticker) !== "STOCK_US"));
+      const currency: Currency = isBr ? "BRL" : "USD";
       const assetType: AssetType =
-        asset.type || (market === "BR" ? classifyBr(asset.ticker) : "STOCK_US");
-      const currency: Currency = market === "BR" ? "BRL" : "USD";
+        asset.type || (currency === "BRL" ? classifyBr(asset.ticker) : "STOCK_US");
       const effectiveYield = resolveTargetYield(
         { type: assetType, targetYield: asset.targetYield },
         settings,
@@ -195,11 +197,14 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
         rawAsset: asset,
       };
     });
-  }, [rawUniverse, market, settings, selic, ipcaAvg, heldTickers]);
+  }, [rawUniverse, settings, selic, ipcaAvg, heldTickers]);
 
   const filteredAndSortedItems = useMemo(() => {
     return items
       .filter((item) => {
+        if (marketFilter === "BR" && item.currency !== "BRL") return false;
+        if (marketFilter === "US" && item.currency !== "USD") return false;
+
         if (classFilter !== "ALL" && item.type !== classFilter) return false;
 
         if (marginFilter === "POSITIVE" && (item.safetyMargin == null || item.safetyMargin <= 0)) {
@@ -254,7 +259,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
         }
         return 0;
       });
-  }, [items, classFilter, marginFilter, dyFilter, pvpFilter, searchQuery, sortOption]);
+  }, [items, marketFilter, classFilter, marginFilter, dyFilter, pvpFilter, searchQuery, sortOption]);
 
   // KPIs
   const totalAnalyzed = filteredAndSortedItems.length;
@@ -332,18 +337,13 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   const disclaimerText = resolveDisclaimerText(t, "calculation");
 
   const clearFilters = () => {
+    setMarketFilter("ALL");
     setClassFilter("ALL");
     setMarginFilter("ALL");
     setDyFilter("ALL");
     setPvpFilter("ALL");
     setSearchQuery("");
     setSortOption("MARGIN_DESC");
-  };
-
-  const handleMarketChange = (newMarket: "BR" | "US") => {
-    setMarket(newMarket);
-    setClassFilter("ALL");
-    updateSettings({ displayCurrency: newMarket === "US" ? "USD" : "BRL" });
   };
 
   if (isAppLoading || isRadarLoading) {
@@ -377,10 +377,18 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
         </div>
       )}
 
-      {/* Primary Discovery Bar: Market Toggle + Global Ticker Search */}
+      {/* Primary Discovery Bar: Global Ticker Search (B3 + US) */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <CurrencyToggle value={market} onChange={handleMarketChange} />
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className="text-[11px] font-mono font-bold text-foreground border-border/80 px-2.5 py-1 uppercase"
+          >
+            B3 + GLOBAL
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {totalAnalyzed} ativos em monitoramento
+          </span>
         </div>
         <div className="flex-1 max-w-md">
           <TickerSearchField
@@ -402,7 +410,37 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
             <span>{t.screenerScreen?.filtersTitle}</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {/* Market Filter */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-muted-foreground">
+                {t.screenerScreen?.marketLabel}
+              </label>
+              <Select
+                value={marketFilter}
+                onValueChange={(val: "ALL" | "BR" | "US") => {
+                  setMarketFilter(val);
+                  if (val === "BR" && ["STOCK_US", "REIT", "ETF"].includes(classFilter)) {
+                    setClassFilter("ALL");
+                  } else if (
+                    val === "US" &&
+                    ["STOCK_BR", "FII", "FIAGRO", "FII_INFRA"].includes(classFilter)
+                  ) {
+                    setClassFilter("ALL");
+                  }
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs bg-background">
+                  <SelectValue placeholder={t.screenerScreen?.marketAll} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">{t.screenerScreen?.marketAll}</SelectItem>
+                  <SelectItem value="BR">{t.screenerScreen?.marketBr}</SelectItem>
+                  <SelectItem value="US">{t.screenerScreen?.marketUs}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Asset Class Filter */}
             <div className="space-y-1">
               <label className="text-[11px] font-medium text-muted-foreground">
@@ -414,14 +452,15 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">{t.screenerScreen?.allClasses}</SelectItem>
-                  {market === "BR" ? (
+                  {marketFilter !== "US" && (
                     <>
                       <SelectItem value="STOCK_BR">{t.types?.STOCK_BR || "Ações BR"}</SelectItem>
                       <SelectItem value="FII">{t.types?.FII || "FIIs"}</SelectItem>
                       <SelectItem value="FIAGRO">{t.types?.FIAGRO || "FIAGRO"}</SelectItem>
                       <SelectItem value="FII_INFRA">{t.types?.FII_INFRA || "FII-Infra"}</SelectItem>
                     </>
-                  ) : (
+                  )}
+                  {marketFilter !== "BR" && (
                     <>
                       <SelectItem value="STOCK_US">{t.types?.STOCK_US || "Stocks EUA"}</SelectItem>
                       <SelectItem value="REIT">{t.types?.REIT || "REITs"}</SelectItem>
@@ -654,13 +693,19 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
                       key={item.ticker}
                       className="border-border/40 hover:bg-muted/30 transition-colors"
                     >
-                      {/* Sticky First Column: Ticker + Name + Portfolio Badge */}
+                      {/* Sticky First Column: Ticker + Market Badge + Name + Portfolio Badge */}
                       <TableCell className={STICKY_FIRST_COLUMN_CLASS}>
                         <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-mono font-bold text-foreground text-sm">
                               {displayTicker(item.ticker)}
                             </span>
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] font-mono font-bold text-muted-foreground border-border/80 px-1 py-0 uppercase"
+                            >
+                              {item.currency === "BRL" ? "B3" : "US"}
+                            </Badge>
                             {item.isHeld && (
                               <Badge
                                 variant="outline"

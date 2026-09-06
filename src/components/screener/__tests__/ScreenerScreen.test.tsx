@@ -186,6 +186,9 @@ describe("ScreenerScreen Component (Fase 9)", () => {
 
     expect(screen.getByText("PETR4")).toBeInTheDocument();
     expect(screen.getByText("BBAS3")).toBeInTheDocument();
+    expect(screen.getByText("AAPL")).toBeInTheDocument();
+    expect(screen.getAllByText("B3").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("US").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders 'Em Carteira' badge for assets already in the user's portfolio", () => {

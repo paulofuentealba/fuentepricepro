@@ -2320,6 +2320,7 @@ export const en = {
     subtitle: "Multi-criteria filter for active discovery of assets in B3 and global markets with Fuente Ceiling Price and Safety Margin.",
     searchPlaceholder: "Search any ticker or name (e.g. PETR4, TAEE11, AAPL, MXRF11)...",
     marketLabel: "Market",
+    marketAll: "All Markets",
     marketBr: "Brazil (B3)",
     marketUs: "US (Global)",
     classLabel: "Asset Class",

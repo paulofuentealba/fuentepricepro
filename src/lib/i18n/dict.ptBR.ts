@@ -2332,6 +2332,7 @@ export const ptBR = {
     subtitle: "Filtro multicritério para prospecção ativa de ativos na B3 e no exterior com Preço Teto Fuente e Margem de Segurança.",
     searchPlaceholder: "Buscar qualquer ticker ou nome (ex: PETR4, TAEE11, AAPL, MXRF11)...",
     marketLabel: "Mercado",
+    marketAll: "Todos os Mercados",
     marketBr: "Brasil (B3)",
     marketUs: "EUA (Global)",
     classLabel: "Classe de Ativo",

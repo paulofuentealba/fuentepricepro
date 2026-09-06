@@ -2336,6 +2336,7 @@ export const es = {
     subtitle: "Filtro multicriterio para la prospección activa de activos en B3 y mercados globales con Precio Techo Fuente y Margen de Seguridad.",
     searchPlaceholder: "Buscar cualquier ticker o nombre (ej: PETR4, TAEE11, AAPL, MXRF11)...",
     marketLabel: "Mercado",
+    marketAll: "Todos los Mercados",
     marketBr: "Brasil (B3)",
     marketUs: "EE.UU. (Global)",
     classLabel: "Clase de Activo",
