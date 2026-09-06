@@ -144,3 +144,93 @@ describe("TransactionFormFields — proteção contra duplicata", () => {
     expect(screen.queryByText(/possível transação duplicada/i)).not.toBeInTheDocument();
   });
 });
+
+describe("TransactionFormFields — campo de corretora", () => {
+  it("inicializa com a corretora da transação em edição (initialData)", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const initialTx: Transaction = {
+      id: "tx-1",
+      ticker: "TEST4",
+      type: "buy",
+      date: Date.now(),
+      quantity: 15,
+      pricePerShare: 25,
+      broker: "XP Investimentos",
+    };
+
+    render(
+      <TransactionFormFields
+        item={item}
+        initialData={initialTx}
+        onSave={onSave}
+        existingTransactions={[]}
+      />,
+    );
+
+    const brokerInput = screen.getByLabelText(/corretora/i) as HTMLInputElement;
+    expect(brokerInput).toBeInTheDocument();
+    expect(brokerInput.value).toBe("XP Investimentos");
+
+    fireEvent.submit(document.querySelector("form")!);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        broker: "XP Investimentos",
+      }),
+    );
+  });
+
+  it("herda a corretora do item quando initialData não tem corretora", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const itemWithBroker: WatchlistItem = {
+      ...item,
+      broker: "BTG Pactual",
+    };
+
+    render(
+      <TransactionFormFields
+        item={itemWithBroker}
+        onSave={onSave}
+        existingTransactions={[]}
+      />,
+    );
+
+    const brokerInput = screen.getByLabelText(/corretora/i) as HTMLInputElement;
+    expect(brokerInput.value).toBe("BTG Pactual");
+
+    fillForm("10", "15");
+    fireEvent.submit(document.querySelector("form")!);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        broker: "BTG Pactual",
+      }),
+    );
+  });
+
+  it("permite alterar a corretora livremente e salvar", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <TransactionFormFields
+        item={item}
+        onSave={onSave}
+        existingTransactions={[]}
+      />,
+    );
+
+    const brokerInput = screen.getByLabelText(/corretora/i);
+    fireEvent.change(brokerInput, { target: { value: "Avenue" } });
+    fillForm("20", "30");
+
+    fireEvent.submit(document.querySelector("form")!);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        broker: "Avenue",
+      }),
+    );
+  });
+});

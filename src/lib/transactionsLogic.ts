@@ -31,6 +31,7 @@ export interface Transaction {
   factor?: number | null;
   fees?: number | null; // corretagem/taxas, a Receita manda incluir no custo
   notes?: string | null;
+  broker?: string | null;
   thesisSnapshot?: ThesisSnapshot | null;
 }
 

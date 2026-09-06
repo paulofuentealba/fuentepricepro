@@ -67,12 +67,13 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const notesMatch = tx.notes?.toLowerCase().includes(q);
+        const brokerMatch = tx.broker?.toLowerCase().includes(q);
         const typeMatch = tx.type.toLowerCase().includes(q);
         const dateMatch = new Intl.DateTimeFormat(toIntlLocale(locale), { dateStyle: "medium" })
           .format(tx.date)
           .toLowerCase()
           .includes(q);
-        if (!notesMatch && !typeMatch && !dateMatch) return false;
+        if (!notesMatch && !brokerMatch && !typeMatch && !dateMatch) return false;
       }
       return true;
     });
@@ -145,9 +146,16 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
 
     await upsert(finalTx);
     const newTxs = [...transactions.filter(t => t.id !== finalTx.id), finalTx].filter(t => t.ticker === item.ticker);
-    const { quantity, averagePrice } = recalculateHoldingFromTransactions(newTxs.sort((a, b) => b.date - a.date));
+    const sortedDesc = [...newTxs].sort((a, b) => b.date - a.date);
+    const { quantity, averagePrice } = recalculateHoldingFromTransactions(sortedDesc);
     const newInvestingSince = recalculateInvestingSinceFromTransactions(newTxs) ?? item.investingSince;
-    await updateAsync(item.id, { quantity, averagePrice, investingSince: newInvestingSince });
+    const isLatestTx = sortedDesc[0]?.id === finalTx.id;
+    await updateAsync(item.id, {
+      quantity,
+      averagePrice,
+      investingSince: newInvestingSince,
+      ...(finalTx.broker && (isLatestTx || !item.broker) ? { broker: finalTx.broker } : {}),
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -294,6 +302,11 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
                           ? t.transactions.buy
                           : t.transactions.sell}
                     </span>
+                    {tx.broker && (
+                      <span className="text-[10px] text-muted-foreground font-normal bg-muted px-1.5 py-0.5 rounded border border-border/40">
+                        {tx.broker}
+                      </span>
+                    )}
                     {tx.notes && (
                       <span className="text-[10px] text-muted-foreground font-normal bg-muted px-1.5 py-0.5 rounded border border-border/40">
                         {tx.notes}

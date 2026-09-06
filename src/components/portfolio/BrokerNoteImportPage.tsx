@@ -207,6 +207,7 @@ export function BrokerNoteImportPage() {
           quantity: trade.quantity,
           pricePerShare: trade.price,
           fees: trade.fees != null ? trade.fees : null,
+          broker: detectedBroker ? KNOWN_BROKER_LABELS[detectedBroker] : null,
         };
 
         try {

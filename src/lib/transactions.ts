@@ -77,6 +77,7 @@ function rowToItem(row: Record<string, unknown>): Transaction {
     factor: (row.factor as number | null | undefined) ?? null,
     fees: (row.fees as number | null | undefined) ?? null,
     notes: (row.notes as string | null | undefined) ?? null,
+    broker: (row.broker as string | null | undefined) ?? null,
     thesisSnapshot: (row.thesisSnapshot as Transaction["thesisSnapshot"] | undefined) ?? null,
   };
 }
@@ -88,6 +89,9 @@ function itemToRow(item: Transaction, userId: string): Record<string, unknown> {
   };
   if (item.thesisSnapshot === undefined) {
     delete row.thesisSnapshot;
+  }
+  if (item.broker === undefined) {
+    delete row.broker;
   }
   return row;
 }

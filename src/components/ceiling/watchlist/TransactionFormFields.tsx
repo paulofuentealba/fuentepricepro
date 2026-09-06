@@ -1,9 +1,15 @@
 import { useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
+
+const BROKER_SUGGESTIONS = Array.from(
+  new Set([...Object.values(KNOWN_BROKER_LABELS), "Avenue", "Interactive Brokers", "Nomad"])
+).sort();
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,6 +77,7 @@ export function TransactionFormFields({
   const [quantity, setQuantity] = useState<string>(initialData?.quantity ? String(initialData.quantity) : "");
   const [pricePerShare, setPricePerShare] = useState<string>(initialData?.pricePerShare ? String(initialData.pricePerShare) : "");
   const [fees, setFees] = useState<string>(initialData?.fees ? String(initialData.fees) : "");
+  const [broker, setBroker] = useState<string>(initialData?.broker ?? item?.broker ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [pendingDuplicate, setPendingDuplicate] = useState<Transaction | null>(null);
   // React state updates from setIsSaving don't apply synchronously, so a
@@ -108,6 +115,9 @@ export function TransactionFormFields({
       quantity: q,
       pricePerShare: p,
       fees: f > 0 ? f : null,
+      broker: broker.trim() || null,
+      notes: initialData?.notes ?? null,
+      thesisSnapshot: initialData?.thesisSnapshot ?? null,
     };
   };
 
@@ -228,6 +238,23 @@ export function TransactionFormFields({
             disabled={disabled}
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="tx-broker">{t.portfolio.brokerLabel}</Label>
+        <Input
+          id="tx-broker"
+          list="tx-known-brokers"
+          value={broker}
+          onChange={(e) => setBroker(e.target.value)}
+          placeholder={t.portfolio.brokerPlaceholder}
+          disabled={disabled}
+        />
+        <datalist id="tx-known-brokers">
+          {BROKER_SUGGESTIONS.map((label) => (
+            <option key={label} value={label} />
+          ))}
+        </datalist>
       </div>
 
       <div className="flex justify-end gap-2 pt-4">

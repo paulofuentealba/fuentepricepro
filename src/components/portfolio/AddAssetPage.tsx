@@ -180,8 +180,9 @@ export function AddAssetPage() {
       quantity: qtyNum,
       pricePerShare: priceNum,
       fees: feesNum > 0 ? feesNum : null,
+      broker: broker.trim() || null,
     };
-  }, [isValidEntry, workingItem, type, date, qtyNum, priceNum, feesNum]);
+  }, [isValidEntry, workingItem, type, date, qtyNum, priceNum, feesNum, broker]);
 
   // --- "Como isso afeta sua carteira" preview -------------------------------------------
   const impact = useMemo(() => {
