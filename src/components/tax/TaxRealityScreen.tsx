@@ -44,6 +44,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
 
 export interface TaxRealityScreenProps {
   context: TaxRealityContext;
@@ -239,7 +240,7 @@ export function TaxRealityScreen({
   // ---- Loading State ----
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="w-full space-y-6">
         <ResultSkeleton />
         <TaxSimulationDisclaimer />
       </div>
@@ -256,7 +257,7 @@ export function TaxRealityScreen({
     etfFixedIncomeMonthly.length > 0;
   if (!hasAnySales) {
     return (
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="w-full space-y-6">
         <Card className="border-border/60 bg-card/70 shadow-sm">
           <CardHeader className="space-y-3 pb-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -289,7 +290,7 @@ export function TaxRealityScreen({
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="w-full space-y-6">
       {/* Top Header Card */}
       <Card className="border-border/60 bg-card/70 shadow-sm">
         <CardHeader className="space-y-3 pb-4">
@@ -332,31 +333,7 @@ export function TaxRealityScreen({
           />
 
           {/* Summary Cards Grid */}
-          <div
-            className={cn(
-              "grid gap-4 sm:grid-cols-2",
-              (() => {
-                const extraCards = [
-                  etfMonthly.length > 0,
-                  fiInfraMonthly.length > 0,
-                  foreignAnnual.length > 0,
-                  etfFixedIncomeMonthly.length > 0,
-                ].filter(Boolean).length;
-                switch (extraCards) {
-                  case 4:
-                    return "lg:grid-cols-8";
-                  case 3:
-                    return "lg:grid-cols-7";
-                  case 2:
-                    return "lg:grid-cols-6";
-                  case 1:
-                    return "lg:grid-cols-5";
-                  default:
-                    return "lg:grid-cols-4";
-                }
-              })(),
-            )}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
             <MetricBox
               label={tScreen.summary.dividendsLabel}
               value={formatCurrency(context.totalDividendNet, "BRL", locale)}
@@ -429,11 +406,11 @@ export function TaxRealityScreen({
               <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.stocksTitle}
               </h3>
-              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
-                <Table>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto scrollbar-thin">
+                <Table className="w-full min-w-[700px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider")}>{tScreen.monthlyDetail.monthHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-center">{tScreen.monthlyDetail.exemptHeader}</TableHead>
@@ -445,7 +422,7 @@ export function TaxRealityScreen({
                   <TableBody>
                     {stockMonthly.map((month) => (
                       <TableRow key={month.month}>
-                        <TableCell className="font-medium">{month.month}</TableCell>
+                        <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "font-medium")}>{month.month}</TableCell>
                         <TableCell className="text-right font-mono">
                           {formatCurrency(month.totalSales, "BRL", locale)}
                         </TableCell>
@@ -486,11 +463,11 @@ export function TaxRealityScreen({
               <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.fiisTitle}
               </h3>
-              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
-                <Table>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto scrollbar-thin">
+                <Table className="w-full min-w-[620px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider")}>{tScreen.monthlyDetail.monthHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
@@ -501,7 +478,7 @@ export function TaxRealityScreen({
                   <TableBody>
                     {fiiMonthly.map((month) => (
                       <TableRow key={month.month}>
-                        <TableCell className="font-medium">{month.month}</TableCell>
+                        <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "font-medium")}>{month.month}</TableCell>
                         <TableCell className="text-right font-mono">
                           {formatCurrency(month.totalSales, "BRL", locale)}
                         </TableCell>
@@ -531,11 +508,11 @@ export function TaxRealityScreen({
               <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.etfsTitle}
               </h3>
-              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
-                <Table>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto scrollbar-thin">
+                <Table className="w-full min-w-[620px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider")}>{tScreen.monthlyDetail.monthHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
@@ -546,7 +523,7 @@ export function TaxRealityScreen({
                   <TableBody>
                     {etfMonthly.map((month) => (
                       <TableRow key={month.month}>
-                        <TableCell className="font-medium">{month.month}</TableCell>
+                        <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "font-medium")}>{month.month}</TableCell>
                         <TableCell className="text-right font-mono">
                           {formatCurrency(month.totalSales, "BRL", locale)}
                         </TableCell>
@@ -581,11 +558,11 @@ export function TaxRealityScreen({
                   <InfoTooltip content={tScreen.monthlyDetail.etfFixedIncomeNote} />
                 )}
               </div>
-              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
-                <Table>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto scrollbar-thin">
+                <Table className="w-full min-w-[620px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.monthHeader}</TableHead>
+                      <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider")}>{tScreen.monthlyDetail.monthHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
@@ -596,7 +573,7 @@ export function TaxRealityScreen({
                   <TableBody>
                     {etfFixedIncomeMonthly.map((month) => (
                       <TableRow key={month.month}>
-                        <TableCell className="font-medium">{month.month}</TableCell>
+                        <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "font-medium")}>{month.month}</TableCell>
                         <TableCell className="text-right font-mono">
                           {formatCurrency(month.totalSales, "BRL", locale)}
                         </TableCell>
@@ -626,11 +603,11 @@ export function TaxRealityScreen({
               <h3 className="font-serif text-lg font-semibold text-foreground">
                 {tScreen.monthlyDetail.foreignTitle}
               </h3>
-              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
-                <Table>
+              <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto scrollbar-thin">
+                <Table className="w-full min-w-[560px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{tScreen.monthlyDetail.yearHeader}</TableHead>
+                      <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider")}>{tScreen.monthlyDetail.yearHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.salesHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.gainHeader}</TableHead>
                       <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{tScreen.monthlyDetail.taxableGainHeader}</TableHead>
@@ -640,7 +617,7 @@ export function TaxRealityScreen({
                   <TableBody>
                     {foreignAnnual.map((row) => (
                       <TableRow key={row.year}>
-                        <TableCell className="font-medium">{row.year}</TableCell>
+                        <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "font-medium")}>{row.year}</TableCell>
                         <TableCell className="text-right font-mono">
                           {formatCurrency(row.totalSales, "USD", locale)}
                         </TableCell>

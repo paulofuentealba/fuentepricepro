@@ -30,9 +30,9 @@ export function AllocationOverviewCard({
   );
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">
+    <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-accent-emerald-light dark:text-[#34D399]">
               {t.dashboard.allocation.eyebrow}

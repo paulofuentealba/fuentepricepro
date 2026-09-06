@@ -210,7 +210,7 @@ export function AskScreen({
   const disclaimerText = resolveDisclaimerText(t, "calculation");
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+    <div className="w-full space-y-6">
       {/* Page header — .top equivalent, outside the .ask card */}
       <div>
         {(eyebrowOverride || subtitle) && (

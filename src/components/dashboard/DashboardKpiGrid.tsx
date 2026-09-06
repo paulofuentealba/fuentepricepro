@@ -27,18 +27,18 @@ function KpiCard({
   isLoading: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-2xl bg-card border border-border p-5 transition-all hover:border-primary/40">
-      <span className="text-xs font-display font-medium uppercase tracking-widest text-muted-foreground">
+    <div className="flex flex-col gap-1.5 sm:gap-2 rounded-2xl bg-card border border-border p-3.5 sm:p-5 transition-all hover:border-primary/40">
+      <span className="text-[11px] sm:text-xs font-display font-medium uppercase tracking-widest text-muted-foreground truncate">
         {label}
       </span>
       {isLoading ? (
-        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-7 sm:h-8 w-24 sm:w-32" />
       ) : (
-        <span className={cn("text-2xl font-semibold font-serif", valueClassName || "text-foreground")}>
+        <span className={cn("text-xl sm:text-2xl font-semibold font-serif truncate", valueClassName || "text-foreground")}>
           {value}
         </span>
       )}
-      {!isLoading && sub && <span className="text-xs font-sans text-muted-foreground">{sub}</span>}
+      {!isLoading && sub && <span className="text-[11px] sm:text-xs font-sans text-muted-foreground line-clamp-1">{sub}</span>}
     </div>
   );
 }
@@ -56,7 +56,7 @@ export function DashboardKpiGrid({
   const projection12m = monthlyIncome * 12;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <KpiCard
         label={t.dashboard.kpi.netWorth}
         value={formatCurrency(netWorth, currency, locale)}

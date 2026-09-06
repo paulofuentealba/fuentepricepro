@@ -129,7 +129,7 @@ export function WithdrawScreen({
   }, [positions]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+    <div className="w-full space-y-6">
       <div>
         <div className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground">
           {t.askScreen?.withdrawSubtitle}

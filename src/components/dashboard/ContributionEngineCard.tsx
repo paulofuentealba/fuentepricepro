@@ -54,7 +54,7 @@ export function ContributionEngineCard({
   }, [valuedItems, amountBRL, settings, isLoading]);
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">
+    <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">
       <div>
         <div className="mb-4">
           <div className="text-xs font-semibold uppercase tracking-wider text-accent-emerald-light">

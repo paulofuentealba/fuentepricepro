@@ -52,7 +52,7 @@ function SmartAllocationRoute() {
   );
 
   const allocationContent = (
-    <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 mx-auto max-w-5xl">
+    <div className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300 w-full">
       <AskScreen
         titleKey="askScreen.contributionTitle"
         subtitleKey="askScreen.contributionSubtitle"

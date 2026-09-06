@@ -93,7 +93,7 @@ function IncomePage() {
 
   if (isAppLoading) {
     return (
-      <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+      <div className="w-full space-y-6">
         <Skeleton className="h-16 w-full rounded-2xl bg-muted/30" />
         <Skeleton className="h-32 w-full rounded-2xl bg-muted/30" />
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -152,7 +152,7 @@ function IncomePage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+    <div className="w-full space-y-6">
       {/* Page header */}
       <div>
         <div className="text-xs font-display font-semibold uppercase tracking-wider text-success">

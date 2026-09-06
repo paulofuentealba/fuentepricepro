@@ -92,8 +92,8 @@ export function FiscalHeroBreakdown({
         </div>
 
         {/* .brk breakdown strip */}
-        <div className="flex flex-wrap border-t border-border/40">
-          <div className="min-w-[115px] flex-1 border-r border-border/40 p-3.5 last:border-r-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-border/40 divide-y sm:divide-y-0 divide-border/40 sm:[&>div:not(:first-child)]:border-l sm:[&>div:not(:first-child)]:border-border/40">
+          <div className="p-3.5">
             <div className="text-[9px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
               {breakdown.lossCarryforward}
             </div>
@@ -102,7 +102,7 @@ export function FiscalHeroBreakdown({
             </div>
             <div className="mt-0.5 text-[9px] text-muted-foreground">{breakdown.lossCarryforwardNote}</div>
           </div>
-          <div className="min-w-[115px] flex-1 border-r border-border/40 p-3.5 last:border-r-0">
+          <div className="p-3.5">
             <div className="text-[9px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
               {breakdown.usWithholding}
             </div>
@@ -111,7 +111,7 @@ export function FiscalHeroBreakdown({
             </div>
             <div className="mt-0.5 text-[9px] text-muted-foreground">{breakdown.usWithholdingNote}</div>
           </div>
-          <div className="min-w-[115px] flex-1 border-r border-border/40 p-3.5 last:border-r-0">
+          <div className="p-3.5">
             <div className="text-[9px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
               {breakdown.jcp}
             </div>
@@ -120,7 +120,7 @@ export function FiscalHeroBreakdown({
             </div>
             <div className="mt-0.5 text-[9px] text-muted-foreground">{breakdown.jcpNote}</div>
           </div>
-          <div className="min-w-[115px] flex-1 p-3.5">
+          <div className="p-3.5">
             <div className="text-[9px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
               {breakdown.brDividends}
             </div>
@@ -133,14 +133,14 @@ export function FiscalHeroBreakdown({
       </div>
 
       {grossNetRows.length > 0 && (
-        <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
+        <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto scrollbar-thin">
           <div className="flex items-center justify-between px-4 py-3 sm:px-5">
             <h3 className="font-serif text-base font-semibold text-foreground">{table.title}</h3>
             <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[10px] font-display font-semibold text-accent-foreground">
               {table.pill}
             </span>
           </div>
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[360px] text-sm">
             <thead>
               <tr className="border-t border-border/40">
                 <th className="px-4 py-2 text-left text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">

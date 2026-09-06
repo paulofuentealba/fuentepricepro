@@ -157,15 +157,27 @@ export function IrpfMirrorReport({
 
       {/* Tabs: Bens e Direitos / Rendimentos Isentos / Tributação Exclusiva */}
       <Tabs defaultValue="bens" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full max-w-xl mb-4">
-          <TabsTrigger value="bens" className="text-xs">
-            {m.tabs.assets} ({activePositions.length})
+        <TabsList className="flex h-auto w-full items-center justify-start gap-1 overflow-x-auto scrollbar-none flex-nowrap rounded-none border-b border-border bg-transparent p-0 pb-px mb-4">
+          <TabsTrigger
+            value="bens"
+            className="flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+          >
+            <span>{m.tabs.assets}</span>
+            <span className="rounded-full bg-muted px-1.5 py-0.2 text-[10px] font-mono">({activePositions.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="isentos" className="text-xs">
-            {m.tabs.exempt} ({exemptDividends.length})
+          <TabsTrigger
+            value="isentos"
+            className="flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+          >
+            <span>{m.tabs.exempt}</span>
+            <span className="rounded-full bg-muted px-1.5 py-0.2 text-[10px] font-mono">({exemptDividends.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="exclusivos" className="text-xs">
-            {m.tabs.exclusive} ({jcpPositions.length})
+          <TabsTrigger
+            value="exclusivos"
+            className="flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+          >
+            <span>{m.tabs.exclusive}</span>
+            <span className="rounded-full bg-muted px-1.5 py-0.2 text-[10px] font-mono">({jcpPositions.length})</span>
           </TabsTrigger>
         </TabsList>
 
@@ -195,7 +207,7 @@ export function IrpfMirrorReport({
                       <span className="text-xs text-muted-foreground">{item.name}</span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs">
+                    <div className="flex items-center gap-3 text-xs flex-wrap">
                       <span className="text-muted-foreground">
                         {m.groupLabel} <strong className="text-foreground font-semibold">{info.group}</strong>
                       </span>
@@ -213,8 +225,8 @@ export function IrpfMirrorReport({
                     <p className="text-xs text-foreground/90 font-mono leading-relaxed select-all">
                       {discrimText}
                     </p>
-                    <div className="mt-2.5 flex items-center justify-between border-t border-border/40 pt-2">
-                      <div className="flex items-center gap-4 text-xs font-mono">
+                    <div className="mt-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-t border-border/40 pt-2">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono">
                         <span className="text-muted-foreground">
                           {m.statusPriorYear.replace("{{year}}", String(previousYear))}{" "}
                           <strong className="text-foreground font-bold">R$ 0,00</strong>
@@ -231,7 +243,7 @@ export function IrpfMirrorReport({
                         type="button"
                         size="sm"
                         variant={isCopied ? "default" : "secondary"}
-                        className="h-7 text-xs gap-1.5"
+                        className="h-7 text-xs gap-1.5 self-start sm:self-auto shrink-0"
                         onClick={() => copyToClipboard(discrimText, `bem-${item.id}`, item.ticker)}
                       >
                         {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -336,7 +348,7 @@ export function IrpfMirrorReport({
                           </span>
                           <span className="text-xs text-muted-foreground">{m.exclusiveCard.codeLabel}</span>
                         </div>
-                        <div className="text-xs font-semibold text-foreground mt-1 flex items-center gap-3">
+                        <div className="text-xs font-semibold text-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                           <span>{m.exclusiveCard.netReceived} <strong className="text-success">{formatCurrency(pos.netAmount, "BRL", "ptBR")}</strong></span>
                           <span className="text-muted-foreground">{m.exclusiveCard.withheldTax} {formatCurrency(pos.withheldTax, "BRL", "ptBR")}</span>
                         </div>

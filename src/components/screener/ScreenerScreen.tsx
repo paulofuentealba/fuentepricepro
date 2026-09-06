@@ -103,7 +103,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
 
   if (isAppLoading) {
     return (
-      <div className={cn("space-y-5", !embedded && "mx-auto max-w-4xl px-4 py-6 sm:px-6")}>
+      <div className={cn("space-y-6", !embedded && "w-full")}>
         <Skeleton className="h-16 w-full rounded-2xl bg-muted/30" />
         <Skeleton className="h-24 w-full rounded-2xl bg-muted/30" />
         <Skeleton className="h-80 w-full rounded-2xl bg-muted/30" />
@@ -114,7 +114,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   const disclaimerText = resolveDisclaimerText(t, "calculation");
 
   return (
-    <div className={cn("space-y-4", !embedded && "mx-auto max-w-4xl px-4 py-6 sm:px-6")}>
+    <div className={cn("space-y-6", !embedded && "w-full")}>
       {!embedded && (
         <div>
           <div className="text-xs font-display font-semibold uppercase tracking-wider text-muted-foreground">

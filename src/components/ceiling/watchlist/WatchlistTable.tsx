@@ -18,6 +18,8 @@ import { AssetTicker, PriceTag } from "../shared/AssetDataDisplay";
 import { Save, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { useWatchlist } from "@/lib/watchlist";
+import { cn } from "@/lib/utils";
+import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
 
 interface WatchlistTableProps {
   items: WatchlistItem[];
@@ -132,11 +134,11 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
         )}
       </div>
 
-      <div className="rounded-md border border-border/60 bg-card overflow-x-auto">
+      <div className="rounded-md border border-border/60 bg-card overflow-x-auto scrollbar-thin">
         <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.asset}</TableHead>
+              <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]")}>{t.global.asset}</TableHead>
               <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.currentPrice}</TableHead>
               <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.averagePrice}</TableHead>
               <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.quantity}</TableHead>
@@ -149,8 +151,8 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
               const price = quote?.price ?? it.currentPrice;
 
               return (
-                <TableRow key={it.id}>
-                  <TableCell>
+                <TableRow key={it.id} className="group">
+                  <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "bg-card group-hover:bg-muted/40 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] transition-colors")}>
                     <AssetTicker ticker={it.ticker} type={it.type} />
                   </TableCell>
                   <TableCell>

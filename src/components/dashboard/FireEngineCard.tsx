@@ -90,7 +90,7 @@ export function FireEngineCard({
   ];
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card p-6 mb-6 shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#163228,#0E1A16_75%)]">
+    <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 mb-6 shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#163228,#0E1A16_75%)]">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
         <div>
@@ -104,7 +104,7 @@ export function FireEngineCard({
             {t.dashboard.fire.subtitle}
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <div className="text-xs uppercase tracking-wide text-muted-foreground">
             {t.dashboard.fire.crossoverLabel}
           </div>
@@ -138,7 +138,7 @@ export function FireEngineCard({
                 className="h-6 w-24 border-0 p-0 font-serif text-base font-semibold focus-visible:ring-0 text-foreground bg-transparent"
               />
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
               {COST_PRESETS.map((preset) => (
                 <button
                   key={preset}
@@ -155,7 +155,7 @@ export function FireEngineCard({
             </div>
           </div>
 
-          <div className="flex items-center gap-5">
+          <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 sm:gap-5 pt-2 sm:pt-0 border-t border-border/40 sm:border-0">
             <div>
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
                 {t.dashboard.fire.currentIncomeLabel}
@@ -164,7 +164,7 @@ export function FireEngineCard({
                 {formatCurrency(monthlyIncome, currency, locale)}
               </div>
             </div>
-            <div className="border-l border-border pl-5">
+            <div className="border-l border-border pl-4 sm:pl-5">
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
                 {t.dashboard.fire.coverageLabel}
               </div>

@@ -13,6 +13,7 @@ import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { computeFxDecomposition, type FxAssetBreakdown } from "@/lib/selectors/fxDecomposition";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { cn } from "@/lib/utils";
+import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
 
 interface FxDecompositionPanelProps {
   valuedItems: ValuedWatchlistItem[];
@@ -149,11 +150,11 @@ export function FxDecompositionPanel({
           </div>
 
           {/* FX Assets Breakdown Table */}
-          <div className="overflow-x-auto rounded-xl border border-border/60 mb-4">
-            <Table>
+          <div className="overflow-x-auto scrollbar-thin rounded-xl border border-border/60 mb-4">
+            <Table className="w-full min-w-[780px]">
               <TableHeader className="bg-surface-1">
                 <TableRow className="border-border/60 hover:bg-transparent">
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "bg-surface-1 py-3 text-xs uppercase tracking-wider text-muted-foreground font-semibold shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]")}>
                     {t.portfolio.fx.columnAssetUs}
                   </TableHead>
                   <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
@@ -186,9 +187,9 @@ export function FxDecompositionPanel({
                     <TableRow
                       key={asset.ticker}
                       onClick={() => originalItem && onSelectItem?.(originalItem)}
-                      className="border-border/40 hover:bg-surface-hover/80 cursor-pointer transition-colors"
+                      className="group border-border/40 hover:bg-surface-hover/80 cursor-pointer transition-colors"
                     >
-                      <TableCell>
+                      <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "bg-card group-hover:bg-surface-hover/80 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] transition-colors")}>
                         <div className="font-bold text-accent-gold text-base leading-tight">
                           {asset.ticker}
                         </div>

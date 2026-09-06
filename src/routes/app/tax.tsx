@@ -79,19 +79,19 @@ export function RealidadeFiscalPage() {
       </div>
 
       <Tabs defaultValue="irpf" className="w-full">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-0">
+        <TabsList className="flex h-auto w-full items-center justify-start gap-1 overflow-x-auto scrollbar-none flex-nowrap rounded-none border-b border-border bg-transparent p-0 pb-px">
           <TabsTrigger
             value="irpf"
-            className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+            className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
           >
-            <FileText className="h-3.5 w-3.5" />
+            <FileText className="h-3.5 w-3.5 shrink-0" />
             <span>{t.taxRealityScreen.tabs.irpfMirror}</span>
           </TabsTrigger>
           <TabsTrigger
             value="darf"
-            className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+            className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
           >
-            <Receipt className="h-3.5 w-3.5" />
+            <Receipt className="h-3.5 w-3.5 shrink-0" />
             <span>{t.taxRealityScreen.tabs.darfSales}</span>
           </TabsTrigger>
         </TabsList>
