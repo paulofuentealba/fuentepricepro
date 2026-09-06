@@ -22,6 +22,7 @@ import { formatCurrency, displayTicker } from "@/lib/formatters";
 import { compactWithSymbol } from "@/components/ceiling/cashflow/CashFlowSummary";
 import { DividendStressTestCard } from "@/components/income/DividendStressTestCard";
 import { MonthlyCashflowTimeline } from "@/components/income/MonthlyCashflowTimeline";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 
 const COLOR_RECEIVED = "var(--success)";
 const COLOR_GRID = "var(--chart-grid)";
@@ -195,7 +196,14 @@ function IncomePage() {
                     <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.assetHeader}</th>
                     <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.grossHeader}</th>
                     <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.paymentHeader}</th>
-                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.netHeader}</th>
+                    <th className="pb-2 text-left font-display font-semibold">
+                      <div className="inline-flex items-center gap-1">
+                        <span>{t.incomeScreen?.netHeader}</span>
+                        {t.incomeScreen?.netFootnote && (
+                          <InfoTooltip content={t.incomeScreen?.netFootnote} />
+                        )}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -219,10 +227,6 @@ function IncomePage() {
               </table>
             </div>
           )}
-
-          <p className="px-5 pb-5 pt-3 text-[11px] leading-relaxed text-muted-foreground sm:px-6">
-            {t.incomeScreen?.netFootnote}
-          </p>
         </div>
 
         {/* Seus meses secos */}
@@ -662,7 +666,12 @@ function IncomePage() {
       {investedVsReceived.length > 0 && (
         <div className="rounded-[22px] border border-border/60 bg-card p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-serif text-base font-medium text-foreground">{t.tabs.chart.investedVsReceived}</h3>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-serif text-base font-medium text-foreground">{t.tabs.chart.investedVsReceived}</h3>
+              {t.tabs.chart.quantityNote && (
+                <InfoTooltip content={t.tabs.chart.quantityNote} />
+              )}
+            </div>
             <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLOR_INVESTED }} />
@@ -700,8 +709,6 @@ function IncomePage() {
               </BarChart>
             </ChartContainer>
           </div>
-
-          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{t.tabs.chart.quantityNote}</p>
         </div>
       )}
 

@@ -18,6 +18,7 @@ import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { Coins, ShieldAlert, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -291,8 +292,14 @@ export function WithdrawScreen({
           <div className="flex flex-wrap items-center justify-between gap-4 bg-muted/30 px-5 py-4 sm:px-6">
             <div className="flex flex-wrap gap-6">
               <div>
-                <div className="text-[11px] text-muted-foreground">
-                  {t.askScreen?.withdrawEstimatedTaxLabel || "Imposto estimado"}
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span>{t.askScreen?.withdrawEstimatedTaxLabel || "Imposto estimado"}</span>
+                  <InfoTooltip
+                    content={
+                      t.askScreen?.withdrawEstimatedTaxTooltip ||
+                      "Simulação de DARF a pagar no mês seguinte à liquidação das vendas com ganho de capital tributável."
+                    }
+                  />
                 </div>
                 <div
                   className={cn(
@@ -304,8 +311,14 @@ export function WithdrawScreen({
                 </div>
               </div>
               <div>
-                <div className="text-[11px] text-muted-foreground">
-                  {t.askScreen?.withdrawIncomeLostLabel || "Renda perdida"}
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span>{t.askScreen?.withdrawIncomeLostLabel || "Renda perdida"}</span>
+                  <InfoTooltip
+                    content={
+                      t.askScreen?.withdrawIncomeLostTooltip ||
+                      "Impacto anual estimado na sua renda passiva futura pela venda destas cotas/ações."
+                    }
+                  />
                 </div>
                 <div className="font-serif text-base font-medium text-foreground">
                   − {formatCurrency(result.totalIncomeLostAnnualBRL, "BRL", locale)}
@@ -313,8 +326,14 @@ export function WithdrawScreen({
               </div>
               {result.lossCarryforwardUsedBRL > 0 && (
                 <div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {t.askScreen?.withdrawLossOffsetLabel || "Prejuízo compensado"}
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <span>{t.askScreen?.withdrawLossOffsetLabel || "Prejuízo compensado"}</span>
+                    <InfoTooltip
+                      content={
+                        t.askScreen?.withdrawLossOffsetTooltip ||
+                        "Aproveitamento de perdas acumuladas anteriores para abater ou zerar o imposto devido."
+                      }
+                    />
                   </div>
                   <div className="font-serif text-base font-medium text-foreground">
                     {formatCurrency(result.lossCarryforwardUsedBRL, "BRL", locale)}

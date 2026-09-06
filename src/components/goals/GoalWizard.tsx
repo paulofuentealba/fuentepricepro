@@ -77,10 +77,15 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
     <div className="space-y-4">
       {/* Card 1: Metas por classe de ativo */}
       <div className="rounded-[18px] border border-border/60 bg-card p-4 sm:p-5">
-        <div className="mb-1 flex items-center justify-between gap-2">
-          <h3 className="font-serif text-lg font-semibold text-foreground">
-            {t.goalWizard.step1Question}
-          </h3>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-serif text-lg font-semibold text-foreground">
+              {t.goalWizard.step1Question}
+            </h3>
+            {t.goalWizard.step1Helper && (
+              <InfoTooltip content={t.goalWizard.step1Helper} />
+            )}
+          </div>
           <Badge
             className={cn(
               "font-mono font-semibold",
@@ -92,9 +97,6 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
             {t.smartAllocation.targetTotal.replace("{{total}}", String(total))}
           </Badge>
         </div>
-        <p className="mb-4 text-[12px] leading-relaxed text-muted-foreground">
-          {t.goalWizard.step1Helper}
-        </p>
 
         {ASSET_TYPES.map((type) => (
           <div key={type} className="mb-3 flex items-center gap-3.5 last:mb-0">
@@ -139,13 +141,13 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
         </h3>
 
         {/* Yield-alvo por classe */}
-        <div className="mb-3.5">
+        <div className="mb-3 flex items-center gap-1.5">
           <span className="text-[12.5px] font-display font-semibold text-foreground">
             {t.smartAllocation.classTargetYieldsTitle}
           </span>
-          <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-            {t.smartAllocation.classTargetYieldsDesc}
-          </p>
+          {t.smartAllocation.classTargetYieldsDesc && (
+            <InfoTooltip content={t.smartAllocation.classTargetYieldsDesc} />
+          )}
         </div>
         {ASSET_TYPES.map((type) => {
           const refYield = CLASS_MARKET_REFERENCE_YIELDS[type] ?? 6.0;
@@ -175,55 +177,87 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
           );
         })}
 
-        {/* Toggles de exclusão + concentração máxima, no estilo .opt do protótipo */}
+        {/* Toggles de exclusão + concentração máxima com InfoTooltips */}
         <div className="mt-4 space-y-2.5">
-          <button
-            type="button"
-            onClick={() => updateSettings({ excludeAboveCeiling: !settings.excludeAboveCeiling })}
+          <div
             className={cn(
-              "w-full rounded-2xl border p-3.5 text-left transition-colors",
+              "flex items-center justify-between rounded-xl border p-3 transition-colors",
               settings.excludeAboveCeiling
-                ? "border-accent bg-accent/10"
-                : "border-border bg-card hover:border-accent/60",
+                ? "border-accent/60 bg-accent/10"
+                : "border-border bg-card",
             )}
           >
-            <div className="text-[13.5px] font-display font-semibold text-foreground">
-              {t.smartAllocation.excludeAboveCeilingLabel}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] font-display font-semibold text-foreground">
+                {t.smartAllocation.excludeAboveCeilingLabel}
+              </span>
+              {t.smartAllocation.excludeAboveCeilingDesc && (
+                <InfoTooltip content={t.smartAllocation.excludeAboveCeilingDesc} />
+              )}
             </div>
-            <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
-              {t.smartAllocation.excludeAboveCeilingDesc}
-            </div>
-          </button>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.excludeAboveCeiling}
+              onClick={() => updateSettings({ excludeAboveCeiling: !settings.excludeAboveCeiling })}
+              className={cn(
+                "relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                settings.excludeAboveCeiling ? "bg-primary" : "bg-muted",
+              )}
+            >
+              <span
+                className={cn(
+                  "pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform",
+                  settings.excludeAboveCeiling ? "translate-x-5" : "translate-x-0",
+                )}
+              />
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => updateSettings({ excludeYieldTraps: !settings.excludeYieldTraps })}
+          <div
             className={cn(
-              "w-full rounded-2xl border p-3.5 text-left transition-colors",
+              "flex items-center justify-between rounded-xl border p-3 transition-colors",
               settings.excludeYieldTraps
-                ? "border-accent bg-accent/10"
-                : "border-border bg-card hover:border-accent/60",
+                ? "border-accent/60 bg-accent/10"
+                : "border-border bg-card",
             )}
           >
-            <div className="text-[13.5px] font-display font-semibold text-foreground">
-              {t.smartAllocation.excludeYieldTrapsLabel}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] font-display font-semibold text-foreground">
+                {t.smartAllocation.excludeYieldTrapsLabel}
+              </span>
+              {t.smartAllocation.excludeYieldTrapsDesc && (
+                <InfoTooltip content={t.smartAllocation.excludeYieldTrapsDesc} />
+              )}
             </div>
-            <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
-              {t.smartAllocation.excludeYieldTrapsDesc}
-            </div>
-          </button>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.excludeYieldTraps}
+              onClick={() => updateSettings({ excludeYieldTraps: !settings.excludeYieldTraps })}
+              className={cn(
+                "relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                settings.excludeYieldTraps ? "bg-primary" : "bg-muted",
+              )}
+            >
+              <span
+                className={cn(
+                  "pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform",
+                  settings.excludeYieldTraps ? "translate-x-5" : "translate-x-0",
+                )}
+              />
+            </button>
+          </div>
 
-          {/* Limite de concentração: input numérico (não um preset fixo em 40% como no
-              protótipo) porque maxConcentrationPerAsset é configurável pelo usuário no modelo
-              real de dados — ver nota de escopo no cabeçalho do componente. */}
-          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5">
-            <div className="flex-1">
-              <div className="text-[13.5px] font-display font-semibold text-foreground">
+          {/* Limite de concentração: input numérico compacto com InfoTooltip */}
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] font-display font-semibold text-foreground">
                 {t.smartAllocation.maxConcentrationLabel}
-              </div>
-              <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
-                {t.smartAllocation.maxConcentrationHint}
-              </div>
+              </span>
+              {t.smartAllocation.maxConcentrationHint && (
+                <InfoTooltip content={t.smartAllocation.maxConcentrationHint} />
+              )}
             </div>
             <div className="relative w-16 shrink-0">
               <Input

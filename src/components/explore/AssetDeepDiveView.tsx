@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ValuationConsensusMatrix } from "@/components/shared/ValuationConsensusMatrix";
 import { DividendSafetyBadge } from "@/components/shared/DividendSafetyBadge";
 import { DividendSafetyRadar } from "@/components/shared/DividendSafetyRadar";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
 import type { SearchHit } from "@/lib/apiService.functions";
 import {
@@ -686,15 +687,13 @@ export function AssetDeepDiveView({
 
           <div className="grid grid-cols-2 gap-3">
             {classMetrics.items.map((m, idx) => (
-              <div key={idx} className="rounded-lg border border-border/50 bg-muted/25 p-3">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {m.label}
+              <div key={idx} className="rounded-lg border border-border/50 bg-muted/25 p-3 flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span>{m.label}</span>
+                  {m.desc && <InfoTooltip content={m.desc} />}
                 </div>
-                <div className="text-xl font-bold text-foreground font-display my-0.5">
+                <div className="text-xl font-bold text-foreground font-display my-1">
                   {m.val}
-                </div>
-                <div className="text-[11px] text-muted-foreground leading-tight">
-                  {m.desc}
                 </div>
               </div>
             ))}

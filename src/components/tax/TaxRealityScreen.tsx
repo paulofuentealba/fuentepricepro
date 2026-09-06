@@ -19,6 +19,7 @@ import { TaxSimulationDisclaimer } from "@/components/shared/TaxSimulationDiscla
 import { MetricBox } from "@/components/shared/MetricBox";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import {
   Card,
   CardHeader,
@@ -572,9 +573,14 @@ export function TaxRealityScreen({
           {/* Monthly Detail — Fixed Income ETFs */}
           {etfFixedIncomeMonthly.length > 0 && (
             <div className="space-y-4">
-              <h3 className="font-serif text-lg font-semibold text-foreground">
-                {tScreen.monthlyDetail.etfFixedIncomeTitle}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-serif text-lg font-semibold text-foreground">
+                  {tScreen.monthlyDetail.etfFixedIncomeTitle}
+                </h3>
+                {tScreen.monthlyDetail.etfFixedIncomeNote && (
+                  <InfoTooltip content={tScreen.monthlyDetail.etfFixedIncomeNote} />
+                )}
+              </div>
               <div className="rounded-xl border border-border/50 bg-background/50 overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -611,7 +617,6 @@ export function TaxRealityScreen({
                   </TableBody>
                 </Table>
               </div>
-              <p className="text-xs text-muted-foreground">{tScreen.monthlyDetail.etfFixedIncomeNote}</p>
             </div>
           )}
 
