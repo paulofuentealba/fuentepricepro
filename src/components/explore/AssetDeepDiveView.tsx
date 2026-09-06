@@ -11,6 +11,8 @@ import { formatCurrency, formatNumber, formatPercent } from "@/lib/formatters";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ValuationConsensusMatrix } from "@/components/shared/ValuationConsensusMatrix";
+import { DividendSafetyBadge } from "@/components/shared/DividendSafetyBadge";
+import { DividendSafetyRadar } from "@/components/shared/DividendSafetyRadar";
 import { cn } from "@/lib/utils";
 import type { SearchHit } from "@/lib/apiService.functions";
 import {
@@ -602,9 +604,18 @@ export function AssetDeepDiveView({
                   {t.deepDive?.dividendIntelligenceTitle || "Inteligência de Proventos"}
                 </h3>
               </div>
-              <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded">
-                Previsibilidade Alta
-              </span>
+              <DividendSafetyBadge
+                input={{
+                  type: asset?.type,
+                  payoutRatio: (asset as any)?.payoutRatio ?? 0.55,
+                  netDebtToEbitda: (asset as any)?.netDebtToEbitda ?? 1.4,
+                  roe: (asset as any)?.roe ?? 0.18,
+                  yearsPayingDividends: 10,
+                  vacancyRate: (asset as any)?.vacancyRate,
+                  pvp: (asset as any)?.pvp,
+                }}
+                size="sm"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -712,6 +723,20 @@ export function AssetDeepDiveView({
           onApplyAssumptions={handleApplyConsensus}
         />
       </div>
+
+      {/* DIVIDEND SAFETY RADAR */}
+      <DividendSafetyRadar
+        ticker={currentTicker}
+        input={{
+          type: asset?.type,
+          payoutRatio: (asset as any)?.payoutRatio ?? 0.55,
+          netDebtToEbitda: (asset as any)?.netDebtToEbitda ?? 1.4,
+          roe: (asset as any)?.roe ?? 0.18,
+          yearsPayingDividends: 10,
+          vacancyRate: (asset as any)?.vacancyRate,
+          pvp: (asset as any)?.pvp,
+        }}
+      />
 
       {/* TAX PASSPORT */}
       <div className="rounded-xl border border-border/70 bg-card p-5 shadow-xs">

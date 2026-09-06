@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
@@ -10,16 +10,18 @@ import { buildTaxContext, type TaxRealityContext } from "@/lib/tax/buildTaxConte
 import { computeTaxRealityRows, buildTaxRealityCsv } from "@/lib/tax/taxRealityRows";
 import { downloadCsv } from "@/lib/csv";
 import { TaxRealityScreen } from "@/components/tax/TaxRealityScreen";
+import { IrpfMirrorReport } from "@/components/tax/IrpfMirrorReport";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Lock } from "lucide-react";
+import { Lock, Receipt, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/app/tax")({
   head: () => ({
     meta: [
-      { title: "Realidade Fiscal | Fuente Price Pro" },
+      { title: "Realidade Fiscal & Espelho IRPF | Fuente Price Pro" },
       {
         name: "description",
-        content: "Visão consolidada de dividendos líquidos e ganhos de capital (ações e FIIs) no ano corrente.",
+        content: "Visão consolidada de dividendos líquidos, apuração de DARF e Espelho do IRPF pronto para copiar e colar na declaração anual.",
       },
     ],
   }),
@@ -62,15 +64,36 @@ export function RealidadeFiscalPage() {
   }
 
   return (
-    <TaxRealityScreen
-      context={context}
-      isLoading={isLoading}
-      onExport={() => {
-        const date = new Date().toISOString().split("T")[0];
-        const rows = computeTaxRealityRows(context);
-        const csv = buildTaxRealityCsv(context, rows);
-        downloadCsv(`realidade-fiscal-${date}.csv`, csv);
-      }}
-    />
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+      <Tabs defaultValue="irpf" className="w-full">
+        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto mb-6">
+          <TabsTrigger value="irpf" className="text-xs sm:text-sm gap-2">
+            <FileText className="h-4 w-4" />
+            Espelho do IRPF (Copiar)
+          </TabsTrigger>
+          <TabsTrigger value="darf" className="text-xs sm:text-sm gap-2">
+            <Receipt className="h-4 w-4" />
+            DARF & Vendas
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="irpf" className="mt-0">
+          <IrpfMirrorReport valuedItems={valuedItems} context={context} />
+        </TabsContent>
+
+        <TabsContent value="darf" className="mt-0">
+          <TaxRealityScreen
+            context={context}
+            isLoading={isLoading}
+            onExport={() => {
+              const date = new Date().toISOString().split("T")[0];
+              const rows = computeTaxRealityRows(context);
+              const csv = buildTaxRealityCsv(context, rows);
+              downloadCsv(`realidade-fiscal-${date}.csv`, csv);
+            }}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

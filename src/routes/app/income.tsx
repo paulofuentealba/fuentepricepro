@@ -20,6 +20,8 @@ import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 import { formatCurrency, displayTicker } from "@/lib/formatters";
 import { compactWithSymbol } from "@/components/ceiling/cashflow/CashFlowSummary";
+import { DividendStressTestCard } from "@/components/income/DividendStressTestCard";
+import { MonthlyCashflowTimeline } from "@/components/income/MonthlyCashflowTimeline";
 
 const COLOR_RECEIVED = "var(--success)";
 const COLOR_GRID = "var(--chart-grid)";
@@ -42,7 +44,7 @@ export const Route = createFileRoute("/app/income")({
 function IncomePage() {
   const isUnlocked = useFeatureGate("cashflowUnlocked");
   const { t, locale } = useI18n();
-  const { items, isAppLoading, fx, dividendEventsMap = {} } = useValuedPortfolio();
+  const { items, totals, isAppLoading, fx, dividendEventsMap = {} } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
   const { settings } = useUserSettings();
   const currency = settings?.displayCurrency || "BRL";
@@ -306,6 +308,9 @@ function IncomePage() {
           )}
         </div>
       </div>
+
+      {/* Linha do Tempo de Proventos do Mês (Calendário de Caixa) */}
+      <MonthlyCashflowTimeline events={events} currency={currency} />
 
       {/* Dividendos por ano / por mês */}
       <div className="rounded-[22px] border border-border/60 bg-card p-5 sm:p-6">
@@ -699,6 +704,13 @@ function IncomePage() {
           <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{t.tabs.chart.quantityNote}</p>
         </div>
       )}
+
+      {/* Stress Test de Proventos & Choque de Carteira */}
+      <DividendStressTestCard
+        monthlyProjectedIncome={(totals?.consolidatedIncome ?? 0) / 12}
+        currency={currency}
+        survivalTargetMonthly={3000}
+      />
     </div>
   );
 }
