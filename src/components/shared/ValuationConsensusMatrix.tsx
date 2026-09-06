@@ -165,7 +165,7 @@ export function ValuationConsensusMatrix({
       </div>
 
       {/* HERO BANNER CONSENSO */}
-      <div className="rounded-xl border border-border/60 bg-muted/20 p-4 mb-4">
+      <div className="rounded-xl border border-border/70 bg-card/80 dark:bg-[#0c1a15]/90 dark:border-[#1e382d] p-4 mb-4 shadow-sm">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -210,7 +210,7 @@ export function ValuationConsensusMatrix({
             </span>
             <span>{t.deepDive?.optimisticCeiling || "Teto Otimista"}</span>
           </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden relative">
+          <div className="h-2 rounded-full bg-muted border border-border/60 overflow-hidden relative">
             <div className="absolute left-[15%] right-[15%] h-full bg-gradient-to-r from-primary to-accent rounded-full" />
           </div>
           <div className="flex justify-between text-[11px] font-display font-medium text-foreground mt-1">
@@ -226,7 +226,7 @@ export function ValuationConsensusMatrix({
       {/* 4 METHOD CARDS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
         {/* BAZIN */}
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 flex flex-col justify-between">
+        <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
             <button
               type="button"
@@ -258,7 +258,7 @@ export function ValuationConsensusMatrix({
         </div>
 
         {/* GRAHAM */}
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 flex flex-col justify-between">
+        <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
             <button
               type="button"
@@ -290,7 +290,7 @@ export function ValuationConsensusMatrix({
         </div>
 
         {/* GORDON */}
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 flex flex-col justify-between">
+        <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
             <button
               type="button"
@@ -322,7 +322,7 @@ export function ValuationConsensusMatrix({
         </div>
 
         {/* PETER LYNCH */}
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 flex flex-col justify-between">
+        <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
             <button
               type="button"
@@ -356,21 +356,28 @@ export function ValuationConsensusMatrix({
 
       {/* SENSITIVITY SLIDERS (IF ENABLED & NOT COMPACT) */}
       {showSensitivitySliders && !compact && (
-        <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-4">
+        <div className="rounded-xl border border-border/70 bg-card/90 dark:bg-[#0c1a15] dark:border-[#1e382d] p-4 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
               <Sliders className="h-3.5 w-3.5 text-primary" />
               {t.deepDive?.assumptionsTitle || "Ajuste de Premissas Globais (Tempo Real)"}
             </span>
-            <span className="text-[10px] text-muted-foreground">Simulação instantânea</span>
+            <span className="text-[10px] font-medium text-muted-foreground">Simulação instantânea</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* SLIDER 1: BAZIN YIELD */}
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">{t.deepDive?.bazinYieldLabel || "Yield Bazin"}</span>
-                <strong className="text-foreground font-mono">{bazinYield.toFixed(1)}%</strong>
+            <div className="flex flex-col justify-between">
+              <div className="flex items-start justify-between gap-2 min-h-[32px] mb-1.5">
+                <span
+                  className="text-xs font-medium text-foreground/90 leading-tight line-clamp-2"
+                  title={t.deepDive?.bazinYieldLabel || "Yield Mínimo Bazin"}
+                >
+                  {t.deepDive?.bazinYieldLabel || "Yield Bazin"}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded font-mono text-xs font-bold bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-success dark:border-primary/40 shrink-0 select-none">
+                  {bazinYield.toFixed(1)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -379,20 +386,27 @@ export function ValuationConsensusMatrix({
                 step="0.5"
                 value={bazinYield}
                 onChange={(e) => setBazinYield(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                className="range-slider-emerald my-1"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+              <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
                 <span>4.0%</span>
-                <span>6.0% (Padrão)</span>
+                <span className="font-semibold text-foreground dark:text-success">6.0% (Padrão)</span>
                 <span>12.0%</span>
               </div>
             </div>
 
             {/* SLIDER 2: GORDON DISCOUNT (k) */}
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">{t.deepDive?.gordonDiscountLabel || "Taxa Desconto (k)"}</span>
-                <strong className="text-foreground font-mono">{kDiscount.toFixed(1)}%</strong>
+            <div className="flex flex-col justify-between">
+              <div className="flex items-start justify-between gap-2 min-h-[32px] mb-1.5">
+                <span
+                  className="text-xs font-medium text-foreground/90 leading-tight line-clamp-2"
+                  title={t.deepDive?.gordonDiscountLabel || "Taxa de Desconto Gordon (k)"}
+                >
+                  {t.deepDive?.gordonDiscountLabel || "Taxa Desconto (k)"}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded font-mono text-xs font-bold bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-success dark:border-primary/40 shrink-0 select-none">
+                  {kDiscount.toFixed(1)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -401,20 +415,27 @@ export function ValuationConsensusMatrix({
                 step="0.5"
                 value={kDiscount}
                 onChange={(e) => setKDiscount(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                className="range-slider-emerald my-1"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+              <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
                 <span>8.0%</span>
-                <span>11.0% (Selic)</span>
+                <span className="font-semibold text-foreground dark:text-success">11.0% (Selic)</span>
                 <span>16.0%</span>
               </div>
             </div>
 
             {/* SLIDER 3: GORDON GROWTH (g) */}
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">{t.deepDive?.perpetualGrowthLabel || "Crescimento (g)"}</span>
-                <strong className="text-foreground font-mono">{gGrowth.toFixed(1)}%</strong>
+            <div className="flex flex-col justify-between">
+              <div className="flex items-start justify-between gap-2 min-h-[32px] mb-1.5">
+                <span
+                  className="text-xs font-medium text-foreground/90 leading-tight line-clamp-2"
+                  title={t.deepDive?.perpetualGrowthLabel || "Crescimento Perpétuo Gordon / Lynch (g)"}
+                >
+                  {t.deepDive?.perpetualGrowthLabel || "Crescimento (g)"}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded font-mono text-xs font-bold bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-success dark:border-primary/40 shrink-0 select-none">
+                  {gGrowth.toFixed(1)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -423,11 +444,11 @@ export function ValuationConsensusMatrix({
                 step="0.5"
                 value={gGrowth}
                 onChange={(e) => setGGrowth(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                className="range-slider-emerald my-1"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+              <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
                 <span>2.0%</span>
-                <span>5.0% (IPCA)</span>
+                <span className="font-semibold text-foreground dark:text-success">5.0% (IPCA)</span>
                 <span>8.0%</span>
               </div>
             </div>
@@ -437,12 +458,12 @@ export function ValuationConsensusMatrix({
             <div className="pt-2 border-t border-border/50 flex justify-end">
               <Button
                 type="button"
-                variant="outline"
                 size="sm"
                 onClick={handleApply}
                 disabled={isApplying}
-                className="text-xs h-8"
+                className="text-xs h-9 px-4 font-semibold border border-primary/40 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground dark:border-primary/50 dark:bg-primary/20 dark:text-success dark:hover:bg-primary dark:hover:text-primary-foreground shadow-sm transition-all flex items-center gap-2 cursor-pointer"
               >
+                <ShieldCheck className="h-3.5 w-3.5" />
                 {isApplying ? "Salvando premissas..." : (t.deepDive?.applyConsensusBtn || "Aplicar Consenso ao Motor de Aportes")}
               </Button>
             </div>

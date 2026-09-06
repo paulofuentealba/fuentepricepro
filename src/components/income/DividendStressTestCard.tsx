@@ -75,10 +75,12 @@ export function DividendStressTestCard({
 
       <CardContent className="space-y-4">
         {/* Slider */}
-        <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2">
-          <div className="flex justify-between text-xs">
+        <div className="rounded-xl border border-border/70 bg-card/90 dark:bg-[#1a0f0f] dark:border-[#3d1d1d] p-4 space-y-3 shadow-sm">
+          <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground">Intensidade do Corte Hipotético:</span>
-            <strong className="font-mono text-danger text-sm">-{stressCutPct}%</strong>
+            <span className="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold text-xs bg-danger/10 text-danger border border-danger/30 dark:bg-danger/20 dark:text-danger dark:border-danger/40 select-none">
+              -{stressCutPct}%
+            </span>
           </div>
           <input
             type="range"
@@ -87,19 +89,19 @@ export function DividendStressTestCard({
             step="5"
             value={stressCutPct}
             onChange={(e) => setStressCutPct(parseInt(e.target.value, 10))}
-            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-danger"
+            className="range-slider-danger my-1"
           />
-          <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>0% (Cenário Base)</span>
-            <span>-25% (Corte Médio)</span>
-            <span>-50% (Crise)</span>
-            <span>-70% (Catástrofe)</span>
+          <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
+            <span className={cn(stressCutPct === 0 && "font-bold text-foreground")}>0% (Cenário Base)</span>
+            <span className={cn(stressCutPct === 25 && "font-bold text-danger")}>-25% (Corte Médio)</span>
+            <span className={cn(stressCutPct === 50 && "font-bold text-danger")}>-50% (Crise)</span>
+            <span className={cn(stressCutPct === 70 && "font-bold text-danger")}>-70% (Catástrofe)</span>
           </div>
         </div>
 
         {/* Output Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+          <div className="rounded-xl border border-border/70 bg-card/80 dark:bg-[#121c18] dark:border-[#1e342a] p-3.5 shadow-xs">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Renda Mensal Sob Estresse
             </div>
@@ -111,19 +113,19 @@ export function DividendStressTestCard({
             </div>
           </div>
 
-          <div className="rounded-xl border border-danger/30 bg-danger/5 p-3.5">
+          <div className="rounded-xl border border-danger/35 bg-danger/10 dark:bg-danger/20 dark:border-danger/40 p-3.5 shadow-xs">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-danger">
               Impacto no Orçamento (Perda)
             </div>
             <div className="text-2xl font-bold font-mono text-danger mt-1">
               -{formatCurrency(monthlyLoss, currency, "ptBR")}/mês
             </div>
-            <div className="text-xs text-danger/80 mt-0.5">
+            <div className="text-xs text-danger/90 mt-0.5">
               -{formatCurrency(annualLoss, currency, "ptBR")} ao ano
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+          <div className="rounded-xl border border-border/70 bg-card/80 dark:bg-[#121c18] dark:border-[#1e342a] p-3.5 shadow-xs">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Cobertura de Custo de Vida
             </div>

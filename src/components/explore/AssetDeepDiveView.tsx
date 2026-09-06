@@ -546,7 +546,7 @@ export function AssetDeepDiveView({
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="rounded-lg border border-border/50 bg-muted/25 p-3">
+              <div className="rounded-lg border border-border/70 bg-card/80 dark:bg-[#121f19] dark:border-[#1e382d] p-3 shadow-xs">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t.deepDive?.qtyInCustody || "Quantidade em Custódia"}
                 </div>
@@ -560,7 +560,7 @@ export function AssetDeepDiveView({
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border/50 bg-muted/25 p-3">
+              <div className="rounded-lg border border-border/70 bg-card/80 dark:bg-[#121f19] dark:border-[#1e382d] p-3 shadow-xs">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t.deepDive?.averagePrice || "Preço Médio (PM)"}
                 </div>
@@ -573,7 +573,7 @@ export function AssetDeepDiveView({
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border/50 bg-muted/25 p-3">
+              <div className="rounded-lg border border-border/70 bg-card/80 dark:bg-[#121f19] dark:border-[#1e382d] p-3 shadow-xs">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t.deepDive?.totalCurrentPosition || "Posição Atual Total"}
                 </div>
@@ -591,7 +591,7 @@ export function AssetDeepDiveView({
                 )}
               </div>
 
-              <div className="rounded-lg border border-border/50 bg-muted/25 p-3">
+              <div className="rounded-lg border border-border/70 bg-card/80 dark:bg-[#121f19] dark:border-[#1e382d] p-3 shadow-xs">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t.deepDive?.capitalGain || "Lucro de Capital"}
                 </div>
@@ -617,7 +617,7 @@ export function AssetDeepDiveView({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg bg-muted/40 p-3 text-xs border border-border/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg bg-card/90 dark:bg-[#0c1a15] p-3 text-xs border border-border/70 shadow-xs">
             <span className="text-muted-foreground">
               {t.deepDive?.yieldOnCost || "Yield on Cost (YoC) Real"}:{" "}
               <strong className="text-success font-semibold">
@@ -733,7 +733,7 @@ export function AssetDeepDiveView({
 
           <div className="grid grid-cols-2 gap-3">
             {classMetrics.items.map((m, idx) => (
-              <div key={idx} className="rounded-lg border border-border/50 bg-muted/25 p-3 flex flex-col justify-between">
+              <div key={idx} className="rounded-lg border border-border/70 bg-card/80 dark:bg-[#121f19] dark:border-[#1e382d] p-3 flex flex-col justify-between shadow-xs">
                 <div className="flex items-center justify-between gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   <span>{m.label}</span>
                   {m.desc && <InfoTooltip content={m.desc} />}
