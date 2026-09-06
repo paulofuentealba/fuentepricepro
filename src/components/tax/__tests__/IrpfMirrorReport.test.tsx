@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { I18nProvider } from "@/lib/i18n-provider";
 import { IrpfMirrorReport } from "../IrpfMirrorReport";
 import type { TaxRealityContext } from "@/lib/tax/buildTaxContext";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 
 describe("IrpfMirrorReport", () => {
+  afterEach(() => {
+    cleanup();
+  });
   const mockValuedItems: ValuedWatchlistItem[] = [
     {
       id: "1",
@@ -82,5 +86,37 @@ describe("IrpfMirrorReport", () => {
     expect(screen.getByText("PETR4")).toBeInTheDocument();
     expect(screen.getByText(/100 ações de PETR4/)).toBeInTheDocument();
     expect(screen.getByText("Copiar Discriminação")).toBeInTheDocument();
+  });
+
+  it("displays explicit Brazilian fiscal legal compliance notice", () => {
+    render(<IrpfMirrorReport valuedItems={mockValuedItems} context={mockContext} />);
+
+    expect(screen.getByText(/Nota de Conformidade/i)).toBeInTheDocument();
+    expect(screen.getByText(/exclusivamente em português/i)).toBeInTheDocument();
+  });
+
+  it("translates UI into English while keeping discrimination text strictly in Portuguese", () => {
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: vi.fn(() => "en"),
+        setItem: vi.fn(),
+      },
+      writable: true,
+      configurable: true,
+    });
+    render(
+      <I18nProvider>
+        <IrpfMirrorReport valuedItems={mockValuedItems} context={mockContext} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText("IRPF Tax Mirror (Ready to Copy)")).toBeInTheDocument();
+    expect(screen.getByText(/Assets & Rights/)).toBeInTheDocument();
+    expect(screen.getByText(/Exempt Income/)).toBeInTheDocument();
+    expect(screen.getByText(/Exclusive \/ JCP/)).toBeInTheDocument();
+    expect(screen.getByText("Copy Description")).toBeInTheDocument();
+
+    expect(screen.getByText(/generated exclusively in Portuguese to comply with Brazilian Federal Revenue/i)).toBeInTheDocument();
+    expect(screen.getByText(/100 ações de PETR4/)).toBeInTheDocument();
   });
 });

@@ -57,17 +57,17 @@ export function AllocationOverviewCard({
                 t.dashboard.allocation.classes?.[entry.key as EightClassKey] ?? entry.key;
 
               let statusLabel = t.dashboard.allocation.statusBalanced;
-              let statusColor = "text-[#a97a1f] dark:text-[#DFC38A]";
-              let barColor = "bg-[#DFC38A]";
+              let statusColor = "text-accent-gold dark:text-[#DFC38A]";
+              let barColor = "bg-accent-gold dark:bg-[#DFC38A]";
 
               if (entry.status === "invest") {
                 statusLabel = t.dashboard.allocation.statusInvest;
-                statusColor = "text-[#15803d] dark:text-[#34D399]";
-                barColor = "bg-[#34D399]";
+                statusColor = "text-success dark:text-[#34D399]";
+                barColor = "bg-success dark:bg-[#34D399]";
               } else if (entry.status === "above") {
                 statusLabel = t.dashboard.allocation.statusAbove;
-                statusColor = "text-[#dc2626] dark:text-[#F87171]";
-                barColor = "bg-[#F87171]";
+                statusColor = "text-danger dark:text-[#F87171]";
+                barColor = "bg-danger dark:bg-[#F87171]";
               }
 
               const fillPct = Math.min(
@@ -78,10 +78,10 @@ export function AllocationOverviewCard({
               return (
                 <div
                   key={entry.key}
-                  className="rounded-xl border border-border/60 bg-surface-2 p-3.5 transition-colors hover:border-border dark:border-[#182C25] dark:bg-[#0D1714]"
+                  className="rounded-xl border border-border/60 bg-muted/40 p-3.5 transition-colors hover:border-border dark:border-[#182C25] dark:bg-[#0D1714]"
                 >
                   <div className="mb-1.5 flex items-center justify-between text-xs">
-                    <span className="font-semibold text-sm text-foreground dark:text-white truncate pr-2">
+                    <span className="font-semibold text-sm text-foreground truncate pr-2">
                       {classLabel}
                     </span>
                     <span className="text-muted-foreground text-xs font-mono shrink-0">
@@ -89,7 +89,7 @@ export function AllocationOverviewCard({
                     </span>
                   </div>
 
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-3 dark:bg-[#182C25] my-2">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted dark:bg-[#182C25] my-2">
                     <div
                       className={cn("h-full rounded-full transition-all duration-300", barColor)}
                       style={{ width: `${fillPct}%` }}

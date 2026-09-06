@@ -123,7 +123,7 @@ export function ResultStats({
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
               {t.result.avgDividendLabel} ({timeframe}Y)
             </div>
-            <div className="inline-flex items-center gap-0.5 p-0.5 rounded-md bg-[#1a1a24] border border-white/5">
+            <div className="inline-flex items-center gap-0.5 p-0.5 rounded-md bg-muted border border-border/70">
               {TIMEFRAMES.map((n) => {
                 const enabled = availableTimeframes.includes(n);
                 const active = timeframe === n;
@@ -136,8 +136,8 @@ export function ResultStats({
                     className={
                       "px-2.5 py-1 text-[10px] rounded-[4px] font-bold tabular-nums transition-all " +
                       (active
-                        ? "bg-primary/80 text-white shadow-sm"
-                        : "text-muted-foreground hover:bg-white/5 hover:text-foreground") +
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "text-muted-foreground hover:bg-muted/80 hover:text-foreground") +
                       (!enabled ? " opacity-30 cursor-not-allowed" : "")
                     }
                     aria-pressed={active}

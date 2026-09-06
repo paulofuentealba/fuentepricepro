@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatCurrency } from "@/lib/formatters";
+import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import type { TaxRealityContext } from "@/lib/tax/buildTaxContext";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,8 @@ export function IrpfMirrorReport({
   context,
   currentYear = new Date().getFullYear(),
 }: IrpfMirrorReportProps) {
+  const { t } = useI18n();
+  const m = t.irpfMirror;
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const baseYear = currentYear;
@@ -30,11 +33,11 @@ export function IrpfMirrorReport({
     navigator.clipboard.writeText(text).then(
       () => {
         setCopiedId(id);
-        toast.success(`Discriminação copiada: ${label}`);
+        toast.success(m.copySuccess.replace("{{label}}", label));
         setTimeout(() => setCopiedId(null), 2500);
       },
       () => {
-        toast.error("Não foi possível copiar para a área de transferência.");
+        toast.error(m.copyError);
       }
     );
   };
@@ -98,15 +101,14 @@ export function IrpfMirrorReport({
             <div>
               <div className="inline-flex items-center gap-2">
                 <StatusBadge variant="default" icon={FileText}>
-                  DECLARAÇÃO DE AJUSTE ANUAL (IRPF {baseYear + 1} / ANO-CALENDÁRIO {baseYear})
+                  {m.badge.replace("{{nextYear}}", String(baseYear + 1)).replace("{{baseYear}}", String(baseYear))}
                 </StatusBadge>
               </div>
               <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-foreground">
-                Espelho do IRPF (Pronto para Copiar)
+                {m.title}
               </h2>
               <p className="mt-1 text-xs text-muted-foreground max-w-2xl">
-                Discriminações padronizadas conforme o leiaute da Receita Federal do Brasil. Copie
-                e cole diretamente no Programa Gerador da Declaração (PGD) ou no e-CAC sem risco de digitação incorreta.
+                {m.subtitle}
               </p>
             </div>
 
@@ -136,13 +138,19 @@ export function IrpfMirrorReport({
                   a.href = url;
                   a.download = `espelho-irpf-${baseYear}.txt`;
                   a.click();
-                  toast.success("Relatório IRPF exportado com sucesso!");
+                  toast.success(m.exportSuccess);
                 }}
               >
                 <Download className="h-3.5 w-3.5" />
-                Exportar Tudo (.txt)
+                {m.exportAllBtn}
               </Button>
             </div>
+          </div>
+
+          {/* Explicit Legal Compliance Card */}
+          <div className="mt-4 rounded-xl border border-border/70 bg-muted/40 p-3.5 text-xs text-muted-foreground leading-relaxed flex items-start gap-2.5">
+            <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+            <span>{m.legalComplianceNote}</span>
           </div>
         </CardHeader>
       </Card>
@@ -151,13 +159,13 @@ export function IrpfMirrorReport({
       <Tabs defaultValue="bens" className="w-full">
         <TabsList className="grid grid-cols-3 w-full max-w-xl mb-4">
           <TabsTrigger value="bens" className="text-xs">
-            Bens e Direitos ({activePositions.length})
+            {m.tabs.assets} ({activePositions.length})
           </TabsTrigger>
           <TabsTrigger value="isentos" className="text-xs">
-            Rendimentos Isentos ({exemptDividends.length})
+            {m.tabs.exempt} ({exemptDividends.length})
           </TabsTrigger>
           <TabsTrigger value="exclusivos" className="text-xs">
-            Tributação Exclusiva / JCP ({jcpPositions.length})
+            {m.tabs.exclusive} ({jcpPositions.length})
           </TabsTrigger>
         </TabsList>
 
@@ -165,7 +173,7 @@ export function IrpfMirrorReport({
         <TabsContent value="bens" className="space-y-4">
           {activePositions.length === 0 ? (
             <div className="p-8 text-center border rounded-xl border-dashed border-border/70 text-muted-foreground text-sm">
-              Nenhum bem ou posição ativa na carteira para o ano-calendário.
+              {m.emptyAssets}
             </div>
           ) : (
             activePositions.map((item) => {
@@ -189,10 +197,10 @@ export function IrpfMirrorReport({
 
                     <div className="flex items-center gap-3 text-xs">
                       <span className="text-muted-foreground">
-                        Grupo: <strong className="text-foreground font-semibold">{info.group}</strong>
+                        {m.groupLabel} <strong className="text-foreground font-semibold">{info.group}</strong>
                       </span>
                       <span className="text-muted-foreground">
-                        Código: <strong className="text-foreground font-semibold">{info.code}</strong>
+                        {m.codeLabel} <strong className="text-foreground font-semibold">{info.code}</strong>
                       </span>
                     </div>
                   </div>
@@ -200,7 +208,7 @@ export function IrpfMirrorReport({
                   {/* Discrimination Text Box */}
                   <div className="rounded-lg bg-muted/40 border border-border/50 p-3 relative group">
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                      Texto da Discriminação (Campo 13 do IRPF):
+                      {m.field13Label}
                     </div>
                     <p className="text-xs text-foreground/90 font-mono leading-relaxed select-all">
                       {discrimText}
@@ -208,11 +216,11 @@ export function IrpfMirrorReport({
                     <div className="mt-2.5 flex items-center justify-between border-t border-border/40 pt-2">
                       <div className="flex items-center gap-4 text-xs font-mono">
                         <span className="text-muted-foreground">
-                          Situação em 31/12/{previousYear}:{" "}
+                          {m.statusPriorYear.replace("{{year}}", String(previousYear))}{" "}
                           <strong className="text-foreground font-bold">R$ 0,00</strong>
                         </span>
                         <span className="text-muted-foreground">
-                          Situação em 31/12/{baseYear}:{" "}
+                          {m.statusCurrentYear.replace("{{year}}", String(baseYear))}{" "}
                           <strong className="text-primary font-bold">
                             {formatCurrency(costBasis, "BRL", "ptBR")}
                           </strong>
@@ -227,7 +235,7 @@ export function IrpfMirrorReport({
                         onClick={() => copyToClipboard(discrimText, `bem-${item.id}`, item.ticker)}
                       >
                         {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        {isCopied ? "Copiado!" : "Copiar Discriminação"}
+                        {isCopied ? m.copiedBadge : m.copyDiscriminationBtn}
                       </Button>
                     </div>
                   </div>
@@ -243,16 +251,16 @@ export function IrpfMirrorReport({
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-success" />
-                Rendimentos Isentos e Não Tributáveis (Código 09 - Lucros e Dividendos)
+                {m.exemptCard.title}
               </CardTitle>
               <CardDescription className="text-xs">
-                Valores recebidos a título de dividendos de ações brasileiras e rendimentos de FIIs durante o ano-calendário {baseYear}.
+                {m.exemptCard.desc.replace("{{year}}", String(baseYear))}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {exemptDividends.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhum dividendo isento apurado no período.
+                  {m.exemptCard.empty}
                 </p>
               ) : (
                 exemptDividends.map((pos, idx) => {
@@ -269,10 +277,10 @@ export function IrpfMirrorReport({
                           <span className="font-mono font-bold text-xs bg-muted px-1.5 py-0.5 rounded">
                             {pos.ticker}
                           </span>
-                          <span className="text-xs text-muted-foreground">Código 09 • Lucros e Dividendos</span>
+                          <span className="text-xs text-muted-foreground">{m.exemptCard.codeLabel}</span>
                         </div>
                         <div className="text-xs font-semibold text-success mt-1">
-                          Valor Declarável: {formatCurrency(pos.grossAmount, "BRL", "ptBR")}
+                          {m.exemptCard.declarableValue} {formatCurrency(pos.grossAmount, "BRL", "ptBR")}
                         </div>
                       </div>
 
@@ -284,7 +292,7 @@ export function IrpfMirrorReport({
                         onClick={() => copyToClipboard(copyText, `isento-${idx}`, pos.ticker)}
                       >
                         {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        {isCopied ? "Copiado!" : "Copiar"}
+                        {isCopied ? m.copiedBadge : m.copyBtn}
                       </Button>
                     </div>
                   );
@@ -300,16 +308,16 @@ export function IrpfMirrorReport({
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Coins className="h-4 w-4 text-accent-text" />
-                Rendimentos Sujeitos à Tributação Exclusiva/Definitiva (Código 10 - JCP)
+                {m.exclusiveCard.title}
               </CardTitle>
               <CardDescription className="text-xs">
-                Juros sobre Capital Próprio já com IR de 15% retido na fonte. No IRPF, informe o valor líquido recebido.
+                {m.exclusiveCard.desc}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {jcpPositions.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhum JCP apurado no período.
+                  {m.exclusiveCard.empty}
                 </p>
               ) : (
                 jcpPositions.map((pos, idx) => {
@@ -326,11 +334,11 @@ export function IrpfMirrorReport({
                           <span className="font-mono font-bold text-xs bg-muted px-1.5 py-0.5 rounded">
                             {pos.ticker}
                           </span>
-                          <span className="text-xs text-muted-foreground">Código 10 • Juros sobre Capital Próprio</span>
+                          <span className="text-xs text-muted-foreground">{m.exclusiveCard.codeLabel}</span>
                         </div>
                         <div className="text-xs font-semibold text-foreground mt-1 flex items-center gap-3">
-                          <span>Líquido Recebido: <strong className="text-success">{formatCurrency(pos.netAmount, "BRL", "ptBR")}</strong></span>
-                          <span className="text-muted-foreground">IR Retido (15%): {formatCurrency(pos.withheldTax, "BRL", "ptBR")}</span>
+                          <span>{m.exclusiveCard.netReceived} <strong className="text-success">{formatCurrency(pos.netAmount, "BRL", "ptBR")}</strong></span>
+                          <span className="text-muted-foreground">{m.exclusiveCard.withheldTax} {formatCurrency(pos.withheldTax, "BRL", "ptBR")}</span>
                         </div>
                       </div>
 
@@ -342,7 +350,7 @@ export function IrpfMirrorReport({
                         onClick={() => copyToClipboard(copyText, `jcp-${idx}`, pos.ticker)}
                       >
                         {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        {isCopied ? "Copiado!" : "Copiar"}
+                        {isCopied ? m.copiedBadge : m.copyBtn}
                       </Button>
                     </div>
                   );

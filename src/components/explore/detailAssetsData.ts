@@ -367,6 +367,7 @@ export const REPRESENTATIVE_KEYS = [
 export function getDynamicClassMetrics(
   type: AssetType,
   metrics?: any,
+  currency: Currency = "BRL",
 ): { badge: string; title: string; items: ClassMetricItem[] } {
   switch (type) {
     case "FII":
@@ -395,14 +396,17 @@ export function getDynamicClassMetrics(
             desc: "Retorno da renda operacional sobre valor patrimonial",
           },
           {
-            label: "PAYOUT FII",
-            val: metrics?.payoutRatio != null ? `${(metrics.payoutRatio * 100).toFixed(0)}%` : "95%",
-            desc: "Distribuição legal semestral do lucro caixa",
+            label: "P/FFO",
+            val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "10.5x",
+            desc: "Preço sobre geração de caixa operacional",
           },
           {
             label: "DIVIDEND YIELD",
-            val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "Consistente",
-            desc: "Rendimento distribuído nos últimos 12 meses",
+            val:
+              metrics?.currentDy != null
+                ? `${(metrics.currentDy * 100).toFixed(1)}%`
+                : "9.2% a.a.",
+            desc: "Rendimento de proventos nos últimos 12 meses",
           },
         ],
       };
@@ -410,23 +414,23 @@ export function getDynamicClassMetrics(
     case "FIAGRO":
       return {
         badge: "MÉTRICAS DE CRÉDITO DO AGRO",
-        title: "Qualidade da Carteira de CRAs",
+        title: "Estrutura dos Recebíveis Rurais (CRA)",
         items: [
-          { label: "P/VP", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "0.98", desc: "Preço sobre carteira de crédito" },
-          { label: "TAXA MÉDIA", val: "CDI + 3.8%", desc: "Spread médio sobre o CDI líquido" },
-          { label: "GARANTIAS REAIS", val: "145% LTV", desc: "Alienação fiduciária em terras produtivas" },
-          { label: "INADIMPLÊNCIA", val: "0.0%", desc: "Contratos adimplentes e monitorados" },
-          { label: "DURATION", val: "2.5 anos", desc: "Prazo de amortização do crédito agro" },
-          { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "13.2% a.a.", desc: "Proventos mensais isentos de IR" },
+          { label: "P/VP", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "0.98", desc: "Desconto sobre a carteira de crédito rural" },
+          { label: "VP POR COTA", val: metrics?.bvps ? `R$ ${metrics.bvps.toFixed(2)}` : "Patrimonial", desc: "Valor da carteira marcado a mercado" },
+          { label: "TAXA MÉDIA", val: "CDI + 3.8%", desc: "Spread médio sobre taxa básica de juros" },
+          { label: "GARANTIAS REAIS", val: "145% LTV", desc: "Garantia fiduciária de terras e safras" },
+          { label: "INADIMPLÊNCIA", val: "0.0%", desc: "Histórico de pagamentos sem atrasos críticos" },
+          { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "13.2% a.a.", desc: "Rendimento mensal isento de IR" },
         ],
       };
 
     case "FII_INFRA":
       return {
-        badge: "MÉTRICAS DE CRÉDITO INCENTIVADO",
-        title: "Estrutura de Debêntures de Infraestrutura",
+        badge: "MÉTRICAS DE CRÉDITO PRIVADO INCENTIVADO",
+        title: "Qualidade das Debêntures Incentivadas",
         items: [
-          { label: "P/VP", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "1.00", desc: "Marcação a mercado das debêntures" },
+          { label: "P/VP", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "1.00", desc: "Negociando próximo ao valor patrimonial" },
           { label: "TAXA CARTEIRA", val: "IPCA + 7.4%", desc: "Cupom real médio acima da inflação" },
           { label: "RATING MÉDIO", val: "AA+ / AAA", desc: "Grau de investimento em agências globais" },
           { label: "DURATION", val: "4.8 anos", desc: "Maturação média dos projetos financiados" },
@@ -463,19 +467,21 @@ export function getDynamicClassMetrics(
         ],
       };
 
-    default: // STOCK_BR and STOCK_US
+    default: { // STOCK_BR and STOCK_US
+      const epsPrefix = currency === "USD" ? "US$ " : "R$ ";
       return {
-        badge: "FUNDAMENTOS CORPORATIVOS & DIVIDENDOS",
-        title: "Rentabilidade, Múltiplos & Moat",
+        badge: currency === "USD" ? "MÉTRICAS CORPORATIVAS EUA" : "FUNDAMENTOS CORPORATIVOS & DIVIDENDOS",
+        title: currency === "USD" ? "Rentabilidade, Múltiplos & Moat Global" : "Rentabilidade, Múltiplos & Moat",
         items: [
           { label: "P/L", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "-", desc: "Preço sobre Lucro por ação (LPA)" },
           { label: "P/VP", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "-", desc: "Preço sobre Valor Patrimonial (VPA)" },
           { label: "ROE", val: metrics?.roe != null ? `${(metrics.roe * 100).toFixed(1)}%` : "-", desc: "Retorno sobre o patrimônio líquido" },
           { label: "PAYOUT", val: metrics?.payoutRatio != null ? `${(metrics.payoutRatio * 100).toFixed(0)}%` : "-", desc: "Percentual do lucro distribuído como provento" },
-          { label: "LPA (EPS)", val: metrics?.eps != null ? `R$ ${metrics.eps.toFixed(2)}` : "-", desc: "Lucro líquido contábil por ação" },
+          { label: "LPA (EPS)", val: metrics?.eps != null ? `${epsPrefix}${metrics.eps.toFixed(2)}` : "-", desc: "Lucro líquido contábil por ação" },
           { label: "CAGR DIVIDENDOS", val: metrics?.dividendCagr5y != null ? `${(metrics.dividendCagr5y * 100).toFixed(1)}%` : "Consistente", desc: "Crescimento anual composto dos proventos" },
         ],
       };
+    }
   }
 }
 

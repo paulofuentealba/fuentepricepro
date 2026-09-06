@@ -65,20 +65,20 @@ export function PortfolioSummaryHeader({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <Button
               asChild
-              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-white hover:bg-primary/90 shadow-sm border-0 transition-all"
+              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm border-0 transition-all"
             >
               <Link to="/app/add-asset">
-                <PlusCircle className="h-4 w-4 text-white" />
+                <PlusCircle className="h-4 w-4" />
                 <span className="truncate">{t.portfolio.emptyStateAddAsset}</span>
               </Link>
             </Button>
 
             <Button
               asChild
-              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-white hover:bg-primary/90 shadow-sm border-0 transition-all"
+              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm border-0 transition-all"
             >
               <Link to="/app/import-broker-note">
-                <FileText className="h-4 w-4 text-white" />
+                <FileText className="h-4 w-4" />
                 <span className="truncate">{t.portfolio.emptyStateImportNote}</span>
               </Link>
             </Button>
@@ -86,9 +86,9 @@ export function PortfolioSummaryHeader({
             <Button
               type="button"
               onClick={() => setIsCsvModalOpen(true)}
-              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-white hover:bg-primary/90 shadow-sm border-0 transition-all"
+              className="w-full min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 font-medium text-xs bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm border-0 transition-all"
             >
-              <FileSpreadsheet className="h-4 w-4 text-white" />
+              <FileSpreadsheet className="h-4 w-4" />
               <span className="truncate">{t.watchlist.addAssetDropdownImportFile}</span>
             </Button>
           </div>

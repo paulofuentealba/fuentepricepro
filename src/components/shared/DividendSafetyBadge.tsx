@@ -61,7 +61,7 @@ export function DividendSafetyBadge({
   }[size];
 
   return (
-    <TooltipProvider delayDuration={150}>
+    <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>
           <span
@@ -80,7 +80,7 @@ export function DividendSafetyBadge({
             </span>
           </span>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-xs p-3.5 text-xs space-y-2">
+        <TooltipContent side="top" className="max-w-xs p-3.5 text-xs space-y-2 border border-border bg-popover text-popover-foreground shadow-md">
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <strong className="font-semibold text-foreground flex items-center gap-1.5">
               {getIcon()}

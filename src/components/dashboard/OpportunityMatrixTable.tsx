@@ -101,7 +101,7 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
           className={cn(
             "rounded-full border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
             activeFilter === "ALL"
-              ? "border-accent-emerald-light bg-accent-emerald text-white dark:bg-[#2A7F5F] dark:border-[#34D399]"
+              ? "border-accent-emerald-light bg-accent-emerald text-primary-foreground dark:bg-[#2A7F5F] dark:border-[#34D399]"
               : "border-border/80 bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground dark:border-[#1B2F27] dark:bg-[#12211C] dark:text-[#94A3B8]",
           )}
         >
@@ -115,7 +115,7 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
               activeFilter === clsKey
-                ? "border-accent-emerald-light bg-accent-emerald text-white dark:bg-[#2A7F5F] dark:border-[#34D399]"
+                ? "border-accent-emerald-light bg-accent-emerald text-primary-foreground dark:bg-[#2A7F5F] dark:border-[#34D399]"
                 : "border-border/80 bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground dark:border-[#1B2F27] dark:bg-[#12211C] dark:text-[#94A3B8]",
             )}
           >
@@ -174,7 +174,7 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
                       >
                         {badge.label}
                       </span>
-                      <span className="inline-block px-2 py-0.5 rounded text-[0.7rem] font-medium bg-[rgba(42,127,95,0.2)] text-accent-emerald-light dark:text-[#34D399] border border-[rgba(52,211,153,0.3)]">
+                      <span className="inline-block px-2 py-0.5 rounded text-[0.7rem] font-medium bg-accent-emerald-subtle text-accent-emerald dark:text-[#34D399] border border-accent-emerald/30">
                         {classLabel}
                       </span>
                     </div>
@@ -186,7 +186,7 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
                       <span className="text-[0.68rem] uppercase tracking-wider text-muted-foreground dark:text-[#64748B] block">
                         {t.dashboard.matrix.columnPrice}
                       </span>
-                      <span className="font-semibold text-foreground dark:text-white text-sm">
+                      <span className="font-semibold text-foreground text-sm">
                         {formatCurrency(livePrice, item.currency, locale)}
                       </span>
                     </div>
@@ -300,11 +300,11 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
                         </div>
                       </TableCell>
                       <TableCell className="py-3.5 px-2 lg:px-2.5 whitespace-nowrap">
-                        <span className="inline-block px-2.5 py-1 rounded-md text-[0.72rem] font-semibold bg-[rgba(42,127,95,0.2)] text-accent-emerald-light dark:text-[#34D399] border border-[rgba(52,211,153,0.3)] whitespace-nowrap">
+                        <span className="inline-block px-2.5 py-1 rounded-md text-[0.72rem] font-semibold bg-accent-emerald-subtle text-accent-emerald dark:text-[#34D399] border border-accent-emerald/30 whitespace-nowrap">
                           {classLabel}
                         </span>
                       </TableCell>
-                      <TableCell className="py-3.5 px-2 lg:px-2.5 whitespace-nowrap font-semibold text-foreground dark:text-white">
+                      <TableCell className="py-3.5 px-2 lg:px-2.5 whitespace-nowrap font-semibold text-foreground">
                         {formatCurrency(livePrice, item.currency, locale)}
                       </TableCell>
                       <TableCell className="py-3.5 px-2 lg:px-2.5 whitespace-nowrap font-semibold text-accent-gold dark:text-[#DFC38A]">

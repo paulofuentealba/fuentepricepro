@@ -43,7 +43,7 @@ export function AssetDeepDiveView({
 }: AssetDeepDiveViewProps) {
   const navigate = useNavigate();
   const { t, locale } = useI18n();
-  const { valuedItems, fx } = useValuedPortfolio();
+  const { valuedItems, fx, totals } = useValuedPortfolio();
   const { settings, updateSettings } = useUserSettings();
 
   const showSelector = hideSelector !== undefined ? !hideSelector : mode !== "modal";
@@ -87,22 +87,34 @@ export function AssetDeepDiveView({
   // Sensitivity Sliders State
   const defaultBazinYield = useMemo(() => {
     const assetType = asset?.type ?? repData?.classType ?? "STOCK_BR";
+    if (currency === "USD" || assetType === "STOCK_US" || assetType === "REIT") {
+      return settings?.classTargetYields?.[assetType] ?? repData?.bazinYieldTarget ?? 3.5;
+    }
     return settings?.classTargetYields?.[assetType] ?? repData?.bazinYieldTarget ?? 6.0;
-  }, [asset?.type, repData, settings]);
+  }, [asset?.type, repData, settings, currency]);
+
+  const defaultKDiscount = useMemo(() => {
+    if (repData?.kDiscount) return repData.kDiscount;
+    if (currency === "USD" || asset?.type === "STOCK_US" || asset?.type === "REIT") {
+      return 8.5;
+    }
+    return 11.0;
+  }, [repData?.kDiscount, currency, asset?.type]);
 
   const [bazinYield, setBazinYield] = useState<number>(defaultBazinYield);
-  const [kDiscount, setKDiscount] = useState<number>(repData?.kDiscount ?? 11.0);
+  const [kDiscount, setKDiscount] = useState<number>(defaultKDiscount);
   const [gGrowth, setGGrowth] = useState<number>(repData?.gGrowth ?? 5.0);
 
   // Reset sliders when ticker changes
   useEffect(() => {
     const assetType = asset?.type ?? repData?.classType ?? "STOCK_BR";
-    const initialYield = settings?.classTargetYields?.[assetType] ?? repData?.bazinYieldTarget ?? 6.0;
+    const isUs = currency === "USD" || assetType === "STOCK_US" || assetType === "REIT";
+    const initialYield = settings?.classTargetYields?.[assetType] ?? repData?.bazinYieldTarget ?? (isUs ? 3.5 : 6.0);
     setBazinYield(initialYield);
-    setKDiscount(repData?.kDiscount ?? 11.0);
+    setKDiscount(repData?.kDiscount ?? (isUs ? 8.5 : 11.0));
     setGGrowth(repData?.gGrowth ?? 5.0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTicker]);
+  }, [currentTicker, currency]);
 
   // Handle ticker selection
   function handleSelectTicker(ticker: string) {
@@ -124,16 +136,21 @@ export function AssetDeepDiveView({
       const sum = asset.dividends3y.reduce((acc, v) => acc + v, 0);
       return sum / asset.dividends3y.length;
     }
-    return livePrice * 0.06;
-  }, [repData, asset, livePrice]);
+    return livePrice * (currency === "USD" ? 0.035 : 0.06);
+  }, [repData, asset, livePrice, currency]);
 
-  // Portfolio Custody calculations
+  // Portfolio Custody calculations (Mixed-currency consolidated)
   const totalPortfolioValue = useMemo(() => {
-    return valuedItems.reduce(
-      (acc, it) => acc + (it.livePrice || it.currentPrice || 0) * (it.quantity || 0),
-      0,
-    );
-  }, [valuedItems]);
+    if (totals?.consolidatedNetWorth && totals.consolidatedNetWorth > 0) {
+      return totals.consolidatedNetWorth;
+    }
+    return valuedItems.reduce((acc, it) => {
+      const p = it.livePrice || it.currentPrice || 0;
+      const q = it.quantity || 0;
+      const val = p * q;
+      return acc + (it.currency === "USD" ? val * (fx?.USDBRL ?? 5.5) : val);
+    }, 0);
+  }, [totals?.consolidatedNetWorth, valuedItems, fx?.USDBRL]);
 
   const custodyQuantity = portfolioHolding ? portfolioHolding.quantity : (repData?.defaultQty ?? 0);
   const custodyAveragePrice =
@@ -145,9 +162,10 @@ export function AssetDeepDiveView({
   const custodyCapitalGain = custodyTotalValue - custodyCostBasis;
   const custodyCapitalGainPct =
     custodyCostBasis > 0 ? (custodyCapitalGain / custodyCostBasis) * 100 : 0;
+  const custodyValueBRL = currency === "USD" ? custodyTotalValue * (fx?.USDBRL ?? 5.5) : custodyTotalValue;
   const custodyWeightPct =
     totalPortfolioValue > 0 && portfolioHolding
-      ? (custodyTotalValue / totalPortfolioValue) * 100
+      ? (custodyValueBRL / totalPortfolioValue) * 100
       : null;
   const custodyYoC =
     portfolioHolding && portfolioHolding.averagePrice && portfolioHolding.averagePrice > 0
@@ -170,14 +188,21 @@ export function AssetDeepDiveView({
 
   // 2. Graham: √(22.5 × LPA × VPA)
   const tetoGraham = useMemo(() => {
+    const isUs = currency === "USD" || asset?.type === "STOCK_US" || asset?.type === "REIT";
+    if (isUs) {
+      if (eps != null && bvps != null && eps > 0 && bvps > 0) {
+        return Math.sqrt(22.5 * eps * bvps);
+      }
+      return null;
+    }
     if (eps != null && bvps != null && eps > 0 && bvps > 0) {
       return Math.sqrt(22.5 * eps * bvps);
     }
-    if (repData) {
+    if (repData && repData.currency !== "USD") {
       return repData.teto * 1.05;
     }
     return null;
-  }, [eps, bvps, repData]);
+  }, [eps, bvps, repData, currency, asset?.type]);
 
   // 3. Gordon: D1 / (k - g)
   const tetoGordon = useMemo(() => {
@@ -263,8 +288,8 @@ export function AssetDeepDiveView({
       };
     }
     const assetType = asset?.type ?? "STOCK_BR";
-    return getDynamicClassMetrics(assetType, asset?.metrics);
-  }, [repData, asset]);
+    return getDynamicClassMetrics(assetType, asset?.metrics, currency);
+  }, [repData, asset, currency]);
 
   // Tax passport
   const taxPassportHtml = useMemo(() => {
@@ -408,12 +433,26 @@ export function AssetDeepDiveView({
               <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
                 {repData?.classLabel ?? asset?.type ?? "Ações"}
               </span>
-              <span className="text-xs text-muted-foreground">
-                Custodiado em:{" "}
-                <strong className="text-foreground font-medium">
-                  {portfolioHolding?.broker || repData?.broker || "BTG Pactual"}
-                </strong>
-              </span>
+              {currency === "USD" && (
+                <span className="inline-flex items-center rounded-full bg-accent-gold/15 text-accent-gold px-2 py-0.5 text-[11px] font-semibold">
+                  USD • US Market
+                </span>
+              )}
+              {portfolioHolding ? (
+                <span className="text-xs text-muted-foreground">
+                  {t.deepDive?.custodyAt || "Custodiado em:"}{" "}
+                  <strong className="text-foreground font-medium">
+                    {portfolioHolding.broker || (currency === "USD" ? "Avenue / Schwab" : "Corretora")}
+                  </strong>
+                </span>
+              ) : repData?.broker ? (
+                <span className="text-xs text-muted-foreground">
+                  {t.deepDive?.refBroker || "Corretora ref.:"}{" "}
+                  <strong className="text-foreground font-medium">
+                    {repData.broker}
+                  </strong>
+                </span>
+              ) : null}
             </div>
             <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground">
               {currentTicker}{" "}
@@ -514,7 +553,9 @@ export function AssetDeepDiveView({
                 <div className="text-lg font-bold text-foreground font-display mt-0.5">
                   {formatNumber(custodyQuantity, locale)}{" "}
                   <span className="text-xs text-muted-foreground font-normal">
-                    {t.deepDive?.sharesSuffix || "cotas/ações"}
+                    {currency === "USD"
+                      ? (t.deepDive?.sharesUsSuffix || "shares")
+                      : (t.deepDive?.sharesSuffix || "cotas/ações")}
                   </span>
                 </div>
               </div>
@@ -543,6 +584,11 @@ export function AssetDeepDiveView({
                     locale,
                   )}
                 </div>
+                {currency === "USD" && fx?.USDBRL && (
+                  <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                    ≈ {formatCurrency(custodyTotalValue * fx.USDBRL, "BRL", locale)}
+                  </div>
+                )}
               </div>
 
               <div className="rounded-lg border border-border/50 bg-muted/25 p-3">
@@ -655,7 +701,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.nextPayment || "Data Pagto & Valor"}
                 </div>
                 <div className="text-sm font-bold text-foreground font-display mt-1">
-                  {repData?.nextPay || "02/OUT"} • {repData?.nextVal || "R$ 0,65 / ação"}
+                  {repData?.nextPay || "—"} • {repData?.nextVal || (annualDividend > 0 ? `${currency === "USD" ? "US$ " : "R$ "}${(annualDividend / 4).toFixed(2)} / ${currency === "USD" ? "share" : "ação"}` : (currency === "USD" ? "US$ — / share" : "R$ — / ação"))}
                 </div>
               </div>
             </div>
@@ -709,10 +755,33 @@ export function AssetDeepDiveView({
             lynch: tetoLynch,
             consensus: tetoConsensus,
             methodDetails: {
-              bazin: { formula: "DPA / 6%", yieldTarget: bazinYield ?? 6, isNetJcp: false, source: "CVM / B3", date: "2026" },
-              gordon: { formula: "D1 / (k - g)", rate: kDiscount ?? 11, growth: gGrowth ?? 5, source: "Consenso Fuente", date: "2026" },
-              graham: { formula: "√(22,5 × LPA × VPA)", margin: 0, source: "Graham Formula", date: "2026" },
-              lynch: { formula: "P/L = Crescimento + DY", growth: 10, dividendYield: 6, source: "Peter Lynch", date: "2026" },
+              bazin: {
+                formula: currency === "USD" ? `DPA / ${bazinYield.toFixed(1)}%` : "DPA / 6%",
+                yieldTarget: bazinYield ?? (currency === "USD" ? 3.5 : 6),
+                isNetJcp: false,
+                source: currency === "USD" ? "SEC / Proventos Líquidos (WHT 30%)" : "CVM / B3",
+                date: "2026",
+              },
+              gordon: {
+                formula: "D1 / (k - g)",
+                rate: kDiscount ?? (currency === "USD" ? 8.5 : 11),
+                growth: gGrowth ?? 5,
+                source: "Consenso Fuente",
+                date: "2026",
+              },
+              graham: {
+                formula: "√(22,5 × LPA × VPA)",
+                margin: 0,
+                source: currency === "USD" ? "Benjamin Graham (Bolsa US)" : "Graham Formula",
+                date: "2026",
+              },
+              lynch: {
+                formula: "P/L = Crescimento + DY",
+                growth: 10,
+                dividendYield: bazinYield ?? (currency === "USD" ? 3.5 : 6),
+                source: "Peter Lynch",
+                date: "2026",
+              },
             },
           }}
           livePrice={livePrice}

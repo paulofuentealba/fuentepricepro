@@ -64,24 +64,43 @@ export function RealidadeFiscalPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="space-y-6">
+      <div>
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <FileText className="h-3.5 w-3.5" />
+          <span>{t.nav.sections.track}</span>
+        </div>
+        <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {t.taxRealityScreen.title}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t.taxRealityScreen.subtitle}
+        </p>
+      </div>
+
       <Tabs defaultValue="irpf" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto mb-6">
-          <TabsTrigger value="irpf" className="text-xs sm:text-sm gap-2">
-            <FileText className="h-4 w-4" />
-            Espelho do IRPF (Copiar)
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-0">
+          <TabsTrigger
+            value="irpf"
+            className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            <span>{t.taxRealityScreen.tabs.irpfMirror}</span>
           </TabsTrigger>
-          <TabsTrigger value="darf" className="text-xs sm:text-sm gap-2">
-            <Receipt className="h-4 w-4" />
-            DARF & Vendas
+          <TabsTrigger
+            value="darf"
+            className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+          >
+            <Receipt className="h-3.5 w-3.5" />
+            <span>{t.taxRealityScreen.tabs.darfSales}</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="irpf" className="mt-0">
+        <TabsContent value="irpf" className="mt-6">
           <IrpfMirrorReport valuedItems={valuedItems} context={context} />
         </TabsContent>
 
-        <TabsContent value="darf" className="mt-0">
+        <TabsContent value="darf" className="mt-6">
           <TaxRealityScreen
             context={context}
             isLoading={isLoading}
