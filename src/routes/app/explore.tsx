@@ -5,7 +5,6 @@ import {
   Calculator as CalculatorIcon,
   Scale,
   ShieldAlert,
-  Sparkles,
   TrendingUp,
   Search,
 } from "lucide-react";
@@ -19,9 +18,6 @@ import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
 
 const RiskRadar = lazy(() =>
   import("@/components/ceiling/RiskRadar").then((m) => ({ default: m.RiskRadar })),
-);
-const DividendRadar = lazy(() =>
-  import("@/components/ceiling/DividendRadar").then((m) => ({ default: m.DividendRadar })),
 );
 
 function ToolSkeleton() {
@@ -97,12 +93,6 @@ export function ExplorarPage() {
       label: t.tabs.riskRadar,
       icon: ShieldAlert,
       description: t.explore.descriptions.riskRadar,
-    },
-    {
-      id: "globalradar",
-      label: t.tabs.radar,
-      icon: Sparkles,
-      description: t.explore.descriptions.globalRadar,
     },
     {
       id: "snowball",
@@ -197,13 +187,7 @@ export function ExplorarPage() {
             );
           }
 
-          return (
-            <TabsContent key={tool.id} value={tool.id} className="mt-6">
-              <Suspense fallback={<ToolSkeleton />}>
-                <DividendRadar />
-              </Suspense>
-            </TabsContent>
-          );
+          return null;
         })}
       </Tabs>
     </div>
