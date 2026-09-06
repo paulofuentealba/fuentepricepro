@@ -10,6 +10,7 @@ import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/formatters";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { ValuationConsensusMatrix } from "@/components/shared/ValuationConsensusMatrix";
 import { cn } from "@/lib/utils";
 import type { SearchHit } from "@/lib/apiService.functions";
 import {
@@ -287,12 +288,13 @@ export function AssetDeepDiveView({
   }, [repData, annualDividend, asset, livePrice, t]);
 
   // Save consensus / target yield to user settings
-  async function handleApplyConsensus() {
+  async function handleApplyConsensus(assumptions?: { bazinYield: number; kDiscount: number; gGrowth: number }) {
     try {
+      const targetYield = assumptions?.bazinYield ?? bazinYield;
       const assetType = asset?.type ?? repData?.classType ?? "STOCK_BR";
       const updatedClassYields = {
         ...(settings?.classTargetYields ?? {}),
-        [assetType]: bazinYield,
+        [assetType]: targetYield,
       };
       await updateSettings({ classTargetYields: updatedClassYields });
       toast.success(
@@ -689,322 +691,26 @@ export function AssetDeepDiveView({
         </div>
 
         {/* MATRIZ DE CONSENSO FUENTE (4 MODELOS) */}
-        <div className="rounded-xl border border-border/80 bg-gradient-to-br from-card via-card to-accent/5 p-5 shadow-xs">
-          <div className="mb-4">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-accent-text">
-              {t.deepDive?.consensusBadge || "VALUATION MULTI-METODOLÓGICO • 4 MODELOS CLÁSSICOS"}
-            </span>
-            <h3 className="font-serif text-lg font-bold text-foreground">
-              {t.deepDive?.consensusTitle || "Matriz de Consenso de Preço Teto Fuente"}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {t.deepDive?.consensusDescription ||
-                "Cruzamento de Bazin, Graham, Gordon e Peter Lynch para eliminar vieses de uma única fórmula."}
-            </p>
-          </div>
-
-          {/* HERO BANNER CONSENSO */}
-          <div className="rounded-xl border border-border/60 bg-muted/30 p-4 mb-4">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.deepDive?.consensusCeiling || "Preço Teto de Consenso Fuente"}
-                </div>
-                <div className="font-serif text-3xl font-bold text-accent-text font-display">
-                  {formatCurrency(tetoConsensus, currency, locale)}
-                </div>
-                <div
-                  className={cn(
-                    "text-xs font-semibold mt-0.5",
-                    marginConsensus >= 0 ? "text-success" : "text-danger",
-                  )}
-                >
-                  {t.deepDive?.avgSafetyMargin || "Margem de Segurança Média"}:{" "}
-                  {marginConsensus >= 0 ? "+" : ""}
-                  {Number.isFinite(marginConsensus) ? marginConsensus.toFixed(1) : "0.0"}%
-                </div>
-              </div>
-
-              <div className="text-right">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.deepDive?.methodConvergence || "Convergência"}
-                </div>
-                <span className="inline-flex items-center rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success ring-1 ring-success/30 mt-1">
-                  {t.deepDive?.approvalsCount?.replace("{{count}}", String(approvalsCount)) ||
-                    `${approvalsCount} de 4 Aprovam`}
-                </span>
-                <div className="text-[10px] text-muted-foreground mt-1">
-                  {t.deepDive?.highConvergence || "Convergência Alta • Risco Baixo"}
-                </div>
-              </div>
-            </div>
-
-            {/* RANGE RULER */}
-            <div className="mt-4 pt-3 border-t border-border/50">
-              <div className="flex justify-between text-[11px] text-muted-foreground mb-1.5">
-                <span>{t.deepDive?.conservativeFloor || "Piso Conservador"}</span>
-                <span className="text-accent-text font-semibold">
-                  {t.deepDive?.weightedConsensus || "Consenso Ponderado"}
-                </span>
-                <span>{t.deepDive?.optimisticCeiling || "Teto Otimista"}</span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden relative">
-                <div className="absolute left-[15%] right-[15%] h-full bg-gradient-to-r from-primary to-accent rounded-full" />
-              </div>
-              <div className="flex justify-between text-[11px] font-display font-medium text-foreground mt-1">
-                <span>{formatCurrency(minFloor, currency, locale)}</span>
-                <span className="text-accent-text font-bold">
-                  {formatCurrency(tetoConsensus, currency, locale)}
-                </span>
-                <span>{formatCurrency(maxCeiling, currency, locale)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 4 METHOD CARDS */}
-          <div className="grid grid-cols-2 gap-2.5 mb-4">
-            {/* BAZIN */}
-            <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <strong className="font-semibold text-foreground">1. Décio Bazin</strong>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-bold",
-                    tetoBazin != null && tetoBazin >= livePrice
-                      ? "bg-success/10 text-success"
-                      : "bg-danger/10 text-danger",
-                  )}
-                >
-                  {tetoBazin != null && tetoBazin >= livePrice
-                    ? t.deepDive?.belowCeiling || "Abaixo Teto"
-                    : t.deepDive?.aboveCeiling || "Acima Teto"}
-                </span>
-              </div>
-              <div className="text-base font-bold text-foreground font-display my-0.5">
-                {tetoBazin != null ? formatCurrency(tetoBazin, currency, locale) : "N/D"}
-              </div>
-              <div className="text-[11px] text-muted-foreground">
-                Margem:{" "}
-                {tetoBazin != null && livePrice > 0 ? (
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      tetoBazin >= livePrice ? "text-success" : "text-danger",
-                    )}
-                  >
-                    {tetoBazin >= livePrice ? "+" : ""}
-                    {Number.isFinite(((tetoBazin - livePrice) / livePrice) * 100)
-                      ? (((tetoBazin - livePrice) / livePrice) * 100).toFixed(1)
-                      : "0.0"}%
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div className="text-[10px] text-muted-foreground/80 mt-0.5">
-                {t.deepDive?.bazinFormula || "Div / Yield Alvo"}
-              </div>
-            </div>
-
-            {/* GRAHAM */}
-            <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <strong className="font-semibold text-foreground">2. Benjamin Graham</strong>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-bold",
-                    tetoGraham != null && tetoGraham >= livePrice
-                      ? "bg-success/10 text-success"
-                      : "bg-danger/10 text-danger",
-                  )}
-                >
-                  {tetoGraham != null && tetoGraham >= livePrice
-                    ? t.deepDive?.belowCeiling || "Abaixo Teto"
-                    : t.deepDive?.aboveCeiling || "Acima Teto"}
-                </span>
-              </div>
-              <div className="text-base font-bold text-foreground font-display my-0.5">
-                {tetoGraham != null ? formatCurrency(tetoGraham, currency, locale) : "N/D"}
-              </div>
-              <div className="text-[11px] text-muted-foreground">
-                Margem:{" "}
-                {tetoGraham != null && livePrice > 0 ? (
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      tetoGraham >= livePrice ? "text-success" : "text-danger",
-                    )}
-                  >
-                    {tetoGraham >= livePrice ? "+" : ""}
-                    {Number.isFinite(((tetoGraham - livePrice) / livePrice) * 100)
-                      ? (((tetoGraham - livePrice) / livePrice) * 100).toFixed(1)
-                      : "0.0"}%
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div className="text-[10px] text-muted-foreground/80 mt-0.5">
-                {t.deepDive?.grahamFormula || "√(22.5 × LPA × VPA)"}
-              </div>
-            </div>
-
-            {/* GORDON */}
-            <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <strong className="font-semibold text-foreground">3. Gordon (DCF)</strong>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-bold",
-                    tetoGordon != null && tetoGordon >= livePrice
-                      ? "bg-success/10 text-success"
-                      : "bg-danger/10 text-danger",
-                  )}
-                >
-                  {tetoGordon != null && tetoGordon >= livePrice
-                    ? t.deepDive?.belowCeiling || "Abaixo Teto"
-                    : t.deepDive?.aboveCeiling || "Acima Teto"}
-                </span>
-              </div>
-              <div className="text-base font-bold text-foreground font-display my-0.5">
-                {tetoGordon != null ? formatCurrency(tetoGordon, currency, locale) : "N/D"}
-              </div>
-              <div className="text-[11px] text-muted-foreground">
-                Margem:{" "}
-                {tetoGordon != null && livePrice > 0 ? (
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      tetoGordon >= livePrice ? "text-success" : "text-danger",
-                    )}
-                  >
-                    {tetoGordon >= livePrice ? "+" : ""}
-                    {Number.isFinite(((tetoGordon - livePrice) / livePrice) * 100)
-                      ? (((tetoGordon - livePrice) / livePrice) * 100).toFixed(1)
-                      : "0.0"}%
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div className="text-[10px] text-muted-foreground/80 mt-0.5">
-                {t.deepDive?.gordonFormula || "D1 / (k - g)"}
-              </div>
-            </div>
-
-            {/* LYNCH */}
-            <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <strong className="font-semibold text-foreground">4. Peter Lynch</strong>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-bold",
-                    tetoLynch != null && tetoLynch >= livePrice
-                      ? "bg-success/10 text-success"
-                      : "bg-danger/10 text-danger",
-                  )}
-                >
-                  {tetoLynch != null && tetoLynch >= livePrice
-                    ? t.deepDive?.belowCeiling || "Abaixo Teto"
-                    : t.deepDive?.aboveCeiling || "Acima Teto"}
-                </span>
-              </div>
-              <div className="text-base font-bold text-foreground font-display my-0.5">
-                {tetoLynch != null ? formatCurrency(tetoLynch, currency, locale) : "N/D"}
-              </div>
-              <div className="text-[11px] text-muted-foreground">
-                Margem:{" "}
-                {tetoLynch != null && livePrice > 0 ? (
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      tetoLynch >= livePrice ? "text-success" : "text-danger",
-                    )}
-                  >
-                    {tetoLynch >= livePrice ? "+" : ""}
-                    {Number.isFinite(((tetoLynch - livePrice) / livePrice) * 100)
-                      ? (((tetoLynch - livePrice) / livePrice) * 100).toFixed(1)
-                      : "0.0"}%
-                  </span>
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div className="text-[10px] text-muted-foreground/80 mt-0.5">
-                {t.deepDive?.lynchFormula || "LPA × Crescimento g"}
-              </div>
-            </div>
-          </div>
-
-          {/* SLIDERS DE PREMISSAS */}
-          <div className="rounded-lg border border-border/60 bg-muted/25 p-3.5 space-y-3 mb-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              {t.deepDive?.assumptionsTitle || "Ajuste de Premissas Globais (Tempo Real)"}
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">
-                  {t.deepDive?.bazinYieldLabel || "Yield Mínimo Bazin"}:
-                </span>
-                <strong className="text-primary font-bold">{(bazinYield ?? 6).toFixed(1)}%</strong>
-              </div>
-              <input
-                type="range"
-                min="4"
-                max="14"
-                step="0.5"
-                value={bazinYield ?? 6}
-                onChange={(e) => setBazinYield(parseFloat(e.target.value))}
-                className="w-full accent-primary h-1.5 bg-muted rounded-lg cursor-pointer"
-              />
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">
-                  {t.deepDive?.gordonDiscountLabel || "Taxa de Desconto Gordon (k)"}:
-                </span>
-                <strong className="text-accent-text font-bold">{(kDiscount ?? 11).toFixed(1)}%</strong>
-              </div>
-              <input
-                type="range"
-                min="8"
-                max="16"
-                step="0.5"
-                value={kDiscount ?? 11}
-                onChange={(e) => setKDiscount(parseFloat(e.target.value))}
-                className="w-full accent-primary h-1.5 bg-muted rounded-lg cursor-pointer"
-              />
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">
-                  {t.deepDive?.perpetualGrowthLabel || "Crescimento Perpétuo Gordon / Lynch (g)"}:
-                </span>
-                <strong className="text-foreground font-bold">{(gGrowth ?? 5).toFixed(1)}%</strong>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="7.5"
-                step="0.5"
-                value={gGrowth ?? 5}
-                onChange={(e) => setGGrowth(parseFloat(e.target.value))}
-                className="w-full accent-primary h-1.5 bg-muted rounded-lg cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleApplyConsensus}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 shadow-sm transition-all cursor-pointer"
-          >
-            {t.deepDive?.applyConsensusBtn || "Aplicar Consenso ao Motor de Aportes"}
-          </button>
-        </div>
+        <ValuationConsensusMatrix
+          valuation={{
+            bazin: tetoBazin,
+            graham: tetoGraham,
+            gordon: tetoGordon,
+            lynch: tetoLynch,
+            consensus: tetoConsensus,
+            methodDetails: {
+              bazin: { formula: "DPA / 6%", yieldTarget: bazinYield ?? 6, isNetJcp: false, source: "CVM / B3", date: "2026" },
+              gordon: { formula: "D1 / (k - g)", rate: kDiscount ?? 11, growth: gGrowth ?? 5, source: "Consenso Fuente", date: "2026" },
+              graham: { formula: "√(22,5 × LPA × VPA)", margin: 0, source: "Graham Formula", date: "2026" },
+              lynch: { formula: "P/L = Crescimento + DY", growth: 10, dividendYield: 6, source: "Peter Lynch", date: "2026" },
+            },
+          }}
+          livePrice={livePrice}
+          currency={currency}
+          ticker={currentTicker}
+          showSensitivitySliders={true}
+          onApplyAssumptions={handleApplyConsensus}
+        />
       </div>
 
       {/* TAX PASSPORT */}

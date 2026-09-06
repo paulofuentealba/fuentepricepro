@@ -37,6 +37,8 @@ export interface TickerSearchFieldProps {
   label?: string;
   /** Hides the "select an asset" inline error — some consumers show their own. */
   hideSelectError?: boolean;
+  /** Enables displaying and persisting recent ticker searches */
+  enableRecentHistory?: boolean;
 }
 
 /**
@@ -55,6 +57,7 @@ export function TickerSearchField({
   autoFocus,
   label,
   hideSelectError,
+  enableRecentHistory = false,
 }: TickerSearchFieldProps) {
   const { t } = useI18n();
   const [query, setQuery] = useState(initialQuery ?? "");
@@ -64,6 +67,16 @@ export function TickerSearchField({
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoPickedRef = useRef(false);
+
+  const [recentHits, setRecentHits] = useState<SearchHit[]>(() => {
+    if (typeof window === "undefined" || !enableRecentHistory) return [];
+    try {
+      const item = localStorage.getItem("fuente_recent_tickers_v1");
+      return item ? JSON.parse(item) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const shouldSearch = useMemo(
     () => query.trim().length > 0 && !(selected && selected.ticker === query.toUpperCase()),
@@ -95,6 +108,16 @@ export function TickerSearchField({
     setSelected(hit);
     setQuery(hit.ticker);
     setOpen(false);
+    if (enableRecentHistory && typeof window !== "undefined") {
+      try {
+        const filtered = recentHits.filter((s) => s.ticker !== hit.ticker);
+        const updated = [hit, ...filtered].slice(0, 5);
+        setRecentHits(updated);
+        localStorage.setItem("fuente_recent_tickers_v1", JSON.stringify(updated));
+      } catch {
+        // Local storage full or unavailable
+      }
+    }
     onPick(hit);
   }
 
@@ -219,6 +242,23 @@ export function TickerSearchField({
       )}
       {!hideSelectError && !selected && query.trim() !== "" && !open && (
         <p className="mt-2 text-center text-xs text-destructive">{t.form.selectAssetError}</p>
+      )}
+      {enableRecentHistory && recentHits.length > 0 && query.trim() === "" && (
+        <div className="flex items-center gap-1.5 pt-1 overflow-x-auto scrollbar-none">
+          <span className="text-[10px] text-muted-foreground uppercase font-semibold whitespace-nowrap">
+            Recentes:
+          </span>
+          {recentHits.map((h) => (
+            <button
+              key={h.ticker}
+              type="button"
+              onClick={() => pick(h)}
+              className="rounded-full bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground text-xs px-2.5 py-0.5 border border-border/60 transition-colors font-display font-medium cursor-pointer"
+            >
+              {displayTicker(h.ticker)}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
