@@ -38,8 +38,9 @@ export function assetQueryOptions(ticker: string) {
     // server-fn client logs every fetch rejection (including benign AbortError) as a
     // console.error, so forwarding the signal here just produces console noise for no gain.
     queryFn: (): Promise<Asset> => fetchAssetFn({ data: { ticker: key } }),
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
+    staleTime: 15 * 60_000,
+    gcTime: 60 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -49,8 +50,9 @@ export function quoteQueryOptions(ticker: string) {
     queryKey: ["quote", key] as const,
     // See assetQueryOptions above — signal intentionally not forwarded, same rationale.
     queryFn: (): Promise<LiveQuote | null> => fetchQuoteFn({ data: { ticker: key } }),
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -61,8 +63,9 @@ export function searchQueryOptions(query: string) {
     queryFn: ({ signal }): Promise<SearchHit[]> =>
       searchAssetsFn({ data: { query: normalized }, signal }),
     staleTime: 5 * 60_000,
-    gcTime: 10 * 60_000,
+    gcTime: 15 * 60_000,
     enabled: normalized.length > 0,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -70,8 +73,9 @@ export function exchangeRateQueryOptions() {
   return queryOptions({
     queryKey: ["exchangeRate", "USDBRL"] as const,
     queryFn: ({ signal }): Promise<{ USDBRL: number }> => fetchExchangeRatesFn({ signal }),
-    staleTime: 10 * 60_000,
-    gcTime: 30 * 60_000,
+    staleTime: 30 * 60_000, // 30 minutes
+    gcTime: 60 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -81,6 +85,7 @@ export function macroRatesQueryOptions() {
     queryFn: ({ signal }): Promise<MacroRates> => fetchMacroRatesFn({ signal }),
     staleTime: 86_400_000, // 24 hours
     gcTime: 172_800_000, // 48 hours
+    refetchOnWindowFocus: false,
   });
 }
 

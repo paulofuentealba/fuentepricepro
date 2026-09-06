@@ -269,6 +269,45 @@ export function useValuedPortfolio() {
   return useValuedPortfolioComputation();
 }
 
+/**
+ * Granular selector: returns only portfolio totals and core rates.
+ * Memoized to prevent re-renders when individual items or quotes update.
+ */
+export function useValuedTotals() {
+  const portfolio = useValuedPortfolio();
+  return useMemo(
+    () => ({
+      totals: portfolio.totals,
+      isAppLoading: portfolio.isAppLoading,
+      fx: portfolio.fx,
+      macroRates: portfolio.macroRates,
+      lastUpdatedAt: portfolio.lastUpdatedAt,
+      isBffMode: portfolio.isBffMode,
+    }),
+    [portfolio.totals, portfolio.isAppLoading, portfolio.fx, portfolio.macroRates, portfolio.lastUpdatedAt, portfolio.isBffMode]
+  );
+}
+
+/**
+ * Granular selector: returns a single ValuedWatchlistItem by ticker.
+ */
+export function useValuedItem(ticker: string | undefined): ValuedWatchlistItem | undefined {
+  const portfolio = useValuedPortfolio();
+  return useMemo(() => {
+    if (!ticker) return undefined;
+    const upper = ticker.toUpperCase();
+    return portfolio.valuedItems.find((it) => it.ticker.toUpperCase() === upper);
+  }, [portfolio.valuedItems, ticker]);
+}
+
+/**
+ * Granular selector: returns only the valuedItems list.
+ */
+export function useValuedItems(): ValuedWatchlistItem[] {
+  const portfolio = useValuedPortfolio();
+  return portfolio.valuedItems;
+}
+
 // Re-export useTransactions for components that still need it
 import { useTransactions, type Transaction } from "./transactions";
 export { useTransactions, type Transaction };

@@ -1,16 +1,13 @@
-import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { AssetCard } from "@/components/shared/AssetCard";
 import { ResultSkeleton } from "@/components/ceiling/ResultSkeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { type WatchlistItem } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useI18n } from "@/lib/i18n-provider";
-import { Info, Calendar as CalendarIcon, ChevronDown, Pencil, Scissors, Sliders, AlertTriangle, Target } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar as CalendarIcon, ChevronDown, Scissors, Target } from "lucide-react";
 import { toast } from "sonner";
-import { ValuationAssumptionsSheet } from "./assetCard/ValuationAssumptionsSheet";
 import { useAssetCardDerived } from "./assetCard/useAssetCardDerived";
 import { AssetCardFinancials } from "./assetCard/AssetCardFinancials";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,13 +15,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
-import { DividendsHistoryPanel } from "./DividendsHistoryPanel";
-import { IndicatorGrid } from "@/components/ceiling/IndicatorGrid";
-import { FundamentalIndicatorsPanel } from "./FundamentalIndicatorsPanel";
-import { DividendHistoryChart } from "@/components/ceiling/result/DividendHistoryChart";
-import { BuyAndHoldChecklistCard } from "./BuyAndHoldChecklistCard";
-import { AssetDynamicFaqAccordion } from "./AssetDynamicFaqAccordion";
-import { RetrospectiveSimulatorCard } from "./RetrospectiveSimulatorCard";
 
 import { exchangeRateQueryOptions, assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, displayTicker, toIntlLocale, formatPercent } from "@/lib/i18n";
@@ -32,96 +22,25 @@ import { convertCurrency } from "@/lib/currency";
 
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
-import { ConsensusPyramid } from "./ConsensusPyramid";
-import { FixedIncomePanel } from "./FixedIncomePanel";
-import { TransactionsPanel } from "./TransactionsPanel";
-import { AssetProjectionPanel } from "./AssetProjectionPanel";
 import { InvestingSinceField } from "../shared/InvestingSinceField";
 import { useTransactions } from "@/lib/transactions";
 import { EditPositionFields } from "./EditPositionFields";
 import { CorporateEventFields } from "@/components/portfolio/CorporateEventFields";
 import { usePendingEvents } from "@/lib/corporateEvents";
 
-function WowInsights({
-  item,
-  asset,
-  valuation,
-}: {
-  item: WatchlistItem;
-  asset?: any;
-  valuation: ReturnType<typeof getAssetValuation>;
-}) {
-  const { t, locale } = useI18n();
+const DividendsHistoryPanel = lazy(() =>
+  import("./DividendsHistoryPanel").then((m) => ({ default: m.DividendsHistoryPanel }))
+);
+const AssetProjectionPanel = lazy(() =>
+  import("./AssetProjectionPanel").then((m) => ({ default: m.AssetProjectionPanel }))
+);
+const TransactionsPanel = lazy(() =>
+  import("./TransactionsPanel").then((m) => ({ default: m.TransactionsPanel }))
+);
+const FixedIncomePanel = lazy(() =>
+  import("./FixedIncomePanel").then((m) => ({ default: m.FixedIncomePanel }))
+);
 
-  const margin = valuation.margin;
-  const marginStr = Math.abs(margin).toFixed(1);
-  const isImplausibleMargin = margin > 100 || !Number.isFinite(margin);
-  const isBargain = margin > 10;
-  const isFair = margin >= 0 && margin <= 10;
-
-  let insightText = "";
-  let badgeColor = "";
-  let iconColor = "";
-  if (isImplausibleMargin) {
-    insightText = t.result.insights.dataInsufficient;
-    badgeColor = "bg-muted/30 border-border/50";
-    iconColor = "text-muted-foreground";
-  } else if (isBargain) {
-    insightText = t.result.insights.bargain.replace("{{margin}}", marginStr);
-    badgeColor = "bg-success/5 border-success/20";
-    iconColor = "text-success";
-  } else if (isFair) {
-    insightText = t.result.insights.fair.replace("{{margin}}", marginStr);
-    badgeColor = "bg-warning/5 border-warning/20";
-    iconColor = "text-warning";
-  } else {
-    insightText = t.result.insights.overvalued.replace("{{margin}}", marginStr);
-    badgeColor = "bg-danger/5 border-danger/20";
-    iconColor = "text-danger";
-  }
-
-  const today = new Date();
-  const currentMonth = today.getMonth() + 1;
-  let nextPayment = null;
-  if (item.paymentMonths && item.paymentMonths.length > 0) {
-    const sorted = [...item.paymentMonths].sort((a, b) => a - b);
-    nextPayment = sorted.find((m) => m >= currentMonth) || sorted[0];
-  }
-
-  let monthName = "";
-  if (nextPayment) {
-    const date = new Date(2024, nextPayment - 1, 1);
-    monthName = new Intl.DateTimeFormat(toIntlLocale(locale), {
-      month: "long",
-    }).format(date);
-    // Capitalize first letter
-    monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-  }
-
-  return (
-    <div className="mb-6 grid gap-4 sm:grid-cols-2">
-      <div className={`flex flex-col gap-2 rounded-lg border p-4 ${badgeColor}`}>
-        <div className={`flex items-center gap-2 font-semibold ${iconColor}`}>
-          <Info className="h-4 w-4" />
-          <span className="text-foreground">{t.result.insights.title}</span>
-        </div>
-        <p className="text-sm text-muted-foreground">{insightText}</p>
-      </div>
-
-      <div className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/20 p-4">
-        <div className="flex items-center gap-2 font-semibold text-muted-foreground">
-          <CalendarIcon className="h-4 w-4" />
-          <span>{t.result.insights.nextPayment}</span>
-        </div>
-        <p className="text-sm font-medium">
-          {nextPayment
-            ? t.result.insights.predictedMonth.replace("{{month}}", monthName)
-            : t.result.insights.noPaymentData}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function AssetHoldings({
   item,
@@ -445,7 +364,9 @@ export function AssetDetailSheet({
                          onUpdateInvestingSince={onUpdateInvestingSince}
                        />
                       {item.type === "FIXED_INCOME" && (
-                        <FixedIncomePanel item={item} />
+                        <Suspense fallback={<ResultSkeleton />}>
+                          <FixedIncomePanel item={item} />
+                        </Suspense>
                       )}
 
                       <div className="space-y-3">
@@ -468,7 +389,9 @@ export function AssetDetailSheet({
 
                       {item.type !== "FIXED_INCOME" && (
                         <div className="pt-2">
-                          <TransactionsPanel item={item} />
+                          <Suspense fallback={<ResultSkeleton />}>
+                            <TransactionsPanel item={item} />
+                          </Suspense>
                         </div>
                       )}
                     </>
@@ -479,12 +402,14 @@ export function AssetDetailSheet({
               {item.type !== "FIXED_INCOME" && (
                 <TabsContent value="dividends" className="space-y-6 mt-0">
                   <ErrorBoundary label="asset_detail_dividends">
-                    <DividendsHistoryPanel
-                      item={item}
-                      events={asset.dividendEvents ?? []}
-                      currency={asset.currency}
-                      asset={asset}
-                    />
+                    <Suspense fallback={<ResultSkeleton />}>
+                      <DividendsHistoryPanel
+                        item={item}
+                        events={asset.dividendEvents ?? []}
+                        currency={asset.currency}
+                        asset={asset}
+                      />
+                    </Suspense>
                   </ErrorBoundary>
                 </TabsContent>
               )}
@@ -492,11 +417,13 @@ export function AssetDetailSheet({
               {item.type !== "FIXED_INCOME" && (
                 <TabsContent value="projection" className="space-y-6 mt-0">
                   <ErrorBoundary label="asset_detail_projection">
-                    <AssetProjectionPanel
-                      item={item}
-                      asset={asset}
-                      currency={asset.currency}
-                    />
+                    <Suspense fallback={<ResultSkeleton />}>
+                      <AssetProjectionPanel
+                        item={item}
+                        asset={asset}
+                        currency={asset.currency}
+                      />
+                    </Suspense>
                   </ErrorBoundary>
                 </TabsContent>
               )}
