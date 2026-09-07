@@ -7,9 +7,12 @@ import { useEffect } from "react";
 
 const STORAGE_KEY = "ceilingPricePro.settings.v1";
 
+export type TaxJurisdiction = "BR" | "US";
+
 export interface UserSettings {
   targetYield: number;
   displayCurrency: Currency;
+  taxJurisdiction?: TaxJurisdiction;
   smartAllocationTargets: Partial<Record<AssetType, number>>;
   classTargetYields?: Partial<Record<AssetType, number>>;
   excludeAboveCeiling?: boolean;
@@ -34,6 +37,7 @@ export interface UserSettings {
 const DEFAULT_SETTINGS: UserSettings = {
   targetYield: 6,
   displayCurrency: "BRL",
+  taxJurisdiction: "BR",
   maxConcentrationPerAsset: null,
   smartAllocationTargets: {
     STOCK_BR: 0,

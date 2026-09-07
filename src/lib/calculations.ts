@@ -126,10 +126,14 @@ export function dividendTaxRate(
   currency?: string,
   customTaxRate?: number | null,
   isJCP?: boolean,
+  taxJurisdiction?: "BR" | "US",
 ): number {
   if (typeof customTaxRate === "number" && customTaxRate >= 0) return customTaxRate / 100;
   if (isJCP) return JCP_TAX_RATE;
-  return isUsAsset(type, currency) ? US_DIVIDEND_TAX_RATE : 0;
+  if (isUsAsset(type, currency)) {
+    return taxJurisdiction === "US" ? 0 : US_DIVIDEND_TAX_RATE;
+  }
+  return 0;
 }
 
 /** Apply withholding tax to a gross dividend amount. */
@@ -139,8 +143,9 @@ export function netAfterTax(
   currency?: string,
   customTaxRate?: number | null,
   isJCP?: boolean,
+  taxJurisdiction?: "BR" | "US",
 ): number {
-  return gross * (1 - dividendTaxRate(type, currency, customTaxRate, isJCP));
+  return gross * (1 - dividendTaxRate(type, currency, customTaxRate, isJCP, taxJurisdiction));
 }
 
 // --- Epic 1: Advanced Valuation (Fuente Consensus) ---
@@ -492,6 +497,7 @@ export interface AssetValuationParams {
   grahamMultiplier?: number;
   usTreasury10Y?: number | null;
   affo?: number | null;
+  taxJurisdiction?: "BR" | "US";
 }
 
 /**
@@ -675,6 +681,7 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     customTaxRate,
     shareholderYield,
     terminalGrowthRate = US_TERMINAL_GROWTH_FALLBACK, // 2.5% US long-term inflation anchor
+    taxJurisdiction,
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
@@ -706,8 +713,8 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     };
   }
 
-  // 1. Net Dividend after US Withholding Tax (30% or custom)
-  const netAvgDividend = netAfterTax(avgDividend, "STOCK_US", currency, customTaxRate);
+  // 1. Net Dividend after US Withholding Tax (30% for BR, 0% for US, or custom)
+  const netAvgDividend = netAfterTax(avgDividend, "STOCK_US", currency, customTaxRate, false, taxJurisdiction);
 
   // 2. Bazin Model (US Adapted)
   const bazin = targetYield > 0 ? netAvgDividend / (targetYield / 100) : null;
@@ -759,10 +766,13 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
     {
       key: "withholdingTax",
       label: "Imposto retido na fonte EUA (Withholding Tax)",
-      helperText: "Alíquota de 30% retida na fonte na distribuição de proventos nos EUA",
-      value: customTaxRate ?? 30,
-      isCustomized: customTaxRate != null && customTaxRate !== 30,
-      suggestedRange: { min: 15, max: 30 },
+      helperText:
+        taxJurisdiction === "US"
+          ? "Alíquota de 0% para residentes fiscais nos EUA (tributação direta no Form 1040)"
+          : "Alíquota de 30% retida na fonte na distribuição de proventos nos EUA",
+      value: customTaxRate ?? (taxJurisdiction === "US" ? 0 : 30),
+      isCustomized: customTaxRate != null && customTaxRate !== (taxJurisdiction === "US" ? 0 : 30),
+      suggestedRange: { min: 0, max: 30 },
       confidenceBadge: 4,
     },
     {
@@ -984,6 +994,7 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
     customTaxRate,
     usTreasury10Y = US_TREASURY_10Y_FALLBACK,
     affo,
+    taxJurisdiction,
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
@@ -1015,8 +1026,8 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
     };
   }
 
-  // 1. Net Dividend after 30% US Withholding Tax
-  const netAvgDividend = netAfterTax(avgDividend, "REIT", currency, customTaxRate);
+  // 1. Net Dividend after 30% US Withholding Tax (0% for US residents or custom)
+  const netAvgDividend = netAfterTax(avgDividend, "REIT", currency, customTaxRate, false, taxJurisdiction);
 
   const effectiveTreasury10Y = usTreasury10Y ?? US_TREASURY_10Y_FALLBACK;
 
@@ -1036,7 +1047,7 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   // 4. AFFO Yield Ceiling (when AFFO per share is provided)
   let affoCeiling: number | null = null;
   if (affo != null && affo > 0 && effectiveRequiredYield > 0) {
-    const netAffo = affo * (1 - (customTaxRate ?? 30) / 100);
+    const netAffo = affo * (1 - dividendTaxRate("REIT", currency, customTaxRate, false, taxJurisdiction));
     affoCeiling = netAffo / (effectiveRequiredYield / 100);
   }
 
@@ -1071,10 +1082,13 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
     {
       key: "withholdingTax",
       label: "Imposto retido na fonte EUA (Withholding Tax)",
-      helperText: "Alíquota de 30% retida na fonte para REITs",
-      value: customTaxRate ?? 30,
-      isCustomized: customTaxRate != null && customTaxRate !== 30,
-      suggestedRange: { min: 15, max: 30 },
+      helperText:
+        taxJurisdiction === "US"
+          ? "Alíquota de 0% para residentes fiscais nos EUA (tributação direta no Form 1040)"
+          : "Alíquota de 30% retida na fonte para REITs",
+      value: customTaxRate ?? (taxJurisdiction === "US" ? 0 : 30),
+      isCustomized: customTaxRate != null && customTaxRate !== (taxJurisdiction === "US" ? 0 : 30),
+      suggestedRange: { min: 0, max: 30 },
       confidenceBadge: 4,
     },
     {
@@ -1134,6 +1148,7 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
     customTaxRate,
     selicPct = SELIC_FALLBACK,
     usTreasury10Y = US_TREASURY_10Y_FALLBACK,
+    taxJurisdiction,
   } = params;
 
   if (currentPrice <= 0) {
@@ -1167,7 +1182,7 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
 
   const isUS = isUsAsset("ETF", currency);
   const netAvgDividend = avgDividend > 0
-    ? netAfterTax(avgDividend, "ETF", currency, customTaxRate)
+    ? netAfterTax(avgDividend, "ETF", currency, customTaxRate, false, taxJurisdiction)
     : 0;
 
   const currentDy = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
@@ -1335,7 +1350,7 @@ export function getAssetValuation(params: AssetValuationParams): ValuationResult
 
   // Default fallback for other asset classes (prior to their dedicated prompt specialization)
   const isUS = isUsAsset(type, params.currency) || params.currency === "USD";
-  const netAvgDividend = netAfterTax(avgDividend, type, params.currency, params.customTaxRate);
+  const netAvgDividend = netAfterTax(avgDividend, type, params.currency, params.customTaxRate, false, params.taxJurisdiction);
   const bazin = params.targetYield > 0 ? netAvgDividend / (params.targetYield / 100) : null;
   const graham = params.eps && params.bvps && params.eps > 0 && params.bvps > 0 ? Math.sqrt(22.5 * params.eps * params.bvps) : null;
   const usDiscountRate = US_COST_OF_EQUITY_FALLBACK;

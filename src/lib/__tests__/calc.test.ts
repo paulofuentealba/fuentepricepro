@@ -44,13 +44,47 @@ describe("Bazin ceiling price math", () => {
     expect(safetyMargin(100, 0)).toBe(0);
   });
 
-  it("applies US withholding to USD dividends only", () => {
+  it("applies US withholding to USD dividends only for BR tax jurisdiction", () => {
     expect(isUsAsset("STOCK_US", "USD")).toBe(true);
     expect(isUsAsset("STOCK_BR", "BRL")).toBe(false);
     expect(dividendTaxRate("REIT", "USD")).toBe(0.3);
     expect(dividendTaxRate("STOCK_BR", "BRL")).toBe(0);
     expect(netAfterTax(100, "REIT", "USD")).toBeCloseTo(70);
     expect(netAfterTax(100, "STOCK_BR", "BRL")).toBe(100);
+  });
+
+  it("applies 0% withholding to USD dividends when taxJurisdiction is US", () => {
+    expect(dividendTaxRate("STOCK_US", "USD", undefined, false, "US")).toBe(0);
+    expect(dividendTaxRate("REIT", "USD", undefined, false, "US")).toBe(0);
+    expect(dividendTaxRate("ETF", "USD", undefined, false, "US")).toBe(0);
+    expect(netAfterTax(100, "STOCK_US", "USD", undefined, false, "US")).toBe(100);
+    expect(netAfterTax(100, "REIT", "USD", undefined, false, "US")).toBe(100);
+    expect(netAfterTax(100, "ETF", "USD", undefined, false, "US")).toBe(100);
+  });
+
+  it("respects taxJurisdiction in getAssetValuation for US stocks and REITs", () => {
+    // US Stock with $6 dividend, targetYield 6%
+    // BR resident: net dividend = 6 * 0.7 = 4.2 => Bazin = 4.2 / 0.06 = 70
+    const brValuation = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 100,
+      avgDividend: 6,
+      currency: "USD",
+      type: "STOCK_US",
+      taxJurisdiction: "BR",
+    });
+    expect(brValuation.bazin).toBeCloseTo(70);
+
+    // US resident: net dividend = 6 => Bazin = 6 / 0.06 = 100
+    const usValuation = getAssetValuation({
+      targetYield: 6,
+      currentPrice: 100,
+      avgDividend: 6,
+      currency: "USD",
+      type: "STOCK_US",
+      taxJurisdiction: "US",
+    });
+    expect(usValuation.bazin).toBeCloseTo(100);
   });
 
   it("applies 15% withholding to JCP events", () => {

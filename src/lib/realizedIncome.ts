@@ -76,6 +76,7 @@ export function calculateRealizedIncome(
   transactions: Transaction[],
   dividendEventsByTicker: Record<string, DividendEvent[] | undefined> | Map<string, DividendEvent[]>,
   assetMetaByTicker?: Record<string, AssetTaxMeta | undefined> | Map<string, AssetTaxMeta>,
+  taxJurisdiction?: "BR" | "US",
 ): RealizedIncomeEvent[] {
   const result: RealizedIncomeEvent[] = [];
   const todayISO = getLocalDateISOString();
@@ -164,6 +165,7 @@ export function calculateRealizedIncome(
           meta.currency,
           meta.customTaxRate,
           event.isJCP,
+          taxJurisdiction,
         );
         const amountNet = Math.round(rawNet * 10000) / 10000;
         const taxType = getTaxType(meta.type, meta.currency, event.isJCP);

@@ -37,6 +37,7 @@ export function computeTotals(
   valuedItems: ValuedWatchlistItem[],
   fx: { USDBRL: number } | undefined,
   macroRates: Parameters<typeof calculateFixedIncomeBalance>[1] | undefined,
+  taxJurisdiction?: "BR" | "US",
 ) {
   let usd = 0;
   let brl = 0;
@@ -55,6 +56,8 @@ export function computeTotals(
       it.type,
       it.currency,
       it.customTaxRate,
+      false,
+      taxJurisdiction,
     );
 
     const worth = getPositionValue(it, macroRates);
@@ -172,7 +175,14 @@ function useValuedPortfolioBff(
   );
 
   const bffQuery = useQuery({
-    queryKey: ["bffPortfolio", itemsWithYield.map((i) => i.ticker).join(","), transactions.length, settings.targetYield, JSON.stringify(settings.classTargetYields || {})],
+    queryKey: [
+      "bffPortfolio",
+      itemsWithYield.map((i) => i.ticker).join(","),
+      transactions.length,
+      settings.targetYield,
+      JSON.stringify(settings.classTargetYields || {}),
+      settings.taxJurisdiction,
+    ],
     queryFn: () =>
       fetchValuedPortfolioFn({
         data: {
@@ -184,6 +194,7 @@ function useValuedPortfolioBff(
           exchangeRate: fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK,
           classTargetYields: settings.classTargetYields,
           targetYield: settings.targetYield,
+          taxJurisdiction: settings.taxJurisdiction,
         },
       }),
     enabled: !isAppLoading && !isAuthLoading && itemsWithYield.length > 0,
@@ -196,8 +207,8 @@ function useValuedPortfolioBff(
   }, [bffQuery.data, t]);
 
   const totals = useMemo(
-    () => computeTotals(valuedItems, fx, macroRates),
-    [valuedItems, fx, macroRates],
+    () => computeTotals(valuedItems, fx, macroRates, settings.taxJurisdiction),
+    [valuedItems, fx, macroRates, settings.taxJurisdiction],
   );
 
   const ownedItems = useMemo(

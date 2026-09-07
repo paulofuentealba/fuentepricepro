@@ -385,6 +385,44 @@ describe("realizedIncome", () => {
         taxType: "jcp",
       });
     });
+
+    it("applies 0% withholding to US dividends when taxJurisdiction is US, and 30% when BR", () => {
+      const txs: Transaction[] = [
+        {
+          id: "tx-o",
+          ticker: "O",
+          type: "buy",
+          date: new Date("2024-01-01").getTime(),
+          pricePerShare: 50,
+          quantity: 100,
+        },
+      ];
+      const events = {
+        O: [
+          {
+            exDate: "2024-01-15",
+            paymentDate: "2024-02-01",
+            amountPerShare: 0.25,
+            currency: "USD" as const,
+          },
+        ],
+      };
+      const assetMeta = {
+        O: { ticker: "O", type: "REIT" as const, currency: "USD" as const },
+      };
+
+      // BR jurisdiction (default): 30% withholding tax => 25 * 0.7 = 17.5
+      const brRes = calculateRealizedIncome(txs, events, assetMeta, "BR");
+      expect(brRes).toHaveLength(1);
+      expect(brRes[0].amountGross).toBe(25);
+      expect(brRes[0].amountNet).toBeCloseTo(17.5);
+
+      // US jurisdiction: 0% withholding tax => 25 net
+      const usRes = calculateRealizedIncome(txs, events, assetMeta, "US");
+      expect(usRes).toHaveLength(1);
+      expect(usRes[0].amountGross).toBe(25);
+      expect(usRes[0].amountNet).toBe(25);
+    });
   });
 
   describe("computeRealizedIncomeSummary", () => {

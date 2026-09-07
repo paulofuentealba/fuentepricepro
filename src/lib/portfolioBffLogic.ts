@@ -40,6 +40,7 @@ export interface FetchValuedPortfolioInput {
   exchangeRate?: number;
   classTargetYields?: Partial<Record<AssetType, number>>;
   targetYield?: number;
+  taxJurisdiction?: "BR" | "US";
 }
 
 export const MAX_PORTFOLIO_BFF_ITEMS = 250;
@@ -134,6 +135,8 @@ export async function computeValuedPortfolioInternal(
       terminalGrowthRate,
       currency: item.currency || asset?.currency || "BRL",
       type: assetType,
+      customTaxRate: item.customTaxRate,
+      taxJurisdiction: input.taxJurisdiction,
     });
 
     const totalValue = quantity * currentPrice;

@@ -210,4 +210,24 @@ describe("transformBffItemToValuedItem — yieldTrapWarning propagation (Item 8)
     const transformed = transformBffItemToValuedItem(rawBffItem);
     expect(transformed.valuation.yieldTrapWarning).toBe(false);
   });
+
+  it("calculates USD income with 0% tax when taxJurisdiction is US and 30% when BR", () => {
+    const items = [
+      createItem({
+        ticker: "O",
+        type: "REIT",
+        currency: "USD",
+        quantity: 100,
+        annualDividend: 3.0, // Gross = $300
+      }),
+    ];
+
+    // BR jurisdiction (default) => 30% withholding tax => $210 net
+    const brTotals = computeTotals(items, { USDBRL: 5.0 }, undefined, "BR");
+    expect(brTotals.usd).toBeCloseTo(210);
+
+    // US jurisdiction => 0% withholding tax => $300 net
+    const usTotals = computeTotals(items, { USDBRL: 5.0 }, undefined, "US");
+    expect(usTotals.usd).toBeCloseTo(300);
+  });
 });
