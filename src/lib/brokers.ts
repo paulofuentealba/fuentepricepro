@@ -19,7 +19,8 @@ export type SupportedBroker =
   | "SANTANDER"
   | "BB"
   | "CAIXA"
-  | "SCHWAB";
+  | "SCHWAB"
+  | "FIDELITY";
 
 export const KNOWN_BROKER_LABELS: Record<SupportedBroker, string> = {
   XP: "XP Investimentos",
@@ -37,4 +38,5 @@ export const KNOWN_BROKER_LABELS: Record<SupportedBroker, string> = {
   BB: "Banco do Brasil",
   CAIXA: "Caixa Econômica Federal",
   SCHWAB: "Charles Schwab",
+  FIDELITY: "Fidelity Investments",
 };

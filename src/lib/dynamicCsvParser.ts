@@ -62,6 +62,7 @@ export const COLUMN_SEMANTIC_ALIASES = {
     "Descrição",
     "Asset",
     "Symbol",
+    "Security Identifier",
   ],
   operationType: [
     "Tipo",
@@ -75,6 +76,10 @@ export const COLUMN_SEMANTIC_ALIASES = {
     "Side",
     "Type",
     "Operation",
+    "Action",
+    "Activity",
+    "Transaction Type",
+    "Action Type",
   ],
   quantity: [
     "Quantidade",
@@ -95,8 +100,12 @@ export const COLUMN_SEMANTIC_ALIASES = {
     "Cotação",
     "Preço Médio",
     "Price",
+    "Price ($)",
     "UnitPrice",
     "AvgPrice",
+    "Cost Basis Per Share",
+    "Cost Basis/Share",
+    "Cost/Share",
   ],
   costs: [
     "Taxas",
@@ -109,7 +118,9 @@ export const COLUMN_SEMANTIC_ALIASES = {
     "Taxas Liquidadas",
     "Costs",
     "Fees",
+    "Fees ($)",
     "Commission",
+    "Commission ($)",
   ],
   date: [
     "Data",
@@ -119,6 +130,8 @@ export const COLUMN_SEMANTIC_ALIASES = {
     "Data Liquidação",
     "Negociação",
     "Trade Date",
+    "Run Date",
+    "Settlement Date",
     "Date",
   ],
 } as const;
@@ -231,15 +244,45 @@ export function parseOperationType(raw: string | null | undefined): {
     .trim()
     .toLowerCase();
 
-  const buyKeywords = ["compra", "c", "buy", "b", "aplicacao", "entrada", "subscricao"];
-  const sellKeywords = ["venda", "v", "sell", "s", "resgate", "saida", "alienacao"];
+  const sellKeywords = [
+    "venda",
+    "v",
+    "sell",
+    "s",
+    "sold",
+    "you sold",
+    "resgate",
+    "saida",
+    "alienacao",
+  ];
 
-  if (buyKeywords.includes(norm) || buyKeywords.some((k) => norm.startsWith(k))) {
-    return { type: "BUY", isFallback: false };
+  const buyKeywords = [
+    "compra",
+    "c",
+    "buy",
+    "b",
+    "bought",
+    "you bought",
+    "reinvestment",
+    "reinvest",
+    "drip",
+    "aplicacao",
+    "entrada",
+    "subscricao",
+  ];
+
+  if (
+    sellKeywords.includes(norm) ||
+    sellKeywords.some((k) => norm.startsWith(k) || (k.length > 2 && norm.includes(k)))
+  ) {
+    return { type: "SELL", isFallback: false };
   }
 
-  if (sellKeywords.includes(norm) || sellKeywords.some((k) => norm.startsWith(k))) {
-    return { type: "SELL", isFallback: false };
+  if (
+    buyKeywords.includes(norm) ||
+    buyKeywords.some((k) => norm.startsWith(k) || (k.length > 2 && norm.includes(k)))
+  ) {
+    return { type: "BUY", isFallback: false };
   }
 
   return { type: "BUY", isFallback: true };
@@ -256,6 +299,11 @@ export function parseNumericValue(
 
   let str = String(raw).trim();
   if (!str) return null;
+
+  // Support accounting parentheses for negative numbers: (100.50) -> -100.50
+  if (/^\(.*\)$/.test(str)) {
+    str = "-" + str.slice(1, -1);
+  }
 
   // Clean currency symbols and non-breaking spaces
   str = str
@@ -429,6 +477,26 @@ export function parseFile(
   const costsIdx = columnMapping.costs.sourceIndex;
   const dateIdx = columnMapping.date.sourceIndex;
 
+  // Identify all cost-related columns to sum them (e.g. Commission + Fees)
+  const costAliases = COLUMN_SEMANTIC_ALIASES.costs.map(normalizeHeader);
+  const costIndices: number[] = [];
+  if (costsIdx !== -1) costIndices.push(costsIdx);
+  headers.forEach((h, idx) => {
+    if (
+      idx !== costsIdx &&
+      idx !== tickerIdx &&
+      idx !== typeIdx &&
+      idx !== qtyIdx &&
+      idx !== priceIdx &&
+      idx !== dateIdx
+    ) {
+      const norm = normalizeHeader(h);
+      if (costAliases.includes(norm)) {
+        costIndices.push(idx);
+      }
+    }
+  });
+
   for (let i = 0; i < rows.length; i++) {
     const lineIndex = i + 2; // +1 for 0-index, +1 for header row
     const row = rows[i];
@@ -462,11 +530,12 @@ export function parseFile(
 
     // 2. Quantity extraction and validation
     const rawQty = qtyIdx !== -1 ? row[qtyIdx] : null;
-    const quantity = parseNumericValue(rawQty as string | number);
-    if (quantity === null || quantity <= 0) {
+    const parsedQty = parseNumericValue(rawQty as string | number);
+    if (parsedQty === null || parsedQty === 0) {
       ignored.push({ lineIndex, rawValues, reason: `Quantidade inválida (${rawQty})` });
       continue;
     }
+    const quantity = Math.abs(parsedQty);
 
     // 3. Price extraction and validation
     const rawPrice = priceIdx !== -1 ? row[priceIdx] : null;
@@ -478,11 +547,21 @@ export function parseFile(
 
     // 4. Operation Type
     const rawType = typeIdx !== -1 ? String(row[typeIdx] ?? "") : undefined;
-    const { type, isFallback } = parseOperationType(rawType);
+    let { type, isFallback } = parseOperationType(rawType);
+    if (isFallback && parsedQty < 0) {
+      type = "SELL";
+      isFallback = false;
+    }
 
-    // 5. Costs
-    const rawCosts = costsIdx !== -1 ? row[costsIdx] : null;
-    const costs = parseNumericValue(rawCosts as string | number) ?? 0;
+    // 5. Costs (sum across primary costs column and any secondary fee/commission columns)
+    let costs = 0;
+    for (const cIdx of costIndices) {
+      const cVal = parseNumericValue(row[cIdx] as string | number);
+      if (cVal !== null && cVal > 0) {
+        costs += cVal;
+      }
+    }
+    costs = Math.round(costs * 100) / 100;
 
     // 6. Date
     const rawDateVal = dateIdx !== -1 ? row[dateIdx] : null;

@@ -232,7 +232,7 @@ export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
       name: header.findIndex((h) => h === "nome" || h === "name" || h === "empresa" || h === "company" || h === "descricao"),
       type: header.findIndex((h) => h === "tipo" || h === "type" || h === "assettype" || h === "classe"),
       qty: header.findIndex((h) => h === "quantidade" || h === "quantity" || h === "qtd" || h === "qtde" || h === "shares" || h === "volume" || h === "posicao" || h === "cantidad" || h === "cant"),
-      avg: header.findIndex((h) => h === "precomedio" || h === "averageprice" || h === "avgprice" || h === "avg" || h === "cost" || h === "preco" || h === "price" || h === "pu"),
+      avg: header.findIndex((h) => h === "precomedio" || h === "averageprice" || h === "avgprice" || h === "avg" || h === "cost" || h === "preco" || h === "price" || h === "pu" || h === "costbasispershare" || h === "costbasis" || h === "costpershare"),
       ceiling: header.findIndex((h) => h === "precoteto" || h === "ceilingprice" || h === "teto" || h === "preciotecho"),
       margin: header.findIndex((h) => h === "margemdeseguranca" || h === "safetymargin" || h === "margem" || h === "margin"),
       targetYield: header.findIndex((h) => h === "yieldalvo" || h === "targetyield" || h === "yieldmeta" || h === "dyalvo"),
@@ -249,9 +249,12 @@ export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
       const cols = parseCsvLine(lines[i]);
       const ticker = (cols[idx.ticker] || "").toUpperCase().trim();
       if (!ticker) continue;
+      // Skip section headers or disclaimer lines (e.g. "PENDING ACTIVITY", disclaimers)
+      if (ticker.includes(" ") || !/^[A-Z0-9.\-=/]{1,12}$/.test(ticker)) continue;
+      const qtyRaw = idx.qty >= 0 ? parseCurrencyValue(cols[idx.qty]) : NaN;
+      if (!Number.isFinite(qtyRaw) || qtyRaw <= 0) continue;
       const rawType = idx.type >= 0 ? (cols[idx.type] || "") : "";
       const type = parseAssetType(rawType);
-      const qtyRaw = idx.qty >= 0 ? parseCurrencyValue(cols[idx.qty]) : NaN;
       const avgRaw = idx.avg >= 0 && cols[idx.avg] !== "" ? parseCurrencyValue(cols[idx.avg]) : NaN;
       const targetYieldRaw = idx.targetYield >= 0 && cols[idx.targetYield] !== "" ? parseCurrencyValue(cols[idx.targetYield]) : NaN;
       const ceilingRaw = idx.ceiling >= 0 && cols[idx.ceiling] !== "" ? parseCurrencyValue(cols[idx.ceiling]) : NaN;
