@@ -93,14 +93,21 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
+      provider.addScope("profile");
+      provider.addScope("email");
       const userCred = await signInWithPopup(auth, provider);
-      const token = await userCred.user.getIdToken();
-      setSessionCookie(token);
+      try {
+        const token = await userCred.user.getIdToken();
+        setSessionCookie(token);
+      } catch (cookieErr) {
+        console.warn("[auth-modal] Failed to set session cookie:", cookieErr);
+      }
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user") {
+        console.error("[auth-modal] Google sign-in error:", err);
         toast.error(err instanceof Error ? err.message : t.authModal.signInFailed);
       }
+    } finally {
       setBusy(false);
     }
   }

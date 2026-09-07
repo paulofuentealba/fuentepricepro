@@ -12,13 +12,6 @@ const host = process.env.HOST || "0.0.0.0";
 app.set("trust proxy", 1);
 app.use(compression());
 
-// Permite que popups de autenticação (como o Google OAuth do Firebase)
-// conversem com a janela opener sem serem bloqueados por isolamento estrito de COOP.
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  next();
-});
-
 app.use(express.static("dist/client"));
 
 app.use(async (req, res) => {

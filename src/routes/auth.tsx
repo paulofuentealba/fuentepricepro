@@ -132,10 +132,15 @@ function AuthPage() {
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
+      provider.addScope("profile");
+      provider.addScope("email");
       const userCred = await signInWithPopup(auth, provider);
-      const token = await userCred.user.getIdToken();
-      setSessionCookie(token);
+      try {
+        const token = await userCred.user.getIdToken();
+        setSessionCookie(token);
+      } catch (cookieErr) {
+        console.warn("[auth] Failed to set session cookie:", cookieErr);
+      }
       if (profile.completedAt || profile.skipped) {
         navigate({ to: returnTo });
       } else {
@@ -143,8 +148,10 @@ function AuthPage() {
       }
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user") {
+        console.error("[auth] Google sign-in error:", err);
         toast.error(err instanceof Error ? err.message : t.authModal.googleSignInFailed);
       }
+    } finally {
       setBusy(false);
     }
   }

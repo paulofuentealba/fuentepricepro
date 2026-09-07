@@ -66,11 +66,7 @@ export const Route = createFileRoute("/settings")({
       if (auth.currentUser) return;
     }
 
-    // Client check only ever sees a session on a SPA transition — a hard
-    // navigation/reload has no client-side Firebase session to read, so
-    // cross-check the session cookie server-side before redirecting (see
-    // verifySession.functions.ts).
-    const { authenticated } = await verifySessionFn();
+    const { authenticated } = await verifySessionFn().catch(() => ({ authenticated: false }));
     if (authenticated) return;
 
     throw redirect({ to: "/auth", search: { returnTo: location.href } });

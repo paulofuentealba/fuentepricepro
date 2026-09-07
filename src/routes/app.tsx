@@ -41,13 +41,7 @@ export const Route = createFileRoute("/app")({
       }
     }
 
-    // The checks above only ever see a session on a client-side SPA
-    // transition — Firebase's client session lives in IndexedDB, which the
-    // server can't read, so a hard navigation/reload always looked
-    // unauthenticated here even for a real signed-in user or an active demo
-    // session. Cross-check the session/demo cookie via Admin SDK before
-    // committing to a redirect (see verifySession.functions.ts).
-    const { authenticated } = await verifySessionFn();
+    const { authenticated } = await verifySessionFn().catch(() => ({ authenticated: false }));
     if (authenticated) return;
 
     throw redirect({ to: "/auth", search: { returnTo: location.href } });

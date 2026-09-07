@@ -18,7 +18,7 @@ export const Route = createFileRoute("/onboarding/metas")({
       if (auth.currentUser) return;
     }
 
-    const { authenticated } = await verifySessionFn();
+    const { authenticated } = await verifySessionFn().catch(() => ({ authenticated: false }));
     if (authenticated) return;
 
     throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/metas" } });

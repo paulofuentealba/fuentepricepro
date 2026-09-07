@@ -20,10 +20,7 @@ export const Route = createFileRoute("/profile")({
       if (auth.currentUser) return;
     }
 
-    // See verifySession.functions.ts — a hard navigation/reload has no
-    // client-side Firebase session to read, so cross-check the cookie
-    // server-side before redirecting.
-    const { authenticated } = await verifySessionFn();
+    const { authenticated } = await verifySessionFn().catch(() => ({ authenticated: false }));
     if (authenticated) return;
 
     throw redirect({ to: "/auth", search: { returnTo: search.returnTo } });
