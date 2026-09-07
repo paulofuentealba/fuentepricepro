@@ -25,6 +25,8 @@ import { useWatchlist } from "@/lib/watchlist";
 import { useIssuerTickerMappings } from "@/lib/useIssuerTickerMappings";
 import { assetQueryOptions } from "@/lib/queryOptions";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth-provider";
+import { useAuthModal } from "@/lib/auth-modal";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
@@ -54,6 +56,8 @@ export function BrokerNoteImportPage() {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const { upsertManyAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const { mappings, saveMappings } = useIssuerTickerMappings();
@@ -166,6 +170,12 @@ export function BrokerNoteImportPage() {
 
   async function handleConfirm() {
     if (!canConfirm) return;
+    if (!user) {
+      openAuthModal({
+        message: t.brokerNoteImportPage?.signInToConfirm || t.guestBanner?.cta,
+      });
+      return;
+    }
     setIsImporting(true);
     try {
       const newMappings: Record<string, string> = {};
@@ -250,16 +260,19 @@ export function BrokerNoteImportPage() {
       toast.success(t.brokerNote.successImport.replace("{{count}}", String(itemsToImport.length)));
       navigate({ to: "/app/myportfolio" });
     } catch (e: any) {
-      toast.error(t.brokerNote.errorImport + ": " + e.message);
+      const errMsg = e?.message ? `${t.errors?.saveTransactionFailed || "Erro ao salvar"}: ${e.message}` : (t.errors?.saveTransactionFailed || "Erro ao salvar transações");
+      toast.error(errMsg);
     } finally {
       setIsImporting(false);
     }
   }
 
   const confirmLabel =
-    checkedRows.length === 1
-      ? t.brokerNoteImportPage?.confirmOne
-      : resolveReasonText(t, "brokerNoteImportPage.confirmN", { count: checkedRows.length });
+    !user
+      ? (t.brokerNoteImportPage?.signInToConfirm || t.guestBanner?.cta || "Entrar para confirmar")
+      : checkedRows.length === 1
+        ? t.brokerNoteImportPage?.confirmOne
+        : resolveReasonText(t, "brokerNoteImportPage.confirmN", { count: checkedRows.length });
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6">

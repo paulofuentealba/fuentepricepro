@@ -20,6 +20,24 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
 }));
 
+let mockCurrentUser: { uid: string } | null = { uid: "test-user-123" };
+vi.mock("@/lib/auth-provider", () => ({
+  useAuth: () => ({
+    user: mockCurrentUser,
+    isAdmin: false,
+    loading: false,
+    signOut: vi.fn(),
+  }),
+}));
+
+const mockOpenAuthModal = vi.fn();
+vi.mock("@/lib/auth-modal", () => ({
+  useAuthModal: () => ({
+    openAuthModal: mockOpenAuthModal,
+    closeAuthModal: vi.fn(),
+  }),
+}));
+
 const mockUpsertTransaction = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/transactions", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/transactions")>();
@@ -158,5 +176,23 @@ describe("BrokerNoteImportPage", () => {
 
     await waitFor(() => expect(mockUpsertTransaction).toHaveBeenCalledTimes(1));
     expect(mockUpsertTransaction).toHaveBeenCalledWith(expect.objectContaining({ ticker: "WEGE3" }));
+  });
+
+  it("opens auth modal when confirm is clicked while unauthenticated", async () => {
+    mockCurrentUser = null;
+    const { container } = render(<BrokerNoteImportPage />);
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { files: [makeFile()] } });
+    await waitFor(() => expect(screen.getByText("WEGE3")).toBeInTheDocument());
+
+    const confirmButton = screen.getByRole("button", { name: /entrar para confirmar/i });
+    fireEvent.click(confirmButton);
+
+    expect(mockOpenAuthModal).toHaveBeenCalledTimes(1);
+    expect(mockUpsertTransaction).not.toHaveBeenCalled();
+    expect(mockUpsertManyAsync).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
+    mockCurrentUser = { uid: "test-user-123" };
   });
 });

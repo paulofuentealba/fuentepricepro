@@ -284,6 +284,7 @@ export const ptBR = {
     edit: "Editar",
     confirmN: "Confirmar {{count}} transações",
     confirmOne: "Confirmar 1 transação",
+    signInToConfirm: "Entrar para confirmar",
     unresolvedTickerPlaceholder: "Ticker (ex: OIBR3)",
     unresolvedBadge: "Confirme o ticker",
     unitsLabel: "{{qty}} cotas",

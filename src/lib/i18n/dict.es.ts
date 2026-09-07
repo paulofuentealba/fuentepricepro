@@ -284,6 +284,7 @@ export const es = {
     edit: "Editar",
     confirmN: "Confirmar {{count}} transacciones",
     confirmOne: "Confirmar 1 transacción",
+    signInToConfirm: "Iniciar sesión para confirmar",
     unresolvedTickerPlaceholder: "Ticker (ej: OIBR3)",
     unresolvedBadge: "Confirma el ticker",
     unitsLabel: "{{qty}} unidades",

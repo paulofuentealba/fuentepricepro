@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { User, onIdTokenChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/integrations/firebase/client";
 import { setSessionCookie, clearSessionCookie } from "@/lib/sessionCookie";
+import { endDemoMode } from "@/lib/demoMode";
 
 interface AuthCtx {
   user: User | null;
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onIdTokenChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        endDemoMode();
         try {
           const tokenResult = await currentUser.getIdTokenResult();
           setIsAdmin(tokenResult.claims?.isAdmin === true);

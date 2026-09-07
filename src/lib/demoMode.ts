@@ -1,6 +1,7 @@
 import { WATCHLIST_STORAGE_KEY, TRANSACTIONS_STORAGE_KEY } from "./localStorageKeys";
 import { DEMO_WATCHLIST_DATA, DEMO_TRANSACTIONS } from "@/__fixtures__/demoPortfolio";
 import { setDemoCookie, clearDemoCookie } from "./sessionCookie";
+import { auth } from "@/integrations/firebase/client";
 
 /**
  * "See demo" mode — lets an unauthenticated visitor explore /app with a
@@ -33,6 +34,11 @@ export const DEMO_DEFAULT_SETTINGS = {
 
 export function isDemoModeActive(): boolean {
   if (typeof window === "undefined") return false;
+  // If user is authenticated, demo mode is NEVER active — purge any leftover keys
+  if (auth?.currentUser) {
+    endDemoMode();
+    return false;
+  }
   return window.localStorage.getItem(DEMO_MODE_KEY) === "true";
 }
 
@@ -83,6 +89,10 @@ export function endDemoMode(): void {
  * signing in.
  */
 export function blockWriteInDemoMode(): boolean {
+  if (auth?.currentUser) {
+    endDemoMode();
+    return false;
+  }
   if (!isDemoModeActive()) return false;
   if (typeof window !== "undefined") {
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);

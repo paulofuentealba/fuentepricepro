@@ -458,7 +458,6 @@ export function useWatchlist() {
 
   const upsertMutation = useMutation({
     mutationFn: async (item: WatchlistItem) => {
-      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -471,6 +470,7 @@ export function useWatchlist() {
           throw error;
         }
       } else {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
         const idx = list.findIndex((i) => i.id === item.id);
         if (idx >= 0) list[idx] = item;
@@ -500,7 +500,6 @@ export function useWatchlist() {
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -515,6 +514,7 @@ export function useWatchlist() {
           throw error;
         }
       } else {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         writeLocal(items.filter((i) => i.id !== id));
       }
       return id;
@@ -540,7 +540,6 @@ export function useWatchlist() {
 
   const clearMutation = useMutation({
     mutationFn: async () => {
-      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -561,6 +560,7 @@ export function useWatchlist() {
           throw error;
         }
       } else {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         clearLocal();
       }
     },
@@ -581,7 +581,6 @@ export function useWatchlist() {
 
   const upsertManyMutation = useMutation({
     mutationFn: async (newItems: WatchlistItem[]) => {
-      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
@@ -608,6 +607,7 @@ export function useWatchlist() {
           throw error;
         }
       } else {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
         newItems.forEach((item) => {
           const idx = list.findIndex((i) => i.id === item.id);
@@ -641,12 +641,11 @@ export function useWatchlist() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<WatchlistItem> }) => {
-      if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
       const existing = items.find((i) => i.id === id);
       if (!existing) throw new Error("Item not found");
       const merged = { ...existing, ...patch };
 
-      if (userId) {
+      if (userId && !USE_LOCAL_ONLY) {
         if (!userId) throw new Error("Usuário não autenticado");
         try {
           const row = itemToRow(merged, userId);
@@ -658,6 +657,7 @@ export function useWatchlist() {
           throw error;
         }
       } else {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
         const list = [...(queryClient.getQueryData<WatchlistItem[]>(queryKey) || [])];
         const idx = list.findIndex((i) => i.id === id);
         if (idx >= 0) list[idx] = merged;
