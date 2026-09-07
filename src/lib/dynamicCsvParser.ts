@@ -1,5 +1,6 @@
 import { isBrTicker } from "./classify";
 import { normalizeTicker } from "./ticker";
+import type { AccountType } from "./transactionsLogic";
 
 export interface ParsedTransaction {
   lineIndex: number;
@@ -12,6 +13,8 @@ export interface ParsedTransaction {
   date: Date;
   rawDate: string;
   notes?: string;
+  accountType?: AccountType;
+  accountName?: string;
 }
 
 export interface IgnoredRow {
@@ -35,6 +38,7 @@ export interface ColumnMapping {
   price: ColumnMatch;
   costs: ColumnMatch;
   date: ColumnMatch;
+  account: ColumnMatch;
 }
 
 export interface ParseResult {
@@ -134,9 +138,39 @@ export const COLUMN_SEMANTIC_ALIASES = {
     "Settlement Date",
     "Date",
   ],
+  account: [
+    "Account",
+    "Account Name",
+    "Account Name/Number",
+    "Account Number",
+    "Account Type",
+    "Conta",
+    "Tipo de Conta",
+    "Nome da Conta",
+  ],
 } as const;
 
 export type MappableColumn = keyof typeof COLUMN_SEMANTIC_ALIASES;
+
+/**
+ * Normalizes an account string into a standard AccountType.
+ * Recognizes Roth IRA, Traditional IRA, 401(k), and defaults to taxable.
+ */
+export function parseAccountType(raw: string | undefined | null): AccountType {
+  if (!raw || typeof raw !== "string") return "taxable";
+  const s = raw.toLowerCase();
+  if (s.includes("roth")) return "roth_ira";
+  if (
+    s.includes("ira") ||
+    s.includes("401k") ||
+    s.includes("401(k)") ||
+    s.includes("rollover") ||
+    s.includes("sep")
+  ) {
+    return "traditional_ira_401k";
+  }
+  return "taxable";
+}
 
 /**
  * Normalizes header string: removes accents, whitespace, punctuation, lowercases, and parenthetical notes.
@@ -166,6 +200,7 @@ export function matchColumn(headers: string[]): ColumnMapping {
     price: { sourceHeader: null, sourceIndex: -1, confidence: "none" },
     costs: { sourceHeader: null, sourceIndex: -1, confidence: "none" },
     date: { sourceHeader: null, sourceIndex: -1, confidence: "none" },
+    account: { sourceHeader: null, sourceIndex: -1, confidence: "none" },
   };
 
   const normalizedHeaders = headers.map(normalizeHeader);
@@ -567,6 +602,11 @@ export function parseFile(
     const rawDateVal = dateIdx !== -1 ? row[dateIdx] : null;
     const date = parseDateValue(rawDateVal as string | number) ?? new Date();
 
+    // 7. Account (e.g. Taxable vs Roth IRA vs Traditional IRA/401k)
+    const accountIdx = columnMapping.account?.sourceIndex ?? -1;
+    const rawAccountVal = accountIdx !== -1 ? String(row[accountIdx] ?? "").trim() : "";
+    const accountType = rawAccountVal ? parseAccountType(rawAccountVal) : undefined;
+
     transactions.push({
       lineIndex,
       ticker,
@@ -577,6 +617,8 @@ export function parseFile(
       costs,
       date,
       rawDate: rawDateVal !== null && rawDateVal !== undefined ? String(rawDateVal) : "",
+      accountType,
+      accountName: rawAccountVal || undefined,
     });
   }
 

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import { useI18n } from "./i18n-provider";
 import type { AssetType, Currency } from "./domain";
+import type { AccountType } from "./transactionsLogic";
 import { assetQueryOptions } from "./queryOptions";
 import { cleanTicker } from "./formatters";
 import { WATCHLIST_STORAGE_KEY } from "./localStorageKeys";
@@ -69,6 +70,8 @@ export interface WatchlistItem {
   /** Custody institution (free text; suggestions come from src/lib/brokers.ts). Null/undefined
    * for positions created before this field existed, or never assigned one manually. */
   broker?: string | null;
+  /** Account segregation (e.g. Taxable Brokerage vs Roth IRA vs Traditional IRA/401k) */
+  accountType?: AccountType | null;
 }
 
 export function makeId(ticker: string, type: AssetType) {

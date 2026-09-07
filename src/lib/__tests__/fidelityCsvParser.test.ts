@@ -100,14 +100,38 @@ describe("Fidelity CSV Parser & Ingestion (Etapa 1)", () => {
       expect(rows[0].ticker).toBe("AAPL");
       expect(rows[0].quantity).toBe(25.5);
       expect(rows[0].averagePrice).toBe(209.74);
+      expect(rows[0].accountType).toBe("taxable");
 
       expect(rows[1].ticker).toBe("O");
       expect(rows[1].quantity).toBe(100.25);
       expect(rows[1].averagePrice).toBe(50.0);
+      expect(rows[1].accountType).toBe("taxable");
 
       expect(rows[2].ticker).toBe("SCHD");
       expect(rows[2].quantity).toBe(50);
       expect(rows[2].averagePrice).toBe(26.0);
+      expect(rows[2].accountType).toBe("taxable");
+    });
+
+    it("5. segregates Taxable vs Roth IRA vs 401(k) accounts in multi-account Fidelity exports", () => {
+      const multiAccountCsv = [
+        "Account Name/Number,Symbol,Description,Quantity,Last Price,Cost Basis Per Share",
+        'Individual - Z12345678,AAPL,APPLE INC,10,$240,$200',
+        'ROTH IRA - Z87654321,O,REALTY INCOME,50,$55,$50',
+        'Rollover IRA - Z11223344,VOO,VANGUARD S&P 500,20,$450,$400',
+      ].join("\n");
+
+      const rows = parseWatchlistCsv(multiAccountCsv);
+      expect(rows).toHaveLength(3);
+
+      expect(rows[0].ticker).toBe("AAPL");
+      expect(rows[0].accountType).toBe("taxable");
+
+      expect(rows[1].ticker).toBe("O");
+      expect(rows[1].accountType).toBe("roth_ira");
+
+      expect(rows[2].ticker).toBe("VOO");
+      expect(rows[2].accountType).toBe("traditional_ira_401k");
     });
   });
 });

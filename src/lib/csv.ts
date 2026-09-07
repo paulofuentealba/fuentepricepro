@@ -1,6 +1,7 @@
 import type { AssetType, Currency } from "./domain";
 import type { WatchlistItem } from "./watchlist";
-import type { Transaction } from "./transactions";
+import type { Transaction, AccountType } from "./transactions";
+import { parseAccountType } from "./dynamicCsvParser";
 
 const VALID_TYPES: AssetType[] = [
   "STOCK_US",
@@ -27,6 +28,7 @@ export interface ParsedCsvRow {
   targetMonthlyIncome?: number | null;
   customTaxRate?: number | null;
   investingSince?: number | null;
+  accountType?: AccountType | null;
 }
 
 export function csvEscape(v: string | number | null): string {
@@ -242,6 +244,7 @@ export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
       targetMonthlyIncome: header.findIndex((h) => h === "metarendamensal" || h === "rendamensalalvo" || h === "targetmonthlyincome" || h === "metaderendamensal"),
       customTaxRate: header.findIndex((h) => h === "aliquotair" || h === "customtaxrate" || h === "taxrate" || h === "imposto" || h === "aliquotadeir"),
       investingSince: header.findIndex((h) => h === "datainicio" || h === "investingsince" || h === "dataprimeiroaporte" || h === "since" || h === "iniciodoinvestimento"),
+      account: header.findIndex((h) => h === "account" || h === "accountname" || h === "accountnamenumber" || h === "accountnumber" || h === "accounttype" || h === "conta" || h === "tipodeconta"),
     };
     if (idx.ticker < 0) return [];
     const rows: ParsedCsvRow[] = [];
@@ -263,6 +266,7 @@ export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
       const monthlyIncomeRaw = idx.targetMonthlyIncome >= 0 && cols[idx.targetMonthlyIncome] !== "" ? parseCurrencyValue(cols[idx.targetMonthlyIncome]) : NaN;
       const taxRateRaw = idx.customTaxRate >= 0 && cols[idx.customTaxRate] !== "" ? parseCurrencyValue(cols[idx.customTaxRate]) : NaN;
       const investingSinceRaw = idx.investingSince >= 0 && cols[idx.investingSince] !== "" ? parseCsvDate(cols[idx.investingSince]) : null;
+      const accountType = idx.account >= 0 && cols[idx.account] ? parseAccountType(cols[idx.account]) : null;
 
       rows.push({
         ticker,
@@ -279,6 +283,7 @@ export function parseWatchlistCsv(text: string): ParsedCsvRow[] {
         targetMonthlyIncome: Number.isFinite(monthlyIncomeRaw) ? monthlyIncomeRaw : null,
         customTaxRate: Number.isFinite(taxRateRaw) ? taxRateRaw : null,
         investingSince: investingSinceRaw,
+        accountType,
       });
     }
     return rows;

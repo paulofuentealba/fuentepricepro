@@ -15,6 +15,8 @@ export interface ThesisSnapshot {
   unavailableReason?: string | null;
 }
 
+export type AccountType = "taxable" | "roth_ira" | "traditional_ira_401k";
+
 export interface Transaction {
   id: string;
   ticker: string;
@@ -33,6 +35,8 @@ export interface Transaction {
   notes?: string | null;
   broker?: string | null;
   thesisSnapshot?: ThesisSnapshot | null;
+  /** Account segregation (e.g. Taxable Brokerage vs Roth IRA vs Traditional IRA/401k) */
+  accountType?: AccountType | null;
 }
 
 export interface PositionHoldingState {
