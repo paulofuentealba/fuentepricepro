@@ -30,7 +30,7 @@ function WithdrawPage() {
   const { t } = useI18n();
   const isUnlocked = useFeatureGate("withdrawUnlocked");
 
-  const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
+  const { valuedItems, ownedItems, isAppLoading, fx } = useValuedPortfolio();
   const { settings } = useUserSettings();
   const currency = settings?.displayCurrency || "BRL";
   const { events: realizedEvents, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
@@ -69,7 +69,7 @@ function WithdrawPage() {
 
   return (
     <WithdrawScreen
-      positions={valuedItems}
+      positions={ownedItems}
       taxState={taxState}
       isLoading={isLoading}
       onExport={(result, strategy) => {

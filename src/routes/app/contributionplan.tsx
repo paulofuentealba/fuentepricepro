@@ -23,7 +23,7 @@ export const Route = createFileRoute("/app/contributionplan")({
 function SmartAllocationRoute() {
   const smartAllocationUnlocked = useFeatureGate("smartAllocationUnlocked") as boolean;
   const { t } = useI18n();
-  const { valuedItems, isAppLoading } = useValuedPortfolio();
+  const { ownedItems, isAppLoading } = useValuedPortfolio();
   const { settings } = useUserSettings();
   const currency = settings?.displayCurrency || "BRL";
 
@@ -63,7 +63,7 @@ function SmartAllocationRoute() {
         strategies={strategies}
         strategyHints={strategyHints}
         defaultStrategyId="correctDrift"
-        positions={valuedItems}
+        positions={ownedItems}
         settings={askSettings}
         currency={currency}
         isLoading={isAppLoading}

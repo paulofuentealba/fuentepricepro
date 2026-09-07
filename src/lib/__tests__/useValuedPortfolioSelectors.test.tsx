@@ -6,6 +6,7 @@ import {
   useValuedTotals,
   useValuedItem,
   useValuedItems,
+  useOwnedValuedItems,
   ValuedPortfolioProvider,
   type ValuedWatchlistItem,
 } from "../useValuedPortfolio";
@@ -69,9 +70,10 @@ vi.mock("@tanstack/react-query", () => ({
 }));
 
 describe("useValuedPortfolio Selectors", () => {
-  it("exports useValuedTotals, useValuedItem, and useValuedItems functions", () => {
+  it("exports useValuedTotals, useValuedItem, useValuedItems, and useOwnedValuedItems functions", () => {
     expect(typeof useValuedTotals).toBe("function");
     expect(typeof useValuedItem).toBe("function");
     expect(typeof useValuedItems).toBe("function");
+    expect(typeof useOwnedValuedItems).toBe("function");
   });
 });

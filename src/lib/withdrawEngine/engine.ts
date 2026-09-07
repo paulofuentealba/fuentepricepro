@@ -57,7 +57,11 @@ export function runWithdraw(ctx: WithdrawStrategyContext, strategy: WithdrawStra
     };
   }
 
-  if (eligiblePositions.length === 0) {
+  const activePositions = (eligiblePositions || []).filter(
+    (p) => !p.isClosedPosition && (p.quantity || 0) > 0,
+  );
+
+  if (activePositions.length === 0) {
     return {
       state: "no_eligible_assets",
       allocations: [],
@@ -68,8 +72,9 @@ export function runWithdraw(ctx: WithdrawStrategyContext, strategy: WithdrawStra
     };
   }
 
-  const candidates = strategy.run(ctx);
-  const positionMap = new Map(eligiblePositions.map((p) => [p.ticker, p]));
+  const activeCtx = { ...ctx, eligiblePositions: activePositions };
+  const candidates = strategy.run(activeCtx);
+  const positionMap = new Map(activePositions.map((p) => [p.ticker, p]));
   const asOfMs = Date.parse(asOf) || Date.now();
 
   const allocationsRaw: Array<Omit<WithdrawAllocation, "percentOfTotal">> = [];

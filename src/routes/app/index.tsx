@@ -36,7 +36,7 @@ interface LastVisitSnapshot {
 
 function AppHome() {
   const { user } = useAuth();
-  const { valuedItems, totals, isAppLoading, fx, macroRates } = useValuedPortfolio();
+  const { valuedItems, ownedItems, totals, isAppLoading, fx, macroRates } = useValuedPortfolio();
   const { settings, updateSettings } = useUserSettings();
   const fi = useFIProgress();
 
@@ -145,7 +145,7 @@ function AppHome() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ContributionEngineCard
-          valuedItems={valuedItems}
+          valuedItems={ownedItems}
           settings={askSettings}
           isLoading={isAppLoading}
           currency={currency}
@@ -153,7 +153,7 @@ function AppHome() {
           onSelectTicker={handleSelectTicker}
         />
         <AllocationOverviewCard
-          valuedItems={valuedItems}
+          valuedItems={ownedItems}
           smartAllocationTargets={settings.smartAllocationTargets}
           usdRate={usdRate}
           isLoading={isAppLoading}
@@ -161,7 +161,7 @@ function AppHome() {
       </div>
 
       <OpportunityMatrixTable
-        valuedItems={valuedItems}
+        valuedItems={ownedItems}
         isLoading={isAppLoading}
         onSelectTicker={handleSelectTicker}
       />

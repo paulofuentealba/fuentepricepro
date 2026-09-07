@@ -31,6 +31,7 @@ vi.mock("@/integrations/firebase/client", () => ({
 vi.mock("@/lib/useValuedPortfolio", () => ({
   useValuedPortfolio: () => ({
     valuedItems: mockValuedItems,
+    ownedItems: mockValuedItems,
     totals: { consolidatedNetWorth: 100000, consolidatedIncome: 5000 },
     isAppLoading: mockIsAppLoading,
     macroRates: undefined,

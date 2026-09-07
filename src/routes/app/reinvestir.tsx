@@ -41,7 +41,7 @@ export function ReinvestirPage() {
   const { t, locale } = useI18n();
   const isUnlocked = useFeatureGate("reinvestUnlocked");
 
-  const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
+  const { valuedItems, ownedItems, isAppLoading, fx } = useValuedPortfolio();
   const { settings } = useUserSettings();
   const currency = settings?.displayCurrency || "BRL";
   const { summary, events, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
@@ -173,7 +173,7 @@ export function ReinvestirPage() {
       strategies={strategies}
       strategyHints={strategyHints}
       defaultStrategyId="accelerateSnowball"
-      positions={valuedItems}
+      positions={ownedItems}
       settings={askSettings}
       currency={currency}
       isLoading={isAppLoading || isIncomeLoading}

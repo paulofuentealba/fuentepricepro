@@ -40,18 +40,23 @@ export function ContributionEngineCard({
     return convertCurrency(parsedAmount, currency, "BRL", usdRate);
   }, [parsedAmount, currency, usdRate]);
 
+  const ownedPositions = useMemo(
+    () => valuedItems.filter((item) => !item.isClosedPosition && (item.quantity ?? 0) > 0),
+    [valuedItems],
+  );
+
   const result = useMemo(() => {
     if (isLoading) return null;
     return runAsk(
       {
-        positions: valuedItems,
+        positions: ownedPositions,
         availableAmount: amountBRL,
         settings,
         asOf: new Date().toISOString(),
       },
       correctDriftStrategy,
     );
-  }, [valuedItems, amountBRL, settings, isLoading]);
+  }, [ownedPositions, amountBRL, settings, isLoading]);
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">

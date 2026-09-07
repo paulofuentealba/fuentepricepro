@@ -53,3 +53,5 @@ list_users.ts
 scratch_positions.ts
 test-scrape.js
 test-scrape2.cjs
+docs/*.csv
+

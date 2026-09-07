@@ -31,10 +31,11 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
   const [activeFilter, setActiveFilter] = useState<EightClassKey | "ALL">("ALL");
 
   const filteredItems = useMemo(() => {
+    const owned = valuedItems.filter((i) => !i.isClosedPosition && (i.quantity ?? 0) > 0);
     const items =
       activeFilter === "ALL"
-        ? valuedItems
-        : valuedItems.filter((i) => classifyPositionToEightClass(i) === activeFilter);
+        ? owned
+        : owned.filter((i) => classifyPositionToEightClass(i) === activeFilter);
     return [...items].sort((a, b) => (b.valuation?.margin ?? -Infinity) - (a.valuation?.margin ?? -Infinity));
   }, [valuedItems, activeFilter]);
 

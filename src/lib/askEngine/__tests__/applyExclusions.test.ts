@@ -292,5 +292,16 @@ describe("AskEngine: applyExclusions", () => {
       expect(eligible.map((e) => e.ticker)).toEqual(["TRAP11"]);
       expect(excluded).toHaveLength(0);
     });
+
+    it("drops closed positions (isClosedPosition: true) so they are never eligible", () => {
+      const active = createMockPosition({ ticker: "BBAS3", isClosedPosition: false, quantity: 100 });
+      const closed = createMockPosition({ ticker: "CPTR11", isClosedPosition: true, quantity: 0 });
+
+      const settings: AskEngineSettings = {};
+      const { eligible, excluded } = applyExclusions([active, closed], settings);
+
+      expect(eligible.map((e) => e.ticker)).toEqual(["BBAS3"]);
+      expect(excluded.map((e) => e.ticker)).not.toContain("CPTR11");
+    });
   });
 });

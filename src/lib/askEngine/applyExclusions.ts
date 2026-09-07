@@ -25,6 +25,11 @@ export function applyExclusions(
       continue;
     }
 
+    // 0. Exclude closed positions (historical only)
+    if (pos.isClosedPosition) {
+      continue;
+    }
+
     const livePrice = pos.livePrice ?? pos.currentPrice ?? 0;
 
     // 1. Invalid or missing price

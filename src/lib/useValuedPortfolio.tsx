@@ -138,7 +138,7 @@ export function transformBffItemToValuedItem(
     livePrice: bffItem.currentPrice,
     sector: bffItem.sector ?? fallbackSector,
     valuation,
-    isClosedPosition: bffItem.quantity === 0,
+    isClosedPosition: !bffItem.quantity || bffItem.quantity <= 0,
     isBffMode: true,
   };
 }
@@ -200,10 +200,16 @@ function useValuedPortfolioBff(
     [valuedItems, fx, macroRates],
   );
 
+  const ownedItems = useMemo(
+    () => valuedItems.filter((item) => !item.isClosedPosition && (item.quantity ?? 0) > 0),
+    [valuedItems],
+  );
+
   return {
     ...watchlistRest,
     items,
     valuedItems,
+    ownedItems,
     totals,
     quotes: liveQuotes,
     meta: liveMeta,
@@ -306,6 +312,14 @@ export function useValuedItem(ticker: string | undefined): ValuedWatchlistItem |
 export function useValuedItems(): ValuedWatchlistItem[] {
   const portfolio = useValuedPortfolio();
   return portfolio.valuedItems;
+}
+
+/**
+ * Granular selector: returns only the owned positions (quantity > 0 and not closed).
+ */
+export function useOwnedValuedItems(): ValuedWatchlistItem[] {
+  const portfolio = useValuedPortfolio();
+  return portfolio.ownedItems;
 }
 
 // Re-export useTransactions for components that still need it
