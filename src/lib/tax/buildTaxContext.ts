@@ -21,6 +21,7 @@ export interface TaxRealityContext {
   currencyByTicker: Map<string, Currency>;
   isFixedIncomeEtfByTicker: Map<string, boolean>;
   transactions: Transaction[];
+  realizedIncomeEvents?: RealizedIncomeEvent[];
   realizedGainEvents: RealizedGainEvent[];
   currentYear: number;
   currentMonthKey: string; // "YYYY-MM"
@@ -129,6 +130,7 @@ export function buildTaxContext(
     currencyByTicker,
     isFixedIncomeEtfByTicker,
     transactions,
+    realizedIncomeEvents,
     realizedGainEvents,
     currentYear,
     currentMonthKey,

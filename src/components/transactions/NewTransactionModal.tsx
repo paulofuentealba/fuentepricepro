@@ -29,6 +29,7 @@ import {
   getQuantityAtDate,
   type Transaction,
   type ThesisSnapshot,
+  type AccountType,
 } from "@/lib/transactions";
 import { useWatchlist } from "@/lib/watchlist";
 import { getAssetValuation } from "@/lib/calculations";
@@ -82,6 +83,9 @@ export function NewTransactionModal({
     initialData?.fees ? String(initialData.fees) : ""
   );
   const [broker, setBroker] = useState(initialData?.broker || "");
+  const [accountType, setAccountType] = useState<AccountType>(
+    initialData?.accountType || "taxable"
+  );
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [isSaving, setIsSaving] = useState(false);
   const savingRef = useRef(false);
@@ -97,6 +101,7 @@ export function NewTransactionModal({
         setFactor(initialData.factor ? String(initialData.factor) : "1");
         setFees(initialData.fees ? String(initialData.fees) : "");
         setBroker(initialData.broker || "");
+        setAccountType(initialData.accountType || "taxable");
         setNotes(initialData.notes || "");
       } else {
         setTicker("");
@@ -107,6 +112,7 @@ export function NewTransactionModal({
         setFactor("1");
         setFees("");
         setBroker("");
+        setAccountType("taxable");
         setNotes("");
       }
       setIsSaving(false);
@@ -251,6 +257,7 @@ export function NewTransactionModal({
         factor: type === "corporate_action" ? factorNum : null,
         fees: finalFees,
         broker: broker.trim() || null,
+        accountType: accountType || "taxable",
         notes: notes.trim() || null,
         thesisSnapshot: snapshot,
       };
@@ -279,6 +286,9 @@ export function NewTransactionModal({
           investingSince: nextInvestingSince,
           ...(txToSave.broker && (isLatestTx || !matchingWatchlistItem.broker)
             ? { broker: txToSave.broker }
+            : {}),
+          ...(accountType && (isLatestTx || !matchingWatchlistItem.accountType)
+            ? { accountType }
             : {}),
         });
       }
@@ -469,6 +479,33 @@ export function NewTransactionModal({
                 className="h-9 font-mono"
               />
             </div>
+          </div>
+
+          {/* Account Type */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-foreground">
+              {t.transactionsLedger.newModal.accountType}
+            </Label>
+            <Select
+              value={accountType}
+              onValueChange={(val: AccountType) => setAccountType(val)}
+              disabled={isSaving}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="taxable">
+                  {t.transactionsLedger.newModal.accountTypeTaxable}
+                </SelectItem>
+                <SelectItem value="roth_ira">
+                  {t.transactionsLedger.newModal.accountTypeRoth}
+                </SelectItem>
+                <SelectItem value="traditional_ira_401k">
+                  {t.transactionsLedger.newModal.accountTypeTraditional}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Notes */}

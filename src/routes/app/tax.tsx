@@ -11,9 +11,10 @@ import { computeTaxRealityRows, buildTaxRealityCsv } from "@/lib/tax/taxRealityR
 import { downloadCsv } from "@/lib/csv";
 import { TaxRealityScreen } from "@/components/tax/TaxRealityScreen";
 import { IrpfMirrorReport } from "@/components/tax/IrpfMirrorReport";
+import { UsTax1099Report } from "@/components/tax/UsTax1099Report";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Lock, Receipt, FileText } from "lucide-react";
+import { Lock, Receipt, FileText, FileSpreadsheet } from "lucide-react";
 
 export const Route = createFileRoute("/app/tax")({
   head: () => ({
@@ -63,6 +64,9 @@ export function RealidadeFiscalPage() {
     );
   }
 
+  const isUS = settings?.taxJurisdiction === "US";
+  const defaultTab = isUS ? "us1099" : "irpf";
+
   return (
     <div className="space-y-6">
       <div>
@@ -78,8 +82,17 @@ export function RealidadeFiscalPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="irpf" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="flex h-auto w-full items-center justify-start gap-1 overflow-x-auto scrollbar-none flex-nowrap rounded-none border-b border-border bg-transparent p-0 pb-px">
+          {isUS && (
+            <TabsTrigger
+              value="us1099"
+              className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />
+              <span>{t.taxRealityScreen.tabs.us1099}</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger
             value="irpf"
             className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
@@ -94,7 +107,24 @@ export function RealidadeFiscalPage() {
             <Receipt className="h-3.5 w-3.5 shrink-0" />
             <span>{t.taxRealityScreen.tabs.darfSales}</span>
           </TabsTrigger>
+          {!isUS && (
+            <TabsTrigger
+              value="us1099"
+              className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />
+              <span>{t.taxRealityScreen.tabs.us1099}</span>
+            </TabsTrigger>
+          )}
         </TabsList>
+
+        <TabsContent value="us1099" className="mt-6">
+          <UsTax1099Report
+            valuedItems={valuedItems}
+            context={context}
+            transactions={transactions}
+          />
+        </TabsContent>
 
         <TabsContent value="irpf" className="mt-6">
           <IrpfMirrorReport valuedItems={valuedItems} context={context} />
