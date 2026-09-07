@@ -33,23 +33,29 @@ export const DEMO_DEFAULT_SETTINGS = {
 };
 
 export function isDemoModeActive(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined" || !window.localStorage) return false;
   // If user is authenticated, demo mode is NEVER active — purge any leftover keys
   if (auth?.currentUser) {
     endDemoMode();
     return false;
   }
-  return window.localStorage.getItem(DEMO_MODE_KEY) === "true";
+  try {
+    return window.localStorage.getItem(DEMO_MODE_KEY) === "true";
+  } catch {
+    return false;
+  }
 }
 
 /** Seeds the guest-mode localStorage with the public demo portfolio and flags demo mode active. */
 export function startDemoMode(): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(DEMO_WATCHLIST_DATA));
-  window.localStorage.setItem(TRANSACTIONS_STORAGE_KEY, JSON.stringify(DEMO_TRANSACTIONS));
-  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(DEMO_DEFAULT_SETTINGS));
-  window.localStorage.setItem(DEMO_MODE_KEY, "true");
-  window.localStorage.setItem(DEMO_VERSION_KEY, "true");
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(DEMO_WATCHLIST_DATA));
+    window.localStorage.setItem(TRANSACTIONS_STORAGE_KEY, JSON.stringify(DEMO_TRANSACTIONS));
+    window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(DEMO_DEFAULT_SETTINGS));
+    window.localStorage.setItem(DEMO_MODE_KEY, "true");
+    window.localStorage.setItem(DEMO_VERSION_KEY, "true");
+  } catch {}
   // Also mirrored into a cookie so the server can see it on a hard
   // navigation/reload — localStorage never reaches the server (see
   // verifySession.functions.ts).
@@ -58,21 +64,25 @@ export function startDemoMode(): void {
 
 /** Ensures existing demo sessions are automatically upgraded to the latest mock dataset (v2). */
 export function syncDemoModeVersion(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !window.localStorage) return;
   if (!isDemoModeActive()) return;
-  if (window.localStorage.getItem(DEMO_VERSION_KEY) !== "true") {
-    startDemoMode();
-  }
+  try {
+    if (window.localStorage.getItem(DEMO_VERSION_KEY) !== "true") {
+      startDemoMode();
+    }
+  } catch {}
 }
 
 /** Clears demo data and the demo flag — called once the visitor authenticates for real. */
 export function endDemoMode(): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
-  window.localStorage.removeItem(TRANSACTIONS_STORAGE_KEY);
-  window.localStorage.removeItem(SETTINGS_STORAGE_KEY);
-  window.localStorage.removeItem(DEMO_MODE_KEY);
-  window.localStorage.removeItem(DEMO_VERSION_KEY);
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
+    window.localStorage.removeItem(TRANSACTIONS_STORAGE_KEY);
+    window.localStorage.removeItem(SETTINGS_STORAGE_KEY);
+    window.localStorage.removeItem(DEMO_MODE_KEY);
+    window.localStorage.removeItem(DEMO_VERSION_KEY);
+  } catch {}
   clearDemoCookie();
 }
 

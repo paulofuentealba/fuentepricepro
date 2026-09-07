@@ -48,7 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAdmin,
     loading,
     signOut: async () => {
-      await firebaseSignOut(auth);
+      try {
+        await firebaseSignOut(auth);
+      } catch (err) {
+        console.warn("[auth] error during signOut:", err);
+      } finally {
+        setUser(null);
+        setIsAdmin(false);
+        clearSessionCookie();
+        endDemoMode();
+        if (typeof window !== "undefined") {
+          window.location.assign("/");
+        }
+      }
     },
   };
 
