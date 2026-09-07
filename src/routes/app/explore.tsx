@@ -7,6 +7,7 @@ import {
   ShieldAlert,
   TrendingUp,
   Search,
+  ReceiptText,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +16,7 @@ import { SnowballScenarioPanel } from "@/components/explore/SnowballScenarioPane
 import { ScreenerScreen } from "@/components/screener/ScreenerScreen";
 import { AssetComparator } from "@/components/ceiling/AssetComparator";
 import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
+import { MyTransactionsView } from "@/components/transactions/MyTransactionsView";
 
 const RiskRadar = lazy(() =>
   import("@/components/ceiling/RiskRadar").then((m) => ({ default: m.RiskRadar })),
@@ -100,6 +102,12 @@ export function ExplorarPage() {
       icon: TrendingUp,
       description: t.explore.descriptions.snowball,
     },
+    {
+      id: "transactions",
+      label: t.tabs.myTransactions,
+      icon: ReceiptText,
+      description: t.explore.descriptions.myTransactions,
+    },
   ];
 
   return (
@@ -183,6 +191,14 @@ export function ExplorarPage() {
                 <Suspense fallback={<ToolSkeleton />}>
                   <RiskRadar />
                 </Suspense>
+              </TabsContent>
+            );
+          }
+
+          if (tool.id === "transactions") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <MyTransactionsView />
               </TabsContent>
             );
           }
