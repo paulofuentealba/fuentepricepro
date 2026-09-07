@@ -1,4 +1,5 @@
 import type { AssetType, Currency } from "@/lib/domain";
+import type { AccountType } from "@/lib/transactionsLogic";
 
 export type Jurisdiction = "BR" | "US";
 
@@ -200,3 +201,79 @@ export interface MonthlyEtfFixedIncomeCapitalGainsResult {
   taxDue: number; // Sum of each lot-sale slice's gain (after carryforward) × its own bracket rate
   unclassifiedTickers?: string[]; // Tickers excluded from this month due to missing/unresolvable assetType
 }
+
+// ---------------------------------------------------------------------------
+// US Tax Residency & IRS Form 1099 Types (Etapa 2)
+// ---------------------------------------------------------------------------
+
+export interface Us1099DivItem {
+  ticker: string;
+  payerName?: string;
+  accountType: AccountType;
+  /** Box 1a: Total ordinary dividends */
+  ordinaryDividends: number;
+  /** Box 1b: Qualified dividends (stocks/ETFs held > 60 days) */
+  qualifiedDividends: number;
+  /** Box 5: Section 199A dividends (REITs eligible for up to 20% deduction) */
+  section199aDividends: number;
+  totalEvents: number;
+  isTaxExempt: boolean;
+  isTaxDeferred: boolean;
+}
+
+export interface Us1099DivSummary {
+  year: number;
+  totalOrdinaryDividends: number; // Box 1a
+  totalQualifiedDividends: number; // Box 1b
+  totalSection199aDividends: number; // Box 5
+  totalNonQualifiedOrdinary: number; // Box 1a - Box 1b
+  rothIraDividendsShielded: number; // 100% tax free
+  traditionalIraDividendsDeferred: number; // Tax deferred
+  items: Us1099DivItem[];
+}
+
+export interface Us1099BSaleLot {
+  id: string;
+  ticker: string;
+  accountType: AccountType;
+  acquisitionDate: number; // ms
+  saleDate: number; // ms
+  quantity: number;
+  proceeds: number; // Box 1d
+  costBasis: number; // Box 1e
+  washSaleLossDisallowed: number; // Box 1g
+  gainOrLoss: number; // proceeds - costBasis + washSaleLossDisallowed
+  term: "SHORT_TERM" | "LONG_TERM";
+  holdingDays: number;
+  isWashSale: boolean;
+  isTaxExempt: boolean;
+  isTaxDeferred: boolean;
+}
+
+export interface Us1099BSummary {
+  year: number;
+  totalProceeds: number;
+  totalCostBasis: number;
+  shortTermGains: number;
+  shortTermLosses: number;
+  netShortTerm: number;
+  longTermGains: number;
+  longTermLosses: number;
+  netLongTerm: number;
+  totalWashSaleDisallowed: number;
+  netTaxableGainOrLoss: number;
+  deductibleLossAgainstIncome: number; // max $3,000 for single / MFJ
+  carryforwardLoss: number;
+  rothIraCapitalGainsShielded: number;
+  sales: Us1099BSaleLot[];
+}
+
+export interface UsTaxYearSummary {
+  year: number;
+  divSummary: Us1099DivSummary;
+  bSummary: Us1099BSummary;
+  totalRothTaxFreeIncome: number;
+  totalTaxDeferredIncome: number;
+  estimatedTaxSavingsRoth: number;
+}
+
