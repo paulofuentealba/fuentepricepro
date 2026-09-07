@@ -61,11 +61,6 @@ function AppHome() {
     [valuedItems, macroRates],
   );
 
-  const availableContributionBRL = useMemo(() => {
-    const contribCurrency = settings.monthlyLivingCostGoalCurrency ?? currency;
-    return convertCurrency(settings.estimatedMonthlyContribution || 0, contribCurrency, "BRL", usdRate);
-  }, [settings.estimatedMonthlyContribution, settings.monthlyLivingCostGoalCurrency, currency, usdRate]);
-
   const askSettings: AskEngineSettings = useMemo(
     () => ({
       smartAllocationTargets: settings.smartAllocationTargets,
@@ -123,7 +118,6 @@ function AppHome() {
         netWorth={convertCurrency(totals.consolidatedNetWorth, "BRL", currency, usdRate)}
         weightedYoc={weightedYoc}
         monthlyIncome={convertCurrency(fi.monthlyIncomeBRL, "BRL", currency, usdRate)}
-        availableContribution={convertCurrency(availableContributionBRL, "BRL", currency, usdRate)}
         currency={currency}
         isLoading={isAppLoading}
       />

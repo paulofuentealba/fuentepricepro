@@ -8,7 +8,6 @@ interface DashboardKpiGridProps {
   netWorth: number;
   weightedYoc: number;
   monthlyIncome: number;
-  availableContribution: number;
   currency: Currency;
   isLoading: boolean;
 }
@@ -47,7 +46,6 @@ export function DashboardKpiGrid({
   netWorth,
   weightedYoc,
   monthlyIncome,
-  availableContribution,
   currency,
   isLoading,
 }: DashboardKpiGridProps) {
@@ -56,7 +54,7 @@ export function DashboardKpiGrid({
   const projection12m = monthlyIncome * 12;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       <KpiCard
         label={t.dashboard.kpi.netWorth}
         value={formatCurrency(netWorth, currency, locale)}
@@ -76,13 +74,6 @@ export function DashboardKpiGrid({
         value={formatCurrency(monthlyIncome, currency, locale)}
         valueClassName="text-foreground"
         sub={t.dashboard.kpi.monthlyIncomeSub.replace("{{projection}}", formatCurrency(projection12m, currency, locale))}
-        isLoading={isLoading}
-      />
-      <KpiCard
-        label={t.dashboard.kpi.availableContribution}
-        value={formatCurrency(availableContribution, currency, locale)}
-        valueClassName="text-accent-gold"
-        sub={t.dashboard.kpi.availableContributionSub}
         isLoading={isLoading}
       />
     </div>
