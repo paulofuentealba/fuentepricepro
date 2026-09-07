@@ -54,15 +54,17 @@ import { verifySessionFn } from "@/lib/verifySession.functions";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: async ({ location }) => {
-    // Wait for auth to be initialized
-    await new Promise<void>((resolve) => {
-      const unsubscribe = auth.onAuthStateChanged(() => {
-        unsubscribe();
-        resolve();
+    if (typeof window !== "undefined") {
+      // Wait for auth to be initialized
+      await new Promise<void>((resolve) => {
+        const unsubscribe = auth.onAuthStateChanged(() => {
+          unsubscribe();
+          resolve();
+        });
       });
-    });
 
-    if (auth.currentUser) return;
+      if (auth.currentUser) return;
+    }
 
     // Client check only ever sees a session on a SPA transition — a hard
     // navigation/reload has no client-side Firebase session to read, so

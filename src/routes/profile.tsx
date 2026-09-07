@@ -9,14 +9,16 @@ export const Route = createFileRoute("/profile")({
     returnTo: typeof search.returnTo === "string" && search.returnTo.trim().length > 0 ? search.returnTo : undefined,
   }),
   beforeLoad: async ({ search }) => {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = auth.onAuthStateChanged(() => {
-        unsubscribe();
-        resolve();
+    if (typeof window !== "undefined") {
+      await new Promise<void>((resolve) => {
+        const unsubscribe = auth.onAuthStateChanged(() => {
+          unsubscribe();
+          resolve();
+        });
       });
-    });
 
-    if (auth.currentUser) return;
+      if (auth.currentUser) return;
+    }
 
     // See verifySession.functions.ts — a hard navigation/reload has no
     // client-side Firebase session to read, so cross-check the cookie

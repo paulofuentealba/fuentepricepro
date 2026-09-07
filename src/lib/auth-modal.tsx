@@ -30,6 +30,7 @@ import {
 } from "firebase/auth";
 import { auth } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
+import { setSessionCookie } from "@/lib/sessionCookie";
 
 type PendingAction = (() => void | Promise<void>) | null;
 
@@ -92,11 +93,14 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     try {
       const provider = new GoogleAuthProvider();
-      provider.addScope("profile");
-      provider.addScope("email");
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.authModal.signInFailed);
+      provider.setCustomParameters({ prompt: "select_account" });
+      const userCred = await signInWithPopup(auth, provider);
+      const token = await userCred.user.getIdToken();
+      setSessionCookie(token);
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user") {
+        toast.error(err instanceof Error ? err.message : t.authModal.signInFailed);
+      }
       setBusy(false);
     }
   }
@@ -110,10 +114,14 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     try {
       if (emailMode === "signup") {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
+        setSessionCookie(token);
         toast.success(t.authModal.successSignup);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
+        setSessionCookie(token);
         toast.success(t.authModal.successLogin);
       }
     } catch (err) {

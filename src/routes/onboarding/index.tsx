@@ -4,14 +4,18 @@ import { verifySessionFn } from "@/lib/verifySession.functions";
 
 export const Route = createFileRoute("/onboarding/")({
   beforeLoad: async () => {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = auth.onAuthStateChanged(() => {
-        unsubscribe();
-        resolve();
+    let hasUser = false;
+    if (typeof window !== "undefined") {
+      await new Promise<void>((resolve) => {
+        const unsubscribe = auth.onAuthStateChanged(() => {
+          unsubscribe();
+          resolve();
+        });
       });
-    });
+      hasUser = !!auth.currentUser;
+    }
 
-    if (!auth.currentUser) {
+    if (!hasUser) {
       const { authenticated } = await verifySessionFn();
       if (!authenticated) {
         throw redirect({ to: "/auth", search: { mode: "signup", returnTo: "/onboarding/metas" } });

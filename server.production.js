@@ -9,11 +9,22 @@ const host = process.env.HOST || "0.0.0.0";
 
 // Fix #6 (auditoria 3.4): Cloud Run não comprime automaticamente; bundles
 // (~1MB min) e HTML trafegavam 3-5× maiores. Middleware global antes do static.
+app.set("trust proxy", 1);
 app.use(compression());
+
+// Permite que popups de autenticação (como o Google OAuth do Firebase)
+// conversem com a janela opener sem serem bloqueados por isolamento estrito de COOP.
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
+
 app.use(express.static("dist/client"));
 
 app.use(async (req, res) => {
-  const url = `http://${host}:${port}${req.url}`;
+  const proto = req.headers["x-forwarded-proto"] || "http";
+  const hostHeader = req.headers["x-forwarded-host"] || req.headers["host"] || `${host}:${port}`;
+  const url = `${proto}://${hostHeader}${req.url}`;
   const headers = new Headers();
   for (const [key, value] of Object.entries(req.headers)) {
     if (Array.isArray(value)) value.forEach((v) => headers.append(key, v));

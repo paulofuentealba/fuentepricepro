@@ -19,6 +19,23 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 
 const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx: any) => ctx.handlerType === "serverFn",
+  origin: (origin: string) => {
+    if (!origin) return false;
+    try {
+      const u = new URL(origin);
+      return (
+        u.hostname === "localhost" ||
+        u.hostname === "127.0.0.1" ||
+        u.hostname === "0.0.0.0" ||
+        u.hostname.endsWith("fuentepricepro.com") ||
+        u.hostname.endsWith("firebaseapp.com") ||
+        u.hostname.endsWith("web.app") ||
+        u.hostname.endsWith("run.app")
+      );
+    } catch {
+      return false;
+    }
+  },
 });
 
 export const startInstance = createStart(() => ({

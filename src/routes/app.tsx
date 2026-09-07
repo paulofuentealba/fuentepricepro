@@ -23,20 +23,22 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async ({ location }) => {
-    // Waits for Firebase to resolve the persisted session (same pattern as
-    // /settings and /profile) before deciding — avoids a false redirect on
-    // a hard refresh while the SDK is still rehydrating auth state.
-    await new Promise<void>((resolve) => {
-      const unsubscribe = auth.onAuthStateChanged(() => {
-        unsubscribe();
-        resolve();
+    if (typeof window !== "undefined") {
+      // Waits for Firebase to resolve the persisted session (same pattern as
+      // /settings and /profile) before deciding — avoids a false redirect on
+      // a hard refresh while the SDK is still rehydrating auth state.
+      await new Promise<void>((resolve) => {
+        const unsubscribe = auth.onAuthStateChanged(() => {
+          unsubscribe();
+          resolve();
+        });
       });
-    });
 
-    if (auth.currentUser) return;
-    if (isDemoModeActive()) {
-      syncDemoModeVersion();
-      return;
+      if (auth.currentUser) return;
+      if (isDemoModeActive()) {
+        syncDemoModeVersion();
+        return;
+      }
     }
 
     // The checks above only ever see a session on a client-side SPA

@@ -24,6 +24,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
+import { setSessionCookie } from "@/lib/sessionCookie";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { mode?: "signin" | "signup"; returnTo?: string } => ({
@@ -104,10 +105,14 @@ function AuthPage() {
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       if (mode === "signup") {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
+        setSessionCookie(token);
         navigate({ to: "/profile", search: { returnTo } });
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
+        setSessionCookie(token);
         toast.success(t.authModal.welcomeBack);
         if (profile.completedAt || profile.skipped) {
           navigate({ to: returnTo });
@@ -127,16 +132,19 @@ function AuthPage() {
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       const provider = new GoogleAuthProvider();
-      provider.addScope("profile");
-      provider.addScope("email");
-      await signInWithPopup(auth, provider);
+      provider.setCustomParameters({ prompt: "select_account" });
+      const userCred = await signInWithPopup(auth, provider);
+      const token = await userCred.user.getIdToken();
+      setSessionCookie(token);
       if (profile.completedAt || profile.skipped) {
         navigate({ to: returnTo });
       } else {
         navigate({ to: "/profile", search: { returnTo } });
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.authModal.googleSignInFailed);
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user") {
+        toast.error(err instanceof Error ? err.message : t.authModal.googleSignInFailed);
+      }
       setBusy(false);
     }
   }

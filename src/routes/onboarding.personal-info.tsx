@@ -22,14 +22,16 @@ import {
 
 export const Route = createFileRoute("/onboarding/personal-info")({
   beforeLoad: async () => {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = auth.onAuthStateChanged(() => {
-        unsubscribe();
-        resolve();
+    if (typeof window !== "undefined") {
+      await new Promise<void>((resolve) => {
+        const unsubscribe = auth.onAuthStateChanged(() => {
+          unsubscribe();
+          resolve();
+        });
       });
-    });
 
-    if (auth.currentUser) return;
+      if (auth.currentUser) return;
+    }
 
     const { authenticated } = await verifySessionFn();
     if (authenticated) return;

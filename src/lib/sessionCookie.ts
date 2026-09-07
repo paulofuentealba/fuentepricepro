@@ -22,22 +22,30 @@ export const DEMO_COOKIE_NAME = "fuente_demo";
 const SESSION_COOKIE_MAX_AGE_S = 60 * 60;
 const DEMO_COOKIE_MAX_AGE_S = 60 * 60 * 24;
 
+function isSecureContext(): boolean {
+  return typeof location !== "undefined" && location.protocol === "https:";
+}
+
 export function setSessionCookie(idToken: string): void {
   if (typeof document === "undefined") return;
-  document.cookie = `${SESSION_COOKIE_NAME}=${idToken}; path=/; max-age=${SESSION_COOKIE_MAX_AGE_S}; SameSite=Lax`;
+  const secure = isSecureContext() ? "; Secure" : "";
+  document.cookie = `${SESSION_COOKIE_NAME}=${idToken}; path=/; max-age=${SESSION_COOKIE_MAX_AGE_S}; SameSite=Lax${secure}`;
 }
 
 export function clearSessionCookie(): void {
   if (typeof document === "undefined") return;
-  document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  const secure = isSecureContext() ? "; Secure" : "";
+  document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax${secure}`;
 }
 
 export function setDemoCookie(): void {
   if (typeof document === "undefined") return;
-  document.cookie = `${DEMO_COOKIE_NAME}=1; path=/; max-age=${DEMO_COOKIE_MAX_AGE_S}; SameSite=Lax`;
+  const secure = isSecureContext() ? "; Secure" : "";
+  document.cookie = `${DEMO_COOKIE_NAME}=1; path=/; max-age=${DEMO_COOKIE_MAX_AGE_S}; SameSite=Lax${secure}`;
 }
 
 export function clearDemoCookie(): void {
   if (typeof document === "undefined") return;
-  document.cookie = `${DEMO_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  const secure = isSecureContext() ? "; Secure" : "";
+  document.cookie = `${DEMO_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax${secure}`;
 }

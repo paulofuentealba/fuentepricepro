@@ -19,24 +19,25 @@ export interface VerifySessionResult {
  */
 export const verifySessionFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<VerifySessionResult> => {
-    if (getCookie(DEMO_COOKIE_NAME) === "1") {
-      return { authenticated: true };
-    }
-
-    const sessionCookie = getCookie(SESSION_COOKIE_NAME);
-    if (!sessionCookie) {
-      return { authenticated: false };
-    }
-
-    const adminAuth = getAdminAuth();
-    if (!adminAuth) {
-      return { authenticated: false };
-    }
-
     try {
+      if (getCookie(DEMO_COOKIE_NAME) === "1") {
+        return { authenticated: true };
+      }
+
+      const sessionCookie = getCookie(SESSION_COOKIE_NAME);
+      if (!sessionCookie) {
+        return { authenticated: false };
+      }
+
+      const adminAuth = getAdminAuth();
+      if (!adminAuth) {
+        return { authenticated: false };
+      }
+
       await adminAuth.verifyIdToken(sessionCookie);
       return { authenticated: true };
-    } catch {
+    } catch (error) {
+      console.warn("[verifySessionFn] Session verification failed or invalid:", error);
       return { authenticated: false };
     }
   },
