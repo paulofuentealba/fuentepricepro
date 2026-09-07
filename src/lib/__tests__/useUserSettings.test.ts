@@ -142,4 +142,12 @@ describe("migrateLegacyAllocationKeys", () => {
     expect(pass2.smartAllocationTargets).not.toHaveProperty("FII_INFRA");
     expect(pass2.smartAllocationTargets).not.toHaveProperty("FIAGRO");
   });
+
+  it("supports taxJurisdiction defaulting to BR and accepting US", () => {
+    const defaultSettings = makeSettings();
+    expect(defaultSettings.taxJurisdiction).toBeUndefined();
+
+    const usSettings = makeSettings({ taxJurisdiction: "US" });
+    expect(usSettings.taxJurisdiction).toBe("US");
+  });
 });

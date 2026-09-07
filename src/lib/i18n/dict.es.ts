@@ -1246,6 +1246,15 @@ export const es = {
       subscription: "Suscripción",
       privacy: "Privacidad (GDPR)",
     },
+    taxJurisdiction: {
+      title: "Jurisdicción Fiscal / Residencia",
+      description: "Define la retención de impuestos sobre dividendos de activos estadounidenses.",
+      brTitle: "Brasil (Residente Fiscal BR)",
+      brDesc: "Retención en la fuente del 30% (W-8BEN) sobre dividendos de acciones, REITs y ETFs estadounidenses.",
+      usTitle: "Estados Unidos (US Tax Resident)",
+      usDesc: "0% de retención en la fuente sobre dividendos estadounidenses. Indicado para residentes fiscales en EE.UU.",
+      savedToast: "Jurisdicción fiscal actualizada con éxito.",
+    },
     profile: {
       title: "Perfil del Inversor",
       name: "Nombre Completo",

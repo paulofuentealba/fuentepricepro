@@ -1234,6 +1234,15 @@ export const en = {
       subscription: "Subscription",
       privacy: "Privacy (GDPR)",
     },
+    taxJurisdiction: {
+      title: "Tax Jurisdiction / Residency",
+      description: "Defines the withholding tax applied to dividends from US assets.",
+      brTitle: "Brazil (BR Tax Resident)",
+      brDesc: "30% withholding tax (W-8BEN) applied to dividends from US equities, REITs, and ETFs.",
+      usTitle: "United States (US Tax Resident)",
+      usDesc: "0% withholding tax at source on US dividends. Ideal for US citizens, green card holders, and tax residents.",
+      savedToast: "Tax jurisdiction updated successfully.",
+    },
     profile: {
       title: "Investor Profile",
       name: "Full Name",

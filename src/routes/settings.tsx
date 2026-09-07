@@ -29,6 +29,7 @@ import {
   Scale,
   FileJson,
   FileSpreadsheet,
+  Globe,
 } from "lucide-react";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { calculateProfileTier, type ProfileTier, type ProfileSublabel } from "@/lib/investor-profile";
@@ -366,62 +367,139 @@ function SettingsPage() {
         <section className="space-y-4">
           {activeTab === "profile" && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
-              <form
-                onSubmit={handleSaveProfile}
-                className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6 space-y-6"
-              >
-                <h3 className="font-serif text-[15px] font-medium text-foreground">{S.profile.title}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>{S.profile.name}</Label>
-                    <Input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={isGoogle}
-                      className={isGoogle ? "bg-muted/50" : ""}
-                      aria-disabled={isGoogle}
-                    />
-                    {isGoogle && (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {S.profile.nameGoogleLocked || "Nome gerenciado pelo Google. Altere nas configurações da sua conta Google."}
+              <div className="space-y-6">
+                <form
+                  onSubmit={handleSaveProfile}
+                  className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6 space-y-6"
+                >
+                  <h3 className="font-serif text-[15px] font-medium text-foreground">{S.profile.title}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>{S.profile.name}</Label>
+                      <Input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={isGoogle}
+                        className={isGoogle ? "bg-muted/50" : ""}
+                        aria-disabled={isGoogle}
+                      />
+                      {isGoogle && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {S.profile.nameGoogleLocked || "Nome gerenciado pelo Google. Altere nas configurações da sua conta Google."}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{S.profile.email}</Label>
+                      <Input value={user.email || ""} disabled className="bg-muted/50" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{S.profile.phone}</Label>
+                      <Input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+55 (11) 99999-9999"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{S.profile.location}</Label>
+                      <Input
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="São Paulo, SP"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-dashed border-border/40 flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      {S.profile.id} <span className="font-mono">{user.uid}</span>
+                    </p>
+                    <Button type="submit" disabled={isSavingProfile} className="font-display">
+                      {isSavingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {S.profile.saveBtn}
+                    </Button>
+                  </div>
+                </form>
+
+                {/* Jurisdição Fiscal / Tax Residency */}
+                <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6 space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-serif text-[15px] font-medium text-foreground">
+                        {S.taxJurisdiction.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        {S.taxJurisdiction.description}
                       </p>
-                    )}
+                    </div>
+                    <Globe className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>{S.profile.email}</Label>
-                    <Input value={user.email || ""} disabled className="bg-muted/50" />
-                  </div>
+                  <div className="grid grid-cols-1 gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (settings.taxJurisdiction !== "BR") {
+                          updateSettings({ taxJurisdiction: "BR" });
+                          toast.success(S.taxJurisdiction.savedToast);
+                        }
+                      }}
+                      className={cn(
+                        "flex flex-col text-left p-3.5 rounded-2xl border transition-all cursor-pointer",
+                        settings.taxJurisdiction !== "US"
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                          : "border-border hover:border-border/80 bg-card",
+                      )}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
+                          <span>🇧🇷</span>
+                          <span>{S.taxJurisdiction.brTitle}</span>
+                        </span>
+                        {settings.taxJurisdiction !== "US" && (
+                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                        {S.taxJurisdiction.brDesc}
+                      </span>
+                    </button>
 
-                  <div className="space-y-2">
-                    <Label>{S.profile.phone}</Label>
-                    <Input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+55 (11) 99999-9999"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>{S.profile.location}</Label>
-                    <Input
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="São Paulo, SP"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (settings.taxJurisdiction !== "US") {
+                          updateSettings({ taxJurisdiction: "US" });
+                          toast.success(S.taxJurisdiction.savedToast);
+                        }
+                      }}
+                      className={cn(
+                        "flex flex-col text-left p-3.5 rounded-2xl border transition-all cursor-pointer",
+                        settings.taxJurisdiction === "US"
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                          : "border-border hover:border-border/80 bg-card",
+                      )}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
+                          <span>🇺🇸</span>
+                          <span>{S.taxJurisdiction.usTitle}</span>
+                        </span>
+                        {settings.taxJurisdiction === "US" && (
+                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                        {S.taxJurisdiction.usDesc}
+                      </span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="pt-4 border-t border-dashed border-border/40 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    {S.profile.id} <span className="font-mono">{user.uid}</span>
-                  </p>
-                  <Button type="submit" disabled={isSavingProfile} className="font-display">
-                    {isSavingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    {S.profile.saveBtn}
-                  </Button>
-                </div>
-              </form>
+              </div>
 
               {/* Investor Profile Summary Card */}
               <InvestorProfileSettingsCard />
