@@ -351,6 +351,7 @@ export const ptBR = {
     investingSinceReadOnlyHint: "Data do primeiro lançamento",
     confirmTitle: "Confirme os detalhes de",
     confirmDesc: "Confirme a adição deste ativo à sua carteira.",
+    recentSearches: "Recentes:",
   },
   result: {
     title: "Resultados",
@@ -2621,6 +2622,13 @@ export const ptBR = {
         jcp: "JCP",
       },
     },
+  },
+  dividendSafetyRadar: {
+    eyebrow: "DIVIDEND SAFETY SCORE • ANÁLISE DE RESILIÊNCIA",
+    title: "Radar de Sustentabilidade de Proventos",
+    meterLow: "Risco de Corte Elevado",
+    meterMid: "Sustentabilidade Moderada",
+    meterHigh: "Blindagem Alta",
   },
   comingSoonScreen: {
     withdrawTitle: "Motor de Retirada Ainda Não Construído",

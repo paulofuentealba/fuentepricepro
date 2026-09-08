@@ -28,6 +28,22 @@ vi.mock("@/lib/i18n-provider", () => ({
   }),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    taxJurisdiction: "BR",
+    isUS: false,
+    isUSNative: false,
+    isBRNative: true,
+    isDual: false,
+    hasBrPositions: false,
+    hasUsPositions: false,
+    defaultScreenerMarket: "ALL",
+    visibleAllocationClasses: [],
+    priorityBrokers: [],
+    secondaryBrokers: [],
+  }),
+}));
+
 describe("TickerSearchField", () => {
   beforeEach(() => {
     vi.clearAllMocks();

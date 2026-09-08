@@ -349,6 +349,7 @@ export const en = {
     investingSinceReadOnlyHint: "Date of first transaction",
     confirmTitle: "Confirm details for",
     confirmDesc: "Confirm adding this asset to your portfolio.",
+    recentSearches: "Recent:",
   },
   result: {
     title: "Results",
@@ -2609,6 +2610,13 @@ export const en = {
         jcp: "JCP (Interest on Capital)",
       },
     },
+  },
+  dividendSafetyRadar: {
+    eyebrow: "DIVIDEND SAFETY SCORE • RESILIENCE ANALYSIS",
+    title: "Dividend Sustainability Radar",
+    meterLow: "High Cut Risk",
+    meterMid: "Moderate Sustainability",
+    meterHigh: "High Shield",
   },
   comingSoonScreen: {
     withdrawTitle: "Withdraw Engine Not Built Yet",

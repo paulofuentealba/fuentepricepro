@@ -24,6 +24,7 @@ import { useUserSettings } from "@/lib/useUserSettings";
 import { useWatchlist } from "@/lib/watchlist";
 import { buildComparatorCsv, downloadCsv, type ComparatorExportRow } from "@/lib/csv";
 import { ComparatorPerformanceChart } from "./ComparatorPerformanceChart";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
@@ -35,8 +36,14 @@ const ALL_TYPES: AssetType[] = [
   "ETF",
 ];
 
+// B3 asset types that should be hidden when a US-native user searches for US assets
+const B3_ONLY_TYPES: AssetType[] = ["STOCK_BR", "FII", "FII_INFRA", "FIAGRO"];
+const B3_QUERY_RE = /^[A-Z]{4}\d{1,2}(\.SA)?$/i;
+const B3_BDR_RE = /^[A-Z]{4}(34|35)$/;
+
 export function AssetComparator() {
   const { t } = useI18n();
+  const { taxJurisdiction, isUSNative } = useMarketScope();
   const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -57,15 +64,29 @@ export function AssetComparator() {
     return () => window.clearTimeout(timer);
   }, [query, shouldSearch]);
 
-  const searchResult = useQuery(searchQueryOptions(debouncedQuery));
+  const searchResult = useQuery(searchQueryOptions(debouncedQuery, taxJurisdiction));
+
+  // Whether the current query looks explicitly like a B3 ticker
+  const queryLooksLikeB3 =
+    B3_QUERY_RE.test(debouncedQuery.trim()) ||
+    B3_BDR_RE.test(debouncedQuery.trim().toUpperCase());
 
   const suggestions = useMemo(() => {
     const raw = searchResult.data ?? [];
-    const validRaw = raw.filter(
-      (item) => ALL_TYPES.includes(item.type) && !selectedTickers.includes(item.ticker),
-    );
+    const validRaw = raw.filter((item) => {
+      if (!ALL_TYPES.includes(item.type)) return false;
+      if (selectedTickers.includes(item.ticker)) return false;
+      // For US-native users: hide B3 domestic stocks/funds and BDRs unless explicitly searching a B3 ticker
+      if (isUSNative && !queryLooksLikeB3) {
+        if (B3_ONLY_TYPES.includes(item.type)) return false;
+        if (B3_BDR_RE.test(item.ticker)) return false;
+      }
+      return true;
+    });
     return Array.from(new Map(validRaw.map((item) => [item.ticker, item])).values());
-  }, [searchResult.data, selectedTickers]);
+  }, [searchResult.data, selectedTickers, isUSNative, queryLooksLikeB3]);
+
+
 
   const searching = shouldSearch && (searchResult.isFetching || debouncedQuery === "");
 

@@ -11,6 +11,7 @@ import { searchQueryOptions } from "@/lib/queryOptions";
 import { useI18n } from "@/lib/i18n-provider";
 import { displayTicker, getDisplayAssetType } from "@/lib/i18n";
 import { getShareClassBadge } from "@/lib/classify";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 const ALL_TYPES: AssetType[] = [
   "STOCK_US",
@@ -22,20 +23,26 @@ const ALL_TYPES: AssetType[] = [
   "ETF",
 ];
 
+// B3 asset types that should be hidden when a US-native user searches for US assets
+const B3_ONLY_TYPES: AssetType[] = ["STOCK_BR", "FII", "FII_INFRA", "FIAGRO"];
+// Regex for detecting an explicit B3 ticker or BDR in the query
+const B3_QUERY_RE = /^[A-Z]{4}\d{1,2}(\.SA)?$/i;
+const B3_BDR_RE = /^[A-Z]{4}(34|35)$/;
+
 export interface TickerSearchFieldProps {
   onPick: (hit: SearchHit) => void;
   /** Controlled initial value for the search input (e.g. deep-link prefill). */
   initialQuery?: string;
   /**
    * When set, auto-picks the exact matching suggestion once it becomes
-   * available for this ticker — mirrors the prefilled ticker auto-submit.
+   * available for this ticker - mirrors the prefilled ticker auto-submit.
    * Fires only once per mount.
    */
   autoPickTicker?: string | null;
   placeholder?: string;
   autoFocus?: boolean;
   label?: string;
-  /** Hides the "select an asset" inline error — some consumers show their own. */
+  /** Hides the "select an asset" inline error - some consumers show their own. */
   hideSelectError?: boolean;
   /** Enables displaying and persisting recent ticker searches */
   enableRecentHistory?: boolean;
@@ -43,11 +50,16 @@ export interface TickerSearchFieldProps {
 
 /**
  * Ticker search input with debounced suggestions, keyboard navigation
- * (↑/↓/Enter/Escape) and click-outside-to-close.
+ * up/down/Enter/Escape and click-outside-to-close.
  *
  * Extracted from AssetForm.tsx (Screener) so it can be reused by any
- * consumer that just needs to resolve a `SearchHit` — this component does
- * not decide what happens after a pick, that's entirely up to `onPick`.
+ * consumer that just needs to resolve a SearchHit - this component does
+ * not decide what happens after a pick, that is entirely up to onPick.
+ *
+ * Jurisdiction-aware: when the user profile is US-native, the search is
+ * routed through Yahoo Finance first (US assets prioritised) and B3
+ * domestic / BDR results are filtered out unless the query looks explicitly
+ * like a B3 ticker (e.g. "PETR4", "CYRE3").
  */
 export function TickerSearchField({
   onPick,
@@ -60,6 +72,7 @@ export function TickerSearchField({
   enableRecentHistory = false,
 }: TickerSearchFieldProps) {
   const { t } = useI18n();
+  const { taxJurisdiction, isUSNative } = useMarketScope();
   const [query, setQuery] = useState(initialQuery ?? "");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selected, setSelected] = useState<SearchHit | null>(null);
@@ -94,13 +107,27 @@ export function TickerSearchField({
     return () => window.clearTimeout(timer);
   }, [query, shouldSearch]);
 
-  const searchResult = useQuery(searchQueryOptions(debouncedQuery));
+  const searchResult = useQuery(searchQueryOptions(debouncedQuery, taxJurisdiction));
+
+  // Whether the current query looks explicitly like a B3 ticker (e.g. "PETR4", "CYRE3", "AAPL34")
+  const queryLooksLikeB3 =
+    B3_QUERY_RE.test(debouncedQuery.trim()) ||
+    B3_BDR_RE.test(debouncedQuery.trim().toUpperCase());
 
   const suggestions: SearchHit[] = useMemo(() => {
     const raw = Array.isArray(searchResult.data) ? searchResult.data : [];
-    const validRaw = raw.filter((item) => ALL_TYPES.includes(item.type));
+    const validRaw = raw.filter((item) => {
+      if (!ALL_TYPES.includes(item.type)) return false;
+      // For US-native users: hide B3 domestic stocks/funds and BDRs unless
+      // the user is explicitly searching for a B3 ticker.
+      if (isUSNative && !queryLooksLikeB3) {
+        if (B3_ONLY_TYPES.includes(item.type)) return false;
+        if (B3_BDR_RE.test(item.ticker)) return false;
+      }
+      return true;
+    });
     return Array.from(new Map(validRaw.map((item) => [item.ticker, item])).values());
-  }, [searchResult.data]);
+  }, [searchResult.data, isUSNative, queryLooksLikeB3]);
 
   const searching = shouldSearch && (searchResult.isFetching || debouncedQuery === "");
 
@@ -246,7 +273,7 @@ export function TickerSearchField({
       {enableRecentHistory && recentHits.length > 0 && query.trim() === "" && (
         <div className="flex items-center gap-1.5 pt-1 overflow-x-auto scrollbar-none">
           <span className="text-[10px] text-muted-foreground uppercase font-semibold whitespace-nowrap">
-            Recentes:
+            {t.form.recentSearches}
           </span>
           {recentHits.map((h) => (
             <button

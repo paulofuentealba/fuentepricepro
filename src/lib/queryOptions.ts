@@ -56,12 +56,13 @@ export function quoteQueryOptions(ticker: string) {
   });
 }
 
-export function searchQueryOptions(query: string) {
+export function searchQueryOptions(query: string, jurisdiction?: "BR" | "US") {
   const normalized = query.trim();
+  const jur = jurisdiction ?? "BR";
   return queryOptions({
-    queryKey: ["search", normalized.toUpperCase()] as const,
+    queryKey: ["search", normalized.toUpperCase(), jur] as const,
     queryFn: ({ signal }): Promise<SearchHit[]> =>
-      searchAssetsFn({ data: { query: normalized }, signal }),
+      searchAssetsFn({ data: { query: normalized, jurisdiction: jur }, signal }),
     staleTime: 5 * 60_000,
     gcTime: 15 * 60_000,
     enabled: normalized.length > 0,

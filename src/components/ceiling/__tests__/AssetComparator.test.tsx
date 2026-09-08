@@ -58,6 +58,22 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    taxJurisdiction: "BR",
+    isUS: false,
+    isUSNative: false,
+    isBRNative: true,
+    isDual: false,
+    hasBrPositions: false,
+    hasUsPositions: false,
+    defaultScreenerMarket: "ALL",
+    visibleAllocationClasses: [],
+    priorityBrokers: [],
+    secondaryBrokers: [],
+  }),
+}));
+
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {

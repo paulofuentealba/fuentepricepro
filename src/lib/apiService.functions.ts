@@ -43,14 +43,27 @@ function sanitizeTicker(raw: unknown): string {
 
 // -------- Search --------
 
+// Regex heuristics for B3 jurisdiction detection in search queries
+const B3_TICKER_QUERY_RE = /^[A-Z]{4}\d{1,2}(\.SA)?$/i;
+const B3_BDR_RE = /^[A-Z]{4}(34|35)$/;
+
 export const searchAssetsFn = createServerFn({ method: "GET" })
-  .validator((data: { query: string }) => ({ query: sanitizeQuery(data?.query) }))
+  .validator((data: { query: string; jurisdiction?: "BR" | "US" }) => ({
+    query: sanitizeQuery(data?.query),
+    jurisdiction: data?.jurisdiction === "US" ? "US" : "BR",
+  }))
   .handler(async ({ data }): Promise<SearchHit[]> => {
     const q = data.query;
+    const jurisdiction = data.jurisdiction ?? "BR";
     if (!q) return [];
 
     const results: SearchHit[] = [];
     const seen = new Set<string>();
+
+    // For US jurisdiction: fetch Yahoo with more results and prioritise US hits.
+    // For BR jurisdiction (default): keep original order — Brapi first, Yahoo second.
+    const isUSJurisdiction = jurisdiction === "US";
+    const yahooQuotesCount = isUSJurisdiction ? 15 : 6;
 
     const [brRes, yhRes] = await Promise.allSettled([
       fetchWithRetry(
@@ -60,14 +73,44 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
         { timeoutMs: 2500, retries: 0 },
       ).then((r: Response) => (r.ok ? r.json() : null)),
       fetchWithRetry(
-        `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=6&newsCount=0`,
+        `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=${yahooQuotesCount}&newsCount=0`,
         "yahoo",
         { headers: { "User-Agent": UA } },
         { timeoutMs: 2500, retries: 0 },
       ).then((r: Response) => (r.ok ? r.json() : null)),
     ]);
 
-    if (brRes.status === "fulfilled" && brRes.value?.stocks) {
+    // For US jurisdiction, push Yahoo US results first so they dominate the top 8 slots
+    if (isUSJurisdiction && yhRes.status === "fulfilled" && yhRes.value?.quotes) {
+      for (const q2 of yhRes.value.quotes) {
+        if (!q2.symbol) continue;
+        const t = String(q2.symbol).toUpperCase();
+        // Skip .SA B3 shadows and other non-primary exchanges
+        if (/\.(SA|BK|F|MX|TA|IL|VI|BR)$/.test(t)) continue;
+        const strippedT = t.replace(/\.SA$/, "");
+        const cleaned = strippedT;
+        if (seen.has(cleaned)) continue;
+        seen.add(cleaned);
+        results.push({
+          ticker: cleaned,
+          name: q2.longname || q2.shortname || strippedT,
+          type: classifyYahoo({
+            symbol: t,
+            quoteType: q2.quoteType,
+            longname: q2.longname,
+            shortname: q2.shortname,
+          }),
+          sector: null,
+        });
+      }
+    }
+
+    // Whether to include B3 results:
+    // - For US jurisdiction only allow them if the query explicitly looks like a B3 ticker
+    const queryLooksLikeB3 = B3_TICKER_QUERY_RE.test(q.trim());
+    const includeBrapi = !isUSJurisdiction || queryLooksLikeB3;
+
+    if (includeBrapi && brRes.status === "fulfilled" && brRes.value?.stocks) {
       // Collect BR candidates first, then resolve their AssetType via classifyBrAsync in
       // parallel (HG Brasil canonical classification, falling back to the local heuristic).
       // This avoids misclassifying ETFs/funds ending in "11" (e.g. IMAB11) as FII, which the
@@ -103,7 +146,8 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
       });
     }
 
-    if (yhRes.status === "fulfilled" && yhRes.value?.quotes) {
+
+    if (!isUSJurisdiction && yhRes.status === "fulfilled" && yhRes.value?.quotes) {
       for (const q2 of yhRes.value.quotes) {
         if (!q2.symbol) continue;
         const t = String(q2.symbol).toUpperCase();
@@ -128,8 +172,9 @@ export const searchAssetsFn = createServerFn({ method: "GET" })
       }
     }
 
-    return results.slice(0, 8);
+    return results.slice(0, 10);
   });
+
 
 // -------- Fetch --------
 

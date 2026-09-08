@@ -6,6 +6,7 @@ import {
   type AssetSafetyInput,
   type DividendSafetyResult,
 } from "@/lib/dividendSafety";
+import { useI18n } from "@/lib/i18n-provider";
 
 interface DividendSafetyRadarProps {
   input: AssetSafetyInput;
@@ -18,6 +19,8 @@ export function DividendSafetyRadar({
   ticker,
   className,
 }: DividendSafetyRadarProps) {
+  const { t } = useI18n();
+  const s = t.dividendSafetyRadar;
   const result: DividendSafetyResult = calculateDividendSafetyScore(input);
 
   const getScoreColor = () => {
@@ -58,10 +61,10 @@ export function DividendSafetyRadar({
         <div>
           <span className="text-[10px] font-semibold uppercase tracking-wider text-accent-text inline-flex items-center gap-1">
             <Activity className="h-3.5 w-3.5 text-accent-text" />
-            DIVIDEND SAFETY SCORE • ANÁLISE DE RESILIÊNCIA
+            {s.eyebrow}
           </span>
           <h3 className="font-serif text-lg font-bold text-foreground mt-0.5">
-            Radar de Sustentabilidade de Proventos {ticker ? `(${ticker})` : ""}
+            {s.title} {ticker ? `(${ticker})` : ""}
           </h3>
         </div>
 
@@ -87,10 +90,11 @@ export function DividendSafetyRadar({
       {/* Main Meter */}
       <div className="mb-5 space-y-1.5">
         <div className="flex justify-between text-[11px] text-muted-foreground">
-          <span>Risco de Corte Elevado</span>
-          <span>Sustentabilidade Moderada</span>
-          <span>Blindagem Alta</span>
+          <span>{s.meterLow}</span>
+          <span>{s.meterMid}</span>
+          <span>{s.meterHigh}</span>
         </div>
+
         <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden relative">
           <div
             className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-500", getBarGradient())}
