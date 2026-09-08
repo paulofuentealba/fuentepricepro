@@ -1,7 +1,8 @@
 import React from "react";
-import { Calendar, CheckCircle2, Clock, DollarSign, ArrowRight } from "lucide-react";
+import { Calendar, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formatters";
+import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
 import type { RealizedIncomeEvent } from "@/lib/realizedIncome";
 import { cn } from "@/lib/utils";
@@ -17,9 +18,16 @@ export function MonthlyCashflowTimeline({
   currency = "BRL",
   className,
 }: MonthlyCashflowTimelineProps) {
+  const { t, locale } = useI18n();
+  const c = t.incomeScreen.cashflowTimeline;
+
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
+
+  const dateLocale = locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";
+  const monthName = now.toLocaleString(dateLocale, { month: "long" });
+  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
   // Filter events whose payment date or ex-date is in the current month
   const monthEvents = events
@@ -39,14 +47,15 @@ export function MonthlyCashflowTimeline({
 
   // Group events by week of the month
   const weeks = [
-    { label: "Semana 1 (Dias 01 a 07)", minDay: 1, maxDay: 7 },
-    { label: "Semana 2 (Dias 08 a 14)", minDay: 8, maxDay: 14 },
-    { label: "Semana 3 (Dias 15 a 21)", minDay: 15, maxDay: 21 },
-    { label: "Semana 4+ (Dias 22 em diante)", minDay: 22, maxDay: 31 },
+    { label: c.weeks.w1, minDay: 1, maxDay: 7 },
+    { label: c.weeks.w2, minDay: 8, maxDay: 14 },
+    { label: c.weeks.w3, minDay: 15, maxDay: 21 },
+    { label: c.weeks.w4, minDay: 22, maxDay: 31 },
   ];
 
-  const monthName = now.toLocaleString("pt-BR", { month: "long" });
-  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  const eyebrowText = c.eyebrow
+    .replace("{{month}}", capitalizedMonth.toUpperCase())
+    .replace("{{year}}", String(currentYear));
 
   return (
     <Card
@@ -58,22 +67,22 @@ export function MonthlyCashflowTimeline({
           <div>
             <span className="text-[10px] font-semibold uppercase tracking-wider text-accent-text inline-flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5 text-accent-text" />
-              CALENDÁRIO DE CAIXA • {capitalizedMonth.toUpperCase()} {currentYear}
+              {eyebrowText}
             </span>
             <CardTitle className="mt-1 font-serif text-lg font-bold text-foreground">
-              Linha do Tempo de Proventos do Mês
+              {c.title}
             </CardTitle>
             <CardDescription className="text-xs">
-              Previsão de pingos em conta e datas COM por semana no mês corrente.
+              {c.description}
             </CardDescription>
           </div>
 
           <div className="text-right">
             <div className="text-[10px] uppercase font-semibold text-muted-foreground">
-              Total Previsto no Mês
+              {c.monthlyTotal}
             </div>
             <div className="font-mono text-xl font-bold text-success">
-              {formatCurrency(monthTotal, currency, "ptBR")}
+              {formatCurrency(monthTotal, currency, locale)}
             </div>
           </div>
         </div>
@@ -82,8 +91,7 @@ export function MonthlyCashflowTimeline({
       <CardContent className="space-y-4">
         {monthEvents.length === 0 ? (
           <div className="p-8 text-center border rounded-xl border-dashed border-border/70 text-muted-foreground text-xs">
-            Nenhum provento com crédito previsto especificamente para este mês até o momento.
-            Consulte os próximos meses na tabela de Sazonalidade Anual abaixo.
+            {c.emptyState}
           </div>
         ) : (
           <div className="space-y-4">
@@ -103,7 +111,7 @@ export function MonthlyCashflowTimeline({
                   <div className="flex items-center justify-between text-xs border-b border-border/40 pb-1 font-semibold text-muted-foreground">
                     <span>{week.label}</span>
                     <span className="font-mono text-foreground font-bold">
-                      {formatCurrency(weekTotal, currency, "ptBR")}
+                      {formatCurrency(weekTotal, currency, locale)}
                     </span>
                   </div>
 
@@ -124,7 +132,7 @@ export function MonthlyCashflowTimeline({
                                 "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold font-mono",
                                 isPast
                                   ? "bg-success/15 text-success"
-                                  : "bg-primary/15 text-primary"
+                                  : "bg-primary/15 text-primary",
                               )}
                             >
                               {evtDate.getDate().toString().padStart(2, "0")}
@@ -135,32 +143,40 @@ export function MonthlyCashflowTimeline({
                                   {evt.ticker}
                                 </strong>
                                 <span className="text-[10px] text-muted-foreground">
-                                  {evt.taxType === "jcp" ? "JCP" : "Dividendo"}
+                                  {evt.taxType === "jcp" ? c.status.jcp : c.status.dividend}
                                 </span>
                               </div>
                               <div className="text-[10.5px] text-muted-foreground mt-0.5">
-                                {evt.paymentDate ? `Crédito: ${new Date(evt.paymentDate).toLocaleDateString("pt-BR")}` : `Data COM: ${new Date(evt.exDate).toLocaleDateString("pt-BR")}`}
+                                {evt.paymentDate
+                                  ? c.status.creditDate.replace(
+                                      "{{date}}",
+                                      new Date(evt.paymentDate).toLocaleDateString(dateLocale),
+                                    )
+                                  : c.status.exDate.replace(
+                                      "{{date}}",
+                                      new Date(evt.exDate).toLocaleDateString(dateLocale),
+                                    )}
                               </div>
                             </div>
                           </div>
 
                           <div className="text-right">
                             <div className="font-mono font-bold text-xs text-success">
-                              +{formatCurrency(evt.amountNet, currency, "ptBR")}
+                              +{formatCurrency(evt.amountNet, currency, locale)}
                             </div>
                             <span
                               className={cn(
                                 "inline-flex items-center text-[10px] gap-0.5 mt-0.5",
-                                isPast ? "text-success" : "text-muted-foreground"
+                                isPast ? "text-success" : "text-muted-foreground",
                               )}
                             >
                               {isPast ? (
                                 <>
-                                  <CheckCircle2 className="h-3 w-3" /> Pago
+                                  <CheckCircle2 className="h-3 w-3" /> {c.status.paid}
                                 </>
                               ) : (
                                 <>
-                                  <Clock className="h-3 w-3" /> A receber
+                                  <Clock className="h-3 w-3" /> {c.status.pending}
                                 </>
                               )}
                             </span>
