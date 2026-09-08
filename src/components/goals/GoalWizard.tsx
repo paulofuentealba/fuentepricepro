@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,9 +11,16 @@ import type { AssetType } from "@/lib/domain";
 import { CLASS_MARKET_REFERENCE_YIELDS } from "@/lib/calculations";
 import { cn } from "@/lib/utils";
 
-const ASSET_TYPES: AssetType[] = [
+const DEFAULT_BR_ASSET_TYPES: AssetType[] = [
   "STOCK_BR",
   "FII",
+  "STOCK_US",
+  "REIT",
+  "ETF",
+  "FIXED_INCOME",
+];
+
+const DEFAULT_US_ASSET_TYPES: AssetType[] = [
   "STOCK_US",
   "REIT",
   "ETF",
@@ -33,27 +41,33 @@ export interface GoalWizardProps {
  *
  * Opera diretamente sobre UserSettings (smartAllocationTargets, classTargetYields,
  * excludeAboveCeiling, excludeYieldTraps, maxConcentrationPerAsset) — os mesmos campos já
- * consumidos pelo AskEngine em Reinvestir e Plano de Aporte. Nenhum campo novo, nenhuma fórmula
- * nova: substitui o antigo TargetAllocationPanel (accordion) reutilizando os mesmos textos i18n
- * de t.smartAllocation.*.
+ * consumidos pelo AskEngine em Reinvestir e Plano de Aporte.
  *
- * Mantém 6 classes de AssetType (STOCK_BR, FII, STOCK_US, REIT, ETF, FIXED_INCOME) em vez dos
- * 4 buckets agrupados do protótipo ("Exterior" = STOCK_US+REIT+ETF) — decisão deliberada para
- * não inventar uma regra de distribuição interna sem validação de produto; consistente com a
- * granularidade já usada em Watchlist e Realidade Fiscal.
- *
- * FII_INFRA e FIAGRO NÃO aparecem como classes separadas aqui: são agrupados em "FII" via
- * `getDisplayAssetType` (mesmo SSOT já usado por usePortfolioRisk/useAssetFilterSort) — o
- * AssetType em si continua distinguindo os três em Watchlist e Realidade Fiscal (FII_INFRA é
- * isento de IR, FIAGRO segue regra de FII a 20%); só a camada de metas/yield-alvo agrupa.
- * `useUserSettings.ts` migra silenciosamente valores legados de FII_INFRA/FIAGRO para FII.
+ * Adapta dinamicamente as classes de ativo com base na jurisdição fiscal:
+ * Para US (taxJurisdiction === "US"), foca nativamente em STOCK_US, REIT, ETF, FIXED_INCOME,
+ * com um botão para ativar classes B3 (STOCK_BR, FII) se desejado.
  */
 export function GoalWizard({ onComplete }: GoalWizardProps) {
   const { t } = useI18n();
   const { settings, updateSettings } = useUserSettings();
+  const isUS = settings.taxJurisdiction === "US";
+
+  const [showBrAssets, setShowBrAssets] = useState<boolean>(() => {
+    return Boolean(
+      (settings.smartAllocationTargets?.STOCK_BR || 0) > 0 ||
+      (settings.smartAllocationTargets?.FII || 0) > 0,
+    );
+  });
+
+  const activeAssetTypes = useMemo(() => {
+    if (!isUS || showBrAssets) {
+      return DEFAULT_BR_ASSET_TYPES;
+    }
+    return DEFAULT_US_ASSET_TYPES;
+  }, [isUS, showBrAssets]);
 
   const targets = settings.smartAllocationTargets;
-  const total = ASSET_TYPES.reduce((sum, type) => sum + (targets[type] || 0), 0);
+  const total = activeAssetTypes.reduce((sum, type) => sum + (targets[type] || 0), 0);
   const isTotalOk = total === 100;
 
   const handleTargetChange = (type: AssetType, val: string | number) => {
@@ -98,7 +112,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
           </Badge>
         </div>
 
-        {ASSET_TYPES.map((type) => (
+        {activeAssetTypes.map((type) => (
           <div key={type} className="mb-3 flex items-center gap-3.5 last:mb-0">
             <span className="flex w-[110px] shrink-0 items-center gap-1 text-[12.5px] font-display font-medium text-foreground sm:w-[130px]">
               {t.types[type] || type}
@@ -120,6 +134,23 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
             </span>
           </div>
         ))}
+
+        {isUS && (
+          <div className="mt-3.5 flex items-center justify-between border-t border-border/40 pt-3">
+            <span className="text-xs text-muted-foreground">
+              {showBrAssets ? t.goalWizard.brAssetsNote : t.goalWizard.includeBrAssets}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setShowBrAssets(!showBrAssets)}
+            >
+              {showBrAssets ? t.goalWizard.hideBrAssets : t.goalWizard.includeBrAssets}
+            </Button>
+          </div>
+        )}
 
         <div
           className={cn(
@@ -149,8 +180,11 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
             <InfoTooltip content={t.smartAllocation.classTargetYieldsDesc} />
           )}
         </div>
-        {ASSET_TYPES.map((type) => {
-          const refYield = CLASS_MARKET_REFERENCE_YIELDS[type] ?? 6.0;
+        {activeAssetTypes.map((type) => {
+          const refYield =
+            isUS && type === "FIXED_INCOME"
+              ? 5.0
+              : CLASS_MARKET_REFERENCE_YIELDS[type] ?? 6.0;
           const customVal = classTargetYields[type];
           const hasCustom = customVal !== undefined && customVal !== null;
           return (
