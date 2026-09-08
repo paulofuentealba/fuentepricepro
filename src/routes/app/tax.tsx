@@ -9,6 +9,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { buildTaxContext, type TaxRealityContext } from "@/lib/tax/buildTaxContext";
 import { computeTaxRealityRows, buildTaxRealityCsv } from "@/lib/tax/taxRealityRows";
 import { downloadCsv } from "@/lib/csv";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { TaxRealityScreen } from "@/components/tax/TaxRealityScreen";
 import { IrpfMirrorReport } from "@/components/tax/IrpfMirrorReport";
 import { UsTax1099Report } from "@/components/tax/UsTax1099Report";
@@ -35,6 +36,7 @@ export function RealidadeFiscalPage() {
 
   const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
   const { settings } = useUserSettings();
+  const { isUS, hasBrPositions, hasUsPositions } = useMarketScope();
   const currency = settings?.displayCurrency || "BRL";
   const { events: realizedEvents, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
   const { transactions, isLoading: isTxLoading } = useTransactions();
@@ -64,21 +66,8 @@ export function RealidadeFiscalPage() {
     );
   }
 
-  const isUS = settings?.taxJurisdiction === "US";
-  const hasBrAssets = valuedItems.some(
-    (item) =>
-      item.type === "STOCK_BR" ||
-      item.type === "FII" ||
-      item.type === "FII_INFRA" ||
-      item.type === "FIAGRO" ||
-      item.currency === "BRL",
-  );
-  const hasUsAssets = valuedItems.some(
-    (item) =>
-      item.type === "STOCK_US" ||
-      item.type === "REIT" ||
-      item.currency === "USD",
-  );
+  const hasBrAssets = hasBrPositions;
+  const hasUsAssets = hasUsPositions;
 
   const [showBrSection, setShowBrSection] = useState<boolean>(!isUS || hasBrAssets);
 
@@ -184,17 +173,17 @@ export function RealidadeFiscalPage() {
         <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
           <span>
             {showBrSection
-              ? t.taxRealityScreen?.tabs?.hideBrSectionToggle || "Ocultar declaração brasileira"
+              ? t.taxRealityScreen?.tabs?.hideBrSectionToggle || "A declaração fiscal brasileira (B3) está visível."
               : t.taxRealityScreen?.tabs?.brSectionToggle || "Precisa de declaração brasileira (IRPF / DARF)?"}
           </span>
           <button
             type="button"
             onClick={() => setShowBrSection(!showBrSection)}
-            className="text-xs text-primary hover:underline font-medium"
+            className="text-xs text-primary hover:underline font-medium cursor-pointer"
           >
             {showBrSection
-              ? t.taxRealityScreen?.tabs?.hideBrSectionToggle || "Ocultar"
-              : t.taxRealityScreen?.tabs?.brSectionToggle || "Exibir abas B3"}
+              ? t.taxRealityScreen?.tabs?.hideBrTabsBtn || "Ocultar abas B3"
+              : t.taxRealityScreen?.tabs?.showBrTabsBtn || "Exibir abas B3"}
           </button>
         </div>
       )}
