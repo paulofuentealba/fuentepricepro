@@ -20,7 +20,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n-provider";
+import { useMarketScope } from "@/lib/useMarketScope";
+import { exchangeRateQueryOptions } from "@/lib/queryOptions";
+import { isBrTicker } from "@/lib/classify";
+import type { Currency } from "@/lib/domain";
 import { buildTransactionsCsv, downloadCsv } from "@/lib/csv";
 import {
   useTransactions,
@@ -36,8 +41,18 @@ import { ThesisSnapshotModal } from "./ThesisSnapshotModal";
 
 export function MyTransactionsView() {
   const { t } = useI18n();
+  const { currency } = useMarketScope();
+  const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { transactions, isLoading, remove } = useTransactions();
   const { items: watchlistItems, updateAsync } = useWatchlist();
+
+  const currencyByTicker = useMemo(() => {
+    const map: Record<string, Currency> = {};
+    for (const item of watchlistItems) {
+      map[item.ticker.toUpperCase()] = item.currency;
+    }
+    return map;
+  }, [watchlistItems]);
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState("");
@@ -307,7 +322,12 @@ export function MyTransactionsView() {
       </div>
 
       {/* 4 KPIs Summary Cards */}
-      <MyTransactionsKpis transactions={transactions} />
+      <MyTransactionsKpis
+        transactions={transactions}
+        currency={currency}
+        currencyByTicker={currencyByTicker}
+        fxRate={fx?.USDBRL ?? 5.5}
+      />
 
       {/* Filter Bar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
@@ -398,6 +418,7 @@ export function MyTransactionsView() {
         onDelete={(tx) => setTxToDelete(tx)}
         onBatchDelete={(ids) => setBatchToDeleteIds(ids)}
         onViewThesis={(tx) => setViewingThesisTx(tx)}
+        currencyByTicker={currencyByTicker}
       />
 
       {/* Create / Edit Transaction Modal */}
@@ -418,7 +439,10 @@ export function MyTransactionsView() {
           onClose={() => setViewingThesisTx(null)}
           snapshot={viewingThesisTx.thesisSnapshot}
           ticker={viewingThesisTx.ticker}
-          currency={matchingWatchlistForThesis?.currency || "BRL"}
+          currency={
+            matchingWatchlistForThesis?.currency ??
+            (isBrTicker(viewingThesisTx.ticker) ? "BRL" : "USD")
+          }
         />
       )}
 

@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import { isUsAsset, netAfterTax, yieldOnCost } from "@/lib/calculations";
 import { formatCurrency, formatPercent, type Locale, dict } from "@/lib/i18n";
+import { useMarketScope } from "@/lib/useMarketScope";
 import type { WatchlistItem } from "@/lib/watchlist";
 
 export interface AssetDerived {
   grossIncome: number;
   isUs: boolean;
+  showNet: boolean;
   netIncome: number;
   positive: boolean;
   hasAvg: boolean;
@@ -18,10 +20,20 @@ export interface AssetDerived {
 }
 
 export function useAssetCardDerived(item: WatchlistItem): AssetDerived {
+  const { taxJurisdiction } = useMarketScope();
+
   return useMemo(() => {
     const grossIncome = item.annualDividend * item.quantity;
     const isUs = isUsAsset(item.type, item.currency);
-    const netIncome = netAfterTax(grossIncome, item.type, item.currency, item.customTaxRate);
+    const netIncome = netAfterTax(
+      grossIncome,
+      item.type,
+      item.currency,
+      item.customTaxRate,
+      false,
+      taxJurisdiction,
+    );
+    const showNet = netIncome < grossIncome;
     const positive = item.safetyMargin >= 0;
     const hasAvg = item.averagePrice != null && item.averagePrice > 0;
     const totalCost = hasAvg ? (item.averagePrice as number) * item.quantity : 0;
@@ -33,6 +45,7 @@ export function useAssetCardDerived(item: WatchlistItem): AssetDerived {
     return {
       grossIncome,
       isUs,
+      showNet,
       netIncome,
       positive,
       hasAvg,
@@ -43,7 +56,7 @@ export function useAssetCardDerived(item: WatchlistItem): AssetDerived {
       totalCost,
       currentValue,
     };
-  }, [item]);
+  }, [item, taxJurisdiction]);
 }
 
 export function buildAssetShareText(

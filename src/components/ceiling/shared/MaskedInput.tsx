@@ -2,6 +2,7 @@ import * as React from "react";
 import { NumericFormat, type NumericFormatProps } from "react-number-format";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n-provider";
+import type { Currency } from "@/lib/domain";
 
 export interface MaskedInputProps extends Omit<
   NumericFormatProps,
@@ -11,10 +12,11 @@ export interface MaskedInputProps extends Omit<
   onChangeValue?: (value: number | undefined) => void;
   formatMode?: "currency" | "percentage" | "numeric";
   currencySymbol?: string;
+  currency?: Currency;
 }
 
 export const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  ({ value, onChangeValue, formatMode = "numeric", currencySymbol, className, ...props }, ref) => {
+  ({ value, onChangeValue, formatMode = "numeric", currencySymbol, currency, className, ...props }, ref) => {
     const { locale } = useI18n();
 
     // Determine separators based on locale
@@ -29,7 +31,11 @@ export const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
     let suffix = "";
 
     if (formatMode === "currency") {
-      prefix = currencySymbol ? `${currencySymbol} ` : isEn ? "$ " : "R$ ";
+      prefix = currencySymbol
+        ? `${currencySymbol} `
+        : currency === "USD" || isEn
+          ? "$ "
+          : "R$ ";
     } else if (formatMode === "percentage") {
       suffix = "%";
     }

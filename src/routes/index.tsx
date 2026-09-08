@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-provider";
 import { useAuthModal } from "@/lib/auth-modal";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency } from "@/lib/i18n";
+import type { Currency } from "@/lib/domain";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 
@@ -44,9 +45,9 @@ function LandingRoute() {
 
 function BrandMark() {
   return (
-    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden>
-      <circle cx="20" cy="20" r="19" stroke="var(--accent)" strokeWidth="1.4" opacity=".35" />
-      <circle cx="20" cy="20" r="13.5" stroke="var(--accent)" strokeWidth="1.4" opacity=".6" />
+    <svg width="24" height="24" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2.5" />
+      <circle cx="20" cy="20" r="13" fill="currentColor" opacity="0.12" />
       <circle cx="20" cy="20" r="8" fill="var(--accent)" />
     </svg>
   );
@@ -59,11 +60,12 @@ function LandingPage() {
   const { openAuthModal } = useAuthModal();
 
   const currentYear = new Date().getFullYear();
+  const currency: Currency = locale === "en" ? "USD" : "BRL";
 
   const heroCardRows = [
-    { name: "BBAS3", tag: P.heroCard.tagStockBR, amount: 850, bar: 78 },
-    { name: "SCHD", tag: P.heroCard.tagForeign, amount: 700, bar: 64 },
-    { name: "TAEE11", tag: P.heroCard.tagStockBR, amount: 550, bar: 50 },
+    { name: "BBAS3", tag: P.heroCard.tagStockBR, amount: currency === "USD" ? 170 : 850, currency, bar: 78 },
+    { name: "SCHD", tag: P.heroCard.tagForeign, amount: currency === "USD" ? 140 : 700, currency, bar: 64 },
+    { name: "TAEE11", tag: P.heroCard.tagStockBR, amount: currency === "USD" ? 110 : 550, currency, bar: 50 },
   ];
 
   return (
@@ -163,7 +165,7 @@ function LandingPage() {
                   />
                 </div>
               </div>
-              <div className="font-serif text-base font-medium">{formatCurrency(row.amount, "BRL", locale)}</div>
+              <div className="font-serif text-base font-medium">{formatCurrency(row.amount, row.currency, locale)}</div>
             </div>
           ))}
           <div className="mt-3 rounded-lg bg-accent/15 px-3 py-2.5 text-[10px] leading-relaxed text-muted-foreground">
@@ -255,7 +257,7 @@ function LandingPage() {
             <div className="font-serif text-xl font-semibold mb-1">{P.pricing.free.name}</div>
             <div className="text-xs text-muted-foreground mb-2.5">{P.pricing.free.tagline}</div>
             <div className="font-serif text-4xl font-medium mb-1">
-              {formatCurrency(0, "BRL", locale)}
+              {formatCurrency(0, currency, locale)}
               <span className="text-sm text-muted-foreground">{P.pricing.priceSuffix}</span>
             </div>
             <ul className="my-4 space-y-1.5">
@@ -286,7 +288,7 @@ function LandingPage() {
             <div className="font-serif text-xl font-semibold mb-1">{P.pricing.pro.name}</div>
             <div className="text-xs text-muted-foreground mb-2.5">{P.pricing.pro.tagline}</div>
             <div className="font-serif text-4xl font-medium mb-1">
-              {formatCurrency(9.9, "BRL", locale)}
+              {formatCurrency(9.9, currency, locale)}
               <span className="text-sm text-muted-foreground">{P.pricing.priceSuffix}</span>
             </div>
             <ul className="my-4 space-y-1.5">

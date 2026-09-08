@@ -30,6 +30,8 @@ import { useAuthModal } from "@/lib/auth-modal";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
 import { useMarketScope } from "@/lib/useMarketScope";
+import { isBrTicker } from "@/lib/classify";
+import type { Currency } from "@/lib/domain";
 
 interface ReviewRow {
   key: string;
@@ -434,6 +436,7 @@ export function BrokerNoteImportPage() {
               <div className="mt-4 flex flex-col divide-y divide-border/40">
                 {rows.map((row) => {
                   const total = row.quantity * row.price;
+                  const rowCurrency: Currency = isBrTicker(row.ticker) ? "BRL" : "USD";
                   return (
                     <div key={row.key} className="flex items-center gap-3 py-3">
                       <Checkbox
@@ -470,21 +473,24 @@ export function BrokerNoteImportPage() {
                         </div>
                       </div>
                       <div className="shrink-0 font-mono text-sm font-semibold text-foreground">
-                        {formatCurrency(total, "BRL", locale)}
+                        {formatCurrency(total, rowCurrency, locale)}
                       </div>
                     </div>
                   );
                 })}
 
-                {totalFees > 0 && (
-                  <div className="flex items-center justify-between py-3 text-sm">
-                    <div>
-                      <div className="text-foreground">{t.brokerNoteImportPage?.feesRowLabel}</div>
-                      <div className="text-xs text-muted-foreground">{t.brokerNoteImportPage?.feesRowDesc}</div>
+                {totalFees > 0 && (() => {
+                  const noteCurrency: Currency = detectedBroker === "SCHWAB" || isUS ? "USD" : "BRL";
+                  return (
+                    <div className="flex items-center justify-between py-3 text-sm">
+                      <div>
+                        <div className="text-foreground">{t.brokerNoteImportPage?.feesRowLabel}</div>
+                        <div className="text-xs text-muted-foreground">{t.brokerNoteImportPage?.feesRowDesc}</div>
+                      </div>
+                      <div className="font-mono font-semibold text-foreground">{formatCurrency(totalFees, noteCurrency, locale)}</div>
                     </div>
-                    <div className="font-mono font-semibold text-foreground">{formatCurrency(totalFees, "BRL", locale)}</div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
 
               <div className="mt-4 flex items-start gap-3 rounded-xl border border-warning/30 bg-warning/10 p-4">

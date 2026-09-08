@@ -2,12 +2,54 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MyTransactionsView } from "../MyTransactionsView";
 import { dict, type Locale } from "@/lib/i18n";
 import type { Transaction } from "@/lib/transactions";
 import type { WatchlistItem } from "@/lib/watchlist";
+import type { Currency } from "@/lib/domain";
 
 let currentLocale: Locale = "ptBR";
+let mockMarketScope = {
+  currency: "BRL" as Currency,
+  isUS: false,
+  isUSNative: false,
+  taxJurisdiction: "BR" as const,
+};
+
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => mockMarketScope,
+}));
+
+vi.mock("@/lib/queryOptions", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/queryOptions")>();
+  return {
+    ...actual,
+    exchangeRateQueryOptions: () => ({
+      queryKey: ["exchangeRate"],
+      queryFn: async () => ({ USDBRL: 5.5, updatedAt: Date.now() }),
+    }),
+  };
+});
+
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+}
+
+function renderWithClient(ui: React.ReactElement) {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+}
 
 vi.mock("@/lib/i18n-provider", () => ({
   useI18n: () => ({
@@ -141,7 +183,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("renders the page title, subtitle, and action buttons", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     expect(screen.getByText("Extrato de Operações")).toBeInTheDocument();
     expect(
@@ -154,7 +196,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("renders the 4 KPI summary cards with computed totals", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     // Total Aportado: (100 * 25 + 5) + (50 * 28 + 2.5) = 2505 + 1402.5 = 3907.50
     expect(screen.getByText("Total Aportado (Compras)")).toBeInTheDocument();
@@ -172,7 +214,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("renders all transactions in the ledger table with appropriate badges", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     expect(screen.getAllByText("BBAS3").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("PETR4")).toBeInTheDocument();
@@ -186,7 +228,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("filters transactions when searching by ticker", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     const searchInput = screen.getByPlaceholderText(
       "Buscar por ativo (BBAS3, HGLG11), corretora ou notas..."
@@ -199,7 +241,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("opens the ThesisSnapshotModal when clicking 'Ver Tese'", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     const viewThesisButtons = screen.getAllByText("Ver Tese");
     expect(viewThesisButtons.length).toBe(1);
@@ -215,7 +257,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("shows empty state when search matches no transactions", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     const searchInput = screen.getByPlaceholderText(
       "Buscar por ativo (BBAS3, HGLG11), corretora ou notas..."
@@ -227,7 +269,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("opens NewTransactionModal when clicking 'Registrar Transação'", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     const registerBtn = screen.getByText("Registrar Transação");
     fireEvent.click(registerBtn);
@@ -237,7 +279,7 @@ describe("MyTransactionsView", () => {
   });
 
   it("shows batch action bar when a transaction checkbox is selected", () => {
-    render(<MyTransactionsView />);
+    renderWithClient(<MyTransactionsView />);
 
     const checkboxes = screen.getAllByRole("checkbox");
     // checkboxes[0] is header checkbox, checkboxes[1] is first row
@@ -245,5 +287,19 @@ describe("MyTransactionsView", () => {
 
     expect(screen.getByText("1 transação selecionada")).toBeInTheDocument();
     expect(screen.getByText("Excluir Selecionadas")).toBeInTheDocument();
+  });
+
+  it("renders with USD currency when market scope is USD", () => {
+    mockMarketScope = {
+      currency: "USD",
+      isUS: true,
+      isUSNative: true,
+      taxJurisdiction: "US",
+    };
+    currentLocale = "en";
+
+    renderWithClient(<MyTransactionsView />);
+
+    expect(screen.getByText("Total Invested (Buys)")).toBeInTheDocument();
   });
 });

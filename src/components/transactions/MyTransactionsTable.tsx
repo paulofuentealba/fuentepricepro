@@ -21,6 +21,8 @@ import {
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
 import type { Transaction } from "@/lib/transactions";
+import type { Currency } from "@/lib/domain";
+import { isBrTicker } from "@/lib/classify";
 
 interface MyTransactionsTableProps {
   allTransactions: Transaction[];
@@ -33,6 +35,7 @@ interface MyTransactionsTableProps {
   onDelete: (tx: Transaction) => void;
   onBatchDelete: (ids: string[]) => void;
   onViewThesis: (tx: Transaction) => void;
+  currencyByTicker?: Record<string, Currency>;
 }
 
 const PAGE_SIZE = 25;
@@ -48,6 +51,7 @@ export function MyTransactionsTable({
   onDelete,
   onBatchDelete,
   onViewThesis,
+  currencyByTicker = {},
 }: MyTransactionsTableProps) {
   const { t, locale } = useI18n();
   const [currentPage, setCurrentPage] = useState(1);
@@ -222,6 +226,8 @@ export function MyTransactionsTable({
               {paginatedTransactions.map((tx) => {
                 const isSelected = selectedIds.has(tx.id);
                 const runningQty = runningBalanceMap.get(tx.id) ?? 0;
+                const txCurrency: Currency =
+                  currencyByTicker[tx.ticker] ?? (isBrTicker(tx.ticker) ? "BRL" : "USD");
                 const formattedDate = new Intl.DateTimeFormat(intlLocale, {
                   dateStyle: "short",
                 }).format(new Date(tx.date));
@@ -304,15 +310,15 @@ export function MyTransactionsTable({
                     <TableCell className="whitespace-nowrap text-right font-mono text-xs text-foreground">
                       {tx.type === "corporate_action"
                         ? "—"
-                        : formatCurrency(tx.pricePerShare, "BRL", locale)}
+                        : formatCurrency(tx.pricePerShare, txCurrency, locale)}
                     </TableCell>
 
                     <TableCell className="whitespace-nowrap text-right font-mono text-xs text-muted-foreground">
-                      {tx.fees ? formatCurrency(tx.fees, "BRL", locale) : "—"}
+                      {tx.fees ? formatCurrency(tx.fees, txCurrency, locale) : "—"}
                     </TableCell>
 
                     <TableCell className="whitespace-nowrap text-right font-mono text-xs font-semibold text-foreground">
-                      {totalAmount != null ? formatCurrency(totalAmount, "BRL", locale) : "—"}
+                      {totalAmount != null ? formatCurrency(totalAmount, txCurrency, locale) : "—"}
                     </TableCell>
 
                     <TableCell className="whitespace-nowrap text-right font-mono text-xs text-muted-foreground">

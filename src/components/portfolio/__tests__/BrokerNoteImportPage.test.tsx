@@ -211,4 +211,23 @@ describe("BrokerNoteImportPage", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
     mockCurrentUser = { uid: "test-user-123" };
   });
+
+  it("formats US trades with USD currency", async () => {
+    const b3Parser = await import("@/lib/dataIngestion/b3Parser");
+    vi.mocked(b3Parser.parseB3BrokerNote).mockReturnValueOnce({
+      success: true,
+      broker: "XP",
+      trades: [
+        { ticker: "AAPL", quantity: 10, price: 150.0, date: "15/07/2026", type: "buy" as const },
+      ],
+      unresolvedTrades: [],
+    });
+
+    const { container } = render(<BrokerNoteImportPage />);
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [makeFile()] } });
+
+    await waitFor(() => expect(screen.getByText("AAPL")).toBeInTheDocument());
+    expect(screen.getByText(/1\.500|1,500/)).toBeInTheDocument();
+  });
 });

@@ -25,6 +25,7 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
   const {
     grossIncome,
     isUs,
+    showNet,
     netIncome,
     positive,
     hasAvg,
@@ -95,14 +96,14 @@ export function AssetCardFinancials({ item, derived, activeMargin }: Props) {
           value={<PriceTag value={grossIncome} currency={item.currency} />}
           variant="success"
           subValue={
-            isUs ? (
+            showNet ? (
               <span>
                 {t.watchlist.netIncome}: <PriceTag value={netIncome} currency={item.currency} />
               </span>
             ) : undefined
           }
           tooltip={
-            isUs ? (
+            showNet ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button

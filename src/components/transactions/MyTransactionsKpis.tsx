@@ -3,12 +3,23 @@ import { ArrowDownLeft, ArrowUpRight, Scale, Receipt } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency } from "@/lib/i18n";
 import type { Transaction } from "@/lib/transactions";
+import type { Currency } from "@/lib/domain";
+import { convertCurrency } from "@/lib/currency";
+import { isBrTicker } from "@/lib/classify";
 
 interface MyTransactionsKpisProps {
   transactions: Transaction[];
+  currency?: Currency;
+  currencyByTicker?: Record<string, Currency>;
+  fxRate?: number;
 }
 
-export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
+export function MyTransactionsKpis({
+  transactions,
+  currency = "BRL",
+  currencyByTicker = {},
+  fxRate = 5.5,
+}: MyTransactionsKpisProps) {
   const { t, locale } = useI18n();
 
   const { totalBuys, buysCount, totalSells, sellsCount, netFlow, totalFees } =
@@ -20,14 +31,19 @@ export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
       let fees = 0;
 
       for (const tx of transactions) {
+        const txCurrency: Currency =
+          currencyByTicker[tx.ticker] ?? (isBrTicker(tx.ticker) ? "BRL" : "USD");
         const txFees = tx.fees || 0;
-        fees += txFees;
+        const convertedFees = convertCurrency(txFees, txCurrency, currency, fxRate);
+        fees += convertedFees;
 
         if (tx.type === "buy") {
-          buys += tx.quantity * tx.pricePerShare + txFees;
+          const rawBuy = tx.quantity * tx.pricePerShare + txFees;
+          buys += convertCurrency(rawBuy, txCurrency, currency, fxRate);
           bCount++;
         } else if (tx.type === "sell") {
-          sells += Math.max(0, tx.quantity * tx.pricePerShare - txFees);
+          const rawSell = Math.max(0, tx.quantity * tx.pricePerShare - txFees);
+          sells += convertCurrency(rawSell, txCurrency, currency, fxRate);
           sCount++;
         }
       }
@@ -40,7 +56,7 @@ export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
         netFlow: buys - sells,
         totalFees: fees,
       };
-    }, [transactions]);
+    }, [transactions, currency, currencyByTicker, fxRate]);
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -55,7 +71,7 @@ export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
           </span>
         </div>
         <p className="mt-2 font-mono text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {formatCurrency(totalBuys, "BRL", locale)}
+          {formatCurrency(totalBuys, currency, locale)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {t.transactionsLedger.kpis.buysCount.replace("{{count}}", String(buysCount))}
@@ -73,7 +89,7 @@ export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
           </span>
         </div>
         <p className="mt-2 font-mono text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {formatCurrency(totalSells, "BRL", locale)}
+          {formatCurrency(totalSells, currency, locale)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {t.transactionsLedger.kpis.sellsCount.replace("{{count}}", String(sellsCount))}
@@ -91,7 +107,7 @@ export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
           </span>
         </div>
         <p className="mt-2 font-mono text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {formatCurrency(netFlow, "BRL", locale)}
+          {formatCurrency(netFlow, currency, locale)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {t.transactionsLedger.kpis.netFlowSub}
@@ -109,7 +125,7 @@ export function MyTransactionsKpis({ transactions }: MyTransactionsKpisProps) {
           </span>
         </div>
         <p className="mt-2 font-mono text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {formatCurrency(totalFees, "BRL", locale)}
+          {formatCurrency(totalFees, currency, locale)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {t.transactionsLedger.kpis.feesSub}
