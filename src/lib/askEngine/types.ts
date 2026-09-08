@@ -1,6 +1,14 @@
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import type { UserSettings } from "@/lib/useUserSettings";
 import type { AssetType } from "@/lib/domain";
+import type { Transaction } from "@/lib/transactionsLogic";
+
+export interface WashSaleRiskAlert {
+  lossDate: number;
+  daysRemaining: number;
+  disallowedLossEstimate: number;
+  salePrice: number;
+}
 
 /**
  * Explicit slice of UserSettings consumed by the AskEngine.
@@ -25,6 +33,8 @@ export interface AskContext {
   asOf: string;
   /** Optional source ticker when the question originates from a specific dividend payer (e.g. Reinforce Payer). */
   sourceTicker?: string;
+  /** Optional transaction history to check for Wash Sale risks (IRC § 1091). */
+  transactions?: Transaction[];
 }
 
 /**
@@ -63,6 +73,7 @@ export interface Allocation {
   percentOfTotal: number;
   reasonKey: string;
   reasonParams?: Record<string, string | number>;
+  washSaleRisk?: WashSaleRiskAlert;
 }
 
 export interface ExcludedAsset {

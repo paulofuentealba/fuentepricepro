@@ -1,4 +1,5 @@
 import { applyExclusions } from "./applyExclusions";
+import { checkWashSaleRisk } from "./washSaleRisk";
 import type {
   AskContext,
   AskResult,
@@ -182,12 +183,20 @@ export function runAsk(ctx: AskContext, strategy: Strategy): AskResult {
     state = "insufficient_funds";
   }
 
-  // 7. Calculate Percentages via Largest Remainder
+  // 7. Calculate Percentages via Largest Remainder & Detect Wash Sale Risks
   const percentages = calculateAllocationPercentages(rawAllocations, availableAmount);
-  const allocations: Allocation[] = rawAllocations.map((a, idx) => ({
-    ...a,
-    percentOfTotal: percentages[idx] || 0,
-  }));
+  const asOfTs = asOf ? new Date(asOf).getTime() : Date.now();
+  const allocations: Allocation[] = rawAllocations.map((a, idx) => {
+    const washSaleRisk = ctx.transactions?.length
+      ? checkWashSaleRisk(a.ticker, ctx.transactions, asOfTs)
+      : undefined;
+
+    return {
+      ...a,
+      percentOfTotal: percentages[idx] || 0,
+      ...(washSaleRisk ? { washSaleRisk } : {}),
+    };
+  });
 
   // 8. Consequences (e.g. Annual Income Added)
   const consequences: Consequence[] = [];
