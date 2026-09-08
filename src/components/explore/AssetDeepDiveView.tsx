@@ -19,6 +19,8 @@ import type { SearchHit } from "@/lib/apiService.functions";
 import {
   REPRESENTATIVE_ASSETS,
   REPRESENTATIVE_KEYS,
+  REPRESENTATIVE_KEYS_US,
+  REPRESENTATIVE_KEYS_BR,
   getDynamicClassMetrics,
   getDynamicTaxPassport,
   type RepresentativeAssetData,
@@ -46,17 +48,23 @@ export function AssetDeepDiveView({
   const { valuedItems, fx, totals } = useValuedPortfolio();
   const { settings, updateSettings } = useUserSettings();
 
+  const isUS = settings?.taxJurisdiction === "US";
+  const defaultTicker = initialTicker === "BBAS3" && isUS ? "KO" : initialTicker;
+
   const showSelector = hideSelector !== undefined ? !hideSelector : mode !== "modal";
   const showSearch = hideSearch !== undefined ? !hideSearch : mode !== "modal";
 
-  const [currentTicker, setCurrentTicker] = useState<string>(initialTicker.toUpperCase());
+  const [currentTicker, setCurrentTicker] = useState<string>(defaultTicker.toUpperCase());
 
   // Keep internal state synced if initialTicker changes from parent (e.g. modal prop)
   useEffect(() => {
     if (initialTicker) {
-      setCurrentTicker(initialTicker.toUpperCase());
+      const eff = initialTicker === "BBAS3" && isUS ? "KO" : initialTicker;
+      setCurrentTicker(eff.toUpperCase());
     }
-  }, [initialTicker]);
+  }, [initialTicker, isUS]);
+
+  const activeRepresentativeKeys = isUS ? REPRESENTATIVE_KEYS_US : REPRESENTATIVE_KEYS_BR;
 
   // Representative data if known
   const repData: RepresentativeAssetData | undefined = REPRESENTATIVE_ASSETS[currentTicker];
@@ -336,20 +344,32 @@ export function AssetDeepDiveView({
 
   return (
     <div className="space-y-6">
-      {/* 8 REPRESENTATIVE CLASS SELECTOR BAR (App Style) */}
+      {/* REPRESENTATIVE CLASS SELECTOR BAR (App Style) */}
       {showSelector && (
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {t.deepDive?.categoriesTitle || "Selecione 1 ativo representativo de cada uma das 8 categorias:"}
+              {isUS
+                ? t.deepDive?.categoriesTitleUs || "Select a representative US dividend asset class:"
+                : t.deepDive?.categoriesTitle || "Selecione 1 ativo representativo de cada uma das 8 categorias:"}
             </span>
             <span className="text-xs text-muted-foreground font-medium">
-              {t.deepDive?.categoriesCount || "8 classes mapeadas"}
+              {isUS
+                ? t.deepDive?.categoriesCountUs || "5 US classes mapped"
+                : t.deepDive?.categoriesCount || "8 classes mapeadas"}
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-            {REPRESENTATIVE_KEYS.map((key) => {
+          <div
+            className={cn(
+              "grid gap-2.5",
+              isUS
+                ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+                : "grid-cols-2 sm:grid-cols-4 lg:grid-cols-8",
+            )}
+          >
+            {activeRepresentativeKeys.map((key) => {
               const item = REPRESENTATIVE_ASSETS[key];
+              if (!item) return null;
               const isSelected = item.ticker === currentTicker;
               const isPositive = item.margin >= 0;
               return (
@@ -371,7 +391,7 @@ export function AssetDeepDiveView({
                     <span
                       className={cn(
                         "text-[11px] font-bold font-display",
-                        isPositive ? "text-success" : "text-danger",
+                        isPositive ? "text-success" : "text-destructive",
                       )}
                     >
                       {isPositive ? "+" : ""}
