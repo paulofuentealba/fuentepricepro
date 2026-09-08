@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, formatPercent, formatNumber } from "@/lib/formatters";
 import type { Currency } from "@/lib/domain";
+import { useMarketScope } from "@/lib/useMarketScope";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import {
   runAsk,
@@ -104,12 +105,14 @@ export function AskScreen({
   positions,
   settings,
   sourceTicker,
-  currency = "BRL",
+  currency: explicitCurrency,
   isLoading = false,
   onExport,
   transactions = [],
 }: AskScreenProps) {
   const { t, locale } = useI18n();
+  const scope = useMarketScope();
+  const currency = explicitCurrency || scope.currency;
 
   // Active strategy state
   const initialStrat =
@@ -251,7 +254,9 @@ export function AskScreen({
                   {amountLabel}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-serif text-xl font-medium text-foreground sm:text-2xl">R$</span>
+                  <span className="font-serif text-xl font-medium text-foreground sm:text-2xl">
+                    {currency === "USD" ? "US$" : "R$"}
+                  </span>
                   <Input
                     id="available-amount-input"
                     type="text"

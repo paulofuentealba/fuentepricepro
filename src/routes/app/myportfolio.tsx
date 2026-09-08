@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 import { PortfolioSummaryHeader } from "@/components/portfolio/PortfolioSummaryHeader";
 import { BrokerCustodyCards } from "@/components/portfolio/BrokerCustodyCards";
@@ -23,6 +24,7 @@ function MyPortfolio() {
   const { valuedItems, totals, isAppLoading, macroRates, fx } = useValuedPortfolio();
   const usdBrlRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const { settings } = useUserSettings();
+  const { currency, isUSNative } = useMarketScope();
   const [selectedItem, setSelectedItem] = useState<ValuedWatchlistItem | null>(null);
 
   const activePositions = valuedItems.filter((item) => !item.isClosedPosition);
@@ -33,7 +35,7 @@ function MyPortfolio() {
       <PortfolioSummaryHeader
         valuedItems={valuedItems}
         totals={totals}
-        currency={settings.displayCurrency}
+        currency={currency}
         usdBrlRate={usdBrlRate}
         isLoading={isAppLoading}
       />
@@ -44,18 +46,20 @@ function MyPortfolio() {
         <>
           <BrokerCustodyCards
             valuedItems={valuedItems}
-            currency={settings.displayCurrency}
+            currency={currency}
             usdBrlRate={usdBrlRate}
             macroRates={macroRates}
             isLoading={isAppLoading}
           />
 
-          <FxDecompositionPanel
-            valuedItems={valuedItems}
-            usdBrlRate={usdBrlRate}
-            isLoading={isAppLoading}
-            onSelectItem={setSelectedItem}
-          />
+          {!isUSNative && (
+            <FxDecompositionPanel
+              valuedItems={valuedItems}
+              usdBrlRate={usdBrlRate}
+              isLoading={isAppLoading}
+              onSelectItem={setSelectedItem}
+            />
+          )}
 
           <PortfolioPositionsTable
             valuedItems={valuedItems}

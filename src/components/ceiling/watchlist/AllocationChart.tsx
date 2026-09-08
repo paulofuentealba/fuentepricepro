@@ -12,11 +12,14 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { getColorForAsset } from "../shared/chartColors";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { useMarketScope } from "@/lib/useMarketScope";
+import type { Currency } from "@/lib/domain";
 
 interface Props {
   items: WatchlistItem[];
   selectedType?: string | null;
   onSelectType?: (type: string | null) => void;
+  currency?: Currency;
 }
 
 const renderActiveShape = (props: any) => {
@@ -36,17 +39,19 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export function AllocationChart({ items, selectedType, onSelectType }: Props) {
+export function AllocationChart({ items, selectedType, onSelectType, currency }: Props) {
   const { t, locale } = useI18n();
+  const scope = useMarketScope();
+  const targetCurrency: Currency = currency || scope.currency;
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const exchangeRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
-  const hasUsdAssets = useMemo(
-    () => items.some((it) => it.currency === "USD" && it.quantity > 0),
-    [items]
+  const hasFxAssets = useMemo(
+    () => items.some((it) => it.currency !== targetCurrency && it.quantity > 0),
+    [items, targetCurrency]
   );
-  const isEstimatedFx = !fx?.USDBRL && hasUsdAssets;
+  const isEstimatedFx = !fx?.USDBRL && hasFxAssets;
 
   const data = useMemo(() => {
     const totals = new Map<string, { name: string; value: number; type: string }>();
@@ -55,18 +60,18 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
       const value = it.currentPrice * it.quantity;
       if (value <= 0) continue;
 
-      const valueInBrl = convertCurrency(value, it.currency, "BRL", exchangeRate);
+      const convertedValue = convertCurrency(value, it.currency, targetCurrency, exchangeRate);
       const displayType = getDisplayAssetType(it.type);
       const typeLabel = t.types[displayType as import("@/lib/domain").AssetType] || displayType;
 
       if (!totals.has(typeLabel)) {
         totals.set(typeLabel, { name: typeLabel, value: 0, type: displayType });
       }
-      totals.get(typeLabel)!.value += valueInBrl;
+      totals.get(typeLabel)!.value += convertedValue;
     }
 
     return Array.from(totals.values()).sort((a, b) => b.value - a.value);
-  }, [items, exchangeRate, t.types]);
+  }, [items, exchangeRate, targetCurrency, t.types]);
 
   if (data.length === 0) return null;
 
@@ -113,7 +118,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value: any) => formatCurrency(value, "BRL", locale)}
+                    formatter={(value: any) => formatCurrency(value, targetCurrency, locale)}
                     hideLabel
                   />
                 }
@@ -174,7 +179,7 @@ export function AllocationChart({ items, selectedType, onSelectType }: Props) {
                   <span className="text-foreground">{d.name}</span>
                 </div>
                 <span className="font-medium tabular-nums">
-                  {formatCurrency(d.value, "BRL", locale)}
+                  {formatCurrency(d.value, targetCurrency, locale)}
                 </span>
               </div>
             );

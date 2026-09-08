@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
-import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOptions";
 import { getPositionValue } from "@/lib/calculations";
 import { convertCurrency } from "@/lib/currency";
@@ -27,8 +27,7 @@ export function useSnowballBase(): SnowballBase {
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { data: macroRates } = useQuery(macroRatesQueryOptions());
   const usdRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
-  const { settings } = useUserSettings();
-  const currency = settings.displayCurrency;
+  const { currency } = useMarketScope();
 
   return useMemo(() => {
     let totalValue = 0;

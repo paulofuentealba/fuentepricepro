@@ -10,6 +10,7 @@ import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 import { buildDecisionLog } from "@/lib/audit/buildDecisionLog";
 import { AuditScreen } from "@/components/audit/AuditScreen";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 /**
  * Feature-gate + data-fetch wrapper around AuditScreen — extracted from the /app/audit route so
@@ -19,6 +20,7 @@ import { AuditScreen } from "@/components/audit/AuditScreen";
 export function AuditPanel() {
   const { t } = useI18n();
   const isUnlocked = useFeatureGate("auditUnlocked");
+  const { currency } = useMarketScope();
 
   const { transactions, isLoading: isTxLoading } = useTransactions();
   const { items, isPending: isWatchlistLoading } = useWatchlist();
@@ -50,5 +52,5 @@ export function AuditPanel() {
     );
   }
 
-  return <AuditScreen summary={summary} isLoading={isLoading} />;
+  return <AuditScreen summary={summary} isLoading={isLoading} currency={currency} fxRate={fxRate} />;
 }

@@ -19,6 +19,7 @@ import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
 import { exchangeRateQueryOptions, assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, displayTicker, toIntlLocale, formatPercent } from "@/lib/i18n";
 import { convertCurrency } from "@/lib/currency";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
@@ -231,6 +232,7 @@ export function AssetDetailSheet({
   onUpdateInvestingSince,
 }: AssetDetailSheetProps) {
   const { t, locale } = useI18n();
+  const { currency: userCurrency } = useMarketScope();
   const [isAssumptionsSheetOpen, setIsAssumptionsSheetOpen] = useState(false);
   const [isAssumptionsUpdating, setIsAssumptionsUpdating] = useState(false);
   const { data: selic } = useSelic();
@@ -301,10 +303,10 @@ export function AssetDetailSheet({
                 {asset?.name ?? item?.name}
               </p>
             </div>
-            {item && item.currency === "USD" && fx?.USDBRL && (
+            {item && item.currency !== userCurrency && fx?.USDBRL && (
               <div className="text-right">
                 <p className="text-xs text-muted-foreground tabular-nums">
-                  ~ {formatCurrency(convertCurrency(livePrice, "USD", "BRL", fx.USDBRL), "BRL", locale)} ({t.common.converted})
+                  ~ {formatCurrency(convertCurrency(livePrice, item.currency, userCurrency, fx.USDBRL), userCurrency, locale)} ({t.common.converted})
                 </p>
               </div>
             )}

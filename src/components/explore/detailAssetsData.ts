@@ -541,7 +541,8 @@ export function getDynamicClassMetrics(
         ],
       };
 
-    case "ETF":
+    case "ETF": {
+      const aumPrefix = currency === "USD" ? "US$ " : "R$ ";
       return {
         badge: "MÉTRICAS DO FUNDO DE ÍNDICE",
         title: "Eficiência de Réplica & Custos",
@@ -549,11 +550,12 @@ export function getDynamicClassMetrics(
           { label: "TAXA DE ADM.", val: metrics?.expenseRatio != null ? `${(metrics.expenseRatio * 100).toFixed(2)}% a.a.` : "0.20% a.a.", desc: "Taxa de gestão e custódia do fundo" },
           { label: "TRACKING ERROR", val: metrics?.trackingError != null ? `${(metrics.trackingError * 100).toFixed(2)}%` : "0.05%", desc: "Aderência em relação ao benchmark" },
           { label: "P/L DA CESTA", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "18.5x", desc: "Múltiplo ponderado das empresas do índice" },
-          { label: "AUM (PATRIMÔNIO)", val: metrics?.aum ? `R$ ${(metrics.aum / 1e9).toFixed(1)}B` : "> R$ 5B", desc: "Volume total sob gestão do fundo" },
+          { label: "AUM (PATRIMÔNIO)", val: metrics?.aum ? `${aumPrefix}${(metrics.aum / 1e9).toFixed(1)}B` : `> ${aumPrefix}5B`, desc: "Volume total sob gestão do fundo" },
           { label: "ROE MÉDIO", val: metrics?.roe != null ? `${(metrics.roe * 100).toFixed(1)}%` : "20%", desc: "Rentabilidade sobre patrimônio da carteira" },
           { label: "POLÍTICA", val: "Eficiência Fiscal", desc: "Distribuição periódica ou reinvestimento" },
         ],
       };
+    }
 
     default: { // STOCK_BR and STOCK_US
       const epsPrefix = currency === "USD" ? "US$ " : "R$ ";

@@ -73,18 +73,18 @@ export function ReinvestirPage() {
     const windowStartISO = new Date(windowStart).toISOString().split("T")[0];
     const windowEndISO = new Date(windowEnd).toISOString().split("T")[0];
 
-    const received = sumReceivedInWindow(events, windowStartISO, windowEndISO, "BRL", fx?.USDBRL);
+    const received = sumReceivedInWindow(events, windowStartISO, windowEndISO, currency, fx?.USDBRL);
     if (received <= 0) return null;
 
     const currencyByTicker: Record<string, "BRL" | "USD"> = {};
     for (const item of valuedItems) currencyByTicker[item.ticker] = item.currency;
-    const convertToBRL = (value: number, curr: "USD" | "BRL") =>
-      convertCurrency(value, curr, "BRL", fx?.USDBRL);
+    const convertToUserCurrency = (value: number, curr: "USD" | "BRL") =>
+      convertCurrency(value, curr, currency, fx?.USDBRL);
     const invested = getNetContributionInWindow(
       transactions,
       windowStart,
       windowEnd,
-      convertToBRL,
+      convertToUserCurrency,
       currencyByTicker,
     );
 
@@ -97,13 +97,13 @@ export function ReinvestirPage() {
     return {
       title: t.askScreen?.idleDividendsTitle || "Dinheiro parado custa caro",
       description: resolveReasonText(t, "askScreen.idleDividendsDesc", {
-        received: formatCurrency(received, "BRL", locale),
-        invested: formatCurrency(invested, "BRL", locale),
-        extra: formatCurrency(extraMonthly, "BRL", locale),
+        received: formatCurrency(received, currency, locale),
+        invested: formatCurrency(invested, currency, locale),
+        extra: formatCurrency(extraMonthly, currency, locale),
       }),
-      value: formatCurrency(idle, "BRL", locale),
+      value: formatCurrency(idle, currency, locale),
     };
-  }, [events, transactions, valuedItems, fx?.USDBRL, totalCapitalBRL, monthlyIncomeBRL, t, locale]);
+  }, [events, transactions, valuedItems, fx?.USDBRL, totalCapitalBRL, monthlyIncomeBRL, t, locale, currency]);
 
   const askSettings: AskEngineSettings = useMemo(() => {
     return {

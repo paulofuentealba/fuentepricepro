@@ -36,7 +36,7 @@ export function PortfolioSummaryHeader({
 
   return (
     <div className="grid gap-3 lg:grid-cols-2">
-      <AllocationChart items={valuedItems} />
+      <AllocationChart items={valuedItems} currency={currency} />
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col rounded-xl border border-primary/30 bg-background p-4 lg:p-6">

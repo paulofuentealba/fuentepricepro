@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HorizonteHero } from "@/components/horizonte/HorizonteHero";
 
@@ -42,6 +42,7 @@ function renderHero() {
 }
 
 beforeEach(() => {
+  cleanup();
   mockUseTransactions.mockReturnValue({ transactions: [] });
   window.matchMedia = vi.fn().mockReturnValue({
     matches: false,
@@ -96,5 +97,29 @@ describe("HorizonteHero", () => {
     renderHero();
 
     expect(screen.getByText("42.5%")).toBeInTheDocument();
+  });
+
+  it("exibe valores em USD e milestone batido quando o perfil é USD", () => {
+    mockUseFIProgress.mockReturnValue({
+      coveragePercent: 0,
+      isReached: false,
+      totalCapitalBRL: 600_000,
+      totalCapital: 120_000,
+      currentMonthlyIncome: 500,
+      currency: "USD",
+      monthsToFI: null,
+      isSetup: false,
+    });
+    mockUseValuedPortfolio.mockReturnValue({
+      items: [{ id: "1", ticker: "VOO", currency: "USD" }],
+      valuedItems: [{ id: "1", ticker: "VOO", currency: "USD" }],
+      isAppLoading: false,
+    });
+
+    renderHero();
+
+    expect(screen.queryByText(/R\$/)).not.toBeInTheDocument();
+    expect(screen.getByText(/US\$ 120,000\.00/)).toBeInTheDocument();
+    expect(screen.getByText(/Primeiros US\$ 100 mil/)).toBeInTheDocument();
   });
 });

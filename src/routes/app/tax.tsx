@@ -35,9 +35,7 @@ export function RealidadeFiscalPage() {
   const isUnlocked = useFeatureGate("taxRealityUnlocked");
 
   const { valuedItems, isAppLoading, fx } = useValuedPortfolio();
-  const { settings } = useUserSettings();
-  const { isUS, hasBrPositions, hasUsPositions } = useMarketScope();
-  const currency = settings?.displayCurrency || "BRL";
+  const { isUS, hasBrPositions, hasUsPositions, currency } = useMarketScope();
   const { events: realizedEvents, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
   const { transactions, isLoading: isTxLoading } = useTransactions();
 

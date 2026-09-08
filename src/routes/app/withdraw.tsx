@@ -72,6 +72,8 @@ function WithdrawPage() {
     <WithdrawScreen
       positions={ownedItems}
       taxState={taxState}
+      currency={currency}
+      usdRate={fx?.USDBRL ?? 1}
       isLoading={isLoading}
       onExport={(result, strategy) => {
         const date = new Date().toISOString().split("T")[0];

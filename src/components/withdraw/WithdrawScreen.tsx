@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, formatNumber } from "@/lib/formatters";
+import { convertCurrency } from "@/lib/currency";
+import { useMarketScope } from "@/lib/useMarketScope";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import {
   runWithdraw,
@@ -35,6 +37,7 @@ export interface WithdrawScreenProps {
   taxState: WithdrawTaxState;
   initialAmount?: number;
   currency?: "BRL" | "USD";
+  usdRate?: number;
   isLoading?: boolean;
   onExport?: (result: WithdrawResult, strategy: WithdrawStrategy) => void;
 }
@@ -43,10 +46,15 @@ export function WithdrawScreen({
   positions,
   taxState,
   initialAmount = 0,
+  currency: explicitCurrency,
+  usdRate,
   isLoading = false,
   onExport,
 }: WithdrawScreenProps) {
   const { t, locale } = useI18n();
+  const scope = useMarketScope();
+  const currency = explicitCurrency || scope.currency;
+  const fxRate = usdRate ?? taxState.fxRate ?? 1;
 
   const [activeStrategyId, setActiveStrategyId] = useState<string>(STRATEGIES[0].id);
   const activeStrategy = useMemo(
@@ -82,13 +90,17 @@ export function WithdrawScreen({
 
   const asOf = useMemo(() => new Date().toISOString(), []);
 
+  const neededAmountBRL = useMemo(() => {
+    return currency === "USD" ? parsedAmount * fxRate : parsedAmount;
+  }, [parsedAmount, currency, fxRate]);
+
   const result: WithdrawResult = useMemo(
     () =>
       runWithdraw(
-        { eligiblePositions, neededAmountBRL: parsedAmount, taxState, asOf },
+        { eligiblePositions, neededAmountBRL, taxState, asOf },
         activeStrategy,
       ),
-    [eligiblePositions, parsedAmount, taxState, activeStrategy, asOf],
+    [eligiblePositions, neededAmountBRL, taxState, activeStrategy, asOf],
   );
 
   // "A ordem de venda importa mais que o valor" — compares the active order's tax against a
@@ -104,21 +116,32 @@ export function WithdrawScreen({
           .map((p) => ({ ticker: p.ticker, reasonKey: "" })),
     };
     const naiveResult = runWithdraw(
-      { eligiblePositions, neededAmountBRL: parsedAmount, taxState, asOf },
+      { eligiblePositions, neededAmountBRL, taxState, asOf },
       naiveStrategy,
     );
-    const diff = naiveResult.totalTaxBRL - result.totalTaxBRL;
-    if (diff <= 1) return null;
+    const rawDiff = naiveResult.totalTaxBRL - result.totalTaxBRL;
+    if (rawDiff <= 1) return null;
+    const diff = convertCurrency(rawDiff, "BRL", currency, fxRate);
+    const carryforwardUser = convertCurrency(result.lossCarryforwardUsedBRL, "BRL", currency, fxRate);
+    const altTaxUser = convertCurrency(naiveResult.totalTaxBRL, "BRL", currency, fxRate);
+
+    const description = scope.isUS
+      ? (t.askScreen?.withdrawInsightDescUS ||
+          "Nesta ordem você utiliza {{carryforward}} de prejuízos acumulados para amortizar ganhos tributáveis. Em outra ordem, o mesmo saque geraria {{altTax}} em impostos.")
+          .replace("{{carryforward}}", formatCurrency(carryforwardUser, currency, locale))
+          .replace("{{altTax}}", formatCurrency(altTaxUser, currency, locale))
+      : resolveReasonText(t, "askScreen.withdrawInsightDesc", {
+          exemption: formatCurrency(20000, "BRL", locale),
+          carryforward: formatCurrency(result.lossCarryforwardUsedBRL, "BRL", locale),
+          altTax: formatCurrency(naiveResult.totalTaxBRL, "BRL", locale),
+        });
+
     return {
       title: t.askScreen?.withdrawInsightTitle || "A ordem de venda importa mais que o valor",
-      description: resolveReasonText(t, "askScreen.withdrawInsightDesc", {
-        exemption: formatCurrency(20000, "BRL", locale),
-        carryforward: formatCurrency(result.lossCarryforwardUsedBRL, "BRL", locale),
-        altTax: formatCurrency(naiveResult.totalTaxBRL, "BRL", locale),
-      }),
-      value: formatCurrency(diff, "BRL", locale),
+      description,
+      value: formatCurrency(diff, currency, locale),
     };
-  }, [activeStrategy.id, result, eligiblePositions, parsedAmount, taxState, asOf, t, locale]);
+  }, [activeStrategy.id, result, eligiblePositions, neededAmountBRL, taxState, asOf, t, locale, currency, fxRate, scope.isUS]);
 
   const disclaimerText = resolveDisclaimerText(t, "tax");
 
@@ -154,7 +177,9 @@ export function WithdrawScreen({
                   {t.askScreen?.withdrawAmountLabel}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-serif text-xl font-medium text-foreground sm:text-2xl">R$</span>
+                  <span className="font-serif text-xl font-medium text-foreground sm:text-2xl">
+                    {currency === "USD" ? "US$" : "R$"}
+                  </span>
                   <Input
                     id="withdraw-amount-input"
                     type="text"
@@ -266,7 +291,7 @@ export function WithdrawScreen({
                         {reasonDisplay}
                         {alloc.taxBRL > 0 && (
                           <span className="ml-1 font-semibold text-danger">
-                            · {formatCurrency(alloc.taxBRL, "BRL", locale)}{" "}
+                            · {formatCurrency(convertCurrency(alloc.taxBRL, "BRL", currency, fxRate), currency, locale)}{" "}
                             {t.askScreen?.withdrawTaxSuffix || "de imposto"}
                           </span>
                         )}
@@ -296,8 +321,11 @@ export function WithdrawScreen({
                   <span>{t.askScreen?.withdrawEstimatedTaxLabel || "Imposto estimado"}</span>
                   <InfoTooltip
                     content={
-                      t.askScreen?.withdrawEstimatedTaxTooltip ||
-                      "Simulação de DARF a pagar no mês seguinte à liquidação das vendas com ganho de capital tributável."
+                      scope.isUS
+                        ? (t.askScreen?.withdrawEstimatedTaxTooltipUS ||
+                            "Estimativa de imposto sobre ganho de capital para esta ordem de venda.")
+                        : (t.askScreen?.withdrawEstimatedTaxTooltip ||
+                            "Simulação de DARF a pagar no mês seguinte à liquidação das vendas com ganho de capital tributável.")
                     }
                   />
                 </div>
@@ -307,7 +335,7 @@ export function WithdrawScreen({
                     result.totalTaxBRL > 0 ? "text-danger" : "text-success",
                   )}
                 >
-                  {formatCurrency(result.totalTaxBRL, "BRL", locale)}
+                  {formatCurrency(convertCurrency(result.totalTaxBRL, "BRL", currency, fxRate), currency, locale)}
                 </div>
               </div>
               <div>
@@ -321,7 +349,7 @@ export function WithdrawScreen({
                   />
                 </div>
                 <div className="font-serif text-base font-medium text-foreground">
-                  − {formatCurrency(result.totalIncomeLostAnnualBRL, "BRL", locale)}
+                  − {formatCurrency(convertCurrency(result.totalIncomeLostAnnualBRL, "BRL", currency, fxRate), currency, locale)}
                 </div>
               </div>
               {result.lossCarryforwardUsedBRL > 0 && (
@@ -336,7 +364,7 @@ export function WithdrawScreen({
                     />
                   </div>
                   <div className="font-serif text-base font-medium text-foreground">
-                    {formatCurrency(result.lossCarryforwardUsedBRL, "BRL", locale)}
+                    {formatCurrency(convertCurrency(result.lossCarryforwardUsedBRL, "BRL", currency, fxRate), currency, locale)}
                   </div>
                 </div>
               )}
@@ -373,7 +401,7 @@ export function WithdrawScreen({
           <p className="flex items-center gap-2 text-sm text-warning">
             <Coins className="h-4 w-4 shrink-0" />
             {resolveReasonText(t, "askScreen.withdrawInsufficientPosition", {
-              amount: formatCurrency(result.leftoverBRL, "BRL", locale),
+              amount: formatCurrency(convertCurrency(result.leftoverBRL, "BRL", currency, fxRate), currency, locale),
             })}
           </p>
         </Card>

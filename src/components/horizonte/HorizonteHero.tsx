@@ -170,8 +170,17 @@ function HorizonteTrajectorySparkline({
 }
 
 export function HorizonteHero() {
-  const { coveragePercent, isReached, totalCapitalBRL, monthsToFI, isSetup, monthlyIncomeBRL } =
-    useFIProgress();
+  const {
+    coveragePercent,
+    isReached,
+    totalCapitalBRL,
+    totalCapital,
+    monthsToFI,
+    isSetup,
+    monthlyIncomeBRL,
+    currentMonthlyIncome,
+    currency = "BRL",
+  } = useFIProgress();
   const { locale, t } = useI18n();
   const { items, isAppLoading, valuedItems } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
@@ -268,32 +277,39 @@ export function HorizonteHero() {
     separator: t.common.durationSeparator,
     lessThanOneMonth: t.common.lessThanOneMonth,
   });
-  const capitalLabel = formatCurrency(totalCapitalBRL, "BRL", locale);
-  const passiveIncomeLabel = formatCurrency(monthlyIncomeBRL, "BRL", locale);
+  const displayCapital = totalCapital ?? totalCapitalBRL ?? 0;
+  const displayIncome = currentMonthlyIncome ?? monthlyIncomeBRL ?? 0;
+  const capitalLabel = formatCurrency(displayCapital, currency, locale);
+  const passiveIncomeLabel = formatCurrency(displayIncome, currency, locale);
 
-  // Aporte deste mês — mesmo cálculo usado anteriormente em app/index.tsx,
-  // movido para dentro do hero (item 3 da spec de correção). Mesmo padrão de
-  // conversão de moeda de useFIProgress.ts (USD -> BRL via
-  // exchangeRateQueryOptions; demais moedas passam direto).
+  // Aporte deste mês — adaptado para respeitar a moeda do usuário (currency)
   const usdRate = fx?.USDBRL ?? 5.5;
   const currencyByTicker = useMemo(() => {
     const map: Record<string, "BRL" | "USD"> = {};
     for (const item of valuedItems) map[item.ticker] = item.currency;
     return map;
   }, [valuedItems]);
-  const convertToBRL = (value: number, curr: "USD" | "BRL") =>
-    convertCurrency(value, curr, "BRL", usdRate);
+  const convertToUserCurrency = (value: number, curr: "USD" | "BRL") =>
+    convertCurrency(value, curr, currency, usdRate);
   const monthlyContribution = useMemo(
-    () => getMonthlyNetContribution(transactions, Date.now(), convertToBRL, currencyByTicker),
-    [transactions, usdRate, currencyByTicker],
+    () => getMonthlyNetContribution(transactions, Date.now(), convertToUserCurrency, currencyByTicker),
+    [transactions, usdRate, currencyByTicker, currency],
   );
-  const monthlyContributionLabel = formatCurrency(monthlyContribution, "BRL", locale);
+  const monthlyContributionLabel = formatCurrency(monthlyContribution, currency, locale);
 
   const milestones: { label: string; achieved: boolean }[] = [];
-  if (totalCapitalBRL > 0) {
+  if (displayCapital > 0) {
+    const milestone100kLabel =
+      currency === "USD"
+        ? locale === "ptBR"
+          ? "Primeiros US$ 100 mil"
+          : locale === "es"
+            ? "Primeros US$ 100 mil"
+            : "First $100k"
+        : t.home.milestoneFirst100k;
     milestones.push({
-      label: t.home.milestoneFirst100k,
-      achieved: totalCapitalBRL >= 100_000,
+      label: milestone100kLabel,
+      achieved: displayCapital >= 100_000,
     });
   }
   if (coveragePercent > 0) {

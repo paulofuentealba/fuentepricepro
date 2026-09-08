@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, formatNumber } from "@/lib/formatters";
+import { convertCurrency } from "@/lib/currency";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { displayTicker, toIntlLocale, type Locale } from "@/lib/i18n";
 import type { DecisionLogEntry, DecisionLogSummary, DecisionVerdict } from "@/lib/audit/types";
 import { InsightBanner } from "@/components/shared/InsightBanner";
@@ -13,6 +15,8 @@ import { cn } from "@/lib/utils";
 export interface AuditScreenProps {
   summary: DecisionLogSummary;
   isLoading?: boolean;
+  currency?: "BRL" | "USD";
+  fxRate?: number;
 }
 
 const VERDICT_VARIANT: Record<DecisionVerdict, "success" | "danger" | "gold" | "default"> = {
@@ -88,8 +92,18 @@ function DecisionRow({ entry, t, locale }: { entry: DecisionLogEntry; t: any; lo
   );
 }
 
-export function AuditScreen({ summary, isLoading = false }: AuditScreenProps) {
+export function AuditScreen({
+  summary,
+  isLoading = false,
+  currency: explicitCurrency,
+  fxRate: explicitFxRate,
+}: AuditScreenProps) {
   const { t, locale } = useI18n();
+  const scope = useMarketScope();
+  const currency = explicitCurrency || scope.currency;
+  const fxRate = explicitFxRate ?? 1;
+
+  const convertBrl = (valBrl: number) => convertCurrency(valBrl, "BRL", currency, fxRate);
 
   if (isLoading) {
     return (
@@ -125,15 +139,15 @@ export function AuditScreen({ summary, isLoading = false }: AuditScreenProps) {
                 )
                   .replace("{{count}}", String(summary.overpaidCount))
                   .replace("{{extraShares}}", formatNumber(summary.overpaidExtraShares, locale, 0))
-                  .replace("{{extraIncome}}", formatCurrency(summary.overpaidExtraMonthlyIncomeBRL, "BRL", locale))
+                  .replace("{{extraIncome}}", formatCurrency(convertBrl(summary.overpaidExtraMonthlyIncomeBRL), currency, locale))
               : (
                   t.auditScreen?.insightDesc ||
                   "Em {{count}} compras você pagou acima do consenso, {{amount}} a mais do que precisava."
                 )
                   .replace("{{count}}", String(summary.overpaidCount))
-                  .replace("{{amount}}", formatCurrency(summary.overpaidTotalBRL, "BRL", locale))
+                  .replace("{{amount}}", formatCurrency(convertBrl(summary.overpaidTotalBRL), currency, locale))
           }
-          value={formatCurrency(summary.overpaidTotalBRL, "BRL", locale)}
+          value={formatCurrency(convertBrl(summary.overpaidTotalBRL), currency, locale)}
         />
       )}
 
@@ -141,19 +155,19 @@ export function AuditScreen({ summary, isLoading = false }: AuditScreenProps) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <MetricBox
             label={t.auditScreen?.totalBoughtLabel || "Total comprado"}
-            value={formatCurrency(summary.totalBoughtBRL, "BRL", locale)}
+            value={formatCurrency(convertBrl(summary.totalBoughtBRL), currency, locale)}
           />
           <MetricBox
             label={t.auditScreen?.totalSoldLabel || "Total líquido vendido"}
-            value={formatCurrency(summary.totalSoldNetBRL, "BRL", locale)}
+            value={formatCurrency(convertBrl(summary.totalSoldNetBRL), currency, locale)}
           />
           <MetricBox
             label={t.auditScreen?.totalFeesLabel || "Taxas pagas"}
-            value={formatCurrency(summary.totalFeesBRL, "BRL", locale)}
+            value={formatCurrency(convertBrl(summary.totalFeesBRL), currency, locale)}
           />
           <MetricBox
             label={t.auditScreen?.totalTaxLabel || "Impostos pagos"}
-            value={formatCurrency(summary.totalTaxBRL, "BRL", locale)}
+            value={formatCurrency(convertBrl(summary.totalTaxBRL), currency, locale)}
             variant={summary.totalTaxBRL > 0 ? "danger" : "default"}
           />
         </div>

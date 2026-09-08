@@ -8,6 +8,8 @@ import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, formatNumber, formatPercent, formatDate } from "@/lib/formatters";
+import { convertCurrency } from "@/lib/currency";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ValuationConsensusMatrix } from "@/components/shared/ValuationConsensusMatrix";
@@ -48,8 +50,7 @@ export function AssetDeepDiveView({
   const { t, locale } = useI18n();
   const { valuedItems, fx, totals } = useValuedPortfolio();
   const { settings, updateSettings } = useUserSettings();
-
-  const isUS = settings?.taxJurisdiction === "US";
+  const { isUS, currency: userCurrency } = useMarketScope();
   const defaultTicker = initialTicker === "BBAS3" && isUS ? "KO" : initialTicker;
 
   const showSelector = hideSelector !== undefined ? !hideSelector : mode !== "modal";
@@ -605,9 +606,9 @@ export function AssetDeepDiveView({
                     locale,
                   )}
                 </div>
-                {currency === "USD" && fx?.USDBRL && (
+                {currency !== userCurrency && fx?.USDBRL && (
                   <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                    ≈ {formatCurrency(custodyTotalValue * fx.USDBRL, "BRL", locale)}
+                    ≈ {formatCurrency(convertCurrency(custodyTotalValue, currency, userCurrency, fx.USDBRL), userCurrency, locale)}
                   </div>
                 )}
               </div>

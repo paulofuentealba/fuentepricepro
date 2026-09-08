@@ -23,6 +23,17 @@ vi.mock("@/lib/i18n-provider", () => ({
   useI18n: () => ({ locale: "ptBR", setLocale: () => {}, t: dict.ptBR }),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    currency: "BRL" as const,
+    taxJurisdiction: "BR" as const,
+    isUS: false,
+    isUSNative: false,
+    isBRNative: true,
+    isDual: false,
+  }),
+}));
+
 afterEach(() => {
   cleanup();
 });

@@ -6,12 +6,15 @@ import { exchangeRateQueryOptions, macroRatesQueryOptions } from "@/lib/queryOpt
 import { getPositionValue } from "@/lib/calculations";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
+import { useMarketScope } from "@/lib/useMarketScope";
+import type { Currency } from "@/lib/domain";
 
 export interface FIProgressResult {
   coveragePercent: number;
   isReached: boolean;
   targetCapital: number;
   totalCapitalBRL: number;
+  totalCapital: number;
   monthlyIncomeBRL: number;
   currentMonthlyIncome: number;
   monthlyCostGoal: number;
@@ -25,6 +28,7 @@ export interface FIProgressResult {
    * casos).
    */
   isSetup: boolean;
+  currency: Currency;
 }
 
 /**
@@ -102,7 +106,7 @@ export function useFIProgress(): FIProgressResult {
     return { totalCapitalBRL: capital, monthlyIncomeBRL: annualIncome / 12 };
   }, [items, convertToBRL, macroRates]);
 
-  const currency = settings.displayCurrency;
+  const { currency } = useMarketScope();
 
   const toUserCurrency = useCallback(
     (valueBRL: number) => {
@@ -118,13 +122,13 @@ export function useFIProgress(): FIProgressResult {
   const totalCapital = toUserCurrency(totalCapitalBRL);
   const currentMonthlyIncome = toUserCurrency(monthlyIncomeBRL);
 
-  const rawGoal = settings.monthlyLivingCostGoal || 0;
-  const storedGoalCurrency = settings.monthlyLivingCostGoalCurrency ?? currency;
+  const rawGoal = settings?.monthlyLivingCostGoal || 0;
+  const storedGoalCurrency = settings?.monthlyLivingCostGoalCurrency ?? currency;
   const monthlyCostGoal =
     rawGoal > 0 ? convertCurrency(rawGoal, storedGoalCurrency, currency, usdRate) : 0;
 
-  const rawContrib = settings.estimatedMonthlyContribution || 0;
-  const storedContribCurrency = settings.monthlyLivingCostGoalCurrency ?? currency;
+  const rawContrib = settings?.estimatedMonthlyContribution || 0;
+  const storedContribCurrency = settings?.monthlyLivingCostGoalCurrency ?? currency;
   const monthlyContribution =
     rawContrib > 0 ? convertCurrency(rawContrib, storedContribCurrency, currency, usdRate) : 0;
 
@@ -134,10 +138,10 @@ export function useFIProgress(): FIProgressResult {
   const coveragePercent = Math.min(100, Math.max(0, ratio * 100));
   const isReached = isSetup && ratio >= 1;
 
-  const targetCapital = isSetup ? monthlyCostGoal / (settings.targetYield / 100 / 12) : 0;
+  const targetCapital = isSetup ? monthlyCostGoal / ((settings?.targetYield || 6) / 100 / 12) : 0;
   const monthsToFIRaw =
     isSetup && !isReached
-      ? calculateMonthsToFI(totalCapital, monthlyContribution, targetCapital, settings.targetYield)
+      ? calculateMonthsToFI(totalCapital, monthlyContribution, targetCapital, settings?.targetYield || 6)
       : 0;
 
   // Nunca expor NaN silenciosamente: Infinity vira null explicitamente.
@@ -148,10 +152,12 @@ export function useFIProgress(): FIProgressResult {
     isReached,
     targetCapital,
     totalCapitalBRL,
+    totalCapital,
     monthlyIncomeBRL,
     currentMonthlyIncome,
     monthlyCostGoal,
     monthsToFI,
     isSetup,
+    currency,
   };
 }

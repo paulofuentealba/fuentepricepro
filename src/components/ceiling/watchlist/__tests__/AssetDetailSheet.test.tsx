@@ -30,6 +30,17 @@ vi.mock("@/lib/i18n-provider", () => ({
   }),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    currency: "BRL" as const,
+    taxJurisdiction: "BR" as const,
+    isUS: false,
+    isUSNative: false,
+    isBRNative: true,
+    isDual: false,
+  }),
+}));
+
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {

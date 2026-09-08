@@ -13,6 +13,18 @@ class ResizeObserverMock {
 global.ResizeObserver = ResizeObserverMock as any;
 
 let mockFxData: { USDBRL?: number } | undefined = { USDBRL: 5.8 };
+let mockScope = {
+  currency: "BRL" as "BRL" | "USD",
+  taxJurisdiction: "BR" as const,
+  isUS: false,
+  isUSNative: false,
+  isBRNative: true,
+  isDual: false,
+};
+
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => mockScope,
+}));
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
@@ -107,5 +119,30 @@ describe("AllocationChart", () => {
 
     expect(screen.getByText("Alocação por Tipo")).toBeDefined();
     expect(screen.queryByTestId("estimated-fx-badge")).toBeNull();
+  });
+
+  it("does not display estimated FX badge when all assets are USD and target currency is USD even if FX is unavailable", () => {
+    mockFxData = undefined; // Feed cambial indisponível, mas usuário e ativo são USD
+    render(
+      <TooltipProvider>
+        <AllocationChart items={[mockUsdItem]} currency="USD" />
+      </TooltipProvider>
+    );
+
+    expect(screen.getByText("Alocação por Tipo")).toBeDefined();
+    expect(screen.queryByTestId("estimated-fx-badge")).toBeNull();
+  });
+
+  it("displays estimated FX badge when asset is BRL and target currency is USD if FX is unavailable", () => {
+    mockFxData = undefined; // Feed cambial indisponível e precisa converter BRL -> USD
+    render(
+      <TooltipProvider>
+        <AllocationChart items={[mockBrlItem]} currency="USD" />
+      </TooltipProvider>
+    );
+
+    expect(screen.getByText("Alocação por Tipo")).toBeDefined();
+    const badge = screen.getByTestId("estimated-fx-badge");
+    expect(badge).toBeDefined();
   });
 });
