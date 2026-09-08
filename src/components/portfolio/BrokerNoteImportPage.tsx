@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import {
   parseBrokerNote,
   reconstructRowsFromTextItems,
-  ALL_SUPPORTED_BROKERS,
   type SupportedBroker,
   type TradeRecord,
 } from "@/lib/dataIngestion/brokerNoteParser";
@@ -30,6 +29,7 @@ import { useAuthModal } from "@/lib/auth-modal";
 // pdfjs-dist is loaded dynamically in processFile to avoid breaking SSR
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 interface ReviewRow {
   key: string;
@@ -61,21 +61,30 @@ export function BrokerNoteImportPage() {
   const { upsertManyAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const { mappings, saveMappings } = useIssuerTickerMappings();
+  const { isUS, priorityBrokers, secondaryBrokers } = useMarketScope();
 
   const [step, setStep] = useState<"upload" | "review">("upload");
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [showSecondaryBrokers, setShowSecondaryBrokers] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fileName, setFileName] = useState<string | null>(null);
   const [detectedBroker, setDetectedBroker] = useState<SupportedBroker | null>(null);
   const [rows, setRows] = useState<ReviewRow[]>([]);
 
-  const supportedBrokerLabels = useMemo(
-    () => ALL_SUPPORTED_BROKERS.map((b) => KNOWN_BROKER_LABELS[b]),
-    [],
+  const priorityBrokerLabels = useMemo(
+    () => priorityBrokers.map((b) => KNOWN_BROKER_LABELS[b]),
+    [priorityBrokers],
   );
+
+  const secondaryBrokerLabels = useMemo(
+    () => secondaryBrokers.map((b) => KNOWN_BROKER_LABELS[b]),
+    [secondaryBrokers],
+  );
+
+  const totalBrokersCount = priorityBrokers.length + secondaryBrokers.length;
 
   const checkedRows = rows.filter((r) => r.checked);
   const totalFees = rows.reduce((sum, r) => sum + (r.fees || 0), 0);
@@ -279,7 +288,7 @@ export function BrokerNoteImportPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xs font-display font-semibold uppercase tracking-widest text-success">
-            {resolveReasonText(t, "brokerNoteImportPage.eyebrow", { count: ALL_SUPPORTED_BROKERS.length })}
+            {resolveReasonText(t, "brokerNoteImportPage.eyebrow", { count: totalBrokersCount })}
           </div>
           <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {t.brokerNoteImportPage?.title}
@@ -344,18 +353,54 @@ export function BrokerNoteImportPage() {
             />
           </div>
 
-          <p className="mt-5 text-[11px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
-            {t.brokerNoteImportPage?.supportedBrokers}
-          </p>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {supportedBrokerLabels.map((label) => (
-              <div
-                key={label}
-                className="rounded-lg border border-border/50 bg-muted/20 px-3 py-2.5 text-center text-xs font-medium text-muted-foreground"
+          <div className="mt-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
+                {isUS
+                  ? t.brokerNoteImportPage?.usBrokersTitle || "US Brokers"
+                  : t.brokerNoteImportPage?.brBrokersTitle || "Brazilian Brokers (B3)"}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowSecondaryBrokers((prev) => !prev)}
+                className="text-[11px] font-medium text-accent-emerald-light dark:text-[#34D399] hover:underline cursor-pointer"
               >
-                {label}
+                {showSecondaryBrokers
+                  ? t.brokerNoteImportPage?.toggleHideBrBrokers || (isUS ? "Hide Brazilian brokers (B3)" : "Hide US brokers")
+                  : t.brokerNoteImportPage?.toggleShowBrBrokers || (isUS ? "Show Brazilian brokers (B3)" : "Show US brokers")}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {priorityBrokerLabels.map((label) => (
+                <div
+                  key={label}
+                  className="rounded-lg border border-border/50 bg-muted/20 px-3 py-2.5 text-center text-xs font-medium text-muted-foreground"
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            {showSecondaryBrokers && (
+              <div className="pt-2 border-t border-border/40 space-y-2">
+                <p className="text-[11px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
+                  {isUS
+                    ? t.brokerNoteImportPage?.brBrokersTitle || "Brazilian Brokers (B3)"
+                    : t.brokerNoteImportPage?.usBrokersTitle || "US Brokers"}
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {secondaryBrokerLabels.map((label) => (
+                    <div
+                      key={label}
+                      className="rounded-lg border border-border/40 bg-muted/10 px-3 py-2 text-center text-[11px] font-medium text-muted-foreground"
+                    >
+                      {label}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
           </div>
 
           <p className="mt-5 text-xs leading-relaxed text-muted-foreground">{t.brokerNoteImportPage?.privacyNote}</p>

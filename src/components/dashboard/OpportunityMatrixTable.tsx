@@ -14,8 +14,10 @@ import { useI18n } from "@/lib/i18n-provider";
 import {
   classifyPositionToEightClass,
   EIGHT_CLASSES_ORDER,
+  US_CLASSES_ORDER,
   type EightClassKey,
 } from "@/lib/selectors/eightClassAllocation";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { computeRecommendedAction, type RecommendedActionKey } from "@/lib/selectors/recommendedAction";
 import { computeTaxRegimeKey } from "@/lib/selectors/taxRegimeLabel";
 import { cn } from "@/lib/utils";
@@ -28,7 +30,24 @@ interface OpportunityMatrixTableProps {
 
 export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker }: OpportunityMatrixTableProps) {
   const { locale, t } = useI18n();
+  const { visibleAllocationClasses } = useMarketScope();
   const [activeFilter, setActiveFilter] = useState<EightClassKey | "ALL">("ALL");
+
+  const availableFilterClasses = useMemo(() => {
+    const classes = new Set(visibleAllocationClasses);
+    for (const item of valuedItems) {
+      if (!item.isClosedPosition && (item.quantity ?? 0) > 0) {
+        classes.add(classifyPositionToEightClass(item));
+      }
+    }
+    const preferredOrder =
+      visibleAllocationClasses.length < 8 ? US_CLASSES_ORDER : EIGHT_CLASSES_ORDER;
+    const ordered = preferredOrder.filter((c) => classes.has(c));
+    for (const c of classes) {
+      if (!ordered.includes(c)) ordered.push(c);
+    }
+    return ordered;
+  }, [valuedItems, visibleAllocationClasses]);
 
   const filteredItems = useMemo(() => {
     const owned = valuedItems.filter((i) => !i.isClosedPosition && (i.quantity ?? 0) > 0);
@@ -106,9 +125,9 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
               : "border-border/80 bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground dark:border-[#1B2F27] dark:bg-[#12211C] dark:text-[#94A3B8]",
           )}
         >
-          {t.dashboard.matrix.filterAll}
+          {t.dashboard.matrix.filterAllDynamic || t.dashboard.matrix.filterAll}
         </button>
-        {EIGHT_CLASSES_ORDER.map((clsKey) => (
+        {availableFilterClasses.map((clsKey) => (
           <button
             key={clsKey}
             type="button"

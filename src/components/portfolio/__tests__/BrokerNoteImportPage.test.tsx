@@ -20,6 +20,22 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    taxJurisdiction: "BR",
+    isUS: false,
+    hasBrPositions: true,
+    hasUsPositions: false,
+    isUSNative: false,
+    isBRNative: true,
+    isDual: false,
+    defaultScreenerMarket: "ALL",
+    visibleAllocationClasses: [],
+    priorityBrokers: ["XP", "BTG", "CLEAR"],
+    secondaryBrokers: ["FIDELITY", "SCHWAB"],
+  }),
+}));
+
 let mockCurrentUser: { uid: string } | null = { uid: "test-user-123" };
 vi.mock("@/lib/auth-provider", () => ({
   useAuth: () => ({

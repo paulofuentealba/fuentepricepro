@@ -31,6 +31,12 @@ export const EIGHT_CLASSES_ORDER: EightClassKey[] = [
   "acoes_us",
 ];
 
+export const US_CLASSES_ORDER: EightClassKey[] = [
+  "acoes_us",
+  "reits_us",
+  "etfs_us",
+];
+
 export const PROTOTYPE_DEFAULT_TARGETS: Record<EightClassKey, number> = {
   acoes_br: 25.0,
   fiis: 15.0,
@@ -40,6 +46,17 @@ export const PROTOTYPE_DEFAULT_TARGETS: Record<EightClassKey, number> = {
   etfs_us: 20.0,
   etfs_br: 5.0,
   acoes_us: 5.0,
+};
+
+export const US_DEFAULT_TARGETS: Record<EightClassKey, number> = {
+  acoes_us: 45.0,
+  reits_us: 25.0,
+  etfs_us: 30.0,
+  acoes_br: 0,
+  fiis: 0,
+  fiagros: 0,
+  fi_infras: 0,
+  etfs_br: 0,
 };
 
 export function classifyPositionToEightClass(pos: ValuedWatchlistItem): EightClassKey {
@@ -60,6 +77,7 @@ export function computeEightClassAllocations(
   positions: ValuedWatchlistItem[],
   userTargets?: Partial<Record<AssetType, number>>,
   fxRate?: number,
+  jurisdiction: "BR" | "US" = "BR",
 ): EightClassAllocationItem[] {
   // 1. Calculate current value in BRL for each of the 8 classes
   const classValues: Record<EightClassKey, number> = {
@@ -85,13 +103,29 @@ export function computeEightClassAllocations(
     totalPortfolioValue += valBRL;
   }
 
-  // 2. Determine target percentages for each of the 8 classes
-  const targets: Record<EightClassKey, number> = { ...PROTOTYPE_DEFAULT_TARGETS };
+  // 2. Determine target percentages for each class
+  const hasBrPositions =
+    classValues.acoes_br > 0 ||
+    classValues.fiis > 0 ||
+    classValues.fiagros > 0 ||
+    classValues.fi_infras > 0 ||
+    classValues.etfs_br > 0;
+
+  const targets: Record<EightClassKey, number> =
+    jurisdiction === "US" && !hasBrPositions
+      ? { ...US_DEFAULT_TARGETS }
+      : { ...PROTOTYPE_DEFAULT_TARGETS };
 
   const totalUserWeight = Object.values(userTargets || {}).reduce(
     (sum: number, w) => sum + (typeof w === "number" && w > 0 ? w : 0),
     0,
   );
+
+  const hasBrUserTargets =
+    Boolean(userTargets?.STOCK_BR && userTargets.STOCK_BR > 0) ||
+    Boolean(userTargets?.FII && userTargets.FII > 0);
+
+  const isUSNative = jurisdiction === "US" && !hasBrPositions && !hasBrUserTargets;
 
   if (totalUserWeight > 0 && userTargets) {
     const wStockBR = userTargets.STOCK_BR ?? 0;
@@ -111,14 +145,21 @@ export function computeEightClassAllocations(
     targets.fi_infras = fiiTargetPct * (15 / 35);
     targets.fiagros = fiiTargetPct * (5 / 35);
 
-    // ETF target is split into ETFs US (80%) and ETFs BR (20%) + Fixed Income
+    // ETF target is split into ETFs US (80%) and ETFs BR (20%) + Fixed Income, or 100% US if US native
     const etfTargetPct = ((wEtf + wFixed) / totalUserWeight) * 100;
-    targets.etfs_us = etfTargetPct * 0.8;
-    targets.etfs_br = etfTargetPct * 0.2;
+    if (isUSNative) {
+      targets.etfs_us = etfTargetPct;
+      targets.etfs_br = 0;
+    } else {
+      targets.etfs_us = etfTargetPct * 0.8;
+      targets.etfs_br = etfTargetPct * 0.2;
+    }
   }
 
-  // 3. Assemble the 8 classes in exact prototype order
-  return EIGHT_CLASSES_ORDER.map((key) => {
+  const orderToUse = isUSNative ? US_CLASSES_ORDER : EIGHT_CLASSES_ORDER;
+
+  // 3. Assemble the classes in exact order
+  return orderToUse.map((key) => {
     const currentVal = classValues[key];
     const currentPct = totalPortfolioValue > 0 ? (currentVal / totalPortfolioValue) * 100 : 0;
     const targetPct = targets[key];

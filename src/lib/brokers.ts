@@ -20,23 +20,61 @@ export type SupportedBroker =
   | "BB"
   | "CAIXA"
   | "SCHWAB"
-  | "FIDELITY";
+  | "FIDELITY"
+  | "VANGUARD"
+  | "IBKR"
+  | "ROBINHOOD"
+  | "ETRADE"
+  | "WEBULL";
 
 export const KNOWN_BROKER_LABELS: Record<SupportedBroker, string> = {
+  FIDELITY: "Fidelity Investments",
+  SCHWAB: "Charles Schwab",
+  VANGUARD: "Vanguard",
+  IBKR: "Interactive Brokers",
+  ROBINHOOD: "Robinhood",
+  ETRADE: "E*TRADE",
+  WEBULL: "Webull",
   XP: "XP Investimentos",
+  BTG: "BTG Pactual",
   CLEAR: "Clear Corretora",
   RICO: "Rico Investimentos",
-  MODAL: "ModalMais",
-  BTG: "BTG Pactual",
   INTER: "Banco Inter",
   NUINVEST: "NuInvest",
-  ORAMA: "Órama",
   GENIAL: "Genial Investimentos",
+  ORAMA: "Órama",
   ITAU: "Itaú Corretora",
   BRADESCO: "Bradesco / Ágora",
   SANTANDER: "Santander / Toro",
   BB: "Banco do Brasil",
   CAIXA: "Caixa Econômica Federal",
-  SCHWAB: "Charles Schwab",
-  FIDELITY: "Fidelity Investments",
+  MODAL: "ModalMais",
 };
+
+export const US_SUPPORTED_BROKERS: SupportedBroker[] = [
+  "FIDELITY",
+  "SCHWAB",
+  "VANGUARD",
+  "IBKR",
+  "ROBINHOOD",
+  "ETRADE",
+  "WEBULL",
+];
+
+export const BR_SUPPORTED_BROKERS: SupportedBroker[] = [
+  "XP",
+  "BTG",
+  "CLEAR",
+  "RICO",
+  "INTER",
+  "NUINVEST",
+  "GENIAL",
+  "ORAMA",
+  "ITAU",
+  "BRADESCO",
+  "SANTANDER",
+  "BB",
+  "CAIXA",
+  "MODAL",
+];
+

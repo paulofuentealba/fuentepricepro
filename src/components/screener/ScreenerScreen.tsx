@@ -37,6 +37,7 @@ import {
 } from "@/lib/queryOptions";
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { simulateScreenerImpact } from "@/lib/screenerSimulation";
 import { buildScreenerCandidate } from "@/lib/screenerCandidate";
 import { resolveReasonText } from "@/lib/askEngine";
@@ -103,7 +104,9 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   const { settings } = useUserSettings();
   const queryClient = useQueryClient();
 
-  const [marketFilter, setMarketFilter] = useState<"ALL" | "BR" | "US">("ALL");
+  const { isUS, defaultScreenerMarket } = useMarketScope();
+
+  const [marketFilter, setMarketFilter] = useState<"ALL" | "BR" | "US">(() => defaultScreenerMarket);
   const [classFilter, setClassFilter] = useState<string>("ALL");
   const [marginFilter, setMarginFilter] = useState<string>("ALL");
   const [dyFilter, setDyFilter] = useState<string>("ALL");
@@ -136,14 +139,14 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   const rawUniverse = useMemo(() => {
     const brList = radarData?.br || [];
     const usList = radarData?.us || [];
-    const combined = [...brList, ...usList];
+    const combined = isUS ? [...usList, ...brList] : [...brList, ...usList];
     for (const custom of customAssets) {
       if (!combined.some((a: any) => a.ticker === custom.ticker)) {
         combined.unshift(custom);
       }
     }
     return combined;
-  }, [radarData, customAssets]);
+  }, [radarData, customAssets, isUS]);
 
   const items = useMemo<ScreenerItem[]>(() => {
     return rawUniverse.map((asset: any) => {
@@ -337,7 +340,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
   const disclaimerText = resolveDisclaimerText(t, "calculation");
 
   const clearFilters = () => {
-    setMarketFilter("ALL");
+    setMarketFilter(defaultScreenerMarket);
     setClassFilter("ALL");
     setMarginFilter("ALL");
     setDyFilter("ALL");
@@ -384,10 +387,15 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
             variant="outline"
             className="text-[11px] font-mono font-bold text-foreground border-border/80 px-2.5 py-1 uppercase"
           >
-            B3 + GLOBAL
+            {marketFilter === "US"
+              ? t.screenerScreen?.marketBadgeUs || "US MARKET"
+              : marketFilter === "BR"
+                ? t.screenerScreen?.marketBadgeBr || "B3 BRASIL"
+                : t.screenerScreen?.marketBadgeAll || "B3 + US GLOBAL"}
           </Badge>
           <span className="text-xs text-muted-foreground">
-            {totalAnalyzed} ativos em monitoramento
+            {resolveReasonText(t, "screenerScreen.monitoredCount", { count: totalAnalyzed }) ||
+              `${totalAnalyzed} monitored assets`}
           </span>
         </div>
         <div className="flex-1 max-w-md">

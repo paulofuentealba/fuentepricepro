@@ -8,6 +8,7 @@ import {
   computeEightClassAllocations,
   type EightClassKey,
 } from "@/lib/selectors/eightClassAllocation";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 interface AllocationOverviewCardProps {
   valuedItems?: ValuedWatchlistItem[];
@@ -23,11 +24,22 @@ export function AllocationOverviewCard({
   isLoading,
 }: AllocationOverviewCardProps) {
   const { t } = useI18n();
+  const { isUSNative, taxJurisdiction } = useMarketScope();
 
   const entries = useMemo(
-    () => computeEightClassAllocations(valuedItems, smartAllocationTargets, usdRate),
-    [valuedItems, smartAllocationTargets, usdRate],
+    () =>
+      computeEightClassAllocations(
+        valuedItems,
+        smartAllocationTargets,
+        usdRate,
+        taxJurisdiction,
+      ),
+    [valuedItems, smartAllocationTargets, usdRate, taxJurisdiction],
   );
+
+  const cardTitle = isUSNative
+    ? t.dashboard.allocation.titleUs || "US Asset Allocation"
+    : t.dashboard.allocation.title;
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">
@@ -38,7 +50,7 @@ export function AllocationOverviewCard({
               {t.dashboard.allocation.eyebrow}
             </div>
             <h2 className="mt-1 font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground dark:text-white">
-              {t.dashboard.allocation.title}
+              {cardTitle}
             </h2>
           </div>
           <span className="text-xs text-muted-foreground">{t.dashboard.allocation.subtitle}</span>
@@ -46,7 +58,7 @@ export function AllocationOverviewCard({
 
         {isLoading ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            {Array.from({ length: isUSNative ? 4 : 8 }).map((_, n) => (
               <Skeleton key={n} className="h-20 w-full rounded-xl" />
             ))}
           </div>

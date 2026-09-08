@@ -11,6 +11,31 @@ vi.mock("@/lib/i18n-provider", () => ({
   useI18n: () => ({ locale: "ptBR", setLocale: () => {}, t: dict.ptBR }),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    taxJurisdiction: "BR",
+    isUS: false,
+    hasBrPositions: true,
+    hasUsPositions: false,
+    isUSNative: false,
+    isBRNative: true,
+    isDual: false,
+    defaultScreenerMarket: "ALL",
+    visibleAllocationClasses: [
+      "acoes_br",
+      "fiis",
+      "fiagros",
+      "fi_infras",
+      "reits_us",
+      "etfs_us",
+      "etfs_br",
+      "acoes_us",
+    ],
+    priorityBrokers: [],
+    secondaryBrokers: [],
+  }),
+}));
+
 function createMockItem(overrides: Partial<ValuedWatchlistItem>): ValuedWatchlistItem {
   const margin = overrides.safetyMargin ?? 30;
   const ceiling = overrides.ceilingPrice ?? 40;
