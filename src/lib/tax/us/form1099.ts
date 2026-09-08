@@ -424,3 +424,60 @@ export function generate1099Csv(summary: UsTaxYearSummary): string {
 
   return lines.join("\n");
 }
+
+/**
+ * Generates an IRS Schedule B compliant CSV (Interest and Ordinary Dividends)
+ * formatted for tax software (TurboTax, TaxAct).
+ */
+export function generateScheduleBCsv(summary: UsTaxYearSummary): string {
+  const lines: string[] = [];
+  lines.push("Payer Name,Ticker,Account Type,Ordinary Dividends (Box 1a),Qualified Dividends (Box 1b),Section 199A Dividends (Box 5)");
+
+  for (const it of summary.divSummary.items) {
+    lines.push(
+      `"${it.payerName || it.ticker}","${it.ticker}","${it.accountType}",${it.ordinaryDividends.toFixed(2)},${it.qualifiedDividends.toFixed(2)},${it.section199aDividends.toFixed(2)}`,
+    );
+  }
+
+  lines.push("");
+  lines.push(
+    `"TOTAL ORDINARY DIVIDENDS","","",${summary.divSummary.totalOrdinaryDividends.toFixed(2)},${summary.divSummary.totalQualifiedDividends.toFixed(2)},${summary.divSummary.totalSection199aDividends.toFixed(2)}`,
+  );
+
+  return lines.join("\n");
+}
+
+/**
+ * Generates an IRS Schedule D & Form 8949 compliant CSV (Sales and Dispositions of Capital Assets)
+ * formatted for TurboTax and other US tax filing software.
+ */
+export function generateScheduleDCsv(summary: UsTaxYearSummary): string {
+  const lines: string[] = [];
+  lines.push(
+    "Description of Property,Date Acquired,Date Sold,Proceeds (Sales Price),Cost Basis,Adjustment Code,Adjustment Amount,Gain or Loss,Term,Form 8949 Part",
+  );
+
+  for (const s of summary.bSummary.sales) {
+    // Only taxable sales reportable on Form 8949 (Roth is tax-exempt)
+    if (s.isTaxExempt) continue;
+
+    const desc = `${s.quantity} sh ${s.ticker}`;
+    const acqDate = new Date(s.acquisitionDate).toISOString().split("T")[0];
+    const saleDate = new Date(s.saleDate).toISOString().split("T")[0];
+    const adjCode = s.isWashSale ? "W" : "";
+    const adjAmount = s.washSaleLossDisallowed > 0 ? s.washSaleLossDisallowed.toFixed(2) : "0.00";
+    const termLabel = s.term === "SHORT_TERM" ? "Short-Term" : "Long-Term";
+    const form8949Part = s.term === "SHORT_TERM" ? "Part I (Box A)" : "Part II (Box D)";
+
+    lines.push(
+      `"${desc}",${acqDate},${saleDate},${s.proceeds.toFixed(2)},${s.costBasis.toFixed(2)},"${adjCode}",${adjAmount},${s.gainOrLoss.toFixed(2)},"${termLabel}","${form8949Part}"`,
+    );
+  }
+
+  lines.push("");
+  lines.push(`"NET SHORT-TERM CAPITAL GAIN/LOSS",,,,,,,,${summary.bSummary.netShortTerm.toFixed(2)},"Part I"`);
+  lines.push(`"NET LONG-TERM CAPITAL GAIN/LOSS",,,,,,,,${summary.bSummary.netLongTerm.toFixed(2)},"Part II"`);
+  lines.push(`"TOTAL NET TAXABLE CAPITAL GAIN/LOSS",,,,,,,,${summary.bSummary.netTaxableGainOrLoss.toFixed(2)},"Schedule D Line 16"`);
+
+  return lines.join("\n");
+}

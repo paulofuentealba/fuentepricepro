@@ -226,4 +226,45 @@ describe("AskScreen Component (Prompt 135 / Item 1.3)", () => {
     expect(calledStrategy).toBe(correctDriftStrategy);
     expect(calledResult.state).toBe("success");
   });
+
+  it("renders wash sale risk alert when an allocated ticker was sold at a loss within 30 days", () => {
+    const now = Date.now();
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+    const txs: any[] = [
+      {
+        id: "buy-old",
+        ticker: "BBAS3",
+        type: "buy",
+        date: now - 60 * MS_PER_DAY,
+        quantity: 100,
+        pricePerShare: 35,
+        accountType: "taxable",
+      },
+      {
+        id: "sell-loss",
+        ticker: "BBAS3",
+        type: "sell",
+        date: now - 10 * MS_PER_DAY, // 10 days ago (within 30-day window)
+        quantity: 50,
+        pricePerShare: 25, // Sold at loss: 25 < 35
+        accountType: "taxable",
+      },
+    ];
+
+    render(
+      <AskScreen
+        questionKey="askScreen.reinvestQuestion"
+        strategies={strategies}
+        defaultStrategyId="accelerateSnowball"
+        positions={mockPositions}
+        settings={{ smartAllocationTargets: { STOCK_BR: 100, STOCK_US: 0, FII: 0, REIT: 0, ETF: 0, FII_INFRA: 0, FIAGRO: 0, FIXED_INCOME: 0 } }}
+        initialAmount={100}
+        transactions={txs}
+      />
+    );
+
+    // Wash sale risk banner should be rendered
+    expect(screen.getByText(/Risco de Wash Sale/i)).toBeInTheDocument();
+  });
 });

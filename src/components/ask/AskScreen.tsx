@@ -22,6 +22,7 @@ import {
   Coins,
   ShieldAlert,
   AlertCircle,
+  AlertTriangle,
   ChevronDown,
   ChevronUp,
   ArrowRight,
@@ -29,6 +30,7 @@ import {
   Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Transaction } from "@/lib/transactionsLogic";
 
 export interface AskScreenProps {
   titleKey?: string;
@@ -59,6 +61,7 @@ export interface AskScreenProps {
   currency?: Currency;
   isLoading?: boolean;
   onExport?: (result: AskResult, strategy: Strategy) => void;
+  transactions?: Transaction[];
 }
 
 function resolveConsequenceLabel(t: any, valueKey: string): string {
@@ -104,6 +107,7 @@ export function AskScreen({
   currency = "BRL",
   isLoading = false,
   onExport,
+  transactions = [],
 }: AskScreenProps) {
   const { t, locale } = useI18n();
 
@@ -165,10 +169,11 @@ export function AskScreen({
         settings,
         asOf: new Date().toISOString(),
         sourceTicker,
+        transactions,
       },
       activeStrategy,
     );
-  }, [positions, parsedAmount, settings, activeStrategy, sourceTicker]);
+  }, [positions, parsedAmount, settings, activeStrategy, sourceTicker, transactions]);
 
   const [showExcluded, setShowExcluded] = useState(false);
 
@@ -421,6 +426,22 @@ export function AskScreen({
                       <p className="mt-1.5 text-[10.5px] leading-tight text-muted-foreground">
                         {reasonDisplay}
                       </p>
+
+                      {alloc.washSaleRisk && (
+                        <div className="mt-2 flex items-start gap-1.5 rounded-md border border-warning/30 bg-warning/10 p-2 text-[11px] text-warning">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-semibold">
+                              {t.askScreen?.washSaleWarningTitle || "Wash Sale Risk (IRC § 1091)"}:
+                            </span>{" "}
+                            {resolveReasonText(t, "askScreen.washSaleWarningDesc", {
+                              ticker: alloc.ticker,
+                              loss: formatCurrency(alloc.washSaleRisk.disallowedLossEstimate, "USD", locale),
+                              days: alloc.washSaleRisk.daysRemaining,
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="w-[92px] shrink-0 text-right sm:w-[115px]">

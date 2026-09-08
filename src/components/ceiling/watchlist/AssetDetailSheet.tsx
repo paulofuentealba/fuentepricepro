@@ -27,6 +27,8 @@ import { useTransactions } from "@/lib/transactions";
 import { EditPositionFields } from "./EditPositionFields";
 import { CorporateEventFields } from "@/components/portfolio/CorporateEventFields";
 import { usePendingEvents } from "@/lib/corporateEvents";
+import { DgiBadge } from "@/components/shared/DgiBadge";
+import { TaxLotsMonitor } from "@/components/tax/TaxLotsMonitor";
 
 const DividendsHistoryPanel = lazy(() =>
   import("./DividendsHistoryPanel").then((m) => ({ default: m.DividendsHistoryPanel }))
@@ -234,6 +236,7 @@ export function AssetDetailSheet({
   const { data: selic } = useSelic();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
   const { pendingEvent } = usePendingEvents(item);
+  const { transactions = [] } = useTransactions();
 
   const query = useQuery({
     ...assetQueryOptions(item?.ticker ?? ""),
@@ -276,6 +279,7 @@ export function AssetDetailSheet({
             <div>
               <div className="flex items-baseline gap-2.5 flex-wrap">
                 <SheetTitle className="text-base font-semibold">{displayTickerStr}</SheetTitle>
+                {item && <DgiBadge ticker={item.ticker} size="sm" />}
                 {item && (
                   <span className="text-sm font-semibold text-foreground/90 tabular-nums">
                     {formatCurrency(livePrice, item.currency, locale)}
@@ -363,6 +367,14 @@ export function AssetDetailSheet({
                          activeMargin={valuation.margin}
                          onUpdateInvestingSince={onUpdateInvestingSince}
                        />
+                      {item.type !== "FIXED_INCOME" && (
+                        <TaxLotsMonitor
+                          ticker={item.ticker}
+                          currentPrice={livePrice}
+                          transactions={transactions}
+                          currency={item.currency}
+                        />
+                      )}
                       {item.type === "FIXED_INCOME" && (
                         <Suspense fallback={<ResultSkeleton />}>
                           <FixedIncomePanel item={item} />

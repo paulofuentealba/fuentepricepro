@@ -177,6 +177,7 @@ export function ReinvestirPage() {
       settings={askSettings}
       currency={currency}
       isLoading={isAppLoading || isIncomeLoading}
+      transactions={transactions}
       onExport={(res, strat) => {
         const date = new Date().toISOString().split("T")[0];
         const csv = buildAskResultCsv(

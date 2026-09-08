@@ -24,6 +24,8 @@ import type { AssetType } from "@/lib/domain";
 import {
   buildUsTaxYearSummary,
   generate1099Csv,
+  generateScheduleBCsv,
+  generateScheduleDCsv,
 } from "@/lib/tax/us/form1099";
 import { downloadCsv } from "@/lib/csv";
 import { cn } from "@/lib/utils";
@@ -108,6 +110,18 @@ export function UsTax1099Report({
     toast.success(u.exportSuccess);
   };
 
+  const handleExportScheduleD = () => {
+    const csvContent = generateScheduleDCsv(summary);
+    downloadCsv(`schedule_d_form8949_${selectedYear}.csv`, csvContent);
+    toast.success(u.exportScheduleDSuccess);
+  };
+
+  const handleExportScheduleB = () => {
+    const csvContent = generateScheduleBCsv(summary);
+    downloadCsv(`schedule_b_${selectedYear}.csv`, csvContent);
+    toast.success(u.exportScheduleBSuccess);
+  };
+
   const formatUsd = (val: number) =>
     formatCurrency(val, "USD", locale === "en" ? "en" : locale === "es" ? "es" : "ptBR");
 
@@ -170,6 +184,16 @@ export function UsTax1099Report({
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>{u.exportBtn}</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportScheduleD}
+                className="gap-1.5 text-xs font-medium"
+              >
+                <Download className="h-3.5 w-3.5 text-primary" />
+                <span>{u.exportScheduleDBtn}</span>
               </Button>
             </div>
           </div>
@@ -297,6 +321,17 @@ export function UsTax1099Report({
 
         {/* Tab 1: Form 1099-DIV */}
         <TabsContent value="div" className="mt-4 space-y-4">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportScheduleB}
+              className="gap-1.5 text-xs font-medium"
+            >
+              <Download className="h-3.5 w-3.5 text-primary" />
+              <span>{u.exportScheduleBBtn}</span>
+            </Button>
+          </div>
           <Card className="border-border/60 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -368,6 +403,17 @@ export function UsTax1099Report({
 
         {/* Tab 2: Form 1099-B */}
         <TabsContent value="b" className="mt-4 space-y-4">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportScheduleD}
+              className="gap-1.5 text-xs font-medium"
+            >
+              <Download className="h-3.5 w-3.5 text-primary" />
+              <span>{u.exportScheduleDBtn}</span>
+            </Button>
+          </div>
           <Card className="border-border/60 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">

@@ -4,6 +4,8 @@ import {
   computeUs1099B,
   buildUsTaxYearSummary,
   generate1099Csv,
+  generateScheduleBCsv,
+  generateScheduleDCsv,
 } from "../form1099";
 import type { RealizedIncomeEvent } from "@/lib/realizedIncome";
 import type { Transaction } from "@/lib/transactionsLogic";
@@ -371,6 +373,19 @@ describe("US Form 1099 Engine (IRS Form 1040 Tax Residency)", () => {
       expect(csv).toContain("FORM 1099-DIV: DIVIDENDS AND DISTRIBUTIONS");
       expect(csv).toContain("FORM 1099-B: PROCEEDS FROM BROKER TRANSACTIONS");
       expect(csv).toContain('"AAPL"');
+
+      // Schedule B CSV
+      const schedB = generateScheduleBCsv(summary);
+      expect(schedB).toContain("Payer Name,Ticker,Account Type,Ordinary Dividends (Box 1a)");
+      expect(schedB).toContain('"Apple Inc.","AAPL","taxable",50.00,50.00,0.00');
+      expect(schedB).toContain('"TOTAL ORDINARY DIVIDENDS"');
+
+      // Schedule D / Form 8949 CSV
+      const schedD = generateScheduleDCsv(summary);
+      expect(schedD).toContain("Description of Property,Date Acquired,Date Sold,Proceeds (Sales Price)");
+      expect(schedD).toContain('"20 sh AAPL"');
+      expect(schedD).toContain("Part II (Box D)"); // Long-term (> 365 days)
+      expect(schedD).toContain('"NET LONG-TERM CAPITAL GAIN/LOSS"');
     });
   });
 });

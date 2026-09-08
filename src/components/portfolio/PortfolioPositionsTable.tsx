@@ -13,6 +13,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { netAfterTax } from "@/lib/calculations";
 import { Download } from "lucide-react";
+import { DgiBadge } from "@/components/shared/DgiBadge";
 import { cn } from "@/lib/utils";
 
 interface PortfolioPositionsTableProps {
@@ -184,8 +185,11 @@ export function PortfolioPositionsTable({ valuedItems, onSelectItem, isLoading }
                     onClick={() => onSelectItem(item)}
                   >
                     <TableCell className={cn(STICKY_FIRST_COLUMN_CLASS, "bg-inherit")}>
-                      <div className="font-bold text-accent-gold text-base leading-tight">
-                        {item.ticker}
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-accent-gold text-base leading-tight">
+                          {item.ticker}
+                        </span>
+                        <DgiBadge ticker={item.ticker} size="sm" />
                       </div>
                       <div className="text-xs text-muted-foreground truncate max-w-[140px]">
                         {item.name}
