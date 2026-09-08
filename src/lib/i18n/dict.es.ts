@@ -766,6 +766,22 @@ export const es = {
     taxPassportBadge: "RÉGIMEN TRIBUTARIO & COMPLIANCE",
     taxPassportTitle: "Pasaporte Fiscal del Activo",
     openInExplore: "Abrir en Pantalla Completa en Explorar ↗",
+    bazinSourceUs: "SEC / Form 1099-DIV (IRS)",
+    bazinSourceUsNonResident: "SEC / Dividendos Netos (WHT 30%)",
+    bazinSourceBr: "CVM / B3",
+    grahamSourceUs: "Benjamin Graham (Mercado US)",
+    grahamSourceBr: "Fórmula de Graham",
+    taxPassports: {
+      usStock: "<strong>Rendimientos (IRS Form 1040):</strong> Los dividendos generalmente tributan como Qualified Dividends (tasa preferencial del 0%, 15% o 20% según el tramo de ingresos) si se cumple el período de tenencia (>60 días en la ventana de 121 días).<br><strong>Ganancia de Capital:</strong> A largo plazo (>1 año) tributa a tasas preferenciales (0/15/20%). A corto plazo tributa a tasas ordinarias.",
+      usReit: "<strong>Rendimientos (IRS Sec. 199A):</strong> La mayoría de las distribuciones de REIT son ingresos ordinarios, pero elegibles para la deducción del 20% de Qualified Business Income (QBI) bajo la Sec. 199A (reduciendo la tasa máxima efectiva del 37% al 29,6%). La devolución de capital reduce la base de coste.<br><strong>Ganancia de Capital:</strong> A largo plazo (>1 año) califica para tasas preferenciales del 0/15/20%.",
+      usEtf: "<strong>Rendimientos (Form 1099-DIV):</strong> Los dividendos se clasifican como Calificados u Ordinarios según los activos subyacentes. Ganancias de capital distribuidas reportadas en la casilla 2a.<br><strong>Ganancia de Capital:</strong> Ventas tributadas como ganancias/pérdidas de capital (0/15/20% para más de 1 año; tasas ordinarias para menos de 1 año).",
+      usForeignBr: "<strong>Activo Extranjero (B3 - Brasil):</strong> Los rendimientos se reportan como ingresos extranjeros en el IRS Form 1040. Si se aplica retención en Brasil (ej. JCP 15%), se puede reclamar el Foreign Tax Credit (IRS Form 1116).<br><strong>Ganancia de Capital:</strong> Tributa según las reglas generales de ganancias de capital de EE. UU.",
+      brStock: "<strong>Rendimientos:</strong> Los dividendos están 100% exentos de impuesto a la renta para personas físicas en Brasil. El JCP sufre retención exclusiva del 15% en la fuente.<br><strong>Ganancia de Capital:</strong> Ventas al contado hasta R$ 20.000/mes están exentas. Por encima de este límite, tasa del 15% sobre el beneficio neto (20% en day trade).",
+      brFii: "<strong>Rendimientos Mensuales:</strong> 100% exentos de impuesto para personas físicas (Ley 11.033/04 para fondos con más de 100 inversores).<br><strong>Ganancia de Capital:</strong> Tasa fija del 20% sobre la ganancia neta en la venta de cuotas (sin exención de R$ 20.000).",
+      brFiiInfra: "<strong>Súper Exención (Ley 12.431/2011):</strong> Los FI-Infras cuentan con el beneficio fiscal más fuerte de Brasil. Los rendimientos mensuales están 100% exentos de IRPF Y las ganancias de capital en bolsa también están 100% exentas para personas físicas (sin tope de R$ 20k).",
+      brEtf: "<strong>Rendimientos:</strong> Según la política del ETF (reinversión automática en el patrimonio o distribución gravable).<br><strong>Ganancia de Capital:</strong> Tasa fija del 15% sobre la ganancia neta en bolsa brasileña (sin exención de R$ 20.000).",
+      brForeignUs: "<strong>Retención EE. UU. (WHT):</strong> 30% retenido en origen por la custodia estadounidense.<br><strong>Brasil (Ley 14.754/2023):</strong> Proventos compensables en la declaración anual (DAA) al 15%, con compensación íntegra del WHT del 30%.",
+    },
   },
 
   tabs: {
@@ -988,6 +1004,8 @@ export const es = {
     includeBrAssets: "Incluir activos de Brasil (B3)",
     hideBrAssets: "Ocultar activos de Brasil (B3)",
     brAssetsNote: "Acciones y FIIs de Brasil habilitados para esta meta.",
+    usBenchmarkPrompt: "¿Desea aplicar la cartera equilibrada de dividendos de EE. UU. (45% Acciones US, 25% REITs, 30% ETFs)?",
+    applyUsBenchmark: "Aplicar Benchmark 45/25/30",
   },
 
   snowball: {
@@ -1956,6 +1974,10 @@ export const es = {
       whtCompensable: "WHT 30% Compensable",
       jcpWithholding: "IR 15% en la Fuente (JCP)",
       standard: "Tributación Estándar",
+      usQualified: "Dividendos Calificados (0/15/20%)",
+      usReitQbi: "Sec. 199A (20% QBI)",
+      usEtf: "Form 1099-DIV",
+      foreignBr: "Activo Extranjero (B3)",
     },
   },
   portfolio: {

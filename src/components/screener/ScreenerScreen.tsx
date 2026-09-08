@@ -38,6 +38,7 @@ import {
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useMarketScope } from "@/lib/useMarketScope";
+import { convertCurrency } from "@/lib/currency";
 import { simulateScreenerImpact } from "@/lib/screenerSimulation";
 import { buildScreenerCandidate } from "@/lib/screenerCandidate";
 import { resolveReasonText } from "@/lib/askEngine";
@@ -319,16 +320,22 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
     return buildScreenerCandidate(simulatingItem.rawAsset, targetYield);
   }, [simulatingItem, valuedItems, settings]);
 
+  const simCurrency = simulatingItem?.currency ?? (isUS ? "USD" : "BRL");
+
   const simulationResult = useMemo(() => {
     if (!simulationCandidate) return null;
+    const amountInBrl =
+      simCurrency === "USD"
+        ? convertCurrency(parsedAmount, "USD", "BRL", fxRate)
+        : parsedAmount;
     return simulateScreenerImpact(
       simulationCandidate,
-      parsedAmount,
+      amountInBrl,
       valuedItems,
       settings || {},
       fxRate,
     );
-  }, [simulationCandidate, parsedAmount, valuedItems, settings, fxRate]);
+  }, [simulationCandidate, simCurrency, parsedAmount, valuedItems, settings, fxRate]);
 
   const reasonParams = useMemo(() => {
     if (!simulationResult) return undefined;
@@ -892,7 +899,9 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
                     {t.screenerScreen?.simulatorModal?.amountLabel}
                   </div>
                   <div className="flex items-baseline justify-end gap-1 mt-0.5">
-                    <span className="font-serif text-base text-muted-foreground">R$</span>
+                    <span className="font-serif text-base text-muted-foreground">
+                      {simCurrency === "USD" ? "US$" : "R$"}
+                    </span>
                     <input
                       value={displayAmount}
                       onFocus={() => setIsAmountFocused(true)}
@@ -918,7 +927,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-wider text-accent-text">
                   {resolveReasonText(t, "screenerScreen.impactLabel", {
-                    amount: formatCurrency(parsedAmount, "BRL", locale),
+                    amount: formatCurrency(parsedAmount, simCurrency, locale),
                   })}
                   <span className="h-px flex-1 bg-border/60" />
                 </div>
@@ -966,11 +975,29 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
                     </div>
                     <div className="flex flex-wrap items-baseline gap-1.5 font-mono text-xs">
                       <span className="text-muted-foreground">
-                        {formatCurrency(simulationResult.incomeBeforeMonthlyBRL, "BRL", locale)}
+                        {formatCurrency(
+                          convertCurrency(
+                            simulationResult.incomeBeforeMonthlyBRL,
+                            "BRL",
+                            simCurrency,
+                            fxRate,
+                          ),
+                          simCurrency,
+                          locale,
+                        )}
                       </span>
                       <span className="text-accent-text">→</span>
                       <span className="text-sm font-bold text-success">
-                        {formatCurrency(simulationResult.incomeAfterMonthlyBRL, "BRL", locale)}
+                        {formatCurrency(
+                          convertCurrency(
+                            simulationResult.incomeAfterMonthlyBRL,
+                            "BRL",
+                            simCurrency,
+                            fxRate,
+                          ),
+                          simCurrency,
+                          locale,
+                        )}
                       </span>
                     </div>
                   </div>

@@ -97,11 +97,25 @@ vi.mock("@/lib/useHasUSDAssets", () => ({
   }),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    currency: "BRL",
+    defaultCurrency: "BRL",
+    isUS: mockCountry === "US",
+    taxJurisdiction: mockCountry === "US" ? "US" : "BR",
+  }),
+}));
+
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
     useQuery: () => ({ data: { USDBRL: 5.4321 }, isLoading: false }),
+    useQueryClient: () => ({
+      getQueryData: vi.fn(),
+      setQueryData: vi.fn(),
+      invalidateQueries: vi.fn(),
+    }),
   };
 });
 

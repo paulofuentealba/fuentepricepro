@@ -7,6 +7,7 @@ import { useTransactions } from "@/lib/transactions";
 import { useFIProgress } from "@/lib/useFIProgress";
 import { useFeatureGate } from "@/lib/useFeatureGate";
 import { useI18n } from "@/lib/i18n-provider";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { downloadCsv } from "@/lib/csv";
 import { computeRecentPaymentInsight, sumReceivedInWindow } from "@/lib/realizedIncome";
 import { getNetContributionInWindow } from "@/lib/selectors/monthlyContribution";
@@ -43,7 +44,7 @@ export function ReinvestirPage() {
 
   const { valuedItems, ownedItems, isAppLoading, fx } = useValuedPortfolio();
   const { settings } = useUserSettings();
-  const currency = settings?.displayCurrency || "BRL";
+  const { currency } = useMarketScope();
   const { summary, events, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
   const { transactions = [] } = useTransactions();
   const { totalCapitalBRL, monthlyIncomeBRL } = useFIProgress();

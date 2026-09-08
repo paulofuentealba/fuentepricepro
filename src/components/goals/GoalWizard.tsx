@@ -75,6 +75,20 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
     updateSettings({ smartAllocationTargets: { ...targets, [type]: Number.isFinite(num) ? num : 0 } });
   };
 
+  const applyUsBenchmark = () => {
+    updateSettings({
+      smartAllocationTargets: {
+        ...targets,
+        STOCK_US: 45,
+        REIT: 25,
+        ETF: 30,
+        FIXED_INCOME: 0,
+        STOCK_BR: 0,
+        FII: 0,
+      },
+    });
+  };
+
   const classTargetYields = settings.classTargetYields || {};
   const handleClassYieldChange = (type: AssetType, val: string) => {
     const next = { ...classTargetYields };
@@ -111,6 +125,23 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
             {t.smartAllocation.targetTotal.replace("{{total}}", String(total))}
           </Badge>
         </div>
+
+        {isUS && !showBrAssets && total === 0 && (
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-primary/25 bg-primary/5 p-3.5">
+            <p className="text-xs leading-relaxed text-foreground">
+              {t.goalWizard.usBenchmarkPrompt}
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="h-7 shrink-0 text-xs font-semibold self-start sm:self-auto"
+              onClick={applyUsBenchmark}
+            >
+              {t.goalWizard.applyUsBenchmark}
+            </Button>
+          </div>
+        )}
 
         {activeAssetTypes.map((type) => (
           <div key={type} className="mb-3 flex items-center gap-3.5 last:mb-0">
@@ -163,6 +194,18 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
           </span>
           {!isTotalOk && <span>{t.smartAllocation.targetTotalIdeal}</span>}
         </div>
+
+        {isUS && !showBrAssets && (
+          <div className="mt-2.5 flex justify-end">
+            <button
+              type="button"
+              onClick={applyUsBenchmark}
+              className="text-[11px] font-medium text-accent-text hover:underline"
+            >
+              {t.goalWizard.applyUsBenchmark}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Card 2: Critérios de exclusão */}

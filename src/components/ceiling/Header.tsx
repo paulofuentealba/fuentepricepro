@@ -33,6 +33,7 @@ import { useNavSections, isNavItemActive } from "@/lib/useNavSections";
 import { Badge } from "@/components/ui/badge";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 interface HeaderProps {
   variant?: "app" | "landing";
@@ -48,7 +49,7 @@ export function Header({ variant = "app" }: HeaderProps) {
   const pathname = location.pathname;
   const { sections: navSections } = useNavSections();
   const { settings, updateSettings } = useUserSettings();
-  const currentCurrency = settings?.displayCurrency || "BRL";
+  const { currency: currentCurrency } = useMarketScope();
 
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
   const L = t.landing;

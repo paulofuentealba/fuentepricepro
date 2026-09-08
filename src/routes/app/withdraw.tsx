@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { useTransactions } from "@/lib/transactions";
 import { useFeatureGate } from "@/lib/useFeatureGate";
@@ -32,7 +33,7 @@ function WithdrawPage() {
 
   const { valuedItems, ownedItems, isAppLoading, fx } = useValuedPortfolio();
   const { settings } = useUserSettings();
-  const currency = settings?.displayCurrency || "BRL";
+  const { currency } = useMarketScope();
   const { events: realizedEvents, isLoading: isIncomeLoading } = useRealizedIncomeSummary(currency);
   const { transactions, isLoading: isTxLoading } = useTransactions();
 

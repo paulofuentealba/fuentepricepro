@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useUserSettings } from "@/lib/useUserSettings";
 import { useValuedPortfolio, type ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
+import type { Currency } from "@/lib/domain";
 import {
   EIGHT_CLASSES_ORDER,
   US_CLASSES_ORDER,
@@ -20,6 +21,8 @@ export interface MarketScope {
   isUSNative: boolean;
   isBRNative: boolean;
   isDual: boolean;
+  defaultCurrency: Currency;
+  currency: Currency;
   defaultScreenerMarket: "US" | "ALL" | "BR";
   visibleAllocationClasses: EightClassKey[];
   priorityBrokers: SupportedBroker[];
@@ -29,8 +32,11 @@ export interface MarketScope {
 export function computeMarketScope(
   taxJurisdiction: "US" | "BR" = "BR",
   positions: ValuedWatchlistItem[] = [],
+  explicitCurrency?: Currency,
 ): MarketScope {
   const isUS = taxJurisdiction === "US";
+  const defaultCurrency: Currency = isUS ? "USD" : "BRL";
+  const currency: Currency = explicitCurrency || defaultCurrency;
 
   let hasBrPositions = false;
   let hasUsPositions = false;
@@ -85,6 +91,8 @@ export function computeMarketScope(
     isUSNative,
     isBRNative,
     isDual,
+    defaultCurrency,
+    currency,
     defaultScreenerMarket,
     visibleAllocationClasses,
     priorityBrokers,
@@ -99,7 +107,7 @@ export function useMarketScope(): MarketScope {
   const taxJurisdiction = settings?.taxJurisdiction === "US" ? "US" : "BR";
 
   return useMemo(
-    () => computeMarketScope(taxJurisdiction, valuedItems),
-    [taxJurisdiction, valuedItems],
+    () => computeMarketScope(taxJurisdiction, valuedItems, settings?.displayCurrency),
+    [taxJurisdiction, valuedItems, settings?.displayCurrency],
   );
 }

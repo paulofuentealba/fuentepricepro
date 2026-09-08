@@ -756,6 +756,22 @@ export const en = {
     taxPassportBadge: "TAX REGIME & COMPLIANCE",
     taxPassportTitle: "Asset Tax Passport",
     openInExplore: "Open Fullscreen in Explore ↗",
+    bazinSourceUs: "SEC / Form 1099-DIV (IRS)",
+    bazinSourceUsNonResident: "SEC / Net Dividends (WHT 30%)",
+    bazinSourceBr: "CVM / B3 Filings",
+    grahamSourceUs: "Benjamin Graham (US Market)",
+    grahamSourceBr: "Graham Formula",
+    taxPassports: {
+      usStock: "<strong>Income (IRS Form 1040):</strong> Dividends are typically taxed as Qualified Dividends (preferential rate of 0%, 15%, or 20% depending on taxable income) if holding period rules are met (>60 days during the 121-day window).<br><strong>Capital Gains:</strong> Long-term capital gains (>1 year) taxed at preferential 0/15/20% rates. Short-term gains taxed at ordinary income tax brackets.",
+      usReit: "<strong>Income (IRS Section 199A):</strong> Most REIT distributions are ordinary income, but eligible for the 20% Qualified Business Income (QBI) deduction under Section 199A (reducing effective top federal bracket from 37% to 29.6%). Return of Capital is non-taxable and reduces cost basis.<br><strong>Capital Gains:</strong> Long-term capital gains (>1 year) qualify for preferential 0/15/20% rates.",
+      usEtf: "<strong>Income (Form 1099-DIV):</strong> Dividends passed through as either Qualified or Non-Qualified depending on underlying securities. Distributed capital gains reported on Box 2a.<br><strong>Capital Gains:</strong> Sales taxed as capital gains/losses (preferential 0/15/20% for long-term >1 year; ordinary brackets for short-term).",
+      usForeignBr: "<strong>Foreign Asset (B3 - Brazil):</strong> Dividends and distributions are treated as foreign ordinary income on IRS Form 1040. If Brazilian withholding applies (e.g. JCP 15%), you may claim a Foreign Tax Credit (IRS Form 1116) to prevent double taxation.<br><strong>Capital Gains:</strong> Taxed under standard US capital gains rules in USD equivalent at transaction date.",
+      brStock: "<strong>Income:</strong> Dividends are 100% exempt from Brazilian personal income tax. Interest on Equity (JCP) is subject to 15% exclusive withholding tax at source.<br><strong>Capital Gains:</strong> Equity sales up to R$ 20,000/month on the spot market are tax-exempt. Above this threshold, 15% flat rate applies on net profit (20% for day trade).",
+      brFii: "<strong>Monthly Income:</strong> 100% exempt from Brazilian personal income tax under Law 11,033/04 (publicly traded REIT with 100+ unitholders).<br><strong>Capital Gains:</strong> Fixed 20% flat tax on net capital gains upon sale of units (no R$ 20k exemption threshold).",
+      brFiiInfra: "<strong>Super Exemption (Law 12,431/2011):</strong> Infrastructure bonds and FI-Infras enjoy the strongest tax benefit in Brazil. Monthly yields are 100% exempt from income tax AND capital gains on secondary market sales are also 100% exempt from income tax for individual investors (with no ceiling limit).",
+      brEtf: "<strong>Income:</strong> Handled according to fund policy (automatic accumulation in NAV or taxable distribution).<br><strong>Capital Gains:</strong> Flat 15% rate on net profit for any secondary market sales on B3 (no R$ 20k exemption applies).",
+      brForeignUs: "<strong>US Withholding (WHT):</strong> 30% withheld at source by US custodian on distributed dividends.<br><strong>Brazil (Law 14,754/2023):</strong> Income and capital gains are reported annually on the DAA at a 15% flat rate, with the 30% US withholding fully creditable against Brazilian tax owed.",
+    },
   },
 
   tabs: {
@@ -976,6 +992,8 @@ export const en = {
     includeBrAssets: "Include Brazilian assets (B3)",
     hideBrAssets: "Hide Brazilian assets (B3)",
     brAssetsNote: "Brazilian equities and REITs (FIIs) enabled for this goal.",
+    usBenchmarkPrompt: "Start with the balanced US dividend portfolio (45% US Stocks, 25% REITs, 30% ETFs)?",
+    applyUsBenchmark: "Apply 45/25/30 Preset",
   },
 
   snowball: {
@@ -1940,6 +1958,10 @@ export const en = {
       whtCompensable: "30% WHT Creditable",
       jcpWithholding: "15% Withholding at Source (JCP)",
       standard: "Standard Taxation",
+      usQualified: "Qualified Dividends (0/15/20%)",
+      usReitQbi: "Sec. 199A (20% QBI)",
+      usEtf: "Form 1099-DIV",
+      foreignBr: "Foreign Asset (B3)",
     },
   },
   portfolio: {

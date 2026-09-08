@@ -37,14 +37,15 @@ import { useHasUSDAssets } from "@/lib/useHasUSDAssets";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 
 /** Up to 2 initials from a display name, e.g. "Paulo Fuentealba" -> "PF". */
 function getInitials(name?: string | null): string {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0][0]!.toUpperCase();
-  return (parts[0][0]! + parts[parts.length - 1][0]!).toUpperCase();
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
 }
 
 export function Sidebar() {
@@ -56,7 +57,7 @@ export function Sidebar() {
   const location = useLocation();
   const { sections } = useNavSections();
   const { settings, updateSettings } = useUserSettings();
-  const currentCurrency = settings?.displayCurrency || "BRL";
+  const { currency: currentCurrency } = useMarketScope();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 

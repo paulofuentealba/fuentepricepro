@@ -12,6 +12,7 @@ import { useI18n } from "@/lib/i18n-provider";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useTransactions } from "@/lib/transactions";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { buildMonthlyBuckets, computeInvestedVsReceived, MONTHS_EN_SHORT, MONTHS_PT_SHORT } from "@/lib/cashflow";
 import { buildConfirmedUpcoming, buildWeakMonths, buildAnnualDividends, buildYearMonthlyDividends, buildMonthTickerBreakdown } from "@/lib/incomeGuaranteed";
@@ -48,7 +49,7 @@ function IncomePage() {
   const { items, totals, isAppLoading, fx, dividendEventsMap = {} } = useValuedPortfolio();
   const { transactions = [] } = useTransactions();
   const { settings } = useUserSettings();
-  const currency = settings?.displayCurrency || "BRL";
+  const { currency } = useMarketScope();
   const { events } = useRealizedIncomeSummary(currency);
   const fxRate = fx?.USDBRL ?? EXCHANGE_RATE_FALLBACK;
   const monthsLabels = locale === "en" ? MONTHS_EN_SHORT : MONTHS_PT_SHORT;

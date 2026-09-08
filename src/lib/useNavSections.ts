@@ -16,6 +16,7 @@ import {
 import { useLocation } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n-provider";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { useLastSeen } from "@/lib/useLastSeen";
 import { formatNumber } from "@/lib/formatters";
@@ -56,7 +57,7 @@ export interface NavSection {
 export function useNavSections(): { sections: NavSection[] } {
   const { t, locale } = useI18n();
   const { settings } = useUserSettings();
-  const currency = settings?.displayCurrency || "BRL";
+  const { currency } = useMarketScope();
   const { summary, events } = useRealizedIncomeSummary(currency);
   const location = useLocation();
 

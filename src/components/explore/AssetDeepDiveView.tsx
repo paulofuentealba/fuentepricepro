@@ -16,6 +16,7 @@ import { DividendSafetyRadar } from "@/components/shared/DividendSafetyRadar";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
 import type { SearchHit } from "@/lib/apiService.functions";
+import type { AssetType } from "@/lib/domain";
 import {
   REPRESENTATIVE_ASSETS,
   REPRESENTATIVE_KEYS,
@@ -301,10 +302,10 @@ export function AssetDeepDiveView({
 
   // Tax passport
   const taxPassportHtml = useMemo(() => {
-    if (repData) return repData.taxPassportHtml;
-    const assetType = asset?.type ?? "STOCK_BR";
-    return getDynamicTaxPassport(assetType, currency);
-  }, [repData, asset, currency]);
+    if (repData && !isUS && locale === "ptBR") return repData.taxPassportHtml;
+    const assetType = asset?.type ?? (repData?.classType as AssetType) ?? "STOCK_BR";
+    return getDynamicTaxPassport(assetType, currency, isUS ? "US" : "BR", t);
+  }, [repData, isUS, locale, asset, currency, t]);
 
   // Snowball calculations
   const snowballInfo = useMemo(() => {
@@ -779,7 +780,12 @@ export function AssetDeepDiveView({
                 formula: currency === "USD" ? `DPA / ${bazinYield.toFixed(1)}%` : "DPA / 6%",
                 yieldTarget: bazinYield ?? (currency === "USD" ? 3.5 : 6),
                 isNetJcp: false,
-                source: currency === "USD" ? "SEC / Proventos Líquidos (WHT 30%)" : "CVM / B3",
+                source:
+                  currency === "USD"
+                    ? isUS
+                      ? t.deepDive.bazinSourceUs
+                      : t.deepDive.bazinSourceUsNonResident
+                    : t.deepDive.bazinSourceBr,
                 date: "2026",
               },
               gordon: {
@@ -792,7 +798,7 @@ export function AssetDeepDiveView({
               graham: {
                 formula: "√(22,5 × LPA × VPA)",
                 margin: 0,
-                source: currency === "USD" ? "Benjamin Graham (Bolsa US)" : "Graham Formula",
+                source: currency === "USD" ? t.deepDive.grahamSourceUs : t.deepDive.grahamSourceBr,
                 date: "2026",
               },
               lynch: {

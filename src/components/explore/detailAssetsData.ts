@@ -573,19 +573,67 @@ export function getDynamicClassMetrics(
   }
 }
 
-export function getDynamicTaxPassport(type: AssetType, currency: Currency): string {
+export function getDynamicTaxPassport(
+  type: AssetType,
+  currency: Currency,
+  jurisdiction: "BR" | "US" = "BR",
+  t?: any,
+): string {
+  const p = t?.deepDive?.taxPassports;
+
+  if (jurisdiction === "US") {
+    if (currency === "BRL" || type === "STOCK_BR" || type === "FII" || type === "FIAGRO" || type === "FII_INFRA") {
+      return (
+        p?.usForeignBr ??
+        "<strong>Foreign Asset (B3 - Brazil):</strong> Dividends and distributions are treated as foreign ordinary income on IRS Form 1040. If Brazilian withholding applies (e.g. JCP 15%), you may claim a Foreign Tax Credit (IRS Form 1116) to prevent double taxation.<br><strong>Capital Gains:</strong> Taxed under standard US capital gains rules in USD equivalent at transaction date."
+      );
+    }
+    if (type === "REIT") {
+      return (
+        p?.usReit ??
+        "<strong>Income (IRS Section 199A):</strong> Most REIT distributions are ordinary income, but eligible for the 20% Qualified Business Income (QBI) deduction under Section 199A (reducing effective top federal bracket from 37% to 29.6%). Return of Capital is non-taxable and reduces cost basis.<br><strong>Capital Gains:</strong> Long-term capital gains (>1 year) qualify for preferential 0/15/20% rates."
+      );
+    }
+    if (type === "ETF") {
+      return (
+        p?.usEtf ??
+        "<strong>Income (Form 1099-DIV):</strong> Dividends passed through as either Qualified or Non-Qualified depending on underlying securities. Distributed capital gains reported on Box 2a.<br><strong>Capital Gains:</strong> Sales taxed as capital gains/losses (preferential 0/15/20% for long-term >1 year; ordinary brackets for short-term)."
+      );
+    }
+    return (
+      p?.usStock ??
+      "<strong>Income (IRS Form 1040):</strong> Dividends are typically taxed as Qualified Dividends (preferential rate of 0%, 15%, or 20% depending on taxable income) if holding period rules are met (>60 days during the 121-day window).<br><strong>Capital Gains:</strong> Long-term capital gains (>1 year) taxed at preferential 0/15/20% rates. Short-term gains taxed at ordinary income tax brackets."
+    );
+  }
+
+  // Jurisdiction === "BR"
   if (type === "FII_INFRA") {
-    return "<strong>Super Isenção (Lei 12.431/2011):</strong> Os FI-Infras possuem o benefício fiscal mais forte do mercado brasileiro. Os rendimentos mensais são 100% isentos de IR E o ganho de capital na alienação de cotas na bolsa também é 100% isento de IR para pessoas físicas (sem teto de R$ 20k).";
+    return (
+      p?.brFiiInfra ??
+      "<strong>Super Isenção (Lei 12.431/2011):</strong> Os FI-Infras possuem o benefício fiscal mais forte do mercado brasileiro. Os rendimentos mensais são 100% isentos de IR E o ganho de capital na alienação de cotas na bolsa também é 100% isento de IR para pessoas físicas (sem teto de R$ 20k)."
+    );
   }
   if (type === "FII" || type === "FIAGRO") {
-    return "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 11.033/04 e Lei 14.130/21 (fundo com mais de 100 cotistas negociado em bolsa).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o lucro líquido na venda das cotas (NÃO há isenção de R$ 20.000).";
+    return (
+      p?.brFii ??
+      "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 11.033/04 e Lei 14.130/21 (fundo com mais de 100 cotistas negociado em bolsa).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o lucro líquido na venda das cotas (NÃO há isenção de R$ 20.000)."
+    );
   }
   if (currency === "USD" || type === "STOCK_US" || type === "REIT") {
-    return "<strong>Retenção US (WHT):</strong> 30% retido na fonte pela custódia americana sobre dividendos distribuídos.<br><strong>Brasil (Lei 14.754/2023):</strong> Proventos são compensáveis na declaração anual de IR (DAA). Ganho de capital na venda apurado em 15% na DAA com compensação integral de eventuais prejuízos passados.";
+    return (
+      p?.brForeignUs ??
+      "<strong>Retenção US (WHT):</strong> 30% retido na fonte pela custódia americana sobre dividendos distribuídos.<br><strong>Brasil (Lei 14.754/2023):</strong> Proventos são compensáveis na declaração anual de IR (DAA). Ganho de capital na venda apurado em 15% na DAA com compensação integral de eventuais prejuízos passados."
+    );
   }
   if (type === "ETF") {
-    return "<strong>Rendimentos:</strong> Conforme política do ETF (reinvestimento automático no patrimônio ou distribuição tributável).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 15% sobre o lucro líquido em qualquer venda na bolsa brasileira (sem faixa de isenção de R$ 20.000).";
+    return (
+      p?.brEtf ??
+      "<strong>Rendimentos:</strong> Conforme política do ETF (reinvestimento automático no patrimônio ou distribuição tributável).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 15% sobre o lucro líquido em qualquer venda na bolsa brasileira (sem faixa de isenção de R$ 20.000)."
+    );
   }
   // STOCK_BR default
-  return "<strong>Rendimentos:</strong> Dividendos são 100% isentos de imposto de renda para pessoa física. Juros sobre Capital Próprio (JCP) sofrem retenção exclusiva de 15% na fonte pela corretora.<br><strong>Ganho de Capital:</strong> Vendas no mercado à vista até R$ 20.000,00 no mês são isentas de IR. Acima desse limite, alíquota de 15% sobre o lucro líquido (20% em operações de day trade).";
+  return (
+    p?.brStock ??
+    "<strong>Rendimentos:</strong> Dividendos são 100% isentos de imposto de renda para pessoa física. Juros sobre Capital Próprio (JCP) sofrem retenção exclusiva de 15% na fonte pela corretora.<br><strong>Ganho de Capital:</strong> Vendas no mercado à vista até R$ 20.000,00 no mês são isentas de IR. Acima desse limite, alíquota de 15% sobre o lucro líquido (20% em operações de day trade)."
+  );
 }

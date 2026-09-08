@@ -4,6 +4,7 @@ import { BlurredPreviewOverlay } from "@/components/ceiling/BlurredPreviewOverla
 import { useFeatureGate } from "@/lib/useFeatureGate";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useMarketScope } from "@/lib/useMarketScope";
 import { useTransactions } from "@/lib/transactions";
 import { useI18n } from "@/lib/i18n-provider";
 import { downloadCsv } from "@/lib/csv";
@@ -26,8 +27,8 @@ function SmartAllocationRoute() {
   const { t } = useI18n();
   const { ownedItems, isAppLoading } = useValuedPortfolio();
   const { settings } = useUserSettings();
+  const { currency } = useMarketScope();
   const { transactions = [] } = useTransactions();
-  const currency = settings?.displayCurrency || "BRL";
 
   const askSettings: AskEngineSettings = useMemo(() => {
     return {

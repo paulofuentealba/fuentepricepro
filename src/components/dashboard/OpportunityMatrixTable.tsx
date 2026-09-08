@@ -30,7 +30,7 @@ interface OpportunityMatrixTableProps {
 
 export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker }: OpportunityMatrixTableProps) {
   const { locale, t } = useI18n();
-  const { visibleAllocationClasses } = useMarketScope();
+  const { visibleAllocationClasses, taxJurisdiction } = useMarketScope();
   const [activeFilter, setActiveFilter] = useState<EightClassKey | "ALL">("ALL");
 
   const availableFilterClasses = useMemo(() => {
@@ -58,12 +58,16 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
     return [...items].sort((a, b) => (b.valuation?.margin ?? -Infinity) - (a.valuation?.margin ?? -Infinity));
   }, [valuedItems, activeFilter]);
 
-  const taxRegimeLabel = {
+  const taxRegimeLabel: Record<string, string> = {
     exemptDouble: t.dashboard.taxRegime.exemptDouble,
     exemptDividend: t.dashboard.taxRegime.exemptDividend,
     whtCompensable: t.dashboard.taxRegime.whtCompensable,
     jcpWithholding: t.dashboard.taxRegime.jcpWithholding,
     standard: t.dashboard.taxRegime.standard,
+    usQualified: t.dashboard.taxRegime.usQualified,
+    usReitQbi: t.dashboard.taxRegime.usReitQbi,
+    usEtf: t.dashboard.taxRegime.usEtf,
+    foreignBr: t.dashboard.taxRegime.foreignBr,
   };
 
   function getBadgeDetails(action: RecommendedActionKey, margin: number | null) {
@@ -158,7 +162,7 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
           <div className="flex flex-col gap-3 md:hidden">
             {filteredItems.map((item) => {
               const action = computeRecommendedAction(item);
-              const regime = computeTaxRegimeKey(item.type, item.currency);
+              const regime = computeTaxRegimeKey(item.type, item.currency, taxJurisdiction);
               const livePrice = item.livePrice ?? item.currentPrice ?? 0;
               const margin = item.valuation?.margin ?? item.safetyMargin ?? null;
               const ceiling = item.valuation?.activeCeiling ?? item.ceilingPrice ?? 0;
@@ -294,7 +298,7 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
               <TableBody>
                 {filteredItems.map((item) => {
                   const action = computeRecommendedAction(item);
-                  const regime = computeTaxRegimeKey(item.type, item.currency);
+                  const regime = computeTaxRegimeKey(item.type, item.currency, taxJurisdiction);
                   const livePrice = item.livePrice ?? item.currentPrice ?? 0;
                   const margin = item.valuation?.margin ?? item.safetyMargin ?? null;
                   const ceiling = item.valuation?.activeCeiling ?? item.ceilingPrice ?? 0;

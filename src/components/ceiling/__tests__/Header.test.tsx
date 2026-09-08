@@ -46,6 +46,15 @@ vi.mock("@/lib/useUserSettings", () => ({
   }),
 }));
 
+vi.mock("@/lib/useMarketScope", () => ({
+  useMarketScope: () => ({
+    currency: "BRL",
+    defaultCurrency: "BRL",
+    isUS: false,
+    taxJurisdiction: "BR",
+  }),
+}));
+
 vi.mock("@/lib/useRealizedIncomeSummary", () => ({
   useRealizedIncomeSummary: () => ({
     summary: { currentMonth: 1130 },

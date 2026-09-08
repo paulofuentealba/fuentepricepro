@@ -761,6 +761,22 @@ export const ptBR = {
     taxPassportBadge: "REGIME TRIBUTÁRIO & COMPLIANCE",
     taxPassportTitle: "Passaporte Fiscal do Ativo",
     openInExplore: "Abrir em Tela Cheia no Explorar ↗",
+    bazinSourceUs: "SEC / Form 1099-DIV (IRS)",
+    bazinSourceUsNonResident: "SEC / Proventos Líquidos (WHT 30%)",
+    bazinSourceBr: "CVM / B3",
+    grahamSourceUs: "Benjamin Graham (Mercado US)",
+    grahamSourceBr: "Fórmula de Graham",
+    taxPassports: {
+      usStock: "<strong>Rendimentos (IRS Form 1040):</strong> Dividendos geralmente tributados como Qualified Dividends (alíquota preferencial de 0%, 15% ou 20% conforme renda tributável) se cumprido o prazo mínimo de custódia (>60 dias em janela de 121 dias).<br><strong>Ganho de Capital:</strong> Longo prazo (>1 ano) tributado a alíquotas preferenciais (0/15/20%). Curto prazo tributado na tabela progressiva ordinária.",
+      usReit: "<strong>Rendimentos (IRS Sec. 199A):</strong> A maioria dos proventos de REITs é renda ordinária, mas elegível à dedução de 20% de Qualified Business Income (QBI) sob a Sec. 199A (reduzindo a alíquota máxima efetiva de 37% para 29,6%). Retorno de Capital não é tributável de imediato e reduz o custo médio.<br><strong>Ganho de Capital:</strong> Longo prazo (>1 ano) se qualifica para alíquotas preferenciais de 0/15/20%.",
+      usEtf: "<strong>Rendimentos (Form 1099-DIV):</strong> Proventos classificados como Qualified ou Ordinary de acordo com os ativos subjacentes da carteira. Ganhos de capital distribuídos reportados no Box 2a.<br><strong>Ganho de Capital:</strong> Vendas tributadas como ganho/perda de capital (alíquotas preferenciais de 0/15/20% para posições mantidas por mais de 1 ano; alíquotas ordinárias para menos de 1 ano).",
+      usForeignBr: "<strong>Ativo Estrangeiro (B3 - Brasil):</strong> Proventos reportados como renda estrangeira no IRS Form 1040. Em caso de retenção de imposto na fonte no Brasil (ex: JCP 15%), é possível pleitear o Foreign Tax Credit (IRS Form 1116) para evitar bitributação.<br><strong>Ganho de Capital:</strong> Tributado sob as regras norte-americanas de ganho de capital em dólares convertidos na data do fato gerador.",
+      brStock: "<strong>Rendimentos:</strong> Dividendos são 100% isentos de imposto de renda para pessoa física. Juros sobre Capital Próprio (JCP) sofrem retenção exclusiva de 15% na fonte pela corretora.<br><strong>Ganho de Capital:</strong> Vendas no mercado à vista até R$ 20.000,00 no mês são isentas de IR. Acima desse limite, alíquota de 15% sobre o lucro líquido (20% em operações de day trade).",
+      brFii: "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 11.033/04 e Lei 14.130/21 (fundo com mais de 100 cotistas negociado em bolsa).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o lucro líquido na venda das cotas (NÃO há isenção de R$ 20.000).",
+      brFiiInfra: "<strong>Super Isenção (Lei 12.431/2011):</strong> Os FI-Infras possuem o benefício fiscal mais forte do mercado brasileiro. Os rendimentos mensais são 100% isentos de IR E o ganho de capital na alienação de cotas na bolsa também é 100% isento de IR para pessoas físicas (sem teto de R$ 20k).",
+      brEtf: "<strong>Rendimentos:</strong> Conforme política do ETF (reinvestimento automático no patrimônio ou distribuição tributável).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 15% sobre o lucro líquido em qualquer venda na bolsa brasileira (sem faixa de isenção de R$ 20.000).",
+      brForeignUs: "<strong>Retenção US (WHT):</strong> 30% retido na fonte pela custódia americana sobre dividendos distribuídos.<br><strong>Brasil (Lei 14.754/2023):</strong> Proventos são compensáveis na declaração anual de IR (DAA). Ganho de capital na venda apurado em 15% na DAA com compensação integral de eventuais prejuízos passados.",
+    },
   },
 
   tabs: {
@@ -983,6 +999,8 @@ export const ptBR = {
     includeBrAssets: "Incluir ativos do Brasil (B3)",
     hideBrAssets: "Ocultar ativos do Brasil (B3)",
     brAssetsNote: "Ações e FIIs do Brasil habilitados para esta meta.",
+    usBenchmarkPrompt: "Deseja aplicar a carteira balanceada de dividendos EUA (45% Ações US, 25% REITs, 30% ETFs)?",
+    applyUsBenchmark: "Aplicar Benchmark 45/25/30",
   },
 
   snowball: {
@@ -1952,6 +1970,10 @@ export const ptBR = {
       whtCompensable: "WHT 30% Compensável",
       jcpWithholding: "IR 15% na Fonte (JCP)",
       standard: "Tributação Padrão",
+      usQualified: "Dividendos Qualificados (0/15/20%)",
+      usReitQbi: "Sec. 199A (20% QBI)",
+      usEtf: "Form 1099-DIV",
+      foreignBr: "Ativo Estrangeiro (B3)",
     },
   },
   portfolio: {
