@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { auth, db } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
 import { useI18n } from "@/lib/i18n-provider";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { verifySessionFn } from "@/lib/verifySession.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,15 +56,27 @@ type CountryCode = "BR" | "US" | "PT" | "other";
 function OnboardingPersonalInfoPage() {
   const { t } = useI18n();
   const { user } = useAuth();
+  const { settings, updateSettings } = useUserSettings();
   const navigate = useNavigate();
   const P = t.onboardingPersonalInfo;
 
   const isGoogle = user?.providerData?.some((p) => p.providerId === "google.com") ?? false;
   const [name, setName] = useState(user?.displayName ?? "");
   const [city, setCity] = useState("");
-  const [country, setCountry] = useState<CountryCode>("BR");
+  const [country, setCountry] = useState<CountryCode>(() => {
+    return settings?.taxJurisdiction === "US" ? "US" : "BR";
+  });
   const [otherCountry, setOtherCountry] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const handleCountryChange = (v: CountryCode) => {
+    setCountry(v);
+    if (v === "US") {
+      updateSettings({ taxJurisdiction: "US", displayCurrency: "USD" });
+    } else if (v === "BR") {
+      updateSettings({ taxJurisdiction: "BR", displayCurrency: "BRL" });
+    }
+  };
 
   const finish = () => {
     toast.success(P.savedToast);
@@ -80,6 +93,12 @@ function OnboardingPersonalInfoPage() {
     try {
       const countryLabel = country === "other" ? otherCountry.trim() : P.countries[country];
       const location = [city.trim(), countryLabel].filter(Boolean).join(", ");
+
+      if (country === "US") {
+        updateSettings({ taxJurisdiction: "US", displayCurrency: "USD" });
+      } else if (country === "BR") {
+        updateSettings({ taxJurisdiction: "BR", displayCurrency: "BRL" });
+      }
 
       await setDoc(
         doc(db, "users", user.uid),
@@ -136,7 +155,7 @@ function OnboardingPersonalInfoPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="pi-country">{P.countryLabel}</Label>
-              <Select value={country} onValueChange={(v) => setCountry(v as CountryCode)}>
+              <Select value={country} onValueChange={(v) => handleCountryChange(v as CountryCode)}>
                 <SelectTrigger id="pi-country">
                   <SelectValue />
                 </SelectTrigger>
@@ -152,6 +171,20 @@ function OnboardingPersonalInfoPage() {
               <Label htmlFor="pi-city">{P.cityLabel}</Label>
               <Input id="pi-city" value={city} onChange={(e) => setCity(e.target.value)} />
             </div>
+          </div>
+
+          <div className="rounded-xl border border-border/70 bg-muted/20 p-3 text-xs flex items-center justify-between">
+            <span className="text-muted-foreground">
+              {t.settings.taxJurisdiction.title}:
+            </span>
+            <span className="font-semibold text-foreground flex items-center gap-1.5">
+              <span>{country === "US" ? "🇺🇸" : "🇧🇷"}</span>
+              <span>
+                {country === "US"
+                  ? t.settings.taxJurisdiction.usTitle
+                  : t.settings.taxJurisdiction.brTitle}
+              </span>
+            </span>
           </div>
 
           {country === "other" && (

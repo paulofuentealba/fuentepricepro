@@ -211,7 +211,11 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
   const applySuggestedAllocation = () => {
     const answers = finishAnswers();
     const suggested = restrictAllocationToCountry(computeSuggestedAllocation(answers), answers.country);
-    updateSettings({ smartAllocationTargets: suggested });
+    updateSettings({
+      smartAllocationTargets: suggested,
+      taxJurisdiction: answers.country === "US" ? "US" : "BR",
+      displayCurrency: answers.country === "US" ? "USD" : "BRL",
+    });
   };
 
   const handleApply = () => {
@@ -280,6 +284,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
                 type="button"
                 onClick={() => {
                   setCountry("BR");
+                  updateSettings({ taxJurisdiction: "BR", displayCurrency: "BRL" });
                   goTo(1);
                 }}
                 className={cn(
@@ -297,6 +302,7 @@ export function InvestorProfileFlow({ onComplete, isModal = true }: InvestorProf
                 type="button"
                 onClick={() => {
                   setCountry("US");
+                  updateSettings({ taxJurisdiction: "US", displayCurrency: "USD" });
                   goTo(1);
                 }}
                 className={cn(
