@@ -65,6 +65,31 @@ export function RealidadeFiscalPage() {
   }
 
   const isUS = settings?.taxJurisdiction === "US";
+  const hasBrAssets = valuedItems.some(
+    (item) =>
+      item.type === "STOCK_BR" ||
+      item.type === "FII" ||
+      item.type === "FII_INFRA" ||
+      item.type === "FIAGRO" ||
+      item.currency === "BRL",
+  );
+  const hasUsAssets = valuedItems.some(
+    (item) =>
+      item.type === "STOCK_US" ||
+      item.type === "REIT" ||
+      item.currency === "USD",
+  );
+
+  const [showBrSection, setShowBrSection] = useState<boolean>(!isUS || hasBrAssets);
+
+  const screenTitle = isUS
+    ? t.taxRealityScreen?.tabs?.usTaxTitle || "US Tax Reporting & Form 1099"
+    : t.taxRealityScreen?.title;
+  const screenSubtitle = isUS
+    ? t.taxRealityScreen?.tabs?.usTaxSubtitle ||
+      "Consolidated view of dividend income (1099-DIV), capital gains (1099-B / Schedule D) and tax-advantaged accounts"
+    : t.taxRealityScreen?.subtitle;
+
   const defaultTab = isUS ? "us1099" : "irpf";
 
   return (
@@ -75,16 +100,17 @@ export function RealidadeFiscalPage() {
           <span>{t.nav.sections.track}</span>
         </div>
         <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          {t.taxRealityScreen.title}
+          {screenTitle}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t.taxRealityScreen.subtitle}
+          {screenSubtitle}
         </p>
       </div>
 
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="flex h-auto w-full items-center justify-start gap-1 overflow-x-auto scrollbar-none flex-nowrap rounded-none border-b border-border bg-transparent p-0 pb-px">
-          {isUS && (
+          {/* US Form 1099 tab */}
+          {(isUS || hasUsAssets) && (
             <TabsTrigger
               value="us1099"
               className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
@@ -93,28 +119,33 @@ export function RealidadeFiscalPage() {
               <span>{t.taxRealityScreen.tabs.us1099}</span>
             </TabsTrigger>
           )}
-          <TabsTrigger
-            value="irpf"
-            className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
-          >
-            <FileText className="h-3.5 w-3.5 shrink-0" />
-            <span>{t.taxRealityScreen.tabs.irpfMirror}</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="darf"
-            className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
-          >
-            <Receipt className="h-3.5 w-3.5 shrink-0" />
-            <span>{t.taxRealityScreen.tabs.darfSales}</span>
-          </TabsTrigger>
-          {!isUS && (
-            <TabsTrigger
-              value="us1099"
-              className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />
-              <span>{t.taxRealityScreen.tabs.us1099}</span>
-            </TabsTrigger>
+
+          {/* Brazilian Tax Tabs */}
+          {(!isUS || showBrSection) && (
+            <>
+              <TabsTrigger
+                value="irpf"
+                className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+              >
+                <FileText className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  {isUS
+                    ? `${t.taxRealityScreen.tabs.irpfMirror} (B3)`
+                    : t.taxRealityScreen.tabs.irpfMirror}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="darf"
+                className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
+              >
+                <Receipt className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  {isUS
+                    ? `${t.taxRealityScreen.tabs.darfSales} (B3)`
+                    : t.taxRealityScreen.tabs.darfSales}
+                </span>
+              </TabsTrigger>
+            </>
           )}
         </TabsList>
 
@@ -126,23 +157,47 @@ export function RealidadeFiscalPage() {
           />
         </TabsContent>
 
-        <TabsContent value="irpf" className="mt-6">
-          <IrpfMirrorReport valuedItems={valuedItems} context={context} />
-        </TabsContent>
+        {(!isUS || showBrSection) && (
+          <>
+            <TabsContent value="irpf" className="mt-6">
+              <IrpfMirrorReport valuedItems={valuedItems} context={context} />
+            </TabsContent>
 
-        <TabsContent value="darf" className="mt-6">
-          <TaxRealityScreen
-            context={context}
-            isLoading={isLoading}
-            onExport={() => {
-              const date = new Date().toISOString().split("T")[0];
-              const rows = computeTaxRealityRows(context);
-              const csv = buildTaxRealityCsv(context, rows);
-              downloadCsv(`realidade-fiscal-${date}.csv`, csv);
-            }}
-          />
-        </TabsContent>
+            <TabsContent value="darf" className="mt-6">
+              <TaxRealityScreen
+                context={context}
+                isLoading={isLoading}
+                onExport={() => {
+                  const date = new Date().toISOString().split("T")[0];
+                  const rows = computeTaxRealityRows(context);
+                  const csv = buildTaxRealityCsv(context, rows);
+                  downloadCsv(`realidade-fiscal-${date}.csv`, csv);
+                }}
+              />
+            </TabsContent>
+          </>
+        )}
       </Tabs>
+
+      {/* Optional Brazilian Reporting toggle for pure US investors */}
+      {isUS && !hasBrAssets && (
+        <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {showBrSection
+              ? t.taxRealityScreen?.tabs?.hideBrSectionToggle || "Ocultar declaração brasileira"
+              : t.taxRealityScreen?.tabs?.brSectionToggle || "Precisa de declaração brasileira (IRPF / DARF)?"}
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowBrSection(!showBrSection)}
+            className="text-xs text-primary hover:underline font-medium"
+          >
+            {showBrSection
+              ? t.taxRealityScreen?.tabs?.hideBrSectionToggle || "Ocultar"
+              : t.taxRealityScreen?.tabs?.brSectionToggle || "Exibir abas B3"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
