@@ -2926,4 +2926,12 @@ export const ptBR = {
       invalidPrice: "Informe um preço unitário válido.",
     },
   },
+  dgi: {
+    kingTitle: "Dividend King",
+    kingBadge: "Dividend King (50+ anos)",
+    kingTooltip: "Dividend King: Empresa com 50+ anos consecutivos de aumentos anuais de dividendos nos EUA.",
+    aristocratTitle: "Dividend Aristocrat",
+    aristocratBadge: "Dividend Aristocrat (25+ anos)",
+    aristocratTooltip: "Dividend Aristocrat: Empresa do S&P 500 com 25+ anos consecutivos de aumentos anuais de dividendos.",
+  },
 } satisfies typeof en;

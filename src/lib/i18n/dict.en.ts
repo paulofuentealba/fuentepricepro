@@ -2914,4 +2914,12 @@ export const en = {
       invalidPrice: "Please enter a valid unit price.",
     },
   },
+  dgi: {
+    kingTitle: "Dividend King",
+    kingBadge: "Dividend King (50+ yrs)",
+    kingTooltip: "Dividend King: Company with 50+ consecutive years of increasing annual dividend payouts in the US.",
+    aristocratTitle: "Dividend Aristocrat",
+    aristocratBadge: "Dividend Aristocrat (25+ yrs)",
+    aristocratTooltip: "Dividend Aristocrat: S&P 500 constituent with 25+ consecutive years of increasing annual dividend payouts.",
+  },
 };
