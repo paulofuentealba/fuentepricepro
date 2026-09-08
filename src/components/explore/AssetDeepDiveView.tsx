@@ -279,27 +279,38 @@ export function AssetDeepDiveView({
 
   // Action verdict badge
   const actionVerdict = useMemo(() => {
-    if (repData) {
-      return { label: repData.action, type: repData.actionType };
-    }
-    if (marginConsensus >= 15) return { label: "APORTE FORTE", type: "strong" as const };
-    if (marginConsensus >= 0) return { label: "APORTE OK", type: "ok" as const };
-    if (marginConsensus >= -10) return { label: "AGUARDAR", type: "hold" as const };
-    return { label: "QUARENTENA", type: "danger" as const };
-  }, [repData, marginConsensus]);
+    const verdictType = repData?.actionType ?? (
+      marginConsensus >= 15
+        ? ("strong" as const)
+        : marginConsensus >= 0
+          ? ("ok" as const)
+          : marginConsensus >= -10
+            ? ("hold" as const)
+            : ("danger" as const)
+    );
+    const label =
+      verdictType === "strong"
+        ? (t.dashboard?.matrix?.actionBuy || "APORTE FORTE")
+        : verdictType === "ok"
+          ? (t.dashboard?.matrix?.actionOk || "APORTE OK")
+          : verdictType === "hold"
+            ? (t.dashboard?.matrix?.actionWatch || "AGUARDAR")
+            : (t.dashboard?.matrix?.actionAvoid || "QUARENTENA");
+    return { label, type: verdictType };
+  }, [repData, marginConsensus, t]);
 
   // Class fundamentals metrics
   const classMetrics = useMemo(() => {
-    if (repData) {
+    if (repData && locale === "ptBR") {
       return {
         badge: repData.metricsBadge,
         title: repData.metricsTitle,
         items: repData.metrics,
       };
     }
-    const assetType = asset?.type ?? "STOCK_BR";
-    return getDynamicClassMetrics(assetType, asset?.metrics, currency);
-  }, [repData, asset, currency]);
+    const assetType = asset?.type ?? (repData?.classType as AssetType) ?? "STOCK_BR";
+    return getDynamicClassMetrics(assetType, asset?.metrics, currency, locale, t);
+  }, [repData, locale, asset, currency, t]);
 
   // Tax passport
   const taxPassportHtml = useMemo(() => {
@@ -310,20 +321,24 @@ export function AssetDeepDiveView({
 
   // Snowball calculations
   const snowballInfo = useMemo(() => {
-    if (repData) {
+    const dividendPerShare = annualDividend / (asset?.paymentMonths?.length || 4 || 1);
+    const req = dividendPerShare > 0 ? Math.ceil(livePrice / dividendPerShare) : (repData?.snowballReqQty ?? 100);
+    if (repData && locale === "ptBR") {
       return {
         reqQty: repData.snowballReqQty,
         text: repData.snowballText,
       };
     }
-    const dividendPerShare = annualDividend / (asset?.paymentMonths?.length || 4 || 1);
-    const req = dividendPerShare > 0 ? Math.ceil(livePrice / dividendPerShare) : 100;
     return {
       reqQty: req,
       text: t.deepDive?.snowballText?.replace("{{qty}}", String(req)) ||
-        `A cada ciclo, ${req} cotas geram proventos suficientes para adquirir 1 nova cota automaticamente.`,
+        (locale === "en"
+          ? `Every cycle, ${req} shares generate enough dividends to automatically purchase 1 new share.`
+          : locale === "es"
+            ? `En cada ciclo, ${req} cuotas generan dividendos suficientes para adquirir 1 nueva cuota automáticamente.`
+            : `A cada ciclo, ${req} cotas geram proventos suficientes para adquirir 1 nova cota automaticamente.`),
     };
-  }, [repData, annualDividend, asset, livePrice, t]);
+  }, [repData, locale, annualDividend, asset, livePrice, t]);
 
   // Save consensus / target yield to user settings
   async function handleApplyConsensus(assumptions?: { bazinYield: number; kDiscount: number; gGrowth: number }) {
@@ -453,7 +468,10 @@ export function AssetDeepDiveView({
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
-                {repData?.classLabel ?? asset?.type ?? "Ações"}
+                {(() => {
+                  const assetType = asset?.type ?? (repData?.classType as AssetType) ?? "STOCK_BR";
+                  return t.types?.[assetType] ?? (locale === "ptBR" ? repData?.classLabel : undefined) ?? assetType;
+                })()}
               </span>
               {currency === "USD" && (
                 <span className="inline-flex items-center rounded-full bg-accent-gold/15 text-accent-gold px-2 py-0.5 text-[11px] font-semibold">
@@ -464,7 +482,7 @@ export function AssetDeepDiveView({
                 <span className="text-xs text-muted-foreground">
                   {t.deepDive?.custodyAt || "Custodiado em:"}{" "}
                   <strong className="text-foreground font-medium">
-                    {portfolioHolding.broker || (currency === "USD" ? "Avenue / Schwab" : "Corretora")}
+                    {portfolioHolding.broker || (currency === "USD" ? "Avenue / Schwab" : (locale === "en" ? "Broker" : "Corretora"))}
                   </strong>
                 </span>
               ) : repData?.broker ? (
@@ -483,7 +501,7 @@ export function AssetDeepDiveView({
               </span>
             </h2>
             <div className="text-sm text-muted-foreground mt-0.5">
-              {asset?.sector || repData?.sector || "Segmento de Renda & Valor"}
+              {asset?.sector || (locale === "ptBR" ? repData?.sector : undefined) || (locale === "en" ? "Income & Value Segment" : locale === "es" ? "Segmento de Renta & Valor" : "Segmento de Renda & Valor")}
             </div>
           </div>
 
@@ -557,8 +575,8 @@ export function AssetDeepDiveView({
               {portfolioHolding ? (
                 <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded">
                   {custodyWeightPct != null && Number.isFinite(custodyWeightPct)
-                    ? `${custodyWeightPct.toFixed(1)}% da carteira`
-                    : "Em Carteira"}
+                    ? `${custodyWeightPct.toFixed(1)}% ${locale === "en" ? "of portfolio" : locale === "es" ? "de la cartera" : "da carteira"}`
+                    : (locale === "en" ? "In Portfolio" : locale === "es" ? "En Cartera" : "Em Carteira")}
                 </span>
               ) : (
                 <span className="text-xs bg-muted/60 text-muted-foreground px-2 py-0.5 rounded">
@@ -644,8 +662,8 @@ export function AssetDeepDiveView({
               {t.deepDive?.yieldOnCost || "Yield on Cost (YoC) Real"}:{" "}
               <strong className="text-success font-semibold">
                 {custodyYoC != null && Number.isFinite(custodyYoC)
-                  ? `${custodyYoC.toFixed(1)}% a.a.`
-                  : repData?.dyProj ?? "12,2% a.a."}
+                  ? `${custodyYoC.toFixed(1)}% ${locale === "en" ? "p.a." : "a.a."}`
+                  : (repData && locale === "ptBR" ? repData.dyProj : (locale === "en" ? "12.2% p.a." : "12,2% a.a."))}
               </strong>
             </span>
             <span className="text-muted-foreground">
@@ -693,8 +711,9 @@ export function AssetDeepDiveView({
                   {t.deepDive?.projectedDy || "DY Projetado (12M)"}
                 </div>
                 <div className="text-lg font-bold text-success font-display mt-0.5">
-                  {repData?.dyProj ||
-                    (livePrice > 0 ? `${((annualDividend / livePrice) * 100).toFixed(1)}% a.a.` : "9.8% a.a.")}
+                  {repData && locale === "ptBR"
+                    ? repData.dyProj
+                    : (livePrice > 0 ? `${((annualDividend / livePrice) * 100).toFixed(1)}% ${locale === "en" ? "p.a." : "a.a."}` : (locale === "en" ? "9.8% p.a." : "9.8% a.a."))}
                 </div>
               </div>
 
@@ -703,7 +722,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.paymentFrequency || "Frequência"}
                 </div>
                 <div className="text-lg font-bold text-foreground mt-0.5">
-                  {repData?.payFreq || "Trimestral"}
+                  {repData && locale === "ptBR" ? repData.payFreq : (locale === "en" ? "Quarterly" : "Trimestral")}
                 </div>
               </div>
 
@@ -713,8 +732,8 @@ export function AssetDeepDiveView({
                 </div>
                 <div className="text-lg font-bold text-accent-text font-display mt-0.5">
                   {asset?.exDividendDate
-                    ? formatDate(asset.exDividendDate, locale) || repData?.nextCom || "—"
-                    : repData?.nextCom || "18/SET/2026"}
+                    ? formatDate(asset.exDividendDate, locale) || (repData && locale === "ptBR" ? repData.nextCom : "—")
+                    : (repData && locale === "ptBR" ? repData.nextCom : "—")}
                 </div>
               </div>
 
@@ -723,7 +742,12 @@ export function AssetDeepDiveView({
                   {t.deepDive?.nextPayment || "Data Pagto & Valor"}
                 </div>
                 <div className="text-sm font-bold text-foreground font-display mt-1">
-                  {repData?.nextPay || "—"} • {repData?.nextVal || (annualDividend > 0 ? `${currency === "USD" ? "US$ " : "R$ "}${(annualDividend / 4).toFixed(2)} / ${currency === "USD" ? "share" : "ação"}` : (currency === "USD" ? "US$ — / share" : "R$ — / ação"))}
+                  {(() => {
+                    const shareUnit = currency === "USD" ? (locale === "en" ? "share" : locale === "es" ? "acción" : "ação") : (locale === "en" ? "share" : locale === "es" ? "cuota" : "cota");
+                    const nextPayText = repData && locale === "ptBR" ? repData.nextPay : "—";
+                    const nextValText = repData && locale === "ptBR" ? repData.nextVal : (annualDividend > 0 ? `${currency === "USD" ? "US$ " : "R$ "}${(annualDividend / 4).toFixed(2)} / ${shareUnit}` : (currency === "USD" ? `US$ — / ${shareUnit}` : `R$ — / ${shareUnit}`));
+                    return `${nextPayText || "—"} • ${nextValText}`;
+                  })()}
                 </div>
               </div>
             </div>
@@ -778,7 +802,7 @@ export function AssetDeepDiveView({
             consensus: tetoConsensus,
             methodDetails: {
               bazin: {
-                formula: currency === "USD" ? `DPA / ${bazinYield.toFixed(1)}%` : "DPA / 6%",
+                formula: currency === "USD" ? `DPS / ${bazinYield.toFixed(1)}%` : `DPA / ${bazinYield.toFixed(1)}%`,
                 yieldTarget: bazinYield ?? (currency === "USD" ? 3.5 : 6),
                 isNetJcp: false,
                 source:
@@ -792,19 +816,19 @@ export function AssetDeepDiveView({
               gordon: {
                 formula: "D1 / (k - g)",
                 rate: kDiscount ?? (currency === "USD" ? 8.5 : 11),
-                growth: gGrowth ?? 5,
-                source: "Consenso Fuente",
+                growth: gGrowth ?? (currency === "USD" ? 2.5 : 5),
+                source: currency === "USD" || locale === "en" ? "Fuente DDM" : "Consenso Fuente",
                 date: "2026",
               },
               graham: {
-                formula: "√(22,5 × LPA × VPA)",
+                formula: currency === "USD" || locale === "en" ? "√(22.5 × EPS × BVPS)" : "√(22,5 × LPA × VPA)",
                 margin: 0,
                 source: currency === "USD" ? t.deepDive.grahamSourceUs : t.deepDive.grahamSourceBr,
                 date: "2026",
               },
               lynch: {
-                formula: "P/L = Crescimento + DY",
-                growth: 10,
+                formula: currency === "USD" || locale === "en" ? "P/E = Growth + DY" : "P/L = Crescimento + DY",
+                growth: gGrowth ?? (currency === "USD" ? 2.5 : 5),
                 dividendYield: bazinYield ?? (currency === "USD" ? 3.5 : 6),
                 source: "Peter Lynch",
                 date: "2026",

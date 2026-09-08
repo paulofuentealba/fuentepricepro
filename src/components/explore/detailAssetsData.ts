@@ -456,9 +456,96 @@ export function getDynamicClassMetrics(
   type: AssetType,
   metrics?: any,
   currency: Currency = "BRL",
+  locale: string = "ptBR",
+  _t?: any,
 ): { badge: string; title: string; items: ClassMetricItem[] } {
+  const isEn = locale === "en";
+  const isEs = locale === "es";
+
   switch (type) {
     case "FII":
+      if (isEn) {
+        return {
+          badge: "BRAZIL REAL ESTATE METRICS (FII)",
+          title: "Real Estate Portfolio Efficiency",
+          items: [
+            {
+              label: "P/NAV",
+              val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "1.00",
+              desc: "Price to Net Asset Value of underlying properties",
+            },
+            {
+              label: "NAV PER SHARE",
+              val: metrics?.bvps ? `R$ ${metrics.bvps.toFixed(2)}` : "Book Value",
+              desc: "Accounting NAV evaluated by certified appraisal reports",
+            },
+            {
+              label: "PHYSICAL VACANCY",
+              val: metrics?.vacancy != null ? `${(metrics.vacancy * 100).toFixed(1)}%` : "Low (<6%)",
+              desc: "Percentage of unleased gross leasable area",
+            },
+            {
+              label: "AVG CAP RATE",
+              val: metrics?.capRate != null ? `${(metrics.capRate * 100).toFixed(1)}%` : "8.5% p.a.",
+              desc: "Operating net rental yield over portfolio value",
+            },
+            {
+              label: "P/FFO",
+              val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "10.5x",
+              desc: "Price to operating cash generation (FFO)",
+            },
+            {
+              label: "DIVIDEND YIELD",
+              val:
+                metrics?.currentDy != null
+                  ? `${(metrics.currentDy * 100).toFixed(1)}%`
+                  : "9.2% p.a.",
+              desc: "Tax-free trailing 12-month dividend yield",
+            },
+          ],
+        };
+      }
+      if (isEs) {
+        return {
+          badge: "MÉTRICAS INMOBILIARIAS (LADRILLO / PAPEL)",
+          title: "Eficiencia de la Cartera Inmobiliaria",
+          items: [
+            {
+              label: "P/VC",
+              val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "1.00",
+              desc: "Relación sobre valor patrimonial de los inmuebles",
+            },
+            {
+              label: "VC POR CUOTA",
+              val: metrics?.bvps ? `R$ ${metrics.bvps.toFixed(2)}` : "Patrimonial",
+              desc: "Valor contable evaluado en tasaciones periciales",
+            },
+            {
+              label: "VACANCIA FÍSICA",
+              val: metrics?.vacancy != null ? `${(metrics.vacancy * 100).toFixed(1)}%` : "Baja (<6%)",
+              desc: "Porcentaje de área bruta alquilable no arrendada",
+            },
+            {
+              label: "CAP RATE MEDIO",
+              val: metrics?.capRate != null ? `${(metrics.capRate * 100).toFixed(1)}%` : "8.5% a.a.",
+              desc: "Rendimiento operativo sobre valor patrimonial",
+            },
+            {
+              label: "P/FFO",
+              val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "10.5x",
+              desc: "Precio sobre generación de caja operativa",
+            },
+            {
+              label: "DIVIDEND YIELD",
+              val:
+                metrics?.currentDy != null
+                  ? `${(metrics.currentDy * 100).toFixed(1)}%`
+                  : "9.2% a.a.",
+              desc: "Rendimiento de dividendos en los últimos 12 meses",
+            },
+          ],
+        };
+      }
       return {
         badge: "MÉTRICAS IMOBILIÁRIAS (TIJOLO / PAPEL)",
         title: "Eficiência do Portfólio Imobiliário",
@@ -500,6 +587,34 @@ export function getDynamicClassMetrics(
       };
 
     case "FIAGRO":
+      if (isEn) {
+        return {
+          badge: "AGRIBUSINESS CREDIT METRICS",
+          title: "Rural Receivables Structure (CRA)",
+          items: [
+            { label: "P/NAV", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "0.98", desc: "Discount to rural credit portfolio value" },
+            { label: "NAV PER SHARE", val: metrics?.bvps ? `R$ ${metrics.bvps.toFixed(2)}` : "Book Value", desc: "Marked-to-market portfolio value per unit" },
+            { label: "AVG SPREAD", val: "CDI + 3.8%", desc: "Average spread over Brazilian CDI base rate" },
+            { label: "COLLATERAL LTV", val: "145% LTV", desc: "Fiduciary lien over agricultural lands and harvests" },
+            { label: "DEFAULT RATE", val: "0.0%", desc: "Payment track record with zero critical default" },
+            { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "13.2% p.a.", desc: "Monthly tax-exempt distributed cash yield" },
+          ],
+        };
+      }
+      if (isEs) {
+        return {
+          badge: "MÉTRICAS DE CRÉDITO DEL AGRO",
+          title: "Estructura de Créditos Rurales (CRA)",
+          items: [
+            { label: "P/VC", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "0.98", desc: "Descuento sobre la cartera de crédito rural" },
+            { label: "VC POR CUOTA", val: metrics?.bvps ? `R$ ${metrics.bvps.toFixed(2)}` : "Patrimonial", desc: "Valor de la cartera valorado a mercado" },
+            { label: "TASA MEDIA", val: "CDI + 3.8%", desc: "Diferencial medio sobre la tasa básica de interés" },
+            { label: "GARANTÍAS REALES", val: "145% LTV", desc: "Garantía fiduciaria de tierras y cosechas" },
+            { label: "MOROSIDAD", val: "0.0%", desc: "Historial de pagos sin atrasos críticos" },
+            { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "13.2% a.a.", desc: "Rendimiento mensual exento de IRPF" },
+          ],
+        };
+      }
       return {
         badge: "MÉTRICAS DE CRÉDITO DO AGRO",
         title: "Estrutura dos Recebíveis Rurais (CRA)",
@@ -514,6 +629,34 @@ export function getDynamicClassMetrics(
       };
 
     case "FII_INFRA":
+      if (isEn) {
+        return {
+          badge: "INCENTIVIZED INFRA CREDIT METRICS",
+          title: "Quality of Incentivized Debentures",
+          items: [
+            { label: "P/NAV", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "1.00", desc: "Trading close to net asset value" },
+            { label: "PORTFOLIO RATE", val: "IPCA + 7.4%", desc: "Real inflation-adjusted coupon spread above IPCA" },
+            { label: "AVG RATING", val: "AA+ / AAA", desc: "Investment grade rating by global agencies" },
+            { label: "DURATION", val: "4.8 years", desc: "Weighted average maturity of financed projects" },
+            { label: "TAX STATUS", val: "Super Tax-Exempt", desc: "0% income tax on monthly yield and capital gains" },
+            { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "12.8% p.a.", desc: "Monthly income free of personal taxation" },
+          ],
+        };
+      }
+      if (isEs) {
+        return {
+          badge: "MÉTRICAS DE CRÉDITO PRIVADO INCENTIVADO",
+          title: "Calidad de Obligaciones Incentivadas",
+          items: [
+            { label: "P/VC", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "1.00", desc: "Negociando cerca del valor patrimonial" },
+            { label: "TASA CARTERA", val: "IPCA + 7.4%", desc: "Cupón real medio por encima de la inflación" },
+            { label: "RATING MEDIO", val: "AA+ / AAA", desc: "Grado de inversión otorgado por agencias de calificación" },
+            { label: "DURACIÓN", val: "4.8 años", desc: "Maduración media de los proyectos financiados" },
+            { label: "EXENCIÓN FISCAL", val: "Súper Exención", desc: "0% IRPF en rendimientos y ganancias de capital" },
+            { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "12.8% a.a.", desc: "Renta mensual libre de tributación" },
+          ],
+        };
+      }
       return {
         badge: "MÉTRICAS DE CRÉDITO PRIVADO INCENTIVADO",
         title: "Qualidade das Debêntures Incentivadas",
@@ -528,6 +671,34 @@ export function getDynamicClassMetrics(
       };
 
     case "REIT":
+      if (isEn) {
+        return {
+          badge: "US REAL ESTATE METRICS",
+          title: "REIT Operational Cash Flow (FFO)",
+          items: [
+            { label: "P/FFO", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "13.5x", desc: "Price to Funds From Operations" },
+            { label: "FFO PAYOUT", val: metrics?.payoutRatio != null ? `${(metrics.payoutRatio * 100).toFixed(0)}%` : "75%", desc: "Operational cash-flow commitment to dividends" },
+            { label: "OCCUPANCY", val: metrics?.vacancy != null ? `${((1 - metrics.vacancy) * 100).toFixed(1)}%` : "98.2%", desc: "Stable property occupancy rate" },
+            { label: "CAP RATE", val: metrics?.capRate != null ? `${(metrics.capRate * 100).toFixed(1)}%` : "7.5%", desc: "Operational real estate return rate" },
+            { label: "WALT", val: "9.5 Years", desc: "Weighted average lease term of tenant contracts" },
+            { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "4.2%", desc: "Dividend yield distributed in USD" },
+          ],
+        };
+      }
+      if (isEs) {
+        return {
+          badge: "MÉTRICAS DE REAL ESTATE EE. UU.",
+          title: "Flujo Operativo de REITs (FFO)",
+          items: [
+            { label: "P/FFO", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "13.5x", desc: "Precio sobre Funds From Operations" },
+            { label: "FFO PAYOUT", val: metrics?.payoutRatio != null ? `${(metrics.payoutRatio * 100).toFixed(0)}%` : "75%", desc: "Compromiso del flujo de caja con dividendos" },
+            { label: "OCUPACIÓN", val: metrics?.vacancy != null ? `${((1 - metrics.vacancy) * 100).toFixed(1)}%` : "98.2%", desc: "Tasa de ocupación estable de los inmuebles" },
+            { label: "CAP RATE", val: metrics?.capRate != null ? `${(metrics.capRate * 100).toFixed(1)}%` : "7.5%", desc: "Tasa operativa de rendimiento inmobiliario" },
+            { label: "WALT", val: "9.5 Años", desc: "Plazo medio ponderado de los contratos de alquiler" },
+            { label: "DIVIDEND YIELD", val: metrics?.currentDy != null ? `${(metrics.currentDy * 100).toFixed(1)}%` : "4.2%", desc: "Rendimiento distribuido en dólares" },
+          ],
+        };
+      }
       return {
         badge: "MÉTRICAS DE REAL ESTATE AMERICANO",
         title: "Fluxo Operacional de REITs (FFO)",
@@ -543,6 +714,34 @@ export function getDynamicClassMetrics(
 
     case "ETF": {
       const aumPrefix = currency === "USD" ? "US$ " : "R$ ";
+      if (isEn) {
+        return {
+          badge: "INDEX FUND METRICS",
+          title: "Tracking Efficiency & Costs",
+          items: [
+            { label: "EXPENSE RATIO", val: metrics?.expenseRatio != null ? `${(metrics.expenseRatio * 100).toFixed(2)}% p.a.` : "0.20% p.a.", desc: "Fund management and custody expense ratio" },
+            { label: "TRACKING ERROR", val: metrics?.trackingError != null ? `${(metrics.trackingError * 100).toFixed(2)}%` : "0.05%", desc: "Historical tracking difference against benchmark" },
+            { label: "BASKET P/E", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "18.5x", desc: "Weighted price-to-earnings multiple of index holdings" },
+            { label: "AUM (ASSETS)", val: metrics?.aum ? `${aumPrefix}${(metrics.aum / 1e9).toFixed(1)}B` : `> ${aumPrefix}5B`, desc: "Total assets under fund management" },
+            { label: "AVG ROE", val: metrics?.roe != null ? `${(metrics.roe * 100).toFixed(1)}%` : "20%", desc: "Weighted return on equity of portfolio companies" },
+            { label: "POLICY", val: "Tax Efficiency", desc: "Periodic cash distributions or automatic reinvestment" },
+          ],
+        };
+      }
+      if (isEs) {
+        return {
+          badge: "MÉTRICAS DEL FONDO DE ÍNDICE",
+          title: "Eficiencia de Réplica & Costes",
+          items: [
+            { label: "COMISIÓN GESTIÓN", val: metrics?.expenseRatio != null ? `${(metrics.expenseRatio * 100).toFixed(2)}% a.a.` : "0.20% a.a.", desc: "Comisión de gestión y custodia del fondo" },
+            { label: "TRACKING ERROR", val: metrics?.trackingError != null ? `${(metrics.trackingError * 100).toFixed(2)}%` : "0.05%", desc: "Desviación histórica respecto al índice de referencia" },
+            { label: "P/U DE LA CESTA", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "18.5x", desc: "Múltiplo ponderado de las empresas del índice" },
+            { label: "AUM (PATRIMONIO)", val: metrics?.aum ? `${aumPrefix}${(metrics.aum / 1e9).toFixed(1)}B` : `> ${aumPrefix}5B`, desc: "Volumen total bajo gestión del fondo" },
+            { label: "ROE MEDIO", val: metrics?.roe != null ? `${(metrics.roe * 100).toFixed(1)}%` : "20%", desc: "Rentabilidad sobre patrimonio de la cartera" },
+            { label: "POLÍTICA", val: "Eficiencia Fiscal", desc: "Distribución periódica o reinversión automática" },
+          ],
+        };
+      }
       return {
         badge: "MÉTRICAS DO FUNDO DE ÍNDICE",
         title: "Eficiência de Réplica & Custos",
@@ -559,6 +758,34 @@ export function getDynamicClassMetrics(
 
     default: { // STOCK_BR and STOCK_US
       const epsPrefix = currency === "USD" ? "US$ " : "R$ ";
+      if (isEn) {
+        return {
+          badge: currency === "USD" ? "US CORPORATE METRICS" : "CORPORATE FUNDAMENTALS & DIVIDENDS",
+          title: currency === "USD" ? "Profitability, Multiples & Global Moat" : "Profitability, Multiples & Moat",
+          items: [
+            { label: "P/E", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "-", desc: "Price to Earnings per share (EPS)" },
+            { label: "P/B", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "-", desc: "Price to Book value per share (BVPS)" },
+            { label: "ROE", val: metrics?.roe != null ? `${(metrics.roe * 100).toFixed(1)}%` : "-", desc: "Return on Equity (net income over equity)" },
+            { label: "PAYOUT", val: metrics?.payoutRatio != null ? `${(metrics.payoutRatio * 100).toFixed(0)}%` : "-", desc: "Percentage of net income distributed as dividends" },
+            { label: "EPS", val: metrics?.eps != null ? `${epsPrefix}${metrics.eps.toFixed(2)}` : "-", desc: "Net accounting profit per share" },
+            { label: "DIVIDEND CAGR", val: metrics?.dividendCagr5y != null ? `${(metrics.dividendCagr5y * 100).toFixed(1)}%` : "Consistent", desc: "Compound annual dividend growth rate" },
+          ],
+        };
+      }
+      if (isEs) {
+        return {
+          badge: currency === "USD" ? "MÉTRICAS CORPORATIVAS EE. UU." : "FUNDAMENTOS CORPORATIVOS & DIVIDENDOS",
+          title: currency === "USD" ? "Rentabilidad, Múltiplos & Moat Global" : "Rentabilidad, Múltiplos & Moat",
+          items: [
+            { label: "P/U", val: metrics?.peRatio ? `${metrics.peRatio.toFixed(1)}x` : "-", desc: "Precio sobre Beneficio por acción (BPA)" },
+            { label: "P/VC", val: metrics?.pbRatio ? `${metrics.pbRatio.toFixed(2)}` : "-", desc: "Precio sobre Valor Contable (VPC)" },
+            { label: "ROE", val: metrics?.roe != null ? `${(metrics.roe * 100).toFixed(1)}%` : "-", desc: "Retorno sobre el patrimonio neto" },
+            { label: "PAYOUT", val: metrics?.payoutRatio != null ? `${(metrics.payoutRatio * 100).toFixed(0)}%` : "-", desc: "Porcentaje del beneficio distribuido como dividendo" },
+            { label: "BPA (EPS)", val: metrics?.eps != null ? `${epsPrefix}${metrics.eps.toFixed(2)}` : "-", desc: "Beneficio neto contable por acción" },
+            { label: "TCAC DIVIDENDOS", val: metrics?.dividendCagr5y != null ? `${(metrics.dividendCagr5y * 100).toFixed(1)}%` : "Consistente", desc: "Tasa de crecimiento anual compuesta de dividendos" },
+          ],
+        };
+      }
       return {
         badge: currency === "USD" ? "MÉTRICAS CORPORATIVAS EUA" : "FUNDAMENTOS CORPORATIVOS & DIVIDENDOS",
         title: currency === "USD" ? "Rentabilidade, Múltiplos & Moat Global" : "Rentabilidade, Múltiplos & Moat",

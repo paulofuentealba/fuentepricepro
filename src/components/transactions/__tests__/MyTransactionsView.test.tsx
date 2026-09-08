@@ -14,7 +14,7 @@ let mockMarketScope = {
   currency: "BRL" as Currency,
   isUS: false,
   isUSNative: false,
-  taxJurisdiction: "BR" as const,
+  taxJurisdiction: "BR" as "BR" | "US",
 };
 
 vi.mock("@/lib/useMarketScope", () => ({

@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { formatCurrency } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n-provider";
 import type { Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
-import { Sliders, HelpCircle, ShieldCheck } from "lucide-react";
+import { Sliders, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { MethodDetailSheet } from "@/components/ceiling/watchlist/MethodDetailSheet";
 
 export type MethodType = "gordon" | "bazin" | "graham" | "lynch" | "consensus";
@@ -48,18 +49,40 @@ export function ValuationConsensusMatrix({
 }: ValuationConsensusMatrixProps) {
   const { locale, t } = useI18n();
   const [mobileMethodOpen, setMobileMethodOpen] = useState<MethodType | null>(null);
+  const isUsdAsset = currency === "USD";
 
   // Sliders state for interactive simulation
   const [bazinYield, setBazinYield] = useState<number>(
-    valuation.methodDetails?.bazin?.yieldTarget ?? 6.0
+    valuation.methodDetails?.bazin?.yieldTarget ?? (currency === "USD" ? 3.5 : 6.0)
   );
   const [kDiscount, setKDiscount] = useState<number>(
-    valuation.methodDetails?.gordon?.rate ?? 11.0
+    valuation.methodDetails?.gordon?.rate ?? (currency === "USD" ? 8.5 : 11.0)
   );
   const [gGrowth, setGGrowth] = useState<number>(
-    valuation.methodDetails?.gordon?.growth ?? 5.0
+    valuation.methodDetails?.gordon?.growth ?? (currency === "USD" ? 2.5 : 5.0)
   );
   const [isApplying, setIsApplying] = useState(false);
+
+  // Sync sliders state if ticker, currency or methodDetails change
+  useEffect(() => {
+    if (valuation.methodDetails?.bazin?.yieldTarget != null) {
+      setBazinYield(valuation.methodDetails.bazin.yieldTarget);
+    } else {
+      setBazinYield(currency === "USD" ? 3.5 : 6.0);
+    }
+
+    if (valuation.methodDetails?.gordon?.rate != null) {
+      setKDiscount(valuation.methodDetails.gordon.rate);
+    } else {
+      setKDiscount(currency === "USD" ? 8.5 : 11.0);
+    }
+
+    if (valuation.methodDetails?.gordon?.growth != null) {
+      setGGrowth(valuation.methodDetails.gordon.growth);
+    } else {
+      setGGrowth(currency === "USD" ? 2.5 : 5.0);
+    }
+  }, [currency, ticker, valuation.methodDetails?.bazin?.yieldTarget, valuation.methodDetails?.gordon?.rate, valuation.methodDetails?.gordon?.growth]);
 
   // Recalculate dynamic values based on sliders
   const dynamicBazin = useMemo(() => {
@@ -193,10 +216,15 @@ export function ValuationConsensusMatrix({
               {t.deepDive?.methodConvergence || "Convergência"}
             </div>
             <span className="inline-flex items-center rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success ring-1 ring-success/30 mt-1">
-              {approvalsCount} de {activeMethods.length || 4} Aprovam
+              {(t.deepDive?.approvalsCount || "{{count}} de 4 Aprovam")
+                .replace("{{count}}", String(approvalsCount))
+                .replace("4", String(activeMethods.length || 4))
+                .replace("{{total}}", String(activeMethods.length || 4))}
             </span>
             <div className="text-[10px] text-muted-foreground mt-1">
-              {approvalsCount >= 3 ? "Convergência Alta • Risco Baixo" : "Convergência Mista • Calibrar"}
+              {approvalsCount >= 3
+                ? (t.deepDive?.highConvergence || "Convergência Alta • Risco Baixo")
+                : (t.deepDive?.mixedConvergence || "Convergência Mista • Calibrar")}
             </div>
           </div>
         </div>
@@ -228,14 +256,26 @@ export function ValuationConsensusMatrix({
         {/* BAZIN */}
         <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
-            <button
-              type="button"
-              onClick={() => setMobileMethodOpen("bazin")}
-              className="font-semibold text-foreground flex items-center gap-1 hover:text-primary transition-colors cursor-pointer text-left"
-            >
-              <span>1. Décio Bazin</span>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setMobileMethodOpen("bazin")}
+                className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer text-left"
+              >
+                1. Décio Bazin
+              </button>
+              <InfoTooltip
+                content={
+                  <div className="space-y-1 text-left">
+                    <div className="font-semibold text-foreground">{t.valuationAssumptions.bazinTooltipTitle}</div>
+                    <div className="text-muted-foreground text-[11px]">{t.valuationAssumptions.bazinTooltipFormula}</div>
+                    <div className="text-[11px] text-foreground/90">
+                      {t.valuationAssumptions.bazinTooltipYieldTarget.replace("{{yieldTarget}}", bazinYield.toFixed(1))}
+                    </div>
+                  </div>
+                }
+              />
+            </div>
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-bold",
@@ -253,21 +293,33 @@ export function ValuationConsensusMatrix({
             {dynamicBazin != null ? formatCurrency(dynamicBazin, currency, locale) : "N/A"}
           </div>
           <div className="text-[11px] text-muted-foreground leading-tight">
-            Yield mín. calibrado em {bazinYield.toFixed(1)}% com DPA histórico
+            {(t.deepDive?.bazinCardSub || "Yield mín. calibrado em {{yield}}% com DPA histórico").replace("{{yield}}", bazinYield.toFixed(1))}
           </div>
         </div>
 
         {/* GRAHAM */}
         <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
-            <button
-              type="button"
-              onClick={() => setMobileMethodOpen("graham")}
-              className="font-semibold text-foreground flex items-center gap-1 hover:text-primary transition-colors cursor-pointer text-left"
-            >
-              <span>2. Benjamin Graham</span>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setMobileMethodOpen("graham")}
+                className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer text-left"
+              >
+                2. Benjamin Graham
+              </button>
+              <InfoTooltip
+                content={
+                  <div className="space-y-1 text-left">
+                    <div className="font-semibold text-foreground">{t.valuationAssumptions.grahamTooltipTitle}</div>
+                    <div className="text-muted-foreground text-[11px]">{t.valuationAssumptions.grahamTooltipFormula}</div>
+                    <div className="text-[11px] text-foreground/90">
+                      {t.valuationAssumptions.grahamTooltipMargin.replace("{{margin}}", "20")}
+                    </div>
+                  </div>
+                }
+              />
+            </div>
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-bold",
@@ -285,21 +337,34 @@ export function ValuationConsensusMatrix({
             {dynamicGraham != null ? formatCurrency(dynamicGraham, currency, locale) : "N/A"}
           </div>
           <div className="text-[11px] text-muted-foreground leading-tight">
-            Fórmula clássica: √(22,5 × LPA × VPA) com margem de segurança
+            {t.deepDive?.grahamCardSub || (currency === "USD" || locale === "en" ? "Classic formula: √(22.5 × EPS × BVPS) with margin of safety" : "Fórmula clássica: √(22,5 × LPA × VPA) com margem de segurança")}
           </div>
         </div>
 
         {/* GORDON */}
         <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
-            <button
-              type="button"
-              onClick={() => setMobileMethodOpen("gordon")}
-              className="font-semibold text-foreground flex items-center gap-1 hover:text-primary transition-colors cursor-pointer text-left"
-            >
-              <span>3. Gordon (DDM)</span>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setMobileMethodOpen("gordon")}
+                className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer text-left"
+              >
+                3. Gordon (DDM)
+              </button>
+              <InfoTooltip
+                content={
+                  <div className="space-y-1 text-left">
+                    <div className="font-semibold text-foreground">{t.valuationAssumptions.gordonTooltipTitle}</div>
+                    <div className="text-muted-foreground text-[11px]">{t.valuationAssumptions.gordonTooltipFormula}</div>
+                    <div className="text-[11px] text-foreground/90">
+                      {t.valuationAssumptions.gordonTooltipRate.replace("{{rate}}", kDiscount.toFixed(1))} •{" "}
+                      {t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", gGrowth.toFixed(1))}
+                    </div>
+                  </div>
+                }
+              />
+            </div>
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-bold",
@@ -317,21 +382,35 @@ export function ValuationConsensusMatrix({
             {dynamicGordon != null ? formatCurrency(dynamicGordon, currency, locale) : "N/A"}
           </div>
           <div className="text-[11px] text-muted-foreground leading-tight">
-            Modelo de Desconto: D1 / (k: {kDiscount.toFixed(1)}% - g: {gGrowth.toFixed(1)}%)
+            {(t.deepDive?.gordonCardSub || "Modelo de Desconto: D1 / (k: {{k}}% - g: {{g}}%)")
+              .replace("{{k}}", kDiscount.toFixed(1))
+              .replace("{{g}}", gGrowth.toFixed(1))}
           </div>
         </div>
 
         {/* PETER LYNCH */}
         <div className="rounded-lg border border-border/70 bg-card/90 dark:bg-[#0f1f1a] dark:border-[#1e382d] p-3.5 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1">
-            <button
-              type="button"
-              onClick={() => setMobileMethodOpen("lynch")}
-              className="font-semibold text-foreground flex items-center gap-1 hover:text-primary transition-colors cursor-pointer text-left"
-            >
-              <span>4. Peter Lynch (PEG)</span>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setMobileMethodOpen("lynch")}
+                className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer text-left"
+              >
+                4. Peter Lynch (PEG)
+              </button>
+              <InfoTooltip
+                content={
+                  <div className="space-y-1 text-left">
+                    <div className="font-semibold text-foreground">{t.valuationAssumptions.lynchTooltipTitle}</div>
+                    <div className="text-muted-foreground text-[11px]">{t.valuationAssumptions.lynchTooltipFormula}</div>
+                    <div className="text-[11px] text-foreground/90">
+                      {t.valuationAssumptions.lynchTooltipGrowth.replace("{{growth}}", gGrowth.toFixed(1))}
+                    </div>
+                  </div>
+                }
+              />
+            </div>
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-bold",
@@ -349,7 +428,7 @@ export function ValuationConsensusMatrix({
             {dynamicLynch != null ? formatCurrency(dynamicLynch, currency, locale) : "N/A"}
           </div>
           <div className="text-[11px] text-muted-foreground leading-tight">
-            Preço justo baseado na paridade PEG Ratio com crescimento e DY
+            {t.deepDive?.lynchCardSub || "Preço justo baseado na paridade PEG Ratio com crescimento e DY"}
           </div>
         </div>
       </div>
@@ -362,7 +441,9 @@ export function ValuationConsensusMatrix({
               <Sliders className="h-3.5 w-3.5 text-primary" />
               {t.deepDive?.assumptionsTitle || "Ajuste de Premissas Globais (Tempo Real)"}
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground">Simulação instantânea</span>
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {t.deepDive?.instantSimulation || "Simulação instantânea"}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -381,17 +462,19 @@ export function ValuationConsensusMatrix({
               </div>
               <input
                 type="range"
-                min="4.0"
-                max="12.0"
+                min={isUsdAsset ? "2.0" : "4.0"}
+                max={isUsdAsset ? "10.0" : "12.0"}
                 step="0.5"
                 value={bazinYield}
                 onChange={(e) => setBazinYield(parseFloat(e.target.value))}
                 className="range-slider-emerald my-1"
               />
               <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
-                <span>4.0%</span>
-                <span className="font-semibold text-foreground dark:text-success">6.0% (Padrão)</span>
-                <span>12.0%</span>
+                <span>{isUsdAsset ? "2.0%" : "4.0%"}</span>
+                <span className="font-semibold text-foreground dark:text-success">
+                  {isUsdAsset ? `3.5% ${t.deepDive?.defaultRef || "(Default)"}` : `6.0% ${t.deepDive?.defaultRef || "(Padrão)"}`}
+                </span>
+                <span>{isUsdAsset ? "10.0%" : "12.0%"}</span>
               </div>
             </div>
 
@@ -410,17 +493,19 @@ export function ValuationConsensusMatrix({
               </div>
               <input
                 type="range"
-                min="8.0"
-                max="16.0"
+                min={isUsdAsset ? "6.0" : "8.0"}
+                max={isUsdAsset ? "14.0" : "16.0"}
                 step="0.5"
                 value={kDiscount}
                 onChange={(e) => setKDiscount(parseFloat(e.target.value))}
                 className="range-slider-emerald my-1"
               />
               <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
-                <span>8.0%</span>
-                <span className="font-semibold text-foreground dark:text-success">11.0% (Selic)</span>
-                <span>16.0%</span>
+                <span>{isUsdAsset ? "6.0%" : "8.0%"}</span>
+                <span className="font-semibold text-foreground dark:text-success">
+                  {isUsdAsset ? `8.5% ${t.deepDive?.macroRateRefUs || "(Ref. 10Y/Fed)"}` : `11.0% ${t.deepDive?.macroRateRefBr || "(Selic)"}`}
+                </span>
+                <span>{isUsdAsset ? "14.0%" : "16.0%"}</span>
               </div>
             </div>
 
@@ -439,17 +524,19 @@ export function ValuationConsensusMatrix({
               </div>
               <input
                 type="range"
-                min="2.0"
-                max="8.0"
+                min={isUsdAsset ? "1.0" : "2.0"}
+                max={isUsdAsset ? "6.0" : "8.0"}
                 step="0.5"
                 value={gGrowth}
                 onChange={(e) => setGGrowth(parseFloat(e.target.value))}
                 className="range-slider-emerald my-1"
               />
               <div className="flex justify-between text-[11px] font-medium text-muted-foreground dark:text-foreground/80 mt-1 select-none">
-                <span>2.0%</span>
-                <span className="font-semibold text-foreground dark:text-success">5.0% (IPCA)</span>
-                <span>8.0%</span>
+                <span>{isUsdAsset ? "1.0%" : "2.0%"}</span>
+                <span className="font-semibold text-foreground dark:text-success">
+                  {isUsdAsset ? `2.5% ${t.deepDive?.macroInflationRefUs || "(CPI)"}` : `5.0% ${t.deepDive?.macroInflationRefBr || "(IPCA)"}`}
+                </span>
+                <span>{isUsdAsset ? "6.0%" : "8.0%"}</span>
               </div>
             </div>
           </div>
@@ -464,7 +551,7 @@ export function ValuationConsensusMatrix({
                 className="text-xs h-9 px-4 font-semibold border border-primary/40 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground dark:border-primary/50 dark:bg-primary/20 dark:text-success dark:hover:bg-primary dark:hover:text-primary-foreground shadow-sm transition-all flex items-center gap-2 cursor-pointer"
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
-                {isApplying ? "Salvando premissas..." : (t.deepDive?.applyConsensusBtn || "Aplicar Consenso ao Motor de Aportes")}
+                {isApplying ? (t.deepDive?.savingAssumptions || "Salvando premissas...") : (t.deepDive?.applyConsensusBtn || "Aplicar Consenso ao Motor de Aportes")}
               </Button>
             </div>
           )}

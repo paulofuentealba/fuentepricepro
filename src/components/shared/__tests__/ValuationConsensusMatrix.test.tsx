@@ -99,4 +99,42 @@ describe("ValuationConsensusMatrix", () => {
 
     expect(handleApply).toHaveBeenCalledTimes(1);
   });
+
+  it("renderiza benchmarks US (Ref. 10Y/Fed e CPI) em vez de Selic/IPCA para ativos em USD", () => {
+    render(
+      <TooltipProvider>
+        <ValuationConsensusMatrix
+          valuation={mockValuation}
+          livePrice={180.0}
+          currency="USD"
+          ticker="AAPL"
+          showSensitivitySliders={true}
+        />
+      </TooltipProvider>
+    );
+
+    // Should display USD macro benchmarks
+    expect(screen.getByText(/Ref\. 10Y\/Fed/i)).toBeInTheDocument();
+    expect(screen.getByText(/CPI/i)).toBeInTheDocument();
+    // Must NOT display Brazilian indices for USD asset
+    expect(screen.queryByText(/Selic/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/IPCA/i)).not.toBeInTheDocument();
+  });
+
+  it("renderiza ícones/botões de InfoTooltip para cada um dos 4 métodos", () => {
+    render(
+      <TooltipProvider>
+        <ValuationConsensusMatrix
+          valuation={mockValuation}
+          livePrice={35.0}
+          currency="BRL"
+          ticker="PETR4"
+        />
+      </TooltipProvider>
+    );
+
+    // 4 info tooltip buttons should be rendered for the 4 methods
+    const infoButtons = screen.getAllByRole("button", { name: /Informações adicionais/i });
+    expect(infoButtons.length).toBeGreaterThanOrEqual(4);
+  });
 });
