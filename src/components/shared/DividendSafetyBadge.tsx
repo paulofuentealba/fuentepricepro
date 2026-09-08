@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n-provider";
 import {
   calculateDividendSafetyScore,
   type AssetSafetyInput,
@@ -26,7 +27,9 @@ export function DividendSafetyBadge({
   showScore = true,
   className,
 }: DividendSafetyBadgeProps) {
-  const result: DividendSafetyResult = calculateDividendSafetyScore(input);
+  const { t, locale } = useI18n();
+  const s = t.dividendSafetyRadar;
+  const result: DividendSafetyResult = calculateDividendSafetyScore(input, locale);
 
   const getIcon = () => {
     switch (result.tier) {
@@ -84,7 +87,7 @@ export function DividendSafetyBadge({
           <div className="flex items-center justify-between border-b border-border/50 pb-2">
             <strong className="font-semibold text-foreground flex items-center gap-1.5">
               {getIcon()}
-              Radar de Segurança de Proventos
+              {s?.badgeTooltipTitle || (locale === "en" ? "Dividend Safety Radar" : locale === "es" ? "Radar de Seguridad de Dividendos" : "Radar de Segurança de Proventos")}
             </strong>
             <span className="font-mono font-bold text-foreground">{result.score}/100</span>
           </div>
@@ -107,7 +110,7 @@ export function DividendSafetyBadge({
             ))}
           </div>
           <div className="border-t border-border/50 pt-2 text-[10px] text-muted-foreground flex justify-between">
-            <span>Risco estatístico de corte:</span>
+            <span>{s?.cutRiskLabel || (locale === "en" ? "Statistical cut risk:" : locale === "es" ? "Riesgo estadístico de recorte:" : "Risco estatístico de corte:")}</span>
             <span className={cn("font-bold", result.cutRiskProbabilityPct > 30 ? "text-danger" : "text-success")}>
               ~{result.cutRiskProbabilityPct}%
             </span>

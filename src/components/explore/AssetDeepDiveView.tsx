@@ -15,6 +15,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ValuationConsensusMatrix } from "@/components/shared/ValuationConsensusMatrix";
 import { DividendSafetyBadge } from "@/components/shared/DividendSafetyBadge";
 import { DividendSafetyRadar } from "@/components/shared/DividendSafetyRadar";
+import type { AssetSafetyInput } from "@/lib/dividendSafety";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
 import type { SearchHit } from "@/lib/apiService.functions";
@@ -359,6 +360,203 @@ export function AssetDeepDiveView({
     }
   }
 
+  // Localized sector description
+  const sectorText = useMemo(() => {
+    if (asset?.sector) return asset.sector;
+    if (!repData?.sector) {
+      return locale === "en"
+        ? "Income & Value Segment"
+        : locale === "es"
+          ? "Segmento de Renta & Valor"
+          : "Segmento de Renda & Valor";
+    }
+    if (locale === "ptBR") return repData.sector;
+    if (currentTicker === "O") {
+      return locale === "en"
+        ? "Real Estate • Triple-Net Retail & Commercial"
+        : locale === "es"
+          ? "Bienes Raíces • Comercial & Minorista Triple-Net"
+          : repData.sector;
+    }
+    if (currentTicker === "KO") {
+      return locale === "en"
+        ? "Consumer Staples • Beverages & Global Brands"
+        : locale === "es"
+          ? "Bienes de Consumo • Bebidas & Marcas Globales"
+          : repData.sector;
+    }
+    if (currentTicker === "SCHD") {
+      return locale === "en"
+        ? "US Equity ETFs • Dividend Yield & Value Equities"
+        : locale === "es"
+          ? "ETFs de Renta Variable EE.UU. • Dividendos & Valor"
+          : repData.sector;
+    }
+    if (currentTicker === "SPYI") {
+      return locale === "en"
+        ? "US ETFs • Covered Call & Equity Income"
+        : locale === "es"
+          ? "ETFs EE.UU. • Covered Call & Renta Variable"
+          : repData.sector;
+    }
+    if (currentTicker === "BTCI") {
+      return locale === "en"
+        ? "Crypto Yield • Bitcoin Covered Call Strategy"
+        : locale === "es"
+          ? "Cripto Renta • Estrategia Covered Call Bitcoin"
+          : repData.sector;
+    }
+    if (currentTicker === "BBAS3") {
+      return locale === "en"
+        ? "Financial Sector • Multiple Banking"
+        : locale === "es"
+          ? "Sector Financiero • Bancos Múltiples"
+          : repData.sector;
+    }
+    if (currentTicker === "TAEE11") {
+      return locale === "en"
+        ? "Electric Utilities • Power Transmission"
+        : locale === "es"
+          ? "Sector Eléctrico • Transmisión de Energía"
+          : repData.sector;
+    }
+    if (currentTicker === "VALE3") {
+      return locale === "en"
+        ? "Basic Materials • Global Mining"
+        : locale === "es"
+          ? "Materiales Básicos • Minería Global"
+          : repData.sector;
+    }
+    if (currentTicker === "HGLG11") {
+      return locale === "en"
+        ? "Real Estate Funds • Logistics & Warehouses"
+        : locale === "es"
+          ? "Fondos Inmobiliarios • Logística & Galpones"
+          : repData.sector;
+    }
+    if (currentTicker === "MXRF11") {
+      return locale === "en"
+        ? "Real Estate Funds • Receivables & Mortgage (CRI)"
+        : locale === "es"
+          ? "Fondos Inmobiliarios • Papel & Crédito Hipotecario (CRI)"
+          : repData.sector;
+    }
+    if (currentTicker === "BODB11") {
+      return locale === "en"
+        ? "Fixed Income • Infrastructure Debentures (Tax-Exempt)"
+        : locale === "es"
+          ? "Renta Fija • Obligaciones de Infraestructura (Exento)"
+          : repData.sector;
+    }
+    return repData.sector;
+  }, [asset?.sector, repData?.sector, currentTicker, locale]);
+
+  // Localized payment frequency
+  const paymentFrequencyText = useMemo(() => {
+    if (repData && locale === "ptBR") return repData.payFreq;
+    if (currentTicker === "O") {
+      return locale === "en"
+        ? "Monthly (The Monthly Dividend Co.)"
+        : locale === "es"
+          ? "Mensual (The Monthly Dividend Co.)"
+          : "Mensal (The Monthly Dividend Co.)";
+    }
+    if (repData?.payFreq?.toLowerCase().startsWith("mensal")) {
+      return locale === "en" ? "Monthly" : locale === "es" ? "Mensual" : repData.payFreq;
+    }
+    if (repData?.payFreq?.toLowerCase().startsWith("trimestral")) {
+      return locale === "en" ? "Quarterly" : locale === "es" ? "Trimestral" : repData.payFreq;
+    }
+    if (repData?.payFreq?.toLowerCase().startsWith("semestral")) {
+      return locale === "en" ? "Semiannual" : locale === "es" ? "Semestral" : repData.payFreq;
+    }
+    if (repData?.payFreq?.toLowerCase().includes("8x")) {
+      return locale === "en" ? "8x per year" : locale === "es" ? "8x al año" : repData.payFreq;
+    }
+    return locale === "en" ? "Quarterly" : locale === "es" ? "Trimestral" : "Trimestral";
+  }, [repData, currentTicker, locale]);
+
+  // Localized date strings for COM and Payment
+  const nextComDateText = useMemo(() => {
+    if (asset?.exDividendDate) {
+      return formatDate(asset.exDividendDate, locale) || "—";
+    }
+    if (repData?.nextCom) {
+      if (locale === "ptBR") return repData.nextCom;
+      return repData.nextCom
+        .replace(/SET/g, "SEP")
+        .replace(/OUT/g, "OCT")
+        .replace(/DEZ/g, locale === "en" ? "DEC" : "DIC")
+        .replace(/FEV/g, "FEB")
+        .replace(/ABR/g, locale === "en" ? "APR" : "ABR")
+        .replace(/MAI/g, locale === "en" ? "MAY" : "MAY")
+        .replace(/AGO/g, locale === "en" ? "AUG" : "AGO");
+    }
+    return "—";
+  }, [asset?.exDividendDate, repData?.nextCom, locale]);
+
+  const nextPaymentDateText = useMemo(() => {
+    if (repData?.nextPay) {
+      if (locale === "ptBR") return repData.nextPay;
+      return repData.nextPay
+        .replace(/SET/g, "SEP")
+        .replace(/OUT/g, "OCT")
+        .replace(/DEZ/g, locale === "en" ? "DEC" : "DIC")
+        .replace(/FEV/g, "FEB")
+        .replace(/ABR/g, locale === "en" ? "APR" : "ABR")
+        .replace(/MAI/g, locale === "en" ? "MAY" : "MAY")
+        .replace(/AGO/g, locale === "en" ? "AUG" : "AGO");
+    }
+    return "—";
+  }, [repData?.nextPay, locale]);
+
+  const nextValFormatted = useMemo(() => {
+    const shareUnit =
+      currency === "USD"
+        ? locale === "en"
+          ? "share"
+          : locale === "es"
+            ? "acción"
+            : "ação"
+        : locale === "en"
+          ? "share"
+          : locale === "es"
+            ? "cuota"
+            : "cota";
+
+    if (repData && locale === "ptBR") return repData.nextVal;
+    if (repData?.nextVal) {
+      return currency === "USD" ? repData.nextVal.replace(",", ".") : repData.nextVal;
+    }
+    if (annualDividend > 0) {
+      return `${currency === "USD" ? "US$ " : "R$ "}${(annualDividend / 4).toFixed(2)} / ${shareUnit}`;
+    }
+    return `${currency === "USD" ? "US$ —" : "R$ —"} / ${shareUnit}`;
+  }, [repData, locale, currency, annualDividend]);
+
+  // Dividend Safety Score Input
+  const safetyInput: AssetSafetyInput = useMemo(() => {
+    const assetType = asset?.type ?? (repData?.classType as AssetType) ?? "STOCK_BR";
+    const isReit = assetType === "REIT" || currentTicker === "O";
+    return {
+      type: assetType,
+      currency,
+      locale,
+      payoutRatio:
+        (asset as any)?.payoutRatio ??
+        (currentTicker === "O" ? 0.74 : asset?.metrics?.payoutRatio != null ? asset.metrics.payoutRatio : 0.55),
+      netDebtToEbitda:
+        (asset as any)?.netDebtToEbitda ??
+        (currentTicker === "O" ? 5.4 : 1.4),
+      roe:
+        (asset as any)?.roe ??
+        (currentTicker === "O" ? 0.08 : asset?.metrics?.roe != null ? asset.metrics.roe : 0.18),
+      yearsPayingDividends: currentTicker === "O" ? 30 : currentTicker === "KO" ? 62 : 10,
+      vacancyRate: (asset as any)?.vacancyRate ?? asset?.metrics?.vacancy ?? (isReit ? 0.014 : undefined),
+      pvp: (asset as any)?.pvp ?? asset?.metrics?.pbRatio ?? (isReit ? 1.05 : undefined),
+    };
+  }, [asset, repData, currentTicker, currency, locale]);
+
   return (
     <div className="space-y-6">
       {/* REPRESENTATIVE CLASS SELECTOR BAR (App Style) */}
@@ -431,8 +629,9 @@ export function AssetDeepDiveView({
           <div className="flex-1 max-w-xl">
             <TickerSearchField
               placeholder={
-                t.deepDive?.searchPlaceholder ||
-                "Buscar qualquer ticker ou ativo da B3 / EUA (ex: PETR4, TAEE11, AAPL, MXRF11)..."
+                isUS
+                  ? (t.deepDive?.searchPlaceholderUs || (locale === "en" ? "Search any US ticker or asset (e.g. O, AAPL, SCHD, KO, MSFT)..." : "Buscar qualquer ticker ou ativo dos EUA..."))
+                  : (t.deepDive?.searchPlaceholder || "Buscar qualquer ticker ou ativo da B3 / EUA (ex: PETR4, TAEE11, AAPL, MXRF11)...")
               }
               onPick={handleSearchPick}
             />
@@ -441,7 +640,9 @@ export function AssetDeepDiveView({
           {/* User holdings quick chips (if available) */}
           {valuedItems.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-              <span className="text-xs text-muted-foreground whitespace-nowrap mr-1">Na sua carteira:</span>
+              <span className="text-xs text-muted-foreground whitespace-nowrap mr-1">
+                {t.deepDive?.inYourPortfolio || (locale === "en" ? "In your portfolio:" : locale === "es" ? "En su cartera:" : "Na sua carteira:")}
+              </span>
               {valuedItems.slice(0, 5).map((holding) => (
                 <button
                   key={holding.ticker}
@@ -501,7 +702,7 @@ export function AssetDeepDiveView({
               </span>
             </h2>
             <div className="text-sm text-muted-foreground mt-0.5">
-              {asset?.sector || (locale === "ptBR" ? repData?.sector : undefined) || (locale === "en" ? "Income & Value Segment" : locale === "es" ? "Segmento de Renta & Valor" : "Segmento de Renda & Valor")}
+              {sectorText}
             </div>
           </div>
 
@@ -692,15 +893,7 @@ export function AssetDeepDiveView({
                 </h3>
               </div>
               <DividendSafetyBadge
-                input={{
-                  type: asset?.type,
-                  payoutRatio: (asset as any)?.payoutRatio ?? 0.55,
-                  netDebtToEbitda: (asset as any)?.netDebtToEbitda ?? 1.4,
-                  roe: (asset as any)?.roe ?? 0.18,
-                  yearsPayingDividends: 10,
-                  vacancyRate: (asset as any)?.vacancyRate,
-                  pvp: (asset as any)?.pvp,
-                }}
+                input={safetyInput}
                 size="sm"
               />
             </div>
@@ -722,7 +915,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.paymentFrequency || "Frequência"}
                 </div>
                 <div className="text-lg font-bold text-foreground mt-0.5">
-                  {repData && locale === "ptBR" ? repData.payFreq : (locale === "en" ? "Quarterly" : "Trimestral")}
+                  {paymentFrequencyText}
                 </div>
               </div>
 
@@ -731,9 +924,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.nextComDate || "Próxima Data COM"}
                 </div>
                 <div className="text-lg font-bold text-accent-text font-display mt-0.5">
-                  {asset?.exDividendDate
-                    ? formatDate(asset.exDividendDate, locale) || (repData && locale === "ptBR" ? repData.nextCom : "—")
-                    : (repData && locale === "ptBR" ? repData.nextCom : "—")}
+                  {nextComDateText}
                 </div>
               </div>
 
@@ -742,12 +933,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.nextPayment || "Data Pagto & Valor"}
                 </div>
                 <div className="text-sm font-bold text-foreground font-display mt-1">
-                  {(() => {
-                    const shareUnit = currency === "USD" ? (locale === "en" ? "share" : locale === "es" ? "acción" : "ação") : (locale === "en" ? "share" : locale === "es" ? "cuota" : "cota");
-                    const nextPayText = repData && locale === "ptBR" ? repData.nextPay : "—";
-                    const nextValText = repData && locale === "ptBR" ? repData.nextVal : (annualDividend > 0 ? `${currency === "USD" ? "US$ " : "R$ "}${(annualDividend / 4).toFixed(2)} / ${shareUnit}` : (currency === "USD" ? `US$ — / ${shareUnit}` : `R$ — / ${shareUnit}`));
-                    return `${nextPayText || "—"} • ${nextValText}`;
-                  })()}
+                  {nextPaymentDateText} • {nextValFormatted}
                 </div>
               </div>
             </div>
@@ -846,15 +1032,7 @@ export function AssetDeepDiveView({
       {/* DIVIDEND SAFETY RADAR */}
       <DividendSafetyRadar
         ticker={currentTicker}
-        input={{
-          type: asset?.type,
-          payoutRatio: (asset as any)?.payoutRatio ?? 0.55,
-          netDebtToEbitda: (asset as any)?.netDebtToEbitda ?? 1.4,
-          roe: (asset as any)?.roe ?? 0.18,
-          yearsPayingDividends: 10,
-          vacancyRate: (asset as any)?.vacancyRate,
-          pvp: (asset as any)?.pvp,
-        }}
+        input={safetyInput}
       />
 
       {/* TAX PASSPORT */}

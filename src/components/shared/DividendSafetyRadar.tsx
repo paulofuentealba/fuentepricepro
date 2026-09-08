@@ -19,9 +19,45 @@ export function DividendSafetyRadar({
   ticker,
   className,
 }: DividendSafetyRadarProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const effectiveLocale = input.locale ?? locale;
   const s = t.dividendSafetyRadar;
-  const result: DividendSafetyResult = calculateDividendSafetyScore(input);
+  const result: DividendSafetyResult = calculateDividendSafetyScore(input, effectiveLocale);
+
+  const eyebrowText =
+    effectiveLocale === "en"
+      ? "DIVIDEND SAFETY SCORE • RESILIENCE ANALYSIS"
+      : effectiveLocale === "es"
+        ? "DIVIDEND SAFETY SCORE • ANÁLISIS DE RESILIENCIA"
+        : s.eyebrow;
+
+  const titleText =
+    effectiveLocale === "en"
+      ? "Dividend Sustainability Radar"
+      : effectiveLocale === "es"
+        ? "Radar de Sostenibilidad de Dividendos"
+        : s.title;
+
+  const meterLowText =
+    effectiveLocale === "en"
+      ? "High Cut Risk"
+      : effectiveLocale === "es"
+        ? "Alto Riesgo de Recorte"
+        : s.meterLow;
+
+  const meterMidText =
+    effectiveLocale === "en"
+      ? "Moderate Sustainability"
+      : effectiveLocale === "es"
+        ? "Sostenibilidad Moderada"
+        : s.meterMid;
+
+  const meterHighText =
+    effectiveLocale === "en"
+      ? "High Shield"
+      : effectiveLocale === "es"
+        ? "Alta Protección"
+        : s.meterHigh;
 
   const getScoreColor = () => {
     switch (result.tier) {
@@ -61,10 +97,10 @@ export function DividendSafetyRadar({
         <div>
           <span className="text-[10px] font-semibold uppercase tracking-wider text-accent-text inline-flex items-center gap-1">
             <Activity className="h-3.5 w-3.5 text-accent-text" />
-            {s.eyebrow}
+            {eyebrowText}
           </span>
           <h3 className="font-serif text-lg font-bold text-foreground mt-0.5">
-            {s.title} {ticker ? `(${ticker})` : ""}
+            {titleText} {ticker ? `(${ticker})` : ""}
           </h3>
         </div>
 
@@ -90,9 +126,9 @@ export function DividendSafetyRadar({
       {/* Main Meter */}
       <div className="mb-5 space-y-1.5">
         <div className="flex justify-between text-[11px] text-muted-foreground">
-          <span>{s.meterLow}</span>
-          <span>{s.meterMid}</span>
-          <span>{s.meterHigh}</span>
+          <span>{meterLowText}</span>
+          <span>{meterMidText}</span>
+          <span>{meterHighText}</span>
         </div>
 
         <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden relative">
