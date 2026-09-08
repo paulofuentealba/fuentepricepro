@@ -198,7 +198,7 @@ export function UsTax1099Report({
           </div>
           <div className="border-t border-border/40 pt-2 flex items-center justify-between text-xs">
             <span className="text-muted-foreground">{u.metrics.box1b}:</span>
-            <span className="font-mono font-semibold text-emerald-500">
+            <span className="font-mono font-semibold text-success">
               {formatUsd(summary.divSummary.totalQualifiedDividends)}
             </span>
           </div>
@@ -230,7 +230,7 @@ export function UsTax1099Report({
           <div
             className={cn(
               "text-2xl font-bold font-mono",
-              summary.bSummary.netTaxableGainOrLoss >= 0 ? "text-emerald-500" : "text-destructive",
+              summary.bSummary.netTaxableGainOrLoss >= 0 ? "text-success" : "text-destructive",
             )}
           >
             {formatUsd(summary.bSummary.netTaxableGainOrLoss)}
@@ -240,7 +240,7 @@ export function UsTax1099Report({
             <span
               className={cn(
                 "font-mono font-semibold",
-                summary.bSummary.totalWashSaleDisallowed > 0 ? "text-amber-500" : "text-foreground",
+                summary.bSummary.totalWashSaleDisallowed > 0 ? "text-warning" : "text-foreground",
               )}
             >
               {formatUsd(summary.bSummary.totalWashSaleDisallowed)}
@@ -254,12 +254,12 @@ export function UsTax1099Report({
             <span>{u.metrics.rothShielded}</span>
             <StatusBadge variant="default">{u.metrics.rothShieldedLabel}</StatusBadge>
           </div>
-          <div className="text-2xl font-bold text-emerald-500 font-mono">
+          <div className="text-2xl font-bold text-success font-mono">
             {formatUsd(summary.totalRothTaxFreeIncome)}
           </div>
           <div className="border-t border-border/40 pt-2 flex items-center justify-between text-xs">
             <span className="text-muted-foreground">{u.rothCard.estimatedSavings}</span>
-            <span className="font-mono font-semibold text-emerald-400">
+            <span className="font-mono font-semibold text-success">
               +{formatUsd(summary.estimatedTaxSavingsRoth)}
             </span>
           </div>
@@ -332,9 +332,9 @@ export function UsTax1099Report({
                             className={cn(
                               "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium",
                               item.accountType === "roth_ira"
-                                ? "bg-emerald-500/10 text-emerald-500"
+                                ? "bg-success/10 text-success"
                                 : item.accountType === "traditional_ira_401k"
-                                ? "bg-blue-500/10 text-blue-500"
+                                ? "bg-primary/10 text-primary"
                                 : "bg-muted text-muted-foreground",
                             )}
                           >
@@ -348,7 +348,7 @@ export function UsTax1099Report({
                         <td className="p-3.5 font-mono text-right font-semibold text-foreground">
                           {formatUsd(item.ordinaryDividends)}
                         </td>
-                        <td className="p-3.5 font-mono text-right text-emerald-500 font-semibold">
+                        <td className="p-3.5 font-mono text-right text-success font-semibold">
                           {item.qualifiedDividends > 0 ? formatUsd(item.qualifiedDividends) : "—"}
                         </td>
                         <td className="p-3.5 font-mono text-right text-primary font-semibold">
@@ -402,9 +402,9 @@ export function UsTax1099Report({
                             className={cn(
                               "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium",
                               s.accountType === "roth_ira"
-                                ? "bg-emerald-500/10 text-emerald-500"
+                                ? "bg-success/10 text-success"
                                 : s.accountType === "traditional_ira_401k"
-                                ? "bg-blue-500/10 text-blue-500"
+                                ? "bg-primary/10 text-primary"
                                 : "bg-muted text-muted-foreground",
                             )}
                           >
@@ -429,7 +429,7 @@ export function UsTax1099Report({
                         </td>
                         <td className="p-3.5 font-mono text-right font-semibold">
                           {s.washSaleLossDisallowed > 0 ? (
-                            <span className="text-amber-500 flex items-center justify-end gap-1">
+                            <span className="text-warning flex items-center justify-end gap-1">
                               <AlertCircle className="h-3 w-3" />
                               {formatUsd(s.washSaleLossDisallowed)}
                             </span>
@@ -440,7 +440,7 @@ export function UsTax1099Report({
                         <td
                           className={cn(
                             "p-3.5 font-mono text-right font-bold",
-                            s.gainOrLoss >= 0 ? "text-emerald-500" : "text-destructive",
+                            s.gainOrLoss >= 0 ? "text-success" : "text-destructive",
                           )}
                         >
                           {s.gainOrLoss >= 0 ? `+${formatUsd(s.gainOrLoss)}` : formatUsd(s.gainOrLoss)}
@@ -478,7 +478,7 @@ export function UsTax1099Report({
                   {u.rothCard.description}
                 </CardDescription>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500 shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/10 text-success shrink-0">
                 <PiggyBank className="h-6 w-6" />
               </div>
             </div>
@@ -498,11 +498,11 @@ export function UsTax1099Report({
                 </div>
               </div>
 
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-1">
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              <div className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-1">
+                <span className="text-xs text-success font-medium">
                   {u.rothCard.totalShielded}
                 </span>
-                <div className="text-2xl font-mono font-bold text-emerald-500">
+                <div className="text-2xl font-mono font-bold text-success">
                   {formatUsd(summary.totalRothTaxFreeIncome)}
                 </div>
               </div>
@@ -515,7 +515,7 @@ export function UsTax1099Report({
                 </span>
                 <p className="text-xs text-muted-foreground">{u.rothCard.savingsNote}</p>
               </div>
-              <div className="text-2xl font-mono font-bold text-emerald-500">
+              <div className="text-2xl font-mono font-bold text-success">
                 +{formatUsd(summary.estimatedTaxSavingsRoth)}
               </div>
             </div>

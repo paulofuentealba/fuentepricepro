@@ -1,4 +1,4 @@
-import { type Transaction, getQuantityAtDate } from "./transactionsLogic";
+import { type Transaction, type AccountType, getQuantityAtDate } from "./transactionsLogic";
 import { type DividendEvent, type AssetType, type Currency } from "./domain";
 import { isUsAsset, dividendTaxRate, netAfterTax } from "./calculations";
 import { convertCurrency, roundCurrency } from "./currency";
@@ -21,6 +21,7 @@ export interface RealizedIncomeEvent {
   amountGross: number;
   amountNet: number;
   taxType: TaxType;
+  accountType?: AccountType | null;
 }
 
 export interface AssetTaxMeta {

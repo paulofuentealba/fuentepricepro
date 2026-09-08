@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { I18nProvider } from "@/lib/i18n-provider";
@@ -10,6 +10,17 @@ import type { Transaction } from "@/lib/transactionsLogic";
 import type { RealizedIncomeEvent } from "@/lib/realizedIncome";
 
 describe("UsTax1099Report Component", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: vi.fn(() => "en"),
+        setItem: vi.fn(),
+      },
+      writable: true,
+      configurable: true,
+    });
+  });
+
   afterEach(() => {
     cleanup();
   });
@@ -32,7 +43,7 @@ describe("UsTax1099Report Component", () => {
       isBffMode: true,
       sector: "Technology",
       valuation: {} as any,
-    } as ValuedWatchlistItem,
+    } as unknown as ValuedWatchlistItem,
     {
       id: "2",
       ticker: "O",
@@ -50,12 +61,12 @@ describe("UsTax1099Report Component", () => {
       isBffMode: true,
       sector: "Real Estate",
       valuation: {} as any,
-    } as ValuedWatchlistItem,
+    } as unknown as ValuedWatchlistItem,
     {
       id: "3",
       ticker: "VOO",
       name: "Vanguard S&P 500 ETF",
-      type: "ETF_US",
+      type: "ETF",
       currency: "USD",
       quantity: 50,
       averagePrice: 400,
@@ -68,47 +79,44 @@ describe("UsTax1099Report Component", () => {
       isBffMode: true,
       sector: "Blend",
       valuation: {} as any,
-    } as ValuedWatchlistItem,
+    } as unknown as ValuedWatchlistItem,
   ];
 
   const mockIncomeEvents: RealizedIncomeEvent[] = [
     {
-      id: "inc_1",
       ticker: "AAPL",
-      type: "dividend",
       taxType: "us_dividend",
       currency: "USD",
       amountGross: 100,
       amountNet: 70,
-      amountWithheld: 30,
+      quantityHeld: 100,
+      amountPerShareGross: 1.0,
       paymentDate: "2026-05-15",
       exDate: "2026-05-01",
       isPaid: true,
       accountType: "taxable",
     },
     {
-      id: "inc_2",
       ticker: "O",
-      type: "dividend",
       taxType: "us_dividend",
       currency: "USD",
       amountGross: 200,
       amountNet: 140,
-      amountWithheld: 60,
+      quantityHeld: 100,
+      amountPerShareGross: 2.0,
       paymentDate: "2026-06-15",
       exDate: "2026-06-01",
       isPaid: true,
       accountType: "taxable",
     },
     {
-      id: "inc_3",
       ticker: "VOO",
-      type: "dividend",
       taxType: "us_dividend",
       currency: "USD",
       amountGross: 300,
       amountNet: 300,
-      amountWithheld: 0,
+      quantityHeld: 50,
+      amountPerShareGross: 6.0,
       paymentDate: "2026-07-15",
       exDate: "2026-07-01",
       isPaid: true,
@@ -144,7 +152,7 @@ describe("UsTax1099Report Component", () => {
     assetTypeByTicker: new Map([
       ["AAPL", "STOCK_US"],
       ["O", "REIT"],
-      ["VOO", "ETF_US"],
+      ["VOO", "ETF"],
     ]),
     currencyByTicker: new Map([
       ["AAPL", "USD"],
@@ -171,7 +179,7 @@ describe("UsTax1099Report Component", () => {
 
   it("renders Form 1099 title, metric cards, and dividend rows", () => {
     render(
-      <I18nProvider initialLocale="en">
+      <I18nProvider>
         <UsTax1099Report
           valuedItems={mockValuedItems}
           context={mockContext}
@@ -200,7 +208,7 @@ describe("UsTax1099Report Component", () => {
 
   it("displays sales metrics on card and handles account filter", () => {
     render(
-      <I18nProvider initialLocale="en">
+      <I18nProvider>
         <UsTax1099Report
           valuedItems={mockValuedItems}
           context={mockContext}
