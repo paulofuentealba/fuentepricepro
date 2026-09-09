@@ -126,7 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           founder: {
             "@type": "Person",
             name: "Paulo Fuentealba",
-            jobTitle: "Founder & Software Engineer",
+            jobTitle: "Founder & Enterprise Architect",
             url: "https://fuentepricepro.com/about",
           },
           publishingPrinciples: "https://fuentepricepro.com/methodology",

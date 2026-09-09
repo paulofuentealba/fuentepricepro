@@ -3091,10 +3091,10 @@ export const en = {
       "Fuente Price Pro was born from real-world investing frustration. Most platforms offer delayed quotes or endless lists of confusing financial ratios, but fail to answer the most fundamental question: 'What is the maximum price I should pay for this stock to secure my target dividend yield?'.",
     storyP2:
       "Inspired by the classic teachings of Décio Bazin in 'Faça Fortuna com Ações' and Benjamin Graham in 'The Intelligent Investor', this platform was architected as an independent algorithmic engine with zero conflicts of interest and total mathematical transparency.",
-    founderTitle: "Founder & Engineering",
-    founderRole: "Founder & Software Engineer",
+    founderTitle: "Founder & Architecture",
+    founderRole: "Founder & Enterprise Architect",
     founderBio:
-      "Paulo Fuentealba is a software engineer and dividend investor focused on building predictable cash-flow portfolios. He architected Fuente Price Pro to combine official regulatory filings from the CVM with modern quantitative valuation algorithms.",
+      "Paulo Fuentealba is an enterprise architect and dividend investor focused on building predictable cash-flow portfolios. He architected Fuente Price Pro to combine official regulatory filings from the CVM with modern quantitative valuation algorithms.",
     valuesTitle: "Core Principles",
     value1Title: "Mathematical Transparency",
     value1Desc:

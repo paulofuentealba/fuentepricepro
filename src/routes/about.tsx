@@ -56,7 +56,7 @@ export const Route = createFileRoute("/about")({
             founder: {
               "@type": "Person",
               name: "Paulo Fuentealba",
-              jobTitle: "Founder & Software Engineer",
+              jobTitle: "Founder & Enterprise Architect",
               url: PAGE_URL,
             },
           },
