@@ -123,6 +123,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           url: "https://fuentepricepro.com",
           description:
             "Intelligent Ceiling Portfolio Valuation & Passive Income Engineering platform for dividend investors across US and Brazilian markets.",
+          founder: {
+            "@type": "Person",
+            name: "Paulo Fuentealba",
+            jobTitle: "Founder & Software Engineer",
+            url: "https://fuentepricepro.com/about",
+          },
+          publishingPrinciples: "https://fuentepricepro.com/methodology",
+          knowsAbout: [
+            "Bazin Method",
+            "Benjamin Graham Valuation",
+            "Gordon Growth Model",
+            "Dividend Yield",
+            "B3 Equities",
+            "Real Estate Investment Trusts (FIIs)",
+          ],
         }),
       },
     ],

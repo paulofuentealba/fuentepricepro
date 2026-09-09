@@ -9,6 +9,7 @@ import { formatCurrency } from "@/lib/i18n";
 import type { Currency } from "@/lib/domain";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
+import { RegulatoryDisclaimerBanner } from "@/components/shared/RegulatoryDisclaimerBanner";
 
 const SITE_URL = "https://fuentepricepro.com";
 const OG_IMAGE =
@@ -33,6 +34,73 @@ export const Route = createFileRoute("/")({
       { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [{ rel: "canonical", href: SITE_URL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Fuente Price Pro",
+          operatingSystem: "Web",
+          applicationCategory: "FinanceApplication",
+          url: SITE_URL,
+          image: OG_IMAGE,
+          description: PAGE_DESCRIPTION,
+          offers: [
+            {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "BRL",
+              name: "Free Plan",
+            },
+            {
+              "@type": "Offer",
+              price: "9.90",
+              priceCurrency: "BRL",
+              name: "Pro Plan",
+            },
+          ],
+          author: {
+            "@type": "Person",
+            name: "Paulo Fuentealba",
+            url: `${SITE_URL}/about`,
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "Como o Preço Teto Bazin é calculado?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "O Preço Teto pelo método de Décio Bazin divide a média dos dividendos anuais pagos pelo ativo pelo dividend yield mínimo desejado pelo investidor (por padrão 6% a.a.).",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "O que é a Margem de Segurança?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "A margem de segurança representa o percentual de desconto da cotação atual em relação ao preço teto calculado. Uma margem positiva indica oportunidade com desconto.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "A plataforma faz recomendações de compra ou venda?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Não. O Fuente Price Pro é uma plataforma analítica e quantitativa independente de apoio à decisão, em conformidade com a Resolução CVM nº 20/2021.",
+              },
+            },
+          ],
+        }),
+      },
+    ],
   }),
   component: LandingRoute,
   errorComponent: RouteErrorComponent,
@@ -316,6 +384,8 @@ function LandingPage() {
           <b className="text-foreground">{P.pricing.legalNoteLabel}</b> {P.pricing.legalNoteText}
         </div>
       </section>
+
+      <RegulatoryDisclaimerBanner forceShow variant="full" />
 
       {/* Footer */}
       <footer className="border-t border-border">
