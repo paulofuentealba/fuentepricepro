@@ -27,6 +27,8 @@ export default defineConfig({
           if (id.includes("firebase")) return "vendor-firebase";
           if (id.includes("framer-motion")) return "vendor-motion";
           if (id.includes("react-dom") || id.includes("/react/")) return "vendor-react";
+          if (id.includes("recharts")) return "vendor-charts";
+          if (id.includes("xlsx")) return "vendor-xlsx";
           return undefined;
         },
       },
