@@ -366,6 +366,58 @@ export function calculateShareholderYield({
   return ((dividendsPaidTotal + netBuybackValue) / marketCap) * 100;
 }
 
+/**
+ * Shared "asset unavailable" ValuationResult builder (Item 8) — the ~20-field literal
+ * previously duplicated at 6 early-return sites. `activeCeiling` is not uniformized here:
+ * callers pass it explicitly because it varies (e.g. ETF always uses 0, others use
+ * currentPrice when positive) per the original per-caller behavior.
+ */
+function buildUnavailableResult(
+  ticker: string,
+  investorProfile: ValuationResult["investorProfile"],
+  activeCeiling: number,
+  extraMethods: Partial<ValuationResult["methods"]> = {},
+): ValuationResult {
+  return {
+    ticker,
+    activeCeiling,
+    margin: 0,
+    fuenteConsensus: null,
+    methods: { bazin: null, graham: null, gordon: null, lynch: null, ...extraMethods },
+    assumptions: [],
+    investorProfile,
+    bazin: null,
+    graham: null,
+    gordon: null,
+    lynch: null,
+    gordonConfidence: null,
+    consensus: null,
+    dividendYield: 0,
+    positive: true,
+    isUnavailable: true,
+    yieldTrapWarning: null,
+    shareholderYield: null,
+  };
+}
+
+/**
+ * Modified Peter Lynch Fair Value: EPS * (Growth Rate + Dividend Yield), clamped to a
+ * [5, 25] multiplier band (Item 2 — shared by valuateStockBR and valuateStockUS, which
+ * previously duplicated this block verbatim).
+ */
+function calculateLynchFairValue(
+  eps: number | null | undefined,
+  currentPrice: number,
+  netAvgDividend: number,
+  dividendCagr: number | null | undefined,
+): number | null {
+  if (eps == null || eps <= 0 || currentPrice <= 0) return null;
+  const rawDy = (netAvgDividend / currentPrice) * 100;
+  const effectiveGrowth = dividendCagr != null && dividendCagr > 0 ? dividendCagr : 6.0;
+  const lynchMultiplier = Math.min(25, Math.max(5, effectiveGrowth + rawDy));
+  return eps * lynchMultiplier;
+}
+
 export function gordonPrice(
   d0: number,
   k: number = DEFAULT_SELIC,
@@ -527,31 +579,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
-    return {
-      ticker,
-      activeCeiling: currentPrice > 0 ? currentPrice : 0,
-      margin: 0,
-      fuenteConsensus: null,
-      methods: {
-        bazin: null,
-        graham: null,
-        gordon: null,
-        lynch: null,
-      },
-      assumptions: [],
-      investorProfile: "moderate",
-      bazin: null,
-      graham: null,
-      gordon: null,
-      lynch: null,
-      gordonConfidence: null,
-      consensus: null,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
-      shareholderYield: null,
-    };
+    return buildUnavailableResult(ticker, "moderate", currentPrice > 0 ? currentPrice : 0);
   }
 
   // 1. Bazin with Net JCP Withholding Tax Deduction (15%)
@@ -563,13 +591,7 @@ export function valuateStockBR(params: AssetValuationParams): ValuationResult {
   const graham = hasCvmAudit ? Math.sqrt(grahamMultiplier * eps * bvps) : null;
 
   // 2b. Modified Peter Lynch Fair Value: EPS * (Growth Rate + Dividend Yield)
-  let lynch: number | null = null;
-  if (eps != null && eps > 0 && currentPrice > 0) {
-    const rawDy = (netAvgDividend / currentPrice) * 100;
-    const effectiveGrowth = dividendCagr != null && dividendCagr > 0 ? dividendCagr : 6.0;
-    const lynchMultiplier = Math.min(25, Math.max(5, effectiveGrowth + rawDy));
-    lynch = eps * lynchMultiplier;
-  }
+  const lynch = calculateLynchFairValue(eps, currentPrice, netAvgDividend, dividendCagr);
 
   // 3. Gordon Model (2-Stage H-Model with ROE Retention Growth)
   const k = selicPct / 100;
@@ -685,32 +707,9 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
-    return {
-      ticker,
-      activeCeiling: currentPrice > 0 ? currentPrice : 0,
-      margin: 0,
-      fuenteConsensus: null,
-      methods: {
-        bazin: null,
-        graham: null,
-        gordon: null,
-        shareholderYield: null,
-        lynch: null,
-      },
-      assumptions: [],
-      investorProfile: "moderate",
-      bazin: null,
-      graham: null,
-      gordon: null,
-      lynch: null,
-      gordonConfidence: null,
-      consensus: null,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
+    return buildUnavailableResult(ticker, "moderate", currentPrice > 0 ? currentPrice : 0, {
       shareholderYield: null,
-    };
+    });
   }
 
   // 1. Net Dividend after US Withholding Tax (30% for BR, 0% for US, or custom)
@@ -727,13 +726,7 @@ export function valuateStockUS(params: AssetValuationParams): ValuationResult {
   }
 
   // 4. Modified Peter Lynch Fair Value: EPS * (Growth Rate + Dividend Yield)
-  let lynchPrice: number | null = null;
-  if (eps != null && eps > 0 && currentPrice > 0) {
-    const rawDy = (netAvgDividend / currentPrice) * 100;
-    const effectiveGrowth = dividendCagr != null && dividendCagr > 0 ? dividendCagr : 6.0;
-    const lynchMultiplier = Math.min(25, Math.max(5, effectiveGrowth + rawDy));
-    lynchPrice = eps * lynchMultiplier;
-  }
+  const lynchPrice = calculateLynchFairValue(eps, currentPrice, netAvgDividend, dividendCagr);
 
   // 5. Multi-Stage Gordon for Dividend Aristocrats
   // US cost of equity ~8.5% (Treasury 10y ~4.25% + ERP ~4.25%)
@@ -845,31 +838,7 @@ export function valuateFundoImobiliario(params: AssetValuationParams): Valuation
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
-    return {
-      ticker,
-      activeCeiling: currentPrice > 0 ? currentPrice : 0,
-      margin: 0,
-      fuenteConsensus: null,
-      methods: {
-        bazin: null,
-        graham: null,
-        gordon: null,
-        lynch: null,
-      },
-      assumptions: [],
-      investorProfile: "moderate",
-      bazin: null,
-      graham: null,
-      gordon: null,
-      lynch: null,
-      gordonConfidence: null,
-      consensus: null,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
-      shareholderYield: null,
-    };
+    return buildUnavailableResult(ticker, "moderate", currentPrice > 0 ? currentPrice : 0);
   }
 
   // 1. NTN-B Benchmark Rate & Subtype Risk Spread Calibration
@@ -998,32 +967,9 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   } = params;
 
   if (currentPrice <= 0 || avgDividend <= 0) {
-    return {
-      ticker,
-      activeCeiling: currentPrice > 0 ? currentPrice : 0,
-      margin: 0,
-      fuenteConsensus: null,
-      methods: {
-        bazin: null,
-        graham: null,
-        gordon: null,
-        affoYield: null,
-        lynch: null,
-      },
-      assumptions: [],
-      investorProfile: "moderate",
-      bazin: null,
-      graham: null,
-      gordon: null,
-      lynch: null,
-      gordonConfidence: null,
-      consensus: null,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
-      shareholderYield: null,
-    };
+    return buildUnavailableResult(ticker, "moderate", currentPrice > 0 ? currentPrice : 0, {
+      affoYield: null,
+    });
   }
 
   // 1. Net Dividend after 30% US Withholding Tax (0% for US residents or custom)
@@ -1037,10 +983,14 @@ export function valuateREIT(params: AssetValuationParams): ValuationResult {
   const bazin = effectiveRequiredYield > 0 ? netAvgDividend / (effectiveRequiredYield / 100) : null;
 
   // 3. REIT-Adapted Gordon Growth Model (k = Treasury 10Y + 4% ERP; g capped at 4%)
+  // Unified with the shared gordonPrice() single-growth-rate perpetuity (Item 1): passing
+  // gInitial = gTerminal = g makes the H-Model's transition term vanish algebraically
+  // (d0*h*(gInitial-gTerminal)/(k-gTerminal) = 0), leaving exactly d0*(1+g)/(k-g) — identical
+  // to the formula this replaces, for any input.
   const k = (effectiveTreasury10Y + 4.0) / 100;
   const g = dividendCagr != null ? Math.min(0.04, Math.max(0, dividendCagr / 100)) : US_TERMINAL_GROWTH_FALLBACK;
   const effectiveK = Math.max(k, g + GORDON_MIN_DISCOUNT_MARGIN);
-  const gordon = (netAvgDividend * (1 + g)) / (effectiveK - g);
+  const gordon = gordonPrice(netAvgDividend, effectiveK, g, g);
 
   const gordonConfidence = resolveGordonConfidence(gordon, dividendHistory);
 
@@ -1152,32 +1102,7 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
   } = params;
 
   if (currentPrice <= 0) {
-    return {
-      ticker,
-      activeCeiling: 0,
-      margin: 0,
-      fuenteConsensus: null,
-      methods: {
-        bazin: null,
-        graham: null,
-        gordon: null,
-        bogleModel: null,
-        lynch: null,
-      },
-      assumptions: [],
-      investorProfile: "moderate",
-      bazin: null,
-      graham: null,
-      gordon: null,
-      lynch: null,
-      gordonConfidence: null,
-      consensus: null,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
-      shareholderYield: null,
-    };
+    return buildUnavailableResult(ticker, "moderate", 0, { bogleModel: null });
   }
 
   const isUS = isUsAsset("ETF", currency);
@@ -1297,109 +1222,37 @@ export function valuateETF(params: AssetValuationParams): ValuationResult {
  * Acts as the centralized SSOT Dispatcher across all asset classes.
  */
 export function getAssetValuation(params: AssetValuationParams): ValuationResult {
-  const { type, currentPrice, avgDividend } = params;
+  const { type, currentPrice } = params;
 
-  // Bypass complex math for Fixed Income
-  if (type === "FIXED_INCOME") {
-    return {
-      ticker: params.ticker ?? "FIXED_INCOME",
-      activeCeiling: currentPrice,
-      margin: 0,
-      fuenteConsensus: null,
-      methods: {
-        bazin: null,
-        graham: null,
-        gordon: null,
-        lynch: null,
-      },
-      assumptions: [],
-      investorProfile: "conservative",
-      bazin: null,
-      graham: null,
-      gordon: null,
-      lynch: null,
-      gordonConfidence: null,
-      consensus: null,
-      dividendYield: 0,
-      positive: true,
-      isUnavailable: true,
-      yieldTrapWarning: null,
-      shareholderYield: null,
-    };
+  switch (type) {
+    case "FIXED_INCOME":
+      // Bypass complex math for Fixed Income
+      return buildUnavailableResult(params.ticker ?? "FIXED_INCOME", "conservative", currentPrice);
+
+    case "STOCK_BR":
+      return valuateStockBR(params);
+
+    case "STOCK_US":
+      return valuateStockUS(params);
+
+    case "FII":
+    case "FII_INFRA":
+    case "FIAGRO":
+      return valuateFundoImobiliario(params);
+
+    case "REIT":
+      return valuateREIT(params);
+
+    case "ETF":
+      return valuateETF(params);
+
+    default: {
+      // Exhaustiveness check: a new AssetType added to domain.ts without a branch here
+      // fails `tsc`, instead of silently falling through as before (Item 9).
+      const _exhaustive: never = type;
+      throw new Error(`getAssetValuation: unhandled AssetType ${_exhaustive as string}`);
+    }
   }
-
-  if (type === "STOCK_BR") {
-    return valuateStockBR(params);
-  }
-
-  if (type === "STOCK_US") {
-    return valuateStockUS(params);
-  }
-
-  if (type === "FII" || type === "FII_INFRA" || type === "FIAGRO") {
-    return valuateFundoImobiliario(params);
-  }
-
-  if (type === "REIT") {
-    return valuateREIT(params);
-  }
-
-  if (type === "ETF") {
-    return valuateETF(params);
-  }
-
-  // Default fallback for other asset classes (prior to their dedicated prompt specialization)
-  const isUS = isUsAsset(type, params.currency) || params.currency === "USD";
-  const netAvgDividend = netAfterTax(avgDividend, type, params.currency, params.customTaxRate, false, params.taxJurisdiction);
-  const bazin = params.targetYield > 0 ? netAvgDividend / (params.targetYield / 100) : null;
-  const graham = params.eps && params.bvps && params.eps > 0 && params.bvps > 0 ? Math.sqrt(22.5 * params.eps * params.bvps) : null;
-  const usDiscountRate = US_COST_OF_EQUITY_FALLBACK;
-  const k = isUS ? usDiscountRate : (params.selicPct ?? SELIC_FALLBACK) / 100;
-  const gInitial = params.dividendCagr != null ? params.dividendCagr / 100 : null;
-  const gTerminal = params.terminalGrowthRate ?? (isUS ? US_TERMINAL_GROWTH_FALLBACK : GORDON_TERMINAL_GROWTH_RATE);
-  const gordon = gordonPrice(
-    netAvgDividend,
-    k,
-    gInitial,
-    gTerminal,
-  );
-
-  const gordonConfidence = resolveGordonConfidence(gordon, params.dividendHistory);
-
-  const consensus = medianConsensus([bazin, graham, gordon]);
-
-  const isUnavailable = consensus === null && bazin === null;
-  const activeCeiling = consensus !== null ? consensus : bazin || 0;
-  const margin = currentPrice > 0 && !isUnavailable ? (activeCeiling / currentPrice - 1) * 100 : 0;
-  const dividendYield = currentPrice > 0 ? (netAvgDividend / currentPrice) * 100 : 0;
-  const yieldTrapWarning = isYieldTrap(dividendYield, params.historicalYieldAverage ?? null);
-
-  return {
-    ticker: params.ticker ?? type,
-    activeCeiling,
-    margin,
-    fuenteConsensus: consensus,
-    methods: {
-      bazin,
-      graham,
-      gordon,
-      shareholderYield: params.shareholderYield ?? null,
-      lynch: null,
-    },
-    assumptions: [],
-    investorProfile: "moderate",
-    bazin,
-    graham,
-    gordon,
-    lynch: null,
-    gordonConfidence,
-    consensus,
-    dividendYield,
-    positive: margin >= 0,
-    isUnavailable,
-    yieldTrapWarning,
-    shareholderYield: params.shareholderYield ?? null,
-  };
 }
 
 export function calculateBvps(
