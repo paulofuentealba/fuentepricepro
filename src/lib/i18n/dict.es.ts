@@ -3085,11 +3085,73 @@ export const es = {
     daysUntilLongTerm: "{{count}}d para Long-Term",
     longTermQualified: "Calificado para LTCG",
     lotDate: "Fecha de Adquisición",
-    shares: "Acciones",
-    costBasis: "Costo Base",
+    shares: "Cuotas",
+    costBasis: "Precio Medio / Costo",
     currentValue: "Valor Actual",
     unrealizedPnl: "Ganancia / Pérdida No Realizada",
     empty: "No se encontraron lotes abiertos para este activo.",
     accountBadge: "Cuenta: {{type}}",
+  },
+  aboutPage: {
+    title: "Sobre Fuente Price Pro — Nuestra Historia y Misión",
+    description:
+      "Conozca la historia de Paulo Fuentealba y la misión de Fuente Price Pro: llevar inteligencia cuantitativa de precio techo y dividendos a inversores particulares.",
+    badge: "QUIÉNES SOMOS",
+    heroTitle: "Ingeniería de Renta Pasiva para el Inversor Independiente",
+    heroSubtitle:
+      "Desarrollado por Paulo Fuentealba para cerrar la brecha entre las teorías consagradas de valoración y las decisiones prácticas del inversor particular en la B3 y el mercado global.",
+    storyTitle: "Nuestra Historia",
+    storyP1:
+      "Fuente Price Pro nació de la frustración práctica al invertir día a día. Muchas plataformas proporcionan cotizaciones con retraso o listas interminables de ratios confusos, pero no responden a la pregunta fundamental: '¿Cuál es el precio máximo que debo pagar por esta acción para asegurar mi rendimiento objetivo en dividendos?'.",
+    storyP2:
+      "Inspirado en las enseñanzas clásicas de Décio Bazin en 'Faça Fortuna com Ações' y Benjamin Graham en 'El Inversor Inteligente', el proyecto fue diseñado como un motor algorítmico independiente, con total transparencia matemática y sin conflictos de interés.",
+    founderTitle: "Fundador & Ingeniería",
+    founderRole: "Fundador & Arquitecto de Software",
+    founderBio:
+      "Paulo Fuentealba es ingeniero de software e inversor enfocado en la generación de flujo de caja a través de dividendos. Desarrolló la arquitectura de Fuente Price Pro uniendo datos contables oficiales de la CVM con modelos analíticos avanzados.",
+    valuesTitle: "Nuestros Principios",
+    value1Title: "Transparencia Matemática",
+    value1Desc:
+      "Todas las fórmulas de precio techo, margen de seguridad y consenso son abiertas y explicadas paso a paso. Sin cajas negras.",
+    value2Title: "Independencia Absoluta",
+    value2Desc:
+      "No somos una agencia intermediaria ni una casa de análisis. No vendemos recomendaciones patrocinadas ni cobramos comisiones por órdenes generadas.",
+    value3Title: "Enfoque a Largo Plazo",
+    value3Desc:
+      "Creemos en la acumulación de patrimonio mediante la reinversión de dividendos y en la disciplina de nunca pagar más que el precio techo calculado.",
+    ctaTitle: "¿Listo para calcular su precio techo?",
+    ctaSubtitle: "Comience a monitorear sus activos y simular su flujo de dividendos de forma gratuita.",
+    ctaButton: "Explorar Plataforma",
+    ctaDemo: "Ver Demostración",
+  },
+  methodologyPage: {
+    title: "Metodología de Valoración — Fuente Price Pro",
+    description:
+      "Conozca en detalle los modelos cuantitativos de Bazin, Graham y Gordon y la ingesta de datos de la CVM utilizados por Fuente Price Pro.",
+    badge: "MODELOS CUANTITATIVOS",
+    heroTitle: "Rigor Matemático Aplicado a la Renta Pasiva",
+    heroSubtitle:
+      "Cómo combinamos datos contables oficiales de la CVM con las teorías clásicas de Bazin, Graham y Gordon para calcular precios techo y márgenes de seguridad confiables.",
+    cvmTitle: "Fuente de Datos Primaria: CVM",
+    cvmText:
+      "Fuente Price Pro procesa continuamente datos públicos y oficiales de la Comisión de Valores Mobiliarios de Brasil (CVM) — incluyendo Estados Financieros Estandarizados (DFP), Formularios de Referencia (FRE) e informes periódicos de FIIs.",
+    bazinTitle: "Método Décio Bazin (Precio Techo)",
+    bazinFormula: "Precio Techo = Promedio de Dividendos Anuales (5 Años) ÷ Rendimiento Mínimo Objetivo",
+    bazinDesc:
+      "Popularizado en la obra clásica 'Faça Fortuna com Ações', el método determina el valor máximo a pagar por una acción para asegurar un dividendo mínimo (convencionalmente 6% anual). Las acciones sobre el precio techo se consideran caras, independientemente del optimismo del mercado.",
+    grahamTitle: "Fórmula de Benjamin Graham (Precio Justo)",
+    grahamFormula: "Precio Justo = √(22,5 × BPA × VPA)",
+    grahamDesc:
+      "Formulada por el padre del Value Investing en 'Security Analysis' y 'El Inversor Inteligente', esta métrica pondera el Beneficio por Acción (BPA) y el Valor Patrimonial por Acción (VPA), considerando múltiplos históricos máximos de P/E 15 y P/B 1,5.",
+    gordonTitle: "Modelo de Descuento de Dividendos de Gordon",
+    gordonFormula: "P₀ = D₁ ÷ (k - g)",
+    gordonDesc:
+      "Desarrollado por Myron J. Gordon, proyecta el valor presente de los dividendos futuros considerando una tasa de descuento requerida por el inversor (k) y una tasa sostenible de crecimiento perpetuo (g).",
+    safetyMarginTitle: "Margen de Seguridad & Radar de Riesgo",
+    safetyMarginDesc:
+      "El margen de seguridad es la diferencia porcentual entre el precio techo calculado y la cotización actual: ((Precio Techo - Precio Actual) ÷ Precio Actual) × 100. Los márgenes positivos protegen al inversor contra oscilaciones e imprevistos.",
+    disclaimerLabel: "Aviso Regulatorio:",
+    disclaimerText:
+      "En cumplimiento de la normativa regulatoria (incluida la Resolución CVM nº 20/2021), Fuente Price Pro es una herramienta estrictamente analítica y educativa. Los cálculos cuantitativos no constituyen asesoramiento en valores ni recomendación individual de inversión.",
   },
 } satisfies typeof en;

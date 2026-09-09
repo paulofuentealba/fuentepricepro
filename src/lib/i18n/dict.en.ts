@@ -3076,4 +3076,66 @@ export const en = {
     empty: "No open lots found for this asset.",
     accountBadge: "Account: {{type}}",
   },
+  aboutPage: {
+    title: "About Fuente Price Pro — Our Story & Mission",
+    description:
+      "Discover the story of Paulo Fuentealba and the mission of Fuente Price Pro: bringing quantitative ceiling price intelligence and dividend clarity to independent investors.",
+    badge: "ABOUT US",
+    heroTitle: "Passive Income Engineering for Independent Investors",
+    heroSubtitle:
+      "Built by Paulo Fuentealba to bridge the gap between proven valuation theories and everyday practical decisions for dividend investors across the US and Brazilian markets.",
+    storyTitle: "Our Story",
+    storyP1:
+      "Fuente Price Pro was born from real-world investing frustration. Most platforms offer delayed quotes or endless lists of confusing financial ratios, but fail to answer the most fundamental question: 'What is the maximum price I should pay for this stock to secure my target dividend yield?'.",
+    storyP2:
+      "Inspired by the classic teachings of Décio Bazin in 'Faça Fortuna com Ações' and Benjamin Graham in 'The Intelligent Investor', this platform was architected as an independent algorithmic engine with zero conflicts of interest and total mathematical transparency.",
+    founderTitle: "Founder & Engineering",
+    founderRole: "Founder & Software Engineer",
+    founderBio:
+      "Paulo Fuentealba is a software engineer and dividend investor focused on building predictable cash-flow portfolios. He architected Fuente Price Pro to combine official regulatory filings from the CVM with modern quantitative valuation algorithms.",
+    valuesTitle: "Core Principles",
+    value1Title: "Mathematical Transparency",
+    value1Desc:
+      "Every formula for ceiling price, safety margin, and consensus is completely open and explained step-by-step. No black boxes.",
+    value2Title: "Absolute Independence",
+    value2Desc:
+      "We are neither a broker nor a research advisory. We do not sell sponsored stock picks or accept order-flow commissions.",
+    value3Title: "Long-Term Wealth Building",
+    value3Desc:
+      "We believe in compounding through dividend reinvestment and the discipline of never overpaying beyond the calculated ceiling price.",
+    ctaTitle: "Ready to calculate your ceiling price?",
+    ctaSubtitle: "Start tracking your assets and simulating your passive income cash flow for free.",
+    ctaButton: "Explore Platform",
+    ctaDemo: "View Demo",
+  },
+  methodologyPage: {
+    title: "Valuation Methodology — Fuente Price Pro",
+    description:
+      "Learn how Fuente Price Pro combines Bazin, Graham, and Gordon valuation models with regulatory CVM data to calculate ceiling prices and safety margins.",
+    badge: "QUANTITATIVE MODELS",
+    heroTitle: "Mathematical Rigor Applied to Passive Income",
+    heroSubtitle:
+      "How we combine official corporate regulatory filings with time-tested valuation models to calculate reliable ceiling prices and safety margins.",
+    cvmTitle: "Primary Data Sourcing: CVM & SEC",
+    cvmText:
+      "Fuente Price Pro continuously processes official open-data filings from the Brazilian Securities and Exchange Commission (CVM) — including Standardized Financial Statements (DFP), Reference Forms (FRE), and REIT reports — alongside global market data.",
+    bazinTitle: "The Décio Bazin Method (Ceiling Price)",
+    bazinFormula: "Ceiling Price = 5-Year Average Annual Dividends ÷ Target Yield",
+    bazinDesc:
+      "Popularized in 'Faça Fortuna com Ações', this formula establishes the maximum purchase price to lock in a minimum acceptable yield (conventionally 6% per annum). Stocks priced above this threshold are deemed overpriced, regardless of market sentiment.",
+    grahamTitle: "The Benjamin Graham Formula (Fair Value)",
+    grahamFormula: "Fair Value = √(22.5 × EPS × BVPS)",
+    grahamDesc:
+      "Formulated by the father of Value Investing in 'Security Analysis' and 'The Intelligent Investor', this model balances Earnings Per Share (EPS) and Book Value Per Share (BVPS), anchoring valuation to conservative historical multiples (P/E 15 and P/B 1.5).",
+    gordonTitle: "The Gordon Dividend Growth Model",
+    gordonFormula: "P₀ = D₁ ÷ (k - g)",
+    gordonDesc:
+      "Created by Myron J. Gordon, this discounted dividend model projects the present value of future payouts based on the investor's required discount rate (k) and a sustainable perpetual dividend growth rate (g).",
+    safetyMarginTitle: "Safety Margin & Risk Radar",
+    safetyMarginDesc:
+      "Safety Margin measures the percentage discount of the current market price relative to the ceiling price: ((Ceiling Price - Current Price) ÷ Current Price) × 100. Positive margins provide a structural cushion against macro shocks and corporate headwinds.",
+    disclaimerLabel: "Regulatory Notice:",
+    disclaimerText:
+      "In compliance with regulatory standards (including CVM Resolution 20/2021), Fuente Price Pro operates strictly as an educational and analytical quantitative tool. Calculations do not constitute individual securities advisory or investment recommendations.",
+  },
 };

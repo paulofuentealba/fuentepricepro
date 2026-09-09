@@ -3088,4 +3088,66 @@ export const ptBR = {
     empty: "Nenhum lote aberto encontrado para este ativo.",
     accountBadge: "Conta: {{type}}",
   },
+  aboutPage: {
+    title: "Sobre o Fuente Price Pro — Nossa História e Missão",
+    description:
+      "Conheça a história de Paulo Fuentealba e a missão do Fuente Price Pro: levar inteligência quantitativa de preço teto e dividendos a investidores pessoa física.",
+    badge: "QUEM SOMOS",
+    heroTitle: "Engenharia de Renda Passiva para o Investidor Independente",
+    heroSubtitle:
+      "Desenvolvido por Paulo Fuentealba para preencher a lacuna entre teorias consagradas de valuation e as decisões práticas do investidor pessoa física na B3 e no mercado global.",
+    storyTitle: "Nossa História",
+    storyP1:
+      "O Fuente Price Pro nasceu da frustração prática de quem investe no dia a dia. Muitas ferramentas no mercado fornecem cotações atrasadas ou listas infindáveis de múltiplos confusos, mas deixam de responder à pergunta mais fundamental: 'Qual é o preço máximo que devo pagar por esta ação para garantir o meu retorno desejado em dividendos?'.",
+    storyP2:
+      "Inspirado pelos ensinamentos clássicos de Décio Bazin em 'Faça Fortuna com Ações' e de Benjamin Graham em 'O Investidor Inteligente', o projeto foi concebido como um motor algorítmico independente, com total transparência matemática e ausência de conflitos de interesse.",
+    founderTitle: "Fundador & Engenharia",
+    founderRole: "Fundador & Arquiteto de Software",
+    founderBio:
+      "Paulo Fuentealba é engenheiro de software e investidor focado em geração de fluxo de caixa através de proventos. Desenvolveu a arquitetura do Fuente Price Pro unindo processamento de dados contábeis oficiais da CVM com modelos analíticos de ponta.",
+    valuesTitle: "Nossos Princípios",
+    value1Title: "Transparência Matemática",
+    value1Desc:
+      "Todas as fórmulas de preço teto, margem de segurança e consenso são abertas e explicadas passo a passo. Sem 'caixas-pretas'.",
+    value2Title: "Independência Absoluta",
+    value2Desc:
+      "Não somos corretora nem casa de análise. Não vendemos relatórios patrocinados nem recebemos comissões por ordens geradas.",
+    value3Title: "Foco no Longo Prazo",
+    value3Desc:
+      "Acreditamos na construção de patrimônio através do reinvestimento de proventos e na disciplina de nunca pagar mais do que o preço teto.",
+    ctaTitle: "Pronto para calcular seu preço teto?",
+    ctaSubtitle: "Comece a monitorar seus ativos e simular seu fluxo de proventos gratuitamente.",
+    ctaButton: "Explorar Ferramenta",
+    ctaDemo: "Ver Demonstração",
+  },
+  methodologyPage: {
+    title: "Metodologia de Valuation — Fuente Price Pro",
+    description:
+      "Conheça em detalhes os modelos quantitativos de Bazin, Graham e Gordon e a ingestão de dados da CVM utilizados pelo Fuente Price Pro.",
+    badge: "MODELOS QUANTITATIVOS",
+    heroTitle: "Rigor Matemático Aplicado à Renda Passiva",
+    heroSubtitle:
+      "Como combinamos dados contábeis oficiais da CVM com as teorias clássicas de Bazin, Graham e Gordon para calcular preços teto e margens de segurança confiáveis.",
+    cvmTitle: "Fonte de Dados Primária: CVM",
+    cvmText:
+      "O Fuente Price Pro ingere diariamente dados públicos e oficiais da Comissão de Valores Mobiliários (CVM), incluindo Demonstrativos Financeiros Padronizados (DFP), Formulários de Referência (FRE) e informes periódicos de Fundos Imobiliários.",
+    bazinTitle: "Método Décio Bazin (Preço Teto)",
+    bazinFormula: "Preço Teto = Média dos Proventos Anuais (5 Anos) ÷ Yield Mínimo Alvo",
+    bazinDesc:
+      "Popularizado na obra clássica 'Faça Fortuna com Ações', o método determina o valor máximo a pagar por uma ação para assegurar um dividendo mínimo (convencionalmente 6% a.a.). Ações acima do preço teto são consideradas caras, independente do otimismo do mercado.",
+    grahamTitle: "Fórmula de Benjamin Graham (Preço Justo)",
+    grahamFormula: "Preço Justo = √(22,5 × LPA × VPA)",
+    grahamDesc:
+      "Formulada pelo pai do Value Investing em 'Security Analysis' e 'O Investidor Inteligente', essa métrica pondera o Lucro por Ação (LPA) e o Valor Patrimonial por Ação (VPA), considerando múltiplos máximos históricos de P/L de 15 e P/VP de 1,5.",
+    gordonTitle: "Modelo de Desconto de Dividendos de Gordon",
+    gordonFormula: "P₀ = D₁ ÷ (k - g)",
+    gordonDesc:
+      "Desenvolvido por Myron J. Gordon, projeta o valor presente dos dividendos futuros considerando uma taxa de desconto exigida pelo investidor (k) e uma taxa sustentável de crescimento perpétuo (g).",
+    safetyMarginTitle: "Margem de Segurança & Radar de Risco",
+    safetyMarginDesc:
+      "A margem de segurança é o diferencial percentual entre o preço teto calculado e a cotação atual do ativo: ((Preço Teto - Preço Atual) ÷ Preço Atual) × 100. Margens positivas protegem o investidor contra oscilações e imprevistos corporativos.",
+    disclaimerLabel: "Aviso de Isenção Regulatória:",
+    disclaimerText:
+      "Em conformidade com a Resolução CVM nº 20/2021, o Fuente Price Pro é uma plataforma estritamente analítica e educacional. Modelos quantitativos não constituem consultoria de valores mobiliários nem recomendação individual de investimento.",
+  },
 } satisfies typeof en;
