@@ -12,7 +12,23 @@ const host = process.env.HOST || "0.0.0.0";
 app.set("trust proxy", 1);
 app.use(compression());
 
-app.use(express.static("dist/client"));
+app.use(
+  express.static("dist/client", {
+    maxAge: "1y",
+    immutable: true,
+    setHeaders: (res, filePath) => {
+      // HTML, XML, TXT and JSON manifests must not be cached indefinitely
+      if (
+        filePath.endsWith(".html") ||
+        filePath.endsWith(".xml") ||
+        filePath.endsWith(".txt") ||
+        filePath.endsWith(".json")
+      ) {
+        res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+      }
+    },
+  }),
+);
 
 app.use(async (req, res) => {
   const proto = req.headers["x-forwarded-proto"] || "http";
