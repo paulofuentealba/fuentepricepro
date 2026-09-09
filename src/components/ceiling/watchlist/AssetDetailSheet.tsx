@@ -23,7 +23,7 @@ import { useMarketScope } from "@/lib/useMarketScope";
 
 import { getAssetValuation } from "@/lib/calculations";
 import { useSelic } from "@/lib/useSelic";
-import { InvestingSinceField } from "../shared/InvestingSinceField";
+import { InvestingSinceField } from "@/components/shared/InvestingSinceField";
 import { useTransactions } from "@/lib/transactions";
 import { EditPositionFields } from "./EditPositionFields";
 import { CorporateEventFields } from "@/components/portfolio/CorporateEventFields";

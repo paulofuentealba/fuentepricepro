@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCurrency, displayTicker, formatPercent, getDisplayAssetType } from "@/lib/i18n";
-import { PriceTag } from "../../shared/AssetDataDisplay";
+import { PriceTag } from "@/components/shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
 import type { LiveQuote } from "@/lib/apiService.functions";
 import type { WatchlistItem } from "@/lib/watchlist";

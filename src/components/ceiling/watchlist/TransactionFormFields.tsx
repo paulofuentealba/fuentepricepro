@@ -25,7 +25,7 @@ import { displayTicker, toIntlLocale } from "@/lib/i18n";
 import type { WatchlistItem } from "@/lib/watchlist";
 import type { Transaction } from "@/lib/transactions";
 import { getQuantityAtDate } from "@/lib/transactions";
-import { MaskedInput } from "../shared/MaskedInput";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 
 interface Props {
   /** Null when no ticker has been picked yet (see `disabled`). */

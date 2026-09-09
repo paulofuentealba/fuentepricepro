@@ -3,7 +3,7 @@ import type { AssetType, Currency } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
 import { FilterPill } from "./FilterPill";
 import { flagFor } from "./utils";
-import { getColorForAsset } from "../shared/chartColors";
+import { getColorForAsset } from "@/components/shared/chartColors";
 import type { OppFilter, SortOption } from "@/lib/useAssetFilterSort";
 import {
   Select,

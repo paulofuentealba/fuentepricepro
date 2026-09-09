@@ -6,25 +6,10 @@ import { cn } from "@/lib/utils";
 import { Sliders, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
-import { MethodDetailSheet } from "@/components/ceiling/watchlist/MethodDetailSheet";
+import { MethodDetailSheet } from "@/components/shared/MethodDetailSheet";
+import type { MethodType, ValuationData } from "@/lib/valuationTypes";
 
-export type MethodType = "gordon" | "bazin" | "graham" | "lynch" | "consensus";
-
-export interface ValuationData {
-  bazin: number | null;
-  graham: number | null;
-  gordon: number | null;
-  lynch?: number | null;
-  consensus: number | null;
-  margin?: number;
-  methodDetails?: {
-    gordon?: { formula: string; rate: number; growth: number; source: string; date: string; growthSource?: string };
-    bazin?: { formula: string; yieldTarget: number; isNetJcp?: boolean; source: string; date: string };
-    graham?: { formula: string; margin: number; source: string; date: string };
-    lynch?: { formula: string; growth: number; dividendYield: number; source: string; date: string };
-    consensus?: { methods: string[]; excluded: string[] };
-  };
-}
+export type { MethodType, ValuationData };
 
 export interface ValuationConsensusMatrixProps {
   valuation: ValuationData;

@@ -14,7 +14,7 @@ import type { WatchlistItem } from "@/lib/watchlist";
 import type { LiveQuote } from "@/lib/apiService.functions";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency } from "@/lib/i18n";
-import { AssetTicker, PriceTag } from "../shared/AssetDataDisplay";
+import { AssetTicker, PriceTag } from "@/components/shared/AssetDataDisplay";
 import { Save, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { useWatchlist } from "@/lib/watchlist";

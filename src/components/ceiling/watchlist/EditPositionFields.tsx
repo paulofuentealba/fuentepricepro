@@ -7,7 +7,7 @@ import type { WatchlistItem } from "@/lib/watchlist";
 import { useWatchlist } from "@/lib/watchlist";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
-import { MaskedInput } from "../shared/MaskedInput";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 import { Target, TrendingUp } from "lucide-react";
 
 interface EditPositionFieldsProps {

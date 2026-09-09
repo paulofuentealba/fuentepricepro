@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { getAssetPnL } from "@/lib/selectors/assetPnL";
-import { getColorForAsset } from "@/components/ceiling/shared/chartColors";
+import { getColorForAsset } from "@/components/shared/chartColors";
 import { formatCurrency, formatPercent, getDisplayAssetType } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import { Input } from "@/components/ui/input";

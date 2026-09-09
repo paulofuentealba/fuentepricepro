@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
-import { MaskedInput } from "@/components/ceiling/shared/MaskedInput";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 import type { SearchHit } from "@/lib/api/types";
 import { assetQueryOptions, exchangeRateQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";

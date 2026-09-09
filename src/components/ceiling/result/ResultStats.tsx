@@ -20,7 +20,7 @@ import { TIMEFRAMES, type Timeframe } from "@/lib/resultCard";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { TargetYieldSlider } from "../../ui/TargetYieldSlider";
-import { MaskedInput } from "../shared/MaskedInput";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 import { Label } from "@/components/ui/label";
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {

@@ -24,7 +24,7 @@ import {
   PriceTag,
   SafetyMarginBadge,
   YieldIndicator,
-} from "./shared/AssetDataDisplay";
+} from "@/components/shared/AssetDataDisplay";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { TargetYieldSlider } from "@/components/ui/TargetYieldSlider";
 import { useSettings } from "@/lib/settings";
@@ -95,7 +95,7 @@ export function DividendRadar() {
           // useAssetFilterSort's counts/sort/filter logic below expects plain numbers —
           // isValuationUnavailable is a parallel flag consumed only by the display layer
           // (SafetyMarginBadge/YieldIndicator/PriceTag already render "—" for null/undefined,
-          // see src/components/ceiling/shared/AssetDataDisplay.tsx) so we don't show a
+          // see src/components/shared/AssetDataDisplay.tsx) so we don't show a
           // literal 0 as if it were a real "at ceiling price"/"0% yield" result.
           safetyMargin: valuation.margin,
           ceiling: valuation.activeCeiling,

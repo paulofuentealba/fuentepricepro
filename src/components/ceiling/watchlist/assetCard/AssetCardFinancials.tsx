@@ -3,7 +3,7 @@ import { ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatPercent, formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
-import { PriceTag } from "../../shared/AssetDataDisplay";
+import { PriceTag } from "@/components/shared/AssetDataDisplay";
 import { useI18n } from "@/lib/i18n-provider";
 import type { WatchlistItem } from "@/lib/watchlist";
 import { cn } from "@/lib/utils";

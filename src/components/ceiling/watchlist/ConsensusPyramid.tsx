@@ -4,24 +4,8 @@ import type { Currency } from "@/lib/domain";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import { useState } from "react";
-import { MethodDetailSheet } from "./MethodDetailSheet";
-
-type MethodType = "gordon" | "bazin" | "graham" | "lynch" | "consensus";
-
-interface ValuationData {
-  bazin: number | null;
-  graham: number | null;
-  gordon: number | null;
-  lynch?: number | null;
-  consensus: number | null;
-  methodDetails?: {
-    gordon?: { formula: string; rate: number; growth: number; source: string; date: string; growthSource: string };
-    bazin?: { formula: string; yieldTarget: number; isNetJcp: boolean; source: string; date: string };
-    graham?: { formula: string; margin: number; source: string; date: string };
-    lynch?: { formula: string; growth: number; dividendYield: number; source: string; date: string };
-    consensus?: { methods: string[]; excluded: string[] };
-  };
-}
+import { MethodDetailSheet } from "@/components/shared/MethodDetailSheet";
+import type { MethodType, ValuationData } from "@/lib/valuationTypes";
 
 interface ConsensusPyramidProps {
   valuation: ValuationData;

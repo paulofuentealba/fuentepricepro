@@ -9,7 +9,7 @@ import { formatCurrency, getDisplayAssetType } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { exchangeRateQueryOptions } from "@/lib/queryOptions";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { getColorForAsset } from "../shared/chartColors";
+import { getColorForAsset } from "@/components/shared/chartColors";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
 import { useMarketScope } from "@/lib/useMarketScope";
