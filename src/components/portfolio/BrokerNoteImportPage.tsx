@@ -60,7 +60,7 @@ export function BrokerNoteImportPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
-  const { upsertManyAsync } = useWatchlist();
+  const { items: watchlistItems, upsertManyAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const { mappings, saveMappings } = useIssuerTickerMappings();
   const { isUS, priorityBrokers, secondaryBrokers } = useMarketScope();
@@ -265,6 +265,7 @@ export function BrokerNoteImportPage() {
         newlyCreatedTransactions,
         assetDataMap,
         detectedBroker,
+        watchlistItems,
       );
 
       await upsertManyAsync(itemsToImport);

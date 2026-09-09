@@ -50,7 +50,9 @@ export function consolidateTradesToWatchlistItems(
   newlyCreatedTransactions: Transaction[],
   assetDataMap: Record<string, any> = {},
   detectedBroker?: SupportedBroker | null,
+  existingWatchlistItems: WatchlistItem[] = [],
 ): WatchlistItem[] {
+  const existingById = new Map(existingWatchlistItems.map((i) => [i.id, i]));
   const tradesByTicker = new Map<string, typeof trades>();
   for (const trade of trades) {
     const ticker = trade.ticker.toUpperCase();
@@ -66,8 +68,10 @@ export function consolidateTradesToWatchlistItems(
     const assetData = assetDataMap[ticker] || null;
 
     const type = assetData?.type || classifyBr(ticker);
+    const id = makeId(ticker, type);
+    const existing = existingById.get(id);
     const annualDiv = assetData ? getCanonicalAnnualDividend(assetData, 3) : 0;
-    const target = 6;
+    const target = existing?.targetYield ?? 6;
     // Single inference used for BOTH the valuation call and the WatchlistItem written below —
     // previously the WatchlistItem hardcoded "BRL" regardless of this, silently mislabeling every
     // imported USD position (e.g. a Schwab confirmation for a NYSE ticker) as Brazilian Reais.
@@ -99,7 +103,7 @@ export function consolidateTradesToWatchlistItems(
     const { quantity, averagePrice } = recalculateHoldingFromTransactions(allTickerTransactions);
 
     itemsToImport.push({
-      id: makeId(ticker, type),
+      id,
       ticker: ticker,
       name: assetData?.name || ticker,
       type,
@@ -112,13 +116,17 @@ export function consolidateTradesToWatchlistItems(
       quantity,
       averagePrice,
       paymentMonths: Array.isArray(assetData?.paymentMonths) ? assetData.paymentMonths : [],
-      payoutRatio: null,
-      targetMonthlyIncome: null,
-      customTaxRate: null,
-      sector: assetData?.sector || null,
-      addedAt: Date.now(),
-      investingSince: recalculateInvestingSinceFromTransactions(allTickerTransactions) ?? Date.now(),
-      broker: detectedBroker ? KNOWN_BROKER_LABELS[detectedBroker] : null,
+      // Preserve user customizations across re-imports (fix: previously these were always
+      // reset to null/6 here, and since watchlist writes use Firestore `merge: true` — which
+      // overwrites fields present in the payload even when null — every PDF re-import silently
+      // wiped the user's target yield, payout ratio, custom tax rate, and income goal).
+      payoutRatio: existing?.payoutRatio ?? null,
+      targetMonthlyIncome: existing?.targetMonthlyIncome ?? null,
+      customTaxRate: existing?.customTaxRate ?? null,
+      sector: assetData?.sector || existing?.sector || null,
+      addedAt: existing?.addedAt ?? Date.now(),
+      investingSince: recalculateInvestingSinceFromTransactions(allTickerTransactions) ?? existing?.investingSince ?? Date.now(),
+      broker: detectedBroker ? KNOWN_BROKER_LABELS[detectedBroker] : (existing?.broker ?? null),
     } as WatchlistItem);
   }
 
