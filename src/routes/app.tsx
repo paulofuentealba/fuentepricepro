@@ -69,6 +69,7 @@ export const Route = createFileRoute("/app")({
         content:
           "Interactive calculator, watchlist, cash-flow calendar, and smart allocation for dividend investors.",
       },
+      { name: "robots", content: "noindex, nofollow" },
     ],
     links: [{ rel: "canonical", href: "https://fuentepricepro.com/app" }],
   }),

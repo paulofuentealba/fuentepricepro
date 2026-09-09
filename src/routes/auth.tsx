@@ -53,6 +53,7 @@ export const Route = createFileRoute("/auth")({
         content:
           "Sign in to save your portfolio, project dividends, and simulate smart allocations.",
       },
+      { name: "robots", content: "noindex, nofollow" },
     ],
     links: [{ rel: "canonical", href: "https://fuentepricepro.com/auth" }],
   }),

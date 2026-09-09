@@ -6,5 +6,6 @@ Disallow: /profile
 Disallow: /admin
 Disallow: /onboarding
 Disallow: /api/
+Disallow: /auth
 
 Sitemap: https://fuentepricepro.com/sitemap.xml
