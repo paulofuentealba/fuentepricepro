@@ -99,10 +99,10 @@ function AboutPage() {
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
               <Link to="/about" className="text-foreground transition-colors font-semibold">
-                {A.badge}
+                {P.nav.about}
               </Link>
               <Link to="/methodology" className="hover:text-foreground transition-colors">
-                {t.methodologyPage.badge}
+                {P.nav.methodology}
               </Link>
               <Link to="/guides" className="hover:text-foreground transition-colors">
                 {P.nav.guides}
@@ -218,10 +218,10 @@ function AboutPage() {
           </div>
           <div className="flex flex-col gap-1">
             <Link to="/about" className="text-foreground transition-colors font-medium">
-              {A.badge}
+              {P.nav.about}
             </Link>
             <Link to="/methodology" className="hover:text-foreground transition-colors">
-              {t.methodologyPage.badge}
+              {P.nav.methodology}
             </Link>
             <Link to="/guides" className="hover:text-foreground transition-colors">
               {P.footer.col1[0]}

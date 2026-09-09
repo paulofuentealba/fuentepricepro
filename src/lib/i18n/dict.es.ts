@@ -1151,6 +1151,8 @@ export const es = {
     },
     page: {
       nav: {
+        about: "Quiénes Somos",
+        methodology: "Metodología",
         questions: "Preguntas",
         comparison: "Comparación",
         pricing: "Precios",

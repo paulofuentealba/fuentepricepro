@@ -98,10 +98,10 @@ function MethodologyPage() {
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
               <Link to="/about" className="hover:text-foreground transition-colors">
-                {t.aboutPage.badge}
+                {P.nav.about}
               </Link>
               <Link to="/methodology" className="text-foreground transition-colors font-semibold">
-                {M.badge}
+                {P.nav.methodology}
               </Link>
               <Link to="/guides" className="hover:text-foreground transition-colors">
                 {P.nav.guides}
@@ -212,10 +212,10 @@ function MethodologyPage() {
           </div>
           <div className="flex flex-col gap-1">
             <Link to="/about" className="hover:text-foreground transition-colors">
-              {t.aboutPage.badge}
+              {P.nav.about}
             </Link>
             <Link to="/methodology" className="text-foreground transition-colors font-medium">
-              {M.badge}
+              {P.nav.methodology}
             </Link>
             <Link to="/guides" className="hover:text-foreground transition-colors">
               {P.footer.col1[0]}

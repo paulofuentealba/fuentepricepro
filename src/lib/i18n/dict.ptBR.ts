@@ -1146,6 +1146,8 @@ export const ptBR = {
     },
     page: {
       nav: {
+        about: "Quem Somos",
+        methodology: "Metodologia",
         questions: "Perguntas",
         comparison: "Comparação",
         pricing: "Preços",

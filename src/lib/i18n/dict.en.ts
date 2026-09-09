@@ -1139,6 +1139,8 @@ export const en = {
     },
     page: {
       nav: {
+        about: "About Us",
+        methodology: "Methodology",
         questions: "Questions",
         comparison: "Comparison",
         pricing: "Pricing",

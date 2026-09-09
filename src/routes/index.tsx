@@ -150,10 +150,10 @@ function LandingPage() {
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
               <Link to="/about" className="hover:text-foreground transition-colors">
-                {t.aboutPage.badge}
+                {P.nav.about}
               </Link>
               <Link to="/methodology" className="hover:text-foreground transition-colors">
-                {t.methodologyPage.badge}
+                {P.nav.methodology}
               </Link>
               <a href="#perguntas" className="hover:text-foreground transition-colors">
                 {P.nav.questions}
@@ -402,10 +402,10 @@ function LandingPage() {
           </div>
           <div className="flex flex-col gap-1">
             <Link to="/about" className="hover:text-foreground transition-colors">
-              {t.aboutPage.badge}
+              {P.nav.about}
             </Link>
             <Link to="/methodology" className="hover:text-foreground transition-colors">
-              {t.methodologyPage.badge}
+              {P.nav.methodology}
             </Link>
             <Link to="/guides" className="hover:text-foreground transition-colors">
               {P.footer.col1[0]}
