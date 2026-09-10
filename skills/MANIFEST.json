@@ -41,6 +41,10 @@
       "sha256": "df1c26bae5fb5c599dc7889997c46d666c0850899356e9e2228e673beb6e386d"
     },
     {
+      "name": "fuente-tributarista-br-us",
+      "sha256": "d5ca0447a21263294d115645126f6c96b78fed7dce9d82a80c93f766f4c2cd44"
+    },
+    {
       "name": "fuente-ux-designer",
       "sha256": "758eba91fcf92e4c08204706d81d028b26b4e3b4b364e86381013199c99b0c88"
     }
