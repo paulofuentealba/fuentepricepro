@@ -72,7 +72,7 @@ export function BrokerNoteImportPage() {
   const [showSecondaryBrokers, setShowSecondaryBrokers] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const [detectedBroker, setDetectedBroker] = useState<SupportedBroker | null>(null);
   const [rows, setRows] = useState<ReviewRow[]>([]);
 
@@ -98,85 +98,120 @@ export function BrokerNoteImportPage() {
 
   function resetToUpload() {
     setStep("upload");
-    setFileName(null);
+    setFileNames([]);
     setDetectedBroker(null);
     setRows([]);
   }
 
-  async function processFile(file: File) {
-    setIsProcessing(true);
-    try {
-      const pdfjsLib = await import("pdfjs-dist");
-      if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-      }
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-      let rawText = "";
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = reconstructRowsFromTextItems(textContent.items as any);
-        rawText += pageText + "\n";
-      }
-
-      const result = parseBrokerNote(rawText, "AUTO", mappings);
-
-      if (!result.success) {
-        if (result.error === "broker_layout_unsupported") {
-          const bName = result.broker ? KNOWN_BROKER_LABELS[result.broker] || result.broker : "";
-          throw new Error(t.brokerNote.brokerLayoutUnsupported.replace("{broker}", bName));
-        }
-        if (result.error === "unknown_broker") {
-          throw new Error(t.brokerNote.unknownBroker);
-        }
-        throw new Error(t.brokerNote.malformedPdf);
-      }
-
-      const resolved = result.trades || [];
-      const unresolved = result.unresolvedTrades || [];
-
-      if (resolved.length === 0 && unresolved.length === 0) {
-        throw new Error(t.brokerNote.malformedPdf);
-      }
-
-      const nextRows: ReviewRow[] = [
-        ...resolved.map((trade, i) => ({
-          key: `r-${i}-${trade.ticker}-${trade.date}`,
-          ticker: trade.ticker.toUpperCase(),
-          isUnresolved: false,
-          type: trade.type || "buy",
-          quantity: trade.quantity,
-          price: trade.price,
-          date: trade.date,
-          fees: trade.fees,
-          checked: true,
-        })),
-        ...unresolved.map((item) => ({
-          key: item.id,
-          ticker: "",
-          isUnresolved: true,
-          normalizedKey: item.normalizedKey,
-          rawSpecification: item.rawSpecification,
-          type: item.type,
-          quantity: item.quantity,
-          price: item.price,
-          date: item.date,
-          checked: true,
-        })),
-      ];
-
-      setFileName(file.name);
-      setDetectedBroker(result.broker ?? null);
-      setRows(nextRows);
-      setStep("review");
-    } catch (err: any) {
-      toast.error(t.brokerNote.errorImport + ": " + err.message);
-    } finally {
-      setIsProcessing(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+  // Parses one PDF and returns its rows + detected broker, without touching component state —
+  // lets processFiles() accumulate results across N notes before committing a single state update.
+  async function parseOneFile(
+    file: File,
+    fileIndex: number,
+  ): Promise<{ rows: ReviewRow[]; broker: SupportedBroker | null }> {
+    const pdfjsLib = await import("pdfjs-dist");
+    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
     }
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    let rawText = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = reconstructRowsFromTextItems(textContent.items as any);
+      rawText += pageText + "\n";
+    }
+
+    const result = parseBrokerNote(rawText, "AUTO", mappings);
+
+    if (!result.success) {
+      if (result.error === "broker_layout_unsupported") {
+        const bName = result.broker ? KNOWN_BROKER_LABELS[result.broker] || result.broker : "";
+        throw new Error(t.brokerNote.brokerLayoutUnsupported.replace("{broker}", bName));
+      }
+      if (result.error === "unknown_broker") {
+        throw new Error(t.brokerNote.unknownBroker);
+      }
+      throw new Error(t.brokerNote.malformedPdf);
+    }
+
+    const resolved = result.trades || [];
+    const unresolved = result.unresolvedTrades || [];
+
+    if (resolved.length === 0 && unresolved.length === 0) {
+      throw new Error(t.brokerNote.malformedPdf);
+    }
+
+    const fileRows: ReviewRow[] = [
+      ...resolved.map((trade, i) => ({
+        key: `f${fileIndex}-r-${i}-${trade.ticker}-${trade.date}`,
+        ticker: trade.ticker.toUpperCase(),
+        isUnresolved: false,
+        type: trade.type || ("buy" as const),
+        quantity: trade.quantity,
+        price: trade.price,
+        date: trade.date,
+        fees: trade.fees,
+        checked: true,
+      })),
+      ...unresolved.map((item) => ({
+        key: `f${fileIndex}-${item.id}`,
+        ticker: "",
+        isUnresolved: true,
+        normalizedKey: item.normalizedKey,
+        rawSpecification: item.rawSpecification,
+        type: item.type,
+        quantity: item.quantity,
+        price: item.price,
+        date: item.date,
+        checked: true,
+      })),
+    ];
+
+    return { rows: fileRows, broker: result.broker ?? null };
+  }
+
+  // Processes N files sequentially (one PDF worker call at a time, kept simple over parallel to
+  // avoid spiking memory with several PDFs decoded at once), accumulating every note's rows into
+  // a single review list. A failure on one note is reported per-file and does not block the rest.
+  async function processFiles(files: File[]) {
+    if (files.length === 0) return;
+    setIsProcessing(true);
+    const allRows: ReviewRow[] = [];
+    const okNames: string[] = [];
+    let firstBroker: SupportedBroker | null = null;
+    let failedCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const { rows: fileRows, broker } = await parseOneFile(file, i);
+        allRows.push(...fileRows);
+        okNames.push(file.name);
+        if (!firstBroker && broker) firstBroker = broker;
+      } catch (err: any) {
+        failedCount++;
+        toast.error(`${file.name}: ${err.message}`);
+      }
+    }
+
+    if (allRows.length > 0) {
+      setFileNames(okNames);
+      setDetectedBroker(firstBroker);
+      setRows(allRows);
+      setStep("review");
+      if (failedCount > 0) {
+        toast.warning(
+          resolveReasonText(t, "brokerNoteImportPage.someFilesFailed", { ok: okNames.length, failed: failedCount }) ||
+            `${okNames.length} nota(s) processada(s), ${failedCount} falharam.`,
+        );
+      }
+    }
+
+    setIsProcessing(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   async function handleConfirm() {
@@ -322,7 +357,7 @@ export function BrokerNoteImportPage() {
               e.preventDefault();
               setIsDragging(false);
               if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                processFile(e.dataTransfer.files[0]);
+                processFiles(Array.from(e.dataTransfer.files));
               }
             }}
             onClick={() => !isProcessing && fileInputRef.current?.click()}
@@ -350,7 +385,7 @@ export function BrokerNoteImportPage() {
               ref={fileInputRef}
               onChange={(e) => {
                 if (e.target.files && e.target.files.length > 0) {
-                  processFile(e.target.files[0]);
+                  processFiles(Array.from(e.target.files));
                 }
               }}
             />
@@ -413,9 +448,9 @@ export function BrokerNoteImportPage() {
         <div className="rounded-[22px] border border-border/60 bg-card p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h3 className="font-serif text-base font-medium text-foreground">{t.brokerNoteImportPage?.reviewCardTitle}</h3>
-            {fileName && (
+            {fileNames.length > 0 && (
               <span className="shrink-0 rounded-full bg-success/10 px-2.5 py-1 text-[11px] font-medium text-success">
-                {fileName}
+                {fileNames.length === 1 ? fileNames[0] : `${fileNames.length} notas`}
               </span>
             )}
           </div>
