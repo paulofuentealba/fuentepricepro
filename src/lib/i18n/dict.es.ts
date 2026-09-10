@@ -1463,9 +1463,9 @@ export const es = {
           a: "El efecto bola de nieve ocurre cuando los dividendos recibidos se reinvierten en la compra de más acciones, que a su vez generan más dividendos. Con el tiempo, el crecimiento se vuelve exponencial — cuanto más tiempo el dinero permanece invertido y reinvertido, mayor es la bola de nieve de ingresos pasivos.",
         },
         {
-          // [REVISIÓN NECESARIA — afirmación fiscal específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          // Verificado el 10/09/2026 (Ley 15.270/2025). Revisar de nuevo entre mar-jun/2027 — la tributación de dividendos/JCP cambia con frecuencia.
           q: "¿Los dividendos de acciones brasileñas pagan impuesto sobre la renta?",
-          a: "Actualmente, los dividendos de acciones brasileñas (ON y PN) están exentos de Impuesto sobre la Renta para personas físicas residentes fiscales en Brasil. Los JCP (Intereses sobre Capital Propio — un mecanismo de distribución de utilidades específico de Brasil, distinto del dividendo tradicional) tienen retención en la fuente del 15%. Los rendimientos de FII (equivalente brasileño a un REIT) están exentos para personas físicas cuando la cuota se negocia en bolsa y el fondo tiene más de 50 cuotistas. Esto aplica solo a residentes fiscales brasileños — consulta siempre a un contador para tu situación específica.",
+          a: "Desde enero de 2026 (Ley 15.270/2025), los dividendos siguen exentos de Impuesto sobre la Renta en la mayoría de los casos, pero con dos cambios: (1) retención del 10% cuando una misma empresa paga más de R$ 50 mil en un mes a la misma persona física, sobre el monto total; (2) quien recibe más de R$ 600 mil al año entra en un régimen de tributación mínima anual. Los JCP (Intereses sobre Capital Propio) tienen retención en la fuente del 17,5% desde ene/2026 (antes era 15%). Los rendimientos de FII (equivalente brasileño a un REIT) están exentos para personas físicas cuando la cuota se negocia en bolsa y el fondo tiene al menos 100 cuotistas. Estas reglas cambian con frecuencia — consulta siempre a un contador para tu situación específica.",
         },
       ],
     },
@@ -1521,9 +1521,9 @@ export const es = {
           a: "El Dividend Yield (DY) se calcula sobre el precio actual de mercado. El Yield on Cost (YoC) se calcula sobre el precio promedio de compra del inversor. Para quien compró una acción hace años a un precio bajo, el YoC puede ser muy superior al DY actual — revelando la calidad real de la inversión a lo largo del tiempo.",
         },
         {
-          // [REVISIÓN NECESARIA — cifra regulatoria específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          // Verificado el 10/09/2026 (Ley 8.668/1993). Revisar de nuevo entre mar-jun/2027.
           q: "¿Qué es un payout ratio saludable para dividendos?",
-          a: "El payout ratio saludable varía por sector. Para empresas industriales y de consumo, un payout entre 40% y 70% se considera sostenible. Por encima del 100% significa que la empresa distribuye más de lo que gana — señal de alerta. Los FII (REITs brasileños) están obligados por ley a distribuir como mínimo el 95% del resultado.",
+          a: "El payout ratio saludable varía por sector. Para empresas industriales y de consumo, un payout entre 40% y 70% se considera sostenible. Por encima del 100% significa que la empresa distribuye más de lo que gana — señal de alerta. Los FII (REITs brasileños) están obligados por la Ley 8.668/1993 a distribuir como mínimo el 95% del resultado en régimen de caja.",
         },
       ],
     },
@@ -1575,9 +1575,9 @@ export const es = {
         "Glosario completo para inversores en dividendos: FII, REIT, BPA (EPS), Valor Contable, JCP y más. Definiciones claras para quien empieza a invertir en la bolsa brasileña (B3).",
       faq: [
         {
-          // [REVISIÓN NECESARIA — afirmación fiscal específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          // Verificado el 10/09/2026 (Ley 14.754/2023). Revisar de nuevo entre mar-jun/2027.
           q: "¿Qué es un FII (fondo inmobiliario brasileño)?",
-          a: "Un FII es un fondo que invierte en activos inmobiliarios — naves logísticas, oficinas, centros comerciales, CRIs — y distribuye los rendimientos mensualmente a los cuotistas. Se negocian en B3 como acciones. Para personas físicas, cuando el fondo tiene más de 50 cuotistas y cotiza en bolsa, los rendimientos están exentos de impuesto sobre la renta en Brasil.",
+          a: "Un FII es un fondo que invierte en activos inmobiliarios — naves logísticas, oficinas, centros comerciales, CRIs — y distribuye los rendimientos mensualmente a los cuotistas. Se negocian en B3 como acciones. Para personas físicas, los rendimientos están exentos de impuesto sobre la renta en Brasil cuando el fondo tiene al menos 100 cuotistas (elevado de 50 a 100 por la Ley 14.754/2023) y cotiza en bolsa, siempre que el inversor no posea el 10% o más de las cuotas ni tenga derecho a más del 10% de los rendimientos distribuidos.",
         },
         {
           q: "¿Qué es un REIT y en qué se diferencia de un FII?",
@@ -1592,9 +1592,9 @@ export const es = {
           a: "El Valor Contable por Acción — VPA en portugués, Book Value en inglés — es el patrimonio neto contable de la empresa dividido entre el número de acciones. Representa el valor teórico de liquidación por acción y se usa en la fórmula de Graham junto con el BPA.",
         },
         {
-          // [REVISIÓN NECESARIA — afirmación fiscal específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          // Verificado el 10/09/2026 (Ley 15.270/2025). Revisar de nuevo entre mar-jun/2027.
           q: "¿Qué es el JCP (Intereses sobre Capital Propio)?",
-          a: "El JCP es una forma de remuneración al accionista específica de Brasil, alternativa al dividendo, que permite a la empresa deducir el pago de la utilidad imponible. Para el accionista persona física, el JCP tiene una retención en la fuente del 15% de impuesto sobre la renta. Es común en bancos como Itaú, Bradesco y Banco do Brasil.",
+          a: "El JCP es una forma de remuneración al accionista específica de Brasil, alternativa al dividendo, que permite a la empresa deducir el pago de la utilidad imponible. Para el accionista persona física, el JCP tiene una retención en la fuente del 17,5% de impuesto sobre la renta desde enero de 2026 (Ley 15.270/2025; antes era 15%). Es común en bancos como Itaú, Bradesco y Banco do Brasil.",
         },
       ],
     },

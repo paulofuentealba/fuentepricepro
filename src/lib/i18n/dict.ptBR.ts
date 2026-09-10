@@ -1458,8 +1458,9 @@ export const ptBR = {
           a: "O efeito bola de neve ocorre quando os dividendos recebidos são reinvestidos na compra de mais ações, que por sua vez geram mais dividendos. Com o tempo, o crescimento se torna exponencial - quanto mais tempo o dinheiro fica investido e reinvestido, maior a bola de neve de renda passiva.",
         },
         {
+          // Verificado em 10/09/2026 (Lei 15.270/2025). Revisar novamente entre mar-jun/2027 — tributação de dividendos/JCP muda com frequência.
           q: "Dividendos de ações brasileiras pagam imposto de renda?",
-          a: "Atualmente, dividendos de ações brasileiras (ON e PN) são isentos de Imposto de Renda para pessoa física. Juros sobre Capital Próprio (JCP) sofrem retenção na fonte de 15%. Proventos de FIIs são isentos para PF quando a cota é negociada em bolsa e o fundo tem mais de 50 cotistas. Sempre consulte um contador para sua situação específica.",
+          a: "Desde janeiro de 2026 (Lei 15.270/2025), dividendos continuam isentos de Imposto de Renda na maioria dos casos, mas com duas mudanças: (1) retenção de 10% na fonte quando uma mesma empresa paga mais de R$ 50 mil em um mês para a mesma pessoa física, incidindo sobre o valor total; (2) quem recebe mais de R$ 600 mil por ano em rendimentos entra num regime de tributação mínima anual. Juros sobre Capital Próprio (JCP) têm retenção na fonte de 17,5% desde jan/2026 (antes era 15%). Proventos de FIIs são isentos para PF quando a cota é negociada em bolsa e o fundo tem no mínimo 100 cotistas. Essas regras mudam com frequência — sempre consulte um contador para sua situação específica.",
         },
       ],
     },
@@ -1515,8 +1516,9 @@ export const ptBR = {
           a: "Dividend Yield (DY) é calculado sobre o preço atual de mercado. Yield on Cost (YoC) é calculado sobre o preço médio de compra do investidor. Para quem comprou uma ação há anos a um preço baixo, o YoC pode ser muito superior ao DY atual - revelando a qualidade real do investimento ao longo do tempo.",
         },
         {
+          // Verificado em 10/09/2026 (Lei 8.668/1993). Revisar novamente entre mar-jun/2027.
           q: "O que é um payout ratio saudável para dividendos?",
-          a: "O payout ratio saudável varia por setor. Para empresas industriais e de consumo, um payout entre 40% e 70% é considerado sustentável. Acima de 100% significa que a empresa paga mais em dividendos do que lucra - sinal de alerta. FIIs são obrigados por lei a distribuir no mínimo 95% do resultado.",
+          a: "O payout ratio saudável varia por setor. Para empresas industriais e de consumo, um payout entre 40% e 70% é considerado sustentável. Acima de 100% significa que a empresa paga mais em dividendos do que lucra - sinal de alerta. FIIs são obrigados pela Lei 8.668/1993 a distribuir no mínimo 95% do resultado apurado em regime de caixa.",
         },
       ],
     },
@@ -1568,8 +1570,9 @@ export const ptBR = {
         "Glossario completo para investidores de dividendos: FII, REIT, LPA (EPS), VPA (Book Value), JCP e mais. Definições claras para quem está começando a investir na B3.",
       faq: [
         {
+          // Verificado em 10/09/2026 (Lei 14.754/2023). Revisar novamente entre mar-jun/2027.
           q: "O que é um FII (Fundo de Investimento Imobiliário)?",
-          a: "FII é um fundo que investe em ativos imobiliários - galpões logísticos, lajes corporativas, shoppings, CRIs - e distribui os rendimentos mensalmente aos cotistas. São negociados na B3 como ações. Para PF com mais de 50 cotistas e cotas em bolsa, os rendimentos são isentos de IR.",
+          a: "FII é um fundo que investe em ativos imobiliários - galpões logísticos, lajes corporativas, shoppings, CRIs - e distribui os rendimentos mensalmente aos cotistas. São negociados na B3 como ações. Para PF com fundo de no mínimo 100 cotistas (limite elevado de 50 para 100 pela Lei 14.754/2023) e cotas em bolsa, os rendimentos são isentos de IR - desde que o investidor não detenha 10% ou mais das cotas nem tenha direito a mais de 10% dos rendimentos distribuídos.",
         },
         {
           q: "O que é REIT e qual a diferença para FII?",
@@ -1584,8 +1587,9 @@ export const ptBR = {
           a: "VPA (Valor Patrimonial por Ação) - Book Value per Share em inglês - é o patrimônio líquido contábil da empresa dividido pelo número de ações. Representa o valor de liquidação teórico por ação e é utilizado na fórmula de Graham junto com o LPA.",
         },
         {
+          // Verificado em 10/09/2026 (Lei 15.270/2025). Revisar novamente entre mar-jun/2027.
           q: "O que é JCP (Juros sobre Capital Próprio)?",
-          a: "JCP é uma forma de remuneração ao acionista brasileira, alternativa ao dividendo, que permite a empresa deduzir o pagamento do lucro tributável. Para o acionista PF, o JCP sofre retenção na fonte de 15% de IR. É comum em bancos como Itaú, Bradesco e BB.",
+          a: "JCP é uma forma de remuneração ao acionista brasileira, alternativa ao dividendo, que permite a empresa deduzir o pagamento do lucro tributável. Para o acionista PF, o JCP sofre retenção na fonte de 17,5% de IR desde janeiro de 2026 (Lei 15.270/2025; antes era 15%). É comum em bancos como Itaú, Bradesco e BB.",
         },
       ],
     },

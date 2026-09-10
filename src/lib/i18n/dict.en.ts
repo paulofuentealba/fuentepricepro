@@ -1449,9 +1449,9 @@ export const en = {
           a: "The snowball effect happens when dividends you receive are reinvested to buy more shares, which in turn generate more dividends. Over time growth becomes exponential — the longer money stays invested and reinvested, the bigger the passive-income snowball grows.",
         },
         {
-          // [REVIEW NEEDED — jurisdiction-specific tax claim, confirm current BR law before publishing]
+          // Verified 2026-09-10 (Law 15.270/2025). Re-check between Mar-Jun 2027 — BR dividend/JCP taxation changes frequently.
           q: "Are Brazilian stock dividends taxed?",
-          a: "As of this writing, dividends from Brazilian stocks (common and preferred shares) are exempt from income tax for individual investors resident in Brazil. JCP (Interest on Equity — a Brazil-specific profit-distribution mechanism, distinct from a regular dividend) is taxed at 15% at source. FII (the Brazilian REIT-equivalent) distributions are tax-exempt for individuals when the fund trades on the exchange and has more than 50 shareholders. This applies to Brazilian tax residents only — always consult an accountant for your specific situation and jurisdiction.",
+          a: "Since January 2026 (Law 15.270/2025), dividends remain exempt from income tax in most cases, but with two changes: (1) a 10% withholding applies when a single company pays more than R$50,000 in a single month to the same individual, on the full amount; (2) anyone receiving more than R$600,000/year in total income enters an annual minimum-tax regime. JCP (Interest on Equity) is now taxed at 17.5% at source as of Jan/2026 (previously 15%). FII (Brazilian REIT-equivalent) distributions are tax-exempt for individuals when the fund trades on the exchange and has at least 100 shareholders. These rules change frequently — always consult an accountant for your specific situation and jurisdiction.",
         },
       ],
     },
@@ -1507,9 +1507,9 @@ export const en = {
           a: "Dividend Yield (DY) is calculated on the current market price. Yield on Cost (YoC) is calculated on the investor's average purchase price. For someone who bought a stock years ago at a low price, YoC can be much higher than the current DY — revealing the real quality of the investment over time.",
         },
         {
-          // [REVIEW NEEDED — jurisdiction-specific regulatory figure, confirm current BR fund law before publishing]
+          // Verified 2026-09-10 (Law 8.668/1993). Re-check between Mar-Jun 2027.
           q: "What's a healthy payout ratio for dividends?",
-          a: "A healthy payout ratio varies by sector. For industrial and consumer companies, a payout between 40% and 70% is generally considered sustainable. Above 100% means the company is paying out more than it earns — a warning sign. FIIs (Brazilian REITs) are legally required to distribute at least 95% of their result.",
+          a: "A healthy payout ratio varies by sector. For industrial and consumer companies, a payout between 40% and 70% is generally considered sustainable. Above 100% means the company is paying out more than it earns — a warning sign. FIIs (Brazilian REITs) are required by Law 8.668/1993 to distribute at least 95% of cash-basis income.",
         },
       ],
     },
@@ -1561,9 +1561,9 @@ export const en = {
         "Complete glossary for dividend investors: FII, REIT, EPS, Book Value, JCP, and more. Clear definitions for anyone starting to invest in the Brazilian market (B3).",
       faq: [
         {
-          // [REVIEW NEEDED — jurisdiction-specific tax claim, confirm current BR law before publishing]
+          // Verified 2026-09-10 (Law 14.754/2023). Re-check between Mar-Jun 2027.
           q: "What is a FII (Brazilian real estate investment fund)?",
-          a: "A FII is a fund that invests in real estate assets — logistics warehouses, office buildings, malls, CRIs — and distributes income monthly to shareholders. They trade on B3 like stocks. For individual investors when the fund has more than 50 shareholders and trades on the exchange, distributions are exempt from income tax in Brazil.",
+          a: "A FII is a fund that invests in real estate assets — logistics warehouses, office buildings, malls, CRIs — and distributes income monthly to shareholders. They trade on B3 like stocks. For individual investors, distributions are exempt from income tax in Brazil when the fund has at least 100 shareholders (raised from 50 by Law 14.754/2023) and trades on the exchange, provided the investor doesn't hold 10% or more of the fund's shares or the right to more than 10% of its distributed income.",
         },
         {
           q: "What is a REIT and how is it different from a FII?",
@@ -1578,9 +1578,9 @@ export const en = {
           a: "Book Value per Share — VPA in Portuguese — is a company's accounting net equity divided by its number of shares. It represents the theoretical liquidation value per share and is used in Graham's formula alongside EPS.",
         },
         {
-          // [REVIEW NEEDED — jurisdiction-specific tax claim, confirm current BR law before publishing]
+          // Verified 2026-09-10 (Law 15.270/2025). Re-check between Mar-Jun 2027.
           q: "What is JCP (Interest on Equity)?",
-          a: "JCP is a Brazil-specific form of shareholder compensation, an alternative to dividends, that lets the company deduct the payment from taxable income. For individual shareholders, JCP is taxed at 15% at source. It's common among banks like Itaú, Bradesco, and Banco do Brasil.",
+          a: "JCP is a Brazil-specific form of shareholder compensation, an alternative to dividends, that lets the company deduct the payment from taxable income. For individual shareholders, JCP has been taxed at 17.5% at source since January 2026 (Law 15.270/2025; previously 15%). It's common among banks like Itaú, Bradesco, and Banco do Brasil.",
         },
       ],
     },
