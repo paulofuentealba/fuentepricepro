@@ -25,6 +25,15 @@ function isLocale(v: unknown): v is Locale {
 
 function detectInitialLocale(): Locale {
   if (typeof window === "undefined") return "ptBR";
+  // ?lang= wins over everything else — if the person clicked through from a
+  // search result promising English/Spanish content, the page must actually
+  // open in that language, not silently fall back to the stored preference.
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get("lang");
+    if (isLocale(fromUrl)) return fromUrl;
+  } catch {
+    // ignore
+  }
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (isLocale(stored)) return stored;

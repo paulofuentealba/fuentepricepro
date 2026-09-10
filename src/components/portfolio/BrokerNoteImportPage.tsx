@@ -45,6 +45,9 @@ interface ReviewRow {
   date: string;
   fees?: number;
   checked: boolean;
+  /** Which note (and therefore which broker) this row came from — tracked per-row since a
+   * single import batch can now mix notes from different brokers (Item: multi-broker fix). */
+  broker: SupportedBroker | null;
 }
 
 /**
@@ -73,8 +76,14 @@ export function BrokerNoteImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fileNames, setFileNames] = useState<string[]>([]);
-  const [detectedBroker, setDetectedBroker] = useState<SupportedBroker | null>(null);
   const [rows, setRows] = useState<ReviewRow[]>([]);
+
+  // Every unique broker actually detected across the imported notes — replaces the old single
+  // `detectedBroker` now that one batch can span notes from different brokers.
+  const detectedBrokers = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.broker).filter((b): b is SupportedBroker => b != null))),
+    [rows],
+  );
 
   const priorityBrokerLabels = useMemo(
     () => priorityBrokers.map((b) => KNOWN_BROKER_LABELS[b]),
@@ -99,7 +108,6 @@ export function BrokerNoteImportPage() {
   function resetToUpload() {
     setStep("upload");
     setFileNames([]);
-    setDetectedBroker(null);
     setRows([]);
   }
 
@@ -155,6 +163,7 @@ export function BrokerNoteImportPage() {
         date: trade.date,
         fees: trade.fees,
         checked: true,
+        broker: result.broker ?? null,
       })),
       ...unresolved.map((item) => ({
         key: `f${fileIndex}-${item.id}`,
@@ -167,6 +176,7 @@ export function BrokerNoteImportPage() {
         price: item.price,
         date: item.date,
         checked: true,
+        broker: result.broker ?? null,
       })),
     ];
 
@@ -181,16 +191,14 @@ export function BrokerNoteImportPage() {
     setIsProcessing(true);
     const allRows: ReviewRow[] = [];
     const okNames: string[] = [];
-    let firstBroker: SupportedBroker | null = null;
     let failedCount = 0;
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       try {
-        const { rows: fileRows, broker } = await parseOneFile(file, i);
+        const { rows: fileRows } = await parseOneFile(file, i);
         allRows.push(...fileRows);
         okNames.push(file.name);
-        if (!firstBroker && broker) firstBroker = broker;
       } catch (err: any) {
         failedCount++;
         toast.error(`${file.name}: ${err.message}`);
@@ -199,7 +207,6 @@ export function BrokerNoteImportPage() {
 
     if (allRows.length > 0) {
       setFileNames(okNames);
-      setDetectedBroker(firstBroker);
       setRows(allRows);
       setStep("review");
       if (failedCount > 0) {
@@ -234,26 +241,36 @@ export function BrokerNoteImportPage() {
         await saveMappings(newMappings);
       }
 
-      const finalTrades: TradeRecord[] = checkedRows.map((row) => ({
-        ticker: row.ticker.trim().toUpperCase(),
-        quantity: row.quantity,
-        price: row.price,
-        date: row.date,
-        type: row.type,
-        fees: row.fees,
-      }));
+      const finalTradesWithBroker: { trade: TradeRecord; broker: SupportedBroker | null }[] = checkedRows.map(
+        (row) => ({
+          trade: {
+            ticker: row.ticker.trim().toUpperCase(),
+            quantity: row.quantity,
+            price: row.price,
+            date: row.date,
+            type: row.type,
+            fees: row.fees,
+          },
+          broker: row.broker,
+        }),
+      );
 
       const newlyCreatedTransactions: Transaction[] = [];
-      const validTrades: TradeRecord[] = [];
+      // Trades grouped by broker, so consolidateTradesToWatchlistItems (which takes a single
+      // `detectedBroker` argument) is called once per broker instead of stamping every item with
+      // whichever broker happened to be detected first (Item: multi-broker import fix).
+      const validTradesByBroker = new Map<string, TradeRecord[]>();
       let invalidDatesCount = 0;
 
-      for (const trade of finalTrades) {
+      for (const { trade, broker } of finalTradesWithBroker) {
         const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
         if (txTimestamp === null) {
           invalidDatesCount++;
           continue;
         }
-        validTrades.push(trade);
+        const brokerKey = broker ?? "__unknown__";
+        if (!validTradesByBroker.has(brokerKey)) validTradesByBroker.set(brokerKey, []);
+        validTradesByBroker.get(brokerKey)!.push(trade);
 
         const transaction: Transaction = {
           id: `tx-pdf-${trade.ticker}-${txTimestamp}-${trade.quantity}-${trade.price}`,
@@ -263,7 +280,7 @@ export function BrokerNoteImportPage() {
           quantity: trade.quantity,
           pricePerShare: trade.price,
           fees: trade.fees != null ? trade.fees : null,
-          broker: detectedBroker ? KNOWN_BROKER_LABELS[detectedBroker] : null,
+          broker: broker ? KNOWN_BROKER_LABELS[broker] : null,
         };
 
         try {
@@ -278,12 +295,15 @@ export function BrokerNoteImportPage() {
         toast.error(t.toasts.brokerNoteInvalidDatesSkipped.replace("{{count}}", String(invalidDatesCount)));
       }
 
-      if (validTrades.length === 0) {
+      const totalValidTrades = Array.from(validTradesByBroker.values()).reduce((n, arr) => n + arr.length, 0);
+      if (totalValidTrades === 0) {
         setIsImporting(false);
         return;
       }
 
-      const uniqueTickers = Array.from(new Set(validTrades.map((tr) => tr.ticker)));
+      const uniqueTickers = Array.from(
+        new Set(Array.from(validTradesByBroker.values()).flat().map((tr) => tr.ticker)),
+      );
       const assetDataMap: Record<string, any> = {};
       for (const ticker of uniqueTickers) {
         try {
@@ -294,14 +314,26 @@ export function BrokerNoteImportPage() {
         }
       }
 
-      const itemsToImport = consolidateTradesToWatchlistItems(
-        validTrades,
-        transactions,
-        newlyCreatedTransactions,
-        assetDataMap,
-        detectedBroker,
-        watchlistItems,
-      );
+      // One call per broker group; later groups overwrite earlier ones for the same ticker if a
+      // ticker somehow appears under two different brokers in the same batch (rare — a real
+      // holding normally custodies at one broker at a time), which is an acceptable, non-silent
+      // last-write-wins rather than a fabricated merge.
+      const itemsByTicker = new Map<string, ReturnType<typeof consolidateTradesToWatchlistItems>[number]>();
+      for (const [brokerKey, trades] of validTradesByBroker.entries()) {
+        const broker = brokerKey === "__unknown__" ? null : (brokerKey as SupportedBroker);
+        const groupItems = consolidateTradesToWatchlistItems(
+          trades,
+          transactions,
+          newlyCreatedTransactions,
+          assetDataMap,
+          broker,
+          watchlistItems,
+        );
+        for (const item of groupItems) {
+          itemsByTicker.set(item.id, item);
+        }
+      }
+      const itemsToImport = Array.from(itemsByTicker.values());
 
       await upsertManyAsync(itemsToImport);
       toast.success(t.brokerNote.successImport.replace("{{count}}", String(itemsToImport.length)));
@@ -459,11 +491,11 @@ export function BrokerNoteImportPage() {
             <p className="mt-4 text-sm text-muted-foreground">{t.brokerNoteImportPage?.empty}</p>
           ) : (
             <>
-              {detectedBroker && (
+              {detectedBrokers.length > 0 && (
                 <div className="mt-4 flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 px-4 py-3 text-sm">
                   <span className="text-muted-foreground">{t.brokerNoteImportPage?.detectedBroker}</span>
                   <span className="font-semibold text-foreground">
-                    {KNOWN_BROKER_LABELS[detectedBroker]}
+                    {detectedBrokers.map((b) => KNOWN_BROKER_LABELS[b]).join(", ")}
                     {detectedDate ? ` · ${detectedDate}` : ""}
                   </span>
                 </div>
@@ -516,7 +548,11 @@ export function BrokerNoteImportPage() {
                 })}
 
                 {totalFees > 0 && (() => {
-                  const noteCurrency: Currency = detectedBroker === "SCHWAB" || isUS ? "USD" : "BRL";
+                  // Multiple notes can mix BRL and USD brokers — approximate with US-market scope
+                  // or a lone detected Schwab note; a mixed-currency fee total across brokers is a
+                  // display simplification, not a calculation used anywhere downstream.
+                  const noteCurrency: Currency =
+                    (detectedBrokers.length === 1 && detectedBrokers[0] === "SCHWAB") || isUS ? "USD" : "BRL";
                   return (
                     <div className="flex items-center justify-between py-3 text-sm">
                       <div>

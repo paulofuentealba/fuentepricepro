@@ -28,7 +28,15 @@ import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as OnboardingPersonalInfoRouteImport } from './routes/onboarding.personal-info'
 import { Route as OnboardingMetasRouteImport } from './routes/onboarding.metas'
+import { Route as GuidesRiskRadarRouteImport } from './routes/guides.risk-radar'
+import { Route as GuidesMetricsRouteImport } from './routes/guides.metrics'
+import { Route as GuidesGrahamRouteImport } from './routes/guides.graham'
+import { Route as GuidesGordonRouteImport } from './routes/guides.gordon'
+import { Route as GuidesGlossaryRouteImport } from './routes/guides.glossary'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
+import { Route as GuidesConceptsRouteImport } from './routes/guides.concepts'
+import { Route as GuidesBrokersRouteImport } from './routes/guides.brokers'
+import { Route as GuidesBazinRouteImport } from './routes/guides.bazin'
 import { Route as AppWithdrawRouteImport } from './routes/app/withdraw'
 import { Route as AppTaxRouteImport } from './routes/app/tax'
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
@@ -143,9 +151,49 @@ const OnboardingMetasRoute = OnboardingMetasRouteImport.update({
   path: '/metas',
   getParentRoute: () => OnboardingRoute,
 } as any)
+const GuidesRiskRadarRoute = GuidesRiskRadarRouteImport.update({
+  id: '/risk-radar',
+  path: '/risk-radar',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesMetricsRoute = GuidesMetricsRouteImport.update({
+  id: '/metrics',
+  path: '/metrics',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesGrahamRoute = GuidesGrahamRouteImport.update({
+  id: '/graham',
+  path: '/graham',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesGordonRoute = GuidesGordonRouteImport.update({
+  id: '/gordon',
+  path: '/gordon',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesGlossaryRoute = GuidesGlossaryRouteImport.update({
+  id: '/glossary',
+  path: '/glossary',
+  getParentRoute: () => GuidesRoute,
+} as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   id: '/dividend-valuation',
   path: '/dividend-valuation',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesConceptsRoute = GuidesConceptsRouteImport.update({
+  id: '/concepts',
+  path: '/concepts',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesBrokersRoute = GuidesBrokersRouteImport.update({
+  id: '/brokers',
+  path: '/brokers',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesBazinRoute = GuidesBazinRouteImport.update({
+  id: '/bazin',
+  path: '/bazin',
   getParentRoute: () => GuidesRoute,
 } as any)
 const AppWithdrawRoute = AppWithdrawRouteImport.update({
@@ -274,7 +322,15 @@ export interface FileRoutesByFullPath {
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/app/tax': typeof AppTaxRoute
   '/app/withdraw': typeof AppWithdrawRoute
+  '/guides/bazin': typeof GuidesBazinRoute
+  '/guides/brokers': typeof GuidesBrokersRoute
+  '/guides/concepts': typeof GuidesConceptsRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/guides/glossary': typeof GuidesGlossaryRoute
+  '/guides/gordon': typeof GuidesGordonRoute
+  '/guides/graham': typeof GuidesGrahamRoute
+  '/guides/metrics': typeof GuidesMetricsRoute
+  '/guides/risk-radar': typeof GuidesRiskRadarRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app/': typeof AppIndexRoute
@@ -312,7 +368,15 @@ export interface FileRoutesByTo {
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/app/tax': typeof AppTaxRoute
   '/app/withdraw': typeof AppWithdrawRoute
+  '/guides/bazin': typeof GuidesBazinRoute
+  '/guides/brokers': typeof GuidesBrokersRoute
+  '/guides/concepts': typeof GuidesConceptsRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/guides/glossary': typeof GuidesGlossaryRoute
+  '/guides/gordon': typeof GuidesGordonRoute
+  '/guides/graham': typeof GuidesGrahamRoute
+  '/guides/metrics': typeof GuidesMetricsRoute
+  '/guides/risk-radar': typeof GuidesRiskRadarRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app': typeof AppIndexRoute
@@ -353,7 +417,15 @@ export interface FileRoutesById {
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/app/tax': typeof AppTaxRoute
   '/app/withdraw': typeof AppWithdrawRoute
+  '/guides/bazin': typeof GuidesBazinRoute
+  '/guides/brokers': typeof GuidesBrokersRoute
+  '/guides/concepts': typeof GuidesConceptsRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/guides/glossary': typeof GuidesGlossaryRoute
+  '/guides/gordon': typeof GuidesGordonRoute
+  '/guides/graham': typeof GuidesGrahamRoute
+  '/guides/metrics': typeof GuidesMetricsRoute
+  '/guides/risk-radar': typeof GuidesRiskRadarRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app/': typeof AppIndexRoute
@@ -395,7 +467,15 @@ export interface FileRouteTypes {
     | '/app/snowballeffectsimulator'
     | '/app/tax'
     | '/app/withdraw'
+    | '/guides/bazin'
+    | '/guides/brokers'
+    | '/guides/concepts'
     | '/guides/dividend-valuation'
+    | '/guides/glossary'
+    | '/guides/gordon'
+    | '/guides/graham'
+    | '/guides/metrics'
+    | '/guides/risk-radar'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
     | '/app/'
@@ -433,7 +513,15 @@ export interface FileRouteTypes {
     | '/app/snowballeffectsimulator'
     | '/app/tax'
     | '/app/withdraw'
+    | '/guides/bazin'
+    | '/guides/brokers'
+    | '/guides/concepts'
     | '/guides/dividend-valuation'
+    | '/guides/glossary'
+    | '/guides/gordon'
+    | '/guides/graham'
+    | '/guides/metrics'
+    | '/guides/risk-radar'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
     | '/app'
@@ -473,7 +561,15 @@ export interface FileRouteTypes {
     | '/app/snowballeffectsimulator'
     | '/app/tax'
     | '/app/withdraw'
+    | '/guides/bazin'
+    | '/guides/brokers'
+    | '/guides/concepts'
     | '/guides/dividend-valuation'
+    | '/guides/glossary'
+    | '/guides/gordon'
+    | '/guides/graham'
+    | '/guides/metrics'
+    | '/guides/risk-radar'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
     | '/app/'
@@ -633,11 +729,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingMetasRouteImport
       parentRoute: typeof OnboardingRoute
     }
+    '/guides/risk-radar': {
+      id: '/guides/risk-radar'
+      path: '/risk-radar'
+      fullPath: '/guides/risk-radar'
+      preLoaderRoute: typeof GuidesRiskRadarRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/metrics': {
+      id: '/guides/metrics'
+      path: '/metrics'
+      fullPath: '/guides/metrics'
+      preLoaderRoute: typeof GuidesMetricsRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/graham': {
+      id: '/guides/graham'
+      path: '/graham'
+      fullPath: '/guides/graham'
+      preLoaderRoute: typeof GuidesGrahamRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/gordon': {
+      id: '/guides/gordon'
+      path: '/gordon'
+      fullPath: '/guides/gordon'
+      preLoaderRoute: typeof GuidesGordonRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/glossary': {
+      id: '/guides/glossary'
+      path: '/glossary'
+      fullPath: '/guides/glossary'
+      preLoaderRoute: typeof GuidesGlossaryRouteImport
+      parentRoute: typeof GuidesRoute
+    }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
       path: '/dividend-valuation'
       fullPath: '/guides/dividend-valuation'
       preLoaderRoute: typeof GuidesDividendValuationRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/concepts': {
+      id: '/guides/concepts'
+      path: '/concepts'
+      fullPath: '/guides/concepts'
+      preLoaderRoute: typeof GuidesConceptsRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/brokers': {
+      id: '/guides/brokers'
+      path: '/brokers'
+      fullPath: '/guides/brokers'
+      preLoaderRoute: typeof GuidesBrokersRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/bazin': {
+      id: '/guides/bazin'
+      path: '/bazin'
+      fullPath: '/guides/bazin'
+      preLoaderRoute: typeof GuidesBazinRouteImport
       parentRoute: typeof GuidesRoute
     }
     '/app/withdraw': {
@@ -816,11 +968,27 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface GuidesRouteChildren {
+  GuidesBazinRoute: typeof GuidesBazinRoute
+  GuidesBrokersRoute: typeof GuidesBrokersRoute
+  GuidesConceptsRoute: typeof GuidesConceptsRoute
   GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
+  GuidesGlossaryRoute: typeof GuidesGlossaryRoute
+  GuidesGordonRoute: typeof GuidesGordonRoute
+  GuidesGrahamRoute: typeof GuidesGrahamRoute
+  GuidesMetricsRoute: typeof GuidesMetricsRoute
+  GuidesRiskRadarRoute: typeof GuidesRiskRadarRoute
 }
 
 const GuidesRouteChildren: GuidesRouteChildren = {
+  GuidesBazinRoute: GuidesBazinRoute,
+  GuidesBrokersRoute: GuidesBrokersRoute,
+  GuidesConceptsRoute: GuidesConceptsRoute,
   GuidesDividendValuationRoute: GuidesDividendValuationRoute,
+  GuidesGlossaryRoute: GuidesGlossaryRoute,
+  GuidesGordonRoute: GuidesGordonRoute,
+  GuidesGrahamRoute: GuidesGrahamRoute,
+  GuidesMetricsRoute: GuidesMetricsRoute,
+  GuidesRiskRadarRoute: GuidesRiskRadarRoute,
 }
 
 const GuidesRouteWithChildren =

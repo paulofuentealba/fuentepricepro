@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   UploadCloud,
   CheckCircle2,
@@ -28,6 +29,9 @@ import { useI18n } from "@/lib/i18n-provider";
 import { useImportParser } from "@/lib/useImportParser";
 import type { MappableColumn, ParseResult } from "@/lib/dynamicCsvParser";
 import { downloadCsv } from "@/lib/csv";
+import { formatCurrency } from "@/lib/formatters";
+import { isBrTicker } from "@/lib/classify";
+import type { Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
 
 interface DynamicImportModalProps {
@@ -41,7 +45,7 @@ export function DynamicImportModal({
   onOpenChange,
   onConfirmImport,
 }: DynamicImportModalProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const dict = t.dynamicImport;
 
   const {
@@ -65,6 +69,7 @@ export function DynamicImportModal({
   >({});
   const [showIgnoredDetails, setShowIgnoredDetails] = useState(false);
   const [isPersisting, setIsPersisting] = useState(false);
+  const [checkedLines, setCheckedLines] = useState<Set<number>>(new Set());
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
@@ -83,8 +88,17 @@ export function DynamicImportModal({
       setSelectedOverrides({});
       setShowIgnoredDetails(false);
       setIsPersisting(false);
+      setCheckedLines(new Set());
     }
   }, [open, reset]);
+
+  // Every parsed transaction starts checked — user unchecks the ones they don't want imported,
+  // same review pattern as the broker-note PDF import flow.
+  useEffect(() => {
+    if (state === "done" && result) {
+      setCheckedLines(new Set(result.transactions.map((tx) => tx.lineIndex)));
+    }
+  }, [state, result]);
 
   // Initialize overrides from columnMapping
   useEffect(() => {
@@ -162,10 +176,15 @@ export function DynamicImportModal({
 
   const handleConfirm = async () => {
     if (!result) return;
+    const checkedResult: ParseResult = {
+      ...result,
+      transactions: result.transactions.filter((tx) => checkedLines.has(tx.lineIndex)),
+    };
+    if (checkedResult.transactions.length === 0) return;
     if (onConfirmImport) {
       setIsPersisting(true);
       try {
-        await onConfirmImport(result);
+        await onConfirmImport(checkedResult);
         onOpenChange(false);
       } finally {
         setIsPersisting(false);
@@ -438,6 +457,46 @@ export function DynamicImportModal({
               </div>
             </div>
 
+            {/* Per-transaction review — same checklist pattern as broker-note PDF import: every
+                parsed row is listed and checked by default, user unchecks what they don't want
+                written before confirming. Nothing is persisted until Confirmar. */}
+            <div className="rounded-xl border border-border/60 bg-background/40 overflow-hidden">
+              <div className="p-3 border-b border-border/40">
+                <p className="text-xs font-semibold text-foreground">{dict.summaryTitle}</p>
+                <p className="text-[11px] text-muted-foreground">{dict.summarySubtitle}</p>
+              </div>
+              <div className="max-h-64 overflow-y-auto divide-y divide-border/40">
+                {result.transactions.map((tx) => {
+                  const rowCurrency: Currency = isBrTicker(tx.ticker) ? "BRL" : "USD";
+                  const total = tx.quantity * tx.price;
+                  return (
+                    <div key={tx.lineIndex} className="flex items-center gap-3 px-3 py-2.5">
+                      <Checkbox
+                        checked={checkedLines.has(tx.lineIndex)}
+                        onCheckedChange={(v) =>
+                          setCheckedLines((prev) => {
+                            const next = new Set(prev);
+                            if (v) next.add(tx.lineIndex);
+                            else next.delete(tx.lineIndex);
+                            return next;
+                          })
+                        }
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-foreground">{tx.ticker}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {tx.type === "BUY" ? t.brokerNote.typeBuy : t.brokerNote.typeSell} · {tx.quantity}
+                        </div>
+                      </div>
+                      <div className="shrink-0 font-mono text-sm font-semibold text-foreground">
+                        {formatCurrency(total, rowCurrency, locale)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Ignored rows accordion if any */}
             {result.ignored.length > 0 && (
               <div className="rounded-xl border border-border/60 bg-background/40 overflow-hidden">
@@ -496,7 +555,7 @@ export function DynamicImportModal({
               <Button
                 size="sm"
                 onClick={handleConfirm}
-                disabled={isPersisting || result.transactions.length === 0}
+                disabled={isPersisting || checkedLines.size === 0}
                 className="font-semibold shadow-md gap-1.5"
               >
                 {isPersisting ? (

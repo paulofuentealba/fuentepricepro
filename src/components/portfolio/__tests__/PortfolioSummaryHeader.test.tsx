@@ -17,8 +17,8 @@ vi.mock("@/components/ceiling/watchlist/AllocationChart", () => ({
   AllocationChart: () => <div data-testid="allocation-chart" />,
 }));
 
-vi.mock("@/components/ceiling/watchlist/CsvImportUploader", () => ({
-  CsvImportUploader: ({ open }: any) => (open ? <div data-testid="csv-modal" /> : null),
+vi.mock("@/components/portfolio/CsvImportWatchlistModal", () => ({
+  CsvImportWatchlistModal: ({ open }: any) => (open ? <div data-testid="csv-modal" /> : null),
 }));
 
 vi.mock("@/lib/i18n-provider", () => ({

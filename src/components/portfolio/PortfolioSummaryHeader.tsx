@@ -4,7 +4,7 @@ import { Globe, PlusCircle, FileText, FileSpreadsheet } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { AllocationChart } from "@/components/ceiling/watchlist/AllocationChart";
-import { CsvImportUploader } from "@/components/ceiling/watchlist/CsvImportUploader";
+import { CsvImportWatchlistModal } from "@/components/portfolio/CsvImportWatchlistModal";
 import { convertCurrency } from "@/lib/currency";
 import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
@@ -95,7 +95,7 @@ export function PortfolioSummaryHeader({
         </div>
       </div>
 
-      <CsvImportUploader open={isCsvModalOpen} onOpenChange={setIsCsvModalOpen} />
+      <CsvImportWatchlistModal open={isCsvModalOpen} onOpenChange={setIsCsvModalOpen} />
     </div>
   );
 }
