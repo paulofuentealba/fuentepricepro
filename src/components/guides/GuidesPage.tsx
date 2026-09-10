@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ChartContainer } from "@/components/ui/chart";
 import { useI18n } from "@/lib/i18n-provider";
+import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 export type GuideTabId =
@@ -115,9 +116,12 @@ export function GuidesPage({ defaultTab = "consensus" }: GuidesPageProps) {
               Fuente Price Pro
             </span>
           </Link>
-          <Button asChild size="sm" className="bg-success text-success-foreground hover:bg-success/90">
-            <Link to="/app">{t.landing.openApp}</Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher className="hidden md:inline-flex" />
+            <Button asChild size="sm" className="bg-success text-success-foreground hover:bg-success/90">
+              <Link to="/app">{t.landing.openApp}</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

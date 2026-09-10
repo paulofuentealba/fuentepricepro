@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { legalContent, LEGAL_LAST_UPDATED } from "@/lib/legal-content";
 
 const SITE_URL = "https://fuentepricepro.com";
@@ -73,9 +74,12 @@ function TermsPage() {
               Fuente Price Pro
             </span>
           </Link>
-          <Button asChild size="sm" variant="outline">
-            <Link to="/">{t.legal.backToHome}</Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher className="hidden md:inline-flex" />
+            <Button asChild size="sm" variant="outline">
+              <Link to="/">{t.legal.backToHome}</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

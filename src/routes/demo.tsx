@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Play, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n-provider";
+import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { startDemoMode } from "@/lib/demoMode";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 
@@ -50,12 +51,13 @@ function DemoPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-sidebar px-6 py-16 text-sidebar-foreground">
-      <Link to="/" className="mb-10 flex items-center gap-2.5">
+      <Link to="/" className="mb-6 flex items-center gap-2.5">
         <BrandMark />
         <div className="font-serif text-lg font-semibold text-sidebar-accent">
           Fuente <span className="text-sidebar-foreground/60">Price Pro</span>
         </div>
       </Link>
+      <LanguageSwitcher variant="sidebar" className="mb-10 max-w-[180px]" />
 
       <div className="w-full max-w-2xl text-center">
         <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-sidebar-accent">
