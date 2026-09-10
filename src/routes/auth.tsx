@@ -86,7 +86,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [busy, setBusy] = useState(false);
-  const returnTo = search.returnTo ?? "/";
+  const returnTo = search.returnTo ?? "/app";
 
   useEffect(() => {
     if (!loading && user && !profilePending) {

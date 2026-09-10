@@ -39,7 +39,7 @@ function ProfilePage() {
       <InvestorProfileFlow
         isModal={false}
         onComplete={() => {
-          navigate({ to: returnTo ?? "/" });
+          navigate({ to: returnTo ?? "/app" });
         }}
       />
     </div>
