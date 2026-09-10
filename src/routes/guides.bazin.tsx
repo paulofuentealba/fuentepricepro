@@ -4,6 +4,8 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/guides/bazin`;
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
 const PAGE_TITLE = "Metodo Bazin de Preco Teto - Calculo de Dividendos | Fuente Price Pro";
 const PAGE_DESCRIPTION =
   "Aprenda o metodo Bazin para calcular o preco teto de acoes de dividendos. Formula passo a passo: preco teto = media de proventos dos ultimos 5 anos dividido pelo yield alvo (6%).";
@@ -17,9 +19,11 @@ export const Route = createFileRoute("/guides/bazin")({
       { property: "og:description", content: PAGE_DESCRIPTION },
       { property: "og:type", content: "article" },
       { property: "og:url", content: PAGE_URL },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: PAGE_TITLE },
       { name: "twitter:description", content: PAGE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [{ rel: "canonical", href: PAGE_URL }],
     scripts: [
@@ -33,6 +37,18 @@ export const Route = createFileRoute("/guides/bazin")({
           mainEntityOfPage: PAGE_URL,
           author: { "@type": "Organization", name: "Fuente Price Pro" },
           publisher: { "@type": "Organization", name: "Fuente Price Pro" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
+            { "@type": "ListItem", position: 3, name: "Bazin", item: PAGE_URL },
+          ],
         }),
       },
       {

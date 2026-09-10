@@ -4,6 +4,8 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/guides/gordon`;
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
 const PAGE_TITLE = "Modelo de Gordon de Crescimento de Dividendos | Fuente Price Pro";
 const PAGE_DESCRIPTION =
   "Aprenda o Modelo de Crescimento de Gordon (DDM): P0 = D1 / (k - g). Calcule o preco justo de acoes com crescimento constante de dividendos e taxa de desconto.";
@@ -17,9 +19,11 @@ export const Route = createFileRoute("/guides/gordon")({
       { property: "og:description", content: PAGE_DESCRIPTION },
       { property: "og:type", content: "article" },
       { property: "og:url", content: PAGE_URL },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: PAGE_TITLE },
       { name: "twitter:description", content: PAGE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [{ rel: "canonical", href: PAGE_URL }],
     scripts: [
@@ -33,6 +37,18 @@ export const Route = createFileRoute("/guides/gordon")({
           mainEntityOfPage: PAGE_URL,
           author: { "@type": "Organization", name: "Fuente Price Pro" },
           publisher: { "@type": "Organization", name: "Fuente Price Pro" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
+            { "@type": "ListItem", position: 3, name: "Gordon", item: PAGE_URL },
+          ],
         }),
       },
       {

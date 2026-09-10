@@ -2,6 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
 const BASE_URL = "https://fuentepricepro.com";
+// Fixed to the date of the last content/structure audit of these public routes
+// (Item: SEO review). Update when meaningfully editing a page's content —
+// this signals actual freshness to crawlers, unlike changefreq/priority (which
+// Google mostly ignores).
+const LAST_AUDIT_DATE = "2026-09-09";
 
 interface SitemapEntry {
   path: string;
@@ -37,6 +42,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           [
             `  <url>`,
             `    <loc>${BASE_URL}${e.path}</loc>`,
+            `    <lastmod>${LAST_AUDIT_DATE}</lastmod>`,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,

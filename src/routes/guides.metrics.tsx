@@ -4,6 +4,8 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/guides/metrics`;
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
 const PAGE_TITLE = "Metricas de Dividendos: Margem de Seguranca, YoC, CAGR | Fuente Price Pro";
 const PAGE_DESCRIPTION =
   "Guia completo das principais metricas de dividendos: margem de seguranca, yield on cost (YoC), payout ratio, CAGR e DY vs YoC. Aprenda a interpretar cada indicador.";
@@ -17,9 +19,11 @@ export const Route = createFileRoute("/guides/metrics")({
       { property: "og:description", content: PAGE_DESCRIPTION },
       { property: "og:type", content: "article" },
       { property: "og:url", content: PAGE_URL },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: PAGE_TITLE },
       { name: "twitter:description", content: PAGE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [{ rel: "canonical", href: PAGE_URL }],
     scripts: [
@@ -33,6 +37,18 @@ export const Route = createFileRoute("/guides/metrics")({
           mainEntityOfPage: PAGE_URL,
           author: { "@type": "Organization", name: "Fuente Price Pro" },
           publisher: { "@type": "Organization", name: "Fuente Price Pro" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
+            { "@type": "ListItem", position: 3, name: "Metrics", item: PAGE_URL },
+          ],
         }),
       },
       {

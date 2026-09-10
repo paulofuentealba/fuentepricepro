@@ -4,6 +4,8 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/guides/risk-radar`;
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
 const PAGE_TITLE = "Risk Radar: Concentracao, Payout e Yield Trap em Dividendos | Fuente Price Pro";
 const PAGE_DESCRIPTION =
   "Identifique os principais riscos em carteiras de dividendos: concentracao setorial, concentracao por ativo, risco de payout e a armadilha do alto yield (yield trap).";
@@ -17,9 +19,11 @@ export const Route = createFileRoute("/guides/risk-radar")({
       { property: "og:description", content: PAGE_DESCRIPTION },
       { property: "og:type", content: "article" },
       { property: "og:url", content: PAGE_URL },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: PAGE_TITLE },
       { name: "twitter:description", content: PAGE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [{ rel: "canonical", href: PAGE_URL }],
     scripts: [
@@ -33,6 +37,18 @@ export const Route = createFileRoute("/guides/risk-radar")({
           mainEntityOfPage: PAGE_URL,
           author: { "@type": "Organization", name: "Fuente Price Pro" },
           publisher: { "@type": "Organization", name: "Fuente Price Pro" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
+            { "@type": "ListItem", position: 3, name: "Risk Radar", item: PAGE_URL },
+          ],
         }),
       },
       {

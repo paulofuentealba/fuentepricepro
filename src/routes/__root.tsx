@@ -118,6 +118,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Fuente Price Pro",
+          url: "https://fuentepricepro.com",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
           "@type": "Organization",
           name: "Fuente Price Pro",
           url: "https://fuentepricepro.com",
