@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { dict, type Dict, type Locale } from "./i18n";
+import { dict, type Dict, type Locale, toIntlLocale } from "./i18n";
 
 interface I18nCtx {
   locale: Locale;
@@ -24,7 +24,7 @@ function isLocale(v: unknown): v is Locale {
 }
 
 function detectInitialLocale(): Locale {
-  if (typeof window === "undefined") return "en";
+  if (typeof window === "undefined") return "ptBR";
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (isLocale(stored)) return stored;
@@ -39,18 +39,33 @@ function detectInitialLocale(): Locale {
   try {
     const nav = (navigator.language || "").toLowerCase();
     if (nav.startsWith("pt")) return "ptBR";
+    if (nav.startsWith("es")) return "es";
+    if (nav.startsWith("en")) return "en";
   } catch {
     // ignore
   }
-  return "en";
+  // No stored preference and no recognized browser language signal —
+  // default to ptBR (decision: majority of content and users are BR).
+  return "ptBR";
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>("ptBR");
 
   useEffect(() => {
     setLocaleState(detectInitialLocale());
   }, []);
+
+  // Keep <html lang> honest for accessibility/SEO crawlers that do render
+  // client JS — was previously hardcoded to "en" in __root.tsx regardless
+  // of actual content language.
+  useEffect(() => {
+    try {
+      document.documentElement.lang = toIntlLocale(locale);
+    } catch {
+      // ignore
+    }
+  }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
