@@ -46,7 +46,7 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 375;
 
   const gordonTooltip = valuation.methodDetails?.gordon
-    ? `${t.valuationAssumptions.gordonTooltipFormula}. ${t.valuationAssumptions.gordonTooltipRate.replace("{{rate}}", valuation.methodDetails.gordon.rate.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", valuation.methodDetails.gordon.growth.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowthSource}. ${t.valuationAssumptions.gordonTooltipSource.replace("{{source}}", valuation.methodDetails.gordon.source).replace("{{date}}", valuation.methodDetails.gordon.date)}`
+    ? `${t.valuationAssumptions.gordonTooltipFormula}. ${t.valuationAssumptions.gordonTooltipRate.replace("{{rate}}", valuation.methodDetails.gordon.rate.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", valuation.methodDetails.gordon.growth.toFixed(2))}. ${t.valuationAssumptions.gordonTooltipGrowthSource}. ${t.valuationAssumptions.gordonTooltipSource.replace("{{source}}", valuation.methodDetails.gordon.source).replace("{{date}}", valuation.methodDetails.gordon.date)}. ${valuation.gordonConfidence === "low" ? t.valuationAssumptions.gordonConfidenceLow : valuation.gordonConfidence === "high" ? t.valuationAssumptions.gordonConfidenceHigh : ""}`
     : t.tooltips?.gordon;
 
   const bazinTooltip = valuation.methodDetails?.bazin
@@ -266,6 +266,11 @@ export function ConsensusPyramid({ valuation, currency }: ConsensusPyramidProps)
                   <p>{t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", valuation.methodDetails.gordon.growth.toFixed(2))}</p>
                   <p className="text-muted-foreground">{t.valuationAssumptions.gordonTooltipGrowthSource}</p>
                   <p className="text-muted-foreground">{t.valuationAssumptions.gordonTooltipSource.replace("{{source}}", valuation.methodDetails.gordon.source).replace("{{date}}", valuation.methodDetails.gordon.date)}</p>
+                  {valuation.gordonConfidence && (
+                    <p className="text-muted-foreground">
+                      {valuation.gordonConfidence === "low" ? t.valuationAssumptions.gordonConfidenceLow : t.valuationAssumptions.gordonConfidenceHigh}
+                    </p>
+                  )}
                 </>
               )}
             </div>

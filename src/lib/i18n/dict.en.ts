@@ -2186,6 +2186,8 @@ export const en = {
     gordonTooltipGrowth: "Implied growth (g): {{growth}}%",
     gordonTooltipGrowthSource: "g derived from ROE × (1 - Payout)",
     gordonTooltipSource: "Source: {{source}}, date: {{date}}",
+    gordonConfidenceHigh: "Model confidence: High.",
+    gordonConfidenceLow: "Model confidence: Low — this asset's historical dividend volatility is above the threshold considered stable, so the assumed growth rate is less predictable. Methodology: H-Model (Fuller & Hsia, 1984).",
     bazinTooltipTitle: "Bazin Model (Yield Target)",
     bazinTooltipFormula: "Formula: Net Payout / Target Yield",
     bazinTooltipYieldTarget: "Target yield applied: {{yieldTarget}}%",

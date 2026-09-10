@@ -2202,6 +2202,8 @@ export const es = {
     gordonTooltipGrowth: "Crecimiento implícito (g): {{growth}}%",
     gordonTooltipGrowthSource: "g derivado de ROE × (1 - Payout)",
     gordonTooltipSource: "Fuente: {{source}}, fecha: {{date}}",
+    gordonConfidenceHigh: "Confianza del modelo: Alta.",
+    gordonConfidenceLow: "Confianza del modelo: Baja — la volatilidad histórica de dividendos de este activo supera el umbral considerado estable, por lo que la tasa de crecimiento asumida es menos predecible. Metodología: H-Model (Fuller & Hsia, 1984).",
     bazinTooltipTitle: "Modelo Bazin (Yield Objetivo)",
     bazinTooltipFormula: "Fórmula: Provento neto / Yield objetivo",
     bazinTooltipYieldTarget: "Yield objetivo aplicado: {{yieldTarget}}%",

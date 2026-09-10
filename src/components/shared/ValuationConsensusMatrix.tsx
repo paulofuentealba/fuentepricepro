@@ -346,6 +346,11 @@ export function ValuationConsensusMatrix({
                       {t.valuationAssumptions.gordonTooltipRate.replace("{{rate}}", kDiscount.toFixed(1))} •{" "}
                       {t.valuationAssumptions.gordonTooltipGrowth.replace("{{growth}}", gGrowth.toFixed(1))}
                     </div>
+                    {valuation.gordonConfidence && (
+                      <div className="text-[11px] text-muted-foreground">
+                        {valuation.gordonConfidence === "low" ? t.valuationAssumptions.gordonConfidenceLow : t.valuationAssumptions.gordonConfidenceHigh}
+                      </div>
+                    )}
                   </div>
                 }
               />
@@ -591,6 +596,11 @@ export function ValuationConsensusMatrix({
                     valuation.methodDetails.gordon.growth.toFixed(2)
                   )}
                 </p>
+                {valuation.gordonConfidence && (
+                  <p className="text-muted-foreground">
+                    {valuation.gordonConfidence === "low" ? t.valuationAssumptions.gordonConfidenceLow : t.valuationAssumptions.gordonConfidenceHigh}
+                  </p>
+                )}
               </>
             )}
             {mobileMethodOpen === "graham" && valuation.methodDetails?.graham && (

@@ -9,6 +9,7 @@ import { useUserSettings } from "@/lib/useUserSettings";
 import { assetQueryOptions, quoteQueryOptions } from "@/lib/queryOptions";
 import { formatCurrency, formatNumber, formatPercent, formatDate } from "@/lib/formatters";
 import { convertCurrency } from "@/lib/currency";
+import { resolveGordonConfidence } from "@/lib/calculations";
 import { useMarketScope } from "@/lib/useMarketScope";
 import { TickerSearchField } from "@/components/shared/TickerSearchField";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -223,6 +224,15 @@ export function AssetDeepDiveView({
     const d1 = annualDividend * (1 + g);
     return d1 / denominator;
   }, [annualDividend, kDiscount, gGrowth]);
+
+  // Gordon model confidence (Item 4): reuses the same SSOT confidence rule as the real
+  // valuation engine (resolveGordonConfidence/GORDON_MAX_GROWTH_VOLATILITY in
+  // calculations.ts), based on this ticker's real dividend history. null when there's no
+  // real asset loaded yet (representative/demo ticker) — no fabricated confidence.
+  const gordonConfidence = useMemo(
+    () => resolveGordonConfidence(tetoGordon, asset?.dividendHistory),
+    [tetoGordon, asset?.dividendHistory],
+  );
 
   // 4. Lynch: LPA × g (PEG logic)
   const tetoLynch = useMemo(() => {
@@ -986,6 +996,7 @@ export function AssetDeepDiveView({
             gordon: tetoGordon,
             lynch: tetoLynch,
             consensus: tetoConsensus,
+            gordonConfidence,
             methodDetails: {
               bazin: {
                 formula: currency === "USD" ? `DPS / ${bazinYield.toFixed(1)}%` : `DPA / ${bazinYield.toFixed(1)}%`,

@@ -13,6 +13,9 @@ export interface ValuationData {
   lynch?: number | null;
   consensus: number | null;
   margin?: number;
+  /** "high"/"low" confidence from resolveGordonConfidence() (calculations.ts), based on
+   * historical dividend growth volatility. null/undefined renders no confidence line. */
+  gordonConfidence?: "high" | "low" | null;
   methodDetails?: {
     gordon?: { formula: string; rate: number; growth: number; source: string; date: string; growthSource?: string };
     bazin?: { formula: string; yieldTarget: number; isNetJcp?: boolean; source: string; date: string };
