@@ -29,6 +29,8 @@ REQUIRED_ROLES = {
     "fuente-investidor-profissional",
     "fuente-investidor-iniciante",
     "fuente-advogado-lgpd-gdpr",
+    "fuente-copywriter-financeiro",
+    "fuente-frontend-designer",
 }
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

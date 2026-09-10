@@ -77,10 +77,10 @@ não só dois.
 🧭 9. Governança de Roles (Skills)
 Regra: Em toda atividade substantiva do projeto (revisão, plano, roadmap,
 desenho de solução, copy, UX), o Claude deve considerar explicitamente os
-dez papéis instalados: fuente-architecture-review, fuente-solution-architect,
+onze papéis instalados: fuente-architecture-review, fuente-solution-architect,
 fuente-business-architect, fuente-product-manager, fuente-product-marketing,
 fuente-ux-designer, fuente-investidor-profissional, fuente-investidor-iniciante,
-fuente-advogado-lgpd-gdpr, fuente-copywriter-financeiro.
+fuente-advogado-lgpd-gdpr, fuente-copywriter-financeiro, fuente-frontend-designer.
 Ação: Se um papel não se aplica à atividade em questão, isso deve ser
 declarado explicitamente, com o motivo — nunca omitido silenciosamente.
 A fonte canônica de cada papel vive em skills/*/SKILL.md, versionada neste
