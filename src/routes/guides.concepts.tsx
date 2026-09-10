@@ -1,83 +1,94 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { GuidesPage } from "@/components/guides/GuidesPage";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
+import { dict, type Locale } from "@/lib/i18n";
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/guides/concepts`;
 const OG_IMAGE =
   "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
-const PAGE_TITLE = "Efeito Bola de Neve e Impostos em Dividendos | Fuente Price Pro";
-const PAGE_DESCRIPTION =
-  "Entenda o efeito bola de neve no reinvestimento de dividendos e como os impostos afetam seus proventos no Brasil. Guia pratico para investidores de longo prazo.";
+
+function isValidLocale(v: unknown): v is Locale {
+  return v === "en" || v === "ptBR" || v === "es";
+}
+
+const HREFLANG: Record<Locale, string> = { ptBR: "pt-BR", en: "en", es: "es" };
+const ALL_LOCALES: Locale[] = ["ptBR", "en", "es"];
+
+function urlFor(locale: Locale): string {
+  return locale === "ptBR" ? PAGE_URL : `${PAGE_URL}?lang=${locale}`;
+}
 
 export const Route = createFileRoute("/guides/concepts")({
-  head: () => ({
-    meta: [
-      { title: PAGE_TITLE },
-      { name: "description", content: PAGE_DESCRIPTION },
-      { property: "og:title", content: PAGE_TITLE },
-      { property: "og:description", content: PAGE_DESCRIPTION },
-      { property: "og:type", content: "article" },
-      { property: "og:url", content: PAGE_URL },
-      { property: "og:image", content: OG_IMAGE },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: PAGE_TITLE },
-      { name: "twitter:description", content: PAGE_DESCRIPTION },
-      { name: "twitter:image", content: OG_IMAGE },
-    ],
-    links: [{ rel: "canonical", href: PAGE_URL }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: PAGE_TITLE,
-          description: PAGE_DESCRIPTION,
-          mainEntityOfPage: PAGE_URL,
-          author: { "@type": "Organization", name: "Fuente Price Pro" },
-          publisher: { "@type": "Organization", name: "Fuente Price Pro" },
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-            { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
-            { "@type": "ListItem", position: 3, name: "Concepts", item: PAGE_URL },
-          ],
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: [
-            {
-              "@type": "Question",
-              name: "O que e o efeito bola de neve nos investimentos?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "O efeito bola de neve ocorre quando os dividendos recebidos sao reinvestidos na compra de mais acoes, que por sua vez geram mais dividendos. Com o tempo, o crescimento se torna exponencial - quanto mais tempo o dinheiro fica investido e reinvestido, maior a bola de neve de renda passiva.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "Dividendos de acoes brasileiras pagam imposto de renda?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "Atualmente, dividendos de acoes brasileiras (ON e PN) sao isentos de Imposto de Renda para pessoa fisica. Juros sobre Capital Proprio (JCP) sofrem retencao na fonte de 15%. Proventos de FIIs sao isentos para PF quando a cota e negociada em bolsa e o fundo tem mais de 50 cotistas. Sempre consulte um contador para sua situacao especifica.",
-              },
-            },
-          ],
-        }),
-      },
-    ],
+  validateSearch: (search: Record<string, unknown>): { lang?: Locale } => ({
+    lang: isValidLocale(search.lang) ? search.lang : undefined,
   }),
+  loaderDeps: ({ search }) => ({ lang: search.lang }),
+  loader: ({ deps }) => ({ locale: (deps.lang ?? "ptBR") as Locale }),
+  head: ({ loaderData }) => {
+    const locale = loaderData?.locale ?? "ptBR";
+    const S = dict[locale].seoGuides.concepts;
+
+    return {
+      meta: [
+        { title: S.title },
+        { name: "description", content: S.description },
+        { property: "og:title", content: S.title },
+        { property: "og:description", content: S.description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: urlFor(locale) },
+        { property: "og:image", content: OG_IMAGE },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: S.title },
+        { name: "twitter:description", content: S.description },
+        { name: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [
+        { rel: "canonical", href: urlFor(locale) },
+        ...ALL_LOCALES.map((l) => ({ rel: "alternate", hrefLang: HREFLANG[l], href: urlFor(l) })),
+        { rel: "alternate", hrefLang: "x-default", href: PAGE_URL },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: S.title,
+            description: S.description,
+            mainEntityOfPage: urlFor(locale),
+            inLanguage: HREFLANG[locale],
+            author: { "@type": "Organization", name: "Fuente Price Pro" },
+            publisher: { "@type": "Organization", name: "Fuente Price Pro" },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
+              { "@type": "ListItem", position: 3, name: "Concepts", item: urlFor(locale) },
+            ],
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: S.faq.map((item) => ({
+              "@type": "Question",
+              name: item.q,
+              acceptedAnswer: { "@type": "Answer", text: item.a },
+            })),
+          }),
+        },
+      ],
+    };
+  },
   component: () => <GuidesPage defaultTab="concepts" />,
   errorComponent: RouteErrorComponent,
   notFoundComponent: RouteNotFoundComponent,

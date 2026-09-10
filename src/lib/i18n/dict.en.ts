@@ -1419,6 +1419,196 @@ export const en = {
     button: "See Pricing & Upgrade",
     cancel: "Maybe later",
   },
+  seoGuides: {
+    bazin: {
+      title: "Bazin Method: How to Calculate a Dividend Stock's Ceiling Price | Fuente Price Pro",
+      description:
+        "Learn the Bazin method to calculate the ceiling price of dividend stocks. Step-by-step formula: ceiling price = 5-year average dividend ÷ target yield (6%).",
+      faq: [
+        {
+          q: "What is the Bazin ceiling price method?",
+          a: "The Bazin method, popularized by Brazilian investor Décio Bazin, calculates the maximum price to pay for a dividend stock by dividing its 5-year average annual dividend by the investor's minimum acceptable yield.",
+        },
+        {
+          q: "How do you calculate the ceiling price using the Bazin method?",
+          a: "Bazin Ceiling Price = 5-Year Average Annual Dividend ÷ Target Yield. Example: if a stock paid an average of $2.00 per year and your target yield is 6%, the ceiling price is $2.00 / 0.06 = $33.33.",
+        },
+        {
+          q: "Why did Décio Bazin use 6% as the minimum yield?",
+          a: "Bazin set 6% as the minimum dividend return needed to justify the added risk of stocks over fixed income in the Brazilian market. Above that yield, the stock trades below its ceiling price; below it, the stock is considered expensive relative to the method.",
+        },
+      ],
+    },
+    concepts: {
+      title: "The Snowball Effect and Dividend Taxes | Fuente Price Pro",
+      description:
+        "Understand the snowball effect of reinvesting dividends and how taxes affect your Brazilian dividend income. A practical guide for long-term investors.",
+      faq: [
+        {
+          q: "What is the snowball effect in investing?",
+          a: "The snowball effect happens when dividends you receive are reinvested to buy more shares, which in turn generate more dividends. Over time growth becomes exponential — the longer money stays invested and reinvested, the bigger the passive-income snowball grows.",
+        },
+        {
+          // [REVIEW NEEDED — jurisdiction-specific tax claim, confirm current BR law before publishing]
+          q: "Are Brazilian stock dividends taxed?",
+          a: "As of this writing, dividends from Brazilian stocks (common and preferred shares) are exempt from income tax for individual investors resident in Brazil. JCP (Interest on Equity — a Brazil-specific profit-distribution mechanism, distinct from a regular dividend) is taxed at 15% at source. FII (the Brazilian REIT-equivalent) distributions are tax-exempt for individuals when the fund trades on the exchange and has more than 50 shareholders. This applies to Brazilian tax residents only — always consult an accountant for your specific situation and jurisdiction.",
+        },
+      ],
+    },
+    graham: {
+      title: "Graham Formula for Stock Intrinsic Value | Fuente Price Pro",
+      description:
+        "Understand Benjamin Graham's formula for calculating a stock's intrinsic value: IV = √(22.5 × EPS × Book Value). Learn when to apply it and which sectors are exceptions.",
+      faq: [
+        {
+          q: "What is Graham's formula for intrinsic value?",
+          a: "Graham's formula is: Intrinsic Value = √(22.5 × EPS × Book Value per Share), where EPS is Earnings Per Share and Book Value per Share is the company's net equity divided by shares outstanding. The number 22.5 represents a maximum P/E of 15 multiplied by a maximum Price-to-Book of 1.5, as defined by Benjamin Graham in 'The Intelligent Investor.'",
+        },
+        {
+          q: "Does Graham's formula work for banks and REITs/FIIs?",
+          a: "No. Graham's formula doesn't apply to financial institutions (banks, insurers) or REITs/FIIs, because their capital structure and accounting are fundamentally different from the industrial companies Graham designed the formula for.",
+        },
+        {
+          q: "What does it mean when a stock trades below its Graham value?",
+          a: "When a stock's market price is below the Intrinsic Value calculated by Graham's formula, the stock is considered undervalued — there's a margin of safety. Graham recommended buying with a margin of safety of at least 33% below intrinsic value.",
+        },
+      ],
+    },
+    gordon: {
+      title: "Gordon Growth Model for Dividend Stocks | Fuente Price Pro",
+      description:
+        "Learn the Gordon Growth Model (DDM): P0 = D1 / (k - g). Calculate the fair price of stocks with constant dividend growth and a discount rate.",
+      faq: [
+        {
+          q: "What is the Gordon Growth Model?",
+          a: "The Gordon Growth Model (DDM — Dividend Discount Model) calculates the fair price of a stock with growing dividends: P0 = D1 / (k - g), where D1 is the next expected dividend, k is the investor's discount rate, and g is the perpetual dividend growth rate. It's only valid when k > g.",
+        },
+        {
+          q: "What's the difference between the Gordon Model and the Bazin method?",
+          a: "The Bazin method uses the historical average dividend divided by a fixed target yield (6%) — it's simple and backward-looking. The Gordon Model uses the expected future dividend and a growth rate — it's forward-looking and more sensitive to long-term assumptions. Fuente Price Pro calculates both and shows the consensus.",
+        },
+        {
+          q: "When doesn't the Gordon Model work?",
+          a: "The Gordon Model isn't valid when: (1) the company doesn't pay dividends, (2) the growth rate g is greater than or equal to the discount rate k, or (3) dividends are unstable (e.g. cyclical or declining). In these cases, the calculated price has no economic meaning.",
+        },
+      ],
+    },
+    metrics: {
+      title: "Dividend Metrics: Margin of Safety, Yield on Cost, CAGR | Fuente Price Pro",
+      description:
+        "Complete guide to the key dividend metrics: margin of safety, yield on cost (YoC), payout ratio, CAGR, and DY vs YoC. Learn how to read each indicator.",
+      faq: [
+        {
+          q: "What is the margin of safety in dividend investing?",
+          a: "The margin of safety is the percentage difference between the calculated ceiling price and the current market price. The bigger the margin, the cheaper the stock is relative to its fair value. Example: ceiling price $40.00, current price $32.00, a 20% margin of safety.",
+        },
+        {
+          q: "What's the difference between Dividend Yield (DY) and Yield on Cost (YoC)?",
+          a: "Dividend Yield (DY) is calculated on the current market price. Yield on Cost (YoC) is calculated on the investor's average purchase price. For someone who bought a stock years ago at a low price, YoC can be much higher than the current DY — revealing the real quality of the investment over time.",
+        },
+        {
+          // [REVIEW NEEDED — jurisdiction-specific regulatory figure, confirm current BR fund law before publishing]
+          q: "What's a healthy payout ratio for dividends?",
+          a: "A healthy payout ratio varies by sector. For industrial and consumer companies, a payout between 40% and 70% is generally considered sustainable. Above 100% means the company is paying out more than it earns — a warning sign. FIIs (Brazilian REITs) are legally required to distribute at least 95% of their result.",
+        },
+      ],
+    },
+    riskRadar: {
+      title: "Risk Radar: Concentration, Payout, and Yield Trap in Dividend Investing | Fuente Price Pro",
+      description:
+        "Identify the key risks in dividend portfolios: sector concentration, asset concentration, payout risk, and the high-yield trap.",
+      faq: [
+        {
+          q: "What is a yield trap?",
+          a: "A yield trap happens when a stock shows a very high dividend yield — seemingly attractive — but it's the result of a sharp drop in the stock price, not a real increase in dividends. Investing in this situation can mean buying a deteriorating company that will soon cut its dividend.",
+        },
+        {
+          q: "How do you spot unsustainable payout risk?",
+          a: "A payout ratio above 90–100% of net income is a warning sign for non-REIT companies: the company is distributing more than it earns, putting dividend sustainability at risk. Also check the trend: a rising payout with stagnant earnings is more dangerous than a high payout with growing earnings.",
+        },
+        {
+          q: "What's the maximum recommended sector concentration for a dividend portfolio?",
+          a: "There's no single rule, but conservative investors typically cap each sector at 20–30% of the portfolio. High concentration in one sector (e.g. over 40% in banks or utilities) exposes the portfolio to sector-specific regulatory and macroeconomic risks that can hit every holding at once.",
+        },
+        {
+          q: "How does Fuente Price Pro help spot portfolio risks?",
+          a: "Fuente Price Pro's Risk Radar automatically analyzes your portfolio and flags: excessive sector or asset concentration, elevated payout ratios, yields far above the sector average (a possible yield trap), and stocks trading above their ceiling price — with visual alerts using semantic colors.",
+        },
+      ],
+    },
+    brokers: {
+      title: "Supported Brokers: XP, BTG, Inter, Schwab | Fuente Price Pro",
+      description:
+        "See all the brokers supported by Fuente Price Pro for brokerage note imports: XP, Clear, Rico, BTG Pactual, Banco Inter, NuInvest, Schwab, and more.",
+      faq: [
+        {
+          q: "Which Brazilian brokers does Fuente Price Pro support?",
+          a: "Fuente Price Pro supports native import of SINACOR-standard brokerage notes from: XP Investimentos, Clear, Rico, Modal, BTG Pactual, Banco Inter, NuInvest, Órama, and Genial Investimentos. Import is done via the brokerage note PDF.",
+        },
+        {
+          q: "Does Fuente Price Pro support international brokers?",
+          a: "Yes. Fuente Price Pro supports CSV statement import from Charles Schwab International Account, letting you track US stocks (NYSE, NASDAQ) and international ETFs in the same portfolio as your Brazilian holdings.",
+        },
+        {
+          q: "What is the SINACOR standard for brokerage notes?",
+          a: "SINACOR is B3's (the Brazilian stock exchange) Integrated Settlement and Clearing System. Brokerage notes in the SINACOR standard follow a standardized layout that lets Fuente Price Pro automatically identify buy/sell trades, fees, and traded assets.",
+        },
+      ],
+    },
+    glossary: {
+      title: "Investing Glossary: FII, REIT, EPS, Book Value, JCP | Fuente Price Pro",
+      description:
+        "Complete glossary for dividend investors: FII, REIT, EPS, Book Value, JCP, and more. Clear definitions for anyone starting to invest in the Brazilian market (B3).",
+      faq: [
+        {
+          // [REVIEW NEEDED — jurisdiction-specific tax claim, confirm current BR law before publishing]
+          q: "What is a FII (Brazilian real estate investment fund)?",
+          a: "A FII is a fund that invests in real estate assets — logistics warehouses, office buildings, malls, CRIs — and distributes income monthly to shareholders. They trade on B3 like stocks. For individual investors when the fund has more than 50 shareholders and trades on the exchange, distributions are exempt from income tax in Brazil.",
+        },
+        {
+          q: "What is a REIT and how is it different from a FII?",
+          a: "A REIT (Real Estate Investment Trust) is the US equivalent of the Brazilian FII. Both invest in real estate and distribute income regularly. The key difference is that US REITs pay dividends in US dollars and are subject to US taxation.",
+        },
+        {
+          q: "What is EPS (Earnings Per Share)?",
+          a: "EPS (Earnings Per Share) — LPA in Portuguese — is a company's net income divided by its number of outstanding shares. It's one of the main profitability indicators and is used in Graham's formula to calculate intrinsic value.",
+        },
+        {
+          q: "What is Book Value per Share?",
+          a: "Book Value per Share — VPA in Portuguese — is a company's accounting net equity divided by its number of shares. It represents the theoretical liquidation value per share and is used in Graham's formula alongside EPS.",
+        },
+        {
+          // [REVIEW NEEDED — jurisdiction-specific tax claim, confirm current BR law before publishing]
+          q: "What is JCP (Interest on Equity)?",
+          a: "JCP is a Brazil-specific form of shareholder compensation, an alternative to dividends, that lets the company deduct the payment from taxable income. For individual shareholders, JCP is taxed at 15% at source. It's common among banks like Itaú, Bradesco, and Banco do Brasil.",
+        },
+      ],
+    },
+    dividendValuation: {
+      title: "Dividend Yield Formula & Bazin Ceiling Price Guide | Fuente Price Pro",
+      description:
+        "Learn how to calculate the ceiling price of a dividend stock with the Bazin method. Step-by-step dividend yield formula, worked examples, and edge cases.",
+      faq: [
+        {
+          q: "What is the dividend yield formula?",
+          a: "Dividend yield = (annual dividend per share ÷ current share price) × 100. It tells you the cash return a stock pays relative to its price.",
+        },
+        {
+          q: "How do you calculate the ceiling price of a dividend stock?",
+          a: "Using the Bazin method: ceiling price = average annual dividend of the last 5 years ÷ target dividend yield. If a stock paid an average of $2 and you want a 6% yield, the ceiling price is $2 / 0.06 = $33.33.",
+        },
+        {
+          q: "What is the Bazin method?",
+          a: "The Bazin method, popularized by Décio Bazin, values a dividend stock by dividing its average dividend by the investor's minimum acceptable yield — producing a ceiling price above which the stock is considered overpriced.",
+        },
+      ],
+    },
+    guidesHub: {
+      title: "Investing Guides & Valuation Methodology | Fuente Price Pro",
+      description:
+        "The complete Fuente Price Pro wiki: Bazin, Graham and Gordon valuation models, dividend yield formulas, portfolio risk alerts, and supported brokerage note formats.",
+    },
+  },
   docs: {
     title: "Valuation Methodology",
     description:

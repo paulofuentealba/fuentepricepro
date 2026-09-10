@@ -1433,6 +1433,196 @@ export const es = {
     button: "Ver Planes y Actualizar",
     cancel: "Tal vez más tarde",
   },
+  seoGuides: {
+    bazin: {
+      title: "Método Bazin: Cómo Calcular el Precio Techo de una Acción con Dividendos | Fuente Price Pro",
+      description:
+        "Aprende el método Bazin para calcular el precio techo de acciones con dividendos. Fórmula paso a paso: precio techo = dividendo promedio de 5 años ÷ yield objetivo (6%).",
+      faq: [
+        {
+          q: "¿Qué es el método Bazin de precio techo?",
+          a: "El método Bazin, popularizado por el inversor brasileño Décio Bazin, calcula el precio máximo a pagar por una acción de dividendos dividiendo el dividendo promedio anual de los últimos 5 años entre el yield mínimo aceptable para el inversor.",
+        },
+        {
+          q: "¿Cómo se calcula el precio techo con el método Bazin?",
+          a: "Precio Techo Bazin = Dividendo Promedio Anual (últimos 5 años) ÷ Yield Objetivo. Ejemplo: si una acción pagó en promedio $2.00 al año y tu yield objetivo es 6%, el precio techo es $2.00 / 0.06 = $33.33.",
+        },
+        {
+          q: "¿Por qué Décio Bazin usaba 6% como yield mínimo?",
+          a: "Bazin fijó el 6% como el retorno mínimo en dividendos necesario para justificar el riesgo adicional de las acciones frente a la renta fija en el mercado brasileño. Por encima de ese yield, la acción cotiza por debajo de su precio techo; por debajo, se considera cara según el método.",
+        },
+      ],
+    },
+    concepts: {
+      title: "El Efecto Bola de Nieve y los Impuestos sobre Dividendos | Fuente Price Pro",
+      description:
+        "Entiende el efecto bola de nieve al reinvertir dividendos y cómo los impuestos afectan tus ingresos por dividendos brasileños. Guía práctica para inversores de largo plazo.",
+      faq: [
+        {
+          q: "¿Qué es el efecto bola de nieve en las inversiones?",
+          a: "El efecto bola de nieve ocurre cuando los dividendos recibidos se reinvierten en la compra de más acciones, que a su vez generan más dividendos. Con el tiempo, el crecimiento se vuelve exponencial — cuanto más tiempo el dinero permanece invertido y reinvertido, mayor es la bola de nieve de ingresos pasivos.",
+        },
+        {
+          // [REVISIÓN NECESARIA — afirmación fiscal específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          q: "¿Los dividendos de acciones brasileñas pagan impuesto sobre la renta?",
+          a: "Actualmente, los dividendos de acciones brasileñas (ON y PN) están exentos de Impuesto sobre la Renta para personas físicas residentes fiscales en Brasil. Los JCP (Intereses sobre Capital Propio — un mecanismo de distribución de utilidades específico de Brasil, distinto del dividendo tradicional) tienen retención en la fuente del 15%. Los rendimientos de FII (equivalente brasileño a un REIT) están exentos para personas físicas cuando la cuota se negocia en bolsa y el fondo tiene más de 50 cuotistas. Esto aplica solo a residentes fiscales brasileños — consulta siempre a un contador para tu situación específica.",
+        },
+      ],
+    },
+    graham: {
+      title: "Fórmula de Graham para el Valor Intrínseco de Acciones | Fuente Price Pro",
+      description:
+        "Entiende la fórmula de Benjamin Graham para calcular el valor intrínseco de una acción: VI = √(22.5 × BPA × Valor Contable). Aprende cuándo aplicarla y qué sectores son excepción.",
+      faq: [
+        {
+          q: "¿Cuál es la fórmula de Graham para el valor intrínseco?",
+          a: "La fórmula de Graham es: Valor Intrínseco = √(22.5 × BPA × Valor Contable por Acción), donde BPA es el Beneficio por Acción y el Valor Contable por Acción es el patrimonio neto de la empresa dividido entre las acciones en circulación. El número 22.5 representa un P/E máximo de 15 multiplicado por un Precio/Valor Contable máximo de 1.5, tal como lo definió Benjamin Graham en 'El Inversor Inteligente.'",
+        },
+        {
+          q: "¿La fórmula de Graham funciona para bancos y REITs/FII?",
+          a: "No. La fórmula de Graham no aplica a instituciones financieras (bancos, aseguradoras) ni a REITs/FII, porque su estructura de capital y contabilidad son fundamentalmente distintas de las empresas industriales para las que Graham la diseñó.",
+        },
+        {
+          q: "¿Qué significa cuando una acción cotiza por debajo de su valor de Graham?",
+          a: "Cuando el precio de mercado de una acción está por debajo del Valor Intrínseco calculado con la fórmula de Graham, la acción se considera subvalorada — existe un margen de seguridad. Graham recomendaba comprar con un margen de seguridad de al menos 33% por debajo del valor intrínseco.",
+        },
+      ],
+    },
+    gordon: {
+      title: "Modelo de Crecimiento de Gordon para Acciones con Dividendos | Fuente Price Pro",
+      description:
+        "Aprende el Modelo de Crecimiento de Gordon (DDM): P0 = D1 / (k - g). Calcula el precio justo de acciones con crecimiento constante de dividendos y tasa de descuento.",
+      faq: [
+        {
+          q: "¿Qué es el Modelo de Crecimiento de Gordon?",
+          a: "El Modelo de Gordon (DDM - Dividend Discount Model) calcula el precio justo de una acción con dividendos crecientes: P0 = D1 / (k - g), donde D1 es el próximo dividendo esperado, k es la tasa de descuento del inversor y g es la tasa de crecimiento perpetuo de los dividendos. Solo es válido cuando k > g.",
+        },
+        {
+          q: "¿Cuál es la diferencia entre el Modelo de Gordon y el método Bazin?",
+          a: "El método Bazin usa el promedio histórico de dividendos dividido entre un yield objetivo fijo (6%) — es simple y retrospectivo. El Modelo de Gordon usa el dividendo futuro esperado y una tasa de crecimiento — es prospectivo y más sensible a los supuestos de largo plazo. Fuente Price Pro calcula ambos y muestra el consenso.",
+        },
+        {
+          q: "¿Cuándo no funciona el Modelo de Gordon?",
+          a: "El Modelo de Gordon no es válido cuando: (1) la empresa no paga dividendos, (2) la tasa de crecimiento g es mayor o igual a la tasa de descuento k, o (3) los dividendos son inestables (ej. cíclicos o en declive). En estos casos, el precio calculado no tiene significado económico.",
+        },
+      ],
+    },
+    metrics: {
+      title: "Métricas de Dividendos: Margen de Seguridad, YoC, CAGR | Fuente Price Pro",
+      description:
+        "Guía completa de las principales métricas de dividendos: margen de seguridad, yield on cost (YoC), payout ratio, CAGR y DY vs YoC. Aprende a interpretar cada indicador.",
+      faq: [
+        {
+          q: "¿Qué es el margen de seguridad en la inversión en dividendos?",
+          a: "El margen de seguridad es la diferencia porcentual entre el precio techo calculado y el precio actual de mercado. Cuanto mayor el margen, más barata está la acción respecto a su valor justo. Ejemplo: precio techo $40.00, precio actual $32.00, margen de seguridad de 20%.",
+        },
+        {
+          q: "¿Cuál es la diferencia entre Dividend Yield (DY) y Yield on Cost (YoC)?",
+          a: "El Dividend Yield (DY) se calcula sobre el precio actual de mercado. El Yield on Cost (YoC) se calcula sobre el precio promedio de compra del inversor. Para quien compró una acción hace años a un precio bajo, el YoC puede ser muy superior al DY actual — revelando la calidad real de la inversión a lo largo del tiempo.",
+        },
+        {
+          // [REVISIÓN NECESARIA — cifra regulatoria específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          q: "¿Qué es un payout ratio saludable para dividendos?",
+          a: "El payout ratio saludable varía por sector. Para empresas industriales y de consumo, un payout entre 40% y 70% se considera sostenible. Por encima del 100% significa que la empresa distribuye más de lo que gana — señal de alerta. Los FII (REITs brasileños) están obligados por ley a distribuir como mínimo el 95% del resultado.",
+        },
+      ],
+    },
+    riskRadar: {
+      title: "Risk Radar: Concentración, Payout y Trampa de Yield en Dividendos | Fuente Price Pro",
+      description:
+        "Identifica los principales riesgos en carteras de dividendos: concentración sectorial, concentración por activo, riesgo de payout y la trampa del alto yield.",
+      faq: [
+        {
+          q: "¿Qué es una yield trap (trampa de dividendos)?",
+          a: "Una yield trap ocurre cuando una acción muestra un dividend yield muy alto — aparentemente atractivo — pero que es resultado de una caída pronunciada en el precio de la acción, no de un aumento real en los dividendos. Invertir en esta situación puede significar comprar una empresa en deterioro que pronto recortará sus dividendos.",
+        },
+        {
+          q: "¿Cómo identificar el riesgo de payout insostenible?",
+          a: "Un payout ratio por encima del 90-100% de la utilidad neta es señal de alerta en empresas que no son FII: la empresa está distribuyendo más de lo que gana, comprometiendo la sostenibilidad de los dividendos. Verifica también la tendencia: un payout creciente con utilidades estancadas es más peligroso que un payout alto con utilidades crecientes.",
+        },
+        {
+          q: "¿Cuál es la concentración sectorial máxima recomendada para una cartera de dividendos?",
+          a: "No existe una regla única, pero los inversores conservadores suelen limitar cada sector al 20-30% de la cartera. Una alta concentración en un sector (ej. más del 40% en bancos o energía eléctrica) expone la cartera a riesgos regulatorios y macroeconómicos sectoriales que pueden impactar todos los activos al mismo tiempo.",
+        },
+        {
+          q: "¿Cómo ayuda Fuente Price Pro a identificar riesgos en la cartera?",
+          a: "El Risk Radar de Fuente Price Pro analiza automáticamente tu cartera y señala: concentración excesiva por sector o activo, payout ratio elevado, yield muy por encima del promedio del sector (posible yield trap) y acciones por encima del precio techo — mostrando alertas visuales con colores semánticos.",
+        },
+      ],
+    },
+    brokers: {
+      title: "Corredoras Compatibles: XP, BTG, Inter, Schwab | Fuente Price Pro",
+      description:
+        "Consulta todas las corredoras compatibles con Fuente Price Pro para importar notas de corretaje: XP, Clear, Rico, BTG Pactual, Banco Inter, NuInvest, Schwab y más.",
+      faq: [
+        {
+          q: "¿Qué corredoras brasileñas son compatibles con Fuente Price Pro?",
+          a: "Fuente Price Pro admite la importación nativa de notas de corretaje en formato SINACOR de: XP Investimentos, Clear, Rico, Modal, BTG Pactual, Banco Inter, NuInvest, Órama y Genial Investimentos. La importación se realiza mediante el PDF de la nota de corretaje.",
+        },
+        {
+          q: "¿Fuente Price Pro es compatible con corredoras internacionales?",
+          a: "Sí. Fuente Price Pro admite la importación del extracto CSV de Charles Schwab International Account, permitiendo el seguimiento de acciones estadounidenses (NYSE, NASDAQ) y ETFs internacionales en la misma cartera que tus activos brasileños.",
+        },
+        {
+          q: "¿Qué es el estándar SINACOR para notas de corretaje?",
+          a: "SINACOR es el Sistema Integrado de Compensación y Liquidación de B3 (la bolsa brasileña). Las notas de corretaje en formato SINACOR siguen un diseño estandarizado que permite a Fuente Price Pro identificar automáticamente las operaciones de compra y venta, comisiones y activos negociados.",
+        },
+      ],
+    },
+    glossary: {
+      title: "Glosario de Inversiones: FII, REIT, BPA, Valor Contable, JCP | Fuente Price Pro",
+      description:
+        "Glosario completo para inversores en dividendos: FII, REIT, BPA (EPS), Valor Contable, JCP y más. Definiciones claras para quien empieza a invertir en la bolsa brasileña (B3).",
+      faq: [
+        {
+          // [REVISIÓN NECESARIA — afirmación fiscal específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          q: "¿Qué es un FII (fondo inmobiliario brasileño)?",
+          a: "Un FII es un fondo que invierte en activos inmobiliarios — naves logísticas, oficinas, centros comerciales, CRIs — y distribuye los rendimientos mensualmente a los cuotistas. Se negocian en B3 como acciones. Para personas físicas, cuando el fondo tiene más de 50 cuotistas y cotiza en bolsa, los rendimientos están exentos de impuesto sobre la renta en Brasil.",
+        },
+        {
+          q: "¿Qué es un REIT y en qué se diferencia de un FII?",
+          a: "Un REIT (Real Estate Investment Trust) es el equivalente estadounidense al FII brasileño. Ambos invierten en inmuebles y distribuyen ingresos regularmente. La diferencia principal es que los REIT estadounidenses pagan dividendos en dólares y están sujetos a tributación de EE.UU.",
+        },
+        {
+          q: "¿Qué es el BPA (Beneficio por Acción)?",
+          a: "El BPA (Beneficio por Acción) — EPS en inglés, LPA en portugués — es la utilidad neta de la empresa dividida entre el número de acciones en circulación. Es uno de los principales indicadores de rentabilidad y se usa en la fórmula de Graham para calcular el valor intrínseco.",
+        },
+        {
+          q: "¿Qué es el Valor Contable por Acción?",
+          a: "El Valor Contable por Acción — VPA en portugués, Book Value en inglés — es el patrimonio neto contable de la empresa dividido entre el número de acciones. Representa el valor teórico de liquidación por acción y se usa en la fórmula de Graham junto con el BPA.",
+        },
+        {
+          // [REVISIÓN NECESARIA — afirmación fiscal específica de jurisdicción, confirmar ley BR vigente antes de publicar]
+          q: "¿Qué es el JCP (Intereses sobre Capital Propio)?",
+          a: "El JCP es una forma de remuneración al accionista específica de Brasil, alternativa al dividendo, que permite a la empresa deducir el pago de la utilidad imponible. Para el accionista persona física, el JCP tiene una retención en la fuente del 15% de impuesto sobre la renta. Es común en bancos como Itaú, Bradesco y Banco do Brasil.",
+        },
+      ],
+    },
+    dividendValuation: {
+      title: "Fórmula de Dividend Yield y Guía del Precio Techo Bazin | Fuente Price Pro",
+      description:
+        "Aprende a calcular el precio techo de una acción con dividendos usando el método Bazin. Fórmula de dividend yield paso a paso, ejemplos prácticos y casos especiales.",
+      faq: [
+        {
+          q: "¿Cuál es la fórmula del dividend yield?",
+          a: "Dividend yield = (dividendo anual por acción ÷ precio actual de la acción) × 100. Indica el retorno en efectivo que paga una acción en relación a su precio.",
+        },
+        {
+          q: "¿Cómo se calcula el precio techo de una acción con dividendos?",
+          a: "Usando el método Bazin: precio techo = dividendo promedio anual de los últimos 5 años ÷ yield objetivo. Si una acción pagó en promedio $2.00 y quieres un yield del 6%, el precio techo es $2.00 / 0.06 = $33.33.",
+        },
+        {
+          q: "¿Qué es el método Bazin?",
+          a: "El método Bazin, popularizado por Décio Bazin, valora una acción con dividendos dividiendo su dividendo promedio entre el yield mínimo aceptable para el inversor — produciendo un precio techo por encima del cual la acción se considera cara.",
+        },
+      ],
+    },
+    guidesHub: {
+      title: "Guías de Inversión y Metodología de Valoración | Fuente Price Pro",
+      description:
+        "La wiki completa de Fuente Price Pro: modelos de valoración Bazin, Graham y Gordon, fórmulas de dividend yield, alertas de riesgo de cartera y formatos de nota de corretaje compatibles.",
+    },
+  },
   docs: {
     title: "Metodología de Valoración",
     description:
