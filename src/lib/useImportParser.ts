@@ -4,8 +4,7 @@ import type {
   MappableColumn,
   ParseResult,
 } from "./dynamicCsvParser";
-import { parseFile, matchColumn } from "./dynamicCsvParser";
-import * as XLSX from "xlsx";
+import { parseFile, matchColumn, readWorkbookWithEncodingFallback } from "./dynamicCsvParser";
 import type {
   WorkerInMessage,
   WorkerOutMessage,
@@ -137,17 +136,7 @@ export function useImportParser() {
           worker.postMessage(msg);
         } else {
           // Fallback if Worker is not available
-          const workbook = XLSX.read(buffer, { raw: true, cellDates: false, codepage: 65001 });
-          const firstSheet = workbook.SheetNames[0];
-          const rawData = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[firstSheet], {
-            header: 1,
-            blankrows: false,
-            defval: "",
-            raw: true,
-          });
-          const rawHeaders = (rawData[0] as unknown[]) || [];
-          const extractedHeaders = rawHeaders.map((h) => String(h || "").trim());
-          const rows = rawData.slice(1);
+          const { headers: extractedHeaders, rows } = readWorkbookWithEncodingFallback(buffer);
           const mapping = matchColumn(extractedHeaders);
 
           setHeaders(extractedHeaders);
@@ -190,17 +179,7 @@ export function useImportParser() {
       } else {
         // Fallback synchronous parse
         try {
-          const workbook = XLSX.read(fileData, { raw: true, cellDates: false, codepage: 65001 });
-          const firstSheet = workbook.SheetNames[0];
-          const rawData = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[firstSheet], {
-            header: 1,
-            blankrows: false,
-            defval: "",
-            raw: true,
-          });
-          const rawHeaders = (rawData[0] as unknown[]) || [];
-          const extractedHeaders = rawHeaders.map((h) => String(h || "").trim());
-          const rows = rawData.slice(1);
+          const { headers: extractedHeaders, rows } = readWorkbookWithEncodingFallback(fileData);
           const parsed = parseFile(rows, extractedHeaders, manualMapping);
           setResult(parsed);
           setState("done");

@@ -1,7 +1,7 @@
-import * as XLSX from "xlsx";
 import {
   parseFile,
   matchColumn,
+  readWorkbookWithEncodingFallback,
   type ColumnMapping,
   type MappableColumn,
   type ParseResult,
@@ -70,36 +70,7 @@ function readSheetData(fileData: ArrayBuffer | string): {
   headers: string[];
   rows: unknown[][];
 } {
-  const readOptions: XLSX.ParsingOptions = {
-    type: typeof fileData === "string" ? "string" : "array",
-    raw: true,
-    cellDates: false,
-    codepage: 65001,
-  };
-
-  const workbook = XLSX.read(fileData, readOptions);
-  const firstSheetName = workbook.SheetNames[0];
-  if (!firstSheetName) {
-    throw new Error("O arquivo não contém nenhuma planilha ou tabela legível.");
-  }
-
-  const worksheet = workbook.Sheets[firstSheetName];
-  const rawData = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
-    header: 1,
-    blankrows: false,
-    defval: "",
-    raw: true,
-  });
-
-  if (!rawData || rawData.length === 0) {
-    throw new Error("A planilha está vazia.");
-  }
-
-  const rawHeaders = (rawData[0] as unknown[]) || [];
-  const headers = rawHeaders.map((h) => (h !== null && h !== undefined ? String(h).trim() : ""));
-  const rows = rawData.slice(1);
-
-  return { headers, rows };
+  return readWorkbookWithEncodingFallback(fileData);
 }
 
 self.onmessage = (event: MessageEvent<WorkerInMessage>) => {

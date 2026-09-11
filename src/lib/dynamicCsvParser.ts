@@ -1,6 +1,7 @@
 import { isBrTicker } from "./classify";
 import { normalizeTicker } from "./ticker";
 import type { AccountType } from "./transactionsLogic";
+import * as XLSX from "xlsx";
 
 export interface ParsedTransaction {
   lineIndex: number;
@@ -151,6 +152,86 @@ export const COLUMN_SEMANTIC_ALIASES = {
 } as const;
 
 export type MappableColumn = keyof typeof COLUMN_SEMANTIC_ALIASES;
+
+function readWorkbookWithCodepage(
+  fileData: ArrayBuffer | string,
+  codepage: number,
+): { headers: string[]; rows: unknown[][] } {
+  const readOptions: XLSX.ParsingOptions = {
+    type: typeof fileData === "string" ? "string" : "array",
+    raw: true,
+    cellDates: false,
+    codepage,
+  };
+
+  const workbook = XLSX.read(fileData, readOptions);
+  const firstSheetName = workbook.SheetNames[0];
+  if (!firstSheetName) {
+    throw new Error("O arquivo não contém nenhuma planilha ou tabela legível.");
+  }
+
+  const worksheet = workbook.Sheets[firstSheetName];
+  const rawData = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
+    header: 1,
+    blankrows: false,
+    defval: "",
+    raw: true,
+  });
+
+  if (!rawData || rawData.length === 0) {
+    throw new Error("A planilha está vazia.");
+  }
+
+  const rawHeaders = (rawData[0] as unknown[]) || [];
+  const headers = rawHeaders.map((h) => (h !== null && h !== undefined ? String(h).trim() : ""));
+  const rows = rawData.slice(1);
+
+  return { headers, rows };
+}
+
+// Counts U+FFFD (Unicode replacement character) occurrences — the reliable signal that a
+// decode used the wrong codepage: any byte sequence invalid in the assumed encoding gets
+// silently replaced by U+FFFD instead of throwing.
+function countReplacementChars(data: { headers: string[]; rows: unknown[][] }): number {
+  let count = 0;
+  const tally = (v: unknown) => {
+    if (typeof v === "string") {
+      for (const ch of v) if (ch === "\uFFFD") count++;
+    }
+  };
+  data.headers.forEach(tally);
+  data.rows.forEach((row) => row.forEach(tally));
+  return count;
+}
+
+/**
+ * Reads a CSV/XLS/XLSX file with automatic encoding fallback — shared by both the Web Worker
+ * parse path and the no-Worker fallback path (Regra 1: one implementation, not two). Brazilian
+ * broker/Excel CSV exports are very commonly saved as Windows-1252 ("ANSI"/cp1252), not UTF-8.
+ * Decoding one as the other doesn't throw, it silently corrupts every accented character and
+ * currency symbol into U+FFFD (e.g. "Preço" -> "Pre�o", "R$ 105,80" -> "R$�105,80"), which then
+ * makes every BRL price fail numeric parsing downstream even though the value was well-formed
+ * in the source file. UTF-8 is tried first (the modern default for most spreadsheet tools); if
+ * it produces replacement characters, cp1252 is tried next and used if it's cleaner. This is a
+ * heuristic, not a guarantee — a file broken in some other way still surfaces via the normal
+ * per-row "Preço inválido" reporting in parseFile(), it just won't be mistaken for an encoding
+ * problem it doesn't have.
+ */
+export function readWorkbookWithEncodingFallback(fileData: ArrayBuffer | string): {
+  headers: string[];
+  rows: unknown[][];
+} {
+  const utf8Result = readWorkbookWithCodepage(fileData, 65001);
+  if (typeof fileData === "string") return utf8Result; // already a JS string, no byte-level encoding ambiguity
+
+  const utf8ReplacementCount = countReplacementChars(utf8Result);
+  if (utf8ReplacementCount === 0) return utf8Result;
+
+  const cp1252Result = readWorkbookWithCodepage(fileData, 1252);
+  const cp1252ReplacementCount = countReplacementChars(cp1252Result);
+
+  return cp1252ReplacementCount < utf8ReplacementCount ? cp1252Result : utf8Result;
+}
 
 /**
  * Normalizes an account string into a standard AccountType.
