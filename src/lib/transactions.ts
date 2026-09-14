@@ -36,7 +36,7 @@ async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
 
 // ---------- Local storage helpers (guest mode) ----------
 function readLocal(): Transaction[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined" || !window.localStorage) return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
@@ -52,7 +52,7 @@ function readLocal(): Transaction[] {
 }
 
 function writeLocal(items: Transaction[]) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !window.localStorage) return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   } catch (e) {
@@ -61,7 +61,7 @@ function writeLocal(items: Transaction[]) {
 }
 
 function clearLocal() {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !window.localStorage) return;
   window.localStorage.removeItem(STORAGE_KEY);
 }
 

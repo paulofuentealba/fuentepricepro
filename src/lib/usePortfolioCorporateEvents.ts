@@ -5,6 +5,7 @@ import { useTransactions } from "./transactions";
 import { useI18n } from "./i18n-provider";
 import {
   applyCorporateEvent,
+  getHoldingAcquisitionDate,
   type ProcessedPosition,
 } from "./corporateEvents";
 import { fetchCorporateEventsBatchFn } from "./apiService.functions";
@@ -72,9 +73,13 @@ export function usePortfolioCorporateEvents() {
     for (const item of ownedItems) {
       const tickerEvents = eventsByTicker[item.ticker.toUpperCase()] || [];
       const appliedIds = new Set(item.appliedEvents?.map((e) => e.eventId) ?? []);
+      const acquisitionDate = getHoldingAcquisitionDate(item, transactions, item.ticker);
 
       for (const ev of tickerEvents) {
         if (appliedIds.has(ev.eventId)) continue;
+
+        // Corporate events before asset purchase date are not applicable to the user's holding
+        if (acquisitionDate > 0 && ev.date < acquisitionDate) continue;
 
         const factor = ev.ratio;
         const currentAvgPrice = item.averagePrice ?? item.currentPrice;
@@ -109,7 +114,7 @@ export function usePortfolioCorporateEvents() {
     }
 
     return list.sort((a, b) => b.event.date - a.event.date);
-  }, [eventsByTicker, ownedItems]);
+  }, [eventsByTicker, ownedItems, transactions]);
 
   const applyEvent = async (pending: PendingPortfolioEvent) => {
     if (applyingEventId) return;
