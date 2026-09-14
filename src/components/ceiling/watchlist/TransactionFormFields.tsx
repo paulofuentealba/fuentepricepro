@@ -72,10 +72,29 @@ export function TransactionFormFields({
   const [type, setType] = useState<"buy" | "sell">(
     initialData?.type === "buy" || initialData?.type === "sell" ? initialData.type : "buy",
   );
-  const [date, setDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : new Date());
+  const hasNoTxs = existingTransactions.length === 0;
+  const defaultDate = initialData?.date
+    ? new Date(initialData.date)
+    : hasNoTxs && item?.investingSince
+      ? new Date(item.investingSince)
+      : new Date();
 
-  const [quantity, setQuantity] = useState<string>(initialData?.quantity ? String(initialData.quantity) : "");
-  const [pricePerShare, setPricePerShare] = useState<string>(initialData?.pricePerShare ? String(initialData.pricePerShare) : "");
+  const [date, setDate] = useState<Date | undefined>(defaultDate);
+
+  const [quantity, setQuantity] = useState<string>(
+    initialData?.quantity
+      ? String(initialData.quantity)
+      : hasNoTxs && item?.quantity
+        ? String(item.quantity)
+        : "",
+  );
+  const [pricePerShare, setPricePerShare] = useState<string>(
+    initialData?.pricePerShare
+      ? String(initialData.pricePerShare)
+      : hasNoTxs && item?.averagePrice
+        ? String(item.averagePrice)
+        : "",
+  );
   const [fees, setFees] = useState<string>(initialData?.fees ? String(initialData.fees) : "");
   const [broker, setBroker] = useState<string>(initialData?.broker ?? item?.broker ?? "");
   const [isSaving, setIsSaving] = useState(false);
@@ -88,12 +107,11 @@ export function TransactionFormFields({
 
   const buildTransaction = (): Transaction | null => {
     if (disabled || !item || !date) return null;
+    const q = parseFloat(quantity) || 0;
+    const p = parseFloat(pricePerShare) || 0;
+    const f = parseFloat(fees) || 0;
 
-    const q = parseFloat(quantity);
-    const p = parseFloat(pricePerShare);
-    const f = fees ? parseFloat(fees) : 0;
-
-    if (isNaN(q) || isNaN(p) || q <= 0 || p <= 0) return null;
+    if (q <= 0 || p < 0 || f < 0) return null;
 
     // Validation for short selling
     if (type === "sell") {
@@ -118,6 +136,8 @@ export function TransactionFormFields({
       broker: broker.trim() || null,
       notes: initialData?.notes ?? null,
       thesisSnapshot: initialData?.thesisSnapshot ?? null,
+      accountType: initialData?.accountType ?? item.accountType ?? null,
+      factor: null,
     };
   };
 

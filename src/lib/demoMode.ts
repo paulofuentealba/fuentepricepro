@@ -34,13 +34,15 @@ export const DEMO_DEFAULT_SETTINGS = {
 
 export function isDemoModeActive(): boolean {
   if (typeof window === "undefined" || !window.localStorage) return false;
-  // If user is authenticated, demo mode is NEVER active — purge any leftover keys
-  if (auth?.currentUser) {
-    endDemoMode();
-    return false;
-  }
   try {
-    return window.localStorage.getItem(DEMO_MODE_KEY) === "true";
+    const isFlagged = window.localStorage.getItem(DEMO_MODE_KEY) === "true";
+    if (auth?.currentUser) {
+      if (isFlagged) {
+        endDemoMode();
+      }
+      return false;
+    }
+    return isFlagged;
   } catch {
     return false;
   }
@@ -76,10 +78,15 @@ export function syncDemoModeVersion(): void {
 /** Clears demo data and the demo flag — called once the visitor authenticates for real. */
 export function endDemoMode(): void {
   if (typeof window === "undefined" || !window.localStorage) return;
+  const wasDemoActive =
+    window.localStorage.getItem(DEMO_MODE_KEY) === "true" ||
+    window.localStorage.getItem(DEMO_VERSION_KEY) === "true";
   try {
-    window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
-    window.localStorage.removeItem(TRANSACTIONS_STORAGE_KEY);
-    window.localStorage.removeItem(SETTINGS_STORAGE_KEY);
+    if (wasDemoActive) {
+      window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
+      window.localStorage.removeItem(TRANSACTIONS_STORAGE_KEY);
+      window.localStorage.removeItem(SETTINGS_STORAGE_KEY);
+    }
     window.localStorage.removeItem(DEMO_MODE_KEY);
     window.localStorage.removeItem(DEMO_VERSION_KEY);
   } catch {}
@@ -100,7 +107,9 @@ export function endDemoMode(): void {
  */
 export function blockWriteInDemoMode(): boolean {
   if (auth?.currentUser) {
-    endDemoMode();
+    if (isDemoModeActive()) {
+      endDemoMode();
+    }
     return false;
   }
   if (!isDemoModeActive()) return false;
