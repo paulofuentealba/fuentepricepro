@@ -34,6 +34,8 @@ async function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
   });
 }
 
+import { cleanTicker } from "./formatters";
+
 // ---------- Local storage helpers (guest mode) ----------
 function readLocal(): Transaction[] {
   if (typeof window === "undefined" || !window.localStorage) return [];
@@ -44,7 +46,7 @@ function readLocal(): Transaction[] {
     }
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed;
+    return parsed.map((item) => rowToItem(item as Record<string, unknown>));
   } catch (e) {
     console.error("Failed to read local transactions", e);
     return [];
@@ -66,34 +68,39 @@ function clearLocal() {
 }
 
 // ---------- Firestore conversions ----------
-function rowToItem(row: Record<string, unknown>): Transaction {
+export function rowToItem(row: Record<string, unknown>): Transaction {
   return {
-    id: row.id as string,
-    ticker: row.ticker as string,
-    type: row.type as Transaction["type"],
+    id: (row.id as string) || "",
+    ticker: cleanTicker((row.ticker as string) || ""),
+    type: (row.type as Transaction["type"]) || "buy",
     date: typeof row.date === "number" ? row.date : 0,
     quantity: typeof row.quantity === "number" ? row.quantity : 0,
     pricePerShare: typeof row.pricePerShare === "number" ? row.pricePerShare : 0,
-    factor: (row.factor as number | null | undefined) ?? null,
-    fees: (row.fees as number | null | undefined) ?? null,
-    notes: (row.notes as string | null | undefined) ?? null,
-    broker: (row.broker as string | null | undefined) ?? null,
+    factor: typeof row.factor === "number" ? row.factor : null,
+    fees: typeof row.fees === "number" ? row.fees : null,
+    notes: typeof row.notes === "string" ? row.notes : null,
+    broker: typeof row.broker === "string" ? row.broker : null,
     thesisSnapshot: (row.thesisSnapshot as Transaction["thesisSnapshot"] | undefined) ?? null,
+    accountType: (row.accountType as Transaction["accountType"] | undefined) ?? null,
   };
 }
 
-function itemToRow(item: Transaction, userId: string): Record<string, unknown> {
-  const row: Record<string, unknown> = {
-    ...item,
+export function itemToRow(item: Transaction, userId: string): Record<string, unknown> {
+  return {
+    id: item.id,
     user_id: userId,
+    ticker: cleanTicker(item.ticker),
+    type: item.type,
+    date: typeof item.date === "number" ? item.date : Date.now(),
+    quantity: typeof item.quantity === "number" ? item.quantity : 0,
+    pricePerShare: typeof item.pricePerShare === "number" ? item.pricePerShare : 0,
+    factor: item.factor ?? null,
+    fees: item.fees ?? null,
+    notes: item.notes ?? null,
+    broker: item.broker ?? null,
+    thesisSnapshot: item.thesisSnapshot ?? null,
+    accountType: item.accountType ?? null,
   };
-  if (item.thesisSnapshot === undefined) {
-    delete row.thesisSnapshot;
-  }
-  if (item.broker === undefined) {
-    delete row.broker;
-  }
-  return row;
 }
 
 // ---------- React Query Hook ----------

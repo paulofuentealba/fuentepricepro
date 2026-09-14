@@ -96,6 +96,8 @@ export function isPendingCorporateEvent(ev: unknown): ev is PendingCorporateEven
   );
 }
 
+import { cleanTicker } from "./formatters";
+
 export function getHoldingAcquisitionDate(
   item: Pick<WatchlistItem, "investingSince" | "addedAt"> | null | undefined,
   transactions?: Array<{ ticker: string; type?: string; quantity?: number; date: number }>,
@@ -103,8 +105,9 @@ export function getHoldingAcquisitionDate(
 ): number {
   if (!item && !transactions) return 0;
   if (transactions && ticker) {
+    const cleanT = cleanTicker(ticker);
     const tickerTx = transactions.filter(
-      (tx) => tx.ticker.trim().toUpperCase() === ticker.trim().toUpperCase() && (tx.type === "buy" || (tx.quantity ?? 0) > 0),
+      (tx) => cleanTicker(tx.ticker) === cleanT && (tx.type === "buy" || (tx.quantity ?? 0) > 0),
     );
     if (tickerTx.length > 0) {
       return Math.min(...tickerTx.map((tx) => tx.date));
@@ -126,16 +129,8 @@ export function usePendingEvents(item: WatchlistItem | null) {
     [item, transactions],
   );
 
-  // Check the most recent applied event. Otherwise fallback to acquisitionDate - 1 day, or 0.
-  const lastSync = useMemo(() => {
-    if (item?.appliedEvents?.length) {
-      return Math.max(...item.appliedEvents.map((e) => e.date));
-    }
-    return acquisitionDate > 0 ? acquisitionDate - 1000 * 60 * 60 * 24 : 0;
-  }, [item?.appliedEvents, acquisitionDate]);
-
   const { data: rawEvents, isPending } = useQuery({
-    ...corporateEventsQueryOptions(item?.ticker, lastSync),
+    ...corporateEventsQueryOptions(item?.ticker),
     enabled: !!item && (item.quantity ?? 0) > 0,
   });
 

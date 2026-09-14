@@ -45,6 +45,8 @@ const FixedIncomePanel = lazy(() =>
 );
 
 
+import { cleanTicker } from "@/lib/formatters";
+
 function AssetHoldings({
   item,
   activeMargin,
@@ -59,7 +61,7 @@ function AssetHoldings({
   const derived = useAssetCardDerived(item);
 
   const firstTransactionDate = useMemo(() => {
-    const tickerTxs = transactions.filter((tx) => tx.ticker === item.ticker);
+    const tickerTxs = transactions.filter((tx) => cleanTicker(tx.ticker) === cleanTicker(item.ticker));
     return tickerTxs.length ? Math.min(...tickerTxs.map((tx) => tx.date)) : null;
   }, [transactions, item.ticker]);
 
@@ -392,15 +394,13 @@ export function AssetDetailSheet({
                           <EditPositionFields item={item} />
                         </MyPositionSection>
 
-                        {pendingEvent && (
-                          <MyPositionSection
-                            title={t.corporateEvents.menuTitle}
-                            icon={<Scissors className="h-4 w-4 text-muted-foreground" />}
-                            defaultOpen={true}
-                          >
-                            <CorporateEventFields item={item} pendingEvent={pendingEvent} />
-                          </MyPositionSection>
-                        )}
+                        <MyPositionSection
+                          title={t.corporateEvents.menuTitle}
+                          icon={<Scissors className="h-4 w-4 text-muted-foreground" />}
+                          defaultOpen={Boolean(pendingEvent)}
+                        >
+                          <CorporateEventFields item={item} pendingEvent={pendingEvent} />
+                        </MyPositionSection>
                       </div>
 
                       {item.type !== "FIXED_INCOME" && (

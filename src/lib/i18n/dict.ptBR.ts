@@ -335,6 +335,11 @@ export const ptBR = {
     fastConfirmTitle: "Confirmar Ajuste de Cotas",
     fastConfirmDesc: "Deseja aplicar o evento em {{ticker}}? Suas cotas passarão para {{newQty}} e o preço médio para {{newAvg}}.",
     dismiss: "Dispensar",
+    noPendingEvents: "Nenhum evento corporativo pendente",
+    noPendingEventsDesc: "A posição deste ativo está em dia com os desdobramentos e agrupamentos de mercado.",
+    appliedEventsTitle: "Histórico de Eventos Aplicados",
+    appliedOn: "Aplicado em",
+    appliedBadge: "Aplicado",
   },
   publicEvents: {
     detectedBadge: "Desdobramento Detectado",

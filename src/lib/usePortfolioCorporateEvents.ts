@@ -10,6 +10,7 @@ import {
 } from "./corporateEvents";
 import { fetchCorporateEventsBatchFn } from "./apiService.functions";
 import type { ReconciledCorporateEvent } from "./api/corporateEventsReconciler.server";
+import { cleanTicker } from "./formatters";
 import { toast } from "sonner";
 
 export interface PendingPortfolioEvent {
@@ -138,17 +139,21 @@ export function usePortfolioCorporateEvents() {
         appliedEvents: newAppliedEvents,
       };
 
-      const hasLedger = transactions.some((tx) => tx.ticker === item.ticker);
+      const hasLedger = transactions.some((tx) => cleanTicker(tx.ticker) === cleanTicker(item.ticker));
       if (hasLedger) {
         await upsertTransaction({
           id: `corp-${event.eventId}`,
-          ticker: item.ticker,
+          ticker: cleanTicker(item.ticker),
           type: "corporate_action",
           date: event.date,
           quantity: 0,
           pricePerShare: 0,
           factor,
           notes: t.transactions.corporateAction,
+          fees: null,
+          broker: null,
+          thesisSnapshot: null,
+          accountType: item.accountType ?? null,
         });
       }
 

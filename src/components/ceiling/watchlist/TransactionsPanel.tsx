@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
+import { cleanTicker } from "@/lib/formatters";
 import { useTransactions, recalculateHoldingFromTransactions, recalculateInvestingSinceFromTransactions, type Transaction, type ThesisSnapshot } from "@/lib/transactions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { getAssetValuation } from "@/lib/calculations";
@@ -24,7 +25,9 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const tickerTxs = useMemo(() => {
-    return transactions.filter(tx => tx.ticker === item.ticker).sort((a, b) => b.date - a.date);
+    return transactions
+      .filter((tx) => cleanTicker(tx.ticker) === cleanTicker(item.ticker))
+      .sort((a, b) => b.date - a.date);
   }, [transactions, item.ticker]);
 
   const { quantity, averagePrice } = useMemo(() => {
@@ -145,7 +148,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
     }
 
     await upsert(finalTx);
-    const newTxs = [...transactions.filter(t => t.id !== finalTx.id), finalTx].filter(t => t.ticker === item.ticker);
+    const newTxs = [...transactions.filter(t => t.id !== finalTx.id), finalTx].filter(t => cleanTicker(t.ticker) === cleanTicker(item.ticker));
     const sortedDesc = [...newTxs].sort((a, b) => b.date - a.date);
     const { quantity, averagePrice } = recalculateHoldingFromTransactions(sortedDesc);
     const newInvestingSince = recalculateInvestingSinceFromTransactions(newTxs) ?? item.investingSince;
@@ -161,7 +164,7 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
   const handleDelete = async (id: string) => {
     if (confirm(t.transactions.confirmDelete)) {
       await remove(id);
-      const newTxs = transactions.filter(t => t.id !== id && t.ticker === item.ticker);
+      const newTxs = transactions.filter(t => t.id !== id && cleanTicker(t.ticker) === cleanTicker(item.ticker));
       const { quantity, averagePrice } = recalculateHoldingFromTransactions(newTxs.sort((a, b) => b.date - a.date));
       const newInvestingSince = recalculateInvestingSinceFromTransactions(newTxs) ?? item.investingSince;
       await updateAsync(item.id, { quantity, averagePrice, investingSince: newInvestingSince });

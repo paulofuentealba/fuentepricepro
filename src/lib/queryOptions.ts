@@ -158,15 +158,14 @@ export function piotroskiScoreQueryOptions(ticker: string) {
   });
 }
 
-export function corporateEventsQueryOptions(ticker?: string, sinceTimestamp?: number) {
+export function corporateEventsQueryOptions(ticker?: string) {
   const key = (ticker || "").trim().toUpperCase();
-  const timestamp = sinceTimestamp ?? 0;
   return queryOptions({
-    queryKey: ["corporateEvents", "single", key, timestamp] as const,
+    queryKey: ["corporateEvents", "single", key] as const,
     queryFn: async ({ signal }) => {
       if (!key) return [];
       const res = await fetchCorporateEventsBatchFn({
-        data: { tickers: [key], sinceTimestamp: timestamp },
+        data: { tickers: [key], sinceTimestamp: 0 },
         signal,
       });
       return res[key] || [];

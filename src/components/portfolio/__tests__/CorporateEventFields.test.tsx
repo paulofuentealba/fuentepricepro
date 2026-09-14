@@ -7,7 +7,16 @@ import type { WatchlistItem } from "@/lib/watchlist";
 
 const mockUpsertAsync = vi.fn().mockResolvedValue(undefined);
 const mockUpsertTransaction = vi.fn().mockResolvedValue(undefined);
+const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
 let mockTransactions: any[] = [];
+
+vi.mock("@tanstack/react-query", async () => {
+  const actual = await vi.importActual<any>("@tanstack/react-query");
+  return {
+    ...actual,
+    useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+  };
+});
 
 vi.mock("@/lib/watchlist", async () => {
   const actual = await vi.importActual<any>("@/lib/watchlist");
@@ -159,11 +168,21 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
     expect(mockUpsertTransaction).not.toHaveBeenCalled();
   });
 
-  it("retorna null e não renderiza nada se não houver pendingEvent", () => {
-    const { container } = render(
-      <CorporateEventFields item={item} pendingEvent={null} />,
-    );
-    expect(container.firstChild).toBeNull();
+  it("renderiza o estado informativo limpo quando não há pendingEvent", () => {
+    render(<CorporateEventFields item={item} pendingEvent={null} />);
+    expect(screen.getByText(/nenhum evento corporativo pendente/i)).toBeInTheDocument();
+  });
+
+  it("renderiza o histórico de eventos aplicados quando existirem", () => {
+    const itemWithApplied: WatchlistItem = {
+      ...item,
+      appliedEvents: [
+        { eventId: "applied1", date: 1716768000000, type: "grouping", ratio: 0.1 },
+      ],
+    };
+    render(<CorporateEventFields item={itemWithApplied} pendingEvent={null} />);
+    expect(screen.getByText(/histórico de eventos aplicados/i)).toBeInTheDocument();
+    expect(screen.getByText(/10 : 1/)).toBeInTheDocument();
   });
 
   it("renderiza o evento detectado em modo leitura sem inputs editáveis de tipo ou proporção", () => {

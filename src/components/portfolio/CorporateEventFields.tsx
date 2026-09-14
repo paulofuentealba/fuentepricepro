@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency as formatCurrencySSOT } from "@/lib/formatters";
+import { formatCurrency as formatCurrencySSOT, cleanTicker } from "@/lib/formatters";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useTransactions } from "@/lib/transactions";
 import {
@@ -17,7 +18,7 @@ import {
   type PendingCorporateEvent,
 } from "@/lib/corporateEvents";
 import { toast } from "sonner";
-import { ArrowDown, AlertCircle, Calendar, Scissors, ShieldCheck } from "lucide-react";
+import { ArrowDown, AlertCircle, Calendar, Scissors, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CorporateEventFieldsProps {
@@ -34,13 +35,30 @@ interface CorporateEventFieldsProps {
  */
 export function CorporateEventFields({ item, pendingEvent, onApplied }: CorporateEventFieldsProps) {
   const { t, locale } = useI18n();
+  const queryClient = useQueryClient();
   const { upsertAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const appliedEvents = item.appliedEvents ?? [];
+
   if (!pendingEvent) {
-    return null;
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-5 flex flex-col items-center justify-center text-center space-y-2">
+          <div className="h-9 w-9 rounded-full bg-success/15 flex items-center justify-center text-success mb-1">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">{t.corporateEvents.noPendingEvents}</p>
+          <p className="text-xs text-muted-foreground max-w-sm">{t.corporateEvents.noPendingEventsDesc}</p>
+        </div>
+
+        {appliedEvents.length > 0 && (
+          <AppliedEventsHistorySection events={appliedEvents} locale={locale} t={t} />
+        )}
+      </div>
+    );
   }
 
   const eventType = pendingEvent.type;
@@ -83,24 +101,32 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
       // If the asset uses the transaction ledger, persist an idempotent
       // corporate_action adjustment so derived positions / realized income
       // reflect the split/grouping.
-      const hasLedger = transactions.some((tx) => tx.ticker === item.ticker);
+      const cleanT = cleanTicker(item.ticker);
+      const hasLedger = transactions.some((tx) => cleanTicker(tx.ticker) === cleanT);
       if (hasLedger) {
         const eventId = pendingEvent.eventId;
         const eventDate = pendingEvent.date || Date.now();
         await upsertTransaction({
           id: `corp-${eventId}`,
-          ticker: item.ticker,
+          ticker: cleanT,
           type: "corporate_action",
           date: eventDate,
           quantity: 0,
           pricePerShare: 0,
           factor,
           notes: t.transactions.corporateAction,
+          fees: null,
+          broker: null,
+          thesisSnapshot: null,
+          accountType: item.accountType ?? null,
         });
       }
 
       await upsertAsync(updatedItem);
-      toast.success(`${item.ticker} ${t.corporateEvents.successMessage}`);
+      toast.success(`${item.ticker} — ${t.corporateEvents.successMessage}`);
+      await queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["corporateEvents"] });
       setIsConfirmOpen(false);
       onApplied?.();
     } catch (e: any) {
@@ -224,6 +250,11 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
         </Button>
       </div>
 
+      {/* Applied Events History */}
+      {appliedEvents.length > 0 && (
+        <AppliedEventsHistorySection events={appliedEvents} locale={locale} t={t} />
+      )}
+
       {/* 2-Step Confirmation Dialog */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <DialogContent className="sm:max-w-md">
@@ -272,6 +303,56 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function AppliedEventsHistorySection({
+  events,
+  locale,
+  t,
+}: {
+  events: Array<{ eventId: string; date: number; type: string; ratio: number }>;
+  locale: string;
+  t: any;
+}) {
+  return (
+    <div className="space-y-2 pt-3 border-t border-border/40">
+      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+        {t.corporateEvents.appliedEventsTitle}
+      </span>
+      <div className="space-y-2">
+        {events.map((ev) => {
+          const evDate = new Intl.DateTimeFormat(locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR", {
+            dateStyle: "medium",
+          }).format(new Date(ev.date));
+          const isSplit = ev.type === "split";
+          const ratioStr = isSplit
+            ? `1 : ${ev.ratio.toFixed(2).replace(/\.?0+$/, "")}`
+            : `${Math.round(1 / ev.ratio)} : 1`;
+
+          return (
+            <div
+              key={ev.eventId}
+              className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-background/50 text-xs"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-foreground">
+                  {isSplit ? t.corporateEvents.split : t.corporateEvents.grouping}
+                </span>
+                <span className="font-mono font-medium text-muted-foreground">({ratioStr})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground font-mono">{evDate}</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success/15 text-success border border-success/30">
+                  {t.corporateEvents.appliedBadge}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -293,3 +293,55 @@ describe("Synthetic transaction emission on manual position edit (EditItemDialog
   });
 });
 
+import { itemToRow, rowToItem } from "../transactions";
+
+describe("itemToRow and rowToItem Firestore conversions", () => {
+  it("itemToRow never outputs undefined fields (preventing Firestore rejection)", () => {
+    const rawTx: Transaction = {
+      id: "tx-1",
+      ticker: "mglu3.sa",
+      type: "corporate_action",
+      date: 123456789,
+      quantity: 0,
+      pricePerShare: 0,
+      factor: 0.1,
+    };
+
+    const row = itemToRow(rawTx, "user-123");
+
+    // Must never contain undefined (Firestore rejects any undefined value)
+    for (const [key, value] of Object.entries(row)) {
+      expect(value, `field ${key} should not be undefined`).not.toBeUndefined();
+    }
+
+    expect(row.user_id).toBe("user-123");
+    expect(row.ticker).toBe("MGLU3");
+    expect(row.factor).toBe(0.1);
+    expect(row.fees).toBeNull();
+    expect(row.notes).toBeNull();
+    expect(row.broker).toBeNull();
+    expect(row.thesisSnapshot).toBeNull();
+    expect(row.accountType).toBeNull();
+  });
+
+  it("rowToItem parses and normalizes row data from Firestore/localStorage", () => {
+    const row = {
+      id: "tx-2",
+      ticker: "PETR4.SA",
+      type: "buy",
+      date: 1000,
+      quantity: 100,
+      pricePerShare: 35,
+    };
+
+    const tx = rowToItem(row);
+    expect(tx.ticker).toBe("PETR4");
+    expect(tx.fees).toBeNull();
+    expect(tx.notes).toBeNull();
+    expect(tx.factor).toBeNull();
+    expect(tx.broker).toBeNull();
+    expect(tx.thesisSnapshot).toBeNull();
+    expect(tx.accountType).toBeNull();
+  });
+});
+

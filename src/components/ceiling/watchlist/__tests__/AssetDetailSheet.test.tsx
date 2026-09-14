@@ -211,7 +211,7 @@ describe("AssetDetailSheet (Tier 1 / Item 5)", () => {
       expect(screen.queryByText(new RegExp(dict.ptBR.common.converted, "i"))).not.toBeInTheDocument();
     });
 
-    it("does NOT display corporate events section in My Position tab when pendingEvent is null", () => {
+    it("displays corporate events section in My Position tab even when pendingEvent is null", () => {
       render(
         <TooltipProvider>
           <AssetDetailSheet
@@ -222,7 +222,7 @@ describe("AssetDetailSheet (Tier 1 / Item 5)", () => {
         </TooltipProvider>
       );
 
-      expect(screen.queryByText(dict.ptBR.corporateEvents.menuTitle)).not.toBeInTheDocument();
+      expect(screen.getByText(dict.ptBR.corporateEvents.menuTitle)).toBeInTheDocument();
     });
   });
 });

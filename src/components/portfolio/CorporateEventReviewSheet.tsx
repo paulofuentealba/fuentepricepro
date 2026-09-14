@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useI18n } from "@/lib/i18n-provider";
-import { formatCurrency as formatCurrencySSOT } from "@/lib/formatters";
+import { formatCurrency as formatCurrencySSOT, cleanTicker } from "@/lib/formatters";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useTransactions } from "@/lib/transactions";
 import {
@@ -110,17 +110,22 @@ export function CorporateEventReviewSheet({
         appliedEvents: newAppliedEvents,
       };
 
-      const hasLedger = transactions.some((tx) => tx.ticker === item.ticker);
+      const cleanT = cleanTicker(item.ticker);
+      const hasLedger = transactions.some((tx) => cleanTicker(tx.ticker) === cleanT);
       if (hasLedger) {
         await upsertTransaction({
           id: `corp-${eventId}`,
-          ticker: item.ticker,
+          ticker: cleanT,
           type: "corporate_action",
           date: eventDate,
           quantity: 0,
           pricePerShare: 0,
           factor,
           notes: t.transactions.corporateAction,
+          fees: null,
+          broker: null,
+          thesisSnapshot: null,
+          accountType: item.accountType ?? null,
         });
       }
 

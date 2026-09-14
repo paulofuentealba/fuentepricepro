@@ -213,10 +213,10 @@ export async function scanBatchCorporateEvents(
 
   for (const ticker of uniqueTickers) {
     try {
-      const events = await fetchReconciledCorporateEvents(ticker, sinceTimestamp);
-      results[ticker] = events;
-      if (events.length > 0) {
-        await persistCorporateEventsToFirestore(ticker, events);
+      const allEvents = await fetchReconciledCorporateEvents(ticker, 0);
+      results[ticker] = sinceTimestamp > 0 ? allEvents.filter((e) => e.date > sinceTimestamp) : allEvents;
+      if (allEvents.length > 0) {
+        await persistCorporateEventsToFirestore(ticker, allEvents);
       }
     } catch (e) {
       console.warn(`[corporateEventsScan] Failed scanning ${ticker}:`, e);

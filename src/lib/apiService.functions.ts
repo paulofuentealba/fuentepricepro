@@ -567,13 +567,13 @@ export const fetchCorporateEventsBatchFn = createServerFn({ method: "POST" })
             return;
           }
 
-          // 2. Fallback: Fetch & reconcile live
-          const events = await fetchReconciledCorporateEvents(ticker, data.sinceTimestamp);
-          results[ticker] = events;
+          // 2. Fallback: Fetch & reconcile live (always fetch full history for cache)
+          const allEvents = await fetchReconciledCorporateEvents(ticker, 0);
+          results[ticker] = data.sinceTimestamp > 0 ? allEvents.filter((e) => e.date > data.sinceTimestamp) : allEvents;
 
           // 3. Persist to Firestore asynchronously if events found
-          if (events.length > 0) {
-            persistCorporateEventsToFirestore(ticker, events).catch((err) =>
+          if (allEvents.length > 0) {
+            persistCorporateEventsToFirestore(ticker, allEvents).catch((err) =>
               console.warn(`[fetchCorporateEventsBatchFn] Background persist failed for ${ticker}:`, err),
             );
           }

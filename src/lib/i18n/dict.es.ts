@@ -335,6 +335,11 @@ export const es = {
     fastConfirmTitle: "Confirmar Ajuste de Cuotas",
     fastConfirmDesc: "¿Desea aplicar el evento a {{ticker}}? Sus cuotas pasarán a {{newQty}} y el precio medio a {{newAvg}}.",
     dismiss: "Descartar",
+    noPendingEvents: "Ningún evento corporativo pendiente",
+    noPendingEventsDesc: "La posición de este activo está al día con los desdoblamientos y agrupaciones de mercado.",
+    appliedEventsTitle: "Historial de Eventos Aplicados",
+    appliedOn: "Aplicado el",
+    appliedBadge: "Aplicado",
   },
   publicEvents: {
     detectedBadge: "Desdoblamiento Detectado",

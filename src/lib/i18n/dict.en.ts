@@ -333,6 +333,11 @@ export const en = {
     fastConfirmTitle: "Confirm Share Adjustment",
     fastConfirmDesc: "Apply corporate event to {{ticker}}? Your holdings will adjust to {{newQty}} shares with {{newAvg}} average price.",
     dismiss: "Dismiss",
+    noPendingEvents: "No pending corporate events",
+    noPendingEventsDesc: "This asset holding is up to date with market splits and groupings.",
+    appliedEventsTitle: "Applied Corporate Events History",
+    appliedOn: "Applied on",
+    appliedBadge: "Applied",
   },
   publicEvents: {
     detectedBadge: "Public Split Detected",
