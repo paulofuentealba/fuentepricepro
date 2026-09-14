@@ -115,11 +115,6 @@ function AuthPage() {
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);
         toast.success(t.authModal.welcomeBack);
-        if (profile.completedAt || profile.skipped) {
-          navigate({ to: returnTo });
-        } else {
-          navigate({ to: "/profile", search: { returnTo } });
-        }
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.authModal.authFailed);
@@ -141,11 +136,6 @@ function AuthPage() {
         setSessionCookie(token);
       } catch (cookieErr) {
         console.warn("[auth] Failed to set session cookie:", cookieErr);
-      }
-      if (profile.completedAt || profile.skipped) {
-        navigate({ to: returnTo });
-      } else {
-        navigate({ to: "/profile", search: { returnTo } });
       }
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user") {
