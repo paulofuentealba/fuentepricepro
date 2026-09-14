@@ -77,6 +77,10 @@ export interface PendingCorporateEvent {
   date: number;
   type: CorporateEventType;
   ratio: number;
+  status?: "confirmed" | "divergent" | "unconfirmed";
+  confidence?: "confirmed" | "single_source" | "divergent";
+  sources?: string[];
+  divergenceDetails?: string;
 }
 
 export function isPendingCorporateEvent(ev: unknown): ev is PendingCorporateEvent {
@@ -98,17 +102,24 @@ import { corporateEventsQueryOptions } from "./queryOptions";
 import { type WatchlistItem } from "./watchlist";
 
 export function usePendingEvents(item: WatchlistItem | null) {
-  // If the user manually added applied events, check the most recent one.
-  // Otherwise fallback to addedAt, minus a 24h buffer for safety.
-  const lastSync = item?.appliedEvents?.length
-    ? Math.max(...item.appliedEvents.map((e) => e.date))
-    : item?.addedAt
-      ? item.addedAt - 1000 * 60 * 60 * 24
-      : Date.now();
+  // Check the most recent applied event. Otherwise fallback to investingSince,
+  // addedAt, or 0 (so historical events relevant to held shares are detected).
+  const lastSync = useMemo(() => {
+    if (item?.appliedEvents?.length) {
+      return Math.max(...item.appliedEvents.map((e) => e.date));
+    }
+    if (item?.investingSince) {
+      return item.investingSince - 1000 * 60 * 60 * 24;
+    }
+    if (item?.addedAt) {
+      return item.addedAt - 1000 * 60 * 60 * 24;
+    }
+    return 0;
+  }, [item?.appliedEvents, item?.investingSince, item?.addedAt]);
 
   const { data: rawEvents, isPending } = useQuery({
     ...corporateEventsQueryOptions(item?.ticker, lastSync),
-    enabled: !!item && item.quantity > 0,
+    enabled: !!item && (item.quantity ?? 0) > 0,
   });
 
   const pendingEvents = useMemo(() => {
@@ -121,6 +132,7 @@ export function usePendingEvents(item: WatchlistItem | null) {
 
   return {
     pendingEvent: pendingEvents?.[0] ?? null,
+    pendingEvents,
     isPending,
   };
 }

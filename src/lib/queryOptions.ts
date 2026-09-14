@@ -9,6 +9,7 @@ import {
   fetchAssetPriceHistoryFn,
   fetchRadarFn,
   checkPendingSplitsFn,
+  fetchCorporateEventsBatchFn,
   fetchPiotroskiScoreFn,
   fetchIpcaFiveYearAverageFn,
   type LiveQuote,
@@ -161,10 +162,16 @@ export function corporateEventsQueryOptions(ticker?: string, sinceTimestamp?: nu
   const key = (ticker || "").trim().toUpperCase();
   const timestamp = sinceTimestamp ?? 0;
   return queryOptions({
-    queryKey: ["pendingSplits", key, timestamp] as const,
-    queryFn: ({ signal }) =>
-      key ? checkPendingSplitsFn({ data: { ticker: key, sinceTimestamp: timestamp }, signal }) : Promise.resolve([]),
-    staleTime: 24 * 60 * 60_000, // 24 hours
-    gcTime: 48 * 60 * 60_000,
+    queryKey: ["corporateEvents", "single", key, timestamp] as const,
+    queryFn: async ({ signal }) => {
+      if (!key) return [];
+      const res = await fetchCorporateEventsBatchFn({
+        data: { tickers: [key], sinceTimestamp: timestamp },
+        signal,
+      });
+      return res[key] || [];
+    },
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 60,
   });
 }

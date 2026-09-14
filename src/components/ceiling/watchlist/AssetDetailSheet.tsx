@@ -392,13 +392,15 @@ export function AssetDetailSheet({
                           <EditPositionFields item={item} />
                         </MyPositionSection>
 
-                        <MyPositionSection
-                          title={t.corporateEvents.menuTitle}
-                          icon={<Scissors className="h-4 w-4 text-muted-foreground" />}
-                          defaultOpen={initialTab === "myPosition" && !!pendingEvent}
-                        >
-                          <CorporateEventFields item={item} pendingEvent={pendingEvent} />
-                        </MyPositionSection>
+                        {pendingEvent && (
+                          <MyPositionSection
+                            title={t.corporateEvents.menuTitle}
+                            icon={<Scissors className="h-4 w-4 text-muted-foreground" />}
+                            defaultOpen={true}
+                          >
+                            <CorporateEventFields item={item} pendingEvent={pendingEvent} />
+                          </MyPositionSection>
+                        )}
                       </div>
 
                       {item.type !== "FIXED_INCOME" && (

@@ -210,5 +210,19 @@ describe("AssetDetailSheet (Tier 1 / Item 5)", () => {
 
       expect(screen.queryByText(new RegExp(dict.ptBR.common.converted, "i"))).not.toBeInTheDocument();
     });
+
+    it("does NOT display corporate events section in My Position tab when pendingEvent is null", () => {
+      render(
+        <TooltipProvider>
+          <AssetDetailSheet
+            item={mockItem}
+            onClose={vi.fn()}
+            initialTab="myPosition"
+          />
+        </TooltipProvider>
+      );
+
+      expect(screen.queryByText(dict.ptBR.corporateEvents.menuTitle)).not.toBeInTheDocument();
+    });
   });
 });

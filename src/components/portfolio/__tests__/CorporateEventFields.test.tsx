@@ -158,4 +158,37 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
     expect(mockUpsertAsync).not.toHaveBeenCalled();
     expect(mockUpsertTransaction).not.toHaveBeenCalled();
   });
+
+  it("retorna null e não renderiza nada se não houver pendingEvent", () => {
+    const { container } = render(
+      <CorporateEventFields item={item} pendingEvent={null} />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renderiza o evento detectado em modo leitura sem inputs editáveis de tipo ou proporção", () => {
+    render(
+      <CorporateEventFields
+        item={item}
+        pendingEvent={{
+          eventId: "ev_read_only",
+          date: 1726329600000,
+          type: "split",
+          ratio: 4,
+          status: "confirmed",
+        }}
+      />,
+    );
+
+    // Não deve possuir radio buttons para alternar entre split e grouping
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+
+    // Não deve possuir input numérico editável de ratio
+    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+
+    // Deve exibir o ratio e o tipo em formato de leitura
+    expect(screen.getByText("1 : 4")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^aplicar evento$/i })).toBeInTheDocument();
+  });
 });
