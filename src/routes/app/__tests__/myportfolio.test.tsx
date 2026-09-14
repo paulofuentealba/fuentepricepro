@@ -44,6 +44,9 @@ vi.mock("@/components/portfolio/PortfolioEmptyState", () => ({
 vi.mock("@/components/ceiling/watchlist/AssetDetailSheet", () => ({
   AssetDetailSheet: ({ item }: any) => (item ? <div data-testid="detail-sheet">{item.ticker}</div> : null),
 }));
+vi.mock("@/components/portfolio/PendingCorporateEventsBanner", () => ({
+  PendingCorporateEventsBanner: () => null,
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (opts: any) => opts,

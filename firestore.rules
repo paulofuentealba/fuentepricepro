@@ -35,6 +35,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /corporateEvents/{ticker} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /assets/{ticker} {
       allow read: if true;
       allow write: if false;

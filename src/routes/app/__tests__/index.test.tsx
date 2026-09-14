@@ -103,6 +103,10 @@ vi.mock("@/components/ceiling/watchlist/AssetDetailSheet", () => ({
     ) : null,
 }));
 
+vi.mock("@/components/portfolio/PendingCorporateEventsBanner", () => ({
+  PendingCorporateEventsBanner: () => null,
+}));
+
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (opts: any) => opts,
 }));

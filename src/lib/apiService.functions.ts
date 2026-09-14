@@ -13,6 +13,12 @@ import { fetchNasdaqDividends } from "./api/nasdaq.server";
 import { fetchHgBrasilDividends, fetchHgBrasilExchangeRate } from "./api/hgBrasil.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
 import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
+import {
+  fetchReconciledCorporateEvents,
+  getCorporateEventsFromFirestore,
+  persistCorporateEventsToFirestore,
+} from "./api/corporateEventsScan.server";
+import type { ReconciledCorporateEvent } from "./api/corporateEventsReconciler.server";
 
 // Re-export public types so existing `@/lib/apiService.server` imports keep working.
 export type { ApiAsset, LiveQuote, SearchHit } from "./api/types";
@@ -535,6 +541,50 @@ export const checkPendingSplitsFn = createServerFn({ method: "GET" })
       console.warn(`[checkPendingSplitsFn] Failed to check splits for ${ticker}`, error);
       return [];
     }
+  });
+
+export const fetchCorporateEventsBatchFn = createServerFn({ method: "POST" })
+  .validator((data: { tickers: string[]; sinceTimestamp?: number }) => {
+    const rawTickers = Array.isArray(data?.tickers) ? data.tickers : [];
+    const tickers = rawTickers.map(sanitizeTicker).filter(Boolean);
+    const sinceTimestamp =
+      typeof data?.sinceTimestamp === "number" && Number.isFinite(data.sinceTimestamp) && data.sinceTimestamp >= 0
+        ? data.sinceTimestamp
+        : 0;
+    return { tickers, sinceTimestamp };
+  })
+  .handler(async ({ data }): Promise<Record<string, ReconciledCorporateEvent[]>> => {
+    const results: Record<string, ReconciledCorporateEvent[]> = {};
+    const uniqueTickers = Array.from(new Set(data.tickers));
+
+    await Promise.all(
+      uniqueTickers.map(async (ticker) => {
+        try {
+          // 1. Try public Firestore collection /corporateEvents/{ticker}
+          const stored = await getCorporateEventsFromFirestore(ticker);
+          if (stored !== null && stored.length > 0) {
+            results[ticker] = stored.filter((e) => e.date > data.sinceTimestamp);
+            return;
+          }
+
+          // 2. Fallback: Fetch & reconcile live
+          const events = await fetchReconciledCorporateEvents(ticker, data.sinceTimestamp);
+          results[ticker] = events;
+
+          // 3. Persist to Firestore asynchronously if events found
+          if (events.length > 0) {
+            persistCorporateEventsToFirestore(ticker, events).catch((err) =>
+              console.warn(`[fetchCorporateEventsBatchFn] Background persist failed for ${ticker}:`, err),
+            );
+          }
+        } catch (e) {
+          console.warn(`[fetchCorporateEventsBatchFn] Failed for ${ticker}:`, e);
+          results[ticker] = [];
+        }
+      }),
+    );
+
+    return results;
   });
 
 // -------- Macro Rates Oracle --------

@@ -10,6 +10,7 @@ import { FxDecompositionPanel } from "@/components/portfolio/FxDecompositionPane
 import { PortfolioPositionsTable } from "@/components/portfolio/PortfolioPositionsTable";
 import { PortfolioEmptyState } from "@/components/portfolio/PortfolioEmptyState";
 import { AssetDetailSheet } from "@/components/ceiling/watchlist/AssetDetailSheet";
+import { PendingCorporateEventsBanner } from "@/components/portfolio/PendingCorporateEventsBanner";
 
 export const Route = createFileRoute("/app/myportfolio")({
   component: MyPortfolio,
@@ -39,6 +40,8 @@ function MyPortfolio() {
         usdBrlRate={usdBrlRate}
         isLoading={isAppLoading}
       />
+
+      <PendingCorporateEventsBanner />
 
       {!isAppLoading && !hasPositions ? (
         <PortfolioEmptyState />

@@ -16,6 +16,7 @@ import { ContributionEngineCard } from "@/components/dashboard/ContributionEngin
 import { AllocationOverviewCard } from "@/components/dashboard/AllocationOverviewCard";
 import { OpportunityMatrixTable } from "@/components/dashboard/OpportunityMatrixTable";
 import { AssetDetailSheet } from "@/components/ceiling/watchlist/AssetDetailSheet";
+import { PendingCorporateEventsBanner } from "@/components/portfolio/PendingCorporateEventsBanner";
 
 /**
  * Home real de `/app`. Reescrita para a nova Dashboard (ver
@@ -121,6 +122,8 @@ function AppHome() {
         currency={currency}
         isLoading={isAppLoading}
       />
+
+      <PendingCorporateEventsBanner />
 
       <FireEngineCard
         coveragePercent={fi.coveragePercent}
