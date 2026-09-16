@@ -7,7 +7,7 @@ let adminDbInstance: Firestore | null = null;
 let adminAuthInstance: Auth | null = null;
 
 function isDevEnvironment(): boolean {
-  return process.env.NODE_ENV !== "production";
+  return process.env.NODE_ENV === "development";
 }
 
 function ensureAppInitialized(): boolean {
