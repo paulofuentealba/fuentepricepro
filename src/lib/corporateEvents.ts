@@ -96,7 +96,181 @@ export function isPendingCorporateEvent(ev: unknown): ev is PendingCorporateEven
   );
 }
 
+import { recalculateHoldingFromTransactions, type Transaction } from "./transactionsLogic";
 import { cleanTicker } from "./formatters";
+
+export interface CorporateEventImpact {
+  /** The quantity eligible for the event on the event date */
+  eligibleQuantity: number;
+  /** Current total quantity before applying event */
+  currentQuantity: number;
+  /** Current average price before applying event */
+  currentAveragePrice: number;
+  /** Projected total quantity after applying event */
+  newQuantity: number;
+  /** Projected average price after applying event */
+  newAveragePrice: number;
+  /** Delta quantity (+ for split, - for grouping) */
+  deltaQuantity: number;
+  /** Price variation percentage */
+  priceVariationPct: number;
+  /** True if the user had eligible shares (> 0) on the event date */
+  isApplicable: boolean;
+  /** Processed position preview */
+  preview: ProcessedPosition;
+}
+
+/**
+ * Computes the financial impact of a corporate event (split or grouping),
+ * strictly applying the adjustment ONLY to the shares that existed on the event date.
+ * Shares acquired after the event date are preserved without alteration.
+ */
+export function calculateCorporateEventImpact(
+  item: WatchlistItem,
+  event: { date: number; type: CorporateEventType; factor: number },
+  transactions: Transaction[] = [],
+  currentMarketPrice?: number,
+): CorporateEventImpact {
+  const cleanT = cleanTicker(item.ticker);
+  const tickerTxs = transactions.filter((tx) => cleanTicker(tx.ticker) === cleanT);
+  const currentAvgPrice = item.averagePrice ?? item.currentPrice;
+
+  if (tickerTxs.length > 0) {
+    // 1. Calculate how many shares existed on the event date
+    const eligibleHolding = recalculateHoldingFromTransactions(
+      tickerTxs.filter((tx) => tx.date <= event.date),
+    );
+    const eligibleQuantity = eligibleHolding.quantity;
+
+    // If 0 shares existed on that date, the event is not applicable to this holding
+    if (eligibleQuantity <= 0) {
+      return {
+        eligibleQuantity: 0,
+        currentQuantity: item.quantity,
+        currentAveragePrice: currentAvgPrice,
+        newQuantity: item.quantity,
+        newAveragePrice: currentAvgPrice,
+        deltaQuantity: 0,
+        priceVariationPct: 0,
+        isApplicable: false,
+        preview: {
+          ticker: item.ticker,
+          quantity: item.quantity,
+          averagePrice: currentAvgPrice,
+        },
+      };
+    }
+
+    // 2. Current holding from the ledger
+    const currentHolding = recalculateHoldingFromTransactions(tickerTxs);
+    const currentQuantity = currentHolding.quantity > 0 ? currentHolding.quantity : item.quantity;
+    const effectiveAvgPrice =
+      currentHolding.quantity > 0 ? currentHolding.averagePrice : currentAvgPrice;
+
+    // 3. Simulate inserting the corporate_action transaction at event.date
+    const simulatedTxs: Transaction[] = [
+      ...tickerTxs,
+      {
+        id: `simulated-corp-${event.date}`,
+        ticker: cleanT,
+        type: "corporate_action",
+        date: event.date,
+        quantity: 0,
+        pricePerShare: 0,
+        factor: event.factor,
+      },
+    ];
+
+    const postEventHolding = recalculateHoldingFromTransactions(simulatedTxs);
+    let newQuantity = postEventHolding.quantity;
+    let newAveragePrice = postEventHolding.averagePrice;
+    let fractionalCash = 0;
+
+    // Handle grouping fractionals (inplit)
+    if (event.type === "grouping") {
+      const roundedQuantity = Math.round(newQuantity * 1000000) / 1000000;
+      const wholeShares = Math.floor(roundedQuantity);
+      const fraction = roundedQuantity - wholeShares;
+      if (fraction > 0) {
+        newQuantity = wholeShares;
+        const priceToUse = currentMarketPrice ?? newAveragePrice;
+        fractionalCash = fraction * priceToUse;
+      }
+    }
+
+    const deltaQuantity = newQuantity - currentQuantity;
+    const priceVariationPct =
+      effectiveAvgPrice > 0
+        ? ((newAveragePrice - effectiveAvgPrice) / effectiveAvgPrice) * 100
+        : 0;
+
+    return {
+      eligibleQuantity,
+      currentQuantity,
+      currentAveragePrice: effectiveAvgPrice,
+      newQuantity,
+      newAveragePrice,
+      deltaQuantity,
+      priceVariationPct,
+      isApplicable: true,
+      preview: {
+        ticker: item.ticker,
+        quantity: newQuantity,
+        averagePrice: newAveragePrice,
+        ...(fractionalCash > 0 ? { fractionalCash } : {}),
+      },
+    };
+  }
+
+  // Fallback: User does NOT have a transaction ledger for this ticker
+  const acquisitionDate = item.investingSince || item.addedAt || 0;
+  if (acquisitionDate > 0 && event.date < acquisitionDate) {
+    return {
+      eligibleQuantity: 0,
+      currentQuantity: item.quantity,
+      currentAveragePrice: currentAvgPrice,
+      newQuantity: item.quantity,
+      newAveragePrice: currentAvgPrice,
+      deltaQuantity: 0,
+      priceVariationPct: 0,
+      isApplicable: false,
+      preview: {
+        ticker: item.ticker,
+        quantity: item.quantity,
+        averagePrice: currentAvgPrice,
+      },
+    };
+  }
+
+  const preview = applyCorporateEvent(
+    {
+      ticker: item.ticker,
+      quantity: item.quantity,
+      averagePrice: currentAvgPrice,
+    },
+    { type: event.type, factor: event.factor },
+    true,
+    currentMarketPrice ?? item.currentPrice,
+  );
+
+  const deltaQuantity = preview.quantity - item.quantity;
+  const priceVariationPct =
+    currentAvgPrice > 0
+      ? ((preview.averagePrice - currentAvgPrice) / currentAvgPrice) * 100
+      : 0;
+
+  return {
+    eligibleQuantity: item.quantity,
+    currentQuantity: item.quantity,
+    currentAveragePrice: currentAvgPrice,
+    newQuantity: preview.quantity,
+    newAveragePrice: preview.averagePrice,
+    deltaQuantity,
+    priceVariationPct,
+    isApplicable: item.quantity > 0,
+    preview,
+  };
+}
 
 export function getHoldingAcquisitionDate(
   item: Pick<WatchlistItem, "investingSince" | "addedAt"> | null | undefined,
@@ -124,10 +298,6 @@ import { useTransactions } from "./transactions";
 
 export function usePendingEvents(item: WatchlistItem | null) {
   const { transactions = [] } = useTransactions();
-  const acquisitionDate = useMemo(
-    () => getHoldingAcquisitionDate(item, transactions, item?.ticker),
-    [item, transactions],
-  );
 
   const { data: rawEvents, isPending } = useQuery({
     ...corporateEventsQueryOptions(item?.ticker),
@@ -140,8 +310,17 @@ export function usePendingEvents(item: WatchlistItem | null) {
     return rawEvents
       .filter(isPendingCorporateEvent)
       .filter((ev) => !appliedIds.has(ev.eventId))
-      .filter((ev) => acquisitionDate === 0 || ev.date >= acquisitionDate);
-  }, [rawEvents, item, acquisitionDate]);
+      .filter((ev) => {
+        const factor =
+          ev.type === "split" ? ev.ratio : ev.ratio < 1 ? ev.ratio : 1 / ev.ratio;
+        const impact = calculateCorporateEventImpact(
+          item,
+          { date: ev.date, type: ev.type, factor },
+          transactions,
+        );
+        return impact.isApplicable;
+      });
+  }, [rawEvents, item, transactions]);
 
   return {
     pendingEvent: pendingEvents?.[0] ?? null,

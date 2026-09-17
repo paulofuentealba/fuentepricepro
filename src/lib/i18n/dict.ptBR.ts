@@ -340,6 +340,7 @@ export const ptBR = {
     appliedEventsTitle: "Histórico de Eventos Aplicados",
     appliedOn: "Aplicado em",
     appliedBadge: "Aplicado",
+    eligibleSharesNote: "Aplicado apenas às {{eligible}} cotas existentes em {{date}}. Cotas adquiridas após o evento não sofrem alteração.",
   },
   publicEvents: {
     detectedBadge: "Desdobramento Detectado",

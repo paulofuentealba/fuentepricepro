@@ -14,7 +14,7 @@ import { formatCurrency as formatCurrencySSOT, cleanTicker } from "@/lib/formatt
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useTransactions } from "@/lib/transactions";
 import {
-  applyCorporateEvent,
+  calculateCorporateEventImpact,
   type PendingCorporateEvent,
 } from "@/lib/corporateEvents";
 import { toast } from "sonner";
@@ -67,17 +67,14 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
   const cleanRatio = eventType === "split" ? rawRatio : (rawRatio < 1 ? Math.round(1 / rawRatio) : rawRatio);
   const displayRatio = eventType === "split" ? `1 : ${cleanRatio}` : `${cleanRatio} : 1`;
 
-  // Calculate preview using the engine
-  const newPosition = applyCorporateEvent(
-    {
-      ticker: item.ticker,
-      quantity: item.quantity,
-      averagePrice: item.averagePrice ?? item.currentPrice,
-    },
-    { type: eventType, factor },
-    true,
+  // Calculate chronological impact using the engine
+  const impact = calculateCorporateEventImpact(
+    item,
+    { date: pendingEvent.date, type: eventType, factor },
+    transactions,
     item.currentPrice,
   );
+  const newPosition = impact.preview;
 
   const handleSubmit = async () => {
     if (isSaving) return;
@@ -93,8 +90,8 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
 
       const updatedItem = {
         ...item,
-        quantity: newPosition.quantity,
-        averagePrice: newPosition.averagePrice,
+        quantity: impact.newQuantity,
+        averagePrice: impact.newAveragePrice,
         appliedEvents: newAppliedEvents,
       };
 
@@ -244,6 +241,19 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
         </div>
       </div>
 
+      {impact.eligibleQuantity < item.quantity && (
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <span>
+            {t.corporateEvents.eligibleSharesNote
+              ? t.corporateEvents.eligibleSharesNote
+                  .replace("{{eligible}}", String(impact.eligibleQuantity))
+                  .replace("{{date}}", formattedDate || "")
+              : `Aplicado apenas às ${impact.eligibleQuantity} cotas existentes na data do evento. Cotas adquiridas após o evento não sofrem alteração.`}
+          </span>
+        </div>
+      )}
+
       <div className="flex justify-end pt-1">
         <Button onClick={() => setIsConfirmOpen(true)} disabled={isSaving} className="w-full sm:w-auto">
           {t.corporateEvents.applyButton}
@@ -282,6 +292,18 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
                   .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
               </span>
             </div>
+            {impact.eligibleQuantity < item.quantity && (
+              <div className="pt-2 border-t border-border/40 text-[11.5px] text-muted-foreground flex items-start gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                <span>
+                  {t.corporateEvents.eligibleSharesNote
+                    ? t.corporateEvents.eligibleSharesNote
+                        .replace("{{eligible}}", String(impact.eligibleQuantity))
+                        .replace("{{date}}", formattedDate || "")
+                    : `Aplicado apenas às ${impact.eligibleQuantity} cotas existentes na data do evento. Cotas adquiridas após o evento não sofrem alteração.`}
+                </span>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex gap-2 sm:justify-end">

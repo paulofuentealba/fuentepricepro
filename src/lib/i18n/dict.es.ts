@@ -340,6 +340,7 @@ export const es = {
     appliedEventsTitle: "Historial de Eventos Aplicados",
     appliedOn: "Aplicado el",
     appliedBadge: "Aplicado",
+    eligibleSharesNote: "Aplicado solo a las {{eligible}} cuotas existentes el {{date}}. Las cuotas adquiridas después del evento no sufren cambios.",
   },
   publicEvents: {
     detectedBadge: "Desdoblamiento Detectado",

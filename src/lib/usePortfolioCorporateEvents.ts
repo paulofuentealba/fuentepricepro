@@ -4,8 +4,7 @@ import { useWatchlist, type WatchlistItem } from "./watchlist";
 import { useTransactions } from "./transactions";
 import { useI18n } from "./i18n-provider";
 import {
-  applyCorporateEvent,
-  getHoldingAcquisitionDate,
+  calculateCorporateEventImpact,
   type ProcessedPosition,
 } from "./corporateEvents";
 import { fetchCorporateEventsBatchFn } from "./apiService.functions";
@@ -21,6 +20,7 @@ export interface PendingPortfolioEvent {
   deltaQuantity: number;
   priceVariationPct: number;
   displayRatioText: string;
+  eligibleQuantity?: number;
 }
 
 export function formatRatioDisplay(type: "split" | "grouping", ratio: number): string {
@@ -28,8 +28,8 @@ export function formatRatioDisplay(type: "split" | "grouping", ratio: number): s
     const cleanRatio = ratio.toFixed(2).replace(/\.?0+$/, "");
     return `1:${cleanRatio}`;
   } else {
-    const inverse = Math.round(1 / ratio);
-    return `${inverse}:1`;
+    const cleanRatio = (1 / ratio).toFixed(2).replace(/\.?0+$/, "");
+    return `${cleanRatio}:1`;
   }
 }
 
@@ -40,23 +40,17 @@ export function usePortfolioCorporateEvents() {
   const queryClient = useQueryClient();
   const [applyingEventId, setApplyingEventId] = useState<string | null>(null);
 
-  // Consider only owned assets (quantity > 0)
-  const ownedItems = useMemo(
-    () => items.filter((it) => typeof it.quantity === "number" && it.quantity > 0),
-    [items],
-  );
+  const ownedItems = useMemo(() => {
+    return items.filter((item) => (item.quantity ?? 0) > 0);
+  }, [items]);
 
-  const tickers = useMemo(
-    () => Array.from(new Set(ownedItems.map((it) => it.ticker.trim().toUpperCase()))),
-    [ownedItems],
-  );
+  const tickers = useMemo(() => {
+    return ownedItems.map((it) => it.ticker.toUpperCase());
+  }, [ownedItems]);
 
-  const queryKey = useMemo(
-    () => ["corporateEvents", "batch", tickers.sort().join(",")],
-    [tickers],
-  );
+  const queryKey = useMemo(() => ["corporateEventsBatch", tickers.sort().join(",")], [tickers]);
 
-  const { data: eventsByTicker, isLoading, isError, refetch } = useQuery({
+  const { data: eventsByTicker, isPending: isLoading, isError, refetch } = useQuery({
     queryKey,
     queryFn: async () => {
       if (tickers.length === 0) return {};
@@ -74,42 +68,29 @@ export function usePortfolioCorporateEvents() {
     for (const item of ownedItems) {
       const tickerEvents = eventsByTicker[item.ticker.toUpperCase()] || [];
       const appliedIds = new Set(item.appliedEvents?.map((e) => e.eventId) ?? []);
-      const acquisitionDate = getHoldingAcquisitionDate(item, transactions, item.ticker);
 
       for (const ev of tickerEvents) {
         if (appliedIds.has(ev.eventId)) continue;
 
-        // Corporate events before asset purchase date are not applicable to the user's holding
-        if (acquisitionDate > 0 && ev.date < acquisitionDate) continue;
-
         const factor = ev.ratio;
-        const currentAvgPrice = item.averagePrice ?? item.currentPrice;
-
-        const preview = applyCorporateEvent(
-          {
-            ticker: item.ticker,
-            quantity: item.quantity,
-            averagePrice: currentAvgPrice,
-          },
-          { type: ev.type, factor },
-          true,
+        const impact = calculateCorporateEventImpact(
+          item,
+          { date: ev.date, type: ev.type, factor },
+          transactions,
           item.currentPrice,
         );
 
-        const deltaQuantity = preview.quantity - item.quantity;
-        const priceVariationPct =
-          currentAvgPrice > 0
-            ? ((preview.averagePrice - currentAvgPrice) / currentAvgPrice) * 100
-            : 0;
+        if (!impact.isApplicable) continue;
 
         list.push({
           event: ev,
           item,
-          preview,
+          preview: impact.preview,
           factor,
-          deltaQuantity,
-          priceVariationPct,
+          deltaQuantity: impact.deltaQuantity,
+          priceVariationPct: impact.priceVariationPct,
           displayRatioText: formatRatioDisplay(ev.type, ev.ratio),
+          eligibleQuantity: impact.eligibleQuantity,
         });
       }
     }
@@ -122,7 +103,13 @@ export function usePortfolioCorporateEvents() {
     setApplyingEventId(pending.event.eventId);
 
     try {
-      const { item, event, preview, factor } = pending;
+      const { item, event, factor } = pending;
+      const impact = calculateCorporateEventImpact(
+        item,
+        { date: event.date, type: event.type, factor },
+        transactions,
+        item.currentPrice,
+      );
       const newAppliedEvents = [...(item.appliedEvents || [])];
 
       newAppliedEvents.push({
@@ -134,8 +121,8 @@ export function usePortfolioCorporateEvents() {
 
       const updatedItem: WatchlistItem = {
         ...item,
-        quantity: preview.quantity,
-        averagePrice: preview.averagePrice,
+        quantity: impact.newQuantity,
+        averagePrice: impact.newAveragePrice,
         appliedEvents: newAppliedEvents,
       };
 

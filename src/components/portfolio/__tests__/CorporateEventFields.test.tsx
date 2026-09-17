@@ -55,8 +55,8 @@ const item: WatchlistItem = {
   averagePrice: 50,
   paymentMonths: [],
   payoutRatio: null,
-  addedAt: Date.now(),
-  investingSince: Date.now(),
+  addedAt: 100,
+  investingSince: 100,
 };
 
 describe("CorporateEventFields — Evento Corporativo (inline, migrado de CorporateEventModal)", () => {
@@ -210,4 +210,35 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
     expect(screen.getByText("1 : 4")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^aplicar evento$/i })).toBeInTheDocument();
   });
+
+  it("aplica split apenas sobre as cotas que existiam na data do evento, preservando compras posteriores", async () => {
+    mockTransactions = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: 100, quantity: 100, pricePerShare: 20 },
+      { id: "tx2", ticker: "VALE3", type: "buy", date: 500, quantity: 50, pricePerShare: 12 },
+    ];
+    const itemWith150: WatchlistItem = {
+      ...item,
+      quantity: 150,
+      averagePrice: 17.33,
+    };
+    render(
+      <CorporateEventFields
+        item={itemWith150}
+        pendingEvent={{ eventId: "ev-split", date: 200, type: "split", ratio: 2 }}
+      />,
+    );
+
+    // Deve exibir nota de cotas elegíveis na data
+    expect(screen.getByText(/aplicado apenas às 100 cotas existentes/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^aplicar evento$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /confirmar e aplicar/i }));
+
+    await waitFor(() => expect(mockUpsertAsync).toHaveBeenCalledTimes(1));
+    const updatedItem = mockUpsertAsync.mock.calls[0][0];
+    // 100 cotas dobram para 200, mais 50 cotas pós-evento = 250 cotas (não 300!)
+    expect(updatedItem.quantity).toBe(250);
+    expect(updatedItem.averagePrice).toBeCloseTo(10.4, 2);
+  });
 });
+

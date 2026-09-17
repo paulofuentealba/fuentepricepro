@@ -15,7 +15,7 @@ import { formatCurrency as formatCurrencySSOT, cleanTicker } from "@/lib/formatt
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import { useTransactions } from "@/lib/transactions";
 import {
-  applyCorporateEvent,
+  calculateCorporateEventImpact,
   type CorporateEventType,
 } from "@/lib/corporateEvents";
 import type { ReconciledCorporateEvent } from "@/lib/api/corporateEventsReconciler.server";
@@ -70,20 +70,16 @@ export function CorporateEventReviewSheet({
   const factor = eventType === "split" ? numericInput : 1 / numericInput;
   const currentAvg = item.averagePrice ?? item.currentPrice;
 
-  const preview = applyCorporateEvent(
-    {
-      ticker: item.ticker,
-      quantity: item.quantity,
-      averagePrice: currentAvg,
-    },
-    { type: eventType, factor },
-    true,
+  const eventDate = event?.date ?? Date.now();
+  const impact = calculateCorporateEventImpact(
+    item,
+    { date: eventDate, type: eventType, factor },
+    transactions,
     item.currentPrice,
   );
-
-  const deltaQty = preview.quantity - item.quantity;
-  const priceVariationPct =
-    currentAvg > 0 ? ((preview.averagePrice - currentAvg) / currentAvg) * 100 : 0;
+  const preview = impact.preview;
+  const deltaQty = impact.deltaQuantity;
+  const priceVariationPct = impact.priceVariationPct;
 
   const formatCurrency = (val: number) => formatCurrencySSOT(val, item.currency, locale);
 
@@ -93,7 +89,6 @@ export function CorporateEventReviewSheet({
 
     try {
       const eventId = event?.eventId ?? `manual-${Date.now()}`;
-      const eventDate = event?.date ?? Date.now();
 
       const newAppliedEvents = [...(item.appliedEvents || [])];
       newAppliedEvents.push({
@@ -105,8 +100,8 @@ export function CorporateEventReviewSheet({
 
       const updatedItem: WatchlistItem = {
         ...item,
-        quantity: preview.quantity,
-        averagePrice: preview.averagePrice,
+        quantity: impact.newQuantity,
+        averagePrice: impact.newAveragePrice,
         appliedEvents: newAppliedEvents,
       };
 
@@ -293,6 +288,19 @@ export function CorporateEventReviewSheet({
                 </tr>
               </tbody>
             </table>
+
+            {impact.eligibleQuantity < item.quantity && (
+              <div className="p-3 bg-muted/30 border-t border-border/40 text-[11.5px] text-muted-foreground flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>
+                  {t.corporateEvents.eligibleSharesNote
+                    ? t.corporateEvents.eligibleSharesNote
+                        .replace("{{eligible}}", String(impact.eligibleQuantity))
+                        .replace("{{date}}", event?.effectiveDate || "")
+                    : `Aplicado apenas às ${impact.eligibleQuantity} cotas existentes na data do evento. Cotas adquiridas após o evento não sofrem alteração.`}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Action buttons */}

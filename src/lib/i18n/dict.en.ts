@@ -338,6 +338,7 @@ export const en = {
     appliedEventsTitle: "Applied Corporate Events History",
     appliedOn: "Applied on",
     appliedBadge: "Applied",
+    eligibleSharesNote: "Applied only to the {{eligible}} shares held on {{date}}. Shares acquired after the event remain unchanged.",
   },
   publicEvents: {
     detectedBadge: "Public Split Detected",

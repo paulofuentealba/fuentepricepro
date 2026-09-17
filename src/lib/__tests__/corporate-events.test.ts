@@ -149,3 +149,154 @@ describe("getHoldingAcquisitionDate — Data Canônica de Aquisição do Ativo",
     expect(isApplicable).toBe(true);
   });
 });
+
+import { calculateCorporateEventImpact } from "../corporateEvents";
+import type { WatchlistItem } from "../watchlist";
+import type { Transaction } from "../transactionsLogic";
+
+describe("calculateCorporateEventImpact — Aplicação Cronológica sobre Cotas Existentes na Data", () => {
+  const baseItem: WatchlistItem = {
+    id: "stock:VALE3",
+    ticker: "VALE3",
+    name: "Vale S.A.",
+    type: "STOCK_BR",
+    currency: "BRL",
+    currentPrice: 60.0,
+    annualDividend: 4.0,
+    targetYield: 6.0,
+    ceilingPrice: 66.66,
+    safetyMargin: 11.1,
+    quantity: 150,
+    averagePrice: 17.33,
+    paymentMonths: [3, 9],
+    payoutRatio: 50,
+    addedAt: 1672531200000,
+    investingSince: 1672531200000,
+  };
+
+  it("aplica o desdobramento apenas nas cotas adquiridas até a data do evento (cenário do usuário)", () => {
+    // 01/01/2023: Compra de 100 cotas a R$ 20 (Custo: 2000)
+    const datePre = new Date("2023-01-01T12:00:00Z").getTime();
+    // 25/05/2023: Desdobramento 1:2 (fator 2)
+    const dateEvent = new Date("2023-05-25T12:00:00Z").getTime();
+    // 30/05/2023: Compra de 50 cotas a R$ 12 (Custo: 600, já pós-desdobramento)
+    const datePost = new Date("2023-05-30T12:00:00Z").getTime();
+
+    const transactions: Transaction[] = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: datePre, quantity: 100, pricePerShare: 20 },
+      { id: "tx2", ticker: "VALE3", type: "buy", date: datePost, quantity: 50, pricePerShare: 12 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      baseItem,
+      { date: dateEvent, type: "split", factor: 2 },
+      transactions,
+    );
+
+    expect(impact.isApplicable).toBe(true);
+    // Na data do evento (25/05), existiam apenas as 100 cotas da tx1
+    expect(impact.eligibleQuantity).toBe(100);
+    // Quantidade total pré-evento: 100 + 50 = 150 cotas
+    expect(impact.currentQuantity).toBe(150);
+    // As 100 cotas dobram para 200; as 50 cotas pós-evento permanecem 50 -> Total: 250 cotas
+    expect(impact.newQuantity).toBe(250);
+    expect(impact.deltaQuantity).toBe(100);
+    // Custo total: (100 * 20) + (50 * 12) = 2000 + 600 = 2600. Novo PM: 2600 / 250 = 10.40
+    expect(impact.newAveragePrice).toBeCloseTo(10.4, 2);
+    expect(impact.preview.quantity).toBe(250);
+    expect(impact.preview.averagePrice).toBeCloseTo(10.4, 2);
+  });
+
+  it("aplica o grupamento apenas nas cotas adquiridas até a data do evento", () => {
+    // 01/01/2023: Compra de 100 cotas a R$ 2 (Custo: 200)
+    const datePre = new Date("2023-01-01T12:00:00Z").getTime();
+    // 25/05/2023: Grupamento 10:1 (fator 0.1)
+    const dateEvent = new Date("2023-05-25T12:00:00Z").getTime();
+    // 30/05/2023: Compra de 15 cotas a R$ 22 (Custo: 330)
+    const datePost = new Date("2023-05-30T12:00:00Z").getTime();
+
+    const transactions: Transaction[] = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: datePre, quantity: 100, pricePerShare: 2 },
+      { id: "tx2", ticker: "VALE3", type: "buy", date: datePost, quantity: 15, pricePerShare: 22 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      baseItem,
+      { date: dateEvent, type: "grouping", factor: 0.1 },
+      transactions,
+    );
+
+    expect(impact.isApplicable).toBe(true);
+    expect(impact.eligibleQuantity).toBe(100);
+    expect(impact.currentQuantity).toBe(115);
+    // 100 cotas agrupadas 10:1 viram 10 cotas. Mais 15 pós-evento = 25 cotas
+    expect(impact.newQuantity).toBe(25);
+    expect(impact.deltaQuantity).toBe(-90);
+    // Custo total: 200 + 330 = 530. Novo PM: 530 / 25 = 21.20
+    expect(impact.newAveragePrice).toBeCloseTo(21.2, 2);
+  });
+
+  it("retorna isApplicable: false quando todas as cotas foram adquiridas após a data do evento", () => {
+    const dateEvent = new Date("2023-05-25T12:00:00Z").getTime();
+    const datePost = new Date("2023-05-30T12:00:00Z").getTime();
+
+    const transactions: Transaction[] = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: datePost, quantity: 50, pricePerShare: 12 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      baseItem,
+      { date: dateEvent, type: "split", factor: 2 },
+      transactions,
+    );
+
+    expect(impact.isApplicable).toBe(false);
+    expect(impact.eligibleQuantity).toBe(0);
+    expect(impact.deltaQuantity).toBe(0);
+  });
+
+  it("retorna isApplicable: false se a posição foi totalmente liquidada antes do evento", () => {
+    const dateBuy = new Date("2023-01-01T12:00:00Z").getTime();
+    const dateSell = new Date("2023-05-10T12:00:00Z").getTime();
+    const dateEvent = new Date("2023-05-25T12:00:00Z").getTime();
+    const dateRebuy = new Date("2023-05-30T12:00:00Z").getTime();
+
+    const transactions: Transaction[] = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: dateBuy, quantity: 100, pricePerShare: 20 },
+      { id: "tx2", ticker: "VALE3", type: "sell", date: dateSell, quantity: 100, pricePerShare: 25 },
+      { id: "tx3", ticker: "VALE3", type: "buy", date: dateRebuy, quantity: 50, pricePerShare: 12 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      baseItem,
+      { date: dateEvent, type: "split", factor: 2 },
+      transactions,
+    );
+
+    // Em 25/05/2023, o investidor possuía 0 cotas (tinha vendido tudo em 10/05)
+    expect(impact.isApplicable).toBe(false);
+    expect(impact.eligibleQuantity).toBe(0);
+  });
+
+  it("aplica sobre a quantidade manual quando o ativo não possui ledger de transações", () => {
+    const datePre = new Date("2023-01-01T12:00:00Z").getTime();
+    const dateEvent = new Date("2023-05-25T12:00:00Z").getTime();
+
+    const manualItem: WatchlistItem = {
+      ...baseItem,
+      quantity: 100,
+      averagePrice: 20,
+      investingSince: datePre,
+    };
+
+    const impact = calculateCorporateEventImpact(
+      manualItem,
+      { date: dateEvent, type: "split", factor: 2 },
+      [],
+    );
+
+    expect(impact.isApplicable).toBe(true);
+    expect(impact.newQuantity).toBe(200);
+    expect(impact.newAveragePrice).toBe(10);
+  });
+});
