@@ -1046,6 +1046,7 @@ export const ptBR = {
     savedToast: "Metas salvas",
     applyToClassAssets: "Aplicar a todos os ativos desta classe no meu portfólio ({{count}})",
     appliedToPortfolioSuccess: "Metas salvas e aplicadas a {{count}} ativo(s) na carteira!",
+    errorToast: "Não foi possível salvar os critérios.",
     includeBrAssets: "Incluir ativos do Brasil (B3)",
     hideBrAssets: "Ocultar ativos do Brasil (B3)",
     brAssetsNote: "Ações e FIIs do Brasil habilitados para esta meta.",

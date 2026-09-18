@@ -1039,6 +1039,7 @@ export const en = {
     savedToast: "Goals saved",
     applyToClassAssets: "Apply to all assets of this class in my portfolio ({{count}})",
     appliedToPortfolioSuccess: "Goals saved and applied to {{count}} asset(s) in portfolio!",
+    errorToast: "Could not save criteria.",
     includeBrAssets: "Include Brazilian assets (B3)",
     hideBrAssets: "Hide Brazilian assets (B3)",
     brAssetsNote: "Brazilian equities and REITs (FIIs) enabled for this goal.",

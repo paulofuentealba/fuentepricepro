@@ -1051,6 +1051,7 @@ export const es = {
     savedToast: "Metas guardadas",
     applyToClassAssets: "Aplicar a todos los activos de esta clase en mi portafolio ({{count}})",
     appliedToPortfolioSuccess: "¡Metas guardadas y aplicadas a {{count}} activo(s) en la cartera!",
+    errorToast: "No se pudieron guardar los criterios.",
     includeBrAssets: "Incluir activos de Brasil (B3)",
     hideBrAssets: "Ocultar activos de Brasil (B3)",
     brAssetsNote: "Acciones y FIIs de Brasil habilitados para esta meta.",
