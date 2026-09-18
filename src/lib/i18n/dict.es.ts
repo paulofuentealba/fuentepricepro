@@ -341,6 +341,10 @@ export const es = {
     appliedOn: "Aplicado el",
     appliedBadge: "Aplicado",
     eligibleSharesNote: "Aplicado solo a las {{eligible}} cuotas existentes el {{date}}. Las cuotas adquiridas después del evento no sufren cambios.",
+    fractionAuctionTitle: "Subasta de Fracciones (B3)",
+    fractionAuctionShares: "Sobras para subasta: {{qty}} cuota(s)",
+    fractionAuctionCash: "Crédito estimado a recibir: {{value}}",
+    fractionAuctionDesc: "En B3, las sobras que no completan una cuota entera se reúnen y se venden en subasta. El valor neto obtenido se acreditará en efectivo en su cuenta del broker.",
   },
   publicEvents: {
     detectedBadge: "Desdoblamiento Detectado",

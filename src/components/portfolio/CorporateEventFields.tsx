@@ -18,8 +18,9 @@ import {
   type PendingCorporateEvent,
 } from "@/lib/corporateEvents";
 import { toast } from "sonner";
-import { ArrowDown, AlertCircle, Calendar, Scissors, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowDown, AlertCircle, Calendar, Scissors, ShieldCheck, CheckCircle2, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isBrTicker } from "@/lib/classify";
 
 interface CorporateEventFieldsProps {
   item: WatchlistItem;
@@ -201,45 +202,83 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
       </div>
 
       {/* Position Impact Preview Card */}
-      <div className="rounded-xl border border-border/60 bg-muted/30 p-5 space-y-4">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
-            {t.corporateEvents.previewOriginal}
-          </span>
-          <span className="text-base font-medium text-foreground">
-            {t.corporateEvents.sharesAt
-              .replace("{{qty}}", String(item.quantity))
-              .replace("{{price}}", formatCurrency(item.averagePrice ?? item.currentPrice))}
-          </span>
-        </div>
+      {(() => {
+        const isBR = isBrTicker(item.ticker);
+        const currentDisplayQty = isBR ? Math.round(item.quantity) : item.quantity;
+        const newDisplayQty = isBR ? Math.round(newPosition.quantity) : newPosition.quantity;
 
-        <div className="flex justify-center -my-2 relative z-10">
-          <div className="bg-background rounded-full p-1 border border-border/50">
-            <ArrowDown className="h-4 w-4 text-muted-foreground" />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5 bg-success/10 -mx-5 -mb-5 p-5 rounded-b-xl border-t border-success/20">
-          <span className="text-xs text-success font-semibold uppercase tracking-wider">
-            {t.corporateEvents.previewNew}
-          </span>
-          <span className="text-base font-bold text-success font-mono">
-            {t.corporateEvents.sharesAt
-              .replace("{{qty}}", String(newPosition.quantity))
-              .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
-          </span>
-          {item.ceilingPrice > 0 && (
-            <div className="flex items-center justify-between gap-2 pt-2 mt-2 border-t border-success/20 text-xs">
-              <span className="text-muted-foreground font-medium">
-                {t.corporateEvents.ceilingImpactLabel}:
+        return (
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-5 space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                {t.corporateEvents.previewOriginal}
               </span>
-              <span className="font-semibold text-foreground font-mono">
-                {formatCurrency(item.ceilingPrice)} → {formatCurrency(item.ceilingPrice / factor)}
+              <span className="text-base font-medium text-foreground">
+                {t.corporateEvents.sharesAt
+                  .replace("{{qty}}", String(currentDisplayQty))
+                  .replace("{{price}}", formatCurrency(item.averagePrice ?? item.currentPrice))}
               </span>
             </div>
-          )}
+
+            <div className="flex justify-center -my-2 relative z-10">
+              <div className="bg-background rounded-full p-1 border border-border/50">
+                <ArrowDown className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 bg-success/10 -mx-5 -mb-5 p-5 rounded-b-xl border-t border-success/20">
+              <span className="text-xs text-success font-semibold uppercase tracking-wider">
+                {t.corporateEvents.previewNew}
+              </span>
+              <span className="text-base font-bold text-success font-mono">
+                {t.corporateEvents.sharesAt
+                  .replace("{{qty}}", String(newDisplayQty))
+                  .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
+              </span>
+              {item.ceilingPrice > 0 && (
+                <div className="flex items-center justify-between gap-2 pt-2 mt-2 border-t border-success/20 text-xs">
+                  <span className="text-muted-foreground font-medium">
+                    {t.corporateEvents.ceilingImpactLabel}:
+                  </span>
+                  <span className="font-semibold text-foreground font-mono">
+                    {formatCurrency(item.ceilingPrice)} → {formatCurrency(item.ceilingPrice / factor)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Fraction Auction Alert (B3 Sobras para Leilão de Frações) */}
+      {impact.fractionalShares && impact.fractionalShares > 0 && (
+        <div className="rounded-xl border border-warning/30 bg-warning/10 p-4 space-y-2 text-xs">
+          <div className="flex items-center gap-2 font-semibold text-warning">
+            <Coins className="h-4 w-4 shrink-0" />
+            <span>{t.corporateEvents.fractionAuctionTitle}</span>
+          </div>
+          <div className="text-foreground/90 space-y-1 pl-6">
+            <p>
+              {t.corporateEvents.fractionAuctionShares
+                ? t.corporateEvents.fractionAuctionShares.replace("{{qty}}", String(impact.fractionalShares))
+                : `Sobras para leilão: ${impact.fractionalShares} cota(s)`}
+            </p>
+            {impact.fractionalCashEstimate && impact.fractionalCashEstimate > 0 && (
+              <p className="font-semibold text-foreground">
+                {t.corporateEvents.fractionAuctionCash
+                  ? t.corporateEvents.fractionAuctionCash.replace(
+                      "{{value}}",
+                      formatCurrency(impact.fractionalCashEstimate),
+                    )
+                  : `Crédito estimado a receber: ${formatCurrency(impact.fractionalCashEstimate)}`}
+              </p>
+            )}
+            <p className="text-[11.5px] text-muted-foreground pt-0.5">
+              {t.corporateEvents.fractionAuctionDesc}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {impact.eligibleQuantity < item.quantity && (
         <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground flex items-start gap-2">
@@ -288,10 +327,28 @@ export function CorporateEventFields({ item, pendingEvent, onApplied }: Corporat
               <span className="text-muted-foreground">{t.corporateEvents.previewNew}:</span>
               <span className="font-bold text-success font-mono">
                 {t.corporateEvents.sharesAt
-                  .replace("{{qty}}", String(newPosition.quantity))
+                  .replace(
+                    "{{qty}}",
+                    String(isBrTicker(item.ticker) ? Math.round(newPosition.quantity) : newPosition.quantity),
+                  )
                   .replace("{{price}}", formatCurrency(newPosition.averagePrice))}
               </span>
             </div>
+            {impact.fractionalShares && impact.fractionalShares > 0 && (
+              <div className="pt-2 border-t border-border/40 text-[11.5px] text-warning flex items-start gap-1.5">
+                <Coins className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>
+                  {t.corporateEvents.fractionAuctionShares
+                    ? t.corporateEvents.fractionAuctionShares.replace(
+                        "{{qty}}",
+                        String(impact.fractionalShares),
+                      )
+                    : `Sobras para leilão: ${impact.fractionalShares} cota(s)`}
+                  {impact.fractionalCashEstimate && impact.fractionalCashEstimate > 0 &&
+                    ` (${formatCurrency(impact.fractionalCashEstimate)})`}
+                </span>
+              </div>
+            )}
             {impact.eligibleQuantity < item.quantity && (
               <div className="pt-2 border-t border-border/40 text-[11.5px] text-muted-foreground flex items-start gap-1.5">
                 <AlertCircle className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />

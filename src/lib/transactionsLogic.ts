@@ -1,3 +1,5 @@
+import { isBrTicker } from "./classify";
+
 export interface ThesisSnapshot {
   consensusPrice: number | null;
   bazinPrice: number | null;
@@ -76,11 +78,31 @@ export function applyTransactionToHolding(
       // Split/grouping: scale quantity and inverse-scale average price so
       // total invested capital stays identical. Applied in chronological
       // order alongside buys/sells.
-      quantity *= factor;
+      const isBr = tx.ticker ? isBrTicker(tx.ticker) : false;
+      if (isBr) {
+        if (factor < 1) {
+          // Grouping (inplit) on B3: whole shares kept, leftovers go to auction
+          quantity = Math.floor(quantity * factor + 1e-7);
+        } else {
+          // Split on B3: whole shares
+          quantity = Math.round(quantity * factor);
+        }
+      } else {
+        quantity *= factor;
+      }
       averagePrice /= factor;
       if (quantity < 0) quantity = 0;
     }
   }
+
+  // Floating point precision sanitation
+  const isBr = tx.ticker ? isBrTicker(tx.ticker) : false;
+  if (isBr) {
+    quantity = Math.round(quantity);
+  } else {
+    quantity = Math.round(quantity * 1e8) / 1e8;
+  }
+  averagePrice = Math.round(averagePrice * 1e4) / 1e4;
 
   return { quantity, averagePrice };
 }

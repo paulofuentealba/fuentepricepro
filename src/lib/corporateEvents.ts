@@ -98,6 +98,7 @@ export function isPendingCorporateEvent(ev: unknown): ev is PendingCorporateEven
 
 import { recalculateHoldingFromTransactions, type Transaction } from "./transactionsLogic";
 import { cleanTicker } from "./formatters";
+import { isBrTicker } from "./classify";
 
 export interface CorporateEventImpact {
   /** The quantity eligible for the event on the event date */
@@ -118,12 +119,29 @@ export interface CorporateEventImpact {
   isApplicable: boolean;
   /** Processed position preview */
   preview: ProcessedPosition;
+  /** Fractional shares / sobras left over from grouping (destined for B3 Leilão de Frações) */
+  fractionalShares?: number;
+  /** Estimated cash proceeds from fraction auction (in R$) */
+  fractionalCashEstimate?: number;
+}
+
+function isTxOnOrBeforeEventDate(txDateMs: number, eventDateMs: number): boolean {
+  if (txDateMs <= eventDateMs) return true;
+  // For realistic modern dates (> year 2000), allow daytime transactions on the same calendar day (Data-Com)
+  if (txDateMs > 946684800000 && eventDateMs > 946684800000) {
+    const txIso = new Date(txDateMs).toISOString().split("T")[0];
+    const evIso = new Date(eventDateMs).toISOString().split("T")[0];
+    return txIso <= evIso;
+  }
+  return false;
 }
 
 /**
  * Computes the financial impact of a corporate event (split or grouping),
- * strictly applying the adjustment ONLY to the shares that existed on the event date.
+ * strictly applying the adjustment ONLY to the shares that existed on the event date (Data-Com/Data-Ex cutoff).
  * Shares acquired after the event date are preserved without alteration.
+ * On B3 assets (Ações and FIIs), custody is strictly whole numbers and any grouping fractions
+ * are identified as leftovers for the B3 Fraction Auction (Leilão de Frações).
  */
 export function calculateCorporateEventImpact(
   item: WatchlistItem,
@@ -134,28 +152,32 @@ export function calculateCorporateEventImpact(
   const cleanT = cleanTicker(item.ticker);
   const tickerTxs = transactions.filter((tx) => cleanTicker(tx.ticker) === cleanT);
   const currentAvgPrice = item.averagePrice ?? item.currentPrice;
+  const isBR = isBrTicker(item.ticker);
+  const sanitizedItemQty = isBR ? Math.round(item.quantity) : item.quantity;
 
   if (tickerTxs.length > 0) {
-    // 1. Calculate how many shares existed on the event date
-    const eligibleHolding = recalculateHoldingFromTransactions(
-      tickerTxs.filter((tx) => tx.date <= event.date),
-    );
-    const eligibleQuantity = eligibleHolding.quantity;
+    // 1. Calculate how many shares existed on or before the event cutoff date (Data-Com)
+    const eligibleTxs = tickerTxs.filter((tx) => isTxOnOrBeforeEventDate(tx.date, event.date));
+    const eligibleHolding = recalculateHoldingFromTransactions(eligibleTxs);
+    let eligibleQuantity = eligibleHolding.quantity;
+    if (isBR) {
+      eligibleQuantity = Math.round(eligibleQuantity);
+    }
 
     // If 0 shares existed on that date, the event is not applicable to this holding
     if (eligibleQuantity <= 0) {
       return {
         eligibleQuantity: 0,
-        currentQuantity: item.quantity,
+        currentQuantity: sanitizedItemQty,
         currentAveragePrice: currentAvgPrice,
-        newQuantity: item.quantity,
+        newQuantity: sanitizedItemQty,
         newAveragePrice: currentAvgPrice,
         deltaQuantity: 0,
         priceVariationPct: 0,
         isApplicable: false,
         preview: {
           ticker: item.ticker,
-          quantity: item.quantity,
+          quantity: sanitizedItemQty,
           averagePrice: currentAvgPrice,
         },
       };
@@ -163,18 +185,28 @@ export function calculateCorporateEventImpact(
 
     // 2. Current holding from the ledger
     const currentHolding = recalculateHoldingFromTransactions(tickerTxs);
-    const currentQuantity = currentHolding.quantity > 0 ? currentHolding.quantity : item.quantity;
+    let currentQuantity = currentHolding.quantity > 0 ? currentHolding.quantity : sanitizedItemQty;
+    if (isBR) {
+      currentQuantity = Math.round(currentQuantity);
+    }
     const effectiveAvgPrice =
       currentHolding.quantity > 0 ? currentHolding.averagePrice : currentAvgPrice;
 
-    // 3. Simulate inserting the corporate_action transaction at event.date
+    // 3. Simulate inserting the corporate_action transaction at the close of event.date (Data-Com)
+    let simulatedCorpDate = event.date;
+    if (event.date > 946684800000) {
+      const eventEndOfDay = new Date(event.date);
+      eventEndOfDay.setUTCHours(23, 59, 59, 999);
+      simulatedCorpDate = Math.max(event.date, eventEndOfDay.getTime());
+    }
+
     const simulatedTxs: Transaction[] = [
       ...tickerTxs,
       {
-        id: `simulated-corp-${event.date}`,
-        ticker: cleanT,
+        id: `simulated-corp-${simulatedCorpDate}`,
+        ticker: item.ticker,
         type: "corporate_action",
-        date: event.date,
+        date: simulatedCorpDate,
         quantity: 0,
         pricePerShare: 0,
         factor: event.factor,
@@ -184,17 +216,36 @@ export function calculateCorporateEventImpact(
     const postEventHolding = recalculateHoldingFromTransactions(simulatedTxs);
     let newQuantity = postEventHolding.quantity;
     let newAveragePrice = postEventHolding.averagePrice;
-    let fractionalCash = 0;
+    let fractionalShares = 0;
+    let fractionalCashEstimate = 0;
 
-    // Handle grouping fractionals (inplit)
-    if (event.type === "grouping") {
-      const roundedQuantity = Math.round(newQuantity * 1000000) / 1000000;
-      const wholeShares = Math.floor(roundedQuantity);
-      const fraction = roundedQuantity - wholeShares;
-      if (fraction > 0) {
-        newQuantity = wholeShares;
-        const priceToUse = currentMarketPrice ?? newAveragePrice;
-        fractionalCash = fraction * priceToUse;
+    if (isBR) {
+      // In B3 (Ações e FIIs), custody is strictly whole numbers
+      newQuantity = Math.round(newQuantity);
+
+      // If grouping, calculate fraction leftovers for the B3 auction
+      if (event.type === "grouping") {
+        const rawGrouped = eligibleQuantity * event.factor;
+        const wholeGrouped = Math.floor(rawGrouped + 1e-7);
+        const fraction = rawGrouped - wholeGrouped;
+        if (fraction > 1e-6) {
+          fractionalShares = Math.round(fraction * 1e4) / 1e4;
+          const priceToUse = currentMarketPrice ?? newAveragePrice;
+          fractionalCashEstimate = Math.round(fraction * priceToUse * 100) / 100;
+        }
+      }
+    } else {
+      // Foreign assets (US Stocks/ETFs) might permit fractional shares or liquidation
+      if (event.type === "grouping") {
+        const roundedQuantity = Math.round(newQuantity * 1000000) / 1000000;
+        const wholeShares = Math.floor(roundedQuantity);
+        const fraction = roundedQuantity - wholeShares;
+        if (fraction > 0) {
+          newQuantity = wholeShares;
+          const priceToUse = currentMarketPrice ?? newAveragePrice;
+          fractionalCashEstimate = fraction * priceToUse;
+          fractionalShares = fraction;
+        }
       }
     }
 
@@ -213,62 +264,96 @@ export function calculateCorporateEventImpact(
       deltaQuantity,
       priceVariationPct,
       isApplicable: true,
+      fractionalShares: fractionalShares > 0 ? fractionalShares : undefined,
+      fractionalCashEstimate: fractionalCashEstimate > 0 ? fractionalCashEstimate : undefined,
       preview: {
         ticker: item.ticker,
         quantity: newQuantity,
         averagePrice: newAveragePrice,
-        ...(fractionalCash > 0 ? { fractionalCash } : {}),
+        ...(fractionalCashEstimate > 0 ? { fractionalCash: fractionalCashEstimate } : {}),
       },
     };
   }
 
   // Fallback: User does NOT have a transaction ledger for this ticker
   const acquisitionDate = item.investingSince || item.addedAt || 0;
-  if (acquisitionDate > 0 && event.date < acquisitionDate) {
+  if (acquisitionDate > 0 && !isTxOnOrBeforeEventDate(acquisitionDate, event.date)) {
     return {
       eligibleQuantity: 0,
-      currentQuantity: item.quantity,
+      currentQuantity: sanitizedItemQty,
       currentAveragePrice: currentAvgPrice,
-      newQuantity: item.quantity,
+      newQuantity: sanitizedItemQty,
       newAveragePrice: currentAvgPrice,
       deltaQuantity: 0,
       priceVariationPct: 0,
       isApplicable: false,
       preview: {
         ticker: item.ticker,
-        quantity: item.quantity,
+        quantity: sanitizedItemQty,
         averagePrice: currentAvgPrice,
       },
     };
   }
 
-  const preview = applyCorporateEvent(
-    {
-      ticker: item.ticker,
-      quantity: item.quantity,
-      averagePrice: currentAvgPrice,
-    },
-    { type: event.type, factor: event.factor },
-    true,
-    currentMarketPrice ?? item.currentPrice,
-  );
+  let newQuantity: number;
+  let newAveragePrice = currentAvgPrice / event.factor;
+  let fractionalShares = 0;
+  let fractionalCashEstimate = 0;
 
-  const deltaQuantity = preview.quantity - item.quantity;
+  if (isBR) {
+    if (event.type === "grouping") {
+      const rawGrouped = sanitizedItemQty * event.factor;
+      const wholeGrouped = Math.floor(rawGrouped + 1e-7);
+      const fraction = rawGrouped - wholeGrouped;
+      newQuantity = wholeGrouped;
+      if (fraction > 1e-6) {
+        fractionalShares = Math.round(fraction * 1e4) / 1e4;
+        const priceToUse = currentMarketPrice ?? newAveragePrice;
+        fractionalCashEstimate = Math.round(fraction * priceToUse * 100) / 100;
+      }
+    } else {
+      newQuantity = Math.round(sanitizedItemQty * event.factor);
+    }
+  } else {
+    const preview = applyCorporateEvent(
+      {
+        ticker: item.ticker,
+        quantity: item.quantity,
+        averagePrice: currentAvgPrice,
+      },
+      { type: event.type, factor: event.factor },
+      true,
+      currentMarketPrice ?? item.currentPrice,
+    );
+    newQuantity = preview.quantity;
+    newAveragePrice = preview.averagePrice;
+    fractionalCashEstimate = preview.fractionalCash ?? 0;
+    fractionalShares = 0;
+  }
+
+  const deltaQuantity = newQuantity - sanitizedItemQty;
   const priceVariationPct =
     currentAvgPrice > 0
-      ? ((preview.averagePrice - currentAvgPrice) / currentAvgPrice) * 100
+      ? ((newAveragePrice - currentAvgPrice) / currentAvgPrice) * 100
       : 0;
 
   return {
-    eligibleQuantity: item.quantity,
-    currentQuantity: item.quantity,
+    eligibleQuantity: sanitizedItemQty,
+    currentQuantity: sanitizedItemQty,
     currentAveragePrice: currentAvgPrice,
-    newQuantity: preview.quantity,
-    newAveragePrice: preview.averagePrice,
+    newQuantity,
+    newAveragePrice,
     deltaQuantity,
     priceVariationPct,
-    isApplicable: item.quantity > 0,
-    preview,
+    isApplicable: sanitizedItemQty > 0,
+    fractionalShares: fractionalShares > 0 ? fractionalShares : undefined,
+    fractionalCashEstimate: fractionalCashEstimate > 0 ? fractionalCashEstimate : undefined,
+    preview: {
+      ticker: item.ticker,
+      quantity: newQuantity,
+      averagePrice: newAveragePrice,
+      ...(fractionalCashEstimate > 0 ? { fractionalCash: fractionalCashEstimate } : {}),
+    },
   };
 }
 

@@ -240,5 +240,31 @@ describe("CorporateEventFields — Evento Corporativo (inline, migrado de Corpor
     expect(updatedItem.quantity).toBe(250);
     expect(updatedItem.averagePrice).toBeCloseTo(10.4, 2);
   });
+
+  it("renderiza o alerta de Leilão de Frações da B3 quando um grupamento gera sobras", async () => {
+    mockTransactions = [
+      { id: "tx1", ticker: "VALE3", type: "buy", date: 100, quantity: 232, pricePerShare: 2.5 },
+    ];
+    const itemWith232: WatchlistItem = {
+      ...item,
+      quantity: 232,
+      averagePrice: 2.5,
+      currentPrice: 2.5,
+    };
+
+    render(
+      <CorporateEventFields
+        item={itemWith232}
+        pendingEvent={{ eventId: "ev-grp", date: 200, type: "grouping", ratio: 0.1 }}
+      />,
+    );
+
+    // Deve renderizar o título de Leilão de Frações da B3
+    expect(screen.getByText(/leilão de frações \(b3\)/i)).toBeInTheDocument();
+    // Deve informar as 0.2 cotas / sobras para leilão
+    expect(screen.getByText(/sobras para leilão: 0.2 cota\(s\)/i)).toBeInTheDocument();
+    // A nova posição deve ser 23 cotas inteiras (e não 23.2 nem 226!)
+    expect(screen.getByText(/23 ações a R\$ 25,00/i)).toBeInTheDocument();
+  });
 });
 

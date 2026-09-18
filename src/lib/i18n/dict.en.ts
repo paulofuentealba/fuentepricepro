@@ -339,6 +339,10 @@ export const en = {
     appliedOn: "Applied on",
     appliedBadge: "Applied",
     eligibleSharesNote: "Applied only to the {{eligible}} shares held on {{date}}. Shares acquired after the event remain unchanged.",
+    fractionAuctionTitle: "Fraction Auction (B3)",
+    fractionAuctionShares: "Leftovers for auction: {{qty}} share(s)",
+    fractionAuctionCash: "Estimated cash proceeds: {{value}}",
+    fractionAuctionDesc: "On B3, grouping leftovers that do not complete a full share are gathered and sold at auction. The net proceeds will be credited in cash directly to your brokerage account.",
   },
   publicEvents: {
     detectedBadge: "Public Split Detected",

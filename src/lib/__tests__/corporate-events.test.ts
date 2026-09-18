@@ -299,4 +299,157 @@ describe("calculateCorporateEventImpact — Aplicação Cronológica sobre Cotas
     expect(impact.newQuantity).toBe(200);
     expect(impact.newAveragePrice).toBe(10);
   });
+
+  it("garante custódia 100% inteira em FIIs (ex: HGLG11) em desdobramento 1:10", () => {
+    const datePre = new Date("2023-01-10T12:00:00Z").getTime();
+    const dateEvent = new Date("2023-06-01T12:00:00Z").getTime();
+
+    const fiiItem: WatchlistItem = {
+      ...baseItem,
+      id: "fii:HGLG11",
+      ticker: "HGLG11",
+      name: "CSHG Logística",
+      type: "FII",
+      quantity: 15,
+      averagePrice: 160.0,
+      currentPrice: 160.0,
+    };
+
+    const transactions: Transaction[] = [
+      { id: "fii-tx1", ticker: "HGLG11", type: "buy", date: datePre, quantity: 15, pricePerShare: 160.0 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      fiiItem,
+      { date: dateEvent, type: "split", factor: 10 },
+      transactions,
+    );
+
+    expect(impact.isApplicable).toBe(true);
+    expect(impact.eligibleQuantity).toBe(15);
+    // 15 cotas multiplicam por 10 = 150 cotas inteiras
+    expect(impact.newQuantity).toBe(150);
+    expect(Number.isInteger(impact.newQuantity)).toBe(true);
+    // Preço médio divide por 10 = 16.00
+    expect(impact.newAveragePrice).toBe(16.0);
+    expect(impact.fractionalShares).toBeUndefined();
+  });
+
+  it("calcula Leilão de Frações em grupamento na B3 para Ações (232 cotas em grupamento 10:1)", () => {
+    const datePre = new Date("2023-01-10T12:00:00Z").getTime();
+    const dateEvent = new Date("2023-06-01T12:00:00Z").getTime();
+
+    const item: WatchlistItem = {
+      ...baseItem,
+      ticker: "MGLU3",
+      quantity: 232,
+      averagePrice: 2.5,
+      currentPrice: 2.5,
+    };
+
+    const transactions: Transaction[] = [
+      { id: "tx1", ticker: "MGLU3", type: "buy", date: datePre, quantity: 232, pricePerShare: 2.5 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      item,
+      { date: dateEvent, type: "grouping", factor: 0.1 },
+      transactions,
+      25.0, // Preço de mercado pós-grupamento: R$ 25,00
+    );
+
+    expect(impact.isApplicable).toBe(true);
+    expect(impact.eligibleQuantity).toBe(232);
+    // 232 cotas agrupadas 10:1 -> 23 cotas inteiras mantidas
+    expect(impact.newQuantity).toBe(23);
+    expect(Number.isInteger(impact.newQuantity)).toBe(true);
+    // Sobras para Leilão de Frações: 0.2 cota (equivalente a 2 cotas originais)
+    expect(impact.fractionalShares).toBe(0.2);
+    // Crédito estimado no leilão: 0.2 * R$ 25 = R$ 5,00
+    expect(impact.fractionalCashEstimate).toBe(5.0);
+    // Preço médio ajustado: 2.5 / 0.1 = 25.0
+    expect(impact.newAveragePrice).toBe(25.0);
+  });
+
+  it("calcula Leilão de Frações em FIIs na B3 (45 cotas em grupamento 10:1)", () => {
+    const datePre = new Date("2023-01-10T12:00:00Z").getTime();
+    const dateEvent = new Date("2023-06-01T12:00:00Z").getTime();
+
+    const fiiItem: WatchlistItem = {
+      ...baseItem,
+      id: "fii:XPCM11",
+      ticker: "XPCM11",
+      name: "XP Corporate Macaé",
+      type: "FII",
+      quantity: 45,
+      averagePrice: 10.0,
+      currentPrice: 10.0,
+    };
+
+    const transactions: Transaction[] = [
+      { id: "fii-tx1", ticker: "XPCM11", type: "buy", date: datePre, quantity: 45, pricePerShare: 10.0 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      fiiItem,
+      { date: dateEvent, type: "grouping", factor: 0.1 },
+      transactions,
+      100.0,
+    );
+
+    expect(impact.isApplicable).toBe(true);
+    expect(impact.eligibleQuantity).toBe(45);
+    // 45 cotas agrupadas 10:1 -> 4 cotas mantidas
+    expect(impact.newQuantity).toBe(4);
+    expect(Number.isInteger(impact.newQuantity)).toBe(true);
+    // Sobras para leilão: 0.5 cota
+    expect(impact.fractionalShares).toBe(0.5);
+    // 0.5 * 100 = R$ 50,00 estimado
+    expect(impact.fractionalCashEstimate).toBe(50.0);
+  });
+
+  it("inclui compras realizadas no mesmo dia da Data-Com mesmo com horários diurnos", () => {
+    // Data-Com: 2023-05-25 (evento registrado como 2023-05-25T00:00:00Z)
+    const dateEvent = new Date("2023-05-25T00:00:00Z").getTime();
+    // Compra realizada às 15:30 da Data-Com (timestamp maior que 00:00:00)
+    const dateTradeDataCom = new Date("2023-05-25T15:30:00Z").getTime();
+    // Compra realizada no dia seguinte (Data-Ex): 2023-05-26T10:00:00Z
+    const dateTradeDataEx = new Date("2023-05-26T10:00:00Z").getTime();
+
+    const transactions: Transaction[] = [
+      { id: "tx-com", ticker: "VALE3", type: "buy", date: dateTradeDataCom, quantity: 100, pricePerShare: 20 },
+      { id: "tx-ex", ticker: "VALE3", type: "buy", date: dateTradeDataEx, quantity: 50, pricePerShare: 10 },
+    ];
+
+    const impact = calculateCorporateEventImpact(
+      baseItem,
+      { date: dateEvent, type: "split", factor: 2 },
+      transactions,
+    );
+
+    // As 100 cotas da Data-Com DEVEM ser elegíveis
+    expect(impact.eligibleQuantity).toBe(100);
+    // 100 dobram para 200, mais as 50 cotas da Data-Ex = 250 cotas
+    expect(impact.newQuantity).toBe(250);
+  });
+
+  it("saneia ponto flutuante corrompido (ex: 232.60000000000002) para número inteiro", () => {
+    const corruptedItem: WatchlistItem = {
+      ...baseItem,
+      ticker: "VALE3",
+      quantity: 232.60000000000002,
+      averagePrice: 26.07,
+    };
+
+    const impact = calculateCorporateEventImpact(
+      corruptedItem,
+      { date: Date.now(), type: "split", factor: 2 },
+      [],
+    );
+
+    // 232.60000000000002 arredondado para inteiro limpo (233) e dobrado para 466
+    expect(impact.currentQuantity).toBe(233);
+    expect(impact.newQuantity).toBe(466);
+    expect(Number.isInteger(impact.newQuantity)).toBe(true);
+  });
 });

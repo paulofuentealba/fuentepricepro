@@ -341,6 +341,10 @@ export const ptBR = {
     appliedOn: "Aplicado em",
     appliedBadge: "Aplicado",
     eligibleSharesNote: "Aplicado apenas às {{eligible}} cotas existentes em {{date}}. Cotas adquiridas após o evento não sofrem alteração.",
+    fractionAuctionTitle: "Leilão de Frações (B3)",
+    fractionAuctionShares: "Sobras para leilão: {{qty}} cota(s)",
+    fractionAuctionCash: "Crédito estimado a receber: {{value}}",
+    fractionAuctionDesc: "Na B3, as sobras que não completam uma cota inteira são reunidas e vendidas em leilão. O valor apurado será creditado em dinheiro na sua conta da corretora.",
   },
   publicEvents: {
     detectedBadge: "Desdobramento Detectado",

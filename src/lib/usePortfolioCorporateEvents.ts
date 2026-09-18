@@ -21,6 +21,8 @@ export interface PendingPortfolioEvent {
   priceVariationPct: number;
   displayRatioText: string;
   eligibleQuantity?: number;
+  fractionalShares?: number;
+  fractionalCashEstimate?: number;
 }
 
 export function formatRatioDisplay(type: "split" | "grouping", ratio: number): string {
@@ -91,6 +93,8 @@ export function usePortfolioCorporateEvents() {
           priceVariationPct: impact.priceVariationPct,
           displayRatioText: formatRatioDisplay(ev.type, ev.ratio),
           eligibleQuantity: impact.eligibleQuantity,
+          fractionalShares: impact.fractionalShares,
+          fractionalCashEstimate: impact.fractionalCashEstimate,
         });
       }
     }

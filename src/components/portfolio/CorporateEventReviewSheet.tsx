@@ -20,8 +20,9 @@ import {
 } from "@/lib/corporateEvents";
 import type { ReconciledCorporateEvent } from "@/lib/api/corporateEventsReconciler.server";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, CheckCircle2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Loader2, ArrowRight, CheckCircle2, ShieldCheck, AlertTriangle, Coins } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { isBrTicker } from "@/lib/classify";
 
 interface CorporateEventReviewSheetProps {
   open: boolean;
@@ -246,48 +247,80 @@ export function CorporateEventReviewSheet({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/20 font-mono tabular-nums">
-                <tr>
-                  <td className="py-2.5 px-4 text-left font-sans text-foreground font-medium">
-                    {C.shares}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-muted-foreground">{item.quantity}</td>
-                  <td className="py-2.5 px-4 text-right text-foreground font-semibold">
-                    {preview.quantity}
-                  </td>
-                  <td className={`py-2.5 px-4 text-right font-bold ${deltaQty >= 0 ? "text-success" : "text-warning"}`}>
-                    {deltaQty >= 0 ? `+${deltaQty}` : `${deltaQty}`}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2.5 px-4 text-left font-sans text-foreground font-medium">
-                    {C.avgPrice}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-muted-foreground">
-                    {formatCurrency(currentAvg)}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-foreground font-semibold">
-                    {formatCurrency(preview.averagePrice)}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-muted-foreground">
-                    {priceVariationPct.toFixed(1)}%
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2.5 px-4 text-left font-sans text-foreground font-medium">
-                    {C.totalInvested}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-muted-foreground">
-                    {formatCurrency(item.quantity * currentAvg)}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-foreground font-semibold">
-                    {formatCurrency(preview.quantity * preview.averagePrice)}
-                  </td>
-                  <td className="py-2.5 px-4 text-right text-success font-medium">
-                    {C.preserved}
-                  </td>
-                </tr>
+                {(() => {
+                  const isBR = isBrTicker(item.ticker);
+                  const displayBeforeQty = isBR ? Math.round(item.quantity) : item.quantity;
+                  const displayAfterQty = isBR ? Math.round(preview.quantity) : preview.quantity;
+
+                  return (
+                    <>
+                      <tr>
+                        <td className="py-2.5 px-4 text-left font-sans text-foreground font-medium">
+                          {C.shares}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-muted-foreground">{displayBeforeQty}</td>
+                        <td className="py-2.5 px-4 text-right text-foreground font-semibold">
+                          {displayAfterQty}
+                        </td>
+                        <td className={`py-2.5 px-4 text-right font-bold ${deltaQty >= 0 ? "text-success" : "text-warning"}`}>
+                          {deltaQty >= 0 ? `+${deltaQty}` : `${deltaQty}`}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-4 text-left font-sans text-foreground font-medium">
+                          {C.avgPrice}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-muted-foreground">
+                          {formatCurrency(currentAvg)}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-foreground font-semibold">
+                          {formatCurrency(preview.averagePrice)}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-muted-foreground">
+                          {priceVariationPct.toFixed(1)}%
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-4 text-left font-sans text-foreground font-medium">
+                          {C.totalInvested}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-muted-foreground">
+                          {formatCurrency(displayBeforeQty * currentAvg)}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-foreground font-semibold">
+                          {formatCurrency(displayAfterQty * preview.averagePrice)}
+                        </td>
+                        <td className="py-2.5 px-4 text-right text-success font-medium">
+                          {C.preserved}
+                        </td>
+                      </tr>
+                    </>
+                  );
+                })()}
               </tbody>
             </table>
+
+            {impact.fractionalShares && impact.fractionalShares > 0 && (
+              <div className="p-3.5 bg-warning/10 border-t border-warning/20 text-xs text-warning flex items-start gap-2.5">
+                <Coins className="h-4 w-4 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-semibold block">{t.corporateEvents.fractionAuctionTitle}</span>
+                  <p className="text-[11.5px] text-foreground/90">
+                    {t.corporateEvents.fractionAuctionShares
+                      ? t.corporateEvents.fractionAuctionShares.replace("{{qty}}", String(impact.fractionalShares))
+                      : `Sobras para leilão: ${impact.fractionalShares} cota(s)`}
+                    {impact.fractionalCashEstimate && impact.fractionalCashEstimate > 0 &&
+                      ` — ${t.corporateEvents.fractionAuctionCash?.replace(
+                        "{{value}}",
+                        formatCurrency(impact.fractionalCashEstimate),
+                      )}`}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t.corporateEvents.fractionAuctionDesc}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {impact.eligibleQuantity < item.quantity && (
               <div className="p-3 bg-muted/30 border-t border-border/40 text-[11.5px] text-muted-foreground flex items-start gap-2">
