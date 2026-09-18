@@ -1044,6 +1044,8 @@ export const ptBR = {
       "Todos os cálculos de sugestão do produto trabalham sobre estes números. Eles são seus — altere quando quiser.",
     finishBtn: "Salvar critérios",
     savedToast: "Metas salvas",
+    applyToClassAssets: "Aplicar a todos os ativos desta classe no meu portfólio ({{count}})",
+    appliedToPortfolioSuccess: "Metas salvas e aplicadas a {{count}} ativo(s) na carteira!",
     includeBrAssets: "Incluir ativos do Brasil (B3)",
     hideBrAssets: "Ocultar ativos do Brasil (B3)",
     brAssetsNote: "Ações e FIIs do Brasil habilitados para esta meta.",

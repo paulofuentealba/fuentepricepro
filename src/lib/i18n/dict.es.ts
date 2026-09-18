@@ -1049,6 +1049,8 @@ export const es = {
       "Todos los cálculos de sugerencia del producto trabajan sobre estos números. Son suyos — cámbielos cuando quiera.",
     finishBtn: "Guardar criterios",
     savedToast: "Metas guardadas",
+    applyToClassAssets: "Aplicar a todos los activos de esta clase en mi portafolio ({{count}})",
+    appliedToPortfolioSuccess: "¡Metas guardadas y aplicadas a {{count}} activo(s) en la cartera!",
     includeBrAssets: "Incluir activos de Brasil (B3)",
     hideBrAssets: "Ocultar activos de Brasil (B3)",
     brAssetsNote: "Acciones y FIIs de Brasil habilitados para esta meta.",
