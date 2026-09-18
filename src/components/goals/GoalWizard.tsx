@@ -4,9 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n-provider";
 import { useUserSettings } from "@/lib/useUserSettings";
+import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
+import { getDisplayAssetType } from "@/lib/formatters";
 import type { AssetType } from "@/lib/domain";
 import { CLASS_MARKET_REFERENCE_YIELDS } from "@/lib/calculations";
 import { cn } from "@/lib/utils";
@@ -50,7 +54,22 @@ export interface GoalWizardProps {
 export function GoalWizard({ onComplete }: GoalWizardProps) {
   const { t } = useI18n();
   const { settings, updateSettings } = useUserSettings();
+  const { items: watchlistItems, upsertManyAsync } = useWatchlist();
   const isUS = settings.taxJurisdiction === "US";
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [applyToPortfolioClasses, setApplyToPortfolioClasses] = useState<
+    Partial<Record<AssetType, boolean>>
+  >({});
+
+  const classCounts = useMemo(() => {
+    const counts: Partial<Record<AssetType, number>> = {};
+    for (const item of watchlistItems) {
+      const displayClass = getDisplayAssetType(item.type);
+      counts[displayClass] = (counts[displayClass] || 0) + 1;
+    }
+    return counts;
+  }, [watchlistItems]);
 
   const [showBrAssets, setShowBrAssets] = useState<boolean>(() => {
     return Boolean(
@@ -99,6 +118,70 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
       if (Number.isFinite(num) && num >= 0) next[type] = num;
     }
     updateSettings({ classTargetYields: next });
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const classesToApply = Object.entries(applyToPortfolioClasses)
+        .filter(([, checked]) => Boolean(checked))
+        .map(([type]) => type as AssetType);
+
+      let updatedCount = 0;
+
+      if (classesToApply.length > 0 && watchlistItems.length > 0) {
+        const itemsToUpdate: WatchlistItem[] = [];
+
+        for (const item of watchlistItems) {
+          const displayClass = getDisplayAssetType(item.type);
+          if (classesToApply.includes(displayClass)) {
+            const classYield =
+              classTargetYields[displayClass] ??
+              (isUS && displayClass === "FIXED_INCOME"
+                ? 5.0
+                : CLASS_MARKET_REFERENCE_YIELDS[displayClass] ?? 6.0);
+
+            if (item.targetYield !== classYield) {
+              const bazinCeiling =
+                classYield > 0 && item.annualDividend > 0
+                  ? item.annualDividend / (classYield / 100)
+                  : item.ceilingPrice;
+              const margin =
+                item.currentPrice > 0 && bazinCeiling > 0
+                  ? ((bazinCeiling - item.currentPrice) / item.currentPrice) * 100
+                  : item.safetyMargin;
+
+              itemsToUpdate.push({
+                ...item,
+                targetYield: classYield,
+                ceilingPrice: bazinCeiling,
+                safetyMargin: margin,
+              });
+            }
+          }
+        }
+
+        if (itemsToUpdate.length > 0) {
+          await upsertManyAsync(itemsToUpdate);
+          updatedCount = itemsToUpdate.length;
+        }
+      }
+
+      if (updatedCount > 0) {
+        toast.success(
+          t.goalWizard.appliedToPortfolioSuccess.replace("{{count}}", String(updatedCount)),
+        );
+      } else {
+        toast.success(t.goalWizard.savedToast);
+      }
+
+      onComplete?.();
+    } catch (err) {
+      console.error("Failed to save goals or apply to portfolio", err);
+      toast.error(t.goalWizard.errorToast);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -230,26 +313,52 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
               : CLASS_MARKET_REFERENCE_YIELDS[type] ?? 6.0;
           const customVal = classTargetYields[type];
           const hasCustom = customVal !== undefined && customVal !== null;
+          const count = classCounts[type] || 0;
+          const isChecked = Boolean(applyToPortfolioClasses[type]);
+
           return (
-            <div key={type} className="mb-2.5 flex items-center gap-3 last:mb-0">
-              <span className="w-[90px] shrink-0 text-[12.5px] font-display font-semibold text-foreground sm:w-[100px]">
-                {t.types[type] || type}
-              </span>
-              <Input
-                type="number"
-                step="0.1"
-                min="0"
-                value={hasCustom ? customVal : ""}
-                onChange={(e) => handleClassYieldChange(type, e.target.value)}
-                className={cn(
-                  "h-7 max-w-[90px] text-center font-mono text-sm font-semibold",
-                  hasCustom && "border-primary/50 text-primary",
-                )}
-                placeholder={refYield.toFixed(1)}
-              />
-              <span className="text-[10.5px] text-muted-foreground">
-                {t.smartAllocation.marketRef}: {refYield.toFixed(1)}%
-              </span>
+            <div key={type} className="mb-2.5 last:mb-0 space-y-1.5">
+              <div className="flex items-center gap-3">
+                <span className="w-[90px] shrink-0 text-[12.5px] font-display font-semibold text-foreground sm:w-[100px]">
+                  {t.types[type] || type}
+                </span>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={hasCustom ? customVal : ""}
+                  onChange={(e) => handleClassYieldChange(type, e.target.value)}
+                  className={cn(
+                    "h-7 max-w-[90px] text-center font-mono text-sm font-semibold",
+                    hasCustom && "border-primary/50 text-primary",
+                  )}
+                  placeholder={refYield.toFixed(1)}
+                />
+                <span className="text-[10.5px] text-muted-foreground">
+                  {t.smartAllocation.marketRef}: {refYield.toFixed(1)}%
+                </span>
+              </div>
+
+              {count > 0 && (
+                <div className="pl-[90px] sm:pl-[100px] flex items-center gap-2">
+                  <Checkbox
+                    id={`apply-class-yield-${type}`}
+                    checked={isChecked}
+                    onCheckedChange={(checked) =>
+                      setApplyToPortfolioClasses((prev) => ({
+                        ...prev,
+                        [type]: Boolean(checked),
+                      }))
+                    }
+                  />
+                  <label
+                    htmlFor={`apply-class-yield-${type}`}
+                    className="text-[11.5px] font-medium text-muted-foreground cursor-pointer select-none leading-tight hover:text-foreground transition-colors"
+                  >
+                    {t.goalWizard.applyToClassAssets.replace("{{count}}", String(count))}
+                  </label>
+                </div>
+              )}
             </div>
           );
         })}
@@ -358,7 +467,7 @@ export function GoalWizard({ onComplete }: GoalWizardProps) {
           {t.smartAllocation.legalDisclaimer}
         </div>
 
-        <Button className="mt-4 gap-1.5" onClick={() => onComplete?.()}>
+        <Button className="mt-4 gap-1.5" onClick={handleSave} disabled={isSaving}>
           <Check className="h-4 w-4" />
           {t.goalWizard.finishBtn}
         </Button>

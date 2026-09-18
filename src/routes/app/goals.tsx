@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n-provider";
 import { GoalWizard } from "@/components/goals/GoalWizard";
 
@@ -31,7 +30,6 @@ function MetasPage() {
 
       <GoalWizard
         onComplete={() => {
-          toast.success(t.goalWizard.savedToast);
           navigate({ to: "/app/contributionplan" });
         }}
       />
