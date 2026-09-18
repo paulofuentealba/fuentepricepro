@@ -126,6 +126,7 @@ export function runAsk(ctx: AskContext, strategy: Strategy): AskResult {
     settings: settings || {},
     asOf: asOf || new Date().toISOString(),
     sourceTicker: ctx?.sourceTicker,
+    fxRate: ctx?.fxRate,
   });
 
   const positionMap = new Map<string, ValuedWatchlistItem>();

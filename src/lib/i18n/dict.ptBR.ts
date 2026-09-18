@@ -2159,7 +2159,7 @@ export const ptBR = {
     },
     allocation: {
       eyebrow: "Equilíbrio Patrimonial",
-      title: "Alocação das 8 Classes",
+      title: "Alocação por Classe de Ativos",
       titleUs: "Alocação de Ativos (US)",
       subtitle: "Meta vs Atual",
       target: "Meta",
@@ -2170,6 +2170,14 @@ export const ptBR = {
       statusInBalance: "Em Equilíbrio",
       statusAbove: "Acima",
       statusInvest: "Aportar",
+      composition: "Composição",
+      subClasses: {
+        FII: "FIIs",
+        FIAGRO: "Fiagros",
+        FII_INFRA: "FI-Infras",
+        ETF_US: "ETFs US",
+        ETF_BR: "ETFs BR",
+      },
       classes: {
         acoes_br: "Ações BR",
         fiis: "FIIs",

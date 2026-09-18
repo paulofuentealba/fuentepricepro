@@ -268,4 +268,76 @@ describe("AskEngine: balanceTargets Strategy", () => {
     expect(candidates[0].ticker).toBe("VCJR11"); // Highest margin within the FII group
     expect(candidates[0].suggestedQuantity).toBe(10); // 1000 / 100
   });
+
+  it("does NOT suggest FII assets when total FII group (FII + FI-Infra + Fiagro) is already above target allocation", () => {
+    // Current portfolio mirrors the user's actual portfolio:
+    // STOCK_BR: 2,150 BRL (21.5%)
+    // FII: 5,430 BRL (54.3%)
+    // FII_INFRA: 1,220 BRL (12.2%)
+    // FIAGRO: 760 BRL (7.6%)
+    // ETF: 390 BRL (3.9%)
+    // Total FII group = 5430 + 1220 + 760 = 7410 BRL (74.5% of 9950 BRL)
+    // Target: STOCK_BR 30%, FII 60%, ETF 10%
+    const stock = createMockPosition({
+      ticker: "PETR4",
+      type: "STOCK_BR",
+      livePrice: 21.5,
+      quantity: 100,
+      safetyMargin: 20,
+    });
+    const fii = createMockPosition({
+      ticker: "HGLG11",
+      type: "FII",
+      livePrice: 100,
+      quantity: 54.3,
+      safetyMargin: 50, // Even with huge margin, FII is above target so must not be picked
+    });
+    const fiiInfra = createMockPosition({
+      ticker: "JURO11",
+      type: "FII_INFRA",
+      livePrice: 100,
+      quantity: 12.2,
+      safetyMargin: 45,
+    });
+    const fiagro = createMockPosition({
+      ticker: "VGIA11",
+      type: "FIAGRO",
+      livePrice: 10,
+      quantity: 76,
+      safetyMargin: 40,
+    });
+    const etf = createMockPosition({
+      ticker: "BOVA11",
+      type: "ETF",
+      livePrice: 130,
+      quantity: 3,
+      safetyMargin: 15,
+    });
+
+    const strategyCtx: AskStrategyContext = {
+      eligiblePositions: [stock, fii, fiiInfra, fiagro, etf],
+      availableAmount: 1000,
+      settings: {
+        smartAllocationTargets: {
+          STOCK_BR: 30,
+          FII: 60,
+          ETF: 10,
+          STOCK_US: 0,
+          REIT: 0,
+          FIXED_INCOME: 0,
+        },
+      },
+      asOf: "2026-08-26T10:00:00.000Z",
+    };
+
+    const candidates = runBalanceTargets(strategyCtx);
+
+    // Only classes below target (STOCK_BR and ETF) should be recommended.
+    // FII, FII_INFRA, and FIAGRO must NOT be in candidates!
+    const candidateTickers = candidates.map((c) => c.ticker);
+    expect(candidateTickers).toContain("PETR4");
+    expect(candidateTickers).not.toContain("HGLG11");
+    expect(candidateTickers).not.toContain("JURO11");
+    expect(candidateTickers).not.toContain("VGIA11");
+  });
 });

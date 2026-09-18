@@ -2147,7 +2147,7 @@ export const en = {
     },
     allocation: {
       eyebrow: "Portfolio Balance",
-      title: "8 Classes Allocation",
+      title: "Asset Class Allocation",
       titleUs: "US Asset Allocation",
       subtitle: "Target vs Current",
       target: "Target",
@@ -2158,6 +2158,14 @@ export const en = {
       statusInBalance: "In Balance",
       statusAbove: "Above",
       statusInvest: "Contribute",
+      composition: "Composition",
+      subClasses: {
+        FII: "FIIs",
+        FIAGRO: "Fiagros",
+        FII_INFRA: "FI-Infras",
+        ETF_US: "US ETFs",
+        ETF_BR: "BR ETFs",
+      },
       classes: {
         acoes_br: "BR Stocks",
         fiis: "FIIs",

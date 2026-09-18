@@ -5,8 +5,8 @@ import type { AssetType } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 import {
-  computeEightClassAllocations,
-  type EightClassKey,
+  computeCanonicalClassAllocations,
+  type CanonicalClassAllocationItem,
 } from "@/lib/selectors/eightClassAllocation";
 import { useMarketScope } from "@/lib/useMarketScope";
 
@@ -28,7 +28,7 @@ export function AllocationOverviewCard({
 
   const entries = useMemo(
     () =>
-      computeEightClassAllocations(
+      computeCanonicalClassAllocations(
         valuedItems,
         smartAllocationTargets,
         usdRate,
@@ -58,15 +58,14 @@ export function AllocationOverviewCard({
 
         {isLoading ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {Array.from({ length: isUSNative ? 4 : 8 }).map((_, n) => (
+            {Array.from({ length: isUSNative ? 4 : 6 }).map((_, n) => (
               <Skeleton key={n} className="h-20 w-full rounded-xl" />
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {entries.map((entry) => {
-              const classLabel =
-                t.dashboard.allocation.classes?.[entry.key as EightClassKey] ?? entry.key;
+              const classLabel = t.types[entry.type] ?? entry.type;
 
               let statusLabel = t.dashboard.allocation.statusBalanced;
               let statusColor = "text-accent-gold dark:text-[#DFC38A]";
@@ -82,14 +81,23 @@ export function AllocationOverviewCard({
                 barColor = "bg-danger dark:bg-[#F87171]";
               }
 
-              const fillPct = Math.min(
-                100,
-                Math.max(entry.currentPct > 0 ? 4 : 0, (entry.currentPct / 30.0) * 100),
-              );
+              const fillPct =
+                entry.targetPct > 0
+                  ? Math.min(
+                      100,
+                      Math.max(entry.currentPct > 0 ? 4 : 0, (entry.currentPct / entry.targetPct) * 100),
+                    )
+                  : entry.currentPct > 0
+                  ? 100
+                  : 0;
+
+              const activeSubAllocations =
+                entry.subAllocations?.filter((s) => s.currentPct > 0) ?? [];
+              const showSubComposition = activeSubAllocations.length > 1;
 
               return (
                 <div
-                  key={entry.key}
+                  key={entry.type}
                   className="rounded-xl border border-border/60 bg-muted/40 p-3.5 transition-colors hover:border-border dark:border-[#182C25] dark:bg-[#0D1714]"
                 >
                   <div className="mb-1.5 flex items-center justify-between text-xs">
@@ -116,6 +124,28 @@ export function AllocationOverviewCard({
                         : t.dashboard.allocation.statusInBalance}
                     </span>
                   </div>
+
+                  {showSubComposition && (
+                    <div className="mt-2.5 pt-2 border-t border-border/40 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                      <span className="font-medium text-foreground/70">
+                        {t.dashboard.allocation.composition}:
+                      </span>
+                      {activeSubAllocations.map((sub, idx, arr) => {
+                        const subLabel =
+                          t.dashboard.allocation.subClasses?.[
+                            sub.rawType as keyof typeof t.dashboard.allocation.subClasses
+                          ] ??
+                          t.types[sub.rawType as AssetType] ??
+                          sub.rawType;
+                        return (
+                          <span key={sub.rawType} className="font-mono">
+                            {subLabel} {(sub.currentPct * 100).toFixed(1)}%
+                            {idx < arr.length - 1 ? " ·" : ""}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -59,6 +59,122 @@ export const US_DEFAULT_TARGETS: Record<EightClassKey, number> = {
   etfs_br: 0,
 };
 
+import {
+  computeClassAllocationState,
+  type ClassAllocationState,
+  type SubClassAllocation,
+} from "@/lib/portfolioAllocationState";
+
+export interface CanonicalClassAllocationItem {
+  type: AssetType;
+  currentPct: number;
+  targetPct: number;
+  currentValue: number;
+  status: "invest" | "balanced" | "above";
+  priority: "priority" | "balanced";
+  subAllocations?: SubClassAllocation[];
+}
+
+export const CANONICAL_BR_CLASSES_ORDER: AssetType[] = [
+  "STOCK_BR",
+  "FII",
+  "ETF",
+  "STOCK_US",
+  "REIT",
+  "FIXED_INCOME",
+];
+
+export const CANONICAL_US_CLASSES_ORDER: AssetType[] = [
+  "STOCK_US",
+  "REIT",
+  "ETF",
+  "FIXED_INCOME",
+];
+
+export const CANONICAL_BR_DEFAULT_TARGETS: Partial<Record<AssetType, number>> = {
+  STOCK_BR: 30,
+  FII: 35,
+  ETF: 25,
+  STOCK_US: 5,
+  REIT: 5,
+  FIXED_INCOME: 0,
+};
+
+export const CANONICAL_US_DEFAULT_TARGETS: Partial<Record<AssetType, number>> = {
+  STOCK_US: 45,
+  REIT: 25,
+  ETF: 30,
+  FIXED_INCOME: 0,
+};
+
+export function computeCanonicalClassAllocations(
+  positions: ValuedWatchlistItem[],
+  userTargets?: Partial<Record<AssetType, number>>,
+  fxRate?: number,
+  jurisdiction: "BR" | "US" = "BR",
+): CanonicalClassAllocationItem[] {
+  const isUSNative = jurisdiction === "US";
+  const defaultTargets = isUSNative ? CANONICAL_US_DEFAULT_TARGETS : CANONICAL_BR_DEFAULT_TARGETS;
+
+  const totalUserWeight = Object.values(userTargets || {}).reduce(
+    (sum: number, w) => sum + (typeof w === "number" && w > 0 ? w : 0),
+    0,
+  );
+
+  const effectiveTargets = totalUserWeight > 0 ? (userTargets || {}) : defaultTargets;
+
+  const allocationState = computeClassAllocationState(
+    positions,
+    effectiveTargets,
+    fxRate,
+    true, // includeZeroTargets
+  );
+
+  const order = isUSNative ? CANONICAL_US_CLASSES_ORDER : CANONICAL_BR_CLASSES_ORDER;
+
+  const items: CanonicalClassAllocationItem[] = [];
+
+  for (const type of order) {
+    const state = allocationState.get(type);
+    const targetPct = (state?.targetPct ?? 0) * 100;
+    const currentPct = (state?.currentPct ?? 0) * 100;
+    const currentValue = state?.currentValue ?? 0;
+    const subAllocations = state?.subAllocations;
+
+    const hasAnyAllocation = targetPct > 0 || currentPct > 0;
+    if (!hasAnyAllocation && totalUserWeight > 0) {
+      continue;
+    }
+
+    const diff = currentPct - targetPct;
+    let status: "invest" | "balanced" | "above" = "balanced";
+    if (diff < -1.5) {
+      status = "invest";
+    } else if (diff > 1.5) {
+      status = "above";
+    }
+
+    const priority: "priority" | "balanced" =
+      targetPct === 0 && currentPct === 0
+        ? "balanced"
+        : currentPct <= targetPct
+        ? "priority"
+        : "balanced";
+
+    items.push({
+      type,
+      currentPct,
+      targetPct,
+      currentValue,
+      status,
+      priority,
+      subAllocations,
+    });
+  }
+
+  return items;
+}
+
 export function classifyPositionToEightClass(pos: ValuedWatchlistItem): EightClassKey {
   if (pos.type === "STOCK_BR") return "acoes_br";
   if (pos.type === "FII") return "fiis";

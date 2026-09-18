@@ -11,7 +11,7 @@ import type { AskStrategyContext, Strategy, StrategyCandidate } from "../types";
  * by safety margin.
  */
 export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] {
-  const { eligiblePositions, availableAmount, settings } = ctx;
+  const { eligiblePositions, availableAmount, settings, fxRate } = ctx;
 
   if (!eligiblePositions || eligiblePositions.length === 0 || availableAmount <= 0) {
     return [];
@@ -21,6 +21,7 @@ export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] 
   const allocationState = computeClassAllocationState(
     eligiblePositions,
     settings.smartAllocationTargets,
+    fxRate,
   );
   if (allocationState.size === 0) {
     return [];
@@ -78,11 +79,11 @@ export function runBalanceTargets(ctx: AskStrategyContext): StrategyCandidate[] 
       return a.ticker.localeCompare(b.ticker);
     });
 
-    // Budget assigned to this class (up to its deficit or remaining budget)
-    const classBudget = classDeficit.deficit > 0
-      ? Math.min(classDeficit.deficit, remainingBudget)
-      : remainingBudget;
+    // Only allocate budget to classes that are below their target (deficit > 0).
+    // Surplus classes (deficit <= 0) must never receive new capital in balanceTargets.
+    if (classDeficit.deficit <= 0) continue;
 
+    const classBudget = Math.min(classDeficit.deficit, remainingBudget);
     let classBudgetRemaining = classBudget;
 
     for (const pos of sortedPositions) {

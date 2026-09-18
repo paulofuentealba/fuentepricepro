@@ -53,10 +53,11 @@ export function ContributionEngineCard({
         availableAmount: amountBRL,
         settings,
         asOf: new Date().toISOString(),
+        fxRate: usdRate,
       },
       correctDriftStrategy,
     );
-  }, [ownedPositions, amountBRL, settings, isLoading]);
+  }, [ownedPositions, amountBRL, settings, isLoading, usdRate]);
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 flex flex-col justify-between shadow-sm dark:border-[#234839] dark:bg-[radial-gradient(circle_at_top_right,#132C22,#0D1A15_70%)]">

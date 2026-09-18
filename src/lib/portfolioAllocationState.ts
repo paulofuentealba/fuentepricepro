@@ -3,6 +3,12 @@ import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { getDisplayAssetType } from "@/lib/formatters";
 import { convertCurrency } from "@/lib/currency";
 
+export interface SubClassAllocation {
+  rawType: AssetType | string;
+  currentValue: number;
+  currentPct: number;
+}
+
 export interface ClassAllocationState {
   type: AssetType;
   /** 0-1, the class's share of smartAllocationTargets' total weight. */
@@ -11,6 +17,8 @@ export interface ClassAllocationState {
   totalCurrentValue: number;
   /** 0-1, currentValue / totalCurrentValue (0 when the portfolio is empty). */
   currentPct: number;
+  /** Decomposição detalhada dos ativos da classe na carteira (ex: FII, FIAGRO, FII_INFRA; ETF US, ETF BR). */
+  subAllocations?: SubClassAllocation[];
 }
 
 /**
@@ -30,18 +38,32 @@ export function computeClassAllocationState(
    * — matches useFIProgress's canonical totalCapitalBRL). Omitted here to keep balanceTargets.ts
    * byte-for-byte behavior-identical to before this extraction; the Screener passes a real rate. */
   fxRate?: number,
+  /** When true, includes classes even if their target weight is 0 (useful for portfolio display). */
+  includeZeroTargets: boolean = false,
 ): Map<AssetType, ClassAllocationState> {
   const classCurrentValue: Partial<Record<AssetType, number>> = {};
+  const classSubValues: Partial<Record<AssetType, Record<string, number>>> = {};
   let totalCurrentValue = 0;
 
   for (const pos of positions) {
-    const livePrice = pos.livePrice ?? pos.currentPrice ?? 0;
+    if (pos.isClosedPosition) continue;
     const qty = pos.quantity ?? 0;
+    if (qty <= 0) continue;
+    const livePrice = pos.livePrice ?? pos.currentPrice ?? 0;
     const rawValue = qty * livePrice;
     const value = fxRate != null ? convertCurrency(rawValue, pos.currency, "BRL", fxRate) : rawValue;
     const type = getDisplayAssetType(pos.type);
     classCurrentValue[type] = (classCurrentValue[type] || 0) + value;
     totalCurrentValue += value;
+
+    let subKey: string = pos.type;
+    if (pos.type === "ETF") {
+      subKey = pos.currency === "USD" ? "ETF_US" : "ETF_BR";
+    }
+    if (!classSubValues[type]) {
+      classSubValues[type] = {};
+    }
+    classSubValues[type]![subKey] = (classSubValues[type]![subKey] || 0) + value;
   }
 
   const totalTargetWeight = Object.values(targets || {}).reduce(
@@ -50,20 +72,30 @@ export function computeClassAllocationState(
   );
 
   const result = new Map<AssetType, ClassAllocationState>();
-  if (totalTargetWeight <= 0) return result;
+  if (totalTargetWeight <= 0 && !includeZeroTargets) return result;
 
   for (const [typeKey, weight] of Object.entries(targets || {})) {
     const type = typeKey as AssetType;
     const w = typeof weight === "number" && weight > 0 ? weight : 0;
-    if (w <= 0) continue;
+    if (w <= 0 && !includeZeroTargets) continue;
 
     const currentValue = classCurrentValue[type] || 0;
+    const subMap = classSubValues[type] || {};
+    const subAllocations: SubClassAllocation[] = Object.entries(subMap)
+      .map(([rawType, val]) => ({
+        rawType,
+        currentValue: val,
+        currentPct: totalCurrentValue > 0 ? val / totalCurrentValue : 0,
+      }))
+      .sort((a, b) => b.currentValue - a.currentValue);
+
     result.set(type, {
       type,
-      targetPct: w / totalTargetWeight,
+      targetPct: totalTargetWeight > 0 ? w / totalTargetWeight : 0,
       currentValue,
       totalCurrentValue,
       currentPct: totalCurrentValue > 0 ? currentValue / totalCurrentValue : 0,
+      subAllocations,
     });
   }
 

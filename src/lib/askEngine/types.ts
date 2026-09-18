@@ -35,6 +35,8 @@ export interface AskContext {
   sourceTicker?: string;
   /** Optional transaction history to check for Wash Sale risks (IRC § 1091). */
   transactions?: Transaction[];
+  /** Optional exchange rate (e.g. USD/BRL) for multi-currency conversion to BRL. */
+  fxRate?: number;
 }
 
 /**
@@ -47,6 +49,8 @@ export interface AskStrategyContext {
   asOf: string;
   /** Optional source ticker when the question originates from a specific dividend payer (e.g. Reinforce Payer). */
   sourceTicker?: string;
+  /** Optional exchange rate (e.g. USD/BRL) for multi-currency conversion to BRL. */
+  fxRate?: number;
 }
 
 /**

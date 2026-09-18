@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   computeEightClassAllocations,
+  computeCanonicalClassAllocations,
   classifyPositionToEightClass,
   PROTOTYPE_DEFAULT_TARGETS,
   EIGHT_CLASSES_ORDER,
@@ -162,6 +163,105 @@ describe("eightClassAllocation", () => {
     expect(etfs.currentPct).toBeCloseTo(20.0);
     expect(etfs.targetPct).toBeCloseTo(30.0);
     expect(etfs.status).toBe("invest");
+  });
+
+  describe("computeCanonicalClassAllocations", () => {
+    it("respects user's real targets without arbitrary subdivisions and calculates subAllocations", () => {
+      const positions: ValuedWatchlistItem[] = [
+        {
+          id: "1",
+          ticker: "PETR4",
+          type: "STOCK_BR",
+          currency: "BRL",
+          quantity: 100,
+          currentPrice: 21.5, // 2,150 BRL (21.5%)
+        } as ValuedWatchlistItem,
+        {
+          id: "2",
+          ticker: "HGLG11",
+          type: "FII",
+          currency: "BRL",
+          quantity: 54.3,
+          currentPrice: 100, // 5,430 BRL (54.3%)
+        } as ValuedWatchlistItem,
+        {
+          id: "3",
+          ticker: "JURO11",
+          type: "FII_INFRA",
+          currency: "BRL",
+          quantity: 12.2,
+          currentPrice: 100, // 1,220 BRL (12.2%)
+        } as ValuedWatchlistItem,
+        {
+          id: "4",
+          ticker: "VGIA11",
+          type: "FIAGRO",
+          currency: "BRL",
+          quantity: 76,
+          currentPrice: 10, // 760 BRL (7.6%)
+        } as ValuedWatchlistItem,
+        {
+          id: "5",
+          ticker: "VOO",
+          type: "ETF",
+          currency: "USD",
+          quantity: 1,
+          currentPrice: 78, // 78 USD @ 5.0 = 390 BRL (3.9%)
+        } as ValuedWatchlistItem,
+        {
+          id: "6",
+          ticker: "AAPL",
+          type: "STOCK_US",
+          currency: "USD",
+          quantity: 1,
+          currentPrice: 10, // 10 USD @ 5.0 = 50 BRL (0.5%)
+        } as ValuedWatchlistItem,
+      ];
+
+      const userTargets = {
+        STOCK_BR: 30,
+        FII: 60,
+        ETF: 10,
+        STOCK_US: 0,
+        REIT: 0,
+        FIXED_INCOME: 0,
+      };
+
+      const result = computeCanonicalClassAllocations(positions, userTargets, 5.0, "BR");
+
+      // Verify FII canonical item
+      const fiiItem = result.find((r) => r.type === "FII")!;
+      expect(fiiItem).toBeDefined();
+      expect(fiiItem.targetPct).toBe(60.0); // Exactly 60%, NOT 25.7%!
+      expect(fiiItem.currentPct).toBeCloseTo(74.1, 1);
+      expect(fiiItem.status).toBe("above");
+      expect(fiiItem.priority).toBe("balanced");
+
+      // Verify sub-allocations
+      expect(fiiItem.subAllocations).toHaveLength(3);
+      const subFii = fiiItem.subAllocations?.find((s) => s.rawType === "FII")!;
+      const subInfra = fiiItem.subAllocations?.find((s) => s.rawType === "FII_INFRA")!;
+      const subFiagro = fiiItem.subAllocations?.find((s) => s.rawType === "FIAGRO")!;
+      expect(subFii.currentPct * 100).toBeCloseTo(54.3, 1);
+      expect(subInfra.currentPct * 100).toBeCloseTo(12.2, 1);
+      expect(subFiagro.currentPct * 100).toBeCloseTo(7.6, 1);
+
+      // Verify STOCK_BR
+      const stockItem = result.find((r) => r.type === "STOCK_BR")!;
+      expect(stockItem).toBeDefined();
+      expect(stockItem.targetPct).toBe(30.0);
+      expect(stockItem.currentPct).toBeCloseTo(21.5, 1);
+      expect(stockItem.status).toBe("invest");
+      expect(stockItem.priority).toBe("priority");
+
+      // Verify ETF
+      const etfItem = result.find((r) => r.type === "ETF")!;
+      expect(etfItem).toBeDefined();
+      expect(etfItem.targetPct).toBe(10.0);
+      expect(etfItem.currentPct).toBeCloseTo(3.9, 1);
+      expect(etfItem.status).toBe("invest");
+      expect(etfItem.priority).toBe("priority");
+    });
   });
 });
 
