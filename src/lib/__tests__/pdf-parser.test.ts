@@ -12,6 +12,7 @@ import { es } from "@/lib/i18n/dict.es";
 import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
+  buildBrokerNoteTransactionId,
 } from "@/lib/dataIngestion/brokerNoteImport";
 import type { Transaction } from "@/lib/transactionsLogic";
 
@@ -120,6 +121,92 @@ describe("PDF Data Ingestion Resiliency (B3 Parser)", () => {
       expect(transaction.quantity).toBe(100);
       expect(transaction.pricePerShare).toBe(45.0);
       expect(transaction.fees).toBeNull();
+    });
+
+    it("buildBrokerNoteTransactionId generates canonical ID for 1st occurrence and indexed suffix for duplicate partial executions", () => {
+      const ts = parseDdMmYyyyToTimestamp("16/09/2026")!;
+
+      const id1 = buildBrokerNoteTransactionId({
+        ticker: "HSLG11",
+        timestamp: ts,
+        quantity: 1,
+        price: 79.1,
+        occurrence: 1,
+      });
+      const id1Default = buildBrokerNoteTransactionId({
+        ticker: "HSLG11",
+        timestamp: ts,
+        quantity: 1,
+        price: 79.1,
+      });
+      const id2 = buildBrokerNoteTransactionId({
+        ticker: "HSLG11",
+        timestamp: ts,
+        quantity: 1,
+        price: 79.1,
+        occurrence: 2,
+      });
+      const id3 = buildBrokerNoteTransactionId({
+        ticker: "HSLG11",
+        timestamp: ts,
+        quantity: 8,
+        price: 79.1,
+        occurrence: 1,
+      });
+
+      expect(id1).toBe(`tx-pdf-HSLG11-${ts}-1-79.1`);
+      expect(id1Default).toBe(`tx-pdf-HSLG11-${ts}-1-79.1`);
+      expect(id2).toBe(`tx-pdf-HSLG11-${ts}-1-79.1-2`);
+      expect(id3).toBe(`tx-pdf-HSLG11-${ts}-8-79.1`);
+      expect(id1).not.toBe(id2);
+    });
+
+    it("preserves 100% of partial execution trades (e.g. 1 + 1 + 8 = 10 cotas) without ID collisions or overwrites", () => {
+      // Simulates real BTG note where HSLG11 had 3 executions: 1 cota @ 79.10, 1 cota @ 79.10, 8 cotas @ 79.10
+      const parsedTrades = [
+        { ticker: "HSLG11", quantity: 1, price: 79.1, date: "16/09/2026", type: "buy" as const },
+        { ticker: "HSLG11", quantity: 1, price: 79.1, date: "16/09/2026", type: "buy" as const },
+        { ticker: "HSLG11", quantity: 8, price: 79.1, date: "16/09/2026", type: "buy" as const },
+      ];
+
+      const occMap = new Map<string, number>();
+      const transactions: Transaction[] = parsedTrades.map((t) => {
+        const ts = parseDdMmYyyyToTimestamp(t.date)!;
+        const occKey = `${t.ticker}-${t.date}-${t.quantity}-${t.price}-${t.type}`;
+        const occ = (occMap.get(occKey) || 0) + 1;
+        occMap.set(occKey, occ);
+
+        return {
+          id: buildBrokerNoteTransactionId({
+            ticker: t.ticker,
+            timestamp: ts,
+            quantity: t.quantity,
+            price: t.price,
+            occurrence: occ,
+          }),
+          ticker: t.ticker,
+          type: t.type,
+          date: ts,
+          quantity: t.quantity,
+          pricePerShare: t.price,
+          fees: null,
+        };
+      });
+
+      // Verify all IDs are strictly unique
+      const ids = transactions.map((t) => t.id);
+      expect(new Set(ids).size).toBe(3);
+
+      // Verify simulated database upsert retains all 3 transactions without overwriting
+      const dbTransactions = new Map<string, Transaction>();
+      for (const tx of transactions) {
+        dbTransactions.set(tx.id, tx);
+      }
+      expect(dbTransactions.size).toBe(3);
+
+      // Verify sum of quantities equals exact 10 shares
+      const totalQty = Array.from(dbTransactions.values()).reduce((sum, tx) => sum + tx.quantity, 0);
+      expect(totalQty).toBe(10);
     });
   });
 

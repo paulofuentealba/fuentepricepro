@@ -18,6 +18,7 @@ import {
 import {
   parseDdMmYyyyToTimestamp,
   consolidateTradesToWatchlistItems,
+  buildBrokerNoteTransactionId,
 } from "@/lib/dataIngestion/brokerNoteImport";
 import { useTransactions, type Transaction } from "@/lib/transactions";
 import { useWatchlist } from "@/lib/watchlist";
@@ -48,6 +49,9 @@ interface ReviewRow {
   /** Which note (and therefore which broker) this row came from — tracked per-row since a
    * single import batch can now mix notes from different brokers (Item: multi-broker fix). */
   broker: SupportedBroker | null;
+  /** 1-based occurrence number within this import batch for identical (ticker, date, qty, price, type)
+   * tuples, ensuring partial execution rows receive distinct, deterministic IDs without collisions. */
+  occurrence: number;
 }
 
 /**
@@ -116,6 +120,7 @@ export function BrokerNoteImportPage() {
   async function parseOneFile(
     file: File,
     fileIndex: number,
+    occurrenceMap?: Map<string, number>,
   ): Promise<{ rows: ReviewRow[]; broker: SupportedBroker | null }> {
     const pdfjsLib = await import("pdfjs-dist");
     if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
@@ -152,32 +157,47 @@ export function BrokerNoteImportPage() {
       throw new Error(t.brokerNote.malformedPdf);
     }
 
+    const occMap = occurrenceMap || new Map<string, number>();
+
     const fileRows: ReviewRow[] = [
-      ...resolved.map((trade, i) => ({
-        key: `f${fileIndex}-r-${i}-${trade.ticker}-${trade.date}`,
-        ticker: trade.ticker.toUpperCase(),
-        isUnresolved: false,
-        type: trade.type || ("buy" as const),
-        quantity: trade.quantity,
-        price: trade.price,
-        date: trade.date,
-        fees: trade.fees,
-        checked: true,
-        broker: result.broker ?? null,
-      })),
-      ...unresolved.map((item) => ({
-        key: `f${fileIndex}-${item.id}`,
-        ticker: "",
-        isUnresolved: true,
-        normalizedKey: item.normalizedKey,
-        rawSpecification: item.rawSpecification,
-        type: item.type,
-        quantity: item.quantity,
-        price: item.price,
-        date: item.date,
-        checked: true,
-        broker: result.broker ?? null,
-      })),
+      ...resolved.map((trade, i) => {
+        const occKey = `${trade.ticker.toUpperCase()}-${trade.date}-${trade.quantity}-${trade.price}-${trade.type || "buy"}`;
+        const occurrence = (occMap.get(occKey) || 0) + 1;
+        occMap.set(occKey, occurrence);
+        return {
+          key: `f${fileIndex}-r-${i}-${trade.ticker}-${trade.date}`,
+          ticker: trade.ticker.toUpperCase(),
+          isUnresolved: false,
+          type: trade.type || ("buy" as const),
+          quantity: trade.quantity,
+          price: trade.price,
+          date: trade.date,
+          fees: trade.fees,
+          checked: true,
+          broker: result.broker ?? null,
+          occurrence,
+        };
+      }),
+      ...unresolved.map((item) => {
+        const itemType = item.type;
+        const occKey = `unresolved-${item.normalizedKey || item.rawSpecification}-${item.date}-${item.quantity}-${item.price}-${itemType}`;
+        const occurrence = (occMap.get(occKey) || 0) + 1;
+        occMap.set(occKey, occurrence);
+        return {
+          key: `f${fileIndex}-${item.id}`,
+          ticker: "",
+          isUnresolved: true,
+          normalizedKey: item.normalizedKey,
+          rawSpecification: item.rawSpecification,
+          type: item.type,
+          quantity: item.quantity,
+          price: item.price,
+          date: item.date,
+          checked: true,
+          broker: result.broker ?? null,
+          occurrence,
+        };
+      }),
     ];
 
     return { rows: fileRows, broker: result.broker ?? null };
@@ -192,11 +212,12 @@ export function BrokerNoteImportPage() {
     const allRows: ReviewRow[] = [];
     const okNames: string[] = [];
     let failedCount = 0;
+    const occurrenceMap = new Map<string, number>();
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       try {
-        const { rows: fileRows } = await parseOneFile(file, i);
+        const { rows: fileRows } = await parseOneFile(file, i, occurrenceMap);
         allRows.push(...fileRows);
         okNames.push(file.name);
       } catch (err: any) {
@@ -241,20 +262,6 @@ export function BrokerNoteImportPage() {
         await saveMappings(newMappings);
       }
 
-      const finalTradesWithBroker: { trade: TradeRecord; broker: SupportedBroker | null }[] = checkedRows.map(
-        (row) => ({
-          trade: {
-            ticker: row.ticker.trim().toUpperCase(),
-            quantity: row.quantity,
-            price: row.price,
-            date: row.date,
-            type: row.type,
-            fees: row.fees,
-          },
-          broker: row.broker,
-        }),
-      );
-
       const newlyCreatedTransactions: Transaction[] = [];
       // Trades grouped by broker, so consolidateTradesToWatchlistItems (which takes a single
       // `detectedBroker` argument) is called once per broker instead of stamping every item with
@@ -262,7 +269,16 @@ export function BrokerNoteImportPage() {
       const validTradesByBroker = new Map<string, TradeRecord[]>();
       let invalidDatesCount = 0;
 
-      for (const { trade, broker } of finalTradesWithBroker) {
+      for (const row of checkedRows) {
+        const trade: TradeRecord = {
+          ticker: row.ticker.trim().toUpperCase(),
+          quantity: row.quantity,
+          price: row.price,
+          date: row.date,
+          type: row.type,
+          fees: row.fees,
+        };
+        const broker = row.broker;
         const txTimestamp = parseDdMmYyyyToTimestamp(trade.date);
         if (txTimestamp === null) {
           invalidDatesCount++;
@@ -273,7 +289,13 @@ export function BrokerNoteImportPage() {
         validTradesByBroker.get(brokerKey)!.push(trade);
 
         const transaction: Transaction = {
-          id: `tx-pdf-${trade.ticker}-${txTimestamp}-${trade.quantity}-${trade.price}`,
+          id: buildBrokerNoteTransactionId({
+            ticker: trade.ticker,
+            timestamp: txTimestamp,
+            quantity: trade.quantity,
+            price: trade.price,
+            occurrence: row.occurrence,
+          }),
           ticker: trade.ticker,
           type: trade.type || "buy",
           date: txTimestamp,

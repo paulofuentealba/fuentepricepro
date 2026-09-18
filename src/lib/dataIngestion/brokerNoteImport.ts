@@ -132,3 +132,32 @@ export function consolidateTradesToWatchlistItems(
 
   return itemsToImport;
 }
+
+export interface BrokerNoteTransactionIdParams {
+  ticker: string;
+  timestamp: number;
+  quantity: number;
+  price: number;
+  occurrence?: number;
+}
+
+/**
+ * Builds a deterministic transaction ID for broker note imports.
+ * The 1st occurrence of a (ticker, timestamp, quantity, price) tuple generates the
+ * canonical base ID `tx-pdf-${ticker}-${timestamp}-${quantity}-${price}`.
+ * Subsequent occurrences within the same import receive a `-2`, `-3` suffix,
+ * preventing identical partial executions (e.g. 1 share + 1 share at the same price)
+ * from colliding and overwriting each other in Firestore or local state, while preserving
+ * full backward compatibility and idempotency.
+ */
+export function buildBrokerNoteTransactionId({
+  ticker,
+  timestamp,
+  quantity,
+  price,
+  occurrence = 1,
+}: BrokerNoteTransactionIdParams): string {
+  const base = `tx-pdf-${ticker.toUpperCase()}-${timestamp}-${quantity}-${price}`;
+  return occurrence > 1 ? `${base}-${occurrence}` : base;
+}
+
