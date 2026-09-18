@@ -446,7 +446,7 @@ export function BrokerNoteImportPage() {
           </div>
 
           <div className="mt-5 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] font-display font-semibold uppercase tracking-wider text-muted-foreground">
                 {isUS
                   ? t.brokerNoteImportPage?.usBrokersTitle || "US Brokers"
@@ -455,11 +455,15 @@ export function BrokerNoteImportPage() {
               <button
                 type="button"
                 onClick={() => setShowSecondaryBrokers((prev) => !prev)}
-                className="text-[11px] font-medium text-accent-emerald-light dark:text-[#34D399] hover:underline cursor-pointer"
+                className="text-[11px] font-medium text-accent-emerald-light dark:text-[#34D399] hover:underline cursor-pointer shrink-0"
               >
                 {showSecondaryBrokers
-                  ? t.brokerNoteImportPage?.toggleHideBrBrokers || (isUS ? "Hide Brazilian brokers (B3)" : "Hide US brokers")
-                  : t.brokerNoteImportPage?.toggleShowBrBrokers || (isUS ? "Show Brazilian brokers (B3)" : "Show US brokers")}
+                  ? (isUS
+                      ? resolveReasonText(t, "brokerNoteImportPage.toggleHideBrBrokers")
+                      : resolveReasonText(t, "brokerNoteImportPage.toggleHideUsBrokers"))
+                  : (isUS
+                      ? resolveReasonText(t, "brokerNoteImportPage.toggleShowBrBrokers", { count: secondaryBrokers.length })
+                      : resolveReasonText(t, "brokerNoteImportPage.toggleShowUsBrokers", { count: secondaryBrokers.length }))}
               </button>
             </div>
 
