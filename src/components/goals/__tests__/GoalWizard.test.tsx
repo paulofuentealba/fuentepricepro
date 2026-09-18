@@ -68,6 +68,8 @@ function createMockItem(overrides: Partial<WatchlistItem> = {}): WatchlistItem {
     averagePrice: 28,
     paymentMonths: [5, 8, 11],
     payoutRatio: 50,
+    addedAt: Date.now(),
+    investingSince: Date.now(),
     ...overrides,
   };
 }
