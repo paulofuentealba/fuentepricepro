@@ -21,6 +21,7 @@ import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
 import type { SearchHit } from "@/lib/apiService.functions";
 import type { AssetType } from "@/lib/domain";
+import { resolveDividendIntelligence } from "@/lib/dividendIntelligence";
 import {
   REPRESENTATIVE_ASSETS,
   REPRESENTATIVE_KEYS,
@@ -143,13 +144,27 @@ export function AssetDeepDiveView({
 
   // Base annual dividend estimate for valuation
   const annualDividend = useMemo(() => {
-    if (repData) return repData.bazinDiv;
     if (asset?.dividends3y && asset.dividends3y.length > 0) {
       const sum = asset.dividends3y.reduce((acc, v) => acc + v, 0);
       return sum / asset.dividends3y.length;
     }
+    if (repData) return repData.bazinDiv;
     return livePrice * (currency === "USD" ? 0.035 : 0.06);
   }, [repData, asset, livePrice, currency]);
+
+  // Canonical Dividend Intelligence
+  const dividendIntel = useMemo(() => {
+    return resolveDividendIntelligence({
+      asset,
+      repData,
+      ticker: currentTicker,
+      livePrice,
+      annualDividend,
+      currency,
+      locale,
+      t,
+    });
+  }, [asset, repData, currentTicker, livePrice, annualDividend, currency, locale, t]);
 
   // Portfolio Custody calculations (Mixed-currency consolidated)
   const totalPortfolioValue = useMemo(() => {
@@ -332,24 +347,24 @@ export function AssetDeepDiveView({
 
   // Snowball calculations
   const snowballInfo = useMemo(() => {
-    const dividendPerShare = annualDividend / (asset?.paymentMonths?.length || 4 || 1);
-    const req = dividendPerShare > 0 ? Math.ceil(livePrice / dividendPerShare) : (repData?.snowballReqQty ?? 100);
-    if (repData && locale === "ptBR") {
+    if (repData && !asset && locale === "ptBR") {
       return {
         reqQty: repData.snowballReqQty,
         text: repData.snowballText,
       };
     }
+    const req = dividendIntel.snowballReqQty;
     return {
       reqQty: req,
-      text: t.deepDive?.snowballText?.replace("{{qty}}", String(req)) ||
+      text:
+        t.deepDive?.snowballText?.replace("{{qty}}", String(req)) ||
         (locale === "en"
           ? `Every cycle, ${req} shares generate enough dividends to automatically purchase 1 new share.`
           : locale === "es"
             ? `En cada ciclo, ${req} cuotas generan dividendos suficientes para adquirir 1 nueva cuota automáticamente.`
             : `A cada ciclo, ${req} cotas geram proventos suficientes para adquirir 1 nova cota automaticamente.`),
     };
-  }, [repData, locale, annualDividend, asset, livePrice, t]);
+  }, [repData, asset, locale, dividendIntel.snowballReqQty, t]);
 
   // Save consensus / target yield to user settings
   async function handleApplyConsensus(assumptions?: { bazinYield: number; kDiscount: number; gGrowth: number }) {
@@ -460,89 +475,6 @@ export function AssetDeepDiveView({
     }
     return repData.sector;
   }, [asset?.sector, repData?.sector, currentTicker, locale]);
-
-  // Localized payment frequency
-  const paymentFrequencyText = useMemo(() => {
-    if (repData && locale === "ptBR") return repData.payFreq;
-    if (currentTicker === "O") {
-      return locale === "en"
-        ? "Monthly (The Monthly Dividend Co.)"
-        : locale === "es"
-          ? "Mensual (The Monthly Dividend Co.)"
-          : "Mensal (The Monthly Dividend Co.)";
-    }
-    if (repData?.payFreq?.toLowerCase().startsWith("mensal")) {
-      return locale === "en" ? "Monthly" : locale === "es" ? "Mensual" : repData.payFreq;
-    }
-    if (repData?.payFreq?.toLowerCase().startsWith("trimestral")) {
-      return locale === "en" ? "Quarterly" : locale === "es" ? "Trimestral" : repData.payFreq;
-    }
-    if (repData?.payFreq?.toLowerCase().startsWith("semestral")) {
-      return locale === "en" ? "Semiannual" : locale === "es" ? "Semestral" : repData.payFreq;
-    }
-    if (repData?.payFreq?.toLowerCase().includes("8x")) {
-      return locale === "en" ? "8x per year" : locale === "es" ? "8x al año" : repData.payFreq;
-    }
-    return locale === "en" ? "Quarterly" : locale === "es" ? "Trimestral" : "Trimestral";
-  }, [repData, currentTicker, locale]);
-
-  // Localized date strings for COM and Payment
-  const nextComDateText = useMemo(() => {
-    if (asset?.exDividendDate) {
-      return formatDate(asset.exDividendDate, locale) || "—";
-    }
-    if (repData?.nextCom) {
-      if (locale === "ptBR") return repData.nextCom;
-      return repData.nextCom
-        .replace(/SET/g, "SEP")
-        .replace(/OUT/g, "OCT")
-        .replace(/DEZ/g, locale === "en" ? "DEC" : "DIC")
-        .replace(/FEV/g, "FEB")
-        .replace(/ABR/g, locale === "en" ? "APR" : "ABR")
-        .replace(/MAI/g, locale === "en" ? "MAY" : "MAY")
-        .replace(/AGO/g, locale === "en" ? "AUG" : "AGO");
-    }
-    return "—";
-  }, [asset?.exDividendDate, repData?.nextCom, locale]);
-
-  const nextPaymentDateText = useMemo(() => {
-    if (repData?.nextPay) {
-      if (locale === "ptBR") return repData.nextPay;
-      return repData.nextPay
-        .replace(/SET/g, "SEP")
-        .replace(/OUT/g, "OCT")
-        .replace(/DEZ/g, locale === "en" ? "DEC" : "DIC")
-        .replace(/FEV/g, "FEB")
-        .replace(/ABR/g, locale === "en" ? "APR" : "ABR")
-        .replace(/MAI/g, locale === "en" ? "MAY" : "MAY")
-        .replace(/AGO/g, locale === "en" ? "AUG" : "AGO");
-    }
-    return "—";
-  }, [repData?.nextPay, locale]);
-
-  const nextValFormatted = useMemo(() => {
-    const shareUnit =
-      currency === "USD"
-        ? locale === "en"
-          ? "share"
-          : locale === "es"
-            ? "acción"
-            : "ação"
-        : locale === "en"
-          ? "share"
-          : locale === "es"
-            ? "cuota"
-            : "cota";
-
-    if (repData && locale === "ptBR") return repData.nextVal;
-    if (repData?.nextVal) {
-      return currency === "USD" ? repData.nextVal.replace(",", ".") : repData.nextVal;
-    }
-    if (annualDividend > 0) {
-      return `${currency === "USD" ? "US$ " : "R$ "}${(annualDividend / 4).toFixed(2)} / ${shareUnit}`;
-    }
-    return `${currency === "USD" ? "US$ —" : "R$ —"} / ${shareUnit}`;
-  }, [repData, locale, currency, annualDividend]);
 
   // Dividend Safety Score Input
   const safetyInput: AssetSafetyInput = useMemo(() => {
@@ -914,7 +846,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.projectedDy || "DY Projetado (12M)"}
                 </div>
                 <div className="text-lg font-bold text-success font-display mt-0.5">
-                  {repData && locale === "ptBR"
+                  {repData && !asset && locale === "ptBR"
                     ? repData.dyProj
                     : (livePrice > 0 ? `${((annualDividend / livePrice) * 100).toFixed(1)}% ${locale === "en" ? "p.a." : "a.a."}` : (locale === "en" ? "9.8% p.a." : "9.8% a.a."))}
                 </div>
@@ -925,7 +857,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.paymentFrequency || "Frequência"}
                 </div>
                 <div className="text-lg font-bold text-foreground mt-0.5">
-                  {paymentFrequencyText}
+                  {dividendIntel.frequencyLabel}
                 </div>
               </div>
 
@@ -934,7 +866,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.nextComDate || "Próxima Data COM"}
                 </div>
                 <div className="text-lg font-bold text-accent-text font-display mt-0.5">
-                  {nextComDateText}
+                  {dividendIntel.nextComDateText}
                 </div>
               </div>
 
@@ -943,7 +875,7 @@ export function AssetDeepDiveView({
                   {t.deepDive?.nextPayment || "Data Pagto & Valor"}
                 </div>
                 <div className="text-sm font-bold text-foreground font-display mt-1">
-                  {nextPaymentDateText} • {nextValFormatted}
+                  {dividendIntel.nextPaymentDateText} • {dividendIntel.nextValFormatted}
                 </div>
               </div>
             </div>

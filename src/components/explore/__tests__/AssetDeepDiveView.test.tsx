@@ -220,4 +220,88 @@ describe("AssetDeepDiveView (Raio-X Aprofundado do Ativo)", () => {
     expect(screen.getAllByText(/ITSA4/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/\/04\/2024/)).toBeInTheDocument();
   });
+
+  it("renders real FII (MXRF11) with 'Mensal' payment frequency instead of hardcoded 'Trimestral'", () => {
+    mockAssetData = {
+      ticker: "MXRF11",
+      name: "Maxi Renda FII",
+      currentPrice: 10.15,
+      type: "FII",
+      currency: "BRL",
+      dividends3y: [1.2, 1.15, 1.1],
+      dividendHistory: [{ year: 2025, amount: 1.2 }],
+      paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      dividendEvents: [
+        {
+          exDate: "2026-09-30T00:00:00.000Z",
+          paymentDate: "2026-10-14T00:00:00.000Z",
+          amountPerShare: 0.1,
+        },
+      ],
+    };
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="MXRF11" />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getAllByText(/MXRF11/i).length).toBeGreaterThan(0);
+    expect(screen.getByText("Mensal")).toBeInTheDocument();
+    expect(screen.getByText(/R\$ 0\.10 \/ cota/)).toBeInTheDocument();
+  });
+
+  it("renders real monthly ETF (SPYI) with 'Mensal' payment frequency", () => {
+    mockAssetData = {
+      ticker: "SPYI",
+      name: "NEOS S&P 500 High Income ETF",
+      currentPrice: 50.0,
+      type: "ETF",
+      currency: "USD",
+      dividends3y: [6.0, 5.8],
+      dividendHistory: [{ year: 2025, amount: 6.0 }],
+      paymentMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      dividendEvents: [
+        {
+          exDate: "2026-09-20T00:00:00.000Z",
+          paymentDate: "2026-09-27T00:00:00.000Z",
+          amountPerShare: 0.5,
+        },
+      ],
+    };
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="SPYI" />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getAllByText(/SPYI/i).length).toBeGreaterThan(0);
+    expect(screen.getByText("Mensal")).toBeInTheDocument();
+    expect(screen.getByText(/US\$ 0\.50 \/ ação/)).toBeInTheDocument();
+  });
+
+  it("renders accumulating ETF (IVVB11) with 'Sem distribuição em dinheiro' frequency", () => {
+    mockAssetData = {
+      ticker: "IVVB11",
+      name: "iShares S&P 500 B3 ETF",
+      currentPrice: 340.0,
+      type: "ETF",
+      currency: "BRL",
+      dividends3y: [],
+      dividendHistory: [],
+      paymentMonths: [],
+      dividendEvents: [],
+    };
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="IVVB11" />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getAllByText(/IVVB11/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Sem distribuição em dinheiro/i)).toBeInTheDocument();
+    expect(screen.getByText(/Reinvestimento Automático/i)).toBeInTheDocument();
+  });
 });
