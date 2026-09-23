@@ -10,7 +10,7 @@ import { fetchSecEdgarFacts, fetchSecEdgarCompanyFacts, getCikForTicker } from "
 import { calculatePiotroskiFScore, type PiotroskiResult } from "./calculations";
 import { fetchCvmEnrichedFacts } from "./api/cvm.server";
 import { fetchNasdaqDividends } from "./api/nasdaq.server";
-import { fetchHgBrasilDividends, fetchHgBrasilExchangeRate } from "./api/hgBrasil.server";
+import { fetchHgBrasilDividends, fetchHgBrasilExchangeRate, enrichDividendPaymentDates } from "./api/hgBrasil.server";
 import { estimatePaymentDate } from "./fiiPaymentRules";
 import { getCachedAsset, setCachedAsset } from "./api/assetCache.server";
 import {
@@ -236,10 +236,14 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
     const looksBr = /^[A-Z]{4}\d{1,2}$/.test(raw);
 
     let asset: ApiAsset | null = null;
+    let fromBrapi = false;
 
     if (looksBr) {
       try {
         asset = await fetchFromBrapi(raw);
+        if (asset) {
+          fromBrapi = true;
+        }
       } catch (err) {
         console.error(`[fetchAsset] Brapi error for ${raw}, falling back to Yahoo:`, err);
       }
@@ -264,7 +268,7 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
     asset = {
       ...asset,
       metrics: { ...asset.metrics },
-      dividendEvents: asset.dividendEvents.map((e) => ({ ...e }))
+      dividendEvents: (asset.dividendEvents || []).map((e) => ({ ...e }))
     };
 
     // Enrich BR dividends & financials via HG Brasil + Dados de Mercado + CVM.
@@ -283,16 +287,25 @@ export const fetchAssetFn = createServerFn({ method: "GET" })
       }
 
       if (hgRes && hgRes.dividends && hgRes.dividends.length > 0) {
-        asset.dividendEvents = hgRes.dividends
-          .map((d) => ({
-            exDate: d.approvedDate ?? "",
-            paymentDate: d.paymentDate ?? null,
-            amountPerShare: d.amount,
-            isJCP: typeof d.type === "string" && d.type.toUpperCase().includes("JCP"),
-          }))
-          .filter((e) => e.exDate !== "");
+        if (fromBrapi && asset.dividendEvents && asset.dividendEvents.length > 0) {
+          // Option 2 (SSOT): Enrich missing payment dates on the multi-year base without discarding historical events
+          asset.dividendEvents = enrichDividendPaymentDates(asset.dividendEvents, hgRes.dividends);
+        } else {
+          // Fallback if Brapi failed (Yahoo fallback for BR asset) OR Brapi brought zero events:
+          // HG Brasil provides the authoritative dividend events
+          asset.dividendEvents = hgRes.dividends
+            .map((d) => ({
+              exDate: d.approvedDate ?? "",
+              paymentDate: d.paymentDate ?? null,
+              amountPerShare: d.amount,
+              isJCP: typeof d.type === "string" && d.type.toUpperCase().includes("JCP"),
+            }))
+            .filter((e) => e.exDate !== "");
+        }
       } else if (dmRes && dmRes.dividendEvents.length > 0) {
-        asset.dividendEvents = dmRes.dividendEvents.map((e) => ({ ...e }));
+        if (!fromBrapi || !asset.dividendEvents || asset.dividendEvents.length === 0) {
+          asset.dividendEvents = dmRes.dividendEvents.map((e) => ({ ...e }));
+        }
       }
 
       if (dmRes) {

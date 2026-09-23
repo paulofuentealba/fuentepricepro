@@ -170,6 +170,30 @@ describe("HG Brasil API Integration (hgBrasil.server.ts)", () => {
       expect(enriched[0].paymentDate).toBe("2024-05-20");
       expect(enriched[1].paymentDate).toBe("2024-06-10"); // preserved
     });
+
+    it("enriches DividendEvent items with ISO exDate strings matching HG approvedDate", () => {
+      const existing = [
+        { exDate: "2024-04-25T03:00:00.000Z", paymentDate: null, amountPerShare: 1.25 },
+        { exDate: "2022-08-10T03:00:00.000Z", paymentDate: "2022-08-25", amountPerShare: 0.90 }, // 2022 event preserved
+      ];
+
+      const hgDividends = [
+        {
+          type: "Dividendo",
+          amount: 1.25,
+          approvedDate: "2024-04-25",
+          paymentDate: "2024-05-20",
+        },
+      ];
+
+      const enriched = enrichDividendPaymentDates(existing, hgDividends);
+      expect(enriched).toHaveLength(2);
+      expect(enriched[0].paymentDate).toBe("2024-05-20");
+      expect(enriched[0].paymentDateSource).toBe("hgBrasil");
+      // Multi-year event preserved intact
+      expect(enriched[1].exDate).toBe("2022-08-10T03:00:00.000Z");
+      expect(enriched[1].paymentDate).toBe("2022-08-25");
+    });
   });
 
   describe("fetchHgBrasilExchangeRate", () => {

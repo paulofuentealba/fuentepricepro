@@ -9,7 +9,14 @@ import type { ApiAsset } from "../types";
 
 vi.mock("../brapi.server");
 vi.mock("../yahoo.server");
-vi.mock("../hgBrasil.server");
+vi.mock("../hgBrasil.server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../hgBrasil.server")>();
+  return {
+    ...actual,
+    fetchHgBrasilDividends: vi.fn(),
+    fetchHgBrasilExchangeRate: vi.fn(),
+  };
+});
 vi.mock("../dadosDeMercadoScraper.server");
 vi.mock("../assetCache.server");
 
@@ -75,10 +82,14 @@ describe("apiService.functions (BR Enrichment Fallback)", () => {
     vi.mocked(assetCacheServer.getCachedAsset).mockResolvedValue(null);
   });
 
-  it("Case 1: Brapi Success + HG Brasil Data", async () => {
+  it("Case 1: Brapi Success + HG Brasil Data (Enriches paymentDate without discarding multi-year events)", async () => {
     vi.mocked(dmServer.fetchDadosDeMercado).mockResolvedValue(null);
     const assetBase = createMockAsset("ALZR11", {
-      dividendEvents: [{ exDate: "2024-01-01", paymentDate: null, amountPerShare: 0.5, isJCP: false }],
+      dividendEvents: [
+        { exDate: "2022-05-10", paymentDate: "2022-05-20", amountPerShare: 0.45, isJCP: false },
+        { exDate: "2023-05-10", paymentDate: "2023-05-20", amountPerShare: 0.50, isJCP: false },
+        { exDate: "2024-02-15", paymentDate: null, amountPerShare: 1.23, isJCP: false },
+      ],
     });
     vi.mocked(brapiServer.fetchFromBrapi).mockResolvedValue(assetBase);
     
@@ -91,11 +102,13 @@ describe("apiService.functions (BR Enrichment Fallback)", () => {
 
     const res = await fetchAssetFn({ data: { ticker: "ALZR11" } });
     
-    // Dividend events should be overwritten by HG Brasil
-    expect(res.dividendEvents).toHaveLength(1);
-    expect(res.dividendEvents[0].amountPerShare).toBe(1.23);
-    expect(res.dividendEvents[0].exDate).toBe("2024-02-15");
-    expect(res.dividendEvents[0].paymentDate).toBe("2024-02-25"); // directly from HG Brasil
+    // Historical events from 2022 and 2023 must be preserved
+    expect(res.dividendEvents).toHaveLength(3);
+    expect(res.dividendEvents[0].exDate).toBe("2022-05-10");
+    expect(res.dividendEvents[1].exDate).toBe("2023-05-10");
+    // The matching 2024 event must have its paymentDate enriched from HG Brasil
+    expect(res.dividendEvents[2].exDate).toBe("2024-02-15");
+    expect(res.dividendEvents[2].paymentDate).toBe("2024-02-25");
   });
 
   it("Case 2: Brapi Fail (403) + HG Brasil Data (AFHI11 bug)", async () => {

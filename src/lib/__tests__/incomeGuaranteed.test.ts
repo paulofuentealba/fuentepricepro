@@ -127,4 +127,21 @@ describe("buildAnnualDividends", () => {
     expect(result.totalGrowthPct).toBe(0);
     expect(result.cagrPct).toBe(0);
   });
+
+  it("sums past year events even when paymentDate is null (fallback to past exDate)", () => {
+    const events: RealizedIncomeEvent[] = [
+      mkEvent({ isPaid: false, paymentDate: null, exDate: "2022-04-15", amountNet: 300, currency: "BRL" }),
+      mkEvent({ isPaid: false, paymentDate: null, exDate: "2023-08-20", amountNet: 500, currency: "BRL" }),
+    ];
+    const currentYearBuckets: MonthBucket[] = [
+      mkBucket({ realizedAmount: 600, announcedAmount: 0, projectedAmount: 0 }),
+    ];
+
+    const result = buildAnnualDividends(events, currentYearBuckets, "BRL", undefined, 4, "2026-01-01");
+    const y2022 = result.years.find((y) => y.year === 2022);
+    const y2023 = result.years.find((y) => y.year === 2023);
+
+    expect(y2022?.receivedAmount).toBe(300);
+    expect(y2023?.receivedAmount).toBe(500);
+  });
 });

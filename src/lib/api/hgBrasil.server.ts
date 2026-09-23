@@ -174,17 +174,28 @@ export async function fetchHgBrasilDividends(
  * Enriches a list of existing dividend items (e.g. from Brapi/B3) with confirmed payment dates from HG Brasil.
  * Pure non-destructive enrichment: never overwrites or alters existing valuation data.
  */
-export function enrichDividendPaymentDates<T extends { paymentDate?: string | null; approvedDate?: string | null; amount?: number; paymentDateSource?: "hgBrasil" | "provider" | "estimated" | null }>(
+export function enrichDividendPaymentDates<
+  T extends {
+    paymentDate?: string | null;
+    approvedDate?: string | null;
+    exDate?: string | null;
+    amount?: number;
+    amountPerShare?: number;
+    paymentDateSource?: "hgBrasil" | "provider" | "estimated" | null;
+  }
+>(
   existingDividends: T[],
   hgDividends: HgBrasilDividendItem[],
-): T[] {
+): (T & { paymentDateSource?: "hgBrasil" | "provider" | "estimated" | null })[] {
   if (!hgDividends || hgDividends.length === 0) return existingDividends;
 
-  // Build a fast lookup key based on approvedDate + approximate amount or payment month
+  // Build a fast lookup key based on approvedDate / data com ("YYYY-MM-DD")
   const hgByApproved = new Map<string, string>();
   for (const hg of hgDividends) {
-    if (hg.approvedDate && hg.paymentDate) {
-      hgByApproved.set(hg.approvedDate, hg.paymentDate);
+    const key = normalizeHgDate(hg.approvedDate);
+    const pay = normalizeHgDate(hg.paymentDate);
+    if (key && pay) {
+      hgByApproved.set(key, pay);
     }
   }
 
@@ -197,11 +208,12 @@ export function enrichDividendPaymentDates<T extends { paymentDate?: string | nu
       };
     }
 
-    // Try match by approvedDate ("data com")
-    if (item.approvedDate && hgByApproved.has(item.approvedDate)) {
+    // Try match by exDate or approvedDate ("data com")
+    const itemDate = normalizeHgDate(item.exDate || item.approvedDate);
+    if (itemDate && hgByApproved.has(itemDate)) {
       return {
         ...item,
-        paymentDate: hgByApproved.get(item.approvedDate)!,
+        paymentDate: hgByApproved.get(itemDate)!,
         paymentDateSource: "hgBrasil",
       };
     }

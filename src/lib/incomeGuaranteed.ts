@@ -137,9 +137,11 @@ export function buildAnnualDividends(
   for (let year = startYear; year < currentYear; year++) {
     let total = 0;
     for (const ev of events) {
-      if (!ev.isPaid) continue;
       const day = ev.paymentDate || ev.exDate;
-      if (!day.startsWith(String(year))) continue;
+      if (!day || !day.startsWith(String(year))) continue;
+      // In a past calendar year, any event on or before today is fully realized
+      const isPastPaid = ev.isPaid || day <= todayISO;
+      if (!isPastPaid) continue;
       total += convertCurrency(ev.amountNet, ev.currency, currency, fxRate);
     }
     years.push({ year, receivedAmount: Math.round(total * 100) / 100, projectedAmount: 0, isCurrentYear: false });
@@ -215,9 +217,10 @@ export function buildYearMonthlyDividends(
 
   const totals = new Array(12).fill(0);
   for (const ev of events) {
-    if (!ev.isPaid) continue;
     const day = ev.paymentDate || ev.exDate;
     if (!day || !day.startsWith(String(year))) continue;
+    const isPastPaid = ev.isPaid || day <= todayISO;
+    if (!isPastPaid) continue;
     const monthIdx = Number(day.slice(5, 7)) - 1;
     if (monthIdx < 0 || monthIdx > 11) continue;
     totals[monthIdx] += convertCurrency(ev.amountNet, ev.currency, currency, fxRate);
@@ -264,6 +267,7 @@ export function buildMonthTickerBreakdown(
   const monthPrefix = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
   const rows = new Map<string, MonthTickerRow & { dominantEventAmount: number }>();
 
+  const todayISO = getLocalDateISOString();
   for (const ev of events) {
     const day = ev.paymentDate || ev.exDate;
     if (!day || !day.startsWith(monthPrefix)) continue;
@@ -278,7 +282,8 @@ export function buildMonthTickerBreakdown(
       taxType: ev.taxType,
       dominantEventAmount: 0,
     };
-    if (ev.isPaid) {
+    const isPastPaid = ev.isPaid || day <= todayISO;
+    if (isPastPaid) {
       existing.receivedAmount += ev.amountNet;
     } else {
       existing.announcedAmount += ev.amountNet;
