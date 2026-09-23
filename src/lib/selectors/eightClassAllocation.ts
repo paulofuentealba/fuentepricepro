@@ -175,7 +175,7 @@ export function computeCanonicalClassAllocations(
   return items;
 }
 
-export function classifyPositionToEightClass(pos: ValuedWatchlistItem): EightClassKey {
+export function classifyPositionToEightClass(pos: { type?: string; currency?: string }): EightClassKey {
   if (pos.type === "STOCK_BR") return "acoes_br";
   if (pos.type === "FII") return "fiis";
   if (pos.type === "FIAGRO") return "fiagros";

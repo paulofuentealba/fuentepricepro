@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import type { AssetType, Currency } from "@/lib/domain";
 import { useI18n } from "@/lib/i18n-provider";
 import { FilterPill } from "./FilterPill";
-import { flagFor } from "./utils";
-import { getColorForAsset } from "@/components/shared/chartColors";
 import type { OppFilter, SortOption } from "@/lib/useAssetFilterSort";
+import type { EightClassKey } from "@/lib/selectors/eightClassAllocation";
+import { AssetClassFilterChips } from "@/components/shared/AssetClassFilterChips";
 import {
   Select,
   SelectContent,
@@ -13,46 +12,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export type TypeFilter = { key: string; type: AssetType; currency: Currency };
-
 interface Props {
-  typeFilters: TypeFilter[];
-  counts: { total: number; byType: Map<string, number>; under: number; over: number };
-  typeFilter: string | null;
+  activeClassFilter: EightClassKey | "ALL";
+  onSelectClassFilter: (key: EightClassKey | "ALL") => void;
+  availableClasses: EightClassKey[];
+  classCounts?: Partial<Record<EightClassKey | "ALL", number>> | Record<string, number>;
+  counts: { total: number; under: number; over: number };
   oppFilter: OppFilter;
   sortOption: SortOption;
-  onSetTypeFilter: (key: string | null) => void;
   onSetOppFilter: (opp: OppFilter) => void;
   onSetSortOption: (sort: SortOption) => void;
 }
 
 export function WatchlistFilterBar({
-  typeFilters,
+  activeClassFilter,
+  onSelectClassFilter,
+  availableClasses,
+  classCounts,
   counts,
-  typeFilter,
   oppFilter,
   sortOption,
-  onSetTypeFilter,
   onSetOppFilter,
   onSetSortOption,
 }: Props): ReactNode {
   const { t } = useI18n();
   return (
-    <div className="flex flex-wrap justify-start items-center gap-2 w-full">
-      <div className="flex items-center flex-wrap gap-2">
-        {typeFilter ? (
-          <div className="inline-flex h-8 items-center gap-2 px-3 rounded-full border border-border bg-background text-xs font-medium">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: getColorForAsset(typeFilter) }}
-            />
-            {String(counts?.byType?.get(typeFilter) ?? 0)}
-          </div>
-        ) : (
-          <div className="inline-flex h-8 items-center gap-2 px-3 rounded-full border border-border bg-background text-xs font-medium text-muted-foreground">
-            {t.watchlist.filterAll} {String(counts?.total ?? 0)}
-          </div>
-        )}
+    <div className="flex flex-wrap justify-start items-center gap-3 w-full">
+      <div className="flex items-center flex-wrap gap-2 flex-1 min-w-[280px]">
+        <AssetClassFilterChips
+          activeFilter={activeClassFilter}
+          onSelectFilter={onSelectClassFilter}
+          availableClasses={availableClasses}
+          counts={classCounts}
+        />
       </div>
 
       <div className="shrink-0 w-full lg:w-auto lg:pl-2 lg:ml-auto flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">

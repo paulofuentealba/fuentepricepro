@@ -12,9 +12,12 @@ import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { netAfterTax } from "@/lib/calculations";
+import { useMemo } from "react";
 import { Download } from "lucide-react";
 import { DgiBadge } from "@/components/shared/DgiBadge";
 import { cn } from "@/lib/utils";
+import { AssetClassFilterChips } from "@/components/shared/AssetClassFilterChips";
+import { useAssetClassFilter } from "@/lib/selectors/useAssetClassFilter";
 
 interface PortfolioPositionsTableProps {
   valuedItems: ValuedWatchlistItem[];
@@ -25,10 +28,22 @@ interface PortfolioPositionsTableProps {
 export function PortfolioPositionsTable({ valuedItems, onSelectItem, isLoading }: PortfolioPositionsTableProps) {
   const { locale, t } = useI18n();
 
-  const positions = valuedItems.filter((item) => !item.isClosedPosition);
+  const positions = useMemo(
+    () => valuedItems.filter((item) => !item.isClosedPosition),
+    [valuedItems],
+  );
+
+  const {
+    activeFilter,
+    setActiveFilter,
+    availableClasses,
+    filteredItems: filteredPositions,
+    countsByClass,
+  } = useAssetClassFilter(positions, { onlyExisting: true });
 
   function exportToCsv() {
-    if (positions.length === 0) return;
+    const listToExport = filteredPositions.length > 0 ? filteredPositions : positions;
+    if (listToExport.length === 0) return;
 
     const headers = [
       t.portfolio.columnAsset,
@@ -45,7 +60,7 @@ export function PortfolioPositionsTable({ valuedItems, onSelectItem, isLoading }
       t.portfolio.columnStatus,
     ];
 
-    const rows = positions.map((item) => {
+    const rows = listToExport.map((item) => {
       const livePrice = item.livePrice ?? item.currentPrice ?? 0;
       const avgPrice = item.averagePrice ?? 0;
       const total = livePrice * item.quantity;
@@ -117,6 +132,16 @@ export function PortfolioPositionsTable({ valuedItems, onSelectItem, isLoading }
         )}
       </div>
 
+      {positions.length > 0 && availableClasses.length > 0 && (
+        <AssetClassFilterChips
+          activeFilter={activeFilter}
+          onSelectFilter={setActiveFilter}
+          availableClasses={availableClasses}
+          counts={countsByClass}
+          className="mb-4"
+        />
+      )}
+
       {isLoading ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-10 w-full" />
@@ -125,6 +150,8 @@ export function PortfolioPositionsTable({ valuedItems, onSelectItem, isLoading }
         </div>
       ) : positions.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8 text-center">{t.portfolio.emptyPositions}</p>
+      ) : filteredPositions.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">{t.dashboard?.matrix?.empty || "Nenhum ativo encontrado nessa classe."}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border/60">
           <Table className="min-w-[950px]">
@@ -160,7 +187,7 @@ export function PortfolioPositionsTable({ valuedItems, onSelectItem, isLoading }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {positions.map((item) => {
+              {filteredPositions.map((item) => {
                 const livePrice = item.livePrice ?? item.currentPrice ?? 0;
                 const avgPrice = item.averagePrice ?? 0;
                 const total = livePrice * item.quantity;

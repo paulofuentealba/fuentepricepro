@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { WatchlistFilterBar } from "./watchlist/WatchlistFilterBar";
+import { useAssetClassFilter } from "@/lib/selectors/useAssetClassFilter";
 
 export function DividendRadar() {
   const { t } = useI18n();
@@ -110,18 +111,23 @@ export function DividendRadar() {
     [rawData, market, targetYield, selic, ipcaAvg],
   );
 
+  const {
+    activeFilter: activeClassFilter,
+    setActiveFilter: setActiveClassFilter,
+    availableClasses,
+    filteredItems: classFilteredData,
+    countsByClass,
+  } = useAssetClassFilter(data, { onlyExisting: true });
+
   // Justification: data elements match WatchlistItem fields needed by useAssetFilterSort
   const {
-    typeFilter,
-    setTypeFilter,
     oppFilter,
     setOppFilter,
     sortOption,
     setSortOption,
-    typeFilters,
     counts,
     filteredAndSorted,
-  } = useAssetFilterSort(data as unknown as import("@/lib/watchlist").WatchlistItem[], "yield_desc");
+  } = useAssetFilterSort(classFilteredData as unknown as import("@/lib/watchlist").WatchlistItem[], "yield_desc");
 
   return (
     <div className="space-y-6">
@@ -132,12 +138,13 @@ export function DividendRadar() {
 
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
         <WatchlistFilterBar
-          typeFilters={typeFilters}
+          activeClassFilter={activeClassFilter}
+          onSelectClassFilter={setActiveClassFilter}
+          availableClasses={availableClasses}
+          classCounts={countsByClass}
           counts={counts}
-          typeFilter={typeFilter}
           oppFilter={oppFilter}
           sortOption={sortOption}
-          onSetTypeFilter={setTypeFilter}
           onSetOppFilter={setOppFilter}
           onSetSortOption={setSortOption}
         />

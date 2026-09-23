@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -13,14 +13,14 @@ import { formatCurrency, formatPercent } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import {
   classifyPositionToEightClass,
-  EIGHT_CLASSES_ORDER,
-  US_CLASSES_ORDER,
   type EightClassKey,
 } from "@/lib/selectors/eightClassAllocation";
 import { useMarketScope } from "@/lib/useMarketScope";
 import { computeRecommendedAction, type RecommendedActionKey } from "@/lib/selectors/recommendedAction";
 import { computeTaxRegimeKey } from "@/lib/selectors/taxRegimeLabel";
 import { cn } from "@/lib/utils";
+import { AssetClassFilterChips } from "@/components/shared/AssetClassFilterChips";
+import { useAssetClassFilter } from "@/lib/selectors/useAssetClassFilter";
 
 interface OpportunityMatrixTableProps {
   valuedItems: ValuedWatchlistItem[];
@@ -30,33 +30,24 @@ interface OpportunityMatrixTableProps {
 
 export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker }: OpportunityMatrixTableProps) {
   const { locale, t } = useI18n();
-  const { visibleAllocationClasses, taxJurisdiction } = useMarketScope();
-  const [activeFilter, setActiveFilter] = useState<EightClassKey | "ALL">("ALL");
+  const { taxJurisdiction } = useMarketScope();
 
-  const availableFilterClasses = useMemo(() => {
-    const classes = new Set(visibleAllocationClasses);
-    for (const item of valuedItems) {
-      if (!item.isClosedPosition && (item.quantity ?? 0) > 0) {
-        classes.add(classifyPositionToEightClass(item));
-      }
-    }
-    const preferredOrder =
-      visibleAllocationClasses.length < 8 ? US_CLASSES_ORDER : EIGHT_CLASSES_ORDER;
-    const ordered = preferredOrder.filter((c) => classes.has(c));
-    for (const c of classes) {
-      if (!ordered.includes(c)) ordered.push(c);
-    }
-    return ordered;
-  }, [valuedItems, visibleAllocationClasses]);
+  const {
+    activeFilter,
+    setActiveFilter,
+    availableClasses: availableFilterClasses,
+    filteredItems: classFilteredItems,
+    countsByClass,
+  } = useAssetClassFilter(valuedItems, {
+    filterPredicate: (i) => !i.isClosedPosition && (i.quantity ?? 0) > 0,
+    onlyExisting: false,
+  });
 
   const filteredItems = useMemo(() => {
-    const owned = valuedItems.filter((i) => !i.isClosedPosition && (i.quantity ?? 0) > 0);
-    const items =
-      activeFilter === "ALL"
-        ? owned
-        : owned.filter((i) => classifyPositionToEightClass(i) === activeFilter);
-    return [...items].sort((a, b) => (b.valuation?.margin ?? -Infinity) - (a.valuation?.margin ?? -Infinity));
-  }, [valuedItems, activeFilter]);
+    return [...classFilteredItems].sort(
+      (a, b) => (b.valuation?.margin ?? -Infinity) - (a.valuation?.margin ?? -Infinity),
+    );
+  }, [classFilteredItems]);
 
   const taxRegimeLabel: Record<string, string> = {
     exemptDouble: t.dashboard.taxRegime.exemptDouble,
@@ -118,35 +109,13 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
       </div>
 
       {/* Filter Chips */}
-      <div className="mb-4 flex flex-wrap gap-2 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setActiveFilter("ALL")}
-          className={cn(
-            "rounded-full border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
-            activeFilter === "ALL"
-              ? "border-accent-emerald-light bg-accent-emerald text-primary-foreground dark:bg-[#2A7F5F] dark:border-[#34D399]"
-              : "border-border/80 bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground dark:border-[#1B2F27] dark:bg-[#12211C] dark:text-[#94A3B8]",
-          )}
-        >
-          {t.dashboard.matrix.filterAllDynamic || t.dashboard.matrix.filterAll}
-        </button>
-        {availableFilterClasses.map((clsKey) => (
-          <button
-            key={clsKey}
-            type="button"
-            onClick={() => setActiveFilter(clsKey)}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
-              activeFilter === clsKey
-                ? "border-accent-emerald-light bg-accent-emerald text-primary-foreground dark:bg-[#2A7F5F] dark:border-[#34D399]"
-                : "border-border/80 bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground dark:border-[#1B2F27] dark:bg-[#12211C] dark:text-[#94A3B8]",
-            )}
-          >
-            {t.dashboard.allocation.classes?.[clsKey] ?? clsKey}
-          </button>
-        ))}
-      </div>
+      <AssetClassFilterChips
+        activeFilter={activeFilter}
+        onSelectFilter={setActiveFilter}
+        availableClasses={availableFilterClasses}
+        counts={countsByClass}
+        className="mb-4"
+      />
 
       {isLoading ? (
         <div className="flex flex-col gap-2">

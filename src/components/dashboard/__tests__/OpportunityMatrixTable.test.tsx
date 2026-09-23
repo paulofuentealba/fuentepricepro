@@ -1,11 +1,15 @@
 // @vitest-environment jsdom
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
-import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
 import { OpportunityMatrixTable } from "../OpportunityMatrixTable";
 import { dict } from "@/lib/i18n";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
+
+afterEach(() => {
+  cleanup();
+});
 
 vi.mock("@/lib/i18n-provider", () => ({
   useI18n: () => ({ locale: "ptBR", setLocale: () => {}, t: dict.ptBR }),
@@ -123,5 +127,40 @@ describe("OpportunityMatrixTable", () => {
     // Closed assets are NOT displayed
     expect(screen.queryByText("CPTR11")).toBeNull();
     expect(screen.queryByText("GRND3")).toBeNull();
+  });
+
+  it("filters items when a specific class chip is clicked", () => {
+    const stockAsset = createMockItem({
+      id: "active-stock",
+      ticker: "PETR4",
+      name: "Petrobras",
+      type: "STOCK_BR",
+      quantity: 100,
+    });
+    const fiiAsset = createMockItem({
+      id: "active-fii",
+      ticker: "HGLG11",
+      name: "CSHG Logística",
+      type: "FII",
+      quantity: 50,
+    });
+
+    render(
+      <OpportunityMatrixTable
+        valuedItems={[stockAsset, fiiAsset]}
+        isLoading={false}
+      />,
+    );
+
+    // Both visible initially
+    expect(screen.getAllByText("PETR4").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("HGLG11").length).toBeGreaterThan(0);
+
+    // Click on FIIs chip
+    fireEvent.click(screen.getByRole("button", { name: /FIIs/ }));
+
+    // Now HGLG11 is visible and PETR4 is filtered out
+    expect(screen.getAllByText("HGLG11").length).toBeGreaterThan(0);
+    expect(screen.queryByText("PETR4")).toBeNull();
   });
 });
