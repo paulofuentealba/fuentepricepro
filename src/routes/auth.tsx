@@ -25,6 +25,7 @@ import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { setSessionCookie } from "@/lib/sessionCookie";
+import { endDemoMode } from "@/lib/demoMode";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { mode?: "signin" | "signup"; returnTo?: string } => ({
@@ -107,11 +108,13 @@ function AuthPage() {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       if (mode === "signup") {
         const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        endDemoMode();
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);
         navigate({ to: "/profile", search: { returnTo } });
       } else {
         const userCred = await signInWithEmailAndPassword(auth, email, password);
+        endDemoMode();
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);
         toast.success(t.authModal.welcomeBack);
@@ -131,6 +134,7 @@ function AuthPage() {
       provider.addScope("profile");
       provider.addScope("email");
       const userCred = await signInWithPopup(auth, provider);
+      endDemoMode();
       try {
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);

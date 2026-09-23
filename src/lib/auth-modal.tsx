@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Loader2, Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
@@ -30,7 +31,9 @@ import {
 } from "firebase/auth";
 import { auth } from "@/integrations/firebase/client";
 import { useAuth } from "@/lib/auth-provider";
+import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { setSessionCookie } from "@/lib/sessionCookie";
+import { endDemoMode } from "@/lib/demoMode";
 
 type PendingAction = (() => void | Promise<void>) | null;
 
@@ -49,6 +52,8 @@ export function useAuthModal() {
 
 export function AuthModalProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { profile, isPending: profilePending } = useInvestorProfile();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [mode, setMode] = useState<"choose" | "email" | "terms" | "privacy">("choose");
@@ -59,6 +64,12 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const pendingRef = useRef<PendingAction>(null);
+  // Distinguishes "a sign-in just happened via this modal" from "user is (still) authenticated
+  // and this effect re-ran for an unrelated reason" (e.g. a profile refetch while the person is
+  // browsing normally elsewhere in the app). Without this guard, the fallback navigation below
+  // would force-redirect an already-logged-in user away from whatever page they're on every time
+  // the effect's dependencies change — not just right after a fresh login.
+  const justSignedInRef = useRef(false);
 
   const openAuthModal = useCallback<AuthModalCtx["openAuthModal"]>((opts) => {
     setMessage(opts?.message ?? null);
@@ -72,9 +83,17 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
 
   const closeAuthModal = useCallback(() => setOpen(false), []);
 
-  // Run pending action once user becomes authenticated, then close modal.
+  // Run the pending action once the user becomes authenticated, then close the modal. If nobody
+  // passed an onSuccess callback when opening the modal (the common case — a bare "Login" button
+  // on the landing page, not a specific gated action), fall back to the same post-login
+  // destination logic the dedicated /auth route already uses: completed/skipped onboarding goes
+  // to /app, otherwise to /profile. Previously there was no fallback at all, so a login via this
+  // modal (Google or email) left the person exactly where they clicked "Login" — typically the
+  // landing page — with no redirect whatsoever. Gated on justSignedInRef so this never fires for
+  // an already-authenticated user just browsing the app.
   useEffect(() => {
-    if (!user) return;
+    if (!user || !justSignedInRef.current || profilePending) return;
+    justSignedInRef.current = false;
     const action = pendingRef.current;
     pendingRef.current = null;
     if (open) setOpen(false);
@@ -82,8 +101,12 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
       Promise.resolve(action()).catch((e) => {
         console.error("[auth-modal] pending action failed", e);
       });
+    } else if (profile.completedAt || profile.skipped) {
+      navigate({ to: "/app" });
+    } else {
+      navigate({ to: "/profile", search: { returnTo: "/app" } });
     }
-  }, [user, open]);
+  }, [user, open, profilePending, profile, navigate]);
 
   async function handleOAuth(providerName: "google") {
     if (!termsAccepted) {
@@ -96,6 +119,8 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
       provider.addScope("profile");
       provider.addScope("email");
       const userCred = await signInWithPopup(auth, provider);
+      endDemoMode();
+      justSignedInRef.current = true;
       try {
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);
@@ -122,11 +147,15 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
     try {
       if (emailMode === "signup") {
         const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        endDemoMode();
+        justSignedInRef.current = true;
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);
         toast.success(t.authModal.successSignup);
       } else {
         const userCred = await signInWithEmailAndPassword(auth, email, password);
+        endDemoMode();
+        justSignedInRef.current = true;
         const token = await userCred.user.getIdToken();
         setSessionCookie(token);
         toast.success(t.authModal.successLogin);

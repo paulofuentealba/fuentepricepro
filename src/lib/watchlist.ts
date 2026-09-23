@@ -20,7 +20,7 @@ import type { AccountType } from "./transactionsLogic";
 import { assetQueryOptions } from "./queryOptions";
 import { cleanTicker } from "./formatters";
 import { WATCHLIST_STORAGE_KEY } from "./localStorageKeys";
-import { blockWriteInDemoMode } from "./demoMode";
+import { blockWriteInDemoMode, isDemoModeActive, isDemoStorage, isDemoWatchlist, endDemoMode } from "./demoMode";
 import { DEV_MOCK_DATA } from "@/__fixtures__/devMockData";
 
 const STORAGE_KEY = WATCHLIST_STORAGE_KEY;
@@ -318,21 +318,35 @@ export function useWatchlist() {
       const hasOnboarded = window.localStorage.getItem(ONBOARDED_KEY) === "true";
 
       if (userId && !USE_LOCAL_ONLY) {
-        // Migrate local items on first cloud load
-        const local = readLocal();
-        if (local.length > 0) {
-          try {
-            const batch = writeBatch(db);
-            const rows = local.map((i) => itemToRow(i, userId));
-            rows.forEach((r) => {
-              const ref = doc(db, "users", userId, "assets", `${r.type}_${r.ticker}`);
-              batch.set(ref, r, { merge: true });
-            });
-            await batch.commit();
-            clearLocal();
-            window.localStorage.setItem(ONBOARDED_KEY, "true");
-          } catch (e) {
-            console.error("[watchlist] migration error", e);
+        // Guard: NEVER migrate demo data to Firestore!
+        const isDemo = isDemoModeActive() || isDemoStorage();
+        if (isDemo) {
+          console.warn("[watchlist] Demo mode detected during cloud load — discarding local demo items without migrating to Firestore");
+          clearLocal();
+          endDemoMode();
+        } else {
+          // Migrate genuine local items on first cloud load
+          const local = readLocal();
+          if (local.length > 0) {
+            if (isDemoWatchlist(local)) {
+              console.warn("[watchlist] Demo watchlist payload detected — discarding without migrating to Firestore");
+              clearLocal();
+              endDemoMode();
+            } else {
+              try {
+                const batch = writeBatch(db);
+                const rows = local.map((i) => itemToRow(i, userId));
+                rows.forEach((r) => {
+                  const ref = doc(db, "users", userId, "assets", `${r.type}_${r.ticker}`);
+                  batch.set(ref, r, { merge: true });
+                });
+                await batch.commit();
+                clearLocal();
+                window.localStorage.setItem(ONBOARDED_KEY, "true");
+              } catch (e) {
+                console.error("[watchlist] migration error", e);
+              }
+            }
           }
         }
 

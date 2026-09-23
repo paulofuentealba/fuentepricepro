@@ -1,4 +1,4 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { isDemoModeActive, startDemoMode, endDemoMode, blockWriteInDemoMode } from "../demoMode";
 import { WATCHLIST_STORAGE_KEY, TRANSACTIONS_STORAGE_KEY } from "../localStorageKeys";
@@ -69,5 +69,35 @@ describe("demoMode safety guards", () => {
     expect(isBlocked).toBe(false);
 
     expect(window.localStorage.getItem(TRANSACTIONS_STORAGE_KEY)).not.toBeNull();
+  });
+
+  it("isDemoTransactions accurately identifies synthetic demo transactions vs user transactions", async () => {
+    const { isDemoTransactions } = await import("../demoMode");
+    const demoPayload = [{ id: "bbas3-1", ticker: "BBAS3", quantity: 300 }];
+    const realPayload = [{ id: "c18a2872-520e-4363-888e-73c38f4d96a1", ticker: "BBAS3", quantity: 300 }];
+
+    expect(isDemoTransactions(demoPayload)).toBe(true);
+    expect(isDemoTransactions(realPayload)).toBe(false);
+  });
+
+  it("isDemoWatchlist accurately identifies demo watchlist items", async () => {
+    const { isDemoWatchlist } = await import("../demoMode");
+    const testIpo = [{ id: "custom-1", ticker: "TEST_IPO_RECENTE" }];
+    const realUserWatchlist = [{ id: "stock:ITSA4", ticker: "ITSA4" }, { id: "stock:BBDC4", ticker: "BBDC4" }];
+
+    expect(isDemoWatchlist(testIpo)).toBe(true);
+    expect(isDemoWatchlist(realUserWatchlist)).toBe(false);
+  });
+
+  it("isDemoStorage detects demo mode even if flags are cleared but payload is demo", async () => {
+    const { isDemoStorage } = await import("../demoMode");
+    window.localStorage.setItem(
+      TRANSACTIONS_STORAGE_KEY,
+      JSON.stringify([{ id: "bbas3-1", ticker: "BBAS3", quantity: 300 }]),
+    );
+
+    expect(isDemoStorage()).toBe(true);
+    endDemoMode();
+    expect(window.localStorage.getItem(TRANSACTIONS_STORAGE_KEY)).toBeNull();
   });
 });

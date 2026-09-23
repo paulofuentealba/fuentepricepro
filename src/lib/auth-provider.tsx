@@ -24,9 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // so the server can verify a real session on a hard navigation/reload
     // — see verifySession.functions.ts for why this cookie exists at all.
     const unsubscribe = onIdTokenChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // ALWAYS purge demo mode synchronously BEFORE setting user and triggering queries!
+        endDemoMode();
+      }
       setUser(currentUser);
       if (currentUser) {
-        endDemoMode();
         try {
           const tokenResult = await currentUser.getIdTokenResult();
           setIsAdmin(tokenResult.claims?.isAdmin === true);

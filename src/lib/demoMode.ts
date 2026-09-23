@@ -75,13 +75,71 @@ export function syncDemoModeVersion(): void {
   } catch {}
 }
 
+const DEMO_TX_ID_PREFIXES = [
+  "bbas3-", "vale3-", "itub4-", "egie3-", "kncr11-", "mxrf11-", "cpts11-",
+  "hglg11-", "bdif11-", "ifra11-", "juro11-", "rura11-", "snag11-", "ivvb11-",
+  "o-", "stag-", "msft-", "jnj-", "mpw-", "vym-", "test-ipo-", "aapl-",
+  "ko-", "schd-", "qqq-"
+];
+
+/**
+ * Checks if a watchlist payload matches the curated demo portfolio dataset.
+ * Prevents accidental cloud migration even if flags were prematurely cleared.
+ */
+export function isDemoWatchlist(items: any[]): boolean {
+  if (!Array.isArray(items) || items.length === 0) return false;
+  if (items.some((i) => i?.ticker === "TEST_IPO_RECENTE")) return true;
+  const demoTickers = new Set(DEMO_WATCHLIST_DATA.map((d) => d.ticker));
+  if (items.length >= 10) {
+    const matches = items.filter((i) => demoTickers.has(i?.ticker)).length;
+    if (matches / items.length >= 0.75) return true;
+  }
+  return false;
+}
+
+/**
+ * Checks if a transactions payload contains synthetic demo transaction IDs.
+ * Demo transactions use deterministic IDs like 'bbas3-1', 'vale3-1', 'mxrf11-1'.
+ */
+export function isDemoTransactions(transactions: any[]): boolean {
+  if (!Array.isArray(transactions) || transactions.length === 0) return false;
+  return transactions.some((t) =>
+    typeof t?.id === "string" &&
+    DEMO_TX_ID_PREFIXES.some((prefix) => t.id.startsWith(prefix))
+  );
+}
+
+/**
+ * Inspects localStorage to determine if demo state or demo data is currently stored.
+ */
+export function isDemoStorage(): boolean {
+  if (typeof window === "undefined" || !window.localStorage) return false;
+  try {
+    if (window.localStorage.getItem(DEMO_MODE_KEY) === "true") return true;
+    if (window.localStorage.getItem(DEMO_VERSION_KEY) === "true") return true;
+    const rawWatchlist = window.localStorage.getItem(WATCHLIST_STORAGE_KEY);
+    if (rawWatchlist) {
+      const parsed = JSON.parse(rawWatchlist);
+      if (isDemoWatchlist(parsed)) return true;
+    }
+    const rawTxs = window.localStorage.getItem(TRANSACTIONS_STORAGE_KEY);
+    if (rawTxs) {
+      const parsed = JSON.parse(rawTxs);
+      if (isDemoTransactions(parsed)) return true;
+    }
+  } catch {}
+  return false;
+}
+
 /** Clears demo data and the demo flag — called once the visitor authenticates for real. */
 export function endDemoMode(): void {
   if (typeof window === "undefined" || !window.localStorage) return;
-  const wasDemoActive =
-    window.localStorage.getItem(DEMO_MODE_KEY) === "true" ||
-    window.localStorage.getItem(DEMO_VERSION_KEY) === "true";
   try {
+    const wasDemoActive =
+      window.localStorage.getItem(DEMO_MODE_KEY) === "true" ||
+      window.localStorage.getItem(DEMO_VERSION_KEY) === "true" ||
+      isDemoStorage();
+
     if (wasDemoActive) {
       window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
       window.localStorage.removeItem(TRANSACTIONS_STORAGE_KEY);

@@ -17,7 +17,7 @@ import { useI18n } from "./i18n-provider";
 import { type Transaction } from "./transactionsLogic";
 export * from "./transactionsLogic";
 import { TRANSACTIONS_STORAGE_KEY } from "./localStorageKeys";
-import { blockWriteInDemoMode } from "./demoMode";
+import { blockWriteInDemoMode, isDemoModeActive, isDemoStorage, isDemoTransactions, endDemoMode } from "./demoMode";
 
 const STORAGE_KEY = TRANSACTIONS_STORAGE_KEY;
 const USE_LOCAL_ONLY = import.meta.env.DEV; // Local-only só no dev server (npm run dev); build de produção sempre usa Firestore automaticamente, sem depender de lembrar de trocar antes do commit
@@ -122,20 +122,32 @@ export function useTransactions() {
         return readLocal();
       }
 
-      // Migrate local transactions to Firestore on first cloud load for this user
-      // (mirrors the same pattern already used in watchlist.ts)
-      const local = readLocal();
-      if (local.length > 0) {
-        try {
-          const batch = writeBatch(db);
-          local.forEach((item) => {
-            const ref = doc(db, "users", user.uid, "transactions", item.id);
-            batch.set(ref, itemToRow(item, user.uid), { merge: true });
-          });
-          await batch.commit();
-          clearLocal();
-        } catch (e) {
-          console.error("[transactions] migration error", e);
+      // Guard: NEVER migrate demo transactions to Firestore!
+      const isDemo = isDemoModeActive() || isDemoStorage();
+      if (isDemo) {
+        console.warn("[transactions] Demo mode detected during cloud load — discarding local demo transactions without migrating to Firestore");
+        clearLocal();
+        endDemoMode();
+      } else {
+        const local = readLocal();
+        if (local.length > 0) {
+          if (isDemoTransactions(local)) {
+            console.warn("[transactions] Demo transactions payload detected — discarding without migrating to Firestore");
+            clearLocal();
+            endDemoMode();
+          } else {
+            try {
+              const batch = writeBatch(db);
+              local.forEach((item) => {
+                const ref = doc(db, "users", user.uid, "transactions", item.id);
+                batch.set(ref, itemToRow(item, user.uid), { merge: true });
+              });
+              await batch.commit();
+              clearLocal();
+            } catch (e) {
+              console.error("[transactions] migration error", e);
+            }
+          }
         }
       }
 
