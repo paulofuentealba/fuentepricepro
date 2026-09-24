@@ -4,27 +4,64 @@ import { Button } from "@/components/ui/button";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { legalContent, LEGAL_LAST_UPDATED } from "@/lib/legal-content";
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/privacy`;
-const PAGE_TITLE = "Privacy Policy — Fuente Price Pro";
-const PAGE_DESCRIPTION =
-  "How Fuente Price Pro collects, uses, and protects your personal data, in compliance with LGPD and GDPR.";
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
+
+function isValidLocale(v: unknown): v is Locale {
+  return v === "en" || v === "ptBR" || v === "es";
+}
+
+const HREFLANG: Record<Locale, string> = { ptBR: "pt-BR", en: "en", es: "es" };
+const ALL_LOCALES: Locale[] = ["ptBR", "en", "es"];
+
+function urlFor(locale: Locale): string {
+  return locale === "ptBR" ? PAGE_URL : `${PAGE_URL}?lang=${locale}`;
+}
+
+const DESCRIPTION: Record<Locale, string> = {
+  ptBR: "Política de Privacidade do Fuente Price Pro — como tratamos seus dados pessoais, conforme a LGPD.",
+  en: "How Fuente Price Pro collects, uses, and protects your personal data, in compliance with LGPD and GDPR.",
+  es: "Cómo Fuente Price Pro recopila, usa y protege tus datos personales, conforme a la LGPD y el RGPD.",
+};
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: PAGE_TITLE },
-      { name: "description", content: PAGE_DESCRIPTION },
-      { property: "og:title", content: PAGE_TITLE },
-      { property: "og:description", content: PAGE_DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: PAGE_URL },
-    ],
-    links: [{ rel: "canonical", href: PAGE_URL }],
+  validateSearch: (search: Record<string, unknown>): { lang?: Locale } => ({
+    lang: isValidLocale(search.lang) ? search.lang : undefined,
   }),
+  loaderDeps: ({ search }) => ({ lang: search.lang }),
+  loader: ({ deps }) => ({ locale: (deps.lang ?? "ptBR") as Locale }),
+  head: ({ loaderData }) => {
+    const locale = loaderData?.locale ?? "ptBR";
+    const title = `${legalContent[locale].privacy.title} — Fuente Price Pro`;
+    const description = DESCRIPTION[locale];
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: urlFor(locale) },
+        { property: "og:image", content: OG_IMAGE },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [
+        { rel: "canonical", href: urlFor(locale) },
+        ...ALL_LOCALES.map((l) => ({ rel: "alternate", hrefLang: HREFLANG[l], href: urlFor(l) })),
+        { rel: "alternate", hrefLang: "x-default", href: PAGE_URL },
+      ],
+    };
+  },
   component: PrivacyPage,
   errorComponent: RouteErrorComponent,
   notFoundComponent: RouteNotFoundComponent,

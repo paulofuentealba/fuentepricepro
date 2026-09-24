@@ -4,27 +4,64 @@ import { Button } from "@/components/ui/button";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { legalContent, LEGAL_LAST_UPDATED } from "@/lib/legal-content";
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/subscription-terms`;
-const PAGE_TITLE = "Subscription Terms — Fuente Price Pro";
-const PAGE_DESCRIPTION =
-  "The terms governing your subscription to the Fuente Price Pro paid plan.";
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
+
+function isValidLocale(v: unknown): v is Locale {
+  return v === "en" || v === "ptBR" || v === "es";
+}
+
+const HREFLANG: Record<Locale, string> = { ptBR: "pt-BR", en: "en", es: "es" };
+const ALL_LOCALES: Locale[] = ["ptBR", "en", "es"];
+
+function urlFor(locale: Locale): string {
+  return locale === "ptBR" ? PAGE_URL : `${PAGE_URL}?lang=${locale}`;
+}
+
+const DESCRIPTION: Record<Locale, string> = {
+  ptBR: "Termos de Assinatura do Fuente Price Pro — planos, cobrança e cancelamento.",
+  en: "The terms governing your subscription to the Fuente Price Pro paid plan.",
+  es: "Términos de Suscripción de Fuente Price Pro — planes, facturación y cancelación.",
+};
 
 export const Route = createFileRoute("/subscription-terms")({
-  head: () => ({
-    meta: [
-      { title: PAGE_TITLE },
-      { name: "description", content: PAGE_DESCRIPTION },
-      { property: "og:title", content: PAGE_TITLE },
-      { property: "og:description", content: PAGE_DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: PAGE_URL },
-    ],
-    links: [{ rel: "canonical", href: PAGE_URL }],
+  validateSearch: (search: Record<string, unknown>): { lang?: Locale } => ({
+    lang: isValidLocale(search.lang) ? search.lang : undefined,
   }),
+  loaderDeps: ({ search }) => ({ lang: search.lang }),
+  loader: ({ deps }) => ({ locale: (deps.lang ?? "ptBR") as Locale }),
+  head: ({ loaderData }) => {
+    const locale = loaderData?.locale ?? "ptBR";
+    const title = `${legalContent[locale].subscriptionTerms.title} — Fuente Price Pro`;
+    const description = DESCRIPTION[locale];
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: urlFor(locale) },
+        { property: "og:image", content: OG_IMAGE },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [
+        { rel: "canonical", href: urlFor(locale) },
+        ...ALL_LOCALES.map((l) => ({ rel: "alternate", hrefLang: HREFLANG[l], href: urlFor(l) })),
+        { rel: "alternate", hrefLang: "x-default", href: PAGE_URL },
+      ],
+    };
+  },
   component: SubscriptionTermsPage,
   errorComponent: RouteErrorComponent,
   notFoundComponent: RouteNotFoundComponent,

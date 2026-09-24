@@ -4,27 +4,67 @@ import { Button } from "@/components/ui/button";
 import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteBoundaries";
 import { useI18n } from "@/lib/i18n-provider";
 import { toIntlLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/ceiling/LanguageSwitcher";
 import { legalContent, LEGAL_LAST_UPDATED } from "@/lib/legal-content";
 
 const SITE_URL = "https://fuentepricepro.com";
 const PAGE_URL = `${SITE_URL}/terms`;
-const PAGE_TITLE = "Terms of Use — Fuente Price Pro";
-const PAGE_DESCRIPTION =
-  "The terms governing your use of Fuente Price Pro — read before you invest based on anything the platform shows you.";
+const OG_IMAGE =
+  "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
+
+function isValidLocale(v: unknown): v is Locale {
+  return v === "en" || v === "ptBR" || v === "es";
+}
+
+const HREFLANG: Record<Locale, string> = { ptBR: "pt-BR", en: "en", es: "es" };
+const ALL_LOCALES: Locale[] = ["ptBR", "en", "es"];
+
+function urlFor(locale: Locale): string {
+  return locale === "ptBR" ? PAGE_URL : `${PAGE_URL}?lang=${locale}`;
+}
+
+// Short SEO description per locale — the full legal text already lives in legalContent (the
+// canonical source, see legal-content.ts header comment); this is only the meta description
+// shown in search results, not legal substance, so it doesn't need Paulo's legal-review gate.
+const DESCRIPTION: Record<Locale, string> = {
+  ptBR: "Termos de Uso do Fuente Price Pro — leia antes de usar a ferramenta para decisões de investimento.",
+  en: "Terms of Use for Fuente Price Pro — read before using the tool for investment decisions.",
+  es: "Términos de Uso de Fuente Price Pro — lee antes de usar la herramienta para decisiones de inversión.",
+};
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: PAGE_TITLE },
-      { name: "description", content: PAGE_DESCRIPTION },
-      { property: "og:title", content: PAGE_TITLE },
-      { property: "og:description", content: PAGE_DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: PAGE_URL },
-    ],
-    links: [{ rel: "canonical", href: PAGE_URL }],
+  validateSearch: (search: Record<string, unknown>): { lang?: Locale } => ({
+    lang: isValidLocale(search.lang) ? search.lang : undefined,
   }),
+  loaderDeps: ({ search }) => ({ lang: search.lang }),
+  loader: ({ deps }) => ({ locale: (deps.lang ?? "ptBR") as Locale }),
+  head: ({ loaderData }) => {
+    const locale = loaderData?.locale ?? "ptBR";
+    const title = `${legalContent[locale].terms.title} — Fuente Price Pro`;
+    const description = DESCRIPTION[locale];
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: urlFor(locale) },
+        { property: "og:image", content: OG_IMAGE },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [
+        { rel: "canonical", href: urlFor(locale) },
+        ...ALL_LOCALES.map((l) => ({ rel: "alternate", hrefLang: HREFLANG[l], href: urlFor(l) })),
+        { rel: "alternate", hrefLang: "x-default", href: PAGE_URL },
+      ],
+    };
+  },
   component: TermsPage,
   errorComponent: RouteErrorComponent,
   notFoundComponent: RouteNotFoundComponent,

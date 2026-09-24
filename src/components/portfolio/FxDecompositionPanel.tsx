@@ -80,14 +80,14 @@ export function FxDecompositionPanel({
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-          </div>
-          <Skeleton className="h-40 w-full rounded-xl" />
-        </div>
+        // Deliberately small/low-commitment while loading — we can't know yet whether this
+        // panel will end up rendering (it hides itself once loaded if the portfolio has no US
+        // holdings), so reserving the full final layout's height here would mean collapsing a
+        // large skeleton to nothing for every non-US-holding user. A slim single-line skeleton
+        // still gives loading feedback but keeps that unavoidable collapse small instead of the
+        // ~760px jump measured via Lighthouse (CLS 0.258 on /app/myportfolio, almost entirely
+        // attributable to this element).
+        <Skeleton className="h-6 w-48" />
       ) : (
         <>
           {/* FX Summary 3 Cards */}

@@ -28,15 +28,25 @@ import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as OnboardingPersonalInfoRouteImport } from './routes/onboarding.personal-info'
 import { Route as OnboardingMetasRouteImport } from './routes/onboarding.metas'
+import { Route as GuidesWithdrawRouteImport } from './routes/guides.withdraw'
+import { Route as GuidesTaxUsaRouteImport } from './routes/guides.tax-usa'
+import { Route as GuidesTaxBrazilRouteImport } from './routes/guides.tax-brazil'
+import { Route as GuidesSnowballRouteImport } from './routes/guides.snowball'
 import { Route as GuidesRiskRadarRouteImport } from './routes/guides.risk-radar'
+import { Route as GuidesReinvestirRouteImport } from './routes/guides.reinvestir'
+import { Route as GuidesPeterLynchRouteImport } from './routes/guides.peter-lynch'
 import { Route as GuidesMetricsRouteImport } from './routes/guides.metrics'
 import { Route as GuidesGrahamRouteImport } from './routes/guides.graham'
 import { Route as GuidesGordonRouteImport } from './routes/guides.gordon'
 import { Route as GuidesGlossaryRouteImport } from './routes/guides.glossary'
+import { Route as GuidesFiInfraRouteImport } from './routes/guides.fi-infra'
 import { Route as GuidesDividendValuationRouteImport } from './routes/guides.dividend-valuation'
+import { Route as GuidesCurrencyDecompositionRouteImport } from './routes/guides.currency-decomposition'
+import { Route as GuidesContributionPlanRouteImport } from './routes/guides.contribution-plan'
 import { Route as GuidesConceptsRouteImport } from './routes/guides.concepts'
 import { Route as GuidesBrokersRouteImport } from './routes/guides.brokers'
 import { Route as GuidesBazinRouteImport } from './routes/guides.bazin'
+import { Route as GuidesAppDirectoryRouteImport } from './routes/guides.app-directory'
 import { Route as AppWithdrawRouteImport } from './routes/app/withdraw'
 import { Route as AppTaxRouteImport } from './routes/app/tax'
 import { Route as AppSnowballeffectsimulatorRouteImport } from './routes/app/snowballeffectsimulator'
@@ -151,9 +161,39 @@ const OnboardingMetasRoute = OnboardingMetasRouteImport.update({
   path: '/metas',
   getParentRoute: () => OnboardingRoute,
 } as any)
+const GuidesWithdrawRoute = GuidesWithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesTaxUsaRoute = GuidesTaxUsaRouteImport.update({
+  id: '/tax-usa',
+  path: '/tax-usa',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesTaxBrazilRoute = GuidesTaxBrazilRouteImport.update({
+  id: '/tax-brazil',
+  path: '/tax-brazil',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesSnowballRoute = GuidesSnowballRouteImport.update({
+  id: '/snowball',
+  path: '/snowball',
+  getParentRoute: () => GuidesRoute,
+} as any)
 const GuidesRiskRadarRoute = GuidesRiskRadarRouteImport.update({
   id: '/risk-radar',
   path: '/risk-radar',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesReinvestirRoute = GuidesReinvestirRouteImport.update({
+  id: '/reinvestir',
+  path: '/reinvestir',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesPeterLynchRoute = GuidesPeterLynchRouteImport.update({
+  id: '/peter-lynch',
+  path: '/peter-lynch',
   getParentRoute: () => GuidesRoute,
 } as any)
 const GuidesMetricsRoute = GuidesMetricsRouteImport.update({
@@ -176,9 +216,25 @@ const GuidesGlossaryRoute = GuidesGlossaryRouteImport.update({
   path: '/glossary',
   getParentRoute: () => GuidesRoute,
 } as any)
+const GuidesFiInfraRoute = GuidesFiInfraRouteImport.update({
+  id: '/fi-infra',
+  path: '/fi-infra',
+  getParentRoute: () => GuidesRoute,
+} as any)
 const GuidesDividendValuationRoute = GuidesDividendValuationRouteImport.update({
   id: '/dividend-valuation',
   path: '/dividend-valuation',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesCurrencyDecompositionRoute =
+  GuidesCurrencyDecompositionRouteImport.update({
+    id: '/currency-decomposition',
+    path: '/currency-decomposition',
+    getParentRoute: () => GuidesRoute,
+  } as any)
+const GuidesContributionPlanRoute = GuidesContributionPlanRouteImport.update({
+  id: '/contribution-plan',
+  path: '/contribution-plan',
   getParentRoute: () => GuidesRoute,
 } as any)
 const GuidesConceptsRoute = GuidesConceptsRouteImport.update({
@@ -194,6 +250,11 @@ const GuidesBrokersRoute = GuidesBrokersRouteImport.update({
 const GuidesBazinRoute = GuidesBazinRouteImport.update({
   id: '/bazin',
   path: '/bazin',
+  getParentRoute: () => GuidesRoute,
+} as any)
+const GuidesAppDirectoryRoute = GuidesAppDirectoryRouteImport.update({
+  id: '/app-directory',
+  path: '/app-directory',
   getParentRoute: () => GuidesRoute,
 } as any)
 const AppWithdrawRoute = AppWithdrawRouteImport.update({
@@ -322,15 +383,25 @@ export interface FileRoutesByFullPath {
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/app/tax': typeof AppTaxRoute
   '/app/withdraw': typeof AppWithdrawRoute
+  '/guides/app-directory': typeof GuidesAppDirectoryRoute
   '/guides/bazin': typeof GuidesBazinRoute
   '/guides/brokers': typeof GuidesBrokersRoute
   '/guides/concepts': typeof GuidesConceptsRoute
+  '/guides/contribution-plan': typeof GuidesContributionPlanRoute
+  '/guides/currency-decomposition': typeof GuidesCurrencyDecompositionRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/guides/fi-infra': typeof GuidesFiInfraRoute
   '/guides/glossary': typeof GuidesGlossaryRoute
   '/guides/gordon': typeof GuidesGordonRoute
   '/guides/graham': typeof GuidesGrahamRoute
   '/guides/metrics': typeof GuidesMetricsRoute
+  '/guides/peter-lynch': typeof GuidesPeterLynchRoute
+  '/guides/reinvestir': typeof GuidesReinvestirRoute
   '/guides/risk-radar': typeof GuidesRiskRadarRoute
+  '/guides/snowball': typeof GuidesSnowballRoute
+  '/guides/tax-brazil': typeof GuidesTaxBrazilRoute
+  '/guides/tax-usa': typeof GuidesTaxUsaRoute
+  '/guides/withdraw': typeof GuidesWithdrawRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app/': typeof AppIndexRoute
@@ -368,15 +439,25 @@ export interface FileRoutesByTo {
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/app/tax': typeof AppTaxRoute
   '/app/withdraw': typeof AppWithdrawRoute
+  '/guides/app-directory': typeof GuidesAppDirectoryRoute
   '/guides/bazin': typeof GuidesBazinRoute
   '/guides/brokers': typeof GuidesBrokersRoute
   '/guides/concepts': typeof GuidesConceptsRoute
+  '/guides/contribution-plan': typeof GuidesContributionPlanRoute
+  '/guides/currency-decomposition': typeof GuidesCurrencyDecompositionRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/guides/fi-infra': typeof GuidesFiInfraRoute
   '/guides/glossary': typeof GuidesGlossaryRoute
   '/guides/gordon': typeof GuidesGordonRoute
   '/guides/graham': typeof GuidesGrahamRoute
   '/guides/metrics': typeof GuidesMetricsRoute
+  '/guides/peter-lynch': typeof GuidesPeterLynchRoute
+  '/guides/reinvestir': typeof GuidesReinvestirRoute
   '/guides/risk-radar': typeof GuidesRiskRadarRoute
+  '/guides/snowball': typeof GuidesSnowballRoute
+  '/guides/tax-brazil': typeof GuidesTaxBrazilRoute
+  '/guides/tax-usa': typeof GuidesTaxUsaRoute
+  '/guides/withdraw': typeof GuidesWithdrawRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app': typeof AppIndexRoute
@@ -417,15 +498,25 @@ export interface FileRoutesById {
   '/app/snowballeffectsimulator': typeof AppSnowballeffectsimulatorRoute
   '/app/tax': typeof AppTaxRoute
   '/app/withdraw': typeof AppWithdrawRoute
+  '/guides/app-directory': typeof GuidesAppDirectoryRoute
   '/guides/bazin': typeof GuidesBazinRoute
   '/guides/brokers': typeof GuidesBrokersRoute
   '/guides/concepts': typeof GuidesConceptsRoute
+  '/guides/contribution-plan': typeof GuidesContributionPlanRoute
+  '/guides/currency-decomposition': typeof GuidesCurrencyDecompositionRoute
   '/guides/dividend-valuation': typeof GuidesDividendValuationRoute
+  '/guides/fi-infra': typeof GuidesFiInfraRoute
   '/guides/glossary': typeof GuidesGlossaryRoute
   '/guides/gordon': typeof GuidesGordonRoute
   '/guides/graham': typeof GuidesGrahamRoute
   '/guides/metrics': typeof GuidesMetricsRoute
+  '/guides/peter-lynch': typeof GuidesPeterLynchRoute
+  '/guides/reinvestir': typeof GuidesReinvestirRoute
   '/guides/risk-radar': typeof GuidesRiskRadarRoute
+  '/guides/snowball': typeof GuidesSnowballRoute
+  '/guides/tax-brazil': typeof GuidesTaxBrazilRoute
+  '/guides/tax-usa': typeof GuidesTaxUsaRoute
+  '/guides/withdraw': typeof GuidesWithdrawRoute
   '/onboarding/metas': typeof OnboardingMetasRoute
   '/onboarding/personal-info': typeof OnboardingPersonalInfoRoute
   '/app/': typeof AppIndexRoute
@@ -467,15 +558,25 @@ export interface FileRouteTypes {
     | '/app/snowballeffectsimulator'
     | '/app/tax'
     | '/app/withdraw'
+    | '/guides/app-directory'
     | '/guides/bazin'
     | '/guides/brokers'
     | '/guides/concepts'
+    | '/guides/contribution-plan'
+    | '/guides/currency-decomposition'
     | '/guides/dividend-valuation'
+    | '/guides/fi-infra'
     | '/guides/glossary'
     | '/guides/gordon'
     | '/guides/graham'
     | '/guides/metrics'
+    | '/guides/peter-lynch'
+    | '/guides/reinvestir'
     | '/guides/risk-radar'
+    | '/guides/snowball'
+    | '/guides/tax-brazil'
+    | '/guides/tax-usa'
+    | '/guides/withdraw'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
     | '/app/'
@@ -513,15 +614,25 @@ export interface FileRouteTypes {
     | '/app/snowballeffectsimulator'
     | '/app/tax'
     | '/app/withdraw'
+    | '/guides/app-directory'
     | '/guides/bazin'
     | '/guides/brokers'
     | '/guides/concepts'
+    | '/guides/contribution-plan'
+    | '/guides/currency-decomposition'
     | '/guides/dividend-valuation'
+    | '/guides/fi-infra'
     | '/guides/glossary'
     | '/guides/gordon'
     | '/guides/graham'
     | '/guides/metrics'
+    | '/guides/peter-lynch'
+    | '/guides/reinvestir'
     | '/guides/risk-radar'
+    | '/guides/snowball'
+    | '/guides/tax-brazil'
+    | '/guides/tax-usa'
+    | '/guides/withdraw'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
     | '/app'
@@ -561,15 +672,25 @@ export interface FileRouteTypes {
     | '/app/snowballeffectsimulator'
     | '/app/tax'
     | '/app/withdraw'
+    | '/guides/app-directory'
     | '/guides/bazin'
     | '/guides/brokers'
     | '/guides/concepts'
+    | '/guides/contribution-plan'
+    | '/guides/currency-decomposition'
     | '/guides/dividend-valuation'
+    | '/guides/fi-infra'
     | '/guides/glossary'
     | '/guides/gordon'
     | '/guides/graham'
     | '/guides/metrics'
+    | '/guides/peter-lynch'
+    | '/guides/reinvestir'
     | '/guides/risk-radar'
+    | '/guides/snowball'
+    | '/guides/tax-brazil'
+    | '/guides/tax-usa'
+    | '/guides/withdraw'
     | '/onboarding/metas'
     | '/onboarding/personal-info'
     | '/app/'
@@ -729,11 +850,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingMetasRouteImport
       parentRoute: typeof OnboardingRoute
     }
+    '/guides/withdraw': {
+      id: '/guides/withdraw'
+      path: '/withdraw'
+      fullPath: '/guides/withdraw'
+      preLoaderRoute: typeof GuidesWithdrawRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/tax-usa': {
+      id: '/guides/tax-usa'
+      path: '/tax-usa'
+      fullPath: '/guides/tax-usa'
+      preLoaderRoute: typeof GuidesTaxUsaRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/tax-brazil': {
+      id: '/guides/tax-brazil'
+      path: '/tax-brazil'
+      fullPath: '/guides/tax-brazil'
+      preLoaderRoute: typeof GuidesTaxBrazilRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/snowball': {
+      id: '/guides/snowball'
+      path: '/snowball'
+      fullPath: '/guides/snowball'
+      preLoaderRoute: typeof GuidesSnowballRouteImport
+      parentRoute: typeof GuidesRoute
+    }
     '/guides/risk-radar': {
       id: '/guides/risk-radar'
       path: '/risk-radar'
       fullPath: '/guides/risk-radar'
       preLoaderRoute: typeof GuidesRiskRadarRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/reinvestir': {
+      id: '/guides/reinvestir'
+      path: '/reinvestir'
+      fullPath: '/guides/reinvestir'
+      preLoaderRoute: typeof GuidesReinvestirRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/peter-lynch': {
+      id: '/guides/peter-lynch'
+      path: '/peter-lynch'
+      fullPath: '/guides/peter-lynch'
+      preLoaderRoute: typeof GuidesPeterLynchRouteImport
       parentRoute: typeof GuidesRoute
     }
     '/guides/metrics': {
@@ -764,11 +927,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesGlossaryRouteImport
       parentRoute: typeof GuidesRoute
     }
+    '/guides/fi-infra': {
+      id: '/guides/fi-infra'
+      path: '/fi-infra'
+      fullPath: '/guides/fi-infra'
+      preLoaderRoute: typeof GuidesFiInfraRouteImport
+      parentRoute: typeof GuidesRoute
+    }
     '/guides/dividend-valuation': {
       id: '/guides/dividend-valuation'
       path: '/dividend-valuation'
       fullPath: '/guides/dividend-valuation'
       preLoaderRoute: typeof GuidesDividendValuationRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/currency-decomposition': {
+      id: '/guides/currency-decomposition'
+      path: '/currency-decomposition'
+      fullPath: '/guides/currency-decomposition'
+      preLoaderRoute: typeof GuidesCurrencyDecompositionRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/contribution-plan': {
+      id: '/guides/contribution-plan'
+      path: '/contribution-plan'
+      fullPath: '/guides/contribution-plan'
+      preLoaderRoute: typeof GuidesContributionPlanRouteImport
       parentRoute: typeof GuidesRoute
     }
     '/guides/concepts': {
@@ -790,6 +974,13 @@ declare module '@tanstack/react-router' {
       path: '/bazin'
       fullPath: '/guides/bazin'
       preLoaderRoute: typeof GuidesBazinRouteImport
+      parentRoute: typeof GuidesRoute
+    }
+    '/guides/app-directory': {
+      id: '/guides/app-directory'
+      path: '/app-directory'
+      fullPath: '/guides/app-directory'
+      preLoaderRoute: typeof GuidesAppDirectoryRouteImport
       parentRoute: typeof GuidesRoute
     }
     '/app/withdraw': {
@@ -968,27 +1159,47 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface GuidesRouteChildren {
+  GuidesAppDirectoryRoute: typeof GuidesAppDirectoryRoute
   GuidesBazinRoute: typeof GuidesBazinRoute
   GuidesBrokersRoute: typeof GuidesBrokersRoute
   GuidesConceptsRoute: typeof GuidesConceptsRoute
+  GuidesContributionPlanRoute: typeof GuidesContributionPlanRoute
+  GuidesCurrencyDecompositionRoute: typeof GuidesCurrencyDecompositionRoute
   GuidesDividendValuationRoute: typeof GuidesDividendValuationRoute
+  GuidesFiInfraRoute: typeof GuidesFiInfraRoute
   GuidesGlossaryRoute: typeof GuidesGlossaryRoute
   GuidesGordonRoute: typeof GuidesGordonRoute
   GuidesGrahamRoute: typeof GuidesGrahamRoute
   GuidesMetricsRoute: typeof GuidesMetricsRoute
+  GuidesPeterLynchRoute: typeof GuidesPeterLynchRoute
+  GuidesReinvestirRoute: typeof GuidesReinvestirRoute
   GuidesRiskRadarRoute: typeof GuidesRiskRadarRoute
+  GuidesSnowballRoute: typeof GuidesSnowballRoute
+  GuidesTaxBrazilRoute: typeof GuidesTaxBrazilRoute
+  GuidesTaxUsaRoute: typeof GuidesTaxUsaRoute
+  GuidesWithdrawRoute: typeof GuidesWithdrawRoute
 }
 
 const GuidesRouteChildren: GuidesRouteChildren = {
+  GuidesAppDirectoryRoute: GuidesAppDirectoryRoute,
   GuidesBazinRoute: GuidesBazinRoute,
   GuidesBrokersRoute: GuidesBrokersRoute,
   GuidesConceptsRoute: GuidesConceptsRoute,
+  GuidesContributionPlanRoute: GuidesContributionPlanRoute,
+  GuidesCurrencyDecompositionRoute: GuidesCurrencyDecompositionRoute,
   GuidesDividendValuationRoute: GuidesDividendValuationRoute,
+  GuidesFiInfraRoute: GuidesFiInfraRoute,
   GuidesGlossaryRoute: GuidesGlossaryRoute,
   GuidesGordonRoute: GuidesGordonRoute,
   GuidesGrahamRoute: GuidesGrahamRoute,
   GuidesMetricsRoute: GuidesMetricsRoute,
+  GuidesPeterLynchRoute: GuidesPeterLynchRoute,
+  GuidesReinvestirRoute: GuidesReinvestirRoute,
   GuidesRiskRadarRoute: GuidesRiskRadarRoute,
+  GuidesSnowballRoute: GuidesSnowballRoute,
+  GuidesTaxBrazilRoute: GuidesTaxBrazilRoute,
+  GuidesTaxUsaRoute: GuidesTaxUsaRoute,
+  GuidesWithdrawRoute: GuidesWithdrawRoute,
 }
 
 const GuidesRouteWithChildren =

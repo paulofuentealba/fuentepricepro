@@ -4,7 +4,7 @@ import { RouteErrorComponent, RouteNotFoundComponent } from "@/components/RouteB
 import { dict, type Locale } from "@/lib/i18n";
 
 const SITE_URL = "https://fuentepricepro.com";
-const PAGE_URL = `${SITE_URL}/guides/graham`;
+const PAGE_URL = `${SITE_URL}/guides/currency-decomposition`;
 const OG_IMAGE =
   "https://firebasestorage.googleapis.com/v0/b/fuentepricepro.firebasestorage.app/o/og-image.png?alt=media";
 
@@ -19,7 +19,7 @@ function urlFor(locale: Locale): string {
   return locale === "ptBR" ? PAGE_URL : `${PAGE_URL}?lang=${locale}`;
 }
 
-export const Route = createFileRoute("/guides/graham")({
+export const Route = createFileRoute("/guides/currency-decomposition")({
   validateSearch: (search: Record<string, unknown>): { lang?: Locale } => ({
     lang: isValidLocale(search.lang) ? search.lang : undefined,
   }),
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/guides/graham")({
   loader: ({ deps }) => ({ locale: (deps.lang ?? "ptBR") as Locale }),
   head: ({ loaderData }) => {
     const locale = loaderData?.locale ?? "ptBR";
-    const S = dict[locale].seoGuides.graham;
+    const S = dict[locale].seoGuides.currencyDecomposition;
 
     return {
       meta: [
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/guides/graham")({
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
               { "@type": "ListItem", position: 2, name: "Guides", item: `${SITE_URL}/guides` },
-              { "@type": "ListItem", position: 3, name: "Graham", item: urlFor(locale) },
+              { "@type": "ListItem", position: 3, name: "Decomposição Cambial", item: urlFor(locale) },
             ],
           }),
         },
@@ -103,7 +103,7 @@ export const Route = createFileRoute("/guides/graham")({
       ],
     };
   },
-  component: () => <GuidesPage defaultTab="graham" />,
+  component: () => <GuidesPage defaultTab="currency-decomposition" />,
   errorComponent: RouteErrorComponent,
   notFoundComponent: RouteNotFoundComponent,
 });

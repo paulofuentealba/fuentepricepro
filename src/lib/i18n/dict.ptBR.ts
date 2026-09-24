@@ -1479,8 +1479,7 @@ export const ptBR = {
   seoGuides: {
     bazin: {
       title: "Método Bazin de Preço Teto - Cálculo de Dividendos | Fuente Price Pro",
-      description:
-        "Aprenda o método Bazin para calcular o preço teto de ações de dividendos. Fórmula passo a passo: preço teto = média de proventos dos últimos 5 anos dividido pelo yield alvo (6%).",
+      description: "Aprenda o método Bazin para calcular o preço teto de ações de dividendos. Fórmula passo a passo: preço teto = média de proventos dos últimos 5 anos dividido pelo yield alvo (6%).",
       faq: [
         {
           q: "O que é o método Bazin de preço teto?",
@@ -1496,26 +1495,9 @@ export const ptBR = {
         },
       ],
     },
-    concepts: {
-      title: "Efeito Bola de Neve e Impostos em Dividendos | Fuente Price Pro",
-      description:
-        "Entenda o efeito bola de neve no reinvestimento de dividendos e como os impostos afetam seus proventos no Brasil. Guia prático para investidores de longo prazo.",
-      faq: [
-        {
-          q: "O que é o efeito bola de neve nos investimentos?",
-          a: "O efeito bola de neve ocorre quando os dividendos recebidos são reinvestidos na compra de mais ações, que por sua vez geram mais dividendos. Com o tempo, o crescimento se torna exponencial - quanto mais tempo o dinheiro fica investido e reinvestido, maior a bola de neve de renda passiva.",
-        },
-        {
-          // Verificado em 10/09/2026 (Lei 15.270/2025). Revisar novamente entre mar-jun/2027 — tributação de dividendos/JCP muda com frequência.
-          q: "Dividendos de ações brasileiras pagam imposto de renda?",
-          a: "Desde janeiro de 2026 (Lei 15.270/2025), dividendos continuam isentos de Imposto de Renda na maioria dos casos, mas com duas mudanças: (1) retenção de 10% na fonte quando uma mesma empresa paga mais de R$ 50 mil em um mês para a mesma pessoa física, incidindo sobre o valor total; (2) quem recebe mais de R$ 600 mil por ano em rendimentos entra num regime de tributação mínima anual. Juros sobre Capital Próprio (JCP) têm retenção na fonte de 17,5% desde jan/2026 (antes era 15%). Proventos de FIIs são isentos para PF quando a cota é negociada em bolsa e o fundo tem no mínimo 100 cotistas. Essas regras mudam com frequência — sempre consulte um contador para sua situação específica.",
-        },
-      ],
-    },
     graham: {
       title: "Fórmula de Graham para Valor Intrínseco de Ações | Fuente Price Pro",
-      description:
-        "Entenda a fórmula de Benjamin Graham para calcular o valor intrínseco de uma ação: VI = raiz(22,5 x LPA x VPA). Aprenda quando aplicar e quais setores são exceção.",
+      description: "Entenda a fórmula de Benjamin Graham para calcular o valor intrínseco de uma ação: VI = raiz(22,5 x LPA x VPA). Aprenda quando aplicar e quais setores são exceção.",
       faq: [
         {
           q: "Qual é a fórmula de Graham para valor intrínseco?",
@@ -1533,8 +1515,7 @@ export const ptBR = {
     },
     gordon: {
       title: "Modelo de Gordon de Crescimento de Dividendos | Fuente Price Pro",
-      description:
-        "Aprenda o Modelo de Crescimento de Gordon (DDM): P0 = D1 / (k - g). Calcule o preço justo de ações com crescimento constante de dividendos e taxa de desconto.",
+      description: "Aprenda o Modelo de Crescimento de Gordon (DDM): P0 = D1 / (k - g). Calcule o preço justo de ações com crescimento constante de dividendos e taxa de desconto.",
       faq: [
         {
           q: "O que é o Modelo de Crescimento de Gordon?",
@@ -1550,101 +1531,27 @@ export const ptBR = {
         },
       ],
     },
-    metrics: {
-      title: "Métricas de Dividendos: Margem de Segurança, YoC, CAGR | Fuente Price Pro",
-      description:
-        "Guia completo das principais métricas de dividendos: margem de segurança, yield on cost (YoC), payout ratio, CAGR e DY vs YoC. Aprenda a interpretar cada indicador.",
+    peterLynch: {
+      title: "Preço Justo Peter Lynch - Valuation e Fórmula PEG | Fuente Price Pro",
+      description: "Calcule o Preço Justo de ações pelo método de Peter Lynch: VI = LPA × (Crescimento de Lucros + Dividend Yield). Ideal para empresas de crescimento com proventos.",
       faq: [
         {
-          q: "O que é a margem de segurança no investimento em dividendos?",
-          a: "A margem de segurança é a diferença percentual entre o preço teto calculado e o preço atual de mercado. Quanto maior a margem, mais barata está a ação em relação ao seu valor justo. Exemplo: preço teto R$ 40,00, preço atual R$ 32,00, margem de segurança de 20%.",
+          q: "O que é o Preço Justo de Peter Lynch?",
+          a: "O Preço Justo de Peter Lynch é um modelo de valuation focado em empresas em expansão (GARP) que relaciona a taxa de crescimento dos lucros e os dividendos pagos com o Lucro por Ação (LPA), definindo que uma empresa está em valor justo quando seu P/L equivale à sua taxa de crescimento (PEG ratio = 1.0).",
         },
         {
-          q: "Qual a diferença entre Dividend Yield (DY) e Yield on Cost (YoC)?",
-          a: "Dividend Yield (DY) é calculado sobre o preço atual de mercado. Yield on Cost (YoC) é calculado sobre o preço médio de compra do investidor. Para quem comprou uma ação há anos a um preço baixo, o YoC pode ser muito superior ao DY atual - revelando a qualidade real do investimento ao longo do tempo.",
+          q: "Qual é a fórmula de Peter Lynch utilizada no Fuente Price Pro?",
+          a: "A fórmula ajustada por dividendos é: Preço Justo = LPA × (Crescimento Anual dos Lucros em % + Dividend Yield em %). Por exemplo, uma empresa com LPA de R$ 4,00, crescimento de 12% a.a. e DY de 4% possui Preço Justo de R$ 4,00 × (12 + 4) = R$ 64,00.",
         },
         {
-          // Verificado em 10/09/2026 (Lei 8.668/1993). Revisar novamente entre mar-jun/2027.
-          q: "O que é um payout ratio saudável para dividendos?",
-          a: "O payout ratio saudável varia por setor. Para empresas industriais e de consumo, um payout entre 40% e 70% é considerado sustentável. Acima de 100% significa que a empresa paga mais em dividendos do que lucra - sinal de alerta. FIIs são obrigados pela Lei 8.668/1993 a distribuir no mínimo 95% do resultado apurado em regime de caixa.",
-        },
-      ],
-    },
-    riskRadar: {
-      title: "Risk Radar: Concentração, Payout e Yield Trap em Dividendos | Fuente Price Pro",
-      description:
-        "Identifique os principais riscos em carteiras de dividendos: concentração setorial, concentração por ativo, risco de payout e a armadilha do alto yield (yield trap).",
-      faq: [
-        {
-          q: "O que é yield trap (armadilha de dividendos)?",
-          a: "Yield trap ocorre quando uma ação apresenta dividend yield muito alto - aparentemente atraente - mas que é resultado de uma queda acentuada no preço da ação, e não de um aumento real nos proventos. Investir nessa situação pode significar comprar uma empresa em deterioração que logo cortará os dividendos.",
-        },
-        {
-          q: "Como identificar risco de payout insustentável?",
-          a: "Um payout ratio acima de 90-100% do lucro líquido é sinal de alerta em empresas não-FII: a empresa está distribuindo mais do que lucra, comprometendo a sustentabilidade dos dividendos. Verifique também a tendência: payout crescente com lucros estagnados é mais perigoso do que payout alto com lucros crescentes.",
-        },
-        {
-          q: "Qual é a concentração setorial máxima recomendada para uma carteira de dividendos?",
-          a: "Não existe regra única, mas investidores conservadores costumam limitar cada setor a 20-30% da carteira. Alta concentração em um setor (ex: mais de 40% em bancos ou energia elétrica) expõe o portfolio a riscos regulatórios e macroeconômicos setoriais que podem impactar todos os ativos ao mesmo tempo.",
-        },
-        {
-          q: "Como o Fuente Price Pro ajuda a identificar riscos na carteira?",
-          a: "O Risk Radar do Fuente Price Pro analisa automaticamente sua carteira e sinaliza: concentração excessiva por setor ou por ativo, payout ratio elevado, yield muito acima da média do setor (possível yield trap) e ações acima do preço teto - exibindo alertas visuais com cores semânticas.",
-        },
-      ],
-    },
-    brokers: {
-      title: "Corretoras Suportadas: XP, BTG, Inter, Schwab | Fuente Price Pro",
-      description:
-        "Confira todas as corretoras suportadas pelo Fuente Price Pro para importação de notas de corretagem: XP, Clear, Rico, BTG Pactual, Banco Inter, NuInvest, Schwab e mais.",
-      faq: [
-        {
-          q: "Quais corretoras brasileiras são suportadas pelo Fuente Price Pro?",
-          a: "O Fuente Price Pro suporta importação nativa de notas de corretagem SINACOR das seguintes corretoras: XP Investimentos, Clear, Rico, Modal, BTG Pactual, Banco Inter, NuInvest, Órama e Genial Investimentos. A importação é feita via PDF da nota de corretagem.",
-        },
-        {
-          q: "O Fuente Price Pro suporta corretoras internacionais?",
-          a: "Sim. O Fuente Price Pro suporta importação do extrato CSV da Charles Schwab International Account, permitindo o acompanhamento de ações americanas (NYSE, NASDAQ) e ETFs internacionais na mesma carteira que seus ativos brasileiros.",
-        },
-        {
-          q: "O que é o padrão SINACOR para notas de corretagem?",
-          a: "SINACOR é o Sistema Integrado de Compensação e Liquidação da B3. As notas de corretagem no padrão SINACOR seguem um layout padronizado que permite ao Fuente Price Pro identificar automaticamente as operações de compra e venda, taxas e ativos negociados.",
-        },
-      ],
-    },
-    glossary: {
-      title: "Glossario de Investimentos: FII, REIT, LPA, VPA, JCP | Fuente Price Pro",
-      description:
-        "Glossario completo para investidores de dividendos: FII, REIT, LPA (EPS), VPA (Book Value), JCP e mais. Definições claras para quem está começando a investir na B3.",
-      faq: [
-        {
-          // Verificado em 10/09/2026 (Lei 14.754/2023). Revisar novamente entre mar-jun/2027.
-          q: "O que é um FII (Fundo de Investimento Imobiliário)?",
-          a: "FII é um fundo que investe em ativos imobiliários - galpões logísticos, lajes corporativas, shoppings, CRIs - e distribui os rendimentos mensalmente aos cotistas. São negociados na B3 como ações. Para PF com fundo de no mínimo 100 cotistas (limite elevado de 50 para 100 pela Lei 14.754/2023) e cotas em bolsa, os rendimentos são isentos de IR - desde que o investidor não detenha 10% ou mais das cotas nem tenha direito a mais de 10% dos rendimentos distribuídos.",
-        },
-        {
-          q: "O que é REIT e qual a diferença para FII?",
-          a: "REIT (Real Estate Investment Trust) é o equivalente americano ao FII brasileiro. Ambos investem em imóveis e distribuem renda regularmente. A principal diferença é que REITs americanos pagam dividendos em dólares e estão sujeitos a tributação americana.",
-        },
-        {
-          q: "O que é LPA (Lucro por Ação)?",
-          a: "LPA (Lucro por Ação) - EPS em inglês - é o lucro líquido da empresa dividido pelo número de ações em circulação. É um dos principais indicadores de rentabilidade e é utilizado na fórmula de Graham para cálculo do valor intrínseco.",
-        },
-        {
-          q: "O que é VPA (Valor Patrimonial por Ação)?",
-          a: "VPA (Valor Patrimonial por Ação) - Book Value per Share em inglês - é o patrimônio líquido contábil da empresa dividido pelo número de ações. Representa o valor de liquidação teórico por ação e é utilizado na fórmula de Graham junto com o LPA.",
-        },
-        {
-          // Verificado em 10/09/2026 (Lei 15.270/2025). Revisar novamente entre mar-jun/2027.
-          q: "O que é JCP (Juros sobre Capital Próprio)?",
-          a: "JCP é uma forma de remuneração ao acionista brasileira, alternativa ao dividendo, que permite a empresa deduzir o pagamento do lucro tributável. Para o acionista PF, o JCP sofre retenção na fonte de 17,5% de IR desde janeiro de 2026 (Lei 15.270/2025; antes era 15%). É comum em bancos como Itaú, Bradesco e BB.",
+          q: "Qual a diferença entre a fórmula de Graham e o método Peter Lynch?",
+          a: "A fórmula de Graham é estritamente voltada para empresas de valor maduras, pesando fortemente o patrimônio líquido (VPA). O modelo de Peter Lynch premia o crescimento sustentável de lucros (earnings growth), sendo muito superior para empresas de tecnologia, consumo e serviços com baixo patrimônio tangível.",
         },
       ],
     },
     dividendValuation: {
       title: "Fórmula de Dividend Yield e Guia de Preço Teto Bazin | Fuente Price Pro",
-      description:
-        "Aprenda a calcular o preço teto de uma ação de dividendos com o método Bazin. Fórmula de dividend yield passo a passo, exemplos práticos e casos especiais.",
+      description: "Aprenda a calcular o preço teto de uma ação de dividendos com o método Bazin. Fórmula de dividend yield passo a passo, exemplos práticos e casos especiais.",
       faq: [
         {
           q: "Qual é a fórmula do dividend yield?",
@@ -1660,166 +1567,524 @@ export const ptBR = {
         },
       ],
     },
+    reinvestir: {
+      title: "Como Reinvestir Dividendos: 3 Estratégias Bola de Neve | Fuente Price Pro",
+      description: "Descubra as 3 estratégias para reinvestir dividendos: Acelerar Bola de Neve (Highest Yield), Corrigir Desvio de Carteira e Reforçar Quem Pagou (DRIP sintético).",
+      faq: [
+        {
+          q: "Qual a melhor estratégia para reinvestir dividendos na bolsa?",
+          a: "Depende do seu objetivo: se busca maximizar o fluxo de caixa imediato, a estratégia 'Acelerar Bola de Neve' compra os ativos descontados com maior dividend yield líquido; se deseja equilíbrio de risco, 'Corrigir Desvio' prioriza a classe mais defasada da carteira.",
+        },
+        {
+          q: "O que é a estratégia Acelerar Bola de Neve no Fuente Price Pro?",
+          a: "É o algoritmo que filtra todos os ativos da sua carteira que estão sendo negociados abaixo do preço teto e ordena pelo maior Dividend Yield líquido projetado, direcionando cada centavo de provento recebido para gerar o máximo de novos proventos no mês seguinte.",
+        },
+        {
+          q: "Qual a diferença entre a tela Reinvestir e o quadro 'Onde meu próximo aporte deve ir?'?",
+          a: "O quadro do Dashboard calcula a recomendação para capital novo externo distribuído proporcionalmente usando o deficit de alocação; já a tela Reinvestir é um motor tático para saldo de proventos acumulados, com simulação de lote fechado e 3 estratégias distintas.",
+        },
+      ],
+    },
+    contributionPlan: {
+      title: "Plano de Aportes com Algoritmo Hare-Niemeyer e Margem de Segurança | Fuente Price Pro",
+      description: "Distribua seus aportes mensais com máxima eficiência usando o algoritmo de maiores restos (Hare-Niemeyer) ponderado pelo déficit de margem de segurança.",
+      faq: [
+        {
+          q: "Como funciona o algoritmo Hare-Niemeyer no plano de aportes?",
+          a: "O método Hare-Niemeyer (maiores restos) distribui o montante exato do seu aporte financeiro em cotas inteiras de ativos, alocando primeiro as partes inteiras ideais e distribuindo as sobras aos maiores restos decimais, eliminando o problema de compras fracionárias impossíveis.",
+        },
+        {
+          q: "Por que o Fuente pondera o aporte pelo déficit de margem de segurança?",
+          a: "Porque comprar um ativo que está longe da meta mas acima do preço teto destrói valor. O algoritmo do Fuente combina a distância percentual da meta com a margem de segurança positiva, garantindo que o dinheiro novo vá para ativos subavaliados.",
+        },
+        {
+          q: "O plano de aportes suporta moedas diferentes (BRL e USD)?",
+          a: "Sim, o motor calcula a conversão cambial em tempo real e permite que você planeje aportes em Reais na B3 ou em Dólares em corretoras internacionais de forma harmonizada.",
+        },
+      ],
+    },
+    withdraw: {
+      title: "Desinvestimento Fiscal Inteligente: Ordem de Venda e Compensação | Fuente Price Pro",
+      description: "Aprenda a ordem matemática de liquidação de posições para pagar menos imposto: compensação de prejuízos, isenção de R$ 20k em ações B3 e otimização LIFO/FIFO.",
+      faq: [
+        {
+          q: "Qual a ordem ideal para vender ativos e pagar menos imposto de renda?",
+          a: "A ordem fiscal inteligente prioriza: (1) ativos com prejuízo acumulado para gerar crédito tributário; (2) ações B3 dentro do limite mensal de isenção de R$ 20.000; (3) ativos com menor ganho de capital percentual; (4) ativos com payout deteriorado ou negociados acima do preço teto.",
+        },
+        {
+          q: "Como funciona a isenção de R$ 20.000 em vendas de ações na B3?",
+          a: "Se o valor total bruto das vendas de ações ordinárias e preferenciais em operações comuns (swing trade) não ultrapassar R$ 20.000 no mês civil, o lucro obtido é 100% isento de Imposto de Renda. Atenção: essa isenção não se aplica a FIIs, ETFs ou BDRs.",
+        },
+        {
+          q: "Posso compensar prejuízos de FIIs com lucro em ações?",
+          a: "Não. Pela legislação da Receita Federal do Brasil, prejuízos com alienação de cotas de FIIs só podem ser compensados com ganhos líquidos na alienação de cotas de outros FIIs. Prejuízos de ações só compensam com lucros de ações.",
+        },
+      ],
+    },
+    snowball: {
+      title: "Simulador Efeito Bola de Neve e Crossover Point (FIRE) | Fuente Price Pro",
+      description: "Calcule quando seus dividendos superarão seu custo de vida (Crossover Point) e acompanhe os 4 marcos de independência financeira (FIRE Essencial, Conforto, Pleno e Fat FIRE).",
+      faq: [
+        {
+          q: "O que é o Crossover Point na independência financeira?",
+          a: "O Crossover Point (Ponto de Cruzamento) é a data exata em que a renda passiva mensal gerada exclusivamente pelos seus proventos ultrapassa seu custo de vida mensal, marcando o início da verdadeira liberdade financeira.",
+        },
+        {
+          q: "Quais são as 4 fases FIRE no Fuente Price Pro?",
+          a: "São quatro marcos: (1) FIRE Essencial (cobre moradia, alimentação básica e saúde); (2) FIRE Conforto (cobre 100% dos seus gastos mensais habituais); (3) FIRE Pleno (cobre custos com margem folgada para reinvestimento contínuo); (4) Fat FIRE (estilo de vida de alto padrão e luxo sustentado por proventos).",
+        },
+        {
+          q: "Como acelerar o efeito bola de neve dos dividendos?",
+          a: "O efeito bola de neve é acelerado por três alavancas: (1) reinvestimento integral e imediato de 100% dos proventos recebidos; (2) compras disciplinadas estritamente abaixo do preço teto; (3) seleção de ativos com histórico consistente de aumento de dividendos acima da inflação.",
+        },
+      ],
+    },
+    taxBrazil: {
+      title: "Tributação de Dividendos, JCP a 17,5% e FIIs no Brasil | Fuente Price Pro",
+      description: "Guia tributário completo para investidores na B3: retenção de 17,5% em JCP (Lei 15.270/2025), isenção de proventos de FIIs (Lei 14.754/2023) e apuração de DARF.",
+      faq: [
+        {
+          q: "Qual a alíquota atual do imposto sobre Juros sobre Capital Próprio (JCP)?",
+          a: "Desde 1º de janeiro de 2026, com a entrada em vigor da Lei 15.270/2025, a alíquota do Imposto de Renda Retido na Fonte (IRRF) sobre o JCP recebido por pessoas físicas é de 17,5% (anteriormente era 15%). O imposto é retido pela fonte pagadora e o valor cai líquido na corretora.",
+        },
+        {
+          q: "Quais os requisitos para que os rendimentos de FIIs sejam isentos de IR?",
+          a: "Segundo a Lei 14.754/2023, os rendimentos distribuídos por FIIs a pessoas físicas são isentos desde que: (1) as cotas sejam negociadas exclusivamente em bolsa ou mercado organizado; (2) o fundo possua no mínimo 100 cotistas; (3) o investidor não detenha 10% ou mais das cotas nem tenha direito a mais de 10% dos rendimentos.",
+        },
+        {
+          q: "Como é tributado o ganho de capital na venda de cotas de FIIs?",
+          a: "O lucro na venda de cotas de FIIs é tributado à alíquota fixa de 20%, sem qualquer limite de isenção mensal. O investidor deve emitir e pagar o DARF até o último dia útil do mês seguinte à operação de venda.",
+        },
+      ],
+    },
+    taxUsa: {
+      title: "Tributação de Ações Americanas, REITs e Withholding Tax (30%) | Fuente Price Pro",
+      description: "Entenda o imposto retido na fonte pelo IRS (30% WHT), deduções Section 199A para REITs e como compensar o imposto pago nos EUA na sua declaração de IRPF no Brasil.",
+      faq: [
+        {
+          q: "Quanto de imposto é retido nos dividendos de ações americanas e REITs?",
+          a: "Para investidores não-residentes fiscais nos EUA que tenham o formulário W-8BEN preenchido na corretora, o IRS retém na fonte uma alíquota fixa de 30% (Withholding Tax - WHT) sobre todos os dividendos distribuídos por empresas americanas e REITs.",
+        },
+        {
+          q: "É possível compensar o imposto retido nos EUA no Imposto de Renda brasileiro?",
+          a: "Sim. Como existe acordo de reciprocidade de tratamento tributário entre a Receita Federal do Brasil e o IRS americano, os 30% retidos na fonte nos EUA podem ser 100% compensados no Carnê-Leão e na Declaração de Ajuste Anual do IRPF no Brasil, evitando bitributação.",
+        },
+        {
+          q: "Como funciona a dedução da Section 199A (QBI) para REITs americanos?",
+          a: "A Section 199A do código tributário americano (IRC) permite que certos dividendos ordinários distribuídos por REITs qualifiquem para uma dedução de até 20% da base tributável para contribuintes elegíveis, conforme reportado no Box 5 do formulário 1099-DIV.",
+        },
+      ],
+    },
+    fiInfra: {
+      title: "FI-Infraestrutura (Lei 12.431): Guia de Dupla Isenção de IR | Fuente Price Pro",
+      description: "Tudo sobre Fundos de Investimento em Infraestrutura (FI-Infra): isenção total de rendimentos mensais e ganho de capital na venda para pessoas físicas pela Lei 12.431/2011.",
+      faq: [
+        {
+          q: "Por que o FI-Infra é considerado duplamente isento de Imposto de Renda?",
+          a: "Nos termos da Lei 12.431/2011, investidores pessoa física desfrutam de dupla isenção em FI-Infras: tanto os rendimentos distribuídos periodicamente quanto o ganho de capital obtido na venda das cotas em bolsa de valores são 100% isentos de Imposto de Renda.",
+        },
+        {
+          q: "Qual a diferença entre FI-Infra e Fundos Imobiliários (FIIs) no aspecto tributário?",
+          a: "Enquanto a venda lucrativa de cotas de FIIs é tributada em 20% de IR via DARF, a venda de cotas de FI-Infra com lucro é completamente isenta de IR para pessoas físicas. Ambos possuem rendimentos mensais isentos quando atendem aos requisitos legais.",
+        },
+        {
+          q: "Quais são os principais riscos ao investir em FI-Infra?",
+          a: "O principal risco é o de crédito das debêntures incentivadas que compõem a carteira do fundo (risco de calote dos emissores em concessões de rodovias, energia, saneamento), além do risco de marcação a mercado dos títulos atrelados ao IPCA e taxa de juros futura.",
+        },
+      ],
+    },
+    currencyDecomposition: {
+      title: "Decomposição Cambial de Ações e ETFs Internacionais | Fuente Price Pro",
+      description: "Aprenda a desagregação matemática de retorno internacional: separe o retorno puro do ativo em Wall Street (USD) do efeito da variação cambial (USD/BRL).",
+      faq: [
+        {
+          q: "O que é decomposição cambial nos investimentos internacionais?",
+          a: "É a separação matemática do retorno total de um investimento no exterior em duas componentes independentes: (1) o desempenho operacional do ativo na moeda de origem (USD); (2) o ganho ou perda cambial decorrente da valorização ou desvalorização do Real frente ao Dólar.",
+        },
+        {
+          q: "Qual é a fórmula da decomposição cambial?",
+          a: "A fórmula multiplicativa é: (1 + Retorno Total em BRL) = (1 + Retorno do Ativo em USD) × (1 + Variação Cambial USD/BRL). Para isolar o efeito em reais, subtrai-se 1 do produto.",
+        },
+        {
+          q: "Por que é perigoso olhar apenas o retorno total em Reais de um ativo em Dólar?",
+          a: "Porque uma ação em Wall Street pode estar caindo 15% enquanto o Dólar sobe 20%, gerando uma ilusão de lucro de +2% em Reais. Sem a decomposição, o investidor não percebe a deterioração fundamentalista do negócio investido.",
+        },
+      ],
+    },
+    appDirectory: {
+      title: "Mapa Completo do Fuente Price Pro: Guia de Telas e Funcionalidades | Fuente Price Pro",
+      description: "O diretório oficial de todas as ferramentas do Fuente Price Pro: Cockpit, MyPortfolio, Reinvestir Proventos, Plano de Aportes, Desinvestimento Fiscal e mais.",
+      faq: [
+        {
+          q: "Quando devo usar a tela Reinvestir em vez do Plano de Aportes?",
+          a: "Use 'Reinvestir' quando tiver saldo em conta proveniente de dividendos recebidos e quiser aplicar uma estratégia focada (Bola de Neve, Correção de Desvio ou DRIP); use 'Plano de Aportes' quando for aportar dinheiro novo do seu salário usando o algoritmo Hare-Niemeyer.",
+        },
+        {
+          q: "O que faz a tela Decomposição Cambial em MyPortfolio?",
+          a: "Ela detalha exatamente quanto do seu patrimônio internacional decorre do crescimento das ações americanas e quanto decorre da oscilação do câmbio Dólar/Real, permitindo avaliar a qualidade real da sua diversificação global.",
+        },
+        {
+          q: "Como o Raio-X do Ativo (Explore) calcula o preço teto?",
+          a: "A tela Explore exibe o Consenso Fuente ponderado de múltiplos métodos (Bazin, Graham, Gordon H-Model e Peter Lynch), mostrando os dados fundamentais oficiais (CVM/SEC), a sustentabilidade do payout e a trajetória histórica do teto de preço.",
+        },
+      ],
+    },
+    concepts: {
+      title: "Efeito Bola de Neve e Impostos em Dividendos | Fuente Price Pro",
+      description: "Entenda o efeito bola de neve no reinvestimento de dividendos e como os impostos afetam seus proventos no Brasil. Guia prático para investidores de longo prazo.",
+      faq: [
+        {
+          q: "O que é o efeito bola de neve nos investimentos?",
+          a: "O efeito bola de neve ocorre quando os dividendos recebidos são reinvestidos na compra de mais ações, que por sua vez geram mais dividendos. Com o tempo, o crescimento se torna exponencial - quanto mais tempo o dinheiro fica investido e reinvestido, maior a bola de neve de renda passiva.",
+        },
+        {
+          q: "Dividendos de ações brasileiras pagam imposto de renda?",
+          a: "No Brasil, dividendos de ações continuam isentos de IRPF para a vasta maioria dos investidores pessoas físicas (com retenção de 10% apenas para valores mensais acima de R$ 50 mil da mesma empresa pela Lei 15.270/2025). Já o JCP possui retenção na fonte de 17,5% desde janeiro de 2026. Proventos de FIIs e FI-Infras contam com regimes de isenção previstos em lei.",
+        },
+      ],
+    },
+    metrics: {
+      title: "Métricas de Dividendos: Margem de Segurança, YoC, CAGR | Fuente Price Pro",
+      description: "Guia completo das principais métricas de dividendos: margem de segurança, yield on cost (YoC), payout ratio, CAGR e DY vs YoC. Aprenda a interpretar cada indicador.",
+      faq: [
+        {
+          q: "O que é a margem de segurança no investimento em dividendos?",
+          a: "A margem de segurança é a diferença percentual entre o preço teto calculado e o preço atual de mercado. Quanto maior a margem, mais barata está a ação em relação ao seu valor justo. Exemplo: preço teto R$ 40,00, preço atual R$ 32,00, margem de segurança de 20%.",
+        },
+        {
+          q: "Qual a diferença entre Dividend Yield (DY) e Yield on Cost (YoC)?",
+          a: "Dividend Yield (DY) é calculado sobre o preço atual de mercado. Yield on Cost (YoC) é calculado sobre o preço médio de compra do investidor. Para quem comprou uma ação há anos a um preço baixo, o YoC pode ser muito superior ao DY atual - revelando a qualidade real do investimento ao longo do tempo.",
+        },
+        {
+          q: "O que é um payout ratio saudável para dividendos?",
+          a: "O payout ratio saudável varia por setor. Para empresas industriais e de consumo, um payout entre 40% e 70% é considerado sustentável. Acima de 100% significa que a empresa paga mais em dividendos do que lucra - sinal de alerta. FIIs são obrigados pela Lei 8.668/1993 a distribuir no mínimo 95% do resultado apurado em regime de caixa.",
+        },
+      ],
+    },
+    riskRadar: {
+      title: "Risk Radar: Concentração, Payout e Yield Trap em Dividendos | Fuente Price Pro",
+      description: "Identifique os principais riscos em carteiras de dividendos: concentração setorial, concentração por ativo, risco de payout e a armadilha do alto yield (yield trap).",
+      faq: [
+        {
+          q: "O que é yield trap (armadilha de dividendos)?",
+          a: "Yield trap ocorre quando uma ação apresenta dividend yield muito alto - aparentemente atraente - mas que é resultado de uma queda acentuada no preço da ação, e não de um aumento real nos proventos. Investir nessa situação pode significar comprar uma empresa em deterioração que logo cortará os dividendos.",
+        },
+        {
+          q: "Como identificar risco de payout insustentável?",
+          a: "Um payout ratio acima de 80-90% do lucro líquido é sinal de alerta em empresas não-FII: a empresa está distribuindo quase tudo o que lucra, comprometendo investimentos e aumentando o risco de corte. Verifique a geração de fluxo de caixa livre.",
+        },
+        {
+          q: "Qual é a concentração setorial máxima recomendada para uma carteira de dividendos?",
+          a: "Recomenda-se não ultrapassar 25% da carteira em um único setor econômico e 15% em um único ativo, mitigando riscos regulatórios, crises setoriais e dependência de executivos individuais.",
+        },
+      ],
+    },
+    brokers: {
+      title: "Corretoras Suportadas: XP, BTG, Inter, BB, Caixa, Schwab | Fuente Price Pro",
+      description: "Confira as corretoras suportadas pelo Fuente Price Pro para importação de notas de corretagem B3 (SINACOR) e Charles Schwab com Privacy by Design.",
+      faq: [
+        {
+          q: "Quais corretoras brasileiras são suportadas pelo Fuente Price Pro?",
+          a: "O Fuente Price Pro suporta notas de corretagem SINACOR de: XP Investimentos, Clear, Rico, BTG Pactual, Banco Inter, NuInvest, Órama, Genial, Banco do Brasil (BB Investimentos) e Caixa Econômica Federal.",
+        },
+        {
+          q: "O Fuente Price Pro suporta corretoras internacionais?",
+          a: "Sim. Suporta importação nativa de confirmações de negociação e extratos da Charles Schwab International Account, identificando tickers, câmbio e proventos automaticamente.",
+        },
+        {
+          q: "Meus dados financeiros e arquivos PDF ficam salvos nos servidores do Fuente?",
+          a: "Não! Por arquitetura de Privacy by Design, o processamento de notas de corretagem ocorre 100% no navegador do seu dispositivo via Web Workers. Nenhum arquivo PDF é transmitido ou armazenado em servidores externos.",
+        },
+      ],
+    },
+    glossary: {
+      title: "Glossário de Investimentos: FII, REIT, LPA, VPA, JCP, FI-Infra | Fuente Price Pro",
+      description: "Glossário completo para investidores de dividendos: FII, REIT, LPA, VPA, JCP, FI-Infra, WHT, Hare-Niemeyer e Crossover Point.",
+      faq: [
+        {
+          q: "O que é um FII (Fundo de Investimento Imobiliário)?",
+          a: "FII é um fundo fechado que investe em imóveis físicos (tijolo) ou títulos de crédito imobiliário (papel/CRI) e distribui mensalmente no mínimo 95% do seu resultado financeiro aos cotistas, com isenção de IR nos rendimentos para pessoas físicas sob os critérios legais.",
+        },
+        {
+          q: "O que é REIT e qual a diferença para FII?",
+          a: "REIT (Real Estate Investment Trust) é o modelo americano de investimento imobiliário. Diferente do FII brasileiro, a maioria dos REITs opera como corporações operacionais com conselho de administração próprio, paga dividendos em Dólares com periodicidade geralmente trimestral e sofre retenção de 30% na fonte nos EUA para investidores estrangeiros.",
+        },
+        {
+          q: "O que é JCP (Juros sobre Capital Próprio)?",
+          a: "JCP é um mecanismo de remuneração ao acionista típico do Brasil, dedutível do lucro tributável da empresa pagadora. Para a pessoa física, incide retenção na fonte de 17,5% de IR (Lei 15.270/2025).",
+        },
+        {
+          q: "O que é FI-Infra?",
+          a: "FI-Infra é um Fundo Incentivado de Investimento em Infraestrutura regido pela Lei 12.431/2011, que aplica recursos em debêntures de infraestrutura e oferece dupla isenção de IR (rendimentos e ganho de capital na alienação) para investidores pessoa física.",
+        },
+      ],
+    },
     guidesHub: {
       title: "Guias de Investimento e Metodologia de Valuation | Fuente Price Pro",
-      description:
-        "A wiki completa do Fuente Price Pro: modelos de valuation Bazin, Graham e Gordon, fórmulas de dividend yield, alertas de risco de carteira e formatos de nota de corretagem suportados.",
+      description: "A wiki completa do Fuente Price Pro: modelos de valuation Bazin, Graham, Gordon e Peter Lynch, motores de reinvestimento, tributação BR/US e diretório de ferramentas.",
     },
   },
   docs: {
-    title: "Metodologia de Valuation",
-    description:
-      "Nossa metodologia de valuation foca em gerar renda passiva segura e crescente, usando múltiplos modelos e margens de segurança para avaliar oportunidades globais.",
+    title: "Metodologia de Valuation & Guias",
+    description: "Nossa metodologia de valuation foca em gerar renda passiva segura e crescente, usando múltiplos modelos matemáticos, margem de segurança e motores fiscais para avaliar oportunidades globais.",
     searchPlaceholder: "Buscar na Wiki...",
     navLink: "Wiki",
     index: "Índice",
+    openInApp: "Abrir no Aplicativo",
+    sections: {
+      valuation: "Modelos de Valuation",
+      decisionEngines: "Motores de Decisão",
+      tax: "Tributação BR / US",
+      analysis: "Métricas & Riscos",
+      appGuide: "Guia do Aplicativo",
+    },
     bazinFormula: "Preço Teto = Dividendo Médio (Últimos Anos) ÷ Yield Alvo",
     gordonFormula: "Preço Justo = (Dividendo Atual × (1 + Crescimento)) / (Taxa de Desconto - Crescimento)",
+    peterLynchFormula: "Preço Justo = LPA × (Crescimento de Lucros % + Dividend Yield %)",
+    hareNiemeyerFormula: "Cotas = Parte Inteira [(Orçamento × Déficit) / Soma Déficits] + Maiores Restos",
+    fxDecompositionFormula: "(1 + Retorno Total BRL) = (1 + Retorno Ativo USD) × (1 + Variação USD/BRL)",
     consensus: {
       title: "O Consenso Fuente",
-      description:
-        "Uma síntese inteligente dos modelos de valuation mais confiáveis. Ao extrair a mediana de Bazin, Graham e Gordon, o consenso mitiga as fraquezas individuais de cada fórmula, entregando um preço teto robusto para uma carteira diversificada.",
+      description: "Uma síntese inteligente dos modelos de valuation mais confiáveis do mercado. Ao extrair a mediana ponderada de Bazin, Graham, Gordon e Peter Lynch, o consenso mitiga as distorções individuais de cada fórmula, entregando um preço teto robusto e auditável para uma carteira diversificada.",
     },
     bazin: {
       title: "O Modelo de Bazin",
-      description:
-        "Ideal para investidores focados em renda. Estabelece o preço teto dividindo o dividendo médio por um yield mínimo aceitável (a clássica regra dos 6%). Altamente eficaz para empresas maduras com distribuições constantes.",
-      example:
-        "Exemplo Numérico: Se a empresa paga R$ 5,25 de dividendo médio, a meta de 6% resulta no Preço Teto de R$ 87,50 (R$ 5,25 / 0,06).",
+      description: "Ideal para investidores focados em renda passiva. Estabelece o preço teto dividindo o dividendo médio dos últimos anos por um yield mínimo aceitável (a clássica regra dos 6% de Décio Bazin). Altamente eficaz para empresas maduras com distribuições previsíveis.",
+      fiiSpreadNote: "Adaptação para FIIs e Ativos de Renda: Para fundos imobiliários e ativos de crédito, o Fuente adapta a meta de yield adicionando um spread de segurança sobre a taxa livre de risco (NTN-B no Brasil ou Treasuries nos EUA), refletindo o prêmio de risco adequado.",
+      example: "Exemplo Numérico: Se a empresa paga R$ 5,25 de dividendo médio, a meta de 6% resulta no Preço Teto de R$ 87,50 (R$ 5,25 / 0,06).",
     },
     graham: {
       title: "A Fórmula de Graham",
-      description:
-        "Criada por Benjamin Graham, calcula o Valor Intrínseco de uma ação baseada no Lucro Por Ação (LPA) e Valor Patrimonial Por Ação (VPA). É excelente para Ações de Valor.",
+      description: "Criada por Benjamin Graham em 'O Investidor Inteligente', calcula o Valor Intrínseco de uma ação baseada no Lucro Por Ação (LPA) e Valor Patrimonial Por Ação (VPA). É excelente para Ações de Valor tradicionais.",
       notApplicableBadge: "Não se aplica a FIIs/REITs",
-      notApplicableReason:
-        "A distorção do patrimônio e a obrigação de distribuição de lucros invalidariam a fórmula.",
-      example:
-        "Exemplo Numérico: Com LPA de R$ 3,00 e VPA de R$ 10,00, a raiz de (22.5 * 3 * 10) resulta em um Valor Intrínseco de R$ 25,98.",
+      notApplicableReason: "A distorção do patrimônio contábil e a obrigação de distribuição de 95% do resultado em regime de caixa invalidariam os múltiplos da fórmula.",
+      example: "Exemplo Numérico: Com LPA de R$ 3,00 e VPA de R$ 10,00, a raiz de (22.5 * 3 * 10) resulta em um Valor Intrínseco de R$ 25,98.",
     },
     gordon: {
-      title: "O Modelo de Gordon",
-      description:
-        "Um modelo de desconto de dividendos que assume crescimento perpétuo. É o modelo matemático ideal para Fundos Imobiliários (FIIs) devido à previsibilidade de distribuição e reajustes constantes por inflação. O Fuente usa um refinamento em 2 estágios (H-Model): uma transição de 5 anos entre a taxa de crescimento do próprio ativo e uma taxa terminal de longo prazo ancorada na inflação, em vez de assumir um único crescimento fixo para sempre.",
-      example:
-        "Exemplo Ilustrativo (não use como recomendação) — fórmula clássica de 1 estágio: Assumindo um dividendo de R$ 1,00, crescimento de 2% e desconto de 6%, o preço justo seria R$ 25,50 [(1,00 * 1,02) / (0,06 - 0,02)]. O cálculo real do Fuente combina isso com uma transição de 5 anos, então o número exibido no app pode divergir levemente.",
+      title: "O Modelo de Gordon & H-Model",
+      description: "Um modelo de desconto de dividendos que assume crescimento constante. O Fuente aplica um refinamento em 2 estágios (H-Model): uma transição linear de 5 anos entre a taxa de crescimento histórica do ativo e uma taxa terminal de longo prazo ancorada na inflação média, evitando projeções irrealistas ao infinito.",
+      example: "Exemplo Prático: Com dividendo de R$ 1,00, taxa de crescimento de 2% e desconto de 6%, a fórmula básica calcula R$ 25,50 [(1,00 * 1,02) / (0,06 - 0,02)]. O cálculo real do Fuente pondera a transição de 5 anos para maior segurança.",
+    },
+    peterLynch: {
+      title: "O Modelo de Peter Lynch",
+      description: "Desenvolvido pelo lendário gestor do Fidelity Magellan Fund, avalia empresas que combinam expansão de lucros e proventos (Growth at a Reasonable Price - GARP). Estabelece que o múltiplo P/L justo de uma empresa deve ser proporcional à soma de sua taxa de crescimento e seu dividend yield.",
+      formula: "Preço Justo = LPA × (Taxa de Crescimento de Lucros % + Dividend Yield %)",
+      example: "Exemplo Numérico: Se a empresa possui LPA de R$ 3,50, taxa de crescimento anual de lucros de 10% e Dividend Yield de 4%, seu Preço Justo é R$ 3,50 × (10 + 4) = R$ 49,00.",
     },
     dividendValuation: {
       title: "Guia de Valuation por Dividendos",
-      intro:
-        "Um passo a passo da fórmula de dividend yield e da fórmula de preço-teto de Bazin — os dois blocos por trás de toda valuation no Fuente.",
+      intro: "Um passo a passo da fórmula de dividend yield e da fórmula de preço-teto de Bazin — os dois blocos fundamentais por trás de toda análise de proventos no Fuente.",
       yieldFormulaTitle: "A fórmula do dividend yield",
       yieldFormula: "Dividend Yield = (Dividendo Anual por Ação ÷ Preço Atual da Ação) × 100",
-      yieldFormulaBody:
-        "Se uma ação é negociada a R$ 50 e pagou R$ 2,50 em dividendos nos últimos 12 meses, o dividend yield é 5%. O yield muda toda vez que o preço se mexe — por isso investidores de longo prazo acompanham separadamente o yield on cost (dividendo ÷ seu preço médio de compra).",
+      yieldFormulaBody: "Se uma ação é negociada a R$ 50 e pagou R$ 2,50 em dividendos nos últimos 12 meses, o dividend yield é 5%. O yield muda toda vez que o preço de mercado se mexe — por isso investidores de longo prazo acompanham separadamente o yield on cost (dividendo ÷ seu preço médio de compra).",
       ceilingFormulaTitle: "A fórmula do preço-teto de Bazin",
-      ceilingFormulaBody:
-        "Décio Bazin inverteu a equação do yield. Em vez de perguntar \"que yield o preço de hoje me dá?\", ele perguntou \"que preço me dá o yield que eu exijo?\". O resultado é seu preço-teto máximo: acima dele, o ativo está caro demais para sua meta; abaixo, existe margem de segurança.",
+      ceilingFormulaBody: "Décio Bazin inverteu a equação do yield. Em vez de perguntar 'que yield o preço de hoje me dá?', ele perguntou 'que preço me dá o yield que eu exijo?'. O resultado é seu preço-teto máximo: acima dele, o ativo está caro demais para sua meta; abaixo, existe margem de segurança.",
       exampleTitle: "Exemplo prático",
-      exampleIntro:
-        "Uma ação pagou os seguintes dividendos por cota nos últimos cinco anos: R$ 1,80, R$ 2,00, R$ 2,10, R$ 2,20 e R$ 1,90.",
+      exampleIntro: "Uma ação pagou os seguintes dividendos por cota nos últimos cinco anos: R$ 1,80, R$ 2,00, R$ 2,10, R$ 2,20 e R$ 1,90.",
       exampleStep1: "Dividendo médio = (1,80 + 2,00 + 2,10 + 2,20 + 1,90) ÷ 5 = R$ 2,00",
-      exampleStep2: "Yield alvo = 6% (seu retorno mínimo aceitável)",
+      exampleStep2: "Yield alvo = 6% (seu retorno mínimo aceitável em proventos)",
       exampleStep3: "Preço-teto = R$ 2,00 ÷ 0,06 = R$ 33,33",
-      exampleNote:
-        "A R$ 28, você teria uma margem de segurança de ~19% e um yield on cost projetado de 7,1%. A R$ 40, você pagaria 20% acima do teto por apenas 5% de yield.",
+      exampleNote: "A R$ 28, você teria uma margem de segurança de ~19% e um yield on cost projetado de 7,1%. A R$ 40, você pagaria 20% acima do teto por apenas 5% de yield.",
       chartCurrentLabel: "Preço A (R$ 28)",
       chartOverLabel: "Preço B (R$ 40)",
       chartCeilingLabel: "Teto (R$ 33,33)",
       edgeCasesTitle: "Casos de atenção",
-      edgeCaseCuts: "Corte de dividendos — a média de 5 anos suaviza um ano ruim, mas um corte permanente quebra o modelo. Confira payout ratio e fluxo de caixa livre antes de confiar no preço-teto.",
-      edgeCaseTax: "Imposto retido na fonte — ações, REITs e ETFs americanos retêm 30% dos dividendos de investidores estrangeiros. Aplique o imposto ao dividendo antes de rodar a fórmula, ou você vai superestimar o teto.",
-      edgeCaseCurrency: "Moeda — compare dividendos em BRL com yield alvo em BRL e dividendos em USD com yield alvo em USD. Nunca misture.",
-      edgeCaseMonthly: "REITs, FIIs e ETFs — esses pagam mensalmente. Multiplique as 12 distribuições mensais mais recentes para obter o valor anual antes de tirar a média.",
+      edgeCaseCuts: "Corte de dividendos — a média de 5 anos suaviza um ano atípico, mas um corte estrutural permanente quebra o modelo. Confira sempre o payout ratio e o fluxo de caixa livre antes de confiar no preço-teto.",
+      edgeCaseTax: "Imposto retido na fonte — ações e REITs americanos sofrem retenção de 30% nos EUA para investidores estrangeiros. O Fuente deduz o imposto do dividendo antes de calcular o teto líquido.",
+      edgeCaseCurrency: "Moeda — compare dividendos em BRL com yield alvo em BRL e dividendos em USD com yield alvo em USD. Nunca misture premissas de moedas diferentes.",
+      edgeCaseMonthly: "Cadências de Pagamento — FIIs no Brasil pagam mensalmente por imposição de fluxo de caixa; REITs americanos pagam tipicamente a cada trimestre (com raras exceções mensais como Realty Income e STAG); ETFs globais distribuem trimestral ou semestralmente.",
+    },
+    reinvestir: {
+      title: "Motor de Reinvestimento de Proventos",
+      description: "O motor de reinvestimento analisa os dividendos acumulados na sua conta e orienta a alocação tática do saldo sem necessidade de novo aporte externo, acelerando a bola de neve de juros compostos.",
+      strategySnowballTitle: "1. Acelerar Bola de Neve (Highest Net Yield)",
+      strategySnowballDesc: "Filtra os ativos da carteira que estão sendo negociados abaixo do preço teto e prioriza aqueles com o maior Dividend Yield líquido projetado. O objetivo é maximizar o fluxo de proventos recebidos no mês seguinte.",
+      strategyDeficitTitle: "2. Corrigir Desvio de Carteira (Target Deficit)",
+      strategyDeficitDesc: "Compara a distribuição patrimonial atual da sua carteira com as metas percentuais definidas. Prioriza os ativos subavaliados que pertencem às classes mais distantes do seu objetivo ideal.",
+      strategyDripTitle: "3. Reforçar Quem Pagou (Synthetic DRIP)",
+      strategyDripDesc: "Reinveste os dividendos diretamente no próprio ativo que os gerou, desde que o ativo continue abaixo do preço teto de segurança. É o equivalente automático ao Dividend Reinvestment Plan de Wall Street.",
+      comparisonTitle: "Diferença vs. 'Onde meu próximo aporte deve ir?'",
+      comparisonDesc: "O quadro do Dashboard calcula a distribuição de capital novo externo (salário ou aporte mensal). Já a rota /reinvestir é um simulador de lote fechado para proventos acumulados, permitindo alternar livremente entre as três estratégias de reinvestimento.",
+    },
+    contributionPlan: {
+      title: "Plano de Aportes Inteligente",
+      description: "O motor de aportes periódicos do Fuente Price Pro utiliza matemática de otimização combinatória para transformar o valor financeiro do seu aporte em ordens de compra precisas em lotes inteiros de ativos.",
+      hareNiemeyerTitle: "Algoritmo Hare-Niemeyer (Maiores Restos)",
+      hareNiemeyerDesc: "Em vez de sugerir frações impossíveis de cotas ou arredondamentos grosseiros que sobram dinheiro em conta, o algoritmo calcula a cota ideal contínua de cada ativo, atribui a parte inteira e distribui as cotas remanescentes aos maiores restos decimais até esgotar exatamente o orçamento.",
+      safetyMarginDeficitTitle: "Ponderação por Déficit de Margem de Segurança",
+      safetyMarginDeficitDesc: "Um ativo com grande distância da meta percentual mas negociado com margem de segurança negativa (acima do teto) recebe peso zero. O algoritmo prioriza estritamente os ativos que combinam déficit de alocação com margem de segurança positiva.",
+      exampleTitle: "Exemplo Prático de Aporte",
+      exampleDesc: "Com um aporte de R$ 5.000, o sistema detecta que o setor de FIIs está defasado em R$ 3.000 e Ações em R$ 2.000. Dentre os ativos elegíveis abaixo do teto, o algoritmo distribui as cotas exatas de modo que o resíduo financeiro final seja menor que o preço de uma única cota.",
+    },
+    withdraw: {
+      title: "Motor de Desinvestimento Fiscal Inteligente",
+      description: "Quando surge a necessidade de resgate financeiro ou rebalanceamento com venda de posições, o motor fiscal estabelece a ordem ideal de liquidação para minimizar o impacto tributário.",
+      harvestingTitle: "Tax-Loss Harvesting (Compensação de Prejuízos)",
+      harvestingDesc: "O motor prioriza a venda de lotes que acumulam prejuízo contábil. Isso não apenas zera o imposto devido no momento, como gera crédito de prejuízo a compensar para abater ganhos futuros na mesma categoria de ativo.",
+      exemption20kTitle: "Uso da Isenção Mensal de R$ 20.000 em Ações B3",
+      exemption20kDesc: "Para ações brasileiras em operações normais, vendas mensais com valor bruto total de até R$ 20.000 contam com isenção total de IR sobre o ganho de capital. O sistema calibra as vendas de ações para nunca ultrapassar o limiar de isenção.",
+      priorityOrderTitle: "Ordem Estratégica de Liquidação",
+      priorityOrderDesc: "A hierarquia de venda seleciona: (1) Ativos com prejuízo acumulado; (2) Ações dentro do limite de isenção de R$ 20k; (3) Ativos negociados muito acima do preço teto ou com risco de payout deteriorado; (4) Lotes com menor ganho percentual relativo.",
+    },
+    snowball: {
+      title: "Efeito Bola de Neve & Metas FIRE",
+      description: "O poder dos juros compostos aplicado a dividendos cria um ciclo virtuoso onde a própria renda passiva adquire novas participações societárias sem demandar aportes externos.",
+      crossoverPointTitle: "O Crossover Point (Ponto de Cruzamento)",
+      crossoverPointDesc: "É o momento matemático em que os dividendos mensais ultrapassam o custo de vida do investidor. A partir desse dia, a carteira se torna autosustentável e a independência financeira é atingida.",
+      fireMilestonesTitle: "Os 4 Marcos de Independência Financeira (FIRE)",
+      fireMilestonesDesc: "O Fuente divide sua jornada em 4 fases: (1) FIRE Essencial (moradia e alimentação); (2) FIRE Conforto (gastos mensais habituais); (3) FIRE Pleno (folga financeira ampla para reinvestimento perpétuo); (4) Fat FIRE (abundância e liberdade irrestrita).",
+    },
+    taxBrazil: {
+      title: "Tributação de Renda Variável no Brasil",
+      description: "A legislação fiscal brasileira possui regras específicas para cada classe de ativo de renda variável negociada na B3.",
+      stocksTitle: "Ações Nacionais (Swing Trade)",
+      stocksDesc: "Ganhos líquidos em vendas de ações de até R$ 20.000/mês são isentos de IR. Vendas acima desse limite tributam o ganho total em 15% via DARF (código 6015) até o último dia útil do mês subsequente.",
+      jcpTitle: "Juros sobre Capital Próprio (JCP a 17,5%)",
+      jcpDesc: "Desde 1º de janeiro de 2026 (Lei 15.270/2025), o IRRF incidente sobre o JCP recebido por pessoas físicas é de 17,5% retido exclusivamente na fonte. O investidor recebe o valor líquido em conta.",
+      fiiTitle: "Fundos Imobiliários (FIIs - Lei 14.754/2023)",
+      fiiDesc: "Rendimentos mensais são isentos de IR se o fundo tiver no mínimo 100 cotistas, for negociado em bolsa e o cotista possuir menos de 10% das cotas. A venda de cotas com lucro tributa 20% fixo de IR, sem isenção de R$ 20k.",
+      darfTitle: "Compensação e Emissão de DARF",
+      darfDesc: "Prejuízos acumulados em meses anteriores podem ser abatidos de lucros futuros da mesma categoria (ações abatem ações; FIIs abatem FIIs). O DARF só é emitido se o imposto devido no mês for igual ou superior a R$ 10,00.",
+    },
+    taxUsa: {
+      title: "Tributação nos Estados Unidos (US Market)",
+      description: "Regras tributárias aplicáveis a investidores brasileiros que investem diretamente em ações americanas, REITs e ETFs listados na NYSE e NASDAQ.",
+      wht30Title: "Retenção na Fonte de 30% (Withholding Tax)",
+      wht30Desc: "O IRS americano retém na fonte 30% sobre todos os dividendos distribuídos a não-residentes com formulário W-8BEN válido. Os proventos já chegam líquidos à sua conta na corretora.",
+      reitTitle: "REITs e Dedução Section 199A",
+      reitDesc: "Os dividendos de REITs são classificados pelo IRS como ordinários (non-qualified). Determinadas distribuições podem se qualificar para a dedução Section 199A de até 20% da base tributável para contribuintes elegíveis.",
+      irpfOffsetTitle: "Compensação de Imposto no IRPF Brasileiro",
+      irpfOffsetDesc: "Em virtude do princípio da reciprocidade de tratamento entre a Receita Federal e o IRS, os 30% pagos nos EUA são integralmente abatidos do imposto apurado no Carnê-Leão e na Declaração Anual de IRPF no Brasil.",
+    },
+    fiInfra: {
+      title: "FI-Infraestrutura (Lei 12.431)",
+      description: "Os Fundos Incentivados de Investimento em Infraestrutura (FI-Infra) contam com o regime tributário mais favorável do mercado financeiro brasileiro para pessoas físicas.",
+      lei12431Title: "O Marco Legal da Lei 12.431/2011",
+      lei12431Desc: "Criados para fomentar o financiamento privado de obras essenciais de energia, saneamento, telecomunicações e transporte através de debêntures incentivadas.",
+      doubleExemptionTitle: "A Dupla Isenção de Imposto de Renda",
+      doubleExemptionDesc: "Diferente de ações (onde o ganho acima de R$ 20k tributa) e de FIIs (onde a venda com lucro tributa 20%), os FI-Infras contam com isenção total de IR tanto nos rendimentos mensais distribuídos quanto no ganho de capital obtido na alienação de cotas em bolsa.",
+      riskTitle: "Gestão de Risco de Crédito Privado",
+      riskDesc: "Embora isentos de impostos, os FI-Infras carregam risco de crédito dos emissores das debêntures e risco de oscilação de taxa de juros (marcação a mercado de títulos indexados ao IPCA).",
+    },
+    currencyDecomposition: {
+      title: "Decomposição Cambial de Retorno",
+      description: "Avaliando a rentabilidade real de ativos internacionais separando a valorização do ativo na moeda de origem da flutuação da taxa de câmbio USD/BRL.",
+      assetVsFxTitle: "Wall Street vs. Efeito Câmbio",
+      assetVsFxDesc: "O retorno em Reais de uma ação americana decorre de dois motores distintos: o crescimento dos lucros da empresa em dólares e a valorização ou desvalorização do Real frente ao Dólar.",
+      exampleTitle: "Exemplo Prático de Decomposição",
+      exampleDesc: "Se você comprou uma ação por US$ 100 com o dólar a R$ 5,00 (custo R$ 500) e a ação subiu para US$ 110 (+10%) com o dólar a R$ 5,50 (+10%), o valor final é R$ 605 (+21%). A decomposição demonstra: +10% de ganho do ativo, +10% de ganho cambial e +1% de efeito cruzado.",
+    },
+    appDirectory: {
+      title: "Diretório e Mapa do Aplicativo",
+      description: "Um guia completo de navegação explicando o propósito de cada módulo da plataforma Fuente Price Pro e quando utilizá-lo.",
+      cockpitTitle: "Cockpit Principal (/app)",
+      cockpitDesc: "Visão geral da sua saúde financeira: patrimônio consolidado, renda mensal projetada, rentabilidade ponderada e alerta de onde deve ir seu próximo aporte externo.",
+      myportfolioTitle: "Minha Carteira (/app/myportfolio)",
+      myportfolioDesc: "Gestão minuciosa de todas as suas posições em carteira, decomposição cambial das posições internacionais, filtros canônicos pelas 8 classes de ativos e exportação CSV.",
+      reinvestirTitle: "Reinvestir Proventos (/app/reinvestir)",
+      reinvestirDesc: "Motor dedicado à alocação de dividendos acumulados em conta, simulando lotes fechados nas estratégias Bola de Neve, Correção de Desvio ou DRIP.",
+      contributionPlanTitle: "Plano de Aportes (/app/contributionplan)",
+      contributionPlanDesc: "Otimizador de aportes periódicos baseado no algoritmo Hare-Niemeyer e ponderação por déficit de margem de segurança para novos recursos externos.",
+      withdrawTitle: "Desinvestimento Fiscal (/app/withdraw)",
+      withdrawDesc: "Ordem inteligente de liquidação de posições para resgates de emergência ou rebalanceamentos, minimizando o pagamento de imposto de renda.",
+      incomeTitle: "Renda Passiva & Stress Test (/app/income)",
+      incomeDesc: "Calendário de proventos confirmados vs projetados, detector de cadência de distribuição e simulador de estresse com cortes repentinos de proventos.",
+      taxTitle: "Realidade Fiscal Dual-Market (/app/tax)",
+      taxDesc: "Controle fiscal completo de B3 e mercado americano: apuração de ganho de capital, compensação de prejuízos, acompanhamento do limite de R$ 20k e crédito de imposto retido nos EUA.",
+      goalsTitle: "Metas FIRE & Alocação (/app/goals)",
+      goalsDesc: "Acompanhamento do progresso rumo aos 4 marcos de independência financeira (FIRE) e definição de percentuais alvo de alocação por classe de ativos.",
+      newsTitle: "Radar de Eventos Corporativos (/app/news)",
+      newsDesc: "Feed em tempo real de desdobramentos de ações, grupamentos, bonificações societárias e eventos que impactam o custo médio de aquisição.",
+      comparatorTitle: "Comparador de Ativos (/app/comparator)",
+      comparatorDesc: "Mesa de decisão para comparar até 3 ativos simultâneos lado a lado através de múltiplos fundamentalistas, preço teto e margem de segurança.",
+      screenerTitle: "Screener Fundamentalista (/app/screener)",
+      screenerDesc: "Filtro de busca em todo o universo de ativos da B3 e de Wall Street para identificar oportunidades com margem de segurança atrativa.",
+      exploreTitle: "Raio-X do Ativo (/app/explore)",
+      exploreDesc: "Análise profunda de um ticker individual, detalhando o Consenso Fuente, fórmulas de Bazin, Graham, Gordon e Peter Lynch, e histórico de preço teto.",
+      riskRadarTitle: "Radar de Riscos (/app/riskradar)",
+      riskRadarDesc: "Painel de alertas de governança da carteira: concentração excessiva em setores ou ativos, risco de corte de payout e armadilhas de alto yield.",
+      importBrokerNoteTitle: "Importação de Notas (/app/import-broker-note)",
+      importBrokerNoteDesc: "Importador automatizado de notas de corretagem B3 no padrão SINACOR e extratos da Charles Schwab, processado 100% no navegador com Privacy by Design.",
     },
     metrics: {
       title: "Métricas Essenciais",
       safetyMargin: {
         title: "Margem de Segurança",
-        description:
-          "A diferença percentual entre o preço atual e o preço teto estimado. Quanto maior a margem de segurança, menor o risco de perda de capital e maior o potencial de upside.",
+        description: "A diferença percentual entre o preço atual de mercado e o preço teto estimado. Quanto maior a margem de segurança, menor o risco de perda de capital e maior o potencial de valorização futura.",
       },
       yieldOnCost: {
         title: "Yield on Cost (YoC)",
-        description:
-          "O Dividend Yield efetivo que você recebe baseado no preço médio que você pagou pela ação, não no preço atual de mercado. Empresas que aumentam os dividendos farão seu YoC crescer ao longo dos anos.",
+        description: "O Dividend Yield efetivo que você recebe calculado sobre o seu preço médio de compra, e não sobre a cotação de mercado. Empresas que aumentam proventos fazem seu YoC crescer ao longo dos anos.",
       },
       payout: {
         title: "Payout Ratio",
-        description:
-          "A porcentagem do lucro líquido que a empresa distribui aos acionistas como dividendos. Um payout de 100% ou mais é insustentável no longo prazo. FIIs e REITs são exceções, pois são obrigados por lei a distribuir quase todo o lucro.",
+        description: "A porcentagem do lucro líquido que a empresa distribui aos acionistas como dividendos. Um payout acima de 80-100% em empresas comuns acende alerta de sustentabilidade. FIIs e REITs distribuem quase a totalidade por obrigação legal.",
       },
       cagr: {
-        title: "CAGR (Taxa Composta Anual de Crescimento)",
-        description:
-          "A taxa de crescimento anualizada dos dividendos nos últimos 5 anos. Mostra se a empresa consegue aumentar os pagamentos consistentemente acima da inflação.",
+        title: "CAGR de Dividendos",
+        description: "A taxa anual composta de crescimento dos dividendos nos últimos 5 anos. Mostra se a empresa consegue aumentar os proventos consistentemente acima da inflação.",
       },
       dyVsYoc: {
         title: "DY vs. Yield on Cost",
-        description:
-          "O Dividend Yield (DY) flutua diariamente com o preço de mercado da ação. O Yield on Cost (YoC) é fixo em relação ao seu preço médio de compra. Acompanhar ambos ajuda a entender se as quedas de preço refletem corte de dividendos ou apenas pânico no mercado.",
+        description: "O Dividend Yield flutua diariamente com o preço de mercado. O Yield on Cost é fixo em relação ao seu custo de aquisição. Acompanhar ambos permite distinguir pânico passageiro do mercado de cortes reais de proventos.",
       },
     },
     concepts: {
-      title: "Conceitos Avançados",
+      title: "Conceitos Fundamentais",
       snowball: {
         title: "Efeito Bola de Neve (Snowball/Crossover)",
-        description:
-          "Ocorre quando a renda passiva gerada pelos seus investimentos é suficiente para comprar novas cotas/ações sem necessidade de aporte externo (Efeito Snowball) e, eventualmente, supera seu custo de vida (Crossover Point).",
+        description: "Ocorre quando a renda passiva gerada pelos seus investimentos é suficiente para comprar novas cotas ou ações sem necessidade de aporte externo (Efeito Snowball) e, eventualmente, supera seu custo de vida (Crossover Point).",
       },
       taxes: {
         title: "Tratamento de Impostos (BR/US)",
-        description:
-          "No Brasil, dividendos de Ações e FIIs atualmente são isentos de IR, mas JCP tem 15% retido na fonte. Nos EUA (ações e REITs), estrangeiros sofrem retenção na fonte de 30% sobre os dividendos, que já chegam líquidos à sua conta na corretora internacional.",
+        description: "No Brasil, dividendos de Ações e FIIs continuam em regra isentos de IRPF para a pessoa física, enquanto o JCP sofre retenção de 17,5% na fonte (Lei 15.270/2025). Nos EUA, estrangeiros sofrem retenção de 30% na fonte (WHT), compensável na declaração anual de IRPF no Brasil.",
       },
     },
     riskRadar: {
       title: "Alertas do Risk Radar",
       sectorConcentration: {
         title: "Concentração Setorial",
-        description:
-          "Alerta ativado quando mais de 25% da sua carteira está no mesmo setor, aumentando o risco de volatilidade em cadeia por crises específicas daquela indústria.",
+        description: "Alerta disparado quando mais de 25% da sua carteira está concentrada no mesmo setor econômico, aumentando o risco de volatilidade por crises regulatórias ou específicas daquela indústria.",
       },
       assetConcentration: {
         title: "Concentração por Ativo",
-        description:
-          "Alerta ativado quando um único ativo compõe mais de 15% do portfólio. Falências ou cortes de dividendos causarão impacto profundo na sua renda.",
+        description: "Alerta disparado quando um único ativo compõe mais de 15% do portfólio. Eventuais cortes de dividendos ou perdas operacionais terão impacto desproporcional na sua renda passiva.",
       },
       payoutRisk: {
         title: "Risco de Payout (Sustentabilidade)",
-        description:
-          "Ações normais distribuindo mais de 80% do lucro podem cortar dividendos em breve. (Ignorado para fundos e REITs).",
+        description: "Empresas normais distribuindo mais de 80% do lucro líquido podem ter de cortar dividendos para honrar investimentos ou dívidas. (Ignorado para fundos imobiliários e REITs).",
       },
       yieldTrap: {
         title: "Yield Trap (Armadilha de Dividendos)",
-        description:
-          "Ocorre quando o Dividend Yield é altíssimo (ex: >10%) porque o preço desabou e o mercado prevê corte iminente dos dividendos. A Margem de Segurança negativa confirma o risco.",
+        description: "Ocorre quando o Dividend Yield parece altíssimo porque a cotação da ação desabou após deterioração de fundamentos. A Margem de Segurança negativa confirma o risco iminente de corte.",
       },
     },
     supportedBrokers: {
-      title: "Corretoras Suportadas (PDF)",
-      description:
-        "Lista das instituições financeiras e corretoras homologadas para importação automática de notas de corretagem B3.",
-      sinacorTitle: "Extração Completa (Padrão SINACOR)",
-      sinacorDesc:
-        "Corretoras digitais que adotam o layout padronizado, permitindo extração integral das suas compras e vendas.",
-      internationalTitle: "Corretoras Internacionais",
-      internationalDesc:
-        "Confirmações de negociação (PDF) da Charles Schwab International Account também são detectadas automaticamente — a primeira corretora não-brasileira suportada. Diferente das notas B3, a Schwab imprime o ticker exato em cada linha, então a importação nunca precisa de matching manual de emissor.",
-      fallbackTitle: "Fallback Gracioso (Bancos Tradicionais)",
-      fallbackDesc:
-        "Bancos costumam alterar o layout de suas notas. Eles são reconhecidos para evitar crashes no parser, retornando um alerta amigável de formato inválido se a nota fugir do padrão.",
-      howToAddTitle: "Como Adicionar Nova Corretora",
-      howToAddDesc:
-        "1. Confirme o CNPJ exato no cabeçalho de uma nota real. 2. Registre-o em `detectBroker` no `src/lib/dataIngestion/b3Parser.ts`. 3. Se for SINACOR, roteie para `parseSinacorLayout`. Se for customizado, apenas detecte para acionar o fallback. 4. Adicione um mock em `pdf-parser.test.ts` e atualize esta Wiki.",
+      title: "Corretoras Suportadas & Privacidade",
+      description: "Lista das instituições financeiras e corretoras homologadas para importação automatizada de notas de corretagem B3 e extratos internacionais.",
+      sinacorTitle: "Extração Completa (Padrão SINACOR B3)",
+      sinacorDesc: "Corretoras que adotam o layout padronizado da bolsa brasileira, permitindo extração integral das operações de compra e venda de ações, FIIs, FI-Infras e ETFs.",
+      internationalTitle: "Corretoras Internacionais (Charles Schwab)",
+      internationalDesc: "Confirmações de negociação em PDF e extratos CSV da Charles Schwab International Account são reconhecidos automaticamente com identificação de ativos e moeda.",
+      fallbackTitle: "Bancos Tradicionais e Grandes Instituições",
+      fallbackDesc: "Suporte a notas e extratos de grandes bancos e corretoras, incluindo Banco do Brasil (BB Investimentos), Caixa Econômica Federal, Itaú, Bradesco/Ágora e Santander/Toro.",
+      privacyByDesignTitle: "Arquitetura Privacy by Design (100% Local)",
+      privacyByDesignDesc: "O processamento de notas de corretagem ocorre inteiramente na memória do seu navegador através de Web Workers. Nenhum dado de CPF, endereço ou arquivo PDF é transmitido para os servidores do Fuente.",
+      requestBrokerTitle: "Solicitar Suporte a Nova Corretora",
+      requestBrokerDesc: "Sua corretora ainda não é reconhecida automaticamente? Envie um exemplo anonimizado da nota para nossa equipe de engenharia para que possamos homologar o layout.",
     },
     glossary: {
-      title: "Glossário",
-      fii: "Fundo de Investimento Imobiliário (BR).",
-      reit: "Real Estate Investment Trust (US).",
-      lpa: "Lucro por Ação (EPS em inglês).",
-      vpa: "Valor Patrimonial por Ação (Book Value).",
-      jcp: "Juros sobre Capital Próprio.",
+      title: "Glossário Geral",
+      fii: "Fundo de Investimento Imobiliário (Brasil). Distribui proventos mensais com isenção de IR sob critérios legais.",
+      reit: "Real Estate Investment Trust (EUA). Corporação imobiliária americana com distribuições regulares em Dólares.",
+      lpa: "Lucro por Ação (EPS em inglês). Métrica fundamental de lucratividade líquida por cota.",
+      vpa: "Valor Patrimonial por Ação (Book Value). Patrimônio líquido contábil dividido pelo número de ações.",
+      jcp: "Juros sobre Capital Próprio. Forma de remuneração societária no Brasil com 17,5% de IRRF.",
+      fiInfra: "Fundo Incentivado de Investimento em Infraestrutura (Lei 12.431/2011). Duplamente isento de IR.",
+      wht: "Withholding Tax. Imposto de 30% retido na fonte nos EUA sobre dividendos pagos a não-residentes.",
+      hareNiemeyer: "Método dos Maiores Restos. Algoritmo matemático para alocação de aportes em cotas inteiras sem sobras.",
+      crossoverPoint: "Ponto de Cruzamento. Data em que a renda passiva dos dividendos supera o custo de vida mensal.",
+      safetyMargin: "Margem de Segurança. Diferença percentual positiva entre o preço teto estimado e o preço de mercado.",
     },
   },
   comparator: {

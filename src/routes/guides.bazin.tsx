@@ -84,6 +84,20 @@ export const Route = createFileRoute("/guides/bazin")({
           type: "application/ld+json",
           children: JSON.stringify({
             "@context": "https://schema.org",
+            "@type": "HowTo",
+            name: S.title,
+            step: S.faq.map((item, i) => ({
+              "@type": "HowToStep",
+              position: i + 1,
+              name: item.q,
+              text: item.a,
+            })),
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: S.faq.map((item) => ({
               "@type": "Question",

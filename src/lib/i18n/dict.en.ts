@@ -1470,8 +1470,7 @@ export const en = {
   seoGuides: {
     bazin: {
       title: "Bazin Method: How to Calculate a Dividend Stock's Ceiling Price | Fuente Price Pro",
-      description:
-        "Learn the Bazin method to calculate the ceiling price of dividend stocks. Step-by-step formula: ceiling price = 5-year average dividend ÷ target yield (6%).",
+      description: "Learn the Bazin method to calculate the ceiling price of dividend stocks. Step-by-step formula: ceiling price = 5-year average dividend ÷ target yield (6%).",
       faq: [
         {
           q: "What is the Bazin ceiling price method?",
@@ -1483,30 +1482,13 @@ export const en = {
         },
         {
           q: "Why did Décio Bazin use 6% as the minimum yield?",
-          a: "Bazin set 6% as the minimum dividend return needed to justify the added risk of stocks over fixed income in the Brazilian market. Above that yield, the stock trades below its ceiling price; below it, the stock is considered expensive relative to the method.",
-        },
-      ],
-    },
-    concepts: {
-      title: "The Snowball Effect and Dividend Taxes | Fuente Price Pro",
-      description:
-        "Understand the snowball effect of reinvesting dividends and how taxes affect your Brazilian dividend income. A practical guide for long-term investors.",
-      faq: [
-        {
-          q: "What is the snowball effect in investing?",
-          a: "The snowball effect happens when dividends you receive are reinvested to buy more shares, which in turn generate more dividends. Over time growth becomes exponential — the longer money stays invested and reinvested, the bigger the passive-income snowball grows.",
-        },
-        {
-          // Verified 2026-09-10 (Law 15.270/2025). Re-check between Mar-Jun 2027 — BR dividend/JCP taxation changes frequently.
-          q: "Are Brazilian stock dividends taxed?",
-          a: "Since January 2026 (Law 15.270/2025), dividends remain exempt from income tax in most cases, but with two changes: (1) a 10% withholding applies when a single company pays more than R$50,000 in a single month to the same individual, on the full amount; (2) anyone receiving more than R$600,000/year in total income enters an annual minimum-tax regime. JCP (Interest on Equity) is now taxed at 17.5% at source as of Jan/2026 (previously 15%). FII (Brazilian REIT-equivalent) distributions are tax-exempt for individuals when the fund trades on the exchange and has at least 100 shareholders. These rules change frequently — always consult an accountant for your specific situation and jurisdiction.",
+          a: "Bazin set 6% as the minimum dividend return needed to justify the added risk of stocks over fixed income. Above that yield, the stock trades below its ceiling price; below it, the stock is considered expensive relative to the method.",
         },
       ],
     },
     graham: {
       title: "Graham Formula for Stock Intrinsic Value | Fuente Price Pro",
-      description:
-        "Understand Benjamin Graham's formula for calculating a stock's intrinsic value: IV = √(22.5 × EPS × Book Value). Learn when to apply it and which sectors are exceptions.",
+      description: "Understand Benjamin Graham's formula for calculating a stock's intrinsic value: IV = √(22.5 × EPS × Book Value). Learn when to apply it and which sectors are exceptions.",
       faq: [
         {
           q: "What is Graham's formula for intrinsic value?",
@@ -1524,8 +1506,7 @@ export const en = {
     },
     gordon: {
       title: "Gordon Growth Model for Dividend Stocks | Fuente Price Pro",
-      description:
-        "Learn the Gordon Growth Model (DDM): P0 = D1 / (k - g). Calculate the fair price of stocks with constant dividend growth and a discount rate.",
+      description: "Learn the Gordon Growth Model (DDM): P0 = D1 / (k - g). Calculate the fair price of stocks with constant dividend growth and a discount rate.",
       faq: [
         {
           q: "What is the Gordon Growth Model?",
@@ -1541,101 +1522,27 @@ export const en = {
         },
       ],
     },
-    metrics: {
-      title: "Dividend Metrics: Margin of Safety, Yield on Cost, CAGR | Fuente Price Pro",
-      description:
-        "Complete guide to the key dividend metrics: margin of safety, yield on cost (YoC), payout ratio, CAGR, and DY vs YoC. Learn how to read each indicator.",
+    peterLynch: {
+      title: "Peter Lynch Fair Value - Valuation & PEG Formula | Fuente Price Pro",
+      description: "Calculate fair stock value using Peter Lynch's PEG methodology: Fair Value = EPS × (Earnings Growth Rate + Dividend Yield). Ideal for GARP dividend stocks.",
       faq: [
         {
-          q: "What is the margin of safety in dividend investing?",
-          a: "The margin of safety is the percentage difference between the calculated ceiling price and the current market price. The bigger the margin, the cheaper the stock is relative to its fair value. Example: ceiling price $40.00, current price $32.00, a 20% margin of safety.",
+          q: "What is Peter Lynch's Fair Value model?",
+          a: "Peter Lynch's Fair Value formula assesses Growth at a Reasonable Price (GARP) companies by linking price-to-earnings to earnings growth and dividend yield, establishing that a fairly priced stock has a PEG ratio around 1.0.",
         },
         {
-          q: "What's the difference between Dividend Yield (DY) and Yield on Cost (YoC)?",
-          a: "Dividend Yield (DY) is calculated on the current market price. Yield on Cost (YoC) is calculated on the investor's average purchase price. For someone who bought a stock years ago at a low price, YoC can be much higher than the current DY — revealing the real quality of the investment over time.",
+          q: "How does Fuente Price Pro calculate Peter Lynch Fair Value?",
+          a: "The dividend-adjusted formula is: Fair Value = EPS × (Annual Earnings Growth % + Dividend Yield %). For example, a company with $3.00 EPS, 12% annual earnings growth, and a 3% DY has a fair value of $3.00 × (12 + 3) = $45.00.",
         },
         {
-          // Verified 2026-09-10 (Law 8.668/1993). Re-check between Mar-Jun 2027.
-          q: "What's a healthy payout ratio for dividends?",
-          a: "A healthy payout ratio varies by sector. For industrial and consumer companies, a payout between 40% and 70% is generally considered sustainable. Above 100% means the company is paying out more than it earns — a warning sign. FIIs (Brazilian REITs) are required by Law 8.668/1993 to distribute at least 95% of cash-basis income.",
-        },
-      ],
-    },
-    riskRadar: {
-      title: "Risk Radar: Concentration, Payout, and Yield Trap in Dividend Investing | Fuente Price Pro",
-      description:
-        "Identify the key risks in dividend portfolios: sector concentration, asset concentration, payout risk, and the high-yield trap.",
-      faq: [
-        {
-          q: "What is a yield trap?",
-          a: "A yield trap happens when a stock shows a very high dividend yield — seemingly attractive — but it's the result of a sharp drop in the stock price, not a real increase in dividends. Investing in this situation can mean buying a deteriorating company that will soon cut its dividend.",
-        },
-        {
-          q: "How do you spot unsustainable payout risk?",
-          a: "A payout ratio above 90–100% of net income is a warning sign for non-REIT companies: the company is distributing more than it earns, putting dividend sustainability at risk. Also check the trend: a rising payout with stagnant earnings is more dangerous than a high payout with growing earnings.",
-        },
-        {
-          q: "What's the maximum recommended sector concentration for a dividend portfolio?",
-          a: "There's no single rule, but conservative investors typically cap each sector at 20–30% of the portfolio. High concentration in one sector (e.g. over 40% in banks or utilities) exposes the portfolio to sector-specific regulatory and macroeconomic risks that can hit every holding at once.",
-        },
-        {
-          q: "How does Fuente Price Pro help spot portfolio risks?",
-          a: "Fuente Price Pro's Risk Radar automatically analyzes your portfolio and flags: excessive sector or asset concentration, elevated payout ratios, yields far above the sector average (a possible yield trap), and stocks trading above their ceiling price — with visual alerts using semantic colors.",
-        },
-      ],
-    },
-    brokers: {
-      title: "Supported Brokers: XP, BTG, Inter, Schwab | Fuente Price Pro",
-      description:
-        "See all the brokers supported by Fuente Price Pro for brokerage note imports: XP, Clear, Rico, BTG Pactual, Banco Inter, NuInvest, Schwab, and more.",
-      faq: [
-        {
-          q: "Which Brazilian brokers does Fuente Price Pro support?",
-          a: "Fuente Price Pro supports native import of SINACOR-standard brokerage notes from: XP Investimentos, Clear, Rico, Modal, BTG Pactual, Banco Inter, NuInvest, Órama, and Genial Investimentos. Import is done via the brokerage note PDF.",
-        },
-        {
-          q: "Does Fuente Price Pro support international brokers?",
-          a: "Yes. Fuente Price Pro supports CSV statement import from Charles Schwab International Account, letting you track US stocks (NYSE, NASDAQ) and international ETFs in the same portfolio as your Brazilian holdings.",
-        },
-        {
-          q: "What is the SINACOR standard for brokerage notes?",
-          a: "SINACOR is B3's (the Brazilian stock exchange) Integrated Settlement and Clearing System. Brokerage notes in the SINACOR standard follow a standardized layout that lets Fuente Price Pro automatically identify buy/sell trades, fees, and traded assets.",
-        },
-      ],
-    },
-    glossary: {
-      title: "Investing Glossary: FII, REIT, EPS, Book Value, JCP | Fuente Price Pro",
-      description:
-        "Complete glossary for dividend investors: FII, REIT, EPS, Book Value, JCP, and more. Clear definitions for anyone starting to invest in the Brazilian market (B3).",
-      faq: [
-        {
-          // Verified 2026-09-10 (Law 14.754/2023). Re-check between Mar-Jun 2027.
-          q: "What is a FII (Brazilian real estate investment fund)?",
-          a: "A FII is a fund that invests in real estate assets — logistics warehouses, office buildings, malls, CRIs — and distributes income monthly to shareholders. They trade on B3 like stocks. For individual investors, distributions are exempt from income tax in Brazil when the fund has at least 100 shareholders (raised from 50 by Law 14.754/2023) and trades on the exchange, provided the investor doesn't hold 10% or more of the fund's shares or the right to more than 10% of its distributed income.",
-        },
-        {
-          q: "What is a REIT and how is it different from a FII?",
-          a: "A REIT (Real Estate Investment Trust) is the US equivalent of the Brazilian FII. Both invest in real estate and distribute income regularly. The key difference is that US REITs pay dividends in US dollars and are subject to US taxation.",
-        },
-        {
-          q: "What is EPS (Earnings Per Share)?",
-          a: "EPS (Earnings Per Share) — LPA in Portuguese — is a company's net income divided by its number of outstanding shares. It's one of the main profitability indicators and is used in Graham's formula to calculate intrinsic value.",
-        },
-        {
-          q: "What is Book Value per Share?",
-          a: "Book Value per Share — VPA in Portuguese — is a company's accounting net equity divided by its number of shares. It represents the theoretical liquidation value per share and is used in Graham's formula alongside EPS.",
-        },
-        {
-          // Verified 2026-09-10 (Law 15.270/2025). Re-check between Mar-Jun 2027.
-          q: "What is JCP (Interest on Equity)?",
-          a: "JCP is a Brazil-specific form of shareholder compensation, an alternative to dividends, that lets the company deduct the payment from taxable income. For individual shareholders, JCP has been taxed at 17.5% at source since January 2026 (Law 15.270/2025; previously 15%). It's common among banks like Itaú, Bradesco, and Banco do Brasil.",
+          q: "What is the key difference between Graham's formula and Peter Lynch's model?",
+          a: "Graham's formula is strictly designed for mature, asset-heavy value companies using book value (BVPS). Peter Lynch rewards sustainable earnings expansion, making it vastly superior for tech, consumer, and service companies with low tangible assets.",
         },
       ],
     },
     dividendValuation: {
       title: "Dividend Yield Formula & Bazin Ceiling Price Guide | Fuente Price Pro",
-      description:
-        "Learn how to calculate the ceiling price of a dividend stock with the Bazin method. Step-by-step dividend yield formula, worked examples, and edge cases.",
+      description: "Learn how to calculate the ceiling price of a dividend stock with the Bazin method. Step-by-step dividend yield formula, worked examples, and edge cases.",
       faq: [
         {
           q: "What is the dividend yield formula?",
@@ -1651,166 +1558,524 @@ export const en = {
         },
       ],
     },
+    reinvestir: {
+      title: "How to Reinvest Dividends: 3 Snowball Strategies | Fuente Price Pro",
+      description: "Explore the 3 strategies to reinvest dividends: Accelerate Snowball (Highest Net Yield), Correct Portfolio Deficit, and Reinforce Paying Holding (Synthetic DRIP).",
+      faq: [
+        {
+          q: "What is the best dividend reinvestment strategy?",
+          a: "It depends on your goal: 'Accelerate Snowball' maximizes immediate cash flow by buying discounted stocks with the highest net yield; 'Correct Deficit' prioritizes your most underweight asset class to balance risk.",
+        },
+        {
+          q: "What is the Accelerate Snowball strategy in Fuente Price Pro?",
+          a: "It filters all portfolio holdings trading below their ceiling price and ranks them by projected net dividend yield, funneling dividend cash to generate maximum cash flow in the next period.",
+        },
+        {
+          q: "How does Reinvestir differ from the 'Where should my next contribution go?' dashboard widget?",
+          a: "The Dashboard widget distributes fresh external capital across portfolio targets. The /reinvestir route is a closed-batch tactical reinvestment engine for accumulated dividend cash.",
+        },
+      ],
+    },
+    contributionPlan: {
+      title: "Contribution Plan with Hare-Niemeyer & Margin of Safety | Fuente Price Pro",
+      description: "Allocate your periodic savings with mathematical efficiency using the Hare-Niemeyer largest remainder method weighted by safety margin deficit.",
+      faq: [
+        {
+          q: "How does the Hare-Niemeyer algorithm work for investment contributions?",
+          a: "Hare-Niemeyer (Largest Remainder Method) assigns exact whole-share counts based on ideal quotas and distributes leftover fractional capital to the largest remainders, eliminating uninvested cash.",
+        },
+        {
+          q: "Why does Fuente weight contributions by safety margin deficit?",
+          a: "Buying an underweight asset trading above its ceiling price destroys value. Fuente only allocates capital to holdings combining an allocation deficit with a positive margin of safety.",
+        },
+        {
+          q: "Does the contribution planner support multi-currency allocations (BRL & USD)?",
+          a: "Yes, real-time FX rates harmonize contributions across Brazilian B3 holdings and US brokerage accounts.",
+        },
+      ],
+    },
+    withdraw: {
+      title: "Tax-Smart Liquidation Engine: Order of Sale & Loss Harvesting | Fuente Price Pro",
+      description: "Learn the mathematical order of liquidation to minimize taxes: tax-loss harvesting, Brazilian R$ 20k stock exemption, and LIFO/FIFO optimization.",
+      faq: [
+        {
+          q: "What is the optimal liquidation order to reduce capital gains tax?",
+          a: "Tax-smart liquidation prioritizes: (1) lots with accumulated losses for tax credits; (2) Brazilian stocks within the monthly R$ 20,000 exemption; (3) assets with lowest capital gains percentage; (4) holdings trading above ceiling price.",
+        },
+        {
+          q: "How does the monthly R$ 20,000 stock sales exemption work in Brazil?",
+          a: "If total gross monthly sales of ordinary/preferred stocks in swing trades do not exceed R$ 20,000, realized gains are 100% tax-free for Brazilian tax residents. Note: FIIs, ETFs, and BDRs are excluded.",
+        },
+        {
+          q: "Can capital losses from FIIs offset stock gains?",
+          a: "No. Under Brazilian tax law, losses from FII real estate fund shares can only offset gains from other FIIs. Stock losses can only offset stock gains.",
+        },
+      ],
+    },
+    snowball: {
+      title: "Snowball Effect Simulator & Crossover Point (FIRE) | Fuente Price Pro",
+      description: "Simulate when your dividends will exceed your cost of living (Crossover Point) and track the 4 FIRE milestones (Essential, Comfort, Full, and Fat FIRE).",
+      faq: [
+        {
+          q: "What is the Crossover Point in financial independence?",
+          a: "The Crossover Point is the exact date when monthly passive dividend income permanently exceeds your monthly living expenses, marking the achievement of financial independence.",
+        },
+        {
+          q: "What are the 4 FIRE milestones in Fuente Price Pro?",
+          a: "The 4 stages are: (1) Essential FIRE (covers food and shelter); (2) Comfort FIRE (covers current lifestyle); (3) Full FIRE (provides surplus for perpetual reinvestment); (4) Fat FIRE (abundance and premium living).",
+        },
+        {
+          q: "How can you accelerate the dividend snowball?",
+          a: "Three levers: (1) 100% immediate reinvestment of received dividends; (2) disciplined buying strictly below ceiling prices; (3) holding companies with track records of dividend increases above inflation.",
+        },
+      ],
+    },
+    taxBrazil: {
+      title: "Taxation of Dividends, JCP at 17.5% and FIIs in Brazil | Fuente Price Pro",
+      description: "Complete tax guide for B3 investors: 17.5% withholding on JCP (Law 15.270/2025), FII tax exemption criteria (Law 14.754/2023), and DARF calculation.",
+      faq: [
+        {
+          q: "What is the current withholding tax rate on JCP (Interest on Equity) in Brazil?",
+          a: "Effective January 1, 2026 (Law 15.270/2025), withholding tax on JCP for individuals is 17.5% at source (previously 15%). The net amount is deposited directly into your brokerage account.",
+        },
+        {
+          q: "What are the requirements for FII distributions to remain tax-exempt in Brazil?",
+          a: "Under Law 14.754/2023, FII distributions are exempt for individuals if: (1) fund shares are exclusively exchange-traded; (2) the fund has at least 100 shareholders; (3) the individual holds less than 10% of total fund shares.",
+        },
+        {
+          q: "How are capital gains on FII share sales taxed?",
+          a: "Realized net gains on FII sales are taxed at a flat 20% rate via DARF, with zero monthly sales exemption threshold. DARF must be paid by the last business day of the following month.",
+        },
+      ],
+    },
+    taxUsa: {
+      title: "US Stock, REIT & Withholding Tax (30%) Guide | Fuente Price Pro",
+      description: "Understand IRS 30% dividend withholding tax (WHT), Section 199A REIT deductions, and foreign tax credit offsets for non-US investors.",
+      faq: [
+        {
+          q: "How much tax is withheld from US stock and REIT dividends?",
+          a: "For non-US resident investors with a valid Form W-8BEN on file, the IRS withholds a statutory 30% tax (Withholding Tax - WHT) from all dividend distributions.",
+        },
+        {
+          q: "Can US withholding tax be credited in my home country?",
+          a: "Yes. Countries with tax reciprocity agreements with the US (such as Brazil) allow the 30% US withheld tax to be credited against local income tax, preventing double taxation.",
+        },
+        {
+          q: "What is the Section 199A (QBI) deduction for US REITs?",
+          a: "Section 199A allows eligible taxpayers to deduct up to 20% of qualified REIT dividends from their taxable base, reported in Box 5 of Form 1099-DIV.",
+        },
+      ],
+    },
+    fiInfra: {
+      title: "FI-Infra (Law 12.431): Double Tax Exemption Guide | Fuente Price Pro",
+      description: "Everything about Brazilian Infrastructure Funds (FI-Infra): complete income tax exemption on monthly distributions AND capital gains for individual investors.",
+      faq: [
+        {
+          q: "Why is FI-Infra double tax-exempt in Brazil?",
+          a: "Under Law 12.431/2011, individual investors enjoy zero income tax on both periodic dividend yields and realized capital gains when selling fund shares on the stock exchange.",
+        },
+        {
+          q: "How does FI-Infra differ from real estate funds (FIIs)?",
+          a: "Unlike FIIs where share sales are taxed at 20% on gains, FI-Infra share sales are 100% tax-exempt for individuals. FI-Infras invest primarily in infrastructure debentures.",
+        },
+        {
+          q: "What are the primary risks of investing in FI-Infra?",
+          a: "Credit risk of private concessionaires (highways, power transmission, water) and interest rate volatility (mark-to-market on inflation-linked bonds).",
+        },
+      ],
+    },
+    currencyDecomposition: {
+      title: "Currency Decomposition of International Stocks & ETFs | Fuente Price Pro",
+      description: "Learn the mathematical return decomposition for foreign investments: isolate pure Wall Street asset performance (USD) from FX rate fluctuations (USD/BRL).",
+      faq: [
+        {
+          q: "What is currency decomposition in international investing?",
+          a: "It mathematically splits total return into two independent drivers: (1) native asset price performance in USD; (2) foreign exchange gain or loss from currency movements.",
+        },
+        {
+          q: "What is the formula for currency return decomposition?",
+          a: "The multiplicative formula is: (1 + Total Return in Local Currency) = (1 + Asset Return in USD) × (1 + FX Change). Subtracting 1 yields the exact isolated local currency return.",
+        },
+        {
+          q: "Why is it dangerous to only look at total return in local currency?",
+          a: "A US stock could be down 15% while the US Dollar rises 20%, creating an illusion of a +2% gain. Without decomposition, you risk missing fundamental business deterioration.",
+        },
+      ],
+    },
+    appDirectory: {
+      title: "Fuente Price Pro App Directory & Screen Guide | Fuente Price Pro",
+      description: "The official directory of all tools in Fuente Price Pro: Cockpit, MyPortfolio, Reinvesting Engine, Contribution Plan, Tax Center, and more.",
+      faq: [
+        {
+          q: "When should I use Reinvestir vs Contribution Plan?",
+          a: "Use 'Reinvestir' when allocating accumulated dividend cash with a specific strategy (Snowball, Deficit, DRIP); use 'Contribution Plan' when deploying fresh paycheck savings using Hare-Niemeyer.",
+        },
+        {
+          q: "What does the Currency Decomposition panel in MyPortfolio do?",
+          a: "It breaks down your foreign holdings into stock performance vs dollar appreciation, showing the real health of your global diversification.",
+        },
+        {
+          q: "How does the Asset Deep Dive (/explore) calculate ceiling prices?",
+          a: "It computes the weighted Fuente Consensus across Bazin, Graham, Gordon H-Model, and Peter Lynch formulas, showing official CVM/SEC data and historical ceiling trajectory.",
+        },
+      ],
+    },
+    concepts: {
+      title: "The Snowball Effect and Dividend Taxes | Fuente Price Pro",
+      description: "Understand the snowball effect of reinvesting dividends and how taxes affect your dividend income. A practical guide for long-term investors.",
+      faq: [
+        {
+          q: "What is the snowball effect in investing?",
+          a: "The snowball effect happens when dividends you receive are reinvested to buy more shares, which in turn generate more dividends, compounding exponentially over time.",
+        },
+        {
+          q: "Are stock dividends taxed in Brazil?",
+          a: "Stock dividends remain mostly tax-exempt for individuals in Brazil (with a 10% withholding above R$ 50k/month from a single payer under Law 15.270/2025). JCP is taxed at 17.5% at source as of 2026. FII and FI-Infra rules offer specific statutory exemptions.",
+        },
+      ],
+    },
+    metrics: {
+      title: "Dividend Metrics: Margin of Safety, Yield on Cost, CAGR | Fuente Price Pro",
+      description: "Complete guide to key dividend metrics: margin of safety, yield on cost (YoC), payout ratio, CAGR, and DY vs YoC. Learn how to read each indicator.",
+      faq: [
+        {
+          q: "What is the margin of safety in dividend investing?",
+          a: "The margin of safety is the percentage difference between the calculated ceiling price and current market price. Example: ceiling $40.00, current price $32.00, yielding a 20% margin of safety.",
+        },
+        {
+          q: "What's the difference between Dividend Yield (DY) and Yield on Cost (YoC)?",
+          a: "DY is calculated on current market price. YoC is calculated on your average purchase price. Over years of dividend increases, your YoC will steadily outgrow current market DY.",
+        },
+        {
+          q: "What's a healthy payout ratio for dividends?",
+          a: "Between 40% and 70% is generally sustainable for industrial companies. Above 80-100% flags potential cut risk. REITs and FIIs are exceptions, distributing almost all profit by law.",
+        },
+      ],
+    },
+    riskRadar: {
+      title: "Risk Radar: Concentration, Payout, and Yield Trap in Dividend Investing | Fuente Price Pro",
+      description: "Identify key risks in dividend portfolios: sector concentration, asset concentration, payout risk, and the high-yield trap.",
+      faq: [
+        {
+          q: "What is a yield trap?",
+          a: "A yield trap occurs when a stock displays a very high dividend yield because its price collapsed following deteriorating business fundamentals, presaging an imminent dividend cut.",
+        },
+        {
+          q: "How do you spot unsustainable payout risk?",
+          a: "A payout ratio above 80-90% of net income warns that dividends may be cut to service debt or cover capital expenditures. Always check free cash flow coverage.",
+        },
+        {
+          q: "What is the recommended maximum sector concentration for a dividend portfolio?",
+          a: "Conservative investors typically cap individual sectors at 25% and individual assets at 15% of total portfolio value to avoid systemic single-industry shocks.",
+        },
+      ],
+    },
+    brokers: {
+      title: "Supported Brokers: XP, BTG, Inter, BB, Caixa, Schwab | Fuente Price Pro",
+      description: "See all brokers supported by Fuente Price Pro for B3 SINACOR and Charles Schwab statement imports with Privacy by Design.",
+      faq: [
+        {
+          q: "Which Brazilian brokers does Fuente Price Pro support?",
+          a: "Fuente Price Pro supports SINACOR-standard notes from XP Investimentos, Clear, Rico, BTG Pactual, Banco Inter, NuInvest, Órama, Genial, Banco do Brasil (BB), and Caixa Econômica Federal.",
+        },
+        {
+          q: "Does Fuente Price Pro support international brokers?",
+          a: "Yes. It natively supports Charles Schwab International Account PDF trade confirmations and CSV statements with automatic ticker, currency, and cashflow recognition.",
+        },
+        {
+          q: "Are my financial documents stored on Fuente servers?",
+          a: "No! By Privacy by Design, statement parsing executes 100% locally in your browser memory via Web Workers. No personal data or PDF files are uploaded or stored externally.",
+        },
+      ],
+    },
+    glossary: {
+      title: "Investing Glossary: FII, REIT, EPS, Book Value, JCP, FI-Infra | Fuente Price Pro",
+      description: "Complete glossary for dividend investors: FII, REIT, EPS, Book Value, JCP, FI-Infra, WHT, Hare-Niemeyer, and Crossover Point.",
+      faq: [
+        {
+          q: "What is a FII (Brazilian Real Estate Investment Fund)?",
+          a: "FII is a closed-end Brazilian real estate fund that distributes at least 95% of cash-basis earnings monthly, tax-exempt for individuals meeting statutory criteria.",
+        },
+        {
+          q: "What is a REIT and how is it different from a FII?",
+          a: "A REIT (Real Estate Investment Trust) is the US counterpart. Most operate as corporations with quarterly dividend distributions in USD and 30% US withholding tax for foreign investors.",
+        },
+        {
+          q: "What is JCP (Interest on Equity)?",
+          a: "JCP is a Brazil-specific shareholder distribution mechanism deductible from corporate tax, subject to 17.5% withholding tax at source for individuals (Law 15.270/2025).",
+        },
+        {
+          q: "What is FI-Infra?",
+          a: "A specialized Brazilian infrastructure fund under Law 12.431/2011 providing double tax exemption on both dividends and capital gains for individual investors.",
+        },
+      ],
+    },
     guidesHub: {
       title: "Investing Guides & Valuation Methodology | Fuente Price Pro",
-      description:
-        "The complete Fuente Price Pro wiki: Bazin, Graham and Gordon valuation models, dividend yield formulas, portfolio risk alerts, and supported brokerage note formats.",
+      description: "The complete Fuente Price Pro wiki: Bazin, Graham, Gordon, and Peter Lynch valuation models, reinvestment engines, BR/US tax intelligence, and app screen directory.",
     },
   },
   docs: {
-    title: "Valuation Methodology",
-    description:
-      "Our valuation methodology focuses on generating safe and growing passive income, using multiple models and safety margins to evaluate global opportunities.",
+    title: "Valuation Methodology & Guides",
+    description: "Our valuation methodology focuses on generating safe and growing passive income, using multiple mathematical models, safety margins, and dual-jurisdiction tax engines to evaluate global opportunities.",
     searchPlaceholder: "Search Wiki...",
     navLink: "Wiki",
     index: "Index",
+    openInApp: "Open in App",
+    sections: {
+      valuation: "Valuation Models",
+      decisionEngines: "Decision Engines",
+      tax: "Tax Center BR / US",
+      analysis: "Metrics & Risks",
+      appGuide: "App Directory",
+    },
     bazinFormula: "Ceiling Price = Average Dividend (Last Years) ÷ Target Yield",
     gordonFormula: "Fair Price = (Current Dividend × (1 + Growth)) / (Discount Rate - Growth)",
+    peterLynchFormula: "Fair Price = EPS × (Earnings Growth Rate % + Dividend Yield %)",
+    hareNiemeyerFormula: "Shares = Integer [(Budget × Deficit) / Sum Deficits] + Largest Remainders",
+    fxDecompositionFormula: "(1 + Total Return BRL) = (1 + Asset Return USD) × (1 + FX Change USD/BRL)",
     consensus: {
       title: "Fuente Consensus",
-      description:
-        "An intelligent synthesis of the most reliable valuation models. By taking the median of Bazin, Graham, and Gordon, the consensus mitigates individual formula weaknesses, delivering a robust ceiling price for a diversified portfolio.",
+      description: "An intelligent synthesis of the market's most dependable valuation models. By taking the weighted median of Bazin, Graham, Gordon, and Peter Lynch, the consensus mitigates individual formula biases, delivering a robust, auditable ceiling price for a diversified portfolio.",
     },
     bazin: {
       title: "Bazin Model",
-      description:
-        "Ideal for income-focused investors. Establishes the ceiling price by dividing the average dividend by an acceptable minimum yield (the classic 6% rule). Highly effective for mature companies with constant distributions.",
-      example:
-        "Numerical Example: If the company pays $5.25 average dividend, the 6% target results in a Ceiling Price of $87.50 ($5.25 / 0.06).",
+      description: "Ideal for income-focused investors. Establishes the ceiling price by dividing historical average dividends by a minimum acceptable yield (the classic 6% rule by Décio Bazin). Highly effective for mature companies with predictable cash distributions.",
+      fiiSpreadNote: "Real Estate & Credit Adaptation: For real estate funds (FIIs/REITs) and credit instruments, Fuente adapts the target yield by adding a safety spread over the risk-free rate (NTN-B in Brazil or Treasuries in the US) to reflect appropriate credit risk premiums.",
+      example: "Numerical Example: If a company pays a $5.25 average dividend, a 6% target results in a Ceiling Price of $87.50 ($5.25 / 0.06).",
     },
     graham: {
       title: "Graham Formula",
-      description:
-        "Created by Benjamin Graham, calculates the Intrinsic Value of a stock based on Earnings Per Share (EPS) and Book Value Per Share (BVPS). Excellent for Value Stocks.",
+      description: "Created by Benjamin Graham in 'The Intelligent Investor', calculates a stock's Intrinsic Value based on Earnings Per Share (EPS) and Book Value Per Share (BVPS). Excellent for asset-heavy Value Stocks.",
       notApplicableBadge: "Not applicable to FIIs/REITs",
-      notApplicableReason:
-        "Equity distortion and profit distribution obligations would invalidate the formula.",
-      example:
-        "Numerical Example: With an EPS of $3.00 and BVPS of $10.00, the square root of (22.5 * 3 * 10) results in an Intrinsic Value of $25.98.",
+      notApplicableReason: "Statutory distribution mandates (95% cash payouts) and accounting equity distortions invalidate classical Graham balance sheet multiples.",
+      example: "Numerical Example: With an EPS of $3.00 and BVPS of $10.00, the square root of (22.5 * 3 * 10) results in an Intrinsic Value of $25.98.",
     },
     gordon: {
-      title: "Gordon Model",
-      description:
-        "A dividend discount model assuming perpetual growth. It's the ideal mathematical model for Real Estate Funds (REITs) due to distribution predictability and constant inflation adjustments. Fuente uses a 2-stage refinement (H-Model): a 5-year transition from the asset's own growth rate down to a long-term terminal rate anchored to inflation, rather than a single flat growth assumption forever.",
-      example:
-        "Illustrative Example (not a recommendation) — textbook single-stage formula: Assuming a $1.00 dividend, 2% growth, and 6% discount rate, the fair price would be $25.50 [(1.00 * 1.02) / (0.06 - 0.02)]. Fuente's actual calculation blends this with a 5-year transition, so the number you see in the app may differ slightly.",
+      title: "Gordon Model & H-Model",
+      description: "A dividend discount model assuming perpetual growth. Fuente applies a 2-stage refinement (H-Model): a 5-year linear transition from the asset's historical growth rate down to a conservative terminal rate anchored to inflation, preventing unrealistic compounding into infinity.",
+      example: "Practical Example: With a $1.00 dividend, 2% growth, and a 6% discount rate, the basic formula yields $25.50 [(1.00 * 1.02) / (0.06 - 0.02)]. Fuente's calculation blends this with a 5-year glide path for enhanced safety.",
+    },
+    peterLynch: {
+      title: "Peter Lynch Model",
+      description: "Developed by legendary Fidelity manager Peter Lynch to assess Growth at a Reasonable Price (GARP) stocks. It establishes that a company's fair P/E multiple corresponds to the sum of its earnings growth rate and dividend yield.",
+      formula: "Fair Price = EPS × (Earnings Growth Rate % + Dividend Yield %)",
+      example: "Numerical Example: If a company has $3.50 EPS, 10% annual earnings growth, and a 4% Dividend Yield, its Fair Price is $3.50 × (10 + 4) = $49.00.",
     },
     dividendValuation: {
       title: "Dividend Valuation Walkthrough",
-      intro:
-        "A step-by-step look at the dividend yield formula and the Bazin ceiling price formula — the two building blocks behind every valuation in Fuente.",
+      intro: "A step-by-step walkthrough of the dividend yield formula and the Bazin ceiling price formula — the two building blocks behind every valuation in Fuente.",
       yieldFormulaTitle: "The dividend yield formula",
       yieldFormula: "Dividend Yield = (Annual Dividend per Share ÷ Current Share Price) × 100",
-      yieldFormulaBody:
-        "If a stock trades at $50 and paid $2.50 in dividends over the last 12 months, its dividend yield is 5%. Yield changes every time the price moves — which is why long-term investors track yield on cost (dividend ÷ your purchase price) separately.",
+      yieldFormulaBody: "If a stock trades at $50 and paid $2.50 in dividends over the last 12 months, its dividend yield is 5%. Yield fluctuates continuously with market price — which is why long-term investors track yield on cost (dividend ÷ your purchase price) separately.",
       ceilingFormulaTitle: "The Bazin ceiling price formula",
-      ceilingFormulaBody:
-        "Décio Bazin flipped the yield equation. Instead of asking \"what yield does today's price give me?\", he asked \"what price gives me the yield I require?\" The result is your maximum fair price: above it, the stock is too expensive for your target; below it, there's a margin of safety.",
+      ceilingFormulaBody: "Décio Bazin inverted the yield equation. Instead of asking 'what yield does today's price give me?', he asked 'what price gives me the yield I require?' The result is your maximum ceiling price: above it, the stock is too expensive for your target; below it, there's a margin of safety.",
       exampleTitle: "Worked example",
-      exampleIntro:
-        "A stock paid the following dividends per share over the last five years: $1.80, $2.00, $2.10, $2.20, and $1.90.",
+      exampleIntro: "A stock paid the following dividends per share over the last five years: $1.80, $2.00, $2.10, $2.20, and $1.90.",
       exampleStep1: "Average dividend = (1.80 + 2.00 + 2.10 + 2.20 + 1.90) ÷ 5 = $2.00",
       exampleStep2: "Target yield = 6% (your minimum acceptable return)",
       exampleStep3: "Ceiling price = $2.00 ÷ 0.06 = $33.33",
-      exampleNote:
-        "At $28, you'd have a ~19% margin of safety and a projected 7.1% yield on cost. At $40, you'd be paying 20% above ceiling for only a 5% yield.",
+      exampleNote: "At $28, you would have a ~19% margin of safety and a projected 7.1% yield on cost. At $40, you would be paying 20% above ceiling for only a 5% yield.",
       chartCurrentLabel: "Price A ($28)",
       chartOverLabel: "Price B ($40)",
       chartCeilingLabel: "Ceiling ($33.33)",
       edgeCasesTitle: "Edge cases to watch",
-      edgeCaseCuts: "Dividend cuts — the 5-year average smooths one bad year, but a permanent cut breaks the model. Check the payout ratio and free cash flow before trusting the ceiling price.",
-      edgeCaseTax: "Withholding tax — US-domiciled stocks, REITs, and ETFs withhold 30% of dividends for foreign investors. Apply the tax to the dividend before running the formula, or you'll overestimate the ceiling.",
-      edgeCaseCurrency: "Currency — compare BRL dividends to a BRL target yield and USD dividends to a USD target yield. Never mix them.",
-      edgeCaseMonthly: "REITs, FIIs, and ETFs — these pay monthly. Multiply the trailing 12 monthly distributions to get the annual figure before averaging.",
+      edgeCaseCuts: "Dividend cuts — the 5-year average smooths one bad year, but a structural cut breaks the model. Always check the payout ratio and free cash flow before trusting the ceiling price.",
+      edgeCaseTax: "Withholding tax — US-domiciled stocks and REITs withhold 30% of dividends for non-US investors. Fuente deducts this withholding before running net valuation formulas.",
+      edgeCaseCurrency: "Currency — compare BRL dividends to a BRL target yield and USD dividends to a USD target yield. Never mix currency assumptions.",
+      edgeCaseMonthly: "Distribution Cadence — Brazilian FIIs pay monthly; US REITs typically distribute quarterly (with monthly exceptions such as Realty Income and STAG); global ETFs distribute quarterly or semi-annually.",
+    },
+    reinvestir: {
+      title: "Dividend Reinvestment Engine",
+      description: "The reinvestment engine analyzes accumulated dividend cash in your account and calculates tactical allocations without requiring fresh external capital, compounding your snowball.",
+      strategySnowballTitle: "1. Accelerate Snowball (Highest Net Yield)",
+      strategySnowballDesc: "Filters all holdings currently trading below their ceiling price and prioritizes those with the highest projected net dividend yield to maximize immediate monthly income.",
+      strategyDeficitTitle: "2. Correct Portfolio Deficit (Target Deficit)",
+      strategyDeficitDesc: "Compares your current asset allocation with your target percentages, allocating capital to undervalued holdings within your most underweight classes.",
+      strategyDripTitle: "3. Reinforce Paying Holding (Synthetic DRIP)",
+      strategyDripDesc: "Reinvests dividends directly into the specific asset that generated them, provided it remains below its safety ceiling price, mimicking an automated DRIP.",
+      comparisonTitle: "Difference vs. 'Where should my next contribution go?'",
+      comparisonDesc: "The Dashboard widget distributes fresh paycheck savings across targets. The /reinvestir route is a closed-batch tactical simulator for accumulated dividend cash, offering 3 distinct reinvestment strategies.",
+    },
+    contributionPlan: {
+      title: "Intelligent Contribution Planner",
+      description: "The periodic contribution engine uses discrete combinatorial optimization to translate your monthly dollar amount into exact whole-share buy orders across your portfolio.",
+      hareNiemeyerTitle: "Hare-Niemeyer Algorithm (Largest Remainder)",
+      hareNiemeyerDesc: "Instead of unexecutable fractional shares or imprecise rounding that leaves uninvested cash, the algorithm computes ideal continuous quotas, allocates whole parts, and distributes leftover units to the largest fractional remainders.",
+      safetyMarginDeficitTitle: "Safety Margin Deficit Weighting",
+      safetyMarginDeficitDesc: "An underweight asset trading with a negative margin of safety (above ceiling) receives zero weight. Capital is strictly directed toward assets combining an allocation deficit with an attractive margin of safety.",
+      exampleTitle: "Practical Contribution Example",
+      exampleDesc: "With a $5,000 contribution, the engine identifies a $3,000 deficit in Real Estate and $2,000 in Value Stocks. Among eligible stocks below ceiling, it determines exact share quantities so that uninvested cash is less than the price of a single share.",
+    },
+    withdraw: {
+      title: "Tax-Smart Liquidation Engine",
+      description: "When liquidity needs or portfolio rebalancing require liquidating positions, the tax engine optimizes sale ordering to minimize tax liability.",
+      harvestingTitle: "Tax-Loss Harvesting",
+      harvestingDesc: "Prioritizes selling tax lots with unrealized capital losses. This generates immediate liquidity with zero tax owed and provides loss credits to offset future realized taxable gains.",
+      exemption20kTitle: "Brazilian R$ 20,000 Monthly Stock Exemption",
+      exemption20kDesc: "For Brazilian stocks in swing trades, gross monthly sales under R$ 20,000 are 100% tax-exempt. The engine caps planned sales to stay strictly beneath statutory thresholds.",
+      priorityOrderTitle: "Strategic Liquidation Order",
+      priorityOrderDesc: "Liquidation order: (1) Lots with accumulated losses; (2) Stocks within the R$ 20k exempt window; (3) Assets trading significantly above ceiling price or facing deteriorating payout ratios; (4) Positions with lowest relative gain percentages.",
+    },
+    snowball: {
+      title: "Snowball Effect & FIRE Milestones",
+      description: "The power of compound dividend reinvestment creates an exponential inflection where passive income purchases new income-generating assets autonomously.",
+      crossoverPointTitle: "The Crossover Point",
+      crossoverPointDesc: "The mathematical milestone where monthly passive dividend income permanently exceeds your cost of living, rendering your portfolio self-sustaining.",
+      fireMilestonesTitle: "The 4 FIRE Milestones",
+      fireMilestonesDesc: "Fuente tracks your path across 4 milestones: (1) Essential FIRE (food and housing); (2) Comfort FIRE (current lifestyle); (3) Full FIRE (abundant buffer for perpetual reinvestment); (4) Fat FIRE (luxurious living funded entirely by dividends).",
+    },
+    taxBrazil: {
+      title: "Brazilian Equities Taxation (B3)",
+      description: "Brazilian tax regulations impose specific rules across each equity asset class traded on the B3 exchange.",
+      stocksTitle: "Domestic Stocks (Swing Trades)",
+      stocksDesc: "Net capital gains from stock sales under R$ 20,000/month are tax-exempt. Sales exceeding this threshold incur a 15% tax on net gains via DARF by the last business day of the following month.",
+      jcpTitle: "Interest on Equity (JCP at 17.5%)",
+      jcpDesc: "Effective January 1, 2026 (Law 15.270/2025), withholding tax on JCP is 17.5% at source. Cash arrives net in your brokerage account with no further tax liability for standard individual investors.",
+      fiiTitle: "Real Estate Funds (FIIs - Law 14.754/2023)",
+      fiiDesc: "Monthly distributions are tax-free if the fund has ≥ 100 shareholders, trades on the exchange, and the investor owns < 10%. Realized capital gains on share sales are taxed at a flat 20% with zero exemption.",
+      darfTitle: "Loss Carryforward & DARF Issuance",
+      darfDesc: "Historical capital losses can offset future gains within the same category (stocks offset stocks, FIIs offset FIIs). DARF vouchers are only generated if the monthly tax due is R$ 10.00 or higher.",
+    },
+    taxUsa: {
+      title: "US Market Taxation for Foreign Investors",
+      description: "Tax rules governing international investors holding US equities, REITs, and ETFs listed on the NYSE and NASDAQ.",
+      wht30Title: "30% Withholding Tax (WHT)",
+      wht30Desc: "The IRS withholds a statutory 30% tax at source on all dividend payments to non-US tax residents with an active Form W-8BEN. Dividends arrive net in international accounts.",
+      reitTitle: "REITs & Section 199A Deductions",
+      reitDesc: "US REIT dividends are treated as ordinary income. Eligible distributions may qualify for Section 199A deductions up to 20% of taxable base for qualifying filers.",
+      irpfOffsetTitle: "Foreign Tax Credit Offsetting",
+      irpfOffsetDesc: "Under reciprocal tax recognition, the 30% tax withheld in the US can be credited against home-country income taxes (such as Brazilian IRPF Carnê-Leão), eliminating double taxation.",
+    },
+    fiInfra: {
+      title: "Infrastructure Funds (Law 12.431)",
+      description: "Brazilian FI-Infra funds enjoy the most favorable tax treatment in the domestic financial market for individual investors.",
+      lei12431Title: "Law 12.431/2011 Framework",
+      lei12431Desc: "Established to incentivize private financing of national energy, sanitation, and highway development through infrastructure debentures.",
+      doubleExemptionTitle: "Double Income Tax Exemption",
+      doubleExemptionDesc: "Unlike stocks (where sales above R$ 20k are taxed) and FIIs (where capital gains are taxed at 20%), FI-Infras offer complete tax exemption on both monthly distributions AND realized capital gains on share sales.",
+      riskTitle: "Private Credit Risk Management",
+      riskDesc: "While tax-exempt, FI-Infras carry corporate credit risk from debenture issuers and mark-to-market sensitivity to real interest rates and inflation curves.",
+    },
+    currencyDecomposition: {
+      title: "Currency Return Decomposition",
+      description: "Disaggregating international portfolio returns between underlying asset growth in USD and currency rate fluctuations in USD/BRL.",
+      assetVsFxTitle: "Wall Street Growth vs. Currency Effect",
+      assetVsFxDesc: "Total return in domestic currency originates from two distinct drivers: the operational earnings growth of the US company and the appreciation or depreciation of the US Dollar.",
+      exampleTitle: "Worked Decomposition Example",
+      exampleDesc: "Purchasing a stock for $100 at 5.00 BRL ($500 BRL) that rises to $110 (+10%) while the Dollar rises to 5.50 BRL (+10%) results in $605 BRL (+21%). Decomposition reveals: +10% asset gain, +10% FX gain, and +1% cross-product effect.",
+    },
+    appDirectory: {
+      title: "Application Directory & Screen Guide",
+      description: "A comprehensive reference guide detailing the purpose and optimal use case for every tool in the Fuente Price Pro ecosystem.",
+      cockpitTitle: "Main Cockpit (/app)",
+      cockpitDesc: "High-level overview of portfolio health: consolidated net worth, projected monthly dividends, weighted return, and your next external contribution destination.",
+      myportfolioTitle: "My Portfolio (/app/myportfolio)",
+      myportfolioDesc: "Detailed view of all active holdings, currency return decomposition for foreign shares, universal 8-class filter chips, and CSV export.",
+      reinvestirTitle: "Reinvest Dividends (/app/reinvestir)",
+      reinvestirDesc: "Dedicated tool for allocating accumulated dividend cash across Accelerate Snowball, Correct Deficit, and Synthetic DRIP strategies.",
+      contributionPlanTitle: "Contribution Planner (/app/contributionplan)",
+      contributionPlanDesc: "Periodic savings optimizer using Hare-Niemeyer whole-share allocation and safety margin deficit weighting for fresh capital.",
+      withdrawTitle: "Tax-Smart Withdrawals (/app/withdraw)",
+      withdrawDesc: "Intelligent liquidation engine prioritizing tax-loss harvesting and statutory exemption thresholds to minimize capital gains taxes.",
+      incomeTitle: "Passive Income & Stress Testing (/app/income)",
+      incomeDesc: "Confirmed vs projected dividend calendar, distribution cadence detection, and stress simulation under sudden dividend cuts.",
+      taxTitle: "Dual-Market Tax Center (/app/tax)",
+      taxDesc: "B3 and US tax accounting: capital gains tracking, loss carryforwards, R$ 20k exemption monitor, and foreign tax credit calculation.",
+      goalsTitle: "FIRE Goals & Allocation (/app/goals)",
+      goalsDesc: "Progress tracking across the 4 Financial Independence milestones and target asset class allocation configuration.",
+      newsTitle: "Corporate Events Radar (/app/news)",
+      newsDesc: "Live feed tracking stock splits, reverse splits, bonus shares, and corporate actions adjusting your cost basis.",
+      comparatorTitle: "Asset Comparator (/app/comparator)",
+      comparatorDesc: "Side-by-side benchmarking table comparing up to 3 assets across fundamental multiples, ceiling prices, and dividend safety margins.",
+      screenerTitle: "Fundamental Screener (/app/screener)",
+      screenerDesc: "Market-wide scanner across B3 and US exchanges to filter dividend securities trading with favorable margins of safety.",
+      exploreTitle: "Asset Deep Dive (/app/explore)",
+      exploreDesc: "Granular ticker analysis displaying the Fuente Consensus, individual valuation formulas (Bazin, Graham, Gordon, Peter Lynch), and ceiling history.",
+      riskRadarTitle: "Portfolio Risk Radar (/app/riskradar)",
+      riskRadarDesc: "Governance dashboard alerting on sector concentration, single-asset overexposure, unsustainable payout ratios, and yield traps.",
+      importBrokerNoteTitle: "Broker Note Import (/app/import-broker-note)",
+      importBrokerNoteDesc: "Automated ingestion of B3 SINACOR and Charles Schwab trade confirmations processed 100% locally in your browser with Privacy by Design.",
     },
     metrics: {
       title: "Essential Metrics",
       safetyMargin: {
-        title: "Safety Margin",
-        description:
-          "The percentage difference between the current price and the estimated ceiling price. The higher the safety margin, the lower the capital loss risk and higher the upside potential.",
+        title: "Margin of Safety",
+        description: "The percentage difference between the current market price and the estimated ceiling price. Higher safety margins lower capital loss risk and boost long-term upside.",
       },
       yieldOnCost: {
         title: "Yield on Cost (YoC)",
-        description:
-          "The effective Dividend Yield you receive based on your average purchase price, not the current market price. Companies that grow dividends will make your YoC grow over the years.",
+        description: "The effective dividend yield received based on your average purchase price rather than current market quotation. Consistently growing dividends increase your YoC over time.",
       },
       payout: {
         title: "Payout Ratio",
-        description:
-          "The percentage of net income the company distributes to shareholders as dividends. A payout of 100% or more is unsustainable long-term. REITs are exceptions, as they are legally required to distribute almost all profit.",
+        description: "The percentage of net income distributed to shareholders as dividends. Payouts exceeding 80-100% in non-REITs signal dividend cut risks. REITs distribute almost all earnings by statute.",
       },
       cagr: {
-        title: "CAGR (Compound Annual Growth Rate)",
-        description:
-          "The annualized growth rate of dividends over the last 5 years. Shows if the company can consistently increase payments above inflation.",
+        title: "Dividend CAGR",
+        description: "The 5-year compound annual growth rate of dividend distributions, proving whether a company expands shareholder income above inflation.",
       },
       dyVsYoc: {
         title: "DY vs. Yield on Cost",
-        description:
-          "Dividend Yield (DY) fluctuates daily with the stock's market price. Yield on Cost (YoC) is fixed relative to your average purchase price. Tracking both helps understand if price drops reflect dividend cuts or just market panic.",
+        description: "Dividend Yield fluctuates with daily stock prices. Yield on Cost is fixed to your purchase basis. Monitoring both differentiates temporary market dips from actual dividend cuts.",
       },
     },
     concepts: {
-      title: "Advanced Concepts",
+      title: "Core Concepts",
       snowball: {
         title: "Snowball Effect (Snowball/Crossover)",
-        description:
-          "Occurs when the passive income generated by your investments is enough to buy new shares without external contributions (Snowball Effect) and eventually surpasses your living expenses (Crossover Point).",
+        description: "Occurs when portfolio passive income autonomously purchases new shares without external capital (Snowball Effect), eventually exceeding living expenses (Crossover Point).",
       },
       taxes: {
         title: "Tax Treatment (BR/US)",
-        description:
-          "In Brazil, dividends from Stocks and FIIs are currently tax-exempt, but JCP has 15% withheld. In the US (stocks and REITs), foreigners suffer 30% withholding tax on dividends, which arrive net in your international broker account.",
+        description: "In Brazil, stock dividends are generally exempt, while JCP is taxed at 17.5% at source (Law 15.270/2025). In the US, non-residents incur 30% withholding tax (WHT), creditable against local tax returns.",
       },
     },
     riskRadar: {
       title: "Risk Radar Alerts",
       sectorConcentration: {
         title: "Sector Concentration",
-        description:
-          "Triggered when more than 25% of your portfolio is in the same sector, increasing chain volatility risk from industry-specific crises.",
+        description: "Triggered when over 25% of your portfolio is in a single economic sector, increasing vulnerability to industry-specific regulatory shocks.",
       },
       assetConcentration: {
         title: "Asset Concentration",
-        description:
-          "Triggered when a single asset makes up over 15% of the portfolio. Bankruptcies or dividend cuts will deeply impact your income.",
+        description: "Triggered when a single holding exceeds 15% of total portfolio value. Operational missteps or dividend cuts will disproportionately hurt total passive income.",
       },
       payoutRisk: {
         title: "Payout Risk (Sustainability)",
-        description:
-          "Normal stocks distributing over 80% of profit may cut dividends soon. (Ignored for funds and REITs).",
+        description: "Standard corporations distributing over 80% of net income may need to cut dividends to service debt or finance capital expenditures. (Ignored for REITs/FIIs).",
       },
       yieldTrap: {
         title: "Yield Trap",
-        description:
-          "Occurs when Dividend Yield is extremely high (e.g., >10%) because the price collapsed and the market expects an imminent dividend cut. A negative Safety Margin confirms the risk.",
+        description: "Occurs when Dividend Yield appears unusually high because the stock price collapsed following fundamental deterioration. A negative Margin of Safety confirms the risk.",
       },
     },
     supportedBrokers: {
-      title: "Supported Brokers (PDF)",
-      description:
-        "List of authorized financial institutions and brokers for automatic import of B3 brokerage notes.",
-      sinacorTitle: "Full Extraction (SINACOR Standard)",
-      sinacorDesc:
-        "Digital brokers using the standard layout, allowing full extraction of your buys and sells.",
-      internationalTitle: "International Brokers",
-      internationalDesc:
-        "Charles Schwab International Account trade confirmations (PDF) are also auto-detected — the first non-Brazilian broker supported. Unlike B3 notes, Schwab prints the exact ticker symbol on each row, so imports never need manual issuer matching.",
-      fallbackTitle: "Graceful Fallback (Traditional Banks)",
-      fallbackDesc:
-        "Traditional banks often alter their note layouts. They are recognized to avoid parser crashes, returning a friendly invalid format alert if the note deviates from the standard.",
-      howToAddTitle: "How to Add a New Broker",
-      howToAddDesc:
-        "1. Confirm the exact CNPJ in a real note's header. 2. Register it in `detectBroker` inside `src/lib/dataIngestion/b3Parser.ts`. 3. If it's SINACOR, route to `parseSinacorLayout`. If custom, just detect to trigger the fallback. 4. Add a mock in `pdf-parser.test.ts` and update this Wiki.",
+      title: "Supported Brokers & Privacy",
+      description: "Authorized financial institutions and brokerages supported for automated statement imports across B3 and international accounts.",
+      sinacorTitle: "Full Extraction (B3 SINACOR Standard)",
+      sinacorDesc: "Brokers adhering to the Brazilian standardized clearing layout, enabling automated extraction of stock, FII, FI-Infra, and ETF buy/sell transactions.",
+      internationalTitle: "International Brokers (Charles Schwab)",
+      internationalDesc: "Charles Schwab International Account trade confirmation PDFs and CSV statements are recognized natively with automatic ticker and cashflow mapping.",
+      fallbackTitle: "Major Banks & Traditional Institutions",
+      fallbackDesc: "Support for statements and confirmations from major Brazilian institutions, including Banco do Brasil (BB Investimentos), Caixa Econômica Federal, Itaú, Bradesco, and Santander.",
+      privacyByDesignTitle: "Privacy by Design (100% Client-Side)",
+      privacyByDesignDesc: "Brokerage note parsing executes entirely in your browser memory via Web Workers. No tax ID (CPF), personal addresses, or PDF documents are ever uploaded to Fuente servers.",
+      requestBrokerTitle: "Request New Broker Support",
+      requestBrokerDesc: "Is your brokerage not supported yet? Submit an anonymized statement sample to our engineering team to calibrate the ingestion parser.",
     },
     glossary: {
-      title: "Glossary",
-      fii: "Brazilian Real Estate Investment Trust.",
-      reit: "US Real Estate Investment Trust.",
-      lpa: "Earnings Per Share.",
-      vpa: "Book Value Per Share.",
-      jcp: "Interest on Equity (BR specific).",
+      title: "General Glossary",
+      fii: "Fundo de Investimento Imobiliário (Brazilian REIT). Distributes monthly tax-exempt income under statutory rules.",
+      reit: "Real Estate Investment Trust (US). Real estate company distributing quarterly income in USD.",
+      lpa: "Earnings Per Share (EPS). Core profitability metric per share.",
+      vpa: "Book Value Per Share. Accounting net equity divided by total shares outstanding.",
+      jcp: "Interest on Equity (BR specific). Corporate distribution mechanism taxed at 17.5% at source.",
+      fiInfra: "Infrastructure Fund (Law 12.431/2011). Double tax-exempt on both dividends and capital gains.",
+      wht: "Withholding Tax. 30% US statutory tax withheld from dividends paid to foreign residents.",
+      hareNiemeyer: "Largest Remainder Method. Mathematical algorithm allocating whole investment shares without cash waste.",
+      crossoverPoint: "Crossover Point. The date when monthly dividend income permanently surpasses living expenses.",
+      safetyMargin: "Margin of Safety. Positive percentage difference between estimated ceiling price and market price.",
     },
   },
   comparator: {
