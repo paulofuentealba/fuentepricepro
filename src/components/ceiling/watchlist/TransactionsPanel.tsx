@@ -5,9 +5,15 @@ import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n-provider";
 import { formatCurrency, toIntlLocale } from "@/lib/i18n";
 import { cleanTicker } from "@/lib/formatters";
-import { useTransactions, recalculateHoldingFromTransactions, recalculateInvestingSinceFromTransactions, type Transaction, type ThesisSnapshot } from "@/lib/transactions";
+import {
+  useTransactions,
+  recalculateHoldingFromTransactions,
+  recalculateInvestingSinceFromTransactions,
+  buildThesisSnapshotFromItemOrAsset,
+  type Transaction,
+  type ThesisSnapshot,
+} from "@/lib/transactions";
 import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
-import { getAssetValuation } from "@/lib/calculations";
 import { TransactionForm } from "./TransactionForm";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
@@ -85,66 +91,13 @@ export function TransactionsPanel({ item }: { item: WatchlistItem }) {
   const handleSave = async (tx: Transaction) => {
     let finalTx: Transaction = tx;
     if (tx.type === "buy" && !tx.thesisSnapshot) {
-      try {
-        const val = getAssetValuation({
-          targetYield: item.targetYield,
-          currentPrice: tx.pricePerShare || item.currentPrice || 1,
-          avgDividend: item.annualDividend,
-          eps: (item as any)?.epsCurrent ?? (item as any)?.metrics?.eps ?? null,
-          bvps: (item as any)?.metrics?.bvps ?? null,
-          dividendCagr: (item as any)?.dividendCagr5y ?? null,
-          currency: item.currency,
-          type: item.type,
-        });
-
-        const consensusPrice = val.fuenteConsensus;
-        const safetyMarginVsConsensus =
-          consensusPrice != null && tx.pricePerShare > 0
-            ? ((consensusPrice - tx.pricePerShare) / tx.pricePerShare) * 100
-            : null;
-        const dy =
-          tx.pricePerShare > 0 && item.annualDividend > 0
-            ? (item.annualDividend / tx.pricePerShare) * 100
-            : val.dividendYield;
-
-        const snapshot: ThesisSnapshot = {
-          consensusPrice,
-          bazinPrice: val.methods.bazin,
-          grahamPrice: val.methods.graham ?? val.methods.lynch ?? null,
-          gordonPrice: val.methods.gordon,
-          purchasePrice: tx.pricePerShare,
-          safetyMarginVsConsensus,
-          payoutRatio: item.payoutRatio ?? null,
-          dividendYield: dy,
-          dividendCagr5y: (item as any)?.dividendCagr5y ?? null,
-          piotroskiScore: (item as any)?.piotroskiScore ?? null,
-          isYieldTrap: !!val.yieldTrapWarning,
-          valuationVersion: "fuente-v1",
-          capturedAt: Date.now(),
-          unavailableReason: consensusPrice == null ? "CONSENSUS_UNAVAILABLE" : null,
-        };
-        finalTx = { ...tx, thesisSnapshot: snapshot };
-      } catch {
-        finalTx = {
-          ...tx,
-          thesisSnapshot: {
-            consensusPrice: null,
-            bazinPrice: null,
-            grahamPrice: null,
-            gordonPrice: null,
-            purchasePrice: tx.pricePerShare,
-            safetyMarginVsConsensus: null,
-            payoutRatio: null,
-            dividendYield: null,
-            dividendCagr5y: null,
-            piotroskiScore: null,
-            isYieldTrap: null,
-            valuationVersion: "fuente-v1",
-            capturedAt: Date.now(),
-            unavailableReason: "VALUATION_ERROR",
-          },
-        };
-      }
+      const snapshot = buildThesisSnapshotFromItemOrAsset({
+        ticker: item.ticker,
+        purchasePrice: tx.pricePerShare,
+        watchlistItem: item,
+        capturedAt: tx.date,
+      });
+      finalTx = { ...tx, thesisSnapshot: snapshot };
     }
 
     await upsert(finalTx);

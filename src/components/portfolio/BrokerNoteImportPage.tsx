@@ -20,7 +20,11 @@ import {
   consolidateTradesToWatchlistItems,
   buildBrokerNoteTransactionId,
 } from "@/lib/dataIngestion/brokerNoteImport";
-import { useTransactions, type Transaction } from "@/lib/transactions";
+import {
+  useTransactions,
+  buildThesisSnapshotFromItemOrAsset,
+  type Transaction,
+} from "@/lib/transactions";
 import { useWatchlist } from "@/lib/watchlist";
 import { useIssuerTickerMappings } from "@/lib/useIssuerTickerMappings";
 import { assetQueryOptions } from "@/lib/queryOptions";
@@ -67,7 +71,7 @@ export function BrokerNoteImportPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
-  const { items: watchlistItems, upsertManyAsync } = useWatchlist();
+  const { items: watchlistItems = [], upsertManyAsync } = useWatchlist();
   const { transactions, upsert: upsertTransaction } = useTransactions();
   const { mappings, saveMappings } = useIssuerTickerMappings();
   const { isUS, priorityBrokers, secondaryBrokers } = useMarketScope();
@@ -269,6 +273,19 @@ export function BrokerNoteImportPage() {
       const validTradesByBroker = new Map<string, TradeRecord[]>();
       let invalidDatesCount = 0;
 
+      const uniqueTickers = Array.from(
+        new Set(checkedRows.map((r) => r.ticker.trim().toUpperCase()))
+      );
+      const assetDataMap: Record<string, any> = {};
+      for (const ticker of uniqueTickers) {
+        try {
+          assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
+        } catch {
+          // Asset metadata is best-effort here — consolidateTradesToWatchlistItems falls back
+          // to classifyBr()/raw ticker when it's missing, so a lookup failure isn't fatal.
+        }
+      }
+
       for (const row of checkedRows) {
         const trade: TradeRecord = {
           ticker: row.ticker.trim().toUpperCase(),
@@ -288,6 +305,20 @@ export function BrokerNoteImportPage() {
         if (!validTradesByBroker.has(brokerKey)) validTradesByBroker.set(brokerKey, []);
         validTradesByBroker.get(brokerKey)!.push(trade);
 
+        const isBuy = !trade.type || trade.type === "buy";
+        const matchingWatchlistItem = watchlistItems.find(
+          (it) => it.ticker.toUpperCase() === trade.ticker.toUpperCase()
+        );
+        const thesisSnapshot = isBuy
+          ? buildThesisSnapshotFromItemOrAsset({
+              ticker: trade.ticker,
+              purchasePrice: trade.price,
+              watchlistItem: matchingWatchlistItem,
+              assetData: assetDataMap[trade.ticker],
+              capturedAt: txTimestamp,
+            })
+          : null;
+
         const transaction: Transaction = {
           id: buildBrokerNoteTransactionId({
             ticker: trade.ticker,
@@ -303,6 +334,7 @@ export function BrokerNoteImportPage() {
           pricePerShare: trade.price,
           fees: trade.fees != null ? trade.fees : null,
           broker: broker ? KNOWN_BROKER_LABELS[broker] : null,
+          thesisSnapshot,
         };
 
         try {
@@ -321,19 +353,6 @@ export function BrokerNoteImportPage() {
       if (totalValidTrades === 0) {
         setIsImporting(false);
         return;
-      }
-
-      const uniqueTickers = Array.from(
-        new Set(Array.from(validTradesByBroker.values()).flat().map((tr) => tr.ticker)),
-      );
-      const assetDataMap: Record<string, any> = {};
-      for (const ticker of uniqueTickers) {
-        try {
-          assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
-        } catch {
-          // Asset metadata is best-effort here — consolidateTradesToWatchlistItems falls back
-          // to classifyBr()/raw ticker when it's missing, so a lookup failure isn't fatal.
-        }
       }
 
       // One call per broker group; later groups overwrite earlier ones for the same ticker if a

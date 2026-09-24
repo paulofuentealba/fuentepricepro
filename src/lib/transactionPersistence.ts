@@ -3,6 +3,7 @@ import {
   type Transaction,
   recalculateHoldingFromTransactions,
   recalculateInvestingSinceFromTransactions,
+  createCanonicalThesisSnapshot,
 } from "./transactions";
 import type { ParsedTransaction } from "./dynamicCsvParser";
 import { classifyBr } from "./classify";
@@ -135,36 +136,24 @@ export async function persistTransactionsBatch(
 
       let thesisSnapshot = null;
       if (parsed.type !== "SELL") {
-        const purchasePrice = parsed.price;
-        const consensusPrice = baseValuation?.fuenteConsensus ?? null;
-        const safetyMarginVsConsensus =
-          consensusPrice != null && purchasePrice > 0
-            ? ((consensusPrice - purchasePrice) / purchasePrice) * 100
-            : null;
-        const dy =
-          purchasePrice > 0 && annualDiv > 0
-            ? (annualDiv / purchasePrice) * 100
-            : (baseValuation?.dividendYield ?? null);
-
-        thesisSnapshot = {
-          consensusPrice,
-          bazinPrice: baseValuation?.methods?.bazin ?? null,
-          grahamPrice: baseValuation?.methods?.graham ?? baseValuation?.methods?.lynch ?? null,
-          gordonPrice: baseValuation?.methods?.gordon ?? null,
-          purchasePrice,
-          safetyMarginVsConsensus,
-          payoutRatio,
-          dividendYield: dy,
+        thesisSnapshot = createCanonicalThesisSnapshot({
+          ticker,
+          purchasePrice: parsed.price,
+          targetYield: target,
+          annualDividend: annualDiv,
+          currentPrice: assetData?.currentPrice || existingItem?.currentPrice,
+          eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
+          bvps: assetData?.metrics?.bvps ?? null,
           dividendCagr5y,
+          payoutRatio,
           piotroskiScore,
-          isYieldTrap: baseValuation?.yieldTrapWarning ? true : false,
-          valuationVersion: "fuente-v1",
+          currency,
+          type,
           capturedAt: Date.now(),
-          unavailableReason:
-            consensusPrice == null
-              ? (valuationUnavailableReason || "FUNDAMENTALS_UNAVAILABLE")
-              : null,
-        };
+        });
+        if (valuationUnavailableReason && !thesisSnapshot.consensusPrice) {
+          thesisSnapshot.unavailableReason = valuationUnavailableReason;
+        }
       }
 
       const tx: Transaction = {

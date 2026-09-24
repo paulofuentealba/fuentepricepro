@@ -339,6 +339,29 @@ describe("MyTransactionsView", () => {
     expect(updatedCalls[1].broker).toBe("BTG Pactual");
   });
 
+  it("allows bulk generating thesis snapshots for selected buy transactions", async () => {
+    renderWithClient(<MyTransactionsView />);
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    // select row 2 (which is tx-buy-2 without thesis)
+    fireEvent.click(checkboxes[2]);
+
+    const editBatchBtn = screen.getByText("Editar Selecionadas");
+    fireEvent.click(editBatchBtn);
+
+    const B = dict.ptBR.transactionsLedger.bulkModal;
+    expect(screen.getByText(B.recalculateThesis)).toBeInTheDocument();
+
+    const applyBtn = screen.getByText(B.saveChanges.replace("{{count}}", "1"));
+    fireEvent.click(applyBtn);
+
+    expect(mockBatchUpsert).toHaveBeenCalledTimes(1);
+    const updatedCalls = mockBatchUpsert.mock.calls[0][0];
+    expect(updatedCalls.length).toBe(1);
+    expect(updatedCalls[0].thesisSnapshot).toBeDefined();
+    expect(updatedCalls[0].thesisSnapshot.purchasePrice).toBe(28.0);
+  });
+
   it("renders with USD currency when market scope is USD", () => {
     mockMarketScope = {
       currency: "USD",

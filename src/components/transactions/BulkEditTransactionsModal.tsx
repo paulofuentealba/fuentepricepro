@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Building, Calendar, FileText, Loader2, AlertCircle } from "lucide-react";
+import { Building, Calendar, FileText, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n-provider";
 import { KNOWN_BROKER_LABELS } from "@/lib/brokers";
@@ -27,6 +27,7 @@ interface BulkEditTransactionsModalProps {
     broker?: string | null;
     date?: number;
     notes?: string | null;
+    updateThesis?: boolean;
   }) => Promise<void>;
 }
 
@@ -48,7 +49,18 @@ export function BulkEditTransactionsModal({
   const { t } = useI18n();
   const B = t.transactionsLedger.bulkModal;
 
-  const [shouldChangeBroker, setShouldChangeBroker] = useState(true);
+  const selectedBuyCount = useMemo(
+    () => selectedTransactions.filter((t) => t.type === "buy").length,
+    [selectedTransactions]
+  );
+  const missingThesisBuyCount = useMemo(
+    () => selectedTransactions.filter((t) => t.type === "buy" && !t.thesisSnapshot).length,
+    [selectedTransactions]
+  );
+
+  const [shouldChangeBroker, setShouldChangeBroker] = useState(
+    missingThesisBuyCount > 0 && selectedBuyCount === selectedTransactions.length ? false : true
+  );
   const [brokerValue, setBrokerValue] = useState("");
   const [clearBroker, setClearBroker] = useState(false);
 
@@ -57,6 +69,10 @@ export function BulkEditTransactionsModal({
 
   const [shouldChangeNotes, setShouldChangeNotes] = useState(false);
   const [notesValue, setNotesValue] = useState("");
+
+  const [shouldUpdateThesis, setShouldUpdateThesis] = useState(
+    missingThesisBuyCount > 0 && selectedBuyCount === selectedTransactions.length
+  );
 
   const [isApplying, setIsApplying] = useState(false);
 
@@ -70,7 +86,12 @@ export function BulkEditTransactionsModal({
   }, [selectedTransactions]);
 
   const handleApply = async () => {
-    if (!shouldChangeBroker && !shouldChangeDate && !shouldChangeNotes) {
+    if (
+      !shouldChangeBroker &&
+      !shouldChangeDate &&
+      !shouldChangeNotes &&
+      !shouldUpdateThesis
+    ) {
       toast.error(B.noChangesSelected);
       return;
     }
@@ -79,6 +100,7 @@ export function BulkEditTransactionsModal({
       broker?: string | null;
       date?: number;
       notes?: string | null;
+      updateThesis?: boolean;
     } = {};
 
     if (shouldChangeBroker) {
@@ -91,6 +113,10 @@ export function BulkEditTransactionsModal({
 
     if (shouldChangeNotes) {
       changes.notes = notesValue.trim() || null;
+    }
+
+    if (shouldUpdateThesis) {
+      changes.updateThesis = true;
     }
 
     try {
@@ -107,7 +133,8 @@ export function BulkEditTransactionsModal({
     }
   };
 
-  const isFormValid = shouldChangeBroker || shouldChangeDate || shouldChangeNotes;
+  const isFormValid =
+    shouldChangeBroker || shouldChangeDate || shouldChangeNotes || shouldUpdateThesis;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && !isApplying && onClose()}>
@@ -255,6 +282,35 @@ export function BulkEditTransactionsModal({
               </div>
             )}
           </div>
+
+          {/* 4. Gerar / Atualizar Tese Fuente (ThesisSnapshot) */}
+          {selectedBuyCount > 0 && (
+            <div className="rounded-xl border border-accent/40 p-3.5 space-y-2 bg-accent/5">
+              <div className="flex items-center gap-2.5">
+                <Checkbox
+                  id="bulk-update-thesis"
+                  checked={shouldUpdateThesis}
+                  onCheckedChange={(checked) => setShouldUpdateThesis(Boolean(checked))}
+                  disabled={isApplying}
+                />
+                <Label
+                  htmlFor="bulk-update-thesis"
+                  className="text-xs font-semibold cursor-pointer text-foreground flex items-center gap-1.5 flex-wrap"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-accent-text shrink-0" />
+                  <span>{B.recalculateThesis}</span>
+                  {missingThesisBuyCount > 0 && (
+                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-accent/40 text-accent-text bg-accent/10">
+                      {B.missingThesisBadge.replace("{{count}}", String(missingThesisBuyCount))}
+                    </Badge>
+                  )}
+                </Label>
+              </div>
+              <p className="text-[11px] text-muted-foreground pl-6 leading-relaxed">
+                {B.recalculateThesisDesc}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Warning Alert about recalculation */}

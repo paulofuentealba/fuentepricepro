@@ -31,6 +31,7 @@ import {
   useTransactions,
   recalculateHoldingFromTransactions,
   recalculateInvestingSinceFromTransactions,
+  buildThesisSnapshotFromItemOrAsset,
   type Transaction,
 } from "@/lib/transactions";
 import { useWatchlist } from "@/lib/watchlist";
@@ -287,6 +288,7 @@ export function MyTransactionsView() {
     broker?: string | null;
     date?: number;
     notes?: string | null;
+    updateThesis?: boolean;
   }) => {
     if (selectedTransactionsList.length === 0) return;
 
@@ -296,6 +298,17 @@ export function MyTransactionsView() {
         if ("broker" in changes) next.broker = changes.broker ?? null;
         if ("date" in changes && typeof changes.date === "number") next.date = changes.date;
         if ("notes" in changes) next.notes = changes.notes ?? null;
+        if (changes.updateThesis && tx.type === "buy") {
+          const matchingWatchlistItem = watchlistItems.find(
+            (it) => it.ticker.toUpperCase() === tx.ticker.toUpperCase()
+          );
+          next.thesisSnapshot = buildThesisSnapshotFromItemOrAsset({
+            ticker: tx.ticker,
+            purchasePrice: next.pricePerShare,
+            watchlistItem: matchingWatchlistItem,
+            capturedAt: next.date,
+          });
+        }
         return next;
       });
 

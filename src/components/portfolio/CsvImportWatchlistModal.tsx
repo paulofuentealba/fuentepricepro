@@ -5,7 +5,11 @@ import type { ParseResult } from "@/lib/dynamicCsvParser";
 import { reconcileParsedTransactionsToWatchlistItems } from "@/lib/dataIngestion/csvImportReconcile";
 import { assetQueryOptions, ipcaFiveYearAverageQueryOptions } from "@/lib/queryOptions";
 import { GORDON_TERMINAL_GROWTH_RATE } from "@/lib/calculations";
-import { useTransactions, type Transaction } from "@/lib/transactions";
+import {
+  useTransactions,
+  buildThesisSnapshotFromItemOrAsset,
+  type Transaction,
+} from "@/lib/transactions";
 import { useWatchlist } from "@/lib/watchlist";
 import { useI18n } from "@/lib/i18n-provider";
 
@@ -25,7 +29,7 @@ export function CsvImportWatchlistModal({ open, onOpenChange }: CsvImportWatchli
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { transactions, upsert: upsertTransaction } = useTransactions();
-  const { items: watchlistItems, upsertManyAsync } = useWatchlist();
+  const { items: watchlistItems = [], upsertManyAsync } = useWatchlist();
 
   const handleCsvConfirmImport = async (result: ParseResult) => {
     const ipcaAvg = await queryClient
@@ -33,19 +37,45 @@ export function CsvImportWatchlistModal({ open, onOpenChange }: CsvImportWatchli
       .catch(() => null);
     const terminalGrowthRate = ipcaAvg ?? GORDON_TERMINAL_GROWTH_RATE;
 
+    const uniqueTickers = Array.from(new Set(result.transactions.map((tx) => tx.ticker.toUpperCase())));
+    const assetDataMap: Record<string, any> = {};
+    for (const ticker of uniqueTickers) {
+      try {
+        assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
+      } catch {
+        // Asset metadata is best-effort — reconcileParsedTransactionsToWatchlistItems skips a
+        // ticker entirely if its asset data never resolves, rather than fabricating an item.
+      }
+    }
+
     const newlyCreatedTransactions: Transaction[] = [];
     let failedCount = 0;
     for (const tx of result.transactions) {
       const ticker = tx.ticker.toUpperCase();
+      const isBuy = tx.type === "BUY";
+      const matchingWatchlistItem = watchlistItems.find(
+        (it) => it.ticker.toUpperCase() === ticker
+      );
+      const thesisSnapshot = isBuy
+        ? buildThesisSnapshotFromItemOrAsset({
+            ticker,
+            purchasePrice: tx.price,
+            watchlistItem: matchingWatchlistItem,
+            assetData: assetDataMap[ticker],
+            capturedAt: tx.date.getTime(),
+          })
+        : null;
+
       const transaction: Transaction = {
         id: `tx-csv-${ticker}-${tx.date.getTime()}-${tx.quantity}-${tx.price}`,
         ticker,
-        type: tx.type === "BUY" ? "buy" : "sell",
+        type: isBuy ? "buy" : "sell",
         date: tx.date.getTime(),
         quantity: tx.quantity,
         pricePerShare: tx.price,
         fees: tx.costs || null,
         notes: tx.notes,
+        thesisSnapshot,
       };
       try {
         await upsertTransaction(transaction);
@@ -59,17 +89,6 @@ export function CsvImportWatchlistModal({ open, onOpenChange }: CsvImportWatchli
     if (newlyCreatedTransactions.length === 0) {
       toast.error(t.toasts.importFailed);
       return;
-    }
-
-    const uniqueTickers = Array.from(new Set(newlyCreatedTransactions.map((tx) => tx.ticker)));
-    const assetDataMap: Record<string, any> = {};
-    for (const ticker of uniqueTickers) {
-      try {
-        assetDataMap[ticker] = await queryClient.ensureQueryData(assetQueryOptions(ticker));
-      } catch {
-        // Asset metadata is best-effort — reconcileParsedTransactionsToWatchlistItems skips a
-        // ticker entirely if its asset data never resolves, rather than fabricating an item.
-      }
     }
 
     const itemsToImport = reconcileParsedTransactionsToWatchlistItems(

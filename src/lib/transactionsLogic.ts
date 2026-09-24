@@ -1,4 +1,6 @@
-import { isBrTicker } from "./classify";
+import { isBrTicker, classifyBr } from "./classify";
+import type { AssetType, Currency } from "./domain";
+import { getAssetValuation } from "./calculations";
 
 export interface ThesisSnapshot {
   consensusPrice: number | null;
@@ -15,6 +17,179 @@ export interface ThesisSnapshot {
   valuationVersion: string;
   capturedAt: number;
   unavailableReason?: string | null;
+}
+
+export interface CanonicalThesisSnapshotParams {
+  ticker: string;
+  purchasePrice: number;
+  targetYield?: number | null;
+  annualDividend?: number | null;
+  currentPrice?: number | null;
+  eps?: number | null;
+  bvps?: number | null;
+  dividendCagr5y?: number | null;
+  payoutRatio?: number | null;
+  piotroskiScore?: number | null;
+  currency?: Currency | null;
+  type?: AssetType | null;
+  terminalGrowthRate?: number | null;
+  capturedAt?: number;
+  fallbackCeilingPrice?: number | null;
+}
+
+/**
+ * Single Source of Truth (SSOT) builder for ThesisSnapshot (Regras 1 e 4 do AGENTS.md).
+ * Executes canonical getAssetValuation and computes frozen consensus, margin of safety,
+ * and purchase-price dividend yield cleanly without duplication across modals and import flows.
+ */
+export function createCanonicalThesisSnapshot({
+  ticker,
+  purchasePrice,
+  targetYield,
+  annualDividend,
+  currentPrice,
+  eps,
+  bvps,
+  dividendCagr5y,
+  payoutRatio,
+  piotroskiScore,
+  currency,
+  type,
+  terminalGrowthRate,
+  capturedAt = Date.now(),
+  fallbackCeilingPrice,
+}: CanonicalThesisSnapshotParams): ThesisSnapshot {
+  const resolvedType = type || classifyBr(ticker);
+  const resolvedCurrency =
+    currency || (isBrTicker(ticker) ? "BRL" : "USD");
+  const resolvedTarget =
+    typeof targetYield === "number" && targetYield > 0 ? targetYield : 6;
+  const resolvedAnnualDiv =
+    typeof annualDividend === "number" && annualDividend >= 0 ? annualDividend : 0;
+  const resolvedPrice =
+    typeof currentPrice === "number" && currentPrice > 0
+      ? currentPrice
+      : purchasePrice > 0
+        ? purchasePrice
+        : 1;
+
+  let baseValuation: ReturnType<typeof getAssetValuation> | null = null;
+  let calculationError = false;
+
+  try {
+    baseValuation = getAssetValuation({
+      targetYield: resolvedTarget,
+      currentPrice: resolvedPrice,
+      avgDividend: resolvedAnnualDiv,
+      eps: eps ?? null,
+      bvps: bvps ?? null,
+      dividendCagr: dividendCagr5y ?? null,
+      terminalGrowthRate: terminalGrowthRate ?? undefined,
+      currency: resolvedCurrency,
+      type: resolvedType,
+    });
+  } catch {
+    calculationError = true;
+  }
+
+  const consensusPrice = baseValuation?.fuenteConsensus ?? fallbackCeilingPrice ?? null;
+  const safetyMarginVsConsensus =
+    consensusPrice != null && purchasePrice > 0
+      ? ((consensusPrice - purchasePrice) / purchasePrice) * 100
+      : null;
+
+  const dy =
+    purchasePrice > 0 && resolvedAnnualDiv > 0
+      ? (resolvedAnnualDiv / purchasePrice) * 100
+      : (baseValuation?.dividendYield ?? null);
+
+  let unavailableReason: string | null = null;
+  if (consensusPrice == null) {
+    unavailableReason = calculationError ? "VALUATION_ERROR" : "CONSENSUS_UNAVAILABLE";
+  }
+
+  return {
+    consensusPrice,
+    bazinPrice: baseValuation?.methods?.bazin ?? null,
+    grahamPrice:
+      baseValuation?.methods?.graham ?? baseValuation?.methods?.lynch ?? null,
+    gordonPrice: baseValuation?.methods?.gordon ?? null,
+    purchasePrice,
+    safetyMarginVsConsensus,
+    payoutRatio: payoutRatio ?? null,
+    dividendYield: dy,
+    dividendCagr5y: dividendCagr5y ?? null,
+    piotroskiScore: piotroskiScore ?? null,
+    isYieldTrap: baseValuation?.yieldTrapWarning ? true : false,
+    valuationVersion: "fuente-v1",
+    capturedAt,
+    unavailableReason,
+  };
+}
+
+/**
+ * Builds a ThesisSnapshot from a WatchlistItem or fetched Asset metadata.
+ */
+export function buildThesisSnapshotFromItemOrAsset({
+  ticker,
+  purchasePrice,
+  watchlistItem,
+  assetData,
+  capturedAt,
+}: {
+  ticker: string;
+  purchasePrice: number;
+  watchlistItem?: any | null;
+  assetData?: any | null;
+  capturedAt?: number;
+}): ThesisSnapshot {
+  const type = watchlistItem?.type || assetData?.type;
+  const currency = watchlistItem?.currency || assetData?.currency;
+  const targetYield = watchlistItem?.targetYield;
+  const annualDividend = watchlistItem?.annualDividend ?? assetData?.annualDividend;
+  const currentPrice = assetData?.currentPrice ?? watchlistItem?.currentPrice;
+  const fallbackCeilingPrice = watchlistItem?.ceilingPrice;
+
+  const eps =
+    watchlistItem?.epsCurrent ??
+    watchlistItem?.metrics?.eps ??
+    assetData?.epsCurrent ??
+    assetData?.metrics?.eps ??
+    null;
+  const bvps =
+    watchlistItem?.metrics?.bvps ?? assetData?.metrics?.bvps ?? null;
+  const dividendCagr5y =
+    watchlistItem?.dividendCagr5y ??
+    watchlistItem?.metrics?.dividendCagr5y ??
+    assetData?.metrics?.dividendCagr5y ??
+    null;
+  const payoutRatio =
+    watchlistItem?.payoutRatio ??
+    watchlistItem?.metrics?.payoutRatio ??
+    assetData?.metrics?.payoutRatio ??
+    null;
+  const piotroskiScore =
+    watchlistItem?.piotroskiScore ??
+    watchlistItem?.metrics?.piotroskiScore ??
+    assetData?.metrics?.piotroskiScore ??
+    null;
+
+  return createCanonicalThesisSnapshot({
+    ticker,
+    purchasePrice,
+    targetYield,
+    annualDividend,
+    currentPrice,
+    eps,
+    bvps,
+    dividendCagr5y,
+    payoutRatio,
+    piotroskiScore,
+    currency,
+    type,
+    fallbackCeilingPrice,
+    capturedAt,
+  });
 }
 
 export type AccountType = "taxable" | "roth_ira" | "traditional_ira_401k";

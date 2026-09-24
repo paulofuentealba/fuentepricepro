@@ -72,6 +72,7 @@ vi.mock("@/lib/watchlist", async (importOriginal) => {
   return {
     ...actual,
     useWatchlist: () => ({
+      items: [],
       upsertManyAsync: mockUpsertManyAsync,
     }),
   };

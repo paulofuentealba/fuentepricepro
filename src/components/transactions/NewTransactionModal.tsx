@@ -27,6 +27,7 @@ import {
   recalculateHoldingFromTransactions,
   recalculateInvestingSinceFromTransactions,
   getQuantityAtDate,
+  buildThesisSnapshotFromItemOrAsset,
   type Transaction,
   type ThesisSnapshot,
   type AccountType,
@@ -187,64 +188,12 @@ export function NewTransactionModal({
 
       // Auto-capture thesis for buy orders if not present
       if (type === "buy" && !snapshot) {
-        if (matchingWatchlistItem) {
-          try {
-            const val = getAssetValuation({
-              targetYield: matchingWatchlistItem.targetYield,
-              currentPrice: priceNum || matchingWatchlistItem.currentPrice || 1,
-              avgDividend: matchingWatchlistItem.annualDividend,
-              eps: (matchingWatchlistItem as any)?.epsCurrent ?? (matchingWatchlistItem as any)?.metrics?.eps ?? null,
-              bvps: (matchingWatchlistItem as any)?.metrics?.bvps ?? null,
-              dividendCagr: (matchingWatchlistItem as any)?.dividendCagr5y ?? null,
-              currency: matchingWatchlistItem.currency,
-              type: matchingWatchlistItem.type,
-            });
-
-            const consensusPrice = val.fuenteConsensus;
-            const safetyMarginVsConsensus =
-              consensusPrice != null && priceNum > 0
-                ? ((consensusPrice - priceNum) / priceNum) * 100
-                : null;
-            const dy =
-              priceNum > 0 && matchingWatchlistItem.annualDividend > 0
-                ? (matchingWatchlistItem.annualDividend / priceNum) * 100
-                : val.dividendYield;
-
-            snapshot = {
-              consensusPrice,
-              bazinPrice: val.methods.bazin,
-              grahamPrice: val.methods.graham ?? val.methods.lynch ?? null,
-              gordonPrice: val.methods.gordon,
-              purchasePrice: priceNum,
-              safetyMarginVsConsensus,
-              payoutRatio: matchingWatchlistItem.payoutRatio ?? null,
-              dividendYield: dy,
-              dividendCagr5y: (matchingWatchlistItem as any)?.dividendCagr5y ?? null,
-              piotroskiScore: (matchingWatchlistItem as any)?.piotroskiScore ?? null,
-              isYieldTrap: !!val.yieldTrapWarning,
-              valuationVersion: "fuente-v1",
-              capturedAt: Date.now(),
-              unavailableReason: consensusPrice == null ? "CONSENSUS_UNAVAILABLE" : null,
-            };
-          } catch {
-            snapshot = {
-              consensusPrice: null,
-              bazinPrice: null,
-              grahamPrice: null,
-              gordonPrice: null,
-              purchasePrice: priceNum,
-              safetyMarginVsConsensus: null,
-              payoutRatio: null,
-              dividendYield: null,
-              dividendCagr5y: null,
-              piotroskiScore: null,
-              isYieldTrap: null,
-              valuationVersion: "fuente-v1",
-              capturedAt: Date.now(),
-              unavailableReason: "VALUATION_ERROR",
-            };
-          }
-        }
+        snapshot = buildThesisSnapshotFromItemOrAsset({
+          ticker: resolvedTicker,
+          purchasePrice: priceNum,
+          watchlistItem: matchingWatchlistItem,
+          capturedAt: date.getTime(),
+        });
       }
 
       const txToSave: Transaction = {

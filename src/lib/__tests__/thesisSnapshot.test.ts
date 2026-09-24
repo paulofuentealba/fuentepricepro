@@ -3,6 +3,8 @@ import {
   type Transaction,
   type ThesisSnapshot,
   recalculateHoldingFromTransactions,
+  createCanonicalThesisSnapshot,
+  buildThesisSnapshotFromItemOrAsset,
 } from "../transactionsLogic";
 import { persistTransactionsBatch } from "../transactionPersistence";
 import type { ParsedTransaction } from "../dynamicCsvParser";
@@ -377,5 +379,60 @@ describe("ThesisSnapshot — Importação em Lote (persistTransactionsBatch)", (
     const okTx = persistedTxs.find((t) => t.ticker === "OK3");
     expect(okTx).toBeDefined();
     expect(okTx?.thesisSnapshot?.consensusPrice).toBeGreaterThan(0);
+  });
+});
+
+describe("ThesisSnapshot — createCanonicalThesisSnapshot & buildThesisSnapshotFromItemOrAsset (SSOT)", () => {
+  it("calculates canonical consensus price, safety margin vs purchase price, and purchase yield", () => {
+    const snapshot = createCanonicalThesisSnapshot({
+      ticker: "BBAS3",
+      purchasePrice: 25.0,
+      targetYield: 6.0,
+      annualDividend: 3.0, // Bazin: 3.0 / 0.06 = 50.0
+      currentPrice: 28.0,
+      eps: 5.0,
+      bvps: 35.0,
+      dividendCagr5y: 12.0,
+      payoutRatio: 40.0,
+      piotroskiScore: 8,
+      currency: "BRL",
+      type: "STOCK_BR",
+    });
+
+    expect(snapshot.consensusPrice).toBeGreaterThan(0);
+    expect(snapshot.purchasePrice).toBe(25.0);
+    expect(snapshot.bazinPrice).toBeCloseTo(50.0, 2);
+    // Margem vs compra: ((consenso - 25) / 25) * 100
+    expect(snapshot.safetyMarginVsConsensus).toBeGreaterThan(0);
+    // DY sobre o preço pago: (3.0 / 25.0) * 100 = 12%
+    expect(snapshot.dividendYield).toBeCloseTo(12.0, 2);
+    expect(snapshot.piotroskiScore).toBe(8);
+    expect(snapshot.valuationVersion).toBe("fuente-v1");
+  });
+
+  it("builds snapshot smoothly from a WatchlistItem object", () => {
+    const mockWatchlistItem: Partial<WatchlistItem> = {
+      ticker: "ITSA4",
+      type: "STOCK_BR",
+      currency: "BRL",
+      targetYield: 6.0,
+      annualDividend: 0.90, // Bazin: 0.90 / 0.06 = 15.0
+      currentPrice: 10.0,
+      ceilingPrice: 15.0,
+      payoutRatio: 35.0,
+    };
+
+    const snapshot = buildThesisSnapshotFromItemOrAsset({
+      ticker: "ITSA4",
+      purchasePrice: 9.0,
+      watchlistItem: mockWatchlistItem,
+      capturedAt: 1700000000000,
+    });
+
+    expect(snapshot.consensusPrice).toBeGreaterThan(0);
+    expect(snapshot.purchasePrice).toBe(9.0);
+    // DY sobre o preço de compra de 9.0: (0.90 / 9.0) * 100 = 10%
+    expect(snapshot.dividendYield).toBeCloseTo(10.0, 2);
+    expect(snapshot.capturedAt).toBe(1700000000000);
   });
 });

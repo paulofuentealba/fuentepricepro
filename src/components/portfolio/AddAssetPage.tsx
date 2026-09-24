@@ -15,6 +15,7 @@ import { useWatchlist, type WatchlistItem } from "@/lib/watchlist";
 import {
   useTransactions,
   recalculateHoldingFromTransactions,
+  buildThesisSnapshotFromItemOrAsset,
   type Transaction,
   type ThesisSnapshot,
 } from "@/lib/transactions";
@@ -287,45 +288,14 @@ export function AddAssetPage() {
 
       if (type === "buy") {
         const assetData = assetResult.data?.ticker === workingItem.ticker ? assetResult.data : null;
-        try {
-          const val = getAssetValuation({
-            targetYield: workingItem.targetYield,
-            currentPrice: priceNum,
-            avgDividend: workingItem.annualDividend,
-            eps: assetData?.epsCurrent ?? assetData?.metrics?.eps ?? null,
-            bvps: assetData?.metrics?.bvps ?? null,
-            dividendCagr: assetData?.metrics?.dividendCagr5y ?? null,
-            currency: workingItem.currency,
-            type: workingItem.type,
-          });
-          const consensusPrice = val.fuenteConsensus ?? workingItem.ceilingPrice ?? null;
-          const safetyMarginVsConsensus =
-            consensusPrice != null && priceNum > 0 ? ((consensusPrice - priceNum) / priceNum) * 100 : null;
-          const dy =
-            priceNum > 0 && workingItem.annualDividend > 0
-              ? (workingItem.annualDividend / priceNum) * 100
-              : val.dividendYield;
-
-          const snapshot: ThesisSnapshot = {
-            consensusPrice,
-            bazinPrice: val.methods.bazin,
-            grahamPrice: val.methods.graham ?? val.methods.lynch ?? null,
-            gordonPrice: val.methods.gordon,
-            purchasePrice: priceNum,
-            safetyMarginVsConsensus,
-            payoutRatio: workingItem.payoutRatio ?? assetData?.metrics?.payoutRatio ?? null,
-            dividendYield: dy,
-            dividendCagr5y: assetData?.metrics?.dividendCagr5y ?? null,
-            piotroskiScore: (assetData?.metrics as any)?.piotroskiScore ?? null,
-            isYieldTrap: !!val.yieldTrapWarning,
-            valuationVersion: "fuente-v1",
-            capturedAt: Date.now(),
-            unavailableReason: consensusPrice == null ? "CONSENSUS_UNAVAILABLE" : null,
-          };
-          finalTx = { ...finalTx, thesisSnapshot: snapshot };
-        } catch {
-          // Save without a thesis snapshot rather than blocking the transaction.
-        }
+        const snapshot = buildThesisSnapshotFromItemOrAsset({
+          ticker: workingItem.ticker,
+          purchasePrice: priceNum,
+          watchlistItem: workingItem,
+          assetData,
+          capturedAt: Date.now(),
+        });
+        finalTx = { ...finalTx, thesisSnapshot: snapshot };
       }
 
       await upsertTransaction(finalTx);
