@@ -2474,7 +2474,7 @@ export const en = {
       columnPrice: "Price",
       columnCeiling: "Ceiling Price",
       columnMargin: "Margin",
-      columnNetDy: "DY (12M)",
+      columnNetDy: "Net DY",
       columnTaxRegime: "Tax Regime",
       columnAction: "Suggested Action",
       actionBuy: "STRONG BUY",
@@ -2488,6 +2488,7 @@ export const en = {
     taxRegime: {
       exemptDouble: "Double Exemption (Law 12.431)",
       exemptDividend: "Tax-Exempt (Law 11.033)",
+      exemptStockBr: "Exempt (Dividends) / 15% (JCP)",
       whtCompensable: "30% WHT Creditable",
       jcpWithholding: "15% Withholding at Source (JCP)",
       standard: "Standard Taxation",

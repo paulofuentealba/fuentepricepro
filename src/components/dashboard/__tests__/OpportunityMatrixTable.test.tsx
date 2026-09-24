@@ -209,4 +209,68 @@ describe("OpportunityMatrixTable", () => {
     const sortedDefault = screen.getAllByText(/BBAS3|VALE3/);
     expect(sortedDefault[0].textContent).toContain("VALE3");
   });
+
+  it("displays 'Isento (Dividendo) / 15% (JCP)' for Brazilian stocks", () => {
+    const stockAsset = createMockItem({
+      id: "stock-1",
+      ticker: "PETR4",
+      type: "STOCK_BR",
+      currency: "BRL",
+      quantity: 10,
+    });
+
+    render(<OpportunityMatrixTable valuedItems={[stockAsset]} isLoading={false} />);
+    expect(screen.getAllByText("Isento (Dividendo) / 15% (JCP)").length).toBeGreaterThan(0);
+  });
+
+  it("displays 'AGUARDAR' for an asset above ceiling price (negative margin), not 'QUARENTENA'", () => {
+    const aboveCeilingAsset = createMockItem({
+      id: "above-ceiling",
+      ticker: "VALE3",
+      currentPrice: 70.7,
+      ceilingPrice: 40.96,
+      safetyMargin: -42.1,
+      valuation: {
+        activeCeiling: 40.96,
+        margin: -42.1,
+        yieldTrapWarning: false,
+      } as any,
+    });
+
+    render(<OpportunityMatrixTable valuedItems={[aboveCeilingAsset]} isLoading={false} />);
+    expect(screen.getAllByText("AGUARDAR").length).toBeGreaterThan(0);
+    expect(screen.queryByText("QUARENTENA")).toBeNull();
+  });
+
+  it("displays 'QUARENTENA' or 'Alerta: Yield Trap' only when yieldTrapWarning is true", () => {
+    const trapAsset = createMockItem({
+      id: "trap-1",
+      ticker: "TRAP3",
+      valuation: {
+        activeCeiling: 50,
+        margin: 20,
+        yieldTrapWarning: true,
+      } as any,
+    });
+
+    render(<OpportunityMatrixTable valuedItems={[trapAsset]} isLoading={false} />);
+    expect(screen.getAllByText(/QUARENTENA|Yield Trap/i).length).toBeGreaterThan(0);
+  });
+
+  it("only renders chips for classes with active positions (onlyExisting: true)", () => {
+    const stockAsset = createMockItem({
+      id: "stock-1",
+      ticker: "BBAS3",
+      type: "STOCK_BR",
+      quantity: 10,
+    });
+
+    render(<OpportunityMatrixTable valuedItems={[stockAsset]} isLoading={false} />);
+    // "Ações BR" chip should exist
+    expect(screen.getByRole("button", { name: /Ações BR/ })).toBeTruthy();
+    // "REITs (US)" or "ETFs BR" should NOT exist because user has 0 items
+    expect(screen.queryByRole("button", { name: /REITs \(US\)/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /ETFs BR/ })).toBeNull();
+  });
 });
+

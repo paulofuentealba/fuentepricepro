@@ -42,13 +42,14 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
     countsByClass,
   } = useAssetClassFilter(valuedItems, {
     filterPredicate: (i) => !i.isClosedPosition && (i.quantity ?? 0) > 0,
-    onlyExisting: false,
+    onlyExisting: true,
   });
 
   const taxRegimeLabel: Record<string, string> = useMemo(
     () => ({
       exemptDouble: t.dashboard.taxRegime.exemptDouble,
       exemptDividend: t.dashboard.taxRegime.exemptDividend,
+      exemptStockBr: t.dashboard.taxRegime.exemptStockBr,
       whtCompensable: t.dashboard.taxRegime.whtCompensable,
       jcpWithholding: t.dashboard.taxRegime.jcpWithholding,
       standard: t.dashboard.taxRegime.standard,
@@ -61,9 +62,9 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
   );
 
   function getBadgeDetails(action: RecommendedActionKey, margin: number | null) {
-    if (action === "yieldTrap" || (margin != null && margin <= -5)) {
+    if (action === "yieldTrap") {
       return {
-        label: t.dashboard.matrix.actionAvoid,
+        label: t.dashboard.matrix.actionYieldTrap || t.dashboard.matrix.actionAvoid,
         className:
           "bg-accent-red-subtle text-accent-red dark:text-[#F87171] border border-accent-red",
       };

@@ -2490,7 +2490,7 @@ export const es = {
       columnPrice: "Cotización",
       columnCeiling: "Precio Techo",
       columnMargin: "Margen",
-      columnNetDy: "DY (12M)",
+      columnNetDy: "DY Neto",
       columnTaxRegime: "Régimen Fiscal",
       columnAction: "Acción Sugerida",
       actionBuy: "APORTE FUERTE",
@@ -2504,6 +2504,7 @@ export const es = {
     taxRegime: {
       exemptDouble: "Exención Doble (Ley 12.431)",
       exemptDividend: "Exento (Ley 11.033)",
+      exemptStockBr: "Exento (Dividendos) / 15% (JCP)",
       whtCompensable: "WHT 30% Compensable",
       jcpWithholding: "IR 15% en la Fuente (JCP)",
       standard: "Tributación Estándar",

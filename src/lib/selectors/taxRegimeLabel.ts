@@ -3,6 +3,7 @@ import type { AssetType, Currency } from "@/lib/domain";
 export type TaxRegimeKey =
   | "exemptDouble"
   | "exemptDividend"
+  | "exemptStockBr"
   | "whtCompensable"
   | "jcpWithholding"
   | "standard"
@@ -39,6 +40,6 @@ export function computeTaxRegimeKey(
   if (type === "FII_INFRA") return "exemptDouble";
   if (type === "FII" || type === "FIAGRO") return "exemptDividend";
   if (currency === "USD") return "whtCompensable";
-  if (type === "STOCK_BR") return "jcpWithholding";
+  if (type === "STOCK_BR") return "exemptStockBr";
   return "standard";
 }

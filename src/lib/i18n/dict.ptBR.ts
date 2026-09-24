@@ -2486,7 +2486,7 @@ export const ptBR = {
       columnPrice: "Cotação",
       columnCeiling: "Preço Teto",
       columnMargin: "Margem",
-      columnNetDy: "DY (12M)",
+      columnNetDy: "DY Líquido",
       columnTaxRegime: "Regime Fiscal",
       columnAction: "Ação Sugerida",
       actionBuy: "APORTE FORTE",
@@ -2500,6 +2500,7 @@ export const ptBR = {
     taxRegime: {
       exemptDouble: "Isenção Dupla (Lei 12.431)",
       exemptDividend: "Isento (Lei 11.033)",
+      exemptStockBr: "Isento (Dividendo) / 15% (JCP)",
       whtCompensable: "WHT 30% Compensável",
       jcpWithholding: "IR 15% na Fonte (JCP)",
       standard: "Tributação Padrão",
