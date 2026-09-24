@@ -38,12 +38,13 @@ import { MyTransactionsKpis } from "./MyTransactionsKpis";
 import { MyTransactionsTable } from "./MyTransactionsTable";
 import { NewTransactionModal } from "./NewTransactionModal";
 import { ThesisSnapshotModal } from "./ThesisSnapshotModal";
+import { BulkEditTransactionsModal } from "./BulkEditTransactionsModal";
 
 export function MyTransactionsView() {
   const { t } = useI18n();
   const { currency } = useMarketScope();
   const { data: fx } = useQuery(exchangeRateQueryOptions());
-  const { transactions, isLoading, remove } = useTransactions();
+  const { transactions, isLoading, remove, batchUpsert } = useTransactions();
   const { items: watchlistItems, updateAsync } = useWatchlist();
 
   const currencyByTicker = useMemo(() => {
@@ -65,6 +66,7 @@ export function MyTransactionsView() {
   // Selection & modals state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [viewingThesisTx, setViewingThesisTx] = useState<Transaction | null>(null);
 
@@ -72,6 +74,10 @@ export function MyTransactionsView() {
   const [txToDelete, setTxToDelete] = useState<Transaction | null>(null);
   const [batchToDeleteIds, setBatchToDeleteIds] = useState<string[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const selectedTransactionsList = useMemo(() => {
+    return transactions.filter((tx) => selectedIds.has(tx.id));
+  }, [transactions, selectedIds]);
 
   // Extract unique brokers for filter dropdown
   const uniqueBrokers = useMemo(() => {
@@ -276,6 +282,62 @@ export function MyTransactionsView() {
     }
   };
 
+  // Batch edit
+  const handleBatchEditConfirm = async (changes: {
+    broker?: string | null;
+    date?: number;
+    notes?: string | null;
+  }) => {
+    if (selectedTransactionsList.length === 0) return;
+
+    try {
+      const updatedTxs: Transaction[] = selectedTransactionsList.map((tx) => {
+        const next = { ...tx };
+        if ("broker" in changes) next.broker = changes.broker ?? null;
+        if ("date" in changes && typeof changes.date === "number") next.date = changes.date;
+        if ("notes" in changes) next.notes = changes.notes ?? null;
+        return next;
+      });
+
+      await batchUpsert(updatedTxs);
+
+      // If dates changed, recalculate affected tickers' average price & investingSince
+      if ("date" in changes) {
+        const affectedTickers = new Set(updatedTxs.map((t) => t.ticker));
+        const updatedTxsMap = new Map(updatedTxs.map((t) => [t.id, t]));
+        const allTxsAfterUpdate = transactions.map((t) => updatedTxsMap.get(t.id) || t);
+
+        for (const ticker of affectedTickers) {
+          const matchingTxs = allTxsAfterUpdate.filter((t) => t.ticker === ticker);
+          const matchingWatchlistItem = watchlistItems.find(
+            (it) => it.ticker.toUpperCase() === ticker.toUpperCase()
+          );
+
+          if (matchingWatchlistItem) {
+            const { quantity, averagePrice } = recalculateHoldingFromTransactions(
+              matchingTxs.sort((a, b) => b.date - a.date)
+            );
+            const investingSince =
+              recalculateInvestingSinceFromTransactions(matchingTxs) ??
+              matchingWatchlistItem.investingSince;
+
+            await updateAsync(matchingWatchlistItem.id, {
+              quantity,
+              averagePrice,
+              investingSince,
+            });
+          }
+        }
+      }
+
+      setSelectedIds(new Set());
+    } catch (err) {
+      console.error("[MyTransactionsView] Batch edit error:", err);
+      toast.error(t.errors?.saveTransactionFailed || "Erro ao atualizar transações em lote.");
+      throw err;
+    }
+  };
+
   const matchingWatchlistForThesis = watchlistItems.find(
     (it) => it.ticker.toUpperCase() === viewingThesisTx?.ticker.toUpperCase()
   );
@@ -417,6 +479,7 @@ export function MyTransactionsView() {
         }}
         onDelete={(tx) => setTxToDelete(tx)}
         onBatchDelete={(ids) => setBatchToDeleteIds(ids)}
+        onBatchEdit={() => setIsBulkEditOpen(true)}
         onViewThesis={(tx) => setViewingThesisTx(tx)}
         currencyByTicker={currencyByTicker}
       />
@@ -431,6 +494,16 @@ export function MyTransactionsView() {
         initialData={editingTx}
         existingTransactions={transactions}
       />
+
+      {/* Bulk Edit Modal */}
+      {isBulkEditOpen && (
+        <BulkEditTransactionsModal
+          open={isBulkEditOpen}
+          onClose={() => setIsBulkEditOpen(false)}
+          selectedTransactions={selectedTransactionsList}
+          onApply={handleBatchEditConfirm}
+        />
+      )}
 
       {/* View Thesis Snapshot Modal */}
       {viewingThesisTx && (

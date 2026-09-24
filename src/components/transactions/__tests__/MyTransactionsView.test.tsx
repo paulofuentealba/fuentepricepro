@@ -134,6 +134,7 @@ const mockWatchlistItems: WatchlistItem[] = [
 
 const mockRemove = vi.fn();
 const mockUpsert = vi.fn();
+const mockBatchUpsert = vi.fn();
 const mockUpdateAsync = vi.fn();
 
 vi.mock("@/lib/transactions", async (importOriginal) => {
@@ -145,6 +146,7 @@ vi.mock("@/lib/transactions", async (importOriginal) => {
       isLoading: false,
       remove: mockRemove,
       upsert: mockUpsert,
+      batchUpsert: mockBatchUpsert,
     }),
   };
 });
@@ -286,7 +288,55 @@ describe("MyTransactionsView", () => {
     fireEvent.click(checkboxes[1]);
 
     expect(screen.getByText("1 transação selecionada")).toBeInTheDocument();
+    expect(screen.getByText("Editar Selecionadas")).toBeInTheDocument();
     expect(screen.getByText("Excluir Selecionadas")).toBeInTheDocument();
+  });
+
+  it("opens BulkEditTransactionsModal when clicking 'Editar Selecionadas'", () => {
+    renderWithClient(<MyTransactionsView />);
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[1]);
+
+    const editBatchBtn = screen.getByText("Editar Selecionadas");
+    fireEvent.click(editBatchBtn);
+
+    const B = dict.ptBR.transactionsLedger.bulkModal;
+    expect(screen.getByText(B.title)).toBeInTheDocument();
+    expect(screen.getByText(B.changeBroker)).toBeInTheDocument();
+    expect(screen.getByText(B.changeDate)).toBeInTheDocument();
+    expect(screen.getByText(B.changeNotes)).toBeInTheDocument();
+    expect(
+      screen.getByText(B.saveChanges.replace("{{count}}", "1"))
+    ).toBeInTheDocument();
+  });
+
+  it("applies bulk broker update when submitted through the modal", async () => {
+    renderWithClient(<MyTransactionsView />);
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    // select first two rows
+    fireEvent.click(checkboxes[1]);
+    fireEvent.click(checkboxes[2]);
+
+    const editBatchBtn = screen.getByText("Editar Selecionadas");
+    fireEvent.click(editBatchBtn);
+
+    const B = dict.ptBR.transactionsLedger.bulkModal;
+    const applyBtnText = B.saveChanges.replace("{{count}}", "2");
+    expect(screen.getByText(applyBtnText)).toBeInTheDocument();
+
+    const brokerInput = screen.getByPlaceholderText(B.brokerPlaceholder);
+    fireEvent.change(brokerInput, { target: { value: "BTG Pactual" } });
+
+    const applyBtn = screen.getByText(applyBtnText);
+    fireEvent.click(applyBtn);
+
+    expect(mockBatchUpsert).toHaveBeenCalledTimes(1);
+    const updatedCalls = mockBatchUpsert.mock.calls[0][0];
+    expect(updatedCalls.length).toBe(2);
+    expect(updatedCalls[0].broker).toBe("BTG Pactual");
+    expect(updatedCalls[1].broker).toBe("BTG Pactual");
   });
 
   it("renders with USD currency when market scope is USD", () => {

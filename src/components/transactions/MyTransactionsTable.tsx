@@ -34,6 +34,7 @@ interface MyTransactionsTableProps {
   onEdit: (tx: Transaction) => void;
   onDelete: (tx: Transaction) => void;
   onBatchDelete: (ids: string[]) => void;
+  onBatchEdit?: (ids: string[]) => void;
   onViewThesis: (tx: Transaction) => void;
   currencyByTicker?: Record<string, Currency>;
 }
@@ -50,6 +51,7 @@ export function MyTransactionsTable({
   onEdit,
   onDelete,
   onBatchDelete,
+  onBatchEdit,
   onViewThesis,
   currencyByTicker = {},
 }: MyTransactionsTableProps) {
@@ -102,8 +104,16 @@ export function MyTransactionsTable({
     [paginatedTransactions]
   );
 
+  const allFilteredIds = useMemo(
+    () => filteredTransactions.map((tx) => tx.id),
+    [filteredTransactions]
+  );
+
   const areAllOnPageSelected =
     pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+
+  const areAllFilteredSelected =
+    allFilteredIds.length > 0 && allFilteredIds.every((id) => selectedIds.has(id));
 
   const handleHeaderCheckboxToggle = () => {
     if (areAllOnPageSelected) {
@@ -135,8 +145,8 @@ export function MyTransactionsTable({
     <div className="space-y-4">
       {/* Batch Action Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 animate-in fade-in-50">
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 animate-in fade-in-50">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-bold">
               {selectedIds.size}
             </span>
@@ -148,6 +158,23 @@ export function MyTransactionsTable({
                     String(selectedIds.size)
                   )}
             </span>
+
+            {/* Prompt to select all across all pages when page is selected */}
+            {areAllOnPageSelected && !areAllFilteredSelected && filteredTransactions.length > paginatedTransactions.length && (
+              <span className="text-xs text-muted-foreground ml-1">
+                —{" "}
+                <button
+                  type="button"
+                  onClick={() => onSelectAll(allFilteredIds)}
+                  className="text-primary hover:underline font-semibold focus-visible:outline-none"
+                >
+                  {t.transactionsLedger.batch.selectAllFiltered.replace(
+                    "{{count}}",
+                    String(filteredTransactions.length)
+                  )}
+                </button>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -160,6 +187,18 @@ export function MyTransactionsTable({
             >
               {t.transactionsLedger.batch.cancel}
             </Button>
+            {onBatchEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onBatchEdit(Array.from(selectedIds))}
+                className="h-8 gap-1.5 text-xs border-accent/40 bg-accent/20 hover:bg-accent/30 text-accent-text"
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+                {t.transactionsLedger.batch.editSelected}
+              </Button>
+            )}
             <Button
               type="button"
               variant="destructive"

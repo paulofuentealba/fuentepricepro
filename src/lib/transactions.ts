@@ -242,10 +242,50 @@ export function useTransactions() {
     },
   });
 
+  // 5. Batch Upsert Mutation
+  const batchUpsert = useMutation({
+    mutationFn: async (items: Transaction[]) => {
+      if (items.length === 0) return items;
+      if (USE_LOCAL_ONLY || !user) {
+        if (blockWriteInDemoMode()) throw new Error("Demo mode: sign in required to save");
+        const current = readLocal();
+        const map = new Map<string, Transaction>(current.map((it) => [it.id, it]));
+        for (const item of items) {
+          map.set(item.id, item);
+        }
+        const next = Array.from(map.values());
+        writeLocal(next);
+        return items;
+      }
+
+      const batch = writeBatch(db);
+      for (const item of items) {
+        const docRef = doc(db, "users", user.uid, "transactions", item.id);
+        batch.set(docRef, itemToRow(item, user.uid), { merge: true });
+      }
+      await withTimeout(batch.commit());
+      return items;
+    },
+    onSuccess: (updatedItems) => {
+      queryClient.setQueryData<Transaction[]>(queryKey, (old = []) => {
+        const map = new Map<string, Transaction>(old.map((it) => [it.id, it]));
+        for (const item of updatedItems) {
+          map.set(item.id, item);
+        }
+        return Array.from(map.values());
+      });
+    },
+    onError: (error) => {
+      toast.error(t.errors.saveTransactionFailed);
+      console.error(error);
+    },
+  });
+
   return {
     transactions: data,
     isLoading,
     upsert: upsert.mutateAsync,
+    batchUpsert: batchUpsert.mutateAsync,
     remove: remove.mutateAsync,
   };
 }
