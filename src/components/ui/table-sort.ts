@@ -22,6 +22,7 @@ export interface UseTableSortReturn<T, K extends string> {
   activeEffectiveDirection: "asc" | "desc";
   toggleSort: (key: K) => void;
   resetSort: () => void;
+  setSort: (key: K | null, direction: SortDirection) => void;
 }
 
 /**
@@ -120,6 +121,11 @@ export function useTableSort<T, K extends string = string>({
       .map(({ item }) => item);
   }, [items, activeEffectiveKey, activeEffectiveDirection, extractors]);
 
+  const setSort = useCallback((key: K | null, direction: SortDirection) => {
+    setSortKey(key);
+    setSortDirection(direction);
+  }, []);
+
   return {
     sortedItems,
     sortKey,
@@ -128,5 +134,6 @@ export function useTableSort<T, K extends string = string>({
     activeEffectiveDirection,
     toggleSort,
     resetSort,
+    setSort,
   };
 }

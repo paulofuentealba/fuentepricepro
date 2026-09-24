@@ -15,7 +15,7 @@ import { useUserSettings } from "@/lib/useUserSettings";
 import { useMarketScope } from "@/lib/useMarketScope";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
 import { buildMonthlyBuckets, computeInvestedVsReceived, MONTHS_EN_SHORT, MONTHS_PT_SHORT } from "@/lib/cashflow";
-import { buildConfirmedUpcoming, buildWeakMonths, buildAnnualDividends, buildYearMonthlyDividends, buildMonthTickerBreakdown } from "@/lib/incomeGuaranteed";
+import { buildConfirmedUpcoming, buildWeakMonths, buildAnnualDividends, buildYearMonthlyDividends, buildMonthTickerBreakdown, type MonthTickerRow } from "@/lib/incomeGuaranteed";
 import { resolveReasonText } from "@/lib/askEngine";
 import { convertCurrency } from "@/lib/currency";
 import { EXCHANGE_RATE_FALLBACK } from "@/lib/macroDefaults";
@@ -24,11 +24,16 @@ import { compactWithSymbol } from "@/components/ceiling/cashflow/CashFlowSummary
 import { DividendStressTestCard } from "@/components/income/DividendStressTestCard";
 import { MonthlyCashflowTimeline } from "@/components/income/MonthlyCashflowTimeline";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 const COLOR_RECEIVED = "var(--success)";
 const COLOR_GRID = "var(--chart-grid)";
 const COLOR_INVESTED = "var(--chart-1)";
 const UPCOMING_WINDOW_DAYS = 60;
+
+type UpcomingSortKey = "asset" | "gross" | "payment" | "net";
+type MonthTickerSortKey = "asset" | "type" | "status" | "gross" | "tax" | "net";
 
 export const Route = createFileRoute("/app/income")({
   head: () => ({
@@ -65,6 +70,23 @@ function IncomePage() {
     [upcoming, currency, fxRate],
   );
 
+  const {
+    sortedItems: sortedUpcoming,
+    sortKey: upcomingSortKey,
+    sortDirection: upcomingSortDirection,
+    toggleSort: toggleUpcomingSort,
+  } = useTableSort<typeof upcoming[0], UpcomingSortKey>({
+    items: upcoming,
+    defaultSortKey: "payment",
+    defaultDirection: "asc",
+    extractors: {
+      asset: (r) => r.ticker,
+      gross: (r) => r.amountGross,
+      payment: (r) => r.daysUntilPayment,
+      net: (r) => r.amountNet,
+    },
+  });
+
   const weakMonths = useMemo(() => buildWeakMonths(calendarBuckets), [calendarBuckets]);
   const annual = useMemo(
     () => buildAnnualDividends(events, calendarBuckets, currency, fxRate, 5),
@@ -87,6 +109,25 @@ function IncomePage() {
         : buildMonthTickerBreakdown(events, selectedYear, expandedMonthIndex),
     [selectedYear, expandedMonthIndex, events],
   );
+  const emptyMonthTickerRows = useMemo<MonthTickerRow[]>(() => [], []);
+  const {
+    sortedItems: sortedMonthTickerRows,
+    sortKey: monthTickerSortKey,
+    sortDirection: monthTickerSortDirection,
+    toggleSort: toggleMonthTickerSort,
+  } = useTableSort<MonthTickerRow, MonthTickerSortKey>({
+    items: monthTickerRows ?? emptyMonthTickerRows,
+    defaultSortKey: "net",
+    defaultDirection: "desc",
+    extractors: {
+      asset: (r) => r.ticker,
+      type: (r) => r.taxType,
+      status: (r) => (r.receivedAmount > 0 ? 1 : 0),
+      gross: (r) => r.grossAmount,
+      tax: (r) => r.taxAmount,
+      net: (r) => r.receivedAmount + r.announcedAmount,
+    },
+  });
   const investedVsReceived = useMemo(
     () => computeInvestedVsReceived(items, dividendEventsMap, transactions, fxRate),
     [items, dividendEventsMap, transactions, fxRate],
@@ -194,21 +235,49 @@ function IncomePage() {
               <table className="w-full min-w-[360px] text-sm">
                 <thead>
                   <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.assetHeader}</th>
-                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.grossHeader}</th>
-                    <th className="pb-2 text-left font-display font-semibold">{t.incomeScreen?.paymentHeader}</th>
-                    <th className="pb-2 text-left font-display font-semibold">
-                      <div className="inline-flex items-center gap-1">
-                        <span>{t.incomeScreen?.netHeader}</span>
-                        {t.incomeScreen?.netFootnote && (
-                          <InfoTooltip content={t.incomeScreen?.netFootnote} />
-                        )}
-                      </div>
-                    </th>
+                    <SortableTableHead
+                      id="asset"
+                      label={t.incomeScreen?.assetHeader}
+                      activeKey={upcomingSortKey}
+                      activeDirection={upcomingSortDirection}
+                      onSort={(k) => toggleUpcomingSort(k as UpcomingSortKey)}
+                      className="pb-2 text-left font-display font-semibold"
+                    />
+                    <SortableTableHead
+                      id="gross"
+                      label={t.incomeScreen?.grossHeader}
+                      activeKey={upcomingSortKey}
+                      activeDirection={upcomingSortDirection}
+                      onSort={(k) => toggleUpcomingSort(k as UpcomingSortKey)}
+                      className="pb-2 text-left font-display font-semibold"
+                    />
+                    <SortableTableHead
+                      id="payment"
+                      label={t.incomeScreen?.paymentHeader}
+                      activeKey={upcomingSortKey}
+                      activeDirection={upcomingSortDirection}
+                      onSort={(k) => toggleUpcomingSort(k as UpcomingSortKey)}
+                      className="pb-2 text-left font-display font-semibold"
+                    />
+                    <SortableTableHead
+                      id="net"
+                      label={
+                        <div className="inline-flex items-center gap-1">
+                          <span>{t.incomeScreen?.netHeader}</span>
+                          {t.incomeScreen?.netFootnote && (
+                            <InfoTooltip content={t.incomeScreen?.netFootnote} />
+                          )}
+                        </div>
+                      }
+                      activeKey={upcomingSortKey}
+                      activeDirection={upcomingSortDirection}
+                      onSort={(k) => toggleUpcomingSort(k as UpcomingSortKey)}
+                      className="pb-2 text-left font-display font-semibold"
+                    />
                   </tr>
                 </thead>
                 <tbody>
-                  {upcoming.map((row) => (
+                  {sortedUpcoming.map((row) => (
                     <tr key={`${row.ticker}-${row.paymentDate}`} className="border-t border-dashed border-border/40">
                       <td className="py-2.5 font-mono text-[13px] font-semibold text-foreground">{row.ticker}</td>
                       <td className="py-2.5 font-mono text-[13px] text-foreground">
@@ -608,16 +677,61 @@ function IncomePage() {
                       <table className="w-full min-w-[480px] text-sm">
                         <thead>
                           <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            <th className="pb-2 pt-2 text-left font-display font-semibold">{t.incomeScreen?.assetHeader}</th>
-                            <th className="pb-2 pt-2 text-left font-display font-semibold">{t.incomeScreen?.typeHeader}</th>
-                            <th className="pb-2 pt-2 text-left font-display font-semibold">{t.incomeScreen?.statusHeader}</th>
-                            <th className="pb-2 pt-2 text-right font-display font-semibold">{t.incomeScreen?.grossHeader}</th>
-                            <th className="pb-2 pt-2 text-right font-display font-semibold">{t.incomeScreen?.taxHeader}</th>
-                            <th className="pb-2 pt-2 text-right font-display font-semibold">{t.incomeScreen?.netHeader}</th>
+                            <SortableTableHead
+                              id="asset"
+                              label={t.incomeScreen?.assetHeader}
+                              activeKey={monthTickerSortKey}
+                              activeDirection={monthTickerSortDirection}
+                              onSort={(k) => toggleMonthTickerSort(k as MonthTickerSortKey)}
+                              className="pb-2 pt-2 text-left font-display font-semibold"
+                            />
+                            <SortableTableHead
+                              id="type"
+                              label={t.incomeScreen?.typeHeader}
+                              activeKey={monthTickerSortKey}
+                              activeDirection={monthTickerSortDirection}
+                              onSort={(k) => toggleMonthTickerSort(k as MonthTickerSortKey)}
+                              className="pb-2 pt-2 text-left font-display font-semibold"
+                            />
+                            <SortableTableHead
+                              id="status"
+                              label={t.incomeScreen?.statusHeader}
+                              activeKey={monthTickerSortKey}
+                              activeDirection={monthTickerSortDirection}
+                              onSort={(k) => toggleMonthTickerSort(k as MonthTickerSortKey)}
+                              className="pb-2 pt-2 text-left font-display font-semibold"
+                            />
+                            <SortableTableHead
+                              id="gross"
+                              label={t.incomeScreen?.grossHeader}
+                              activeKey={monthTickerSortKey}
+                              activeDirection={monthTickerSortDirection}
+                              onSort={(k) => toggleMonthTickerSort(k as MonthTickerSortKey)}
+                              align="right"
+                              className="pb-2 pt-2 text-right font-display font-semibold"
+                            />
+                            <SortableTableHead
+                              id="tax"
+                              label={t.incomeScreen?.taxHeader}
+                              activeKey={monthTickerSortKey}
+                              activeDirection={monthTickerSortDirection}
+                              onSort={(k) => toggleMonthTickerSort(k as MonthTickerSortKey)}
+                              align="right"
+                              className="pb-2 pt-2 text-right font-display font-semibold"
+                            />
+                            <SortableTableHead
+                              id="net"
+                              label={t.incomeScreen?.netHeader}
+                              activeKey={monthTickerSortKey}
+                              activeDirection={monthTickerSortDirection}
+                              onSort={(k) => toggleMonthTickerSort(k as MonthTickerSortKey)}
+                              align="right"
+                              className="pb-2 pt-2 text-right font-display font-semibold"
+                            />
                           </tr>
                         </thead>
                         <tbody>
-                          {monthTickerRows.map((row) => {
+                          {sortedMonthTickerRows.map((row) => {
                             const taxTypeLabel =
                               row.taxType === "jcp"
                                 ? t.incomeScreen?.taxTypeJcp

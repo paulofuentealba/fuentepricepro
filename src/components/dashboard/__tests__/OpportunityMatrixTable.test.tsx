@@ -163,4 +163,50 @@ describe("OpportunityMatrixTable", () => {
     expect(screen.getAllByText("HGLG11").length).toBeGreaterThan(0);
     expect(screen.queryByText("PETR4")).toBeNull();
   });
+
+  it("supports tri-state column sorting (asc -> desc -> default) and returns to margin descending", () => {
+    const itemA = createMockItem({
+      id: "item-a",
+      ticker: "BBAS3",
+      currentPrice: 20,
+      safetyMargin: 15,
+      valuation: { margin: 15, activeCeiling: 30, dividendYield: 8 } as any,
+    });
+    const itemB = createMockItem({
+      id: "item-b",
+      ticker: "VALE3",
+      currentPrice: 60,
+      safetyMargin: 25,
+      valuation: { margin: 25, activeCeiling: 80, dividendYield: 5 } as any,
+    });
+
+    render(
+      <OpportunityMatrixTable
+        valuedItems={[itemA, itemB]}
+        isLoading={false}
+      />,
+    );
+
+    // Default: margin descending -> VALE3 (25%) before BBAS3 (15%)
+    const tickerElements = screen.getAllByText(/BBAS3|VALE3/);
+    expect(tickerElements[0].textContent).toContain("VALE3");
+
+    // Click on "Preço" header (1st click -> asc)
+    const priceHeaders = screen.getAllByRole("button", { name: /Preço/i });
+    fireEvent.click(priceHeaders[0]);
+
+    // Price asc: BBAS3 (20) should now come before VALE3 (60)
+    const sortedAsc = screen.getAllByText(/BBAS3|VALE3/);
+    expect(sortedAsc[0].textContent).toContain("BBAS3");
+
+    // 2nd click -> desc: VALE3 (60) comes first
+    fireEvent.click(priceHeaders[0]);
+    const sortedDesc = screen.getAllByText(/BBAS3|VALE3/);
+    expect(sortedDesc[0].textContent).toContain("VALE3");
+
+    // 3rd click -> default: back to margin descending (VALE3 margin 25% first)
+    fireEvent.click(priceHeaders[0]);
+    const sortedDefault = screen.getAllByText(/BBAS3|VALE3/);
+    expect(sortedDefault[0].textContent).toContain("VALE3");
+  });
 });

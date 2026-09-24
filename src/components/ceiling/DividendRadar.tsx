@@ -18,6 +18,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 import { Badge } from "@/components/ui/badge";
 import {
   AssetTicker,
@@ -129,6 +131,29 @@ export function DividendRadar() {
     filteredAndSorted,
   } = useAssetFilterSort(classFilteredData as unknown as import("@/lib/watchlist").WatchlistItem[], "yield_desc");
 
+  const {
+    sortedItems: tableSortedData,
+    sortKey,
+    sortDirection,
+    toggleSort,
+  } = useTableSort<
+    any,
+    "ticker" | "type" | "sector" | "currentPrice" | "ceiling" | "dy" | "exDate"
+  >({
+    items: (filteredAndSorted || []) as any[],
+    defaultSortKey: "dy",
+    defaultDirection: "desc",
+    extractors: {
+      ticker: (a) => a.ticker,
+      type: (a) => a.type,
+      sector: (a) => a.sector,
+      currentPrice: (a) => a.currentPrice,
+      ceiling: (a) => (a.isValuationUnavailable ? null : a.ceiling),
+      dy: (a) => (a.isValuationUnavailable ? null : a.dy),
+      exDate: (a) => a.exDate,
+    },
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -168,28 +193,75 @@ export function DividendRadar() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className={STICKY_FIRST_COLUMN_CLASS}>{t.radar.asset}</TableHead>
-                  <TableHead>{t.global.type}</TableHead>
-                  <TableHead>{t.radar.sector}</TableHead>
-                  <TableHead className="text-right">{t.radar.currentPrice}</TableHead>
-                  <TableHead className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {t.radar.ceilingPrice}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[280px]">
-                          {t.radar.globalYieldNote?.replace(
-                            "{targetYield}",
-                            targetYield.toString(),
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-right">{t.radar.currentDy}</TableHead>
-                  <TableHead className="text-right">{t.radar.exDate}</TableHead>
+                  <SortableTableHead
+                    id="ticker"
+                    label={t.radar.asset}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className={STICKY_FIRST_COLUMN_CLASS}
+                  />
+                  <SortableTableHead
+                    id="type"
+                    label={t.global.type}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                  />
+                  <SortableTableHead
+                    id="sector"
+                    label={t.radar.sector}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                  />
+                  <SortableTableHead
+                    id="currentPrice"
+                    label={t.radar.currentPrice}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    align="right"
+                  />
+                  <SortableTableHead
+                    id="ceiling"
+                    label={
+                      <div className="flex items-center justify-end gap-1">
+                        {t.radar.ceilingPrice}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[280px]">
+                            {t.radar.globalYieldNote?.replace(
+                              "{targetYield}",
+                              targetYield.toString(),
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    }
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    align="right"
+                  />
+                  <SortableTableHead
+                    id="dy"
+                    label={t.radar.currentDy}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    align="right"
+                  />
+                  <SortableTableHead
+                    id="exDate"
+                    label={t.radar.exDate}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    align="right"
+                  />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -232,7 +304,7 @@ export function DividendRadar() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAndSorted.map((asset: any) => {
+                  tableSortedData.map((asset: any) => {
                     const margin = asset.isValuationUnavailable ? null : asset.safetyMargin;
                     const dyValue = asset.isValuationUnavailable ? null : asset.dy;
                     const ceilingValue = asset.isValuationUnavailable ? null : asset.ceiling;

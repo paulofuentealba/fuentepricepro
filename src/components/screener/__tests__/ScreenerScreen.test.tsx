@@ -235,4 +235,25 @@ describe("ScreenerScreen Component (Fase 9)", () => {
     expect(screen.getByText(dict.ptBR.screenerScreen.allocLabel)).toBeInTheDocument();
     expect(screen.getByText(dict.ptBR.screenerScreen.incomeLabel)).toBeInTheDocument();
   });
+
+  it("supports tri-state column sorting on table headers and returns to default", () => {
+    render(<ScreenerScreen />);
+
+    // Table headers are sortable buttons
+    const assetHeader = screen.getByRole("button", {
+      name: new RegExp(dict.ptBR.screenerScreen.table.asset, "i"),
+    });
+
+    // Click 1: asc
+    fireEvent.click(assetHeader);
+    expect(assetHeader).toHaveAttribute("aria-sort", "ascending");
+
+    // Click 2: desc
+    fireEvent.click(assetHeader);
+    expect(assetHeader).toHaveAttribute("aria-sort", "descending");
+
+    // Click 3: default (none)
+    fireEvent.click(assetHeader);
+    expect(assetHeader).toHaveAttribute("aria-sort", "none");
+  });
 });

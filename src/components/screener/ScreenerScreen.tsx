@@ -63,6 +63,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 import {
   Dialog,
   DialogContent,
@@ -203,67 +205,87 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
     });
   }, [rawUniverse, settings, selic, ipcaAvg, heldTickers]);
 
-  const filteredAndSortedItems = useMemo(() => {
-    return items
-      .filter((item) => {
-        if (marketFilter === "BR" && item.currency !== "BRL") return false;
-        if (marketFilter === "US" && item.currency !== "USD") return false;
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (marketFilter === "BR" && item.currency !== "BRL") return false;
+      if (marketFilter === "US" && item.currency !== "USD") return false;
 
-        if (classFilter !== "ALL" && item.type !== classFilter) return false;
+      if (classFilter !== "ALL" && item.type !== classFilter) return false;
 
-        if (marginFilter === "POSITIVE" && (item.safetyMargin == null || item.safetyMargin <= 0)) {
-          return false;
-        }
-        if (marginFilter === "SAFE" && (item.safetyMargin == null || item.safetyMargin < 10)) {
-          return false;
-        }
-        if (marginFilter === "DEEP" && (item.safetyMargin == null || item.safetyMargin < 20)) {
-          return false;
-        }
+      if (marginFilter === "POSITIVE" && (item.safetyMargin == null || item.safetyMargin <= 0)) {
+        return false;
+      }
+      if (marginFilter === "SAFE" && (item.safetyMargin == null || item.safetyMargin < 10)) {
+        return false;
+      }
+      if (marginFilter === "DEEP" && (item.safetyMargin == null || item.safetyMargin < 20)) {
+        return false;
+      }
 
-        if (dyFilter !== "ALL") {
-          const minDy = Number(dyFilter);
-          if (item.dy == null || item.dy < minDy) return false;
-        }
+      if (dyFilter !== "ALL") {
+        const minDy = Number(dyFilter);
+        if (item.dy == null || item.dy < minDy) return false;
+      }
 
-        if (pvpFilter === "DISCOUNT" && (item.pvp == null || item.pvp >= 1.0)) {
-          return false;
-        }
-        if (pvpFilter === "FAIR" && (item.pvp == null || item.pvp >= 1.2)) {
-          return false;
-        }
+      if (pvpFilter === "DISCOUNT" && (item.pvp == null || item.pvp >= 1.0)) {
+        return false;
+      }
+      if (pvpFilter === "FAIR" && (item.pvp == null || item.pvp >= 1.2)) {
+        return false;
+      }
 
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase().trim();
-          const matchTicker = item.ticker.toLowerCase().includes(q);
-          const matchName = item.name.toLowerCase().includes(q);
-          if (!matchTicker && !matchName) return false;
-        }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchTicker = item.ticker.toLowerCase().includes(q);
+        const matchName = item.name.toLowerCase().includes(q);
+        if (!matchTicker && !matchName) return false;
+      }
 
-        return true;
-      })
-      .sort((a, b) => {
-        if (sortOption === "MARGIN_DESC") {
-          const mA = a.safetyMargin ?? -Infinity;
-          const mB = b.safetyMargin ?? -Infinity;
-          return mB - mA;
-        }
-        if (sortOption === "DY_DESC") {
-          const dyA = a.dy ?? -Infinity;
-          const dyB = b.dy ?? -Infinity;
-          return dyB - dyA;
-        }
-        if (sortOption === "PVP_ASC") {
-          const pA = a.pvp ?? Infinity;
-          const pB = b.pvp ?? Infinity;
-          return pA - pB;
-        }
-        if (sortOption === "TICKER_ASC") {
-          return a.ticker.localeCompare(b.ticker);
-        }
-        return 0;
-      });
-  }, [items, marketFilter, classFilter, marginFilter, dyFilter, pvpFilter, searchQuery, sortOption]);
+      return true;
+    });
+  }, [items, marketFilter, classFilter, marginFilter, dyFilter, pvpFilter, searchQuery]);
+
+  const {
+    sortedItems: filteredAndSortedItems,
+    sortKey,
+    sortDirection,
+    toggleSort,
+    setSort,
+    resetSort,
+  } = useTableSort<
+    ScreenerItem,
+    "asset" | "class" | "currentPrice" | "ceilingPrice" | "safetyMargin" | "dy" | "pvp"
+  >({
+    items: filteredItems,
+    defaultSortKey: "safetyMargin",
+    defaultDirection: "desc",
+    extractors: {
+      asset: (i) => i.ticker,
+      class: (i) => i.type,
+      currentPrice: (i) => i.currentPrice,
+      ceilingPrice: (i) => i.ceilingPrice,
+      safetyMargin: (i) => i.safetyMargin,
+      dy: (i) => i.dy,
+      pvp: (i) => i.pvp,
+    },
+  });
+
+  const currentSortOptionValue = useMemo(() => {
+    if (sortKey === "safetyMargin" && sortDirection === "desc") return "MARGIN_DESC";
+    if (sortKey === "dy" && sortDirection === "desc") return "DY_DESC";
+    if (sortKey === "pvp" && sortDirection === "asc") return "PVP_ASC";
+    if (sortKey === "asset" && sortDirection === "asc") return "TICKER_ASC";
+    if (sortDirection === "default") return "MARGIN_DESC";
+    return "";
+  }, [sortKey, sortDirection]);
+
+  const handleSortSelectChange = (val: string) => {
+    setSortOption(val);
+    if (val === "MARGIN_DESC") setSort("safetyMargin", "desc");
+    else if (val === "DY_DESC") setSort("dy", "desc");
+    else if (val === "PVP_ASC") setSort("pvp", "asc");
+    else if (val === "TICKER_ASC") setSort("asset", "asc");
+  };
 
   // KPIs
   const totalAnalyzed = filteredAndSortedItems.length;
@@ -354,6 +376,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
     setPvpFilter("ALL");
     setSearchQuery("");
     setSortOption("MARGIN_DESC");
+    resetSort();
   };
 
   if (isAppLoading || isRadarLoading) {
@@ -545,7 +568,7 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
               <label className="text-[11px] font-medium text-muted-foreground">
                 {t.screenerScreen?.sortLabel}
               </label>
-              <Select value={sortOption} onValueChange={setSortOption}>
+              <Select value={currentSortOptionValue || sortOption} onValueChange={handleSortSelectChange}>
                 <SelectTrigger className="h-8 text-xs bg-background">
                   <SelectValue placeholder={t.screenerScreen?.sortMarginDesc} />
                 </SelectTrigger>
@@ -653,25 +676,67 @@ export function ScreenerScreen({ embedded = false }: { embedded?: boolean } = {}
           <Table>
             <TableHeader>
               <TableRow className="border-border/60 hover:bg-transparent">
-                <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "min-w-[180px]")}>
-                  {t.screenerScreen?.table?.asset}
-                </TableHead>
-                <TableHead className="min-w-[100px]">{t.screenerScreen?.table?.class}</TableHead>
-                <TableHead className="text-right min-w-[100px]">
-                  {t.screenerScreen?.table?.currentPrice}
-                </TableHead>
-                <TableHead className="text-right min-w-[110px]">
-                  {t.screenerScreen?.table?.ceilingPrice}
-                </TableHead>
-                <TableHead className="text-right min-w-[120px]">
-                  {t.screenerScreen?.table?.safetyMargin}
-                </TableHead>
-                <TableHead className="text-right min-w-[100px]">
-                  {t.screenerScreen?.table?.dy}
-                </TableHead>
-                <TableHead className="text-right min-w-[80px]">
-                  {t.screenerScreen?.table?.pvp}
-                </TableHead>
+                <SortableTableHead
+                  id="asset"
+                  label={t.screenerScreen?.table?.asset}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  className={cn(STICKY_FIRST_COLUMN_CLASS, "min-w-[180px]")}
+                />
+                <SortableTableHead
+                  id="class"
+                  label={t.screenerScreen?.table?.class}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  className="min-w-[100px]"
+                />
+                <SortableTableHead
+                  id="currentPrice"
+                  label={t.screenerScreen?.table?.currentPrice}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="min-w-[100px]"
+                />
+                <SortableTableHead
+                  id="ceilingPrice"
+                  label={t.screenerScreen?.table?.ceilingPrice}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="min-w-[110px]"
+                />
+                <SortableTableHead
+                  id="safetyMargin"
+                  label={t.screenerScreen?.table?.safetyMargin}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="min-w-[120px]"
+                />
+                <SortableTableHead
+                  id="dy"
+                  label={t.screenerScreen?.table?.dy}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="min-w-[100px]"
+                />
+                <SortableTableHead
+                  id="pvp"
+                  label={t.screenerScreen?.table?.pvp}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="min-w-[80px]"
+                />
                 <TableHead className="text-right min-w-[180px]">
                   {t.screenerScreen?.table?.actions}
                 </TableHead>

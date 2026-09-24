@@ -11,6 +11,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { History } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 export interface AuditScreenProps {
   summary: DecisionLogSummary;
@@ -18,6 +20,8 @@ export interface AuditScreenProps {
   currency?: "BRL" | "USD";
   fxRate?: number;
 }
+
+type AuditSortKey = "date" | "asset" | "price" | "verdict" | "effect" | "feesTax" | "total";
 
 const VERDICT_VARIANT: Record<DecisionVerdict, "success" | "danger" | "gold" | "default"> = {
   above_ceiling: "danger",
@@ -104,6 +108,26 @@ export function AuditScreen({
   const fxRate = explicitFxRate ?? 1;
 
   const convertBrl = (valBrl: number) => convertCurrency(valBrl, "BRL", currency, fxRate);
+
+  const {
+    sortedItems: sortedEntries,
+    sortKey,
+    sortDirection,
+    toggleSort,
+  } = useTableSort<DecisionLogEntry, AuditSortKey>({
+    items: summary.entries,
+    defaultSortKey: "date",
+    defaultDirection: "desc",
+    extractors: {
+      date: (e) => e.date,
+      asset: (e) => e.ticker,
+      price: (e) => e.pricePerShare,
+      verdict: (e) => e.verdict,
+      effect: (e) => e.effectNative,
+      feesTax: (e) => e.feesNative + e.taxNative,
+      total: (e) => e.totalNative,
+    },
+  });
 
   if (isLoading) {
     return (
@@ -207,17 +231,70 @@ export function AuditScreen({
             <table className="w-full min-w-[600px] text-[12.5px]">
               <thead>
                 <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <th className="pb-2 pr-3 text-left font-display font-semibold">{t.auditScreen?.dateHeader || "Data"}</th>
-                  <th className="pb-2 pr-3 text-left font-display font-semibold">{t.auditScreen?.assetHeader || "Ativo"}</th>
-                  <th className="pb-2 pr-3 text-right font-display font-semibold">{t.auditScreen?.priceHeader || "Preço"}</th>
-                  <th className="pb-2 pr-3 text-left font-display font-semibold">{t.auditScreen?.verdictHeader || "Veredito"}</th>
-                  <th className="pb-2 pr-3 text-right font-display font-semibold">{t.auditScreen?.effectHeader || "Efeito"}</th>
-                  <th className="pb-2 pr-3 text-right font-display font-semibold">{t.auditScreen?.feesTaxHeader || "Taxa/Imp."}</th>
-                  <th className="pb-2 text-right font-display font-semibold">{t.auditScreen?.totalHeader || "Total"}</th>
+                  <SortableTableHead
+                    id="date"
+                    label={t.auditScreen?.dateHeader || "Data"}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    className="pb-2 pr-3 text-left font-display font-semibold"
+                  />
+                  <SortableTableHead
+                    id="asset"
+                    label={t.auditScreen?.assetHeader || "Ativo"}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    className="pb-2 pr-3 text-left font-display font-semibold"
+                  />
+                  <SortableTableHead
+                    id="price"
+                    label={t.auditScreen?.priceHeader || "Preço"}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    align="right"
+                    className="pb-2 pr-3 text-right font-display font-semibold"
+                  />
+                  <SortableTableHead
+                    id="verdict"
+                    label={t.auditScreen?.verdictHeader || "Veredito"}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    className="pb-2 pr-3 text-left font-display font-semibold"
+                  />
+                  <SortableTableHead
+                    id="effect"
+                    label={t.auditScreen?.effectHeader || "Efeito"}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    align="right"
+                    className="pb-2 pr-3 text-right font-display font-semibold"
+                  />
+                  <SortableTableHead
+                    id="feesTax"
+                    label={t.auditScreen?.feesTaxHeader || "Taxa/Imp."}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    align="right"
+                    className="pb-2 pr-3 text-right font-display font-semibold"
+                  />
+                  <SortableTableHead
+                    id="total"
+                    label={t.auditScreen?.totalHeader || "Total"}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as AuditSortKey)}
+                    align="right"
+                    className="pb-2 text-right font-display font-semibold"
+                  />
                 </tr>
               </thead>
               <tbody>
-                {summary.entries.map((entry) => (
+                {sortedEntries.map((entry) => (
                   <DecisionRow key={entry.id} entry={entry} t={t} locale={locale} />
                 ))}
               </tbody>

@@ -21,6 +21,8 @@ import { computeTaxRegimeKey } from "@/lib/selectors/taxRegimeLabel";
 import { cn } from "@/lib/utils";
 import { AssetClassFilterChips } from "@/components/shared/AssetClassFilterChips";
 import { useAssetClassFilter } from "@/lib/selectors/useAssetClassFilter";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 interface OpportunityMatrixTableProps {
   valuedItems: ValuedWatchlistItem[];
@@ -43,23 +45,20 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
     onlyExisting: false,
   });
 
-  const filteredItems = useMemo(() => {
-    return [...classFilteredItems].sort(
-      (a, b) => (b.valuation?.margin ?? -Infinity) - (a.valuation?.margin ?? -Infinity),
-    );
-  }, [classFilteredItems]);
-
-  const taxRegimeLabel: Record<string, string> = {
-    exemptDouble: t.dashboard.taxRegime.exemptDouble,
-    exemptDividend: t.dashboard.taxRegime.exemptDividend,
-    whtCompensable: t.dashboard.taxRegime.whtCompensable,
-    jcpWithholding: t.dashboard.taxRegime.jcpWithholding,
-    standard: t.dashboard.taxRegime.standard,
-    usQualified: t.dashboard.taxRegime.usQualified,
-    usReitQbi: t.dashboard.taxRegime.usReitQbi,
-    usEtf: t.dashboard.taxRegime.usEtf,
-    foreignBr: t.dashboard.taxRegime.foreignBr,
-  };
+  const taxRegimeLabel: Record<string, string> = useMemo(
+    () => ({
+      exemptDouble: t.dashboard.taxRegime.exemptDouble,
+      exemptDividend: t.dashboard.taxRegime.exemptDividend,
+      whtCompensable: t.dashboard.taxRegime.whtCompensable,
+      jcpWithholding: t.dashboard.taxRegime.jcpWithholding,
+      standard: t.dashboard.taxRegime.standard,
+      usQualified: t.dashboard.taxRegime.usQualified,
+      usReitQbi: t.dashboard.taxRegime.usReitQbi,
+      usEtf: t.dashboard.taxRegime.usEtf,
+      foreignBr: t.dashboard.taxRegime.foreignBr,
+    }),
+    [t],
+  );
 
   function getBadgeDetails(action: RecommendedActionKey, margin: number | null) {
     if (action === "yieldTrap" || (margin != null && margin <= -5)) {
@@ -97,6 +96,35 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
     };
   }
 
+  const { sortedItems, sortKey, sortDirection, toggleSort } = useTableSort<
+    ValuedWatchlistItem,
+    "ticker" | "class" | "price" | "ceiling" | "margin" | "dy" | "taxRegime" | "action"
+  >({
+    items: classFilteredItems,
+    defaultSortKey: "margin",
+    defaultDirection: "desc",
+    extractors: {
+      ticker: (i) => i.ticker,
+      class: (i) => {
+        const classKey = classifyPositionToEightClass(i);
+        return t.dashboard.allocation.classes?.[classKey] ?? t.types[i.type] ?? i.type;
+      },
+      price: (i) => i.livePrice ?? i.currentPrice ?? 0,
+      ceiling: (i) => i.valuation?.activeCeiling ?? i.ceilingPrice ?? 0,
+      margin: (i) => i.valuation?.margin ?? i.safetyMargin ?? null,
+      dy: (i) => i.valuation?.dividendYield ?? 0,
+      taxRegime: (i) => {
+        const regime = computeTaxRegimeKey(i.type, i.currency, taxJurisdiction);
+        return taxRegimeLabel[regime] ?? "";
+      },
+      action: (i) => {
+        const margin = i.valuation?.margin ?? i.safetyMargin ?? null;
+        const action = computeRecommendedAction(i);
+        return getBadgeDetails(action, margin).label;
+      },
+    },
+  });
+
   return (
     <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm dark:border-[#1B2F27] dark:bg-[#0D1714]">
       <div className="mb-4">
@@ -123,13 +151,13 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
           <Skeleton className="h-12 w-full rounded-lg" />
           <Skeleton className="h-12 w-full rounded-lg" />
         </div>
-      ) : filteredItems.length === 0 ? (
+      ) : sortedItems.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8 text-center">{t.dashboard.matrix.empty}</p>
       ) : (
         <>
           {/* Mobile View (< md): Stacked Asset Cards (Zero Horizontal Scroll) */}
           <div className="flex flex-col gap-3 md:hidden">
-            {filteredItems.map((item) => {
+            {sortedItems.map((item) => {
               const action = computeRecommendedAction(item);
               const regime = computeTaxRegimeKey(item.type, item.currency, taxJurisdiction);
               const livePrice = item.livePrice ?? item.currentPrice ?? 0;
@@ -238,34 +266,74 @@ export function OpportunityMatrixTable({ valuedItems, isLoading, onSelectTicker 
             <Table containerClassName="overflow-x-auto scrollbar-thin" className="w-full min-w-[760px]">
               <TableHeader className="bg-surface-1 dark:bg-[#0D1714]">
                 <TableRow className="border-border/60 dark:border-[#1B2F27] hover:bg-transparent">
-                  <TableHead className="sticky left-0 z-20 bg-surface-1 dark:bg-[#0D1714] py-3 pl-3 pr-2 lg:pl-4 lg:pr-3 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.4)]">
-                    {t.dashboard.matrix.columnAsset}
-                  </TableHead>
-                  <TableHead className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnClass}
-                  </TableHead>
-                  <TableHead className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnPrice}
-                  </TableHead>
-                  <TableHead className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnCeiling}
-                  </TableHead>
-                  <TableHead className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnMargin}
-                  </TableHead>
-                  <TableHead className="py-3 pl-2 pr-1 lg:pl-2.5 lg:pr-1.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnNetDy}
-                  </TableHead>
-                  <TableHead className="py-3 pl-1 pr-2 lg:pl-1.5 lg:pr-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnTaxRegime}
-                  </TableHead>
-                  <TableHead className="py-3 pl-2 pr-3 lg:pl-3 lg:pr-4 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap">
-                    {t.dashboard.matrix.columnAction}
-                  </TableHead>
+                  <SortableTableHead
+                    id="ticker"
+                    label={t.dashboard.matrix.columnAsset}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="sticky left-0 z-20 bg-surface-1 dark:bg-[#0D1714] py-3 pl-3 pr-2 lg:pl-4 lg:pr-3 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.4)]"
+                  />
+                  <SortableTableHead
+                    id="class"
+                    label={t.dashboard.matrix.columnClass}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
+                  <SortableTableHead
+                    id="price"
+                    label={t.dashboard.matrix.columnPrice}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
+                  <SortableTableHead
+                    id="ceiling"
+                    label={t.dashboard.matrix.columnCeiling}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
+                  <SortableTableHead
+                    id="margin"
+                    label={t.dashboard.matrix.columnMargin}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 px-2 lg:px-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
+                  <SortableTableHead
+                    id="dy"
+                    label={t.dashboard.matrix.columnNetDy}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 pl-2 pr-1 lg:pl-2.5 lg:pr-1.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
+                  <SortableTableHead
+                    id="taxRegime"
+                    label={t.dashboard.matrix.columnTaxRegime}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 pl-1 pr-2 lg:pl-1.5 lg:pr-2.5 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
+                  <SortableTableHead
+                    id="action"
+                    label={t.dashboard.matrix.columnAction}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="py-3 pl-2 pr-3 lg:pl-3 lg:pr-4 text-[0.72rem] uppercase tracking-wider font-semibold text-muted-foreground dark:text-[#64748B] whitespace-nowrap"
+                  />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredItems.map((item) => {
+                {sortedItems.map((item) => {
                   const action = computeRecommendedAction(item);
                   const regime = computeTaxRegimeKey(item.type, item.currency, taxJurisdiction);
                   const livePrice = item.livePrice ?? item.currentPrice ?? 0;

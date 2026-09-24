@@ -14,6 +14,8 @@ import { computeFxDecomposition, type FxAssetBreakdown } from "@/lib/selectors/f
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import { cn } from "@/lib/utils";
 import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 interface FxDecompositionPanelProps {
   valuedItems: ValuedWatchlistItem[];
@@ -45,6 +47,37 @@ export function FxDecompositionPanel({
     hedgeCompensated: t.portfolio.fx.diagHedgeCompensated,
     stable: t.portfolio.fx.diagStable,
   };
+
+  const {
+    sortedItems: sortedUsAssets,
+    sortKey,
+    sortDirection,
+    toggleSort,
+  } = useTableSort<
+    FxAssetBreakdown,
+    | "asset"
+    | "avgCostUsd"
+    | "currentPriceUsd"
+    | "assetReturn"
+    | "avgFx"
+    | "fxReturn"
+    | "totalReturnBrl"
+    | "diagnosis"
+  >({
+    items: summary.usAssets,
+    defaultSortKey: "totalReturnBrl",
+    defaultDirection: "desc",
+    extractors: {
+      asset: (a) => a.ticker,
+      avgCostUsd: (a) => a.avgCostUsd,
+      currentPriceUsd: (a) => a.currentPriceUsd,
+      assetReturn: (a) => a.assetReturnPct,
+      avgFx: (a) => a.avgFx,
+      fxReturn: (a) => a.fxReturnPct,
+      totalReturnBrl: (a) => a.totalReturnBrlPct,
+      diagnosis: (a) => diagnosisLabelMap[a.diagnosisKey] ?? a.diagnosisKey,
+    },
+  });
 
   const radarText = summary.isAboveMa
     ? t.portfolio.fx.radarAboveMa
@@ -154,34 +187,74 @@ export function FxDecompositionPanel({
             <Table className="w-full min-w-[780px]">
               <TableHeader className="bg-surface-1">
                 <TableRow className="border-border/60 hover:bg-transparent">
-                  <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "bg-surface-1 py-3 text-xs uppercase tracking-wider text-muted-foreground font-semibold shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]")}>
-                    {t.portfolio.fx.columnAssetUs}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnAvgCostUsd}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnCurrentPriceUsd}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnAssetReturnUsd}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnAvgFx}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnFxEffect}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnTotalReturnBrl}
-                  </TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    {t.portfolio.fx.columnDiagnosis}
-                  </TableHead>
+                  <SortableTableHead
+                    id="asset"
+                    label={t.portfolio.fx.columnAssetUs}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className={cn(STICKY_FIRST_COLUMN_CLASS, "bg-surface-1 py-3 text-xs uppercase tracking-wider text-muted-foreground font-semibold shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]")}
+                  />
+                  <SortableTableHead
+                    id="avgCostUsd"
+                    label={t.portfolio.fx.columnAvgCostUsd}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
+                  <SortableTableHead
+                    id="currentPriceUsd"
+                    label={t.portfolio.fx.columnCurrentPriceUsd}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
+                  <SortableTableHead
+                    id="assetReturn"
+                    label={t.portfolio.fx.columnAssetReturnUsd}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
+                  <SortableTableHead
+                    id="avgFx"
+                    label={t.portfolio.fx.columnAvgFx}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
+                  <SortableTableHead
+                    id="fxReturn"
+                    label={t.portfolio.fx.columnFxEffect}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
+                  <SortableTableHead
+                    id="totalReturnBrl"
+                    label={t.portfolio.fx.columnTotalReturnBrl}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
+                  <SortableTableHead
+                    id="diagnosis"
+                    label={t.portfolio.fx.columnDiagnosis}
+                    activeKey={sortKey}
+                    activeDirection={sortDirection}
+                    onSort={(k) => toggleSort(k as any)}
+                    className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+                  />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {summary.usAssets.map((asset) => {
+                {sortedUsAssets.map((asset) => {
                   const originalItem = valuedItems.find((i) => i.ticker === asset.ticker);
                   return (
                     <TableRow

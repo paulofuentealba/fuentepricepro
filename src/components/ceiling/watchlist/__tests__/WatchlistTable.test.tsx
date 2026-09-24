@@ -168,4 +168,29 @@ describe("WatchlistTable Batch Edit", () => {
       averagePrice: 0,
     });
   });
+
+  it("supports tri-state column sorting on WatchlistTable and defaults to total descending", () => {
+    // mockItems: PETR4 (qty: 100, price: 38.5 -> total 3850), AAPL (qty: 10.5, price: 220 -> total 2310)
+    render(<WatchlistTable items={mockItems} quotes={{}} />);
+
+    // Default: Total descending -> PETR4 (3850) before AAPL (2310)
+    let tickers = screen.getAllByText(/PETR4|AAPL/);
+    expect(tickers[0].textContent).toContain("PETR4");
+
+    // Click on "Ativo" header -> 1st click = asc (AAPL before PETR4)
+    const assetHeader = screen.getByRole("button", { name: /Ativo/i });
+    fireEvent.click(assetHeader);
+    tickers = screen.getAllByText(/PETR4|AAPL/);
+    expect(tickers[0].textContent).toContain("AAPL");
+
+    // 2nd click -> desc (PETR4 before AAPL)
+    fireEvent.click(assetHeader);
+    tickers = screen.getAllByText(/PETR4|AAPL/);
+    expect(tickers[0].textContent).toContain("PETR4");
+
+    // 3rd click -> back to default (total descending: PETR4 before AAPL)
+    fireEvent.click(assetHeader);
+    tickers = screen.getAllByText(/PETR4|AAPL/);
+    expect(tickers[0].textContent).toContain("PETR4");
+  });
 });

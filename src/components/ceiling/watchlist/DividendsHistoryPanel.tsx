@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 interface Props {
   item: WatchlistItem;
@@ -86,14 +88,25 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
     };
   }, [pastRealizedEvents]);
 
-  const marketEvents = useMemo(() => {
-    return [...events].sort((a, b) => {
-      return new Date(b.exDate).getTime() - new Date(a.exDate).getTime();
-    });
-  }, [events]);
+  const {
+    sortedItems: sortedMarketEvents,
+    sortKey,
+    sortDirection,
+    toggleSort,
+  } = useTableSort<DividendEvent, "exDate" | "paymentDate" | "type" | "amountPerShare">({
+    items: events,
+    defaultSortKey: "exDate",
+    defaultDirection: "desc",
+    extractors: {
+      exDate: (ev) => ev.exDate,
+      paymentDate: (ev) => ev.paymentDate || "",
+      type: (ev) => getDividendTypeLabel(item.type, ev.isJCP, t),
+      amountPerShare: (ev) => ev.amountPerShare,
+    },
+  });
 
-  const totalPages = Math.ceil(marketEvents.length / pageSize);
-  const visibleEvents = marketEvents.slice(page * pageSize, (page + 1) * pageSize);
+  const totalPages = Math.ceil(sortedMarketEvents.length / pageSize);
+  const visibleEvents = sortedMarketEvents.slice(page * pageSize, (page + 1) * pageSize);
 
   if (events.length === 0) {
     return (
@@ -183,10 +196,36 @@ export function DividendsHistoryPanel({ item, events, currency, asset }: Props) 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className={STICKY_FIRST_COLUMN_CLASS}>{t.watchlist.exDate}</TableHead>
-              <TableHead>{t.watchlist.paymentDate}</TableHead>
-              <TableHead>{t.watchlist.type}</TableHead>
-              <TableHead className="text-right">{t.watchlist.amountPerShare}</TableHead>
+              <SortableTableHead
+                id="exDate"
+                label={t.watchlist.exDate}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                className={STICKY_FIRST_COLUMN_CLASS}
+              />
+              <SortableTableHead
+                id="paymentDate"
+                label={t.watchlist.paymentDate}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+              />
+              <SortableTableHead
+                id="type"
+                label={t.watchlist.type}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+              />
+              <SortableTableHead
+                id="amountPerShare"
+                label={t.watchlist.amountPerShare}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                align="right"
+              />
             </TableRow>
           </TableHeader>
           <TableBody>

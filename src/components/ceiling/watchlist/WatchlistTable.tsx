@@ -20,6 +20,8 @@ import { toast } from "sonner";
 import { useWatchlist } from "@/lib/watchlist";
 import { cn } from "@/lib/utils";
 import { STICKY_FIRST_COLUMN_CLASS } from "@/components/ui/responsive-table";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 interface WatchlistTableProps {
   items: WatchlistItem[];
@@ -110,6 +112,25 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
     }
   };
 
+  const { sortedItems, sortKey, sortDirection, toggleSort } = useTableSort<
+    WatchlistItem,
+    "asset" | "currentPrice" | "averagePrice" | "quantity" | "total"
+  >({
+    items: items || [],
+    defaultSortKey: "total",
+    defaultDirection: "desc",
+    extractors: {
+      asset: (it) => it.ticker,
+      currentPrice: (it) => quotes[it.ticker]?.price ?? it.currentPrice,
+      averagePrice: (it) => it.averagePrice,
+      quantity: (it) => it.quantity,
+      total: (it) => {
+        const price = quotes[it.ticker]?.price ?? it.currentPrice;
+        return price != null ? price * it.quantity : null;
+      },
+    },
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -138,15 +159,51 @@ export function WatchlistTable({ items, quotes }: WatchlistTableProps) {
         <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
-              <TableHead className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]")}>{t.global.asset}</TableHead>
-              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.currentPrice}</TableHead>
-              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.averagePrice}</TableHead>
-              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider">{t.global.quantity}</TableHead>
-              <TableHead className="font-display text-xs font-semibold uppercase tracking-wider text-right">{t.global.total}</TableHead>
+              <SortableTableHead
+                id="asset"
+                label={t.global.asset}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                className={cn(STICKY_FIRST_COLUMN_CLASS, "font-display text-xs font-semibold uppercase tracking-wider shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]")}
+              />
+              <SortableTableHead
+                id="currentPrice"
+                label={t.global.currentPrice}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                className="font-display text-xs font-semibold uppercase tracking-wider"
+              />
+              <SortableTableHead
+                id="averagePrice"
+                label={t.global.averagePrice}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                className="font-display text-xs font-semibold uppercase tracking-wider"
+              />
+              <SortableTableHead
+                id="quantity"
+                label={t.global.quantity}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                className="font-display text-xs font-semibold uppercase tracking-wider"
+              />
+              <SortableTableHead
+                id="total"
+                label={t.global.total}
+                activeKey={sortKey}
+                activeDirection={sortDirection}
+                onSort={(k) => toggleSort(k as any)}
+                align="right"
+                className="font-display text-xs font-semibold uppercase tracking-wider"
+              />
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(items || []).map((it) => {
+            {sortedItems.map((it) => {
               const quote = quotes[it.ticker];
               const price = quote?.price ?? it.currentPrice;
 

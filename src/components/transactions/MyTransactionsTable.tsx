@@ -23,6 +23,8 @@ import { formatCurrency, displayTicker, toIntlLocale } from "@/lib/i18n";
 import type { Transaction } from "@/lib/transactions";
 import type { Currency } from "@/lib/domain";
 import { isBrTicker } from "@/lib/classify";
+import { useTableSort } from "@/components/ui/table-sort";
+import { SortableTableHead } from "@/components/ui/SortableTableHead";
 
 interface MyTransactionsTableProps {
   allTransactions: Transaction[];
@@ -91,13 +93,40 @@ export function MyTransactionsTable({
     return map;
   }, [allTransactions]);
 
+  const { sortedItems: sortedTransactions, sortKey, sortDirection, toggleSort } = useTableSort<
+    Transaction,
+    "date" | "asset" | "type" | "broker" | "quantity" | "unitPrice" | "fees" | "total" | "runningBalance"
+  >({
+    items: filteredTransactions,
+    defaultSortKey: "date",
+    defaultDirection: "desc",
+    extractors: {
+      date: (tx) => tx.date,
+      asset: (tx) => tx.ticker,
+      type: (tx) => tx.type,
+      broker: (tx) => tx.broker ?? "",
+      quantity: (tx) => tx.quantity,
+      unitPrice: (tx) => tx.pricePerShare,
+      fees: (tx) => tx.fees ?? 0,
+      total: (tx) => {
+        if (tx.type === "buy") {
+          return tx.quantity * tx.pricePerShare + (tx.fees || 0);
+        } else if (tx.type === "sell") {
+          return tx.quantity * tx.pricePerShare - (tx.fees || 0);
+        }
+        return 0;
+      },
+      runningBalance: (tx) => runningBalanceMap.get(tx.id) ?? 0,
+    },
+  });
+
   const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const paginatedTransactions = useMemo(() => {
     const start = (safeCurrentPage - 1) * PAGE_SIZE;
-    return filteredTransactions.slice(start, start + PAGE_SIZE);
-  }, [filteredTransactions, safeCurrentPage]);
+    return sortedTransactions.slice(start, start + PAGE_SIZE);
+  }, [sortedTransactions, safeCurrentPage]);
 
   const pageIds = useMemo(
     () => paginatedTransactions.map((tx) => tx.id),
@@ -226,33 +255,83 @@ export function MyTransactionsTable({
                     aria-label="Select all on page"
                   />
                 </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.date}
-                </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.asset}
-                </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.type}
-                </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.broker}
-                </TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.quantity}
-                </TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.unitPrice}
-                </TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.fees}
-                </TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.total}
-                </TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t.transactionsLedger.table.runningBalance}
-                </TableHead>
+                <SortableTableHead
+                  id="date"
+                  label={t.transactionsLedger.table.date}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="asset"
+                  label={t.transactionsLedger.table.asset}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="type"
+                  label={t.transactionsLedger.table.type}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="broker"
+                  label={t.transactionsLedger.table.broker}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="quantity"
+                  label={t.transactionsLedger.table.quantity}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="unitPrice"
+                  label={t.transactionsLedger.table.unitPrice}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="fees"
+                  label={t.transactionsLedger.table.fees}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="total"
+                  label={t.transactionsLedger.table.total}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
+                <SortableTableHead
+                  id="runningBalance"
+                  label={t.transactionsLedger.table.runningBalance}
+                  activeKey={sortKey}
+                  activeDirection={sortDirection}
+                  onSort={(k) => toggleSort(k as any)}
+                  align="right"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                />
                 <TableHead className="text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {t.transactionsLedger.table.thesis}
                 </TableHead>
