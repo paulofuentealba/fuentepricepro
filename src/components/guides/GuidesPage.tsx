@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   BookOpen,
   Calculator,
@@ -91,6 +91,34 @@ export const TAB_PATHS: Record<GuideTabId, string> = {
   concepts: "/guides/concepts",
 };
 
+export const PATH_TO_TAB: Record<string, GuideTabId> = {
+  "/guides": "consensus",
+  "/guides/bazin": "bazin",
+  "/guides/graham": "graham",
+  "/guides/gordon": "gordon",
+  "/guides/peter-lynch": "peter-lynch",
+  "/guides/dividend-valuation": "dividend-valuation",
+  "/guides/reinvestir": "reinvestir",
+  "/guides/contribution-plan": "contribution-plan",
+  "/guides/withdraw": "withdraw",
+  "/guides/snowball": "snowball",
+  "/guides/tax-brazil": "tax-brazil",
+  "/guides/tax-usa": "tax-usa",
+  "/guides/fi-infra": "fi-infra",
+  "/guides/metrics": "metrics",
+  "/guides/risk-radar": "risk-radar",
+  "/guides/currency-decomposition": "currency-decomposition",
+  "/guides/app-directory": "app-directory",
+  "/guides/brokers": "brokers",
+  "/guides/glossary": "glossary",
+  "/guides/concepts": "concepts",
+};
+
+export function getTabFromPathname(pathname: string, fallback: GuideTabId = "consensus"): GuideTabId {
+  const clean = pathname.replace(/\/+$/, "") || "/guides";
+  return PATH_TO_TAB[clean] ?? fallback;
+}
+
 interface GuideTabItem {
   id: GuideTabId;
   label: string;
@@ -109,12 +137,32 @@ interface GuidesPageProps {
 export function GuidesPage({ defaultTab = "consensus" }: GuidesPageProps) {
   const { t } = useI18n();
   const D = t.docs;
+  const location = useLocation();
+
+  const currentTabFromPath = useMemo(
+    () => getTabFromPathname(location.pathname, defaultTab),
+    [location.pathname, defaultTab],
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<GuideTabId>(defaultTab);
+  const [activeTab, setActiveTab] = useState<GuideTabId>(currentTabFromPath);
 
   useEffect(() => {
-    setActiveTab(defaultTab);
-  }, [defaultTab]);
+    setActiveTab(currentTabFromPath);
+  }, [currentTabFromPath]);
+
+  const handleTabClick = (tabId: GuideTabId) => {
+    setActiveTab(tabId);
+    if (typeof window !== "undefined") {
+      const mainContent = document.getElementById("guides-main-content");
+      if (mainContent) {
+        const rect = mainContent.getBoundingClientRect();
+        if (rect.top < 0) {
+          window.scrollTo({ top: window.scrollY + rect.top - 100, behavior: "smooth" });
+        }
+      }
+    }
+  };
 
   const normalize = (text: string) =>
     text
@@ -235,7 +283,7 @@ export function GuidesPage({ defaultTab = "consensus" }: GuidesPageProps) {
 
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as GuideTabId)}
+          onValueChange={(v) => handleTabClick(v as GuideTabId)}
           className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-[250px_1fr] md:items-start"
         >
           {/* Mobile: scroll horizontal com todas as abas filtradas */}
@@ -247,6 +295,8 @@ export function GuidesPage({ defaultTab = "consensus" }: GuidesPageProps) {
                   <Link
                     key={tab.id}
                     to={TAB_PATHS[tab.id]}
+                    search={(prev) => prev}
+                    onClick={() => handleTabClick(tab.id)}
                     className={cn(
                       "flex shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                       activeTab === tab.id
@@ -278,6 +328,8 @@ export function GuidesPage({ defaultTab = "consensus" }: GuidesPageProps) {
                         <Link
                           key={tab.id}
                           to={TAB_PATHS[tab.id]}
+                          search={(prev) => prev}
+                          onClick={() => handleTabClick(tab.id)}
                           className={cn(
                             "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors",
                             activeTab === tab.id
@@ -297,7 +349,7 @@ export function GuidesPage({ defaultTab = "consensus" }: GuidesPageProps) {
           </nav>
 
           {/* Área Principal de Conteúdo */}
-          <div className="min-w-0">
+          <div id="guides-main-content" className="min-w-0">
             <ValuationTab />
             <DecisionEnginesTab />
             <TaxGuideTab />
