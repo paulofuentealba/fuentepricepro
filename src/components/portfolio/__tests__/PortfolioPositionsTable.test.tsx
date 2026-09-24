@@ -156,4 +156,62 @@ describe("PortfolioPositionsTable", () => {
     expect(screen.getByText("BBAS3")).toBeInTheDocument();
     expect(screen.getByText("HGLG11")).toBeInTheDocument();
   });
+
+  it("ordena por Yield on Cost no ciclo de 3 cliques (asc -> desc -> default por peso)", () => {
+    // BBAS3: quantity 100, livePrice 30, total 3000, avgPrice 20, annualDiv 2 -> YoC = 10%
+    const itemLowTotalHighYoc = makeItem({
+      id: "1",
+      ticker: "BBAS3",
+      quantity: 100,
+      livePrice: 30,
+      currentPrice: 30,
+      averagePrice: 20,
+      annualDividend: 2, // YoC = 2/20 = 10%
+    });
+
+    // TAEE11: quantity 1000, livePrice 40, total 40000, avgPrice 40, annualDiv 2 -> YoC = 5%
+    const itemHighTotalLowYoc = makeItem({
+      id: "2",
+      ticker: "TAEE11",
+      quantity: 1000,
+      livePrice: 40,
+      currentPrice: 40,
+      averagePrice: 40,
+      annualDividend: 2, // YoC = 2/40 = 5%
+    });
+
+    render(
+      <PortfolioPositionsTable
+        valuedItems={[itemLowTotalHighYoc, itemHighTotalLowYoc]}
+        onSelectItem={vi.fn()}
+        isLoading={false}
+      />,
+    );
+
+    // Estado inicial: ordenado pelo total desc (peso na carteira: TAEE11=40.000 > BBAS3=3.000)
+    let rows = screen.getAllByRole("row");
+    // Row 0 é header, Row 1 deve ser TAEE11, Row 2 deve ser BBAS3
+    expect(rows[1]).toHaveTextContent("TAEE11");
+    expect(rows[2]).toHaveTextContent("BBAS3");
+
+    const yocHeader = screen.getByRole("button", { name: /yield on cost/i });
+
+    // 1º Clique no header Yield on Cost: ordem crescente (menor YoC primeiro: TAEE11 5% < BBAS3 10%)
+    fireEvent.click(yocHeader);
+    rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("TAEE11");
+    expect(rows[2]).toHaveTextContent("BBAS3");
+
+    // 2º Clique no header Yield on Cost: ordem decrescente (maior YoC primeiro: BBAS3 10% > TAEE11 5%)
+    fireEvent.click(yocHeader);
+    rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("BBAS3");
+    expect(rows[2]).toHaveTextContent("TAEE11");
+
+    // 3º Clique no header Yield on Cost: volta ao padrão da tabela (peso na carteira: TAEE11 > BBAS3)
+    fireEvent.click(yocHeader);
+    rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("TAEE11");
+    expect(rows[2]).toHaveTextContent("BBAS3");
+  });
 });

@@ -25,6 +25,12 @@ export const es = {
     lessThanOneMonth: "menos de 1 mes",
     durationSeparator: "y",
     converted: "convertido",
+    tableSort: {
+      clickToSort: "Haga clic para ordenar",
+      sortedAscending: "Ordenado de forma ascendente",
+      sortedDescending: "Ordenado de forma descendente",
+      defaultSort: "Orden predeterminado",
+    },
   },
   showcase: {
     title: "Escaparate",

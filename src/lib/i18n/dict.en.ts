@@ -23,6 +23,12 @@ export const en = {
     lessThanOneMonth: "less than 1 month",
     durationSeparator: "and",
     converted: "converted",
+    tableSort: {
+      clickToSort: "Click to sort",
+      sortedAscending: "Sorted ascending",
+      sortedDescending: "Sorted descending",
+      defaultSort: "Default sort",
+    },
   },
   showcase: {
     title: "Showcase",

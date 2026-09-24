@@ -25,6 +25,12 @@ export const ptBR = {
     lessThanOneMonth: "menos de 1 mês",
     durationSeparator: "e",
     converted: "convertido",
+    tableSort: {
+      clickToSort: "Clique para ordenar",
+      sortedAscending: "Ordenado de forma crescente",
+      sortedDescending: "Ordenado de forma decrescente",
+      defaultSort: "Ordem padrão",
+    },
   },
   showcase: {
     title: "Vitrine",
