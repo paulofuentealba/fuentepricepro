@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Mail } from "lucide-react";
+import { Mail, CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { useMarketScope } from "@/lib/useMarketScope";
+import { useUserSettings } from "@/lib/useUserSettings";
 import { useValuedPortfolio } from "@/lib/useValuedPortfolio";
 import { useTransactions } from "@/lib/transactions";
 import { useRealizedIncomeSummary } from "@/lib/useRealizedIncomeSummary";
@@ -28,6 +29,7 @@ function NewsPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { currency } = useMarketScope();
+  const { settings } = useUserSettings();
 
   // SSOT domain hooks
   const { valuedItems, totals, fx } = useValuedPortfolio();
@@ -111,6 +113,31 @@ function NewsPage() {
     )}`;
   }, [daysSinceLastVisit, t.newsScreen]);
 
+  // Dynamic email digest button label & active status
+  const isDigestSubscribed = Boolean(settings.weeklyDigestEmailConsent);
+  const digestButtonLabel = useMemo(() => {
+    if (!isDigestSubscribed) {
+      return t.newsScreen.digestModal.buttons.default;
+    }
+    const prefs = settings.newsDigestPreferences;
+    const freq = prefs?.frequency ?? "weekly";
+
+    if (freq === "critical_only") {
+      return t.newsScreen.digestModal.buttons.subscribedCritical;
+    }
+    if (freq === "monthly") {
+      const dom = prefs?.dayOfMonth ?? "first_business_day";
+      if (dom === "first_day") return t.newsScreen.digestModal.buttons.subscribedMonthlyFirst;
+      if (dom === "fifteenth") return t.newsScreen.digestModal.buttons.subscribedMonthlyFifteenth;
+      return t.newsScreen.digestModal.buttons.subscribedMonthlyFirstBusiness;
+    }
+
+    // Weekly
+    const dow = prefs?.dayOfWeek ?? "monday";
+    if (dow === "friday") return t.newsScreen.digestModal.buttons.subscribedWeeklyFriday;
+    return t.newsScreen.digestModal.buttons.subscribedWeeklyMonday;
+  }, [isDigestSubscribed, settings.newsDigestPreferences, t.newsScreen.digestModal.buttons]);
+
   // Handle CTA clicks
   const handleActionClick = (item: NewsFeedItem) => {
     switch (item.actionType) {
@@ -152,11 +179,19 @@ function NewsPage() {
         <Button
           variant="outline"
           size="sm"
-          className="self-start sm:self-auto gap-2 border-border/80 text-foreground hover:bg-muted/30"
+          className={`self-start sm:self-auto gap-2 text-foreground transition-colors ${
+            isDigestSubscribed
+              ? "border-accent/50 bg-accent/10 hover:bg-accent/15"
+              : "border-border/80 hover:bg-muted/30"
+          }`}
           onClick={() => setDigestModalOpen(true)}
         >
-          <Mail className="h-3.5 w-3.5 text-accent-text" />
-          <span>{t.newsScreen.receiveByEmail}</span>
+          {isDigestSubscribed ? (
+            <CheckCircle2 className="h-3.5 w-3.5 text-accent-text" />
+          ) : (
+            <Mail className="h-3.5 w-3.5 text-accent-text" />
+          )}
+          <span>{digestButtonLabel}</span>
         </Button>
       </div>
 

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +8,26 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mail, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
+import {
+  Mail,
+  CheckCircle2,
+  ShieldCheck,
+  AlertCircle,
+  Calendar,
+  CalendarDays,
+  ShieldAlert,
+  Check,
+} from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { useAuth } from "@/lib/auth-provider";
-import { useUserSettings } from "@/lib/useUserSettings";
+import {
+  useUserSettings,
+  DEFAULT_DIGEST_PREFERENCES,
+  type NewsDigestPreferences,
+  type NewsDigestFrequency,
+  type NewsDigestDayOfWeek,
+  type NewsDigestDayOfMonth,
+} from "@/lib/useUserSettings";
 
 interface NewsDigestModalProps {
   open: boolean;
@@ -22,35 +39,75 @@ export function NewsDigestModal({ open, onClose }: NewsDigestModalProps) {
   const { user } = useAuth();
   const { settings, updateSettings } = useUserSettings();
 
-  const isSubscribed = Boolean(settings.weeklyDigestEmailConsent);
+  // Local editable draft state (AGENTS.md Rule 8: explicit save/cancel)
+  const [enabled, setEnabled] = useState(Boolean(settings.weeklyDigestEmailConsent));
+  const [preferences, setPreferences] = useState<NewsDigestPreferences>(
+    settings.newsDigestPreferences ?? DEFAULT_DIGEST_PREFERENCES,
+  );
 
-  const handleToggle = () => {
-    updateSettings({ weeklyDigestEmailConsent: !isSubscribed });
+  // Synchronize draft whenever modal opens
+  useEffect(() => {
+    if (open) {
+      setEnabled(Boolean(settings.weeklyDigestEmailConsent));
+      setPreferences(settings.newsDigestPreferences ?? DEFAULT_DIGEST_PREFERENCES);
+    }
+  }, [open, settings.weeklyDigestEmailConsent, settings.newsDigestPreferences]);
+
+  const handleSave = () => {
+    updateSettings({
+      weeklyDigestEmailConsent: enabled,
+      newsDigestPreferences: preferences,
+    });
     onClose();
   };
 
+  const setFrequency = (freq: NewsDigestFrequency) => {
+    setPreferences((prev) => ({
+      ...prev,
+      frequency: freq,
+      dayOfWeek: prev.dayOfWeek ?? "monday",
+      dayOfMonth: prev.dayOfMonth ?? "first_business_day",
+    }));
+  };
+
+  const toggleTopic = (
+    key:
+      | "includeIncomeAnnouncements"
+      | "includeRiskAlerts"
+      | "includeThesisDrift"
+      | "includeOpportunities",
+  ) => {
+    setPreferences((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const M = t.newsScreen.digestModal;
+
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="max-w-md" closeLabel={t.common.close}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" closeLabel={t.common.close}>
         <DialogHeader>
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/15 text-accent-text">
               <Mail className="h-4 w-4" />
             </span>
-            <DialogTitle className="font-serif text-lg font-semibold">
-              {t.newsScreen.digestModal.title}
+            <DialogTitle className="font-serif text-lg font-semibold text-foreground">
+              {M.title}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-xs text-muted-foreground pt-1">
-            {t.newsScreen.digestModal.description}
+          <DialogDescription className="text-xs text-muted-foreground pt-0.5 leading-relaxed">
+            {M.description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 py-3">
+        <div className="space-y-4 py-2">
+          {/* User Auth Email Card */}
           {user?.email ? (
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 space-y-1">
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 space-y-0.5">
               <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
-                {t.newsScreen.digestModal.emailLabel}
+                {M.emailLabel}
               </p>
               <p className="font-mono text-sm font-semibold text-foreground">
                 {user.email}
@@ -59,48 +116,281 @@ export function NewsDigestModal({ open, onClose }: NewsDigestModalProps) {
           ) : (
             <div className="flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 text-xs text-warning">
               <AlertCircle className="h-4 w-4 shrink-0 text-warning" />
-              <span>{t.newsScreen.digestModal.loginRequired}</span>
+              <span>{M.loginRequired}</span>
             </div>
           )}
 
+          {/* Master Toggle Card */}
           <div
-            className={`flex items-center gap-2.5 rounded-xl border p-3 text-xs ${
-              isSubscribed
-                ? "border-success/30 bg-success/10 text-success"
-                : "border-border/60 bg-muted/20 text-muted-foreground"
+            onClick={() => user?.email && setEnabled((prev) => !prev)}
+            className={`flex items-center justify-between rounded-xl border p-3.5 transition-colors ${
+              user?.email ? "cursor-pointer" : "opacity-60 cursor-not-allowed"
+            } ${
+              enabled
+                ? "border-accent bg-accent/10"
+                : "border-border/60 bg-muted/20 hover:border-border"
             }`}
           >
-            {isSubscribed ? (
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
-            ) : (
-              <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
-            )}
-            <span>
-              {isSubscribed
-                ? t.newsScreen.digestModal.subscribedAlert
-                : t.newsScreen.digestModal.unsubscribedAlert}
-            </span>
+            <div className="space-y-0.5 pr-2">
+              <div className="text-xs font-semibold text-foreground">
+                {M.masterToggleLabel}
+              </div>
+              <div className="text-[11px] text-muted-foreground leading-snug">
+                {M.masterToggleDesc}
+              </div>
+            </div>
+            <div
+              className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                enabled ? "bg-accent-text" : "bg-muted"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
+                  enabled ? "translate-x-4" : "translate-x-0.5"
+                }`}
+              />
+            </div>
           </div>
 
+          {enabled && (
+            <>
+              {/* Frequency Selector */}
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {M.frequencySectionTitle}
+                </label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {/* Weekly */}
+                  <button
+                    type="button"
+                    onClick={() => setFrequency("weekly")}
+                    className={`flex flex-col text-left rounded-xl border p-3 transition-colors ${
+                      preferences.frequency === "weekly"
+                        ? "border-accent bg-accent/10 text-foreground"
+                        : "border-border/60 bg-card hover:border-accent/40 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                      <Calendar className="h-3.5 w-3.5 text-accent-text" />
+                      <span>{M.frequencies.weekly}</span>
+                    </div>
+                    <span className="text-[10.5px] text-muted-foreground mt-1 leading-tight">
+                      {M.frequencies.weeklyDesc}
+                    </span>
+                  </button>
+
+                  {/* Monthly */}
+                  <button
+                    type="button"
+                    onClick={() => setFrequency("monthly")}
+                    className={`flex flex-col text-left rounded-xl border p-3 transition-colors ${
+                      preferences.frequency === "monthly"
+                        ? "border-accent bg-accent/10 text-foreground"
+                        : "border-border/60 bg-card hover:border-accent/40 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                      <CalendarDays className="h-3.5 w-3.5 text-accent-text" />
+                      <span>{M.frequencies.monthly}</span>
+                    </div>
+                    <span className="text-[10.5px] text-muted-foreground mt-1 leading-tight">
+                      {M.frequencies.monthlyDesc}
+                    </span>
+                  </button>
+
+                  {/* Critical Only */}
+                  <button
+                    type="button"
+                    onClick={() => setFrequency("critical_only")}
+                    className={`flex flex-col text-left rounded-xl border p-3 transition-colors ${
+                      preferences.frequency === "critical_only"
+                        ? "border-accent bg-accent/10 text-foreground"
+                        : "border-border/60 bg-card hover:border-accent/40 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                      <ShieldAlert className="h-3.5 w-3.5 text-warning" />
+                      <span>{M.frequencies.criticalOnly}</span>
+                    </div>
+                    <span className="text-[10.5px] text-muted-foreground mt-1 leading-tight">
+                      {M.frequencies.criticalOnlyDesc}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Contextual Timing Settings */}
+              {preferences.frequency === "weekly" && (
+                <div className="space-y-2 rounded-xl border border-border/50 bg-muted/15 p-3">
+                  <label className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {M.timingSectionTitle}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreferences((prev) => ({ ...prev, dayOfWeek: "monday" }))
+                      }
+                      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                        preferences.dayOfWeek === "monday"
+                          ? "border-accent bg-accent/15 text-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-border"
+                      }`}
+                    >
+                      <span>{M.daysOfWeek.monday}</span>
+                      {preferences.dayOfWeek === "monday" && (
+                        <Check className="h-3.5 w-3.5 text-accent-text" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreferences((prev) => ({ ...prev, dayOfWeek: "friday" }))
+                      }
+                      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                        preferences.dayOfWeek === "friday"
+                          ? "border-accent bg-accent/15 text-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-border"
+                      }`}
+                    >
+                      <span>{M.daysOfWeek.friday}</span>
+                      {preferences.dayOfWeek === "friday" && (
+                        <Check className="h-3.5 w-3.5 text-accent-text" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {preferences.frequency === "monthly" && (
+                <div className="space-y-2 rounded-xl border border-border/50 bg-muted/15 p-3">
+                  <label className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {M.timingSectionTitle}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreferences((prev) => ({
+                          ...prev,
+                          dayOfMonth: "first_business_day",
+                        }))
+                      }
+                      className={`flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors ${
+                        preferences.dayOfMonth === "first_business_day"
+                          ? "border-accent bg-accent/15 text-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-border"
+                      }`}
+                    >
+                      <span className="truncate">{M.daysOfMonth.firstBusinessDay}</span>
+                      {preferences.dayOfMonth === "first_business_day" && (
+                        <Check className="h-3.5 w-3.5 text-accent-text shrink-0 ml-1" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreferences((prev) => ({ ...prev, dayOfMonth: "first_day" }))
+                      }
+                      className={`flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors ${
+                        preferences.dayOfMonth === "first_day"
+                          ? "border-accent bg-accent/15 text-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-border"
+                      }`}
+                    >
+                      <span className="truncate">{M.daysOfMonth.firstDay}</span>
+                      {preferences.dayOfMonth === "first_day" && (
+                        <Check className="h-3.5 w-3.5 text-accent-text shrink-0 ml-1" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreferences((prev) => ({ ...prev, dayOfMonth: "fifteenth" }))
+                      }
+                      className={`flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors ${
+                        preferences.dayOfMonth === "fifteenth"
+                          ? "border-accent bg-accent/15 text-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-border"
+                      }`}
+                    >
+                      <span className="truncate">{M.daysOfMonth.fifteenth}</span>
+                      {preferences.dayOfMonth === "fifteenth" && (
+                        <Check className="h-3.5 w-3.5 text-accent-text shrink-0 ml-1" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Topics Selection Checkboxes */}
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {M.topicsSectionTitle}
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Income */}
+                  <label className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-card p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/10 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={preferences.includeIncomeAnnouncements}
+                      onChange={() => toggleTopic("includeIncomeAnnouncements")}
+                      className="h-4 w-4 rounded accent-accent-text cursor-pointer"
+                    />
+                    <span>{M.topics.income}</span>
+                  </label>
+
+                  {/* Risk */}
+                  <label className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-card p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/10 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={preferences.includeRiskAlerts}
+                      onChange={() => toggleTopic("includeRiskAlerts")}
+                      className="h-4 w-4 rounded accent-accent-text cursor-pointer"
+                    />
+                    <span>{M.topics.risk}</span>
+                  </label>
+
+                  {/* Thesis */}
+                  <label className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-card p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/10 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={preferences.includeThesisDrift}
+                      onChange={() => toggleTopic("includeThesisDrift")}
+                      className="h-4 w-4 rounded accent-accent-text cursor-pointer"
+                    />
+                    <span>{M.topics.thesis}</span>
+                  </label>
+
+                  {/* Opportunities */}
+                  <label className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-card p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/10 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={preferences.includeOpportunities}
+                      onChange={() => toggleTopic("includeOpportunities")}
+                      className="h-4 w-4 rounded accent-accent-text cursor-pointer"
+                    />
+                    <span>{M.topics.opportunities}</span>
+                  </label>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* LGPD Compliance Footer Notice */}
           <div className="flex items-start gap-2 pt-1 text-[11px] text-muted-foreground leading-relaxed">
             <ShieldCheck className="h-4 w-4 shrink-0 text-accent-text mt-0.5" />
-            <span>{t.newsScreen.digestModal.lgpdNotice}</span>
+            <span>{M.lgpdNotice}</span>
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2 sm:justify-end">
+        <DialogFooter className="flex gap-2 sm:justify-end border-t border-border/40 pt-3">
           <Button variant="outline" size="sm" onClick={onClose}>
-            {t.newsScreen.digestModal.closeBtn}
+            {M.cancelBtn}
           </Button>
           {user?.email && (
-            <Button
-              size="sm"
-              variant={isSubscribed ? "destructive" : "default"}
-              onClick={handleToggle}
-            >
-              {isSubscribed
-                ? t.newsScreen.digestModal.disableBtn
-                : t.newsScreen.digestModal.enableBtn}
+            <Button size="sm" onClick={handleSave}>
+              {M.saveBtn}
             </Button>
           )}
         </DialogFooter>

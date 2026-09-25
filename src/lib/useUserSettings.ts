@@ -31,8 +31,34 @@ export interface UserSettings {
    * cookies aren't a stored field — they're mandatory for auth and always shown as locked-on. */
   usageAnalyticsConsent?: boolean;
   weeklyDigestEmailConsent?: boolean;
+  newsDigestPreferences?: NewsDigestPreferences;
   allocationKeysMigrated?: boolean;
 }
+
+export type NewsDigestFrequency = "weekly" | "monthly" | "critical_only";
+export type NewsDigestDayOfWeek = "monday" | "friday";
+export type NewsDigestDayOfMonth = "first_business_day" | "first_day" | "fifteenth";
+
+export interface NewsDigestPreferences {
+  frequency: NewsDigestFrequency;
+  dayOfWeek?: NewsDigestDayOfWeek;
+  dayOfMonth?: NewsDigestDayOfMonth;
+  timeOfDay?: "morning" | "evening";
+  includeIncomeAnnouncements: boolean;
+  includeRiskAlerts: boolean;
+  includeThesisDrift: boolean;
+  includeOpportunities: boolean;
+}
+
+export const DEFAULT_DIGEST_PREFERENCES: NewsDigestPreferences = {
+  frequency: "weekly",
+  dayOfWeek: "monday",
+  timeOfDay: "morning",
+  includeIncomeAnnouncements: true,
+  includeRiskAlerts: true,
+  includeThesisDrift: true,
+  includeOpportunities: true,
+};
 
 const DEFAULT_SETTINGS: UserSettings = {
   targetYield: 6,
@@ -50,6 +76,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   valuationAssumptionsMode: "simple",
   usageAnalyticsConsent: true,
   weeklyDigestEmailConsent: false,
+  newsDigestPreferences: DEFAULT_DIGEST_PREFERENCES,
 };
 
 /**
