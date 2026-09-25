@@ -64,76 +64,45 @@ describe("DividendRadarView", () => {
     );
   }
 
-  it("renders the hero gap finder, seasonality bar, filters, and cards grid by default", () => {
+  it("renders the primary unified agenda daily view by default", () => {
     renderView();
 
     expect(screen.getByTestId("dividend-radar-view")).toBeInTheDocument();
-    expect(screen.getByTestId("dividend-radar-hero")).toBeInTheDocument();
-    expect(screen.getByTestId("seasonality-bar")).toBeInTheDocument();
-    expect(screen.getByTestId("radar-cards-grid")).toBeInTheDocument();
+    expect(screen.getByTestId("dividend-radar-agenda")).toBeInTheDocument();
+    expect(screen.getByTestId("btn-market-br")).toBeInTheDocument();
+    expect(screen.getByTestId("btn-market-us")).toBeInTheDocument();
+    expect(screen.getByTestId("btn-scroll-today")).toBeInTheDocument();
 
     // Check presence of key tickers
     expect(screen.getByText("BBAS3")).toBeInTheDocument();
-    expect(screen.getByText("TAEE11")).toBeInTheDocument();
+    expect(screen.getByText("HGLG11")).toBeInTheDocument();
   });
 
-  it("toggles between Cards mode and Pro Table mode", () => {
+  it("switches smoothly between Brasil and EUA markets", () => {
     renderView();
 
-    // Initially in cards mode
-    expect(screen.getByTestId("radar-cards-grid")).toBeInTheDocument();
-    expect(screen.queryByTestId("dividend-radar-table")).not.toBeInTheDocument();
+    // Initially in BR mode
+    expect(screen.getByText("BBAS3")).toBeInTheDocument();
+    expect(screen.queryByText("JNJ")).not.toBeInTheDocument();
 
-    // Find and click view mode switcher
-    const toggleBtn = screen.getByText(dict.ptBR.dividendRadar.viewMode.table);
-    fireEvent.click(toggleBtn);
+    // Switch to US market
+    const usBtn = screen.getByTestId("btn-market-us");
+    fireEvent.click(usBtn);
 
-    // Now in table mode
-    expect(screen.getByTestId("dividend-radar-table")).toBeInTheDocument();
-    expect(screen.queryByTestId("radar-cards-grid")).not.toBeInTheDocument();
-
-    // Toggle back to cards
-    const cardsBtn = screen.getByText(dict.ptBR.dividendRadar.viewMode.cards);
-    fireEvent.click(cardsBtn);
-    expect(screen.getByTestId("radar-cards-grid")).toBeInTheDocument();
-  });
-
-  it("filters items by month when clicking a seasonality tab", () => {
-    renderView();
-
-    // Click on MAI tab
-    const maiBtn = screen.getByText("MAI");
-    fireEvent.click(maiBtn);
-
-    // TAEE11 announces in May, should be present
-    expect(screen.getByText("TAEE11")).toBeInTheDocument();
-
-    // CPLE6 announces in Apr & Nov, should not be present in May
-    expect(screen.queryByText("CPLE6")).not.toBeInTheDocument();
+    // US assets appear
+    expect(screen.getByText("O")).toBeInTheDocument();
+    expect(screen.getByText("JNJ")).toBeInTheDocument();
+    expect(screen.queryByText("BBAS3")).not.toBeInTheDocument();
   });
 
   it("filters items when typing in the search box", () => {
     renderView();
 
-    const searchInput = screen.getByPlaceholderText(dict.ptBR.dividendRadar.searchPlaceholder);
-    fireEvent.change(searchInput, { target: { value: "Copel" } });
+    const searchInput = screen.getByTestId("agenda-search-input");
+    fireEvent.change(searchInput, { target: { value: "HGLG" } });
 
-    expect(screen.getByText("CPLE6")).toBeInTheDocument();
+    expect(screen.getByText("HGLG11")).toBeInTheDocument();
     expect(screen.queryByText("BBAS3")).not.toBeInTheDocument();
-  });
-
-  it("filters items when clicking strategy chips", () => {
-    renderView();
-
-    // Click on "Reis dos Dividendos" (dgi)
-    const dgiBtn = screen.getByText(dict.ptBR.dividendRadar.strategies.dgi);
-    fireEvent.click(dgiBtn);
-
-    // JNJ is a dividend king, should be visible
-    expect(screen.getByText("JNJ")).toBeInTheDocument();
-
-    // MXRF11 is not a DGI king, should not be visible
-    expect(screen.queryByText("MXRF11")).not.toBeInTheDocument();
   });
 
   it("opens the detail sheet when clicking on an asset card", () => {
@@ -141,7 +110,7 @@ describe("DividendRadarView", () => {
 
     // Click on BBAS3 card
     const bbas3Element = screen.getByText("BBAS3");
-    fireEvent.click(bbas3Element);
+    fireEvent.click(bbas3Element.closest("[data-testid^='agenda-card-']")!);
 
     // Verify detail sheet opened with Bazin breakdown
     expect(

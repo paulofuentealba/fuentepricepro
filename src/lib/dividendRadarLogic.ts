@@ -769,3 +769,470 @@ export function detectPortfolioGaps(
     portfolioMonthlyAvg: monthlyAvg,
   };
 }
+
+// =========================================================
+// AGENDA DIÁRIA & RADAR DATA COM (OPÇÃO E)
+// =========================================================
+
+export type DividendEventType = "com" | "pay";
+export type DividendTaxType = "dividendo" | "jcp" | "rendimento_fii" | "us_cash" | "bdr" | "amortizacao";
+export type MarketRegion = "BR" | "US";
+export type AgendaAssetClass = "all" | "STOCK_BR" | "FII" | "ETF_BR" | "BDR" | "STOCK_US" | "REIT" | "ETF_US";
+
+export interface RawAgendaEvent {
+  id: string;
+  market: MarketRegion;
+  dateKey: string; // YYYY-MM-DD
+  month: number; // 1 to 12
+  isToday?: boolean;
+  ticker: string;
+  name: string;
+  type: AssetType;
+  currency: "BRL" | "USD";
+  eventType: DividendEventType;
+  taxType: DividendTaxType;
+  declaredAmount: number;
+  reciprocalDate: string; // e.g. "14/10/2026"
+  isTrap?: boolean;
+}
+
+export interface AgendaDividendEvent {
+  id: string;
+  market: MarketRegion;
+  dateKey: string;
+  dateFormatted: string;
+  isToday: boolean;
+  month: number;
+  ticker: string;
+  name: string;
+  type: AssetType;
+  currency: "BRL" | "USD";
+  eventType: DividendEventType;
+  taxType: DividendTaxType;
+  declaredAmount: number;
+  reciprocalDateFormatted: string;
+  price: number;
+  ceilingPrice: number;
+  margin: number;
+  isBelowCeiling: boolean;
+  dyGross: number;
+  dyNet: number;
+  payout: number | null;
+  safetyScore: number;
+  safetyTier: DividendSafetyTier;
+  safetyLabel: string;
+  isTrap: boolean;
+  radarItem?: RadarItem;
+}
+
+export interface AgendaSummaryStats {
+  totalEvents: number;
+  totalCom: number;
+  totalPay: number;
+  totalBelowCeiling: number;
+  totalHighSafety: number;
+}
+
+export const AGENDA_CATALOG: RawAgendaEvent[] = [
+  // ================= BRASIL (B3) =================
+  // HOJE (25/Set/2026)
+  {
+    id: "br-bbas3-20260925-com",
+    market: "BR",
+    dateKey: "2026-09-25",
+    month: 9,
+    isToday: true,
+    ticker: "BBAS3",
+    name: "Banco do Brasil S.A.",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "com",
+    taxType: "jcp",
+    declaredAmount: 0.8454,
+    reciprocalDate: "14/10/2026",
+  },
+  {
+    id: "br-hglg11-20260925-pay",
+    market: "BR",
+    dateKey: "2026-09-25",
+    month: 9,
+    isToday: true,
+    ticker: "HGLG11",
+    name: "CSHG Logística FII",
+    type: "FII",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "rendimento_fii",
+    declaredAmount: 1.1,
+    reciprocalDate: "15/09/2026",
+  },
+  {
+    id: "br-cple6-20260925-com",
+    market: "BR",
+    dateKey: "2026-09-25",
+    month: 9,
+    isToday: true,
+    ticker: "CPLE6",
+    name: "Copel Energia",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "com",
+    taxType: "dividendo",
+    declaredAmount: 0.285,
+    reciprocalDate: "14/10/2026",
+  },
+
+  // 28/Set/2026
+  {
+    id: "br-itsa4-20260928-com",
+    market: "BR",
+    dateKey: "2026-09-28",
+    month: 9,
+    ticker: "ITSA4",
+    name: "Itaúsa Investimentos",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "com",
+    taxType: "jcp",
+    declaredAmount: 0.0512,
+    reciprocalDate: "30/10/2026",
+  },
+  {
+    id: "br-xpml11-20260928-com",
+    market: "BR",
+    dateKey: "2026-09-28",
+    month: 9,
+    ticker: "XPML11",
+    name: "XP Malls FII",
+    type: "FII",
+    currency: "BRL",
+    eventType: "com",
+    taxType: "rendimento_fii",
+    declaredAmount: 0.92,
+    reciprocalDate: "14/10/2026",
+  },
+
+  // 29/Set/2026
+  {
+    id: "br-taee11-20260929-pay",
+    market: "BR",
+    dateKey: "2026-09-29",
+    month: 9,
+    ticker: "TAEE11",
+    name: "Taesa Transmissora",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "dividendo",
+    declaredAmount: 0.984,
+    reciprocalDate: "12/09/2026",
+  },
+
+  // 30/Set/2026 (Fechamento Mensal)
+  {
+    id: "br-vale3-20260930-pay",
+    market: "BR",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "VALE3",
+    name: "Vale S.A.",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "jcp",
+    declaredAmount: 1.8245,
+    reciprocalDate: "10/09/2026",
+  },
+  {
+    id: "br-petr4-20260930-com",
+    market: "BR",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "PETR4",
+    name: "Petróleo Brasileiro S.A.",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "com",
+    taxType: "dividendo",
+    declaredAmount: 1.352,
+    reciprocalDate: "20/11/2026",
+    isTrap: true,
+  },
+  {
+    id: "br-knip11-20260930-pay",
+    market: "BR",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "KNIP11",
+    name: "Kinea Rendimentos Imobiliários FII",
+    type: "FII",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "rendimento_fii",
+    declaredAmount: 0.85,
+    reciprocalDate: "15/09/2026",
+  },
+  {
+    id: "br-aapl34-20260930-pay",
+    market: "BR",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "AAPL34",
+    name: "Apple Inc BDR B3",
+    type: "STOCK_US",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "bdr",
+    declaredAmount: 0.3812,
+    reciprocalDate: "11/09/2026",
+  },
+
+  // OUTUBRO
+  {
+    id: "br-trpl4-20261005-com",
+    market: "BR",
+    dateKey: "2026-10-05",
+    month: 10,
+    ticker: "TRPL4",
+    name: "ISA CTEEP S.A.",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "com",
+    taxType: "jcp",
+    declaredAmount: 0.623,
+    reciprocalDate: "28/10/2026",
+  },
+  {
+    id: "br-bbas3-20261014-pay",
+    market: "BR",
+    dateKey: "2026-10-14",
+    month: 10,
+    ticker: "BBAS3",
+    name: "Banco do Brasil S.A.",
+    type: "STOCK_BR",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "jcp",
+    declaredAmount: 0.8454,
+    reciprocalDate: "25/09/2026",
+  },
+  {
+    id: "br-ivvb11-20261030-pay",
+    market: "BR",
+    dateKey: "2026-10-30",
+    month: 10,
+    ticker: "IVVB11",
+    name: "iShares S&P 500 ETF B3",
+    type: "ETF",
+    currency: "BRL",
+    eventType: "pay",
+    taxType: "amortizacao",
+    declaredAmount: 2.1,
+    reciprocalDate: "15/10/2026",
+  },
+
+  // ================= ESTADOS UNIDOS (NYSE/NASDAQ) =================
+  // HOJE (25/Sep/2026)
+  {
+    id: "us-o-20260925-pay",
+    market: "US",
+    dateKey: "2026-09-25",
+    month: 9,
+    isToday: true,
+    ticker: "O",
+    name: "Realty Income Corp",
+    type: "REIT",
+    currency: "USD",
+    eventType: "pay",
+    taxType: "us_cash",
+    declaredAmount: 0.2635,
+    reciprocalDate: "01/09/2026",
+  },
+  {
+    id: "us-jnj-20260928-com",
+    market: "US",
+    dateKey: "2026-09-28",
+    month: 9,
+    ticker: "JNJ",
+    name: "Johnson & Johnson",
+    type: "STOCK_US",
+    currency: "USD",
+    eventType: "com",
+    taxType: "us_cash",
+    declaredAmount: 1.24,
+    reciprocalDate: "15/10/2026",
+  },
+  {
+    id: "us-pg-20260929-com",
+    market: "US",
+    dateKey: "2026-09-29",
+    month: 9,
+    ticker: "PG",
+    name: "Procter & Gamble Co.",
+    type: "STOCK_US",
+    currency: "USD",
+    eventType: "com",
+    taxType: "us_cash",
+    declaredAmount: 1.0065,
+    reciprocalDate: "15/10/2026",
+  },
+  {
+    id: "us-ko-20260930-pay",
+    market: "US",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "KO",
+    name: "The Coca-Cola Company",
+    type: "STOCK_US",
+    currency: "USD",
+    eventType: "pay",
+    taxType: "us_cash",
+    declaredAmount: 0.485,
+    reciprocalDate: "13/09/2026",
+  },
+  {
+    id: "us-vici-20260930-com",
+    market: "US",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "VICI",
+    name: "VICI Properties Inc.",
+    type: "REIT",
+    currency: "USD",
+    eventType: "com",
+    taxType: "us_cash",
+    declaredAmount: 0.4325,
+    reciprocalDate: "15/10/2026",
+  },
+  {
+    id: "us-vym-20260930-pay",
+    market: "US",
+    dateKey: "2026-09-30",
+    month: 9,
+    ticker: "VYM",
+    name: "Vanguard High Dividend Yield ETF",
+    type: "ETF",
+    currency: "USD",
+    eventType: "pay",
+    taxType: "us_cash",
+    declaredAmount: 0.942,
+    reciprocalDate: "18/09/2026",
+  },
+  {
+    id: "us-schd-20261002-com",
+    market: "US",
+    dateKey: "2026-10-02",
+    month: 10,
+    ticker: "SCHD",
+    name: "Schwab US Dividend Equity ETF",
+    type: "ETF",
+    currency: "USD",
+    eventType: "com",
+    taxType: "us_cash",
+    declaredAmount: 0.751,
+    reciprocalDate: "15/10/2026",
+  },
+  {
+    id: "us-msft-20261015-pay",
+    market: "US",
+    dateKey: "2026-10-15",
+    month: 10,
+    ticker: "MSFT",
+    name: "Microsoft Corp",
+    type: "STOCK_US",
+    currency: "USD",
+    eventType: "pay",
+    taxType: "us_cash",
+    declaredAmount: 0.83,
+    reciprocalDate: "20/09/2026",
+  },
+];
+
+/**
+ * Builds normalized daily agenda events enriched with SSOT Valuation and Dividend Safety Score
+ */
+export function buildAgendaEvents(
+  radarItems: RadarItem[] = [],
+  locale: string = "pt-BR",
+  customCatalog?: RawAgendaEvent[],
+): AgendaDividendEvent[] {
+  const catalog = customCatalog || AGENDA_CATALOG;
+  const radarMap = new Map<string, RadarItem>();
+  for (const r of radarItems) {
+    radarMap.set(r.ticker.toUpperCase(), r);
+  }
+
+  return catalog.map((raw) => {
+    const radar = radarMap.get(raw.ticker.toUpperCase());
+
+    const price = radar ? radar.price : raw.currency === "USD" ? 50.0 : 30.0;
+    const ceiling = radar ? radar.ceilingPrice : price * 1.15;
+    const margin = radar ? radar.margin : safetyMargin(ceiling, price);
+    const isBelowCeiling = margin > 0;
+    const dyGross = radar ? radar.dyGross : (raw.declaredAmount * 4) / price * 100;
+    const dyNet = radar ? radar.dyNet : dyGross;
+    const payout = radar ? radar.payout : 60;
+    const safetyScore = radar ? radar.safetyScore : 90;
+    const safetyTier = radar ? radar.safetyTier : "safe";
+    const safetyLabel = radar ? radar.safetyLabel : "Seguro";
+    const isTrap = Boolean(raw.isTrap || (radar ? radar.isTrap : false));
+
+    // Formatar data de forma legível de acordo com o locale
+    let dateFormatted = raw.dateKey;
+    try {
+      const [y, m, d] = raw.dateKey.split("-").map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      const weekday = dateObj.toLocaleDateString(locale, { weekday: "long" });
+      const day = String(d).padStart(2, "0");
+      const monthLong = dateObj.toLocaleDateString(locale, { month: "long" });
+      const capWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+      const capMonth = monthLong.charAt(0).toUpperCase() + monthLong.slice(1);
+      dateFormatted = `${capWeekday}, ${day} de ${capMonth} de ${y}`;
+    } catch {
+      dateFormatted = raw.dateKey;
+    }
+
+    return {
+      id: raw.id,
+      market: raw.market,
+      dateKey: raw.dateKey,
+      dateFormatted,
+      isToday: Boolean(raw.isToday),
+      month: raw.month,
+      ticker: raw.ticker,
+      name: raw.name,
+      type: raw.type,
+      currency: raw.currency,
+      eventType: raw.eventType,
+      taxType: raw.taxType,
+      declaredAmount: raw.declaredAmount,
+      reciprocalDateFormatted: raw.reciprocalDate,
+      price,
+      ceilingPrice: ceiling,
+      margin,
+      isBelowCeiling,
+      dyGross,
+      dyNet,
+      payout,
+      safetyScore,
+      safetyTier,
+      safetyLabel,
+      isTrap,
+      radarItem: radar,
+    };
+  });
+}
+
+/**
+ * Computes quantitative monthly summary statistics for the agenda banner
+ */
+export function computeAgendaStats(events: AgendaDividendEvent[]): AgendaSummaryStats {
+  return {
+    totalEvents: events.length,
+    totalCom: events.filter((e) => e.eventType === "com").length,
+    totalPay: events.filter((e) => e.eventType === "pay").length,
+    totalBelowCeiling: events.filter((e) => e.isBelowCeiling).length,
+    totalHighSafety: events.filter((e) => e.safetyScore >= 80).length,
+  };
+}
+
