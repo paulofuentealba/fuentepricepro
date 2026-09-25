@@ -30,6 +30,8 @@ import {
   FileJson,
   FileSpreadsheet,
   Globe,
+  Bell,
+  Mail,
 } from "lucide-react";
 import { useInvestorProfile } from "@/lib/useInvestorProfile";
 import { calculateProfileTier, type ProfileTier, type ProfileSublabel } from "@/lib/investor-profile";
@@ -43,7 +45,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n-provider";
-import { useUserSettings } from "@/lib/useUserSettings";
+import { useUserSettings, DEFAULT_DIGEST_PREFERENCES } from "@/lib/useUserSettings";
 import { useWatchlist } from "@/lib/watchlist";
 import { useSubscription } from "@/lib/subscription";
 import { useFeatureGate } from "@/lib/useFeatureGate";
@@ -52,6 +54,7 @@ import { buildWatchlistFullCsv, downloadCsv } from "@/lib/csv";
 import { toIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { verifySessionFn } from "@/lib/verifySession.functions";
+import { NewsDigestSettingsForm } from "@/components/news/NewsDigestSettingsForm";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: async ({ location }) => {
@@ -150,7 +153,16 @@ function SettingsPage() {
   const withdrawUnlocked = useFeatureGate("withdrawUnlocked");
   const auditUnlocked = useFeatureGate("auditUnlocked");
   const freeAssetLimit = useFeatureGate("freeAssetLimit");
-  const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "privacy">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "subscription" | "notifications" | "privacy">(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab === "subscription" || tab === "notifications" || tab === "privacy") {
+        return tab;
+      }
+    }
+    return "profile";
+  });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isExportingJson, setIsExportingJson] = useState(false);
 
@@ -351,6 +363,18 @@ function SettingsPage() {
           </button>
           <button
             role="tab"
+            aria-selected={activeTab === "notifications"}
+            onClick={() => setActiveTab("notifications")}
+            className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-[12.5px] font-display transition-colors ${
+              activeTab === "notifications"
+                ? "border-accent font-semibold text-foreground"
+                : "border-transparent font-medium text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Bell className="h-3.5 w-3.5" /> {S.tabs.notifications}
+          </button>
+          <button
+            role="tab"
             aria-selected={activeTab === "privacy"}
             onClick={() => setActiveTab("privacy")}
             className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-[12.5px] font-display transition-colors ${
@@ -501,8 +525,13 @@ function SettingsPage() {
                 </div>
               </div>
 
-              {/* Investor Profile Summary Card */}
-              <InvestorProfileSettingsCard />
+              <div className="space-y-6">
+                {/* Investor Profile Summary Card */}
+                <InvestorProfileSettingsCard />
+
+                {/* Notifications & Digest Summary Card */}
+                <NotificationsDigestSettingsSummaryCard onManage={() => setActiveTab("notifications")} />
+              </div>
             </div>
           )}
 
@@ -598,6 +627,28 @@ function SettingsPage() {
                     {S.subscription.usageFreeLimitNote.replace("{{limit}}", String(freeAssetLimit))}
                   </p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "notifications" && (
+            <div className="max-w-2xl space-y-6">
+              <div className="rounded-[18px] border border-border/60 bg-card p-5 sm:p-6 space-y-5">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/15 text-accent-text">
+                      <Bell className="h-4 w-4" />
+                    </span>
+                    <h3 className="font-serif text-lg font-semibold text-foreground">
+                      {S.notifications.title}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-1.5 leading-relaxed">
+                    {S.notifications.description}
+                  </p>
+                </div>
+
+                <NewsDigestSettingsForm />
               </div>
             </div>
           )}
@@ -706,6 +757,17 @@ function SettingsPage() {
                     <div className="mt-0.5 text-[11.5px] leading-snug text-muted-foreground">
                       {S.privacy.consents.digestDesc}
                     </div>
+                    {settings.weeklyDigestEmailConsent && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveTab("notifications");
+                        }}
+                        className="mt-2 text-xs font-semibold text-accent-text hover:underline inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        {S.notifications.profileCard.manageBtn} →
+                      </div>
+                    )}
                   </button>
                 </div>
               </div>
@@ -1114,6 +1176,109 @@ function InvestorProfileSettingsCard() {
       >
         {IC.goalsLink}
       </Link>
+    </div>
+  );
+}
+
+function NotificationsDigestSettingsSummaryCard({ onManage }: { onManage: () => void }) {
+  const { t } = useI18n();
+  const { settings } = useUserSettings();
+  const N = t.settings.notifications;
+  const M = t.newsScreen.digestModal;
+
+  const isEnabled = Boolean(settings.weeklyDigestEmailConsent);
+  const prefs = settings.newsDigestPreferences ?? DEFAULT_DIGEST_PREFERENCES;
+
+  const activeTopicsCount = [
+    prefs.includeIncomeAnnouncements,
+    prefs.includeRiskAlerts,
+    prefs.includeThesisDrift,
+    prefs.includeOpportunities,
+  ].filter(Boolean).length;
+
+  const getFrequencyLabel = () => {
+    if (prefs.frequency === "weekly") {
+      return prefs.dayOfWeek === "friday"
+        ? `${M.frequencies.weekly} · ${M.daysOfWeek.friday}`
+        : `${M.frequencies.weekly} · ${M.daysOfWeek.monday}`;
+    }
+    if (prefs.frequency === "monthly") {
+      if (prefs.dayOfMonth === "first_day") {
+        return `${M.frequencies.monthly} · ${M.daysOfMonth.firstDay}`;
+      }
+      if (prefs.dayOfMonth === "fifteenth") {
+        return `${M.frequencies.monthly} · ${M.daysOfMonth.fifteenth}`;
+      }
+      return `${M.frequencies.monthly} · ${M.daysOfMonth.firstBusinessDay}`;
+    }
+    return M.frequencies.criticalOnly;
+  };
+
+  return (
+    <div className="flex flex-col rounded-[18px] border border-border/60 bg-card p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/15 text-accent-text">
+            <Mail className="h-3.5 w-3.5" />
+          </span>
+          <h3 className="font-serif text-[15px] font-medium text-foreground">
+            {N.profileCard.title}
+          </h3>
+        </div>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-display font-semibold",
+            isEnabled
+              ? "bg-accent/15 text-accent-text"
+              : "bg-muted/60 text-muted-foreground",
+          )}
+        >
+          {isEnabled ? N.profileCard.active : N.profileCard.inactive}
+        </span>
+      </div>
+
+      {isEnabled ? (
+        <div className="space-y-3">
+          <div className="rounded-[14px] bg-muted/40 p-3.5 text-[12.5px] space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">{M.frequencySectionTitle}</span>
+              <span className="font-medium text-foreground">{getFrequencyLabel()}</span>
+            </div>
+            <div className="flex items-center justify-between border-t border-dashed border-border/40 pt-1.5">
+              <span className="text-muted-foreground">{M.topicsSectionTitle}</span>
+              <span className="font-medium text-foreground">
+                {N.profileCard.topicsActive
+                  .replace("{{count}}", String(activeTopicsCount))
+                  .replace("{{total}}", "4")}
+              </span>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onManage}
+            className="w-full font-display text-xs"
+          >
+            {N.profileCard.manageBtn}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+            {N.profileCard.notConfiguredDesc}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onManage}
+            className="w-full font-display text-xs"
+          >
+            {N.profileCard.configureBtn}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

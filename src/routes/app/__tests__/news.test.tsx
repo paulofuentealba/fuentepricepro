@@ -77,6 +77,7 @@ vi.mock("@/lib/i18n-provider", () => ({
   useI18n: () => ({
     locale: "pt-BR",
     t: {
+      toasts: { settingsSaved: "Configurações salvas." },
       common: { close: "Fechar" },
       newsScreen: {
         metaTitle: "O Que Mudou | Fuente Price Pro",

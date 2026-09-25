@@ -1330,6 +1330,7 @@ export const en = {
     tabs: {
       profile: "Profile",
       subscription: "Subscription",
+      notifications: "Notifications",
       privacy: "Privacy (GDPR)",
     },
     taxJurisdiction: {
@@ -1391,6 +1392,19 @@ export const en = {
       usageCardTitle: "Usage",
       usageAssetsLabel: "Assets in portfolio",
       usageFreeLimitNote: "The free plan limit is {{limit}} assets. You're on Pro, no limit.",
+    },
+    notifications: {
+      title: "Notifications & Executive Digest",
+      description: "Customize the frequency and topics of portfolio updates sent to your email.",
+      profileCard: {
+        title: "Executive Email Digest",
+        active: "Active",
+        inactive: "Inactive",
+        manageBtn: "Manage notifications",
+        configureBtn: "Configure preferences",
+        notConfiguredDesc: "Receive alerts in your email regarding dividend cuts, assets below ceiling, and thesis drift.",
+        topicsActive: "{{count}} of {{total}} topics active",
+      },
     },
     privacy: {
       title: "Privacy and Data",

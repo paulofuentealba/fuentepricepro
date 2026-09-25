@@ -1337,6 +1337,7 @@ export const ptBR = {
     tabs: {
       profile: "Perfil",
       subscription: "Assinatura",
+      notifications: "Notificações",
       privacy: "Privacidade (LGPD)",
     },
     taxJurisdiction: {
@@ -1398,6 +1399,19 @@ export const ptBR = {
       usageCardTitle: "Uso",
       usageAssetsLabel: "Ativos na carteira",
       usageFreeLimitNote: "No plano grátis o limite é de {{limit}} ativos. Você está no Pro, sem limite.",
+    },
+    notifications: {
+      title: "Notificações & Resumo Executivo",
+      description: "Personalize a frequência e os tópicos das novidades da sua carteira enviadas para o seu e-mail.",
+      profileCard: {
+        title: "Resumo Executivo por E-mail",
+        active: "Ativo",
+        inactive: "Inativo",
+        manageBtn: "Gerenciar notificações",
+        configureBtn: "Configurar preferências",
+        notConfiguredDesc: "Receba alertas no seu e-mail sobre cortes de dividendos, ativos abaixo do teto e desvios de tese.",
+        topicsActive: "{{count}} de {{total}} tópicos ativos",
+      },
     },
     privacy: {
       title: "Privacidade e Dados",

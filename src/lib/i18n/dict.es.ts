@@ -1342,6 +1342,7 @@ export const es = {
     tabs: {
       profile: "Perfil",
       subscription: "Suscripción",
+      notifications: "Notificaciones",
       privacy: "Privacidad (GDPR)",
     },
     taxJurisdiction: {
@@ -1403,6 +1404,19 @@ export const es = {
       usageCardTitle: "Uso",
       usageAssetsLabel: "Activos en cartera",
       usageFreeLimitNote: "El plan gratis tiene un límite de {{limit}} activos. Usted está en Pro, sin límite.",
+    },
+    notifications: {
+      title: "Notificaciones y Resumen Ejecutivo",
+      description: "Personalice la frecuencia y los temas de las novedades de su cartera enviadas a su correo electrónico.",
+      profileCard: {
+        title: "Resumen Ejecutivo por Correo",
+        active: "Activo",
+        inactive: "Inactivo",
+        manageBtn: "Administrar notificaciones",
+        configureBtn: "Configurar preferencias",
+        notConfiguredDesc: "Reciba alertas en su correo sobre recortes de dividendos, activos bajo el precio techo y desvíos de tesis.",
+        topicsActive: "{{count}} de {{total}} temas activos",
+      },
     },
     privacy: {
       title: "Privacidad y Datos",
