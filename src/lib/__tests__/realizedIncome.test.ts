@@ -343,7 +343,7 @@ describe("realizedIncome", () => {
       expect(fiiRes.taxType).toBe("rendimento_fii");
     });
 
-    it("scenario 7: JCP event applies 15% withholding tax", () => {
+    it("scenario 7: JCP event applies 17.5% withholding tax", () => {
       const txs: Transaction[] = [
         {
           id: "t1",
@@ -381,7 +381,7 @@ describe("realizedIncome", () => {
         quantityHeld: 100,
         amountPerShareGross: 1.0,
         amountGross: 100,
-        amountNet: 85, // 100 * (1 - 0.15)
+        amountNet: 82.5, // 100 * (1 - 0.175)
         taxType: "jcp",
       });
     });

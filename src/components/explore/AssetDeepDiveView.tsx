@@ -338,22 +338,15 @@ export function AssetDeepDiveView({
     return getDynamicClassMetrics(assetType, asset?.metrics, currency, locale, t);
   }, [repData, locale, asset, currency, t]);
 
-  // Tax passport
+  // Tax passport (Single source of truth via i18n)
   const taxPassportHtml = useMemo(() => {
-    if (repData && !isUS && locale === "ptBR") return repData.taxPassportHtml;
     const assetType = asset?.type ?? (repData?.classType as AssetType) ?? "STOCK_BR";
     return getDynamicTaxPassport(assetType, currency, isUS ? "US" : "BR", t);
-  }, [repData, isUS, locale, asset, currency, t]);
+  }, [asset, repData, currency, isUS, t]);
 
   // Snowball calculations
   const snowballInfo = useMemo(() => {
-    if (repData && !asset && locale === "ptBR") {
-      return {
-        reqQty: repData.snowballReqQty,
-        text: repData.snowballText,
-      };
-    }
-    const req = dividendIntel.snowballReqQty;
+    const req = dividendIntel.snowballReqQty || (repData ? repData.snowballReqQty : 1);
     return {
       reqQty: req,
       text:
@@ -364,7 +357,7 @@ export function AssetDeepDiveView({
             ? `En cada ciclo, ${req} cuotas generan dividendos suficientes para adquirir 1 nueva cuota automáticamente.`
             : `A cada ciclo, ${req} cotas geram proventos suficientes para adquirir 1 nova cota automaticamente.`),
     };
-  }, [repData, asset, locale, dividendIntel.snowballReqQty, t]);
+  }, [dividendIntel.snowballReqQty, repData, t, locale]);
 
   // Save consensus / target yield to user settings
   async function handleApplyConsensus(assumptions?: { bazinYield: number; kDiscount: number; gGrowth: number }) {
@@ -556,7 +549,7 @@ export function AssetDeepDiveView({
                     </span>
                   </div>
                   <div className="text-[11px] text-muted-foreground truncate mt-0.5 font-medium">
-                    {item.classLabel}
+                    {t.types?.[item.classType] ?? item.classLabel}
                   </div>
                 </button>
               );

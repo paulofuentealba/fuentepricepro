@@ -150,8 +150,8 @@ describe("buildTaxContext (Prompt 142 / Item 2.2)", () => {
     ] as WatchlistItem[];
 
     const realizedEvents: RealizedIncomeEvent[] = [
-      // 1. JCP event: Gross R$ 100,00, Phase 1 net R$ 85,00
-      // Phase 2 adapter must compute 15% on R$ 100,00 -> Net R$ 85,00 (NOT 85 * 0.85 = 72.25)
+      // 1. JCP event: Gross R$ 100,00, Phase 1 net R$ 82,50 (17.5% IRRF)
+      // Phase 2 adapter must compute 17.5% on R$ 100,00 -> Net R$ 82,50
       {
         ticker: "BBAS3",
         currency: "BRL",
@@ -161,7 +161,7 @@ describe("buildTaxContext (Prompt 142 / Item 2.2)", () => {
         quantityHeld: 100,
         amountPerShareGross: 1.0,
         amountGross: 100,
-        amountNet: 85,
+        amountNet: 82.5,
         taxType: "jcp",
       },
       // 2. BR Ordinary Dividend: Gross R$ 200,00 -> 0% tax -> Net R$ 200,00
@@ -195,11 +195,11 @@ describe("buildTaxContext (Prompt 142 / Item 2.2)", () => {
     const fxRate = 5.0;
     const context = buildTaxContext([], watchlistItems, realizedEvents, fxRate);
 
-    // Verify JCP: strictly R$ 85,00 (tax = R$ 15,00)
+    // Verify JCP: strictly R$ 82,50 (tax = R$ 17,50)
     expect(context.jcpTaxResult.totalGross).toBe(100);
-    expect(context.jcpTaxResult.totalTax).toBe(15);
-    expect(context.jcpTaxResult.totalNet).toBe(85);
-    expect(context.totalNetJcp).toBe(85);
+    expect(context.jcpTaxResult.totalTax).toBe(17.5);
+    expect(context.jcpTaxResult.totalNet).toBe(82.5);
+    expect(context.totalNetJcp).toBe(82.5);
 
     // Verify BR Ordinary Dividends: strictly R$ 200,00 (tax = 0)
     expect(context.brDividendsTaxResult.totalGross).toBe(200);
@@ -214,9 +214,9 @@ describe("buildTaxContext (Prompt 142 / Item 2.2)", () => {
     expect(context.totalNetUsBrl).toBe(350);
 
     // Aggregates:
-    // totalDividendNet = 200 + 85 + 350 = 635 BRL
-    // totalWithheldTax = 15 (JCP) + 150 (US @ 5.0) = 165 BRL
-    expect(context.totalDividendNet).toBe(635);
-    expect(context.totalWithheldTax).toBe(165);
+    // totalDividendNet = 200 + 82.5 + 350 = 632.5 BRL
+    // totalWithheldTax = 17.5 (JCP) + 150 (US @ 5.0) = 167.5 BRL
+    expect(context.totalDividendNet).toBe(632.5);
+    expect(context.totalWithheldTax).toBe(167.5);
   });
 });

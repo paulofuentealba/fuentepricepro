@@ -31,7 +31,6 @@ export interface RepresentativeAssetData {
   metricsBadge: string;
   metricsTitle: string;
   metrics: ClassMetricItem[];
-  taxPassportHtml: string;
   bazinDiv: number;
   bazinYieldTarget: number;
   kDiscount: number;
@@ -71,8 +70,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "PAYOUT", val: "45.0%", desc: "Política estatutária de distribuição de lucros" },
       { label: "ÍNDICE BASILEIA", val: "15.6%", desc: "Capitalização e solvência muito acima do mínimo" },
     ],
-    taxPassportHtml:
-      "<strong>Rendimentos:</strong> Dividendos são 100% isentos de imposto de renda para pessoa física. Juros sobre Capital Próprio (JCP) sofrem retenção exclusiva de 15% na fonte pela corretora.<br><strong>Ganho de Capital:</strong> Vendas no mercado à vista até R$ 20.000,00 no mês são isentas de IR. Acima desse limite, alíquota de 15% sobre o lucro líquido (20% em operações de day trade).",
     bazinDiv: 2.04,
     bazinYieldTarget: 6.0,
     kDiscount: 11.0,
@@ -110,8 +107,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "CAP RATE MÉDIO", val: "8.9% a.a.", desc: "Taxa de retorno operacional dos galpões" },
       { label: "CONTRATOS ATÍPICOS", val: "62%", desc: "Contratos de longo prazo (Build-to-Suit / Sale & Leaseback)" },
     ],
-    taxPassportHtml:
-      "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 11.033/04 (fundo com mais de 100 cotistas negociado em bolsa).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o lucro líquido na venda das cotas (NÃO há isenção de R$ 20.000 para FIIs).",
     bazinDiv: 13.2,
     bazinYieldTarget: 8.0,
     kDiscount: 10.5,
@@ -149,8 +144,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "INADIMPLÊNCIA", val: "0.0%", desc: "Nenhum atraso ou default na carteira" },
       { label: "DURATION MÉDIA", val: "2.3 anos", desc: "Prazo médio moderado com amortizações contínuas" },
     ],
-    taxPassportHtml:
-      "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 14.130/2021.<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o ganho apurado na alienação das cotas em bolsa.",
     bazinDiv: 1.25,
     bazinYieldTarget: 12.0,
     kDiscount: 13.0,
@@ -188,8 +181,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "DURATION", val: "4.8 anos", desc: "Maturação média dos projetos financiados" },
       { label: "BENEFÍCIO FISCAL", val: "Isenção Dupla", desc: "100% livre de IR tanto em rendimentos quanto ganho" },
     ],
-    taxPassportHtml:
-      "<strong>Super Isenção (Lei 12.431/2011):</strong> Os FI-Infras possuem o benefício fiscal mais forte do mercado brasileiro. Os rendimentos mensais são 100% isentos de IR E o ganho de capital na alienação de cotas na bolsa também é 100% isento de IR para pessoas físicas (sem limite de R$ 20k).",
     bazinDiv: 12.4,
     bazinYieldTarget: 11.5,
     kDiscount: 12.0,
@@ -227,8 +218,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "MARGEM OPERACIONAL", val: "29.4%", desc: "Forte poder de precificação e marcas icônicas" },
       { label: "STREAK DIVIDENDOS", val: "62 Anos", desc: "Classificação como Dividend King oficial" },
     ],
-    taxPassportHtml:
-      "<strong>Retenção US (WHT):</strong> 30% retido diretamente na fonte pelo governo americano (IRS).<br><strong>Brasil (Lei 14.754/2023):</strong> Tributação de 15% na Declaração de Ajuste Anual (DAA) com compensação integral dos 30% pagos nos EUA. Sem imposto complementar a pagar no Brasil.",
     bazinDiv: 1.94,
     bazinYieldTarget: 3.0,
     kDiscount: 8.5,
@@ -266,8 +255,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "WALT", val: "9.8 Anos", desc: "Prazo médio restante dos contratos de locação" },
       { label: "PROPRIEDADES", val: "+15.400", desc: "Portfólio ultra-diversificado nos EUA e Reino Unido" },
     ],
-    taxPassportHtml:
-      "<strong>Retenção US:</strong> 30% retido na fonte pela custódia americana.<br><strong>Brasil (Lei 14.754/23):</strong> Proventos compensáveis na declaração anual. Ganhos de capital em alienação tributados em 15% na DAA anual com compensação de perdas.",
     bazinDiv: 3.16,
     bazinYieldTarget: 5.5,
     kDiscount: 9.0,
@@ -305,8 +292,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "ATIVO BASE", val: "ETF IVV", desc: "Cotas custodiadas diretamente do ETF IVV da NYSE" },
       { label: "POLÍTICA", val: "Acumulação", desc: "Otimização tributária sem antecipação de proventos" },
     ],
-    taxPassportHtml:
-      "<strong>Sem Dividendos Diretos:</strong> Os proventos não transitam pela sua conta, evitando recolhimento antecipado.<br><strong>Ganho de Capital:</strong> Alíquota fixa de 15% sobre o lucro líquido apurado em qualquer venda (NÃO se aplica a isenção de R$ 20.000 de ações).",
     bazinDiv: 17.5,
     bazinYieldTarget: 5.0,
     kDiscount: 10.0,
@@ -344,8 +329,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "ATIVOS", val: "100 Ações", desc: "Diversificação setorial com teto de 4% por empresa" },
       { label: "REBALANCEAMENTO", val: "Anual (Março)", desc: "Exclusão automática de empresas que cortam proventos" },
     ],
-    taxPassportHtml:
-      "<strong>Dividendos:</strong> Retenção de 30% WHT na fonte americana.<br><strong>Brasil:</strong> Tributação unificada de 15% na declaração de ajuste anual com compensação dos 30% retidos nos EUA. Ganhos de capital tributados anualmente em 15% na DAA.",
     bazinDiv: 3.28,
     bazinYieldTarget: 4.0,
     kDiscount: 8.5,
@@ -383,8 +366,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "STREAK DIVIDENDOS", val: "62 Anos", desc: "Membro canônico dos Dividend Kings" },
       { label: "PAYOUT RATIO", val: "65.4%", desc: "Margem de segurança saudável sobre lucros operacionais" },
     ],
-    taxPassportHtml:
-      "<strong>Tax Reality:</strong> Para US Tax Resident, tributação conforme alíquota preferencial de Qualified Dividends (0%, 15% ou 20%).",
     bazinDiv: 4.96,
     bazinYieldTarget: 3.2,
     kDiscount: 8.0,
@@ -422,8 +403,6 @@ export const REPRESENTATIVE_ASSETS: Record<string, RepresentativeAssetData> = {
       { label: "ROE MÉDIO", val: "22.4%", desc: "Eficiência combinada dos líderes de mercado" },
       { label: "TRACKING ERROR", val: "0.01%", desc: "Aderência perfeita ao índice S&P 500" },
     ],
-    taxPassportHtml:
-      "<strong>Tax Reality:</strong> Para US Tax Resident, dividendos qualificados com retenção zero na fonte e reporte no Form 1099-DIV.",
     bazinDiv: 7.12,
     bazinYieldTarget: 1.5,
     kDiscount: 9.0,
@@ -814,7 +793,7 @@ export function getDynamicTaxPassport(
     if (currency === "BRL" || type === "STOCK_BR" || type === "FII" || type === "FIAGRO" || type === "FII_INFRA") {
       return (
         p?.usForeignBr ??
-        "<strong>Foreign Asset (B3 - Brazil):</strong> Dividends and distributions are treated as foreign ordinary income on IRS Form 1040. If Brazilian withholding applies (e.g. JCP 15%), you may claim a Foreign Tax Credit (IRS Form 1116) to prevent double taxation.<br><strong>Capital Gains:</strong> Taxed under standard US capital gains rules in USD equivalent at transaction date."
+        "<strong>Foreign Asset (B3 - Brazil):</strong> Dividends and distributions are treated as foreign ordinary income on IRS Form 1040. If Brazilian withholding applies (e.g. JCP 17.5%), you may claim a Foreign Tax Credit (IRS Form 1116) to prevent double taxation.<br><strong>Capital Gains:</strong> Taxed under standard US capital gains rules in USD equivalent at transaction date."
       );
     }
     if (type === "REIT") {
@@ -845,13 +824,13 @@ export function getDynamicTaxPassport(
   if (type === "FII" || type === "FIAGRO") {
     return (
       p?.brFii ??
-      "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 11.033/04 e Lei 14.130/21 (fundo com mais de 100 cotistas negociado em bolsa).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o lucro líquido na venda das cotas (NÃO há isenção de R$ 20.000)."
+      "<strong>Rendimentos Mensais:</strong> 100% isentos de imposto de renda para pessoa física, conforme Lei 11.033/04 e Lei 14.130/21 (fundo com mais de 100 cotistas negociado em bolsa, conforme Lei 14.754/2023).<br><strong>Ganho de Capital:</strong> Alíquota fixa de 20% sobre o lucro líquido na venda das cotas (NÃO há isenção de R$ 20.000)."
     );
   }
   if (currency === "USD" || type === "STOCK_US" || type === "REIT") {
     return (
       p?.brForeignUs ??
-      "<strong>Retenção US (WHT):</strong> 30% retido na fonte pela custódia americana sobre dividendos distribuídos.<br><strong>Brasil (Lei 14.754/2023):</strong> Proventos são compensáveis na declaração anual de IR (DAA). Ganho de capital na venda apurado em 15% na DAA com compensação integral de eventuais prejuízos passados."
+      "<strong>Retenção US (WHT):</strong> 30% retido na fonte pela custódia americana sobre dividendos distribuídos.<br><strong>Brasil (Lei 14.754/2023):</strong> Proventos e ganhos de capital no exterior são declarados na DAA à alíquota uniforme de 15%, com compensação integral do imposto retido nos EUA."
     );
   }
   if (type === "ETF") {
@@ -863,6 +842,6 @@ export function getDynamicTaxPassport(
   // STOCK_BR default
   return (
     p?.brStock ??
-    "<strong>Rendimentos:</strong> Dividendos são 100% isentos de imposto de renda para pessoa física. Juros sobre Capital Próprio (JCP) sofrem retenção exclusiva de 15% na fonte pela corretora.<br><strong>Ganho de Capital:</strong> Vendas no mercado à vista até R$ 20.000,00 no mês são isentas de IR. Acima desse limite, alíquota de 15% sobre o lucro líquido (20% em operações de day trade)."
+    "<strong>Rendimentos:</strong> Dividendos de ações são isentos de IRPF para a pessoa física (com retenção de 10% exclusivamente sobre parcelas acima de R$ 50 mil/mês da mesma empresa, conforme Lei 15.270/2025). Juros sobre Capital Próprio (JCP) sofrem retenção exclusiva e definitiva de 17,5% na fonte (Lei 15.270/2025 / LC 224/2025).<br><strong>Ganho de Capital:</strong> Vendas no mercado à vista até R$ 20.000,00 no mês são isentas de IR. Acima desse limite, alíquota de 15% sobre o lucro líquido (20% em operações de day trade)."
   );
 }

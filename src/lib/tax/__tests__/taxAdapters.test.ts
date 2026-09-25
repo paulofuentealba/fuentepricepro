@@ -69,7 +69,7 @@ describe("Tax Simulation Adapters (Prompt 138 / Item 2.1a)", () => {
   });
 
   describe("simulateBrJcpTax (Brazilian Juros sobre Capital Próprio)", () => {
-    it("matches SSOT netAfterTax and dividendTaxRate with 15% withholding tax", () => {
+    it("matches SSOT netAfterTax and dividendTaxRate with 17.5% withholding tax", () => {
       const positions: TaxSimulationPositionInput[] = [
         { ticker: "BBDC4", type: "STOCK_BR", grossAmount: 1000 },
         { ticker: "ITUB4", type: "STOCK_BR", grossAmount: 2000 },
@@ -79,8 +79,8 @@ describe("Tax Simulation Adapters (Prompt 138 / Item 2.1a)", () => {
 
       expect(result.jurisdiction).toBe("BR");
       expect(result.totalGross).toBe(3000);
-      expect(result.totalNet).toBe(2550); // 3000 * 0.85
-      expect(result.totalTax).toBe(450);  // 3000 * 0.15
+      expect(result.totalNet).toBe(2475); // 3000 * 0.825
+      expect(result.totalTax).toBe(525);  // 3000 * 0.175
       expect(result.effectiveTaxRate).toBe(JCP_TAX_RATE);
 
       // Verify each position matches direct SSOT calls with isJCP = true
@@ -91,9 +91,9 @@ describe("Tax Simulation Adapters (Prompt 138 / Item 2.1a)", () => {
         const expectedNet = netAfterTax(input.grossAmount, input.type, "BRL", undefined, true);
 
         expect(out.taxRate).toBe(expectedRate);
-        expect(out.taxRate).toBe(0.15);
+        expect(out.taxRate).toBe(0.175);
         expect(out.netAmount).toBe(expectedNet);
-        expect(out.withheldTax).toBe(input.grossAmount * 0.15);
+        expect(out.withheldTax).toBe(input.grossAmount * 0.175);
         expect(out.isJCP).toBe(true);
       }
     });

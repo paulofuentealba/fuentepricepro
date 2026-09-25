@@ -112,8 +112,10 @@ export function resolveTargetYield(
 
 /** US withholding tax applied to dividends paid to non-US foreign investors. */
 export const US_DIVIDEND_TAX_RATE = 0.3;
-/** Brazilian withholding tax applied to JCP (Juros sobre Capital Próprio). */
-export const JCP_TAX_RATE = 0.15;
+/** Brazilian withholding tax applied to JCP (Juros sobre Capital Próprio).
+ * Effective Jan 1, 2026 (Lei 15.270/2025 / LC 224/2025), the withholding rate on JCP is 17.5% (was 15%).
+ */
+export const JCP_TAX_RATE = 0.175;
 
 export function isUsAsset(type: AssetType, currency?: string): boolean {
   if (type === "STOCK_US" || type === "REIT") return true;

@@ -210,7 +210,7 @@ describe("OpportunityMatrixTable", () => {
     expect(sortedDefault[0].textContent).toContain("VALE3");
   });
 
-  it("displays 'Isento (Dividendo) / 15% (JCP)' for Brazilian stocks", () => {
+  it("displays 'Isento (Dividendo) / 17,5% (JCP)' for Brazilian stocks", () => {
     const stockAsset = createMockItem({
       id: "stock-1",
       ticker: "PETR4",
@@ -220,7 +220,7 @@ describe("OpportunityMatrixTable", () => {
     });
 
     render(<OpportunityMatrixTable valuedItems={[stockAsset]} isLoading={false} />);
-    expect(screen.getAllByText("Isento (Dividendo) / 15% (JCP)").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Isento (Dividendo) / 17,5% (JCP)").length).toBeGreaterThan(0);
   });
 
   it("displays 'AGUARDAR' for an asset above ceiling price (negative margin), not 'QUARENTENA'", () => {

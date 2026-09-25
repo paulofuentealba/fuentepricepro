@@ -96,7 +96,7 @@ describe("valuateStockBR - Ações Brasileiras Especializadas", () => {
     expect(result.lynch).toBeNull();
   });
 
-  it("should correctly apply 15% withholding tax when isJCP is true", () => {
+  it("should correctly apply 17.5% withholding tax when isJCP is true", () => {
     const grossDividend = 2.0;
     const resultWithJcp = valuateStockBR({
       ticker: "PETR4",
@@ -111,9 +111,9 @@ describe("valuateStockBR - Ações Brasileiras Especializadas", () => {
       type: "STOCK_BR",
     });
 
-    // Net dividend = 2.0 * (1 - 0.15) = 1.70
-    // Bazin = 1.70 / 0.06 = 28.333
-    expect(resultWithJcp.methods.bazin).toBeCloseTo(28.33, 1);
+    // Net dividend = 2.0 * (1 - 0.175) = 1.65
+    // Bazin = 1.65 / 0.06 = 27.50
+    expect(resultWithJcp.methods.bazin).toBeCloseTo(27.5, 1);
   });
 
   it("should set confidenceBadge: 2 for Graham when LPA/VPA is missing", () => {

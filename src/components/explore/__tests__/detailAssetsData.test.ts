@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getDynamicClassMetrics } from "../detailAssetsData";
+import { getDynamicClassMetrics, getDynamicTaxPassport } from "../detailAssetsData";
 
 describe("detailAssetsData - getDynamicClassMetrics i18n & zero Portuguese leak", () => {
   const sampleMetrics = {
@@ -104,6 +104,48 @@ describe("detailAssetsData - getDynamicClassMetrics i18n & zero Portuguese leak"
       const labels = res.items.map((i) => i.label);
       expect(labels).toEqual(["P/L", "P/VP", "ROE", "PAYOUT", "LPA (EPS)", "CAGR DIVIDENDOS"]);
       expect(res.items[0].desc).toBe("Preço sobre Lucro por ação (LPA)");
+    });
+  });
+
+  describe("getDynamicTaxPassport - 2026 Tax Compliance (17.5% JCP & zero 15% leakage on JCP)", () => {
+    it("returns 17,5% JCP and Lei 15.270/2025 in fallback mode for STOCK_BR", () => {
+      const html = getDynamicTaxPassport("STOCK_BR", "BRL", "BR");
+      expect(html).toContain("17,5%");
+      expect(html).toContain("Lei 15.270/2025");
+      expect(html).not.toContain("JCP) sofrem retenção exclusiva de 15%");
+      expect(html).not.toContain("JCP 15%");
+    });
+
+    it("returns 17.5% JCP in English fallback mode for US residents holding BR assets", () => {
+      const html = getDynamicTaxPassport("STOCK_BR", "BRL", "US");
+      expect(html).toContain("17.5%");
+      expect(html).toContain("Foreign Tax Credit");
+      expect(html).not.toMatch(/JCP.*15%/);
+    });
+
+    it("correctly consumes localized taxPassports dictionary from ptBR", () => {
+      const tMock = {
+        deepDive: {
+          taxPassports: {
+            brStock: "<strong>Rendimentos:</strong> JCP retido a 17,5% na fonte (Lei 15.270/2025).",
+          },
+        },
+      };
+      const html = getDynamicTaxPassport("STOCK_BR", "BRL", "BR", tMock);
+      expect(html).toBe("<strong>Rendimentos:</strong> JCP retido a 17,5% na fonte (Lei 15.270/2025).");
+    });
+
+    it("verifies FII tax rules: 100 cotistas requirement and 20% on capital gains", () => {
+      const html = getDynamicTaxPassport("FII", "BRL", "BR");
+      expect(html).toContain("100 cotistas");
+      expect(html).toContain("20%");
+      expect(html).not.toContain("15%");
+    });
+
+    it("verifies FI-Infra super exemption under Lei 12.431/2011", () => {
+      const html = getDynamicTaxPassport("FII_INFRA", "BRL", "BR");
+      expect(html).toContain("Lei 12.431/2011");
+      expect(html).toContain("100% isentos");
     });
   });
 });

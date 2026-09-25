@@ -302,6 +302,6 @@ describe("AssetDeepDiveView (Raio-X Aprofundado do Ativo)", () => {
 
     expect(screen.getAllByText(/IVVB11/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Sem distribuição em dinheiro/i)).toBeInTheDocument();
-    expect(screen.getByText(/Reinvestimento Automático/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Reinvestimento Automático/i).length).toBeGreaterThan(0);
   });
 });

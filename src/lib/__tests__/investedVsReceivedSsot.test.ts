@@ -57,7 +57,7 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
     expect(result[0].received).toBe(220);
   });
 
-  it("calculates Brazilian Stock JCP dividends with 15% WHT deducted", () => {
+  it("calculates Brazilian Stock JCP dividends with 17.5% WHT deducted", () => {
     const item = createItem({ ticker: "BBAS3", type: "STOCK_BR", quantity: 200, averagePrice: 25 });
     const events: DividendEvent[] = [
       { exDate: "2024-05-15", paymentDate: "2024-05-22", amountPerShare: 1.0, isJCP: true },
@@ -80,8 +80,8 @@ describe("computeInvestedVsReceived SSOT parity with calculateRealizedIncome", (
     expect(result).toHaveLength(1);
     expect(result[0].ticker).toBe("BBAS3");
     expect(result[0].invested).toBe(5000); // 200 * 25
-    // 200 * 1.00 * (1 - 0.15) = 170.00
-    expect(result[0].received).toBe(170);
+    // 200 * 1.00 * (1 - 0.175) = 165.00
+    expect(result[0].received).toBe(165);
   });
 
   it("calculates US Stock dividends with 30% US withholding tax deducted", () => {

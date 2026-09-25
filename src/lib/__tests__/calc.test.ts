@@ -87,9 +87,9 @@ describe("Bazin ceiling price math", () => {
     expect(usValuation.bazin).toBeCloseTo(100);
   });
 
-  it("applies 15% withholding to JCP events", () => {
-    expect(dividendTaxRate("STOCK_BR", "BRL", undefined, true)).toBe(0.15);
-    expect(netAfterTax(100, "STOCK_BR", "BRL", undefined, true)).toBe(85);
+  it("applies 17.5% withholding to JCP events", () => {
+    expect(dividendTaxRate("STOCK_BR", "BRL", undefined, true)).toBe(0.175);
+    expect(netAfterTax(100, "STOCK_BR", "BRL", undefined, true)).toBe(82.5);
   });
 });
 

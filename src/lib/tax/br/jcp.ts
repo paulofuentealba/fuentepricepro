@@ -10,7 +10,7 @@ import type {
  * Pure adapter for Brazilian JCP (Juros sobre Capital Próprio).
  * Consumes the SSOT (`dividendTaxRate` and `netAfterTax`) from `src/lib/calculations.ts`.
  *
- * Brazilian JCP is subject to 15% withholding income tax at source (IRRF).
+ * Brazilian JCP is subject to 17.5% withholding income tax at source (IRRF) since Jan 1, 2026 (Lei 15.270/2025 / LC 224/2025).
  */
 export function simulateBrJcpTax(
   positions: TaxSimulationPositionInput[],
