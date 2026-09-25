@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Search,
   ReceiptText,
+  Compass,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +18,7 @@ import { ScreenerScreen } from "@/components/screener/ScreenerScreen";
 import { AssetComparator } from "@/components/ceiling/AssetComparator";
 import { AssetDeepDiveView } from "@/components/explore/AssetDeepDiveView";
 import { MyTransactionsView } from "@/components/transactions/MyTransactionsView";
+import { DividendRadarView } from "@/components/dividend-radar/DividendRadarView";
 
 const RiskRadar = lazy(() =>
   import("@/components/ceiling/RiskRadar").then((m) => ({ default: m.RiskRadar })),
@@ -77,6 +79,12 @@ export function ExplorarPage() {
       label: t.tabs?.deepDive || "Raio-X do Ativo",
       icon: Activity,
       description: t.explore?.descriptions?.deepDive || "Análise fundamentalista e consenso 360° do ativo",
+    },
+    {
+      id: "dividendradar",
+      label: t.tabs.dividendRadar || t.tabs.dividendRadarTitle || "Radar de Dividendos",
+      icon: Compass,
+      description: t.explore.descriptions.dividendRadar,
     },
     {
       id: "screener",
@@ -147,6 +155,14 @@ export function ExplorarPage() {
             return (
               <TabsContent key={tool.id} value={tool.id} className="mt-6">
                 <AssetDeepDiveView initialTicker={search.ticker} />
+              </TabsContent>
+            );
+          }
+
+          if (tool.id === "dividendradar") {
+            return (
+              <TabsContent key={tool.id} value={tool.id} className="mt-6">
+                <DividendRadarView />
               </TabsContent>
             );
           }

@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Fuente Price Pro — Protótipo: Radar de Dividendos</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+[data-theme="light"] {
+  --paper: #f6f2ea;
+  --paper2: #efe9dc;
+  --card: #fffdf8;
+  --ink: #14201a;
+  --muted: rgba(20, 32, 26, .58);
+  --line: rgba(20, 32, 26, .12);
+  --line2: rgba(20, 32, 26, .07);
+  --nav: #0e2a1f;
+  --navfg: #f6f2ea;
+  --moss-700: #1c4a34;
+  --moss-500: #2f6b4c;
+  --moss-300: #8fb59d;
+  --gold-600: #a97a1f;
+  --gold-500: #c99a3a;
+  --gold-300: #e9c877;
+  --pos: #2f6b4c;
+  --neg: #b5533a;
+  --posbg: rgba(47, 107, 76, .12);
+  --negbg: rgba(181, 83, 58, .12);
+  --goldbg: rgba(201, 154, 58, .14);
+}
+
+[data-theme="dark"] {
+  --paper: #0a1410;
+  --paper2: #101d16;
+  --card: #131f18;
+  --ink: #e9e3d5;
+  --muted: rgba(233, 227, 213, .58);
+  --line: rgba(233, 227, 213, .13);
+  --line2: rgba(233, 227, 213, .07);
+  --nav: #08110d;
+  --navfg: #e9e3d5;
+  --moss-700: #245c40;
+  --moss-500: #57a97b;
+  --moss-300: #8fb59d;
+  --gold-600: #e9c877;
+  --gold-500: #e9c877;
+  --gold-300: #f0d792;
+  --pos: #57a97b;
+  --neg: #e2795e;
+  --posbg: rgba(87, 169, 123, .14);
+  --negbg: rgba(226, 121, 94, .14);
+  --goldbg: rgba(233, 200, 119, .14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background .35s, color .3s;
+  min-height: 100vh;
+}
+.serif { font-family: 'Fraunces', serif; }
+.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(120, 120, 120, .04) 1px, transparent 1px);
+  background-size: 3px 3px;
+  z-index: 0;
+}
+
+/* Shell Layout */
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+nav {
+  background: var(--nav);
+  color: var(--navfg);
+  padding: 22px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 0 8px;
+}
+.brand .w {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--gold-300);
+}
+.brand .w span {
+  color: var(--navfg);
+  opacity: .5;
+  font-weight: 400;
+  font-size: 9.5px;
+  display: block;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.nl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8.5px 12px;
+  border-radius: 9px;
+  color: color-mix(in srgb, var(--navfg) 65%, transparent);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 0;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: .15s;
+}
+.nl svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nl:hover { background: color-mix(in srgb, var(--navfg) 8%, transparent); color: var(--navfg); }
+.nl.active { background: var(--moss-700); color: var(--gold-300); }
+.nl .cnt {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  background: var(--gold-500);
+  color: #0e2a1f;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.nl .dotb { margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-300); }
+.nsec {
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--navfg) 35%, transparent);
+  margin: 14px 11px 5px;
+  font-weight: 600;
+}
+
+.navuser { margin-top: auto; border-top: 1px solid rgba(255, 255, 255, .1); padding-top: 12px; }
+.uchip { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+.uchip:hover { background: rgba(255, 255, 255, .06); }
+.uav {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--gold-500); color: #0e2a1f;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.uinfo .un { font-size: 12.5px; font-weight: 600; color: var(--navfg); }
+.uinfo .up { font-size: 10px; color: var(--gold-300); }
+.tt {
+  display: flex; gap: 4px; background: color-mix(in srgb, var(--navfg) 7%, transparent);
+  padding: 4px; border-radius: 9px; margin-top: 10px;
+}
+.tt button {
+  flex: 1; border: 0; background: none; color: color-mix(in srgb, var(--navfg) 55%, transparent);
+  padding: 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: inherit;
+}
+.tt button.on { background: var(--moss-700); color: var(--gold-300); }
+
+/* Main Content Area */
+main {
+  padding: 26px 36px 90px;
+  max-width: 1180px;
+}
+
+/* Approach Selector Banner */
+.proposal-switcher-bar {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 8px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+.ps-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0 12px;
+}
+.ps-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  padding: 9px 18px;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ps-btn:hover { color: var(--ink); background: var(--paper2); }
+.ps-btn.active {
+  background: var(--paper2);
+  color: var(--ink);
+  border-color: var(--gold-500);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.ps-btn .badge {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--goldbg);
+  color: var(--gold-600);
+  font-weight: 700;
+}
+
+/* Top Screen Header */
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.eye {
+  font-size: 10.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--moss-500);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+h1.pg {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+
+/* Standard Components from Prototype */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 18px;
+}
+.rt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rt h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pill.pos { background: var(--posbg); color: var(--pos); }
+.pill.neg { background: var(--negbg); color: var(--neg); }
+.pill.gold { background: var(--goldbg); color: var(--gold-600); }
+.pill.warn { background: rgba(217, 119, 6, .14); color: #d97706; }
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 15px 18px;
+}
+.kl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.kv {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  margin-top: 5px;
+  font-weight: 500;
+}
+.kd {
+  font-size: 11px;
+  margin-top: 3px;
+  font-weight: 600;
+}
+.kd.up { color: var(--pos); }
+.kd.down { color: var(--neg); }
+.kd.warn { color: var(--gold-600); }
+
+/* Insight Card */
+.insight {
+  background: linear-gradient(135deg, var(--goldbg), transparent);
+  border: 1px solid var(--gold-500);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 18px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.insight .ii { font-size: 24px; color: var(--gold-500); }
+.insight .it { flex: 1; min-width: 240px; }
+.insight .it h4 { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+.insight .it p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.insight .it p b { color: var(--ink); }
+.insight .iv { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500; color: var(--gold-600); text-align: right; }
+
+/* Filter Chips Bar */
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fchip {
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 6px 13px;
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fchip:hover { border-color: var(--gold-500); color: var(--ink); }
+.fchip.active { background: var(--goldbg); color: var(--gold-600); border-color: var(--gold-500); }
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 9px;
+  width: 220px;
+}
+.search-box input {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+}
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th {
+  text-align: left;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper2);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px dashed var(--line2);
+  vertical-align: middle;
+}
+tr:hover td { background: color-mix(in srgb, var(--gold-500) 4%, transparent); cursor: pointer; }
+.ticker-title { font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
+.ticker-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+/* Buttons */
+.btn {
+  background: var(--moss-700);
+  color: var(--gold-300);
+  border: 0;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { opacity: .9; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.btn.sm { padding: 6px 12px; font-size: 11px; }
+
+/* Disclaimer footer */
+.disc {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 20px;
+  background: var(--goldbg);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 18px;
+}
+.disc .di { color: var(--gold-600); font-weight: 700; flex-shrink: 0; }
+.disc b { color: var(--ink); font-weight: 600; }
+
+/* Seasonality Timeline Components (Proposal 2) */
+.months-bar {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 5px;
+  margin: 14px 0 20px;
+}
+.m-tab {
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: .15s;
+}
+.m-tab:hover { border-color: var(--gold-500); }
+.m-tab.active {
+  background: var(--goldbg);
+  border-color: var(--gold-500);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.m-name { font-size: 11.5px; font-weight: 700; font-family: 'Fraunces', serif; }
+.m-assets { font-size: 9.5px; color: var(--muted); margin-top: 2px; }
+.m-tab.active .m-name { color: var(--gold-600); }
+.m-tab.active .m-assets { color: var(--ink); font-weight: 600; }
+.m-star { font-size: 8px; color: var(--gold-500); margin-left: 2px; }
+
+/* Seasonality Bar for Proposal D */
+.months-bar-d {
+  display: grid;
+  grid-template-columns: 85px repeat(12, 1fr);
+  gap: 5px;
+  margin: 12px 0 16px;
+}
+.m-tab-d {
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: .15s;
+}
+.m-tab-d:hover { border-color: var(--gold-500); }
+.m-tab-d.active {
+  background: var(--goldbg);
+  border-color: var(--gold-500);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.m-tab-d.active .m-name { color: var(--gold-600); }
+.m-tab-d.active .m-assets { color: var(--ink); font-weight: 600; }
+
+@media(max-width: 900px) {
+  .months-bar-d { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 360 Grid Cards (Proposal 3 & 4) */
+.cards360 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.card360 {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px 20px;
+  transition: transform .15s, border-color .15s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.card360:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold-500);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
+.c360-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.score-badge {
+  text-align: right;
+}
+.score-circle {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+.score-sub { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+
+.c360-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: var(--paper2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.c360-m-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.c360-m-val { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 600; margin-top: 3px; }
+
+.c360-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed var(--line2);
+  padding-top: 10px;
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Detail Drawer Modal (Raio-X do Ativo) */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  display: none;
+}
+.drawer-backdrop.show { display: block; }
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 520px;
+  max-width: 90vw;
+  background: var(--card);
+  border-left: 1px solid var(--line);
+  z-index: 100;
+  padding: 28px 30px;
+  overflow-y: auto;
+  display: none;
+  animation: slideLeft .25s ease forwards;
+}
+.drawer.show { display: block; }
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media(max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  nav { display: none; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .months-bar { grid-template-columns: repeat(6, 1fr); }
+  .cards360 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR (Exact Replica of Fuente v6 Prototype) -->
+  <nav>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="19" stroke="#e9c877" stroke-width="1.4" opacity=".35"/>
+        <circle cx="20" cy="20" r="13.5" stroke="#e9c877" stroke-width="1.4" opacity=".6"/>
+        <circle cx="20" cy="20" r="8" fill="#e9c877"/>
+      </svg>
+      <div class="w">Fuente<span>Price Pro</span></div>
+    </div>
+
+    <div class="nsec">Decidir</div>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 11-3-6.7M21 3v6h-6"/></svg> Reinvestir <span class="cnt">R$1.130</span></button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M5 9l7-7 7 7"/></svg> Plano de aporte</button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22V2M5 15l7 7 7-7"/></svg> Retirar</button>
+
+    <div class="nsec">Acompanhar</div>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg> O que mudou <span class="cnt">4</span></button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg> Renda garantida</button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15h6"/></svg> Realidade fiscal <span class="dotb"></span></button>
+
+    <div class="nsec">Analisar & Radar</div>
+    <button class="nl active" style="background:var(--moss-700);color:var(--gold-300);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>
+      Radar de dividendos <span class="cnt">14</span>
+    </button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg> Minha carteira</button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Explorar ativos</button>
+    <button class="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg> Auditoria</button>
+
+    <div class="navuser">
+      <div class="uchip"><div class="uav">PF</div><div class="uinfo"><div class="un">Paulo F.</div><div class="up">Plano Pro</div></div></div>
+      <div class="tt">
+        <button id="bl" onclick="setTheme('light')">☀ Light</button>
+        <button id="bd" class="on" onclick="setTheme('dark')">☾ Dark</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN VIEW -->
+  <main>
+    <!-- Switcher de Abordagens para Decisão de Produto -->
+    <div class="proposal-switcher-bar">
+      <span class="ps-label">Alternar Protótipo:</span>
+      <button class="ps-btn active" onclick="switchProposal(1)">
+        <span>Opção A: Radar Tático Bazin</span>
+        <span class="badge">Aporte</span>
+      </button>
+      <button class="ps-btn" onclick="switchProposal(2)">
+        <span>Opção B: Sazonalidade</span>
+        <span class="badge">Data Com</span>
+      </button>
+      <button class="ps-btn" onclick="switchProposal(3)">
+        <span>Opção C: Radar 360°</span>
+        <span class="badge">Padrão SA</span>
+      </button>
+      <button class="ps-btn" onclick="switchProposal(4)">
+        <span>Opção D: Fusão 360° + Sazonalidade</span>
+        <span class="badge" style="background:var(--moss-700);color:#fff">Definitiva ★</span>
+      </button>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ABORDAGEM A: RADAR TÁTICO BAZIN (FOCO NO APORTE)       -->
+    <!-- ======================================================= -->
+    <div id="view-prop-1">
+      <div class="top">
+        <div>
+          <div class="eye">Scanner de Mercado · Margem de Segurança Bazin & Consenso</div>
+          <h1 class="pg">Radar de Oportunidades em Dividendos</h1>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn sm ghost" onclick="alert('Exporta CSV com todas as 14 métricas e fontes.')">Exportar CSV</button>
+          <button class="btn sm" onclick="alert('Abrindo modal de configuração de yield-alvo.')">Ajustar Teto</button>
+        </div>
+      </div>
+
+      <!-- Insight Card -->
+      <div class="insight">
+        <div class="ii">◈</div>
+        <div class="it">
+          <h4>14 ativos de alta qualidade estão em Zona de Compra hoje</h4>
+          <p>Filtrados por margem de segurança contra o <b>Preço Teto Bazin</b>. A margem média de desconto dos ativos selecionados é de <b>+14,8%</b>, com <b>DY médio de 8,9%</b>. 3 armadilhas de yield foram descartadas automaticamente.</p>
+        </div>
+        <div class="iv">+14,8%<div style="font-size:11px;color:var(--muted);font-family:'Space Grotesk'">desconto médio</div></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kl">Na Zona de Compra (&lt; Teto)</div>
+          <div class="kv" style="color:var(--pos)">14 ativos</div>
+          <div class="kd up">6 Ações · 4 FIIs · 4 US</div>
+        </div>
+        <div class="kpi">
+          <div class="kl">Yield Médio do Radar</div>
+          <div class="kv">8,92%</div>
+          <div class="kd">Líquido de impostos BR/US</div>
+        </div>
+        <div class="kpi">
+          <div class="kl">Armadilhas Excluídas</div>
+          <div class="kv" style="color:var(--neg)">3 ativos</div>
+          <div class="kd down">Payout &gt; 100% ou DY fake</div>
+        </div>
+        <div class="kpi">
+          <div class="kl">Maior Margem de Segurança</div>
+          <div class="kv">BBAS3</div>
+          <div class="kd up">+18,9% abaixo do teto</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row">
+        <div class="filter-chips">
+          <button class="fchip active" onclick="filterClass(this, 'all')">Todos (14)</button>
+          <button class="fchip" onclick="filterClass(this, 'stock_br')">🇧🇷 Ações B3 (6)</button>
+          <button class="fchip" onclick="filterClass(this, 'fii')">🏢 FIIs (4)</button>
+          <button class="fchip" onclick="filterClass(this, 'dgi_us')">🇺🇸 Aristocratas US (2)</button>
+          <button class="fchip" onclick="filterClass(this, 'reit_us')">🗽 REITs US (2)</button>
+        </div>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" placeholder="Filtrar por ticker..." oninput="searchTable(this.value)">
+        </div>
+      </div>
+
+      <!-- Tactical Table -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table id="radar-table-1">
+          <thead>
+            <tr>
+              <th>Ativo</th>
+              <th>Cotação</th>
+              <th>Preço Teto Bazin</th>
+              <th>Margem</th>
+              <th>DY 12m</th>
+              <th>Payout</th>
+              <th>Qualidade / Veredito</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openDrawer('BBAS3', 'Banco do Brasil', 'STOCK_BR', 'R$ 26,15', 'R$ 31,10', '+18,9%', '9,8%', '41%', '94/100', 'Mai/26')">
+              <td>
+                <div class="ticker-title">BBAS3 <span class="pill pos">B3</span></div>
+                <div class="ticker-sub">Banco do Brasil S.A. · Financeiro</div>
+              </td>
+              <td class="mono">R$ 26,15</td>
+              <td class="mono" style="font-weight:600">R$ 31,10</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+18,9%</td>
+              <td class="mono">9,8%</td>
+              <td class="mono">41%</td>
+              <td><span class="pill pos">Compra Segura · 9/10</span></td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button></td>
+            </tr>
+            <tr onclick="openDrawer('TAEE11', 'Taesa', 'STOCK_BR', 'R$ 34,00', 'R$ 38,20', '+12,4%', '8,4%', '88%', '78/100', 'Mai/26')">
+              <td>
+                <div class="ticker-title">TAEE11 <span class="pill pos">B3</span></div>
+                <div class="ticker-sub">Taesa · Transmissão de Energia</div>
+              </td>
+              <td class="mono">R$ 34,00</td>
+              <td class="mono" style="font-weight:600">R$ 38,20</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+12,4%</td>
+              <td class="mono">8,4%</td>
+              <td class="mono">88%</td>
+              <td><span class="pill gold">Estável · 7/10</span></td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button></td>
+            </tr>
+            <tr onclick="openDrawer('O', 'Realty Income', 'REIT', 'US$ 52,40', 'US$ 58,00', '+10,7%', '5,9%', '74%', '98/100', 'Todo dia 15')">
+              <td>
+                <div class="ticker-title">O <span class="pill gold">NYSE · US$</span></div>
+                <div class="ticker-sub">Realty Income Corp · Dividendo Mensal</div>
+              </td>
+              <td class="mono">US$ 52,40</td>
+              <td class="mono" style="font-weight:600">US$ 58,00</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+10,7%</td>
+              <td class="mono">5,9% <span style="font-size:10px;color:var(--muted)">(4,1% líq)</span></td>
+              <td class="mono">74% AFFO</td>
+              <td><span class="pill pos">Aristocrata 30a</span></td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button></td>
+            </tr>
+            <tr onclick="openDrawer('KNIP11', 'Kinea Índices', 'FII', 'R$ 94,20', 'R$ 101,00', '+7,2%', '11,2%', '98%', '88/100', 'Todo dia 12')">
+              <td>
+                <div class="ticker-title">KNIP11 <span class="pill pos">FII</span></div>
+                <div class="ticker-sub">Kinea Índices de Preços · Papel IPCA</div>
+              </td>
+              <td class="mono">R$ 94,20</td>
+              <td class="mono" style="font-weight:600">R$ 101,00</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+7,2%</td>
+              <td class="mono">11,2%</td>
+              <td class="mono">98%</td>
+              <td><span class="pill pos">Defensivo IPCA</span></td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button></td>
+            </tr>
+            <tr onclick="openDrawer('SCHD', 'Schwab US Dividend', 'ETF', 'US$ 81,10', 'US$ 87,40', '+7,7%', '3,8%', '—', '99/100', 'Trimestral')">
+              <td>
+                <div class="ticker-title">SCHD <span class="pill gold">NYSE · US$</span></div>
+                <div class="ticker-sub">Schwab US Dividend Equity ETF</div>
+              </td>
+              <td class="mono">US$ 81,10</td>
+              <td class="mono" style="font-weight:600">US$ 87,40</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+7,7%</td>
+              <td class="mono">3,8% <span style="font-size:10px;color:var(--muted)">(2,66% líq)</span></td>
+              <td class="mono">Sólido</td>
+              <td><span class="pill pos">Core DGI</span></td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button></td>
+            </tr>
+            <tr style="opacity:0.6;background:rgba(217, 119, 6, .03);" onclick="openDrawer('MXRF11', 'Maxi Renda', 'FII', 'R$ 10,08', 'R$ 10,40', '+3,1%', '12,6%', '104%', '42/100', 'Todo dia 14')">
+              <td>
+                <div class="ticker-title">MXRF11 <span class="pill warn">FII · Alerta</span></div>
+                <div class="ticker-sub">Maxi Renda · Sinal de Armadilha</div>
+              </td>
+              <td class="mono">R$ 10,08</td>
+              <td class="mono" style="font-weight:600">R$ 10,40</td>
+              <td class="mono" style="color:var(--gold-600);font-weight:600">+3,1%</td>
+              <td class="mono" style="color:var(--neg);font-weight:700">12,6% ⚠</td>
+              <td class="mono" style="color:var(--neg)">104%</td>
+              <td><span class="pill warn">Armadilha (DY 2× média)</span></td>
+              <td><button class="btn sm ghost" onclick="event.stopPropagation(); openDrawer('MXRF11', 'Maxi Renda', 'FII', 'R$ 10,08', 'R$ 10,40', '+3,1%', '12,6%', '104%', '42/100', 'Todo dia 14')">Auditar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="disc">
+        <span class="di">◆</span>
+        <div><b>Sugestão de triagem, não recomendação de investimento.</b> O Preço Teto Bazin é calculado pela fórmula canônica (DPA Médio / Yield-Alvo). Ativos com sinais de corte de proventos ou insustentabilidade são sinalizados como armadilha. A decisão de seguir ou não qualquer sugestão é exclusivamente sua.</div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ABORDAGEM B: MAPA DE SAZONALIDADE & DATA COM           -->
+    <!-- ======================================================= -->
+    <div id="view-prop-2" style="display:none;">
+      <div class="top">
+        <div>
+          <div class="eye">Calendário Preditivo · Previsibilidade de Fluxo & Meses Secos</div>
+          <h1 class="pg">Mapa de Sazonalidade & Data Com</h1>
+        </div>
+        <div class="pill gold" style="font-size:11px;padding:6px 14px;">
+          ★ Histórico de 5 Anos Auditado
+        </div>
+      </div>
+
+      <!-- Insight de Meses Secos da Carteira -->
+      <div class="insight">
+        <div class="ii">◈</div>
+        <div class="it">
+          <h4>Preencha os meses secos da sua carteira</h4>
+          <p>Sua carteira hoje recebe menos de <b>R$ 250</b> nos meses de <b>Maio</b> e <b>Novembro</b> (contra R$ 1.900 nos meses cheios). Os ativos <b>TAEE11</b> e <b>TRPL4</b> costumam anunciar proventos exatamente nesses meses com <b>100% de consistência</b> e estão abaixo do teto hoje.</p>
+        </div>
+        <button class="btn sm" onclick="alert('Filtrando ativos que cobrem Maio e Novembro!')">Equilibrar Fluxo</button>
+      </div>
+
+      <!-- Month Selector Slider Bar -->
+      <div class="card" style="padding:16px 20px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Selecione o Mês para Visualizar os Anúncios Históricos</div>
+        <div class="months-bar">
+          <div class="m-tab" onclick="selectMonth(this, 'JAN', 4)">
+            <div class="m-name">JAN</div>
+            <div class="m-assets">4 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'FEV', 7)">
+            <div class="m-name">FEV</div>
+            <div class="m-assets">7 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'MAR', 8)">
+            <div class="m-name">MAR</div>
+            <div class="m-assets">8 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'ABR', 11)">
+            <div class="m-name">ABR</div>
+            <div class="m-assets">11 ativos</div>
+          </div>
+          <div class="m-tab active" onclick="selectMonth(this, 'MAI', 14)">
+            <div class="m-name">MAI<span class="m-star">★</span></div>
+            <div class="m-assets">14 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'JUN', 6)">
+            <div class="m-name">JUN</div>
+            <div class="m-assets">6 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'JUL', 4)">
+            <div class="m-name">JUL</div>
+            <div class="m-assets">4 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'AGO', 10)">
+            <div class="m-name">AGO</div>
+            <div class="m-assets">10 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'SET', 6)">
+            <div class="m-name">SET</div>
+            <div class="m-assets">6 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'OUT', 5)">
+            <div class="m-name">OUT</div>
+            <div class="m-assets">5 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'NOV', 12)">
+            <div class="m-name">NOV<span class="m-star">★</span></div>
+            <div class="m-assets">12 ativos</div>
+          </div>
+          <div class="m-tab" onclick="selectMonth(this, 'DEZ', 16)">
+            <div class="m-name">DEZ</div>
+            <div class="m-assets">16 ativos</div>
+          </div>
+        </div>
+
+        <!-- Selected Month Table -->
+        <table id="season-table">
+          <thead>
+            <tr>
+              <th id="season-month-header">Ativo Previsto para Maio</th>
+              <th>Consistência (5 anos)</th>
+              <th>Janela Data Com Prevista</th>
+              <th>Pagamento Previsto</th>
+              <th>Cotação vs Teto</th>
+              <th>Yield Estimado do Lote</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openDrawer('TAEE11', 'Taesa', 'STOCK_BR', 'R$ 34,00', 'R$ 38,20', '+12,4%', '8,4%', '88%', '78/100', 'Mai/26')">
+              <td>
+                <div class="ticker-title">TAEE11 <span class="pill pos">B3</span></div>
+                <div class="ticker-sub">Taesa · Dividendos + JCP</div>
+              </td>
+              <td><span class="pill pos">5 de 5 anos (100%)</span></td>
+              <td class="mono">~08 a 15 de Maio</td>
+              <td class="mono">~28 a 31 de Maio</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">R$ 34,00 (&lt; R$ 38,20)</td>
+              <td class="mono" style="font-weight:600">~R$ 0,95 / unit (2,8%)</td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Lembrete de Data Com configurado!')">Garantir Com</button></td>
+            </tr>
+            <tr onclick="openDrawer('TRPL4', 'ISA CTEEP', 'STOCK_BR', 'R$ 25,10', 'R$ 28,50', '+13,5%', '7,6%', '82%', '86/100', 'Mai/26')">
+              <td>
+                <div class="ticker-title">TRPL4 <span class="pill pos">B3</span></div>
+                <div class="ticker-sub">ISA CTEEP · Transmissão Paulista</div>
+              </td>
+              <td><span class="pill pos">5 de 5 anos (100%)</span></td>
+              <td class="mono">~10 a 14 de Maio</td>
+              <td class="mono">~30 de Maio</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">R$ 25,10 (&lt; R$ 28,50)</td>
+              <td class="mono" style="font-weight:600">~R$ 0,62 / ação (2,5%)</td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Lembrete de Data Com configurado!')">Garantir Com</button></td>
+            </tr>
+            <tr onclick="openDrawer('PETR4', 'Petrobras', 'STOCK_BR', 'R$ 36,80', 'R$ 41,00', '+11,4%', '14,2%', '45%', '81/100', 'Mai/26')">
+              <td>
+                <div class="ticker-title">PETR4 <span class="pill gold">B3</span></div>
+                <div class="ticker-sub">Petrobras · Petróleo e Gás</div>
+              </td>
+              <td><span class="pill gold">4 de 5 anos (80%)</span></td>
+              <td class="mono">~12 a 16 de Maio</td>
+              <td class="mono">~Junho/Julho</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">R$ 36,80 (&lt; R$ 41,00)</td>
+              <td class="mono" style="font-weight:600">~R$ 1,40 / ação (3,8%)</td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Lembrete de Data Com configurado!')">Garantir Com</button></td>
+            </tr>
+            <tr onclick="openDrawer('BBAS3', 'Banco do Brasil', 'STOCK_BR', 'R$ 26,15', 'R$ 31,10', '+18,9%', '9,8%', '41%', '94/100', 'Mai/26')">
+              <td>
+                <div class="ticker-title">BBAS3 <span class="pill pos">B3</span></div>
+                <div class="ticker-sub">Banco do Brasil S.A.</div>
+              </td>
+              <td><span class="pill pos">5 de 5 anos (100%)</span></td>
+              <td class="mono">~22 a 25 de Maio</td>
+              <td class="mono">~12 de Junho</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">R$ 26,15 (&lt; R$ 31,10)</td>
+              <td class="mono" style="font-weight:600">~R$ 0,84 / ação (3,2%)</td>
+              <td><button class="btn sm" onclick="event.stopPropagation(); alert('Lembrete de Data Com configurado!')">Garantir Com</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="disc">
+        <span class="di">◆</span>
+        <div><b>Metodologia de Sazonalidade:</b> As janelas de Data Com e pagamento são estimadas com base na regularidade estatística dos últimos 5 anos de publicações na CVM e SEC. Pagamentos dependem de aprovação em conselho/assembleia de cada emissor.</div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ABORDAGEM C: RADAR 360° SAFETY & GROWTH (RECOMENDADO)  -->
+    <!-- ======================================================= -->
+    <div id="view-prop-3" style="display:none;">
+      <div class="top">
+        <div>
+          <div class="eye">Inteligência 360° · Seeking Alpha + Bazin Global + Previsibilidade</div>
+          <h1 class="pg">Radar 360° Dividend Health & Safety</h1>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn sm" id="btn-toggle-view" onclick="toggle360ViewMode()">Modo Tabela Pro</button>
+        </div>
+      </div>
+
+      <!-- Insight Institucional -->
+      <div class="insight">
+        <div class="ii">◈</div>
+        <div class="it">
+          <h4>Dividend Safety Score™ — Proteção contra cortes antes de acontecerem</h4>
+          <p>Cada ativo é pontuado de <b>0 a 100</b> avaliando <i>Payout sobre FCF</i>, <i>Alavancagem Líquida</i> e <i>CAGR de Dividendos em 5 anos</i>. Ativos com score acima de 80 nunca cortaram proventos em crises.</p>
+        </div>
+        <div class="iv">92<div style="font-size:11px;color:var(--muted);font-family:'Space Grotesk'">Score Médio Seguro</div></div>
+      </div>
+
+      <!-- Internal Tabs within Proposal 3 -->
+      <div class="filter-row">
+        <div class="filter-chips">
+          <button class="fchip active" onclick="switch360Tab(this, 'dgi')">💎 Reis dos Dividendos (DGI)</button>
+          <button class="fchip" onclick="switch360Tab(this, 'bazin')">🟢 Oportunidades &lt; Teto</button>
+          <button class="fchip" onclick="switch360Tab(this, 'upcoming')">📅 Próximas Datas Com</button>
+          <button class="fchip" onclick="switch360Tab(this, 'risk')">⚠️ Alertas de Risco</button>
+        </div>
+        <div class="pill gold" style="font-size:11px;">
+          Mercados: B3 (R$) + NYSE/Nasdaq (US$)
+        </div>
+      </div>
+
+      <!-- CARDS MODE (Iniciante / Rápido) -->
+      <div id="c360-cards-container" class="cards360">
+        <!-- Asset 1: BBAS3 -->
+        <div class="card360" data-tags="dgi bazin upcoming" onclick="openDrawer('BBAS3', 'Banco do Brasil', 'STOCK_BR', 'R$ 26,15', 'R$ 31,10', '+18,9%', '9,8%', '41%', '94/100', 'Mai/26', false)">
+          <div class="c360-header">
+            <div>
+              <div class="ticker-title">BBAS3 <span class="pill pos">B3</span></div>
+              <div class="ticker-sub">Banco do Brasil S.A.</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-circle" style="color:var(--pos)">94<span style="font-size:11px;color:var(--muted)">/100</span></div>
+              <div class="score-sub" style="color:var(--pos)">Muito Seguro</div>
+            </div>
+          </div>
+          <div class="c360-metrics">
+            <div>
+              <div class="c360-m-lbl">Cotação</div>
+              <div class="c360-m-val">R$ 26,15</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Preço Teto</div>
+              <div class="c360-m-val" style="color:var(--pos)">R$ 31,10</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Margem</div>
+              <div class="c360-m-val" style="color:var(--pos)">+18,9%</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+            <span>DY 12m: <b style="color:var(--ink)">9,8%</b></span>
+            <span>Payout: <b style="color:var(--ink)">41%</b></span>
+            <span>CAGR 5a: <b style="color:var(--pos)">+12,4%</b></span>
+          </div>
+          <div class="c360-foot">
+            <span>Próxima Com: <b>Mai/26</b></span>
+            <button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button>
+          </div>
+        </div>
+
+        <!-- Asset 2: O -->
+        <div class="card360" data-tags="dgi bazin" onclick="openDrawer('O', 'Realty Income', 'REIT', 'US$ 52,40', 'US$ 58,00', '+10,7%', '5,9%', '74%', '98/100', 'Todo dia 15', false)">
+          <div class="c360-header">
+            <div>
+              <div class="ticker-title">O <span class="pill gold">NYSE · US$</span></div>
+              <div class="ticker-sub">Realty Income Corp · The Monthly Dividend Co.</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-circle" style="color:var(--pos)">98<span style="font-size:11px;color:var(--muted)">/100</span></div>
+              <div class="score-sub" style="color:var(--pos)">Aristocrata 30a</div>
+            </div>
+          </div>
+          <div class="c360-metrics">
+            <div>
+              <div class="c360-m-lbl">Cotação</div>
+              <div class="c360-m-val">US$ 52,40</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Preço Teto</div>
+              <div class="c360-m-val" style="color:var(--pos)">US$ 58,00</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Margem</div>
+              <div class="c360-m-val" style="color:var(--pos)">+10,7%</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+            <span>DY 12m: <b style="color:var(--ink)">5,9% (4,1% líq)</b></span>
+            <span>AFFO: <b style="color:var(--ink)">74%</b></span>
+            <span>Freq: <b style="color:var(--pos)">Mensal</b></span>
+          </div>
+          <div class="c360-foot">
+            <span>Paga todo <b>dia 15</b></span>
+            <button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button>
+          </div>
+        </div>
+
+        <!-- Asset 3: TAEE11 -->
+        <div class="card360" data-tags="bazin upcoming" onclick="openDrawer('TAEE11', 'Taesa', 'STOCK_BR', 'R$ 34,00', 'R$ 38,20', '+12,4%', '8,4%', '88%', '78/100', 'Mai/26', false)">
+          <div class="c360-header">
+            <div>
+              <div class="ticker-title">TAEE11 <span class="pill pos">B3</span></div>
+              <div class="ticker-sub">Taesa S.A. · Transmissão</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-circle" style="color:var(--gold-600)">78<span style="font-size:11px;color:var(--muted)">/100</span></div>
+              <div class="score-sub" style="color:var(--gold-600)">Seguro · Payout Alto</div>
+            </div>
+          </div>
+          <div class="c360-metrics">
+            <div>
+              <div class="c360-m-lbl">Cotação</div>
+              <div class="c360-m-val">R$ 34,00</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Preço Teto</div>
+              <div class="c360-m-val" style="color:var(--pos)">R$ 38,20</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Margem</div>
+              <div class="c360-m-val" style="color:var(--pos)">+12,4%</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+            <span>DY 12m: <b style="color:var(--ink)">8,4%</b></span>
+            <span>Payout: <b style="color:var(--gold-600)">88%</b></span>
+            <span>Dívida: <b style="color:var(--ink)">3,2× EBITDA</b></span>
+          </div>
+          <div class="c360-foot">
+            <span>Próxima Com: <b>Mai/26</b></span>
+            <button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button>
+          </div>
+        </div>
+
+        <!-- Asset 4: JNJ -->
+        <div class="card360" data-tags="dgi bazin" onclick="openDrawer('JNJ', 'Johnson & Johnson', 'STOCK_US', 'US$ 158,20', 'US$ 172,00', '+8,7%', '3,2%', '68%', '99/100', 'Trimestral', false)">
+          <div class="c360-header">
+            <div>
+              <div class="ticker-title">JNJ <span class="pill gold">NYSE · US$</span></div>
+              <div class="ticker-sub">Johnson & Johnson · Saúde Global</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-circle" style="color:var(--pos)">99<span style="font-size:11px;color:var(--muted)">/100</span></div>
+              <div class="score-sub" style="color:var(--pos)">Dividend King 62a</div>
+            </div>
+          </div>
+          <div class="c360-metrics">
+            <div>
+              <div class="c360-m-lbl">Cotação</div>
+              <div class="c360-m-val">US$ 158,20</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Preço Teto</div>
+              <div class="c360-m-val" style="color:var(--pos)">US$ 172,00</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Margem</div>
+              <div class="c360-m-val" style="color:var(--pos)">+8,7%</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+            <span>DY 12m: <b style="color:var(--ink)">3,2% (2,24% líq)</b></span>
+            <span>FCF: <b style="color:var(--pos)">US$ 18B</b></span>
+            <span>Rating: <b style="color:var(--pos)">AAA Moody's</b></span>
+          </div>
+          <div class="c360-foot">
+            <span>62 anos de aumento contínuo</span>
+            <button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button>
+          </div>
+        </div>
+
+        <!-- Asset 5: WEGE3 -->
+        <div class="card360" data-tags="dgi bazin" onclick="openDrawer('WEGE3', 'WEG S.A.', 'STOCK_BR', 'R$ 48,20', 'R$ 51,00', '+5,8%', '2,1%', '52%', '96/100', 'Set/26', false)">
+          <div class="c360-header">
+            <div>
+              <div class="ticker-title">WEGE3 <span class="pill pos">B3</span></div>
+              <div class="ticker-sub">WEG S.A. · Bens de Capital / Motores</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-circle" style="color:var(--pos)">96<span style="font-size:11px;color:var(--muted)">/100</span></div>
+              <div class="score-sub" style="color:var(--pos)">Campeão de Crescimento</div>
+            </div>
+          </div>
+          <div class="c360-metrics">
+            <div>
+              <div class="c360-m-lbl">Cotação</div>
+              <div class="c360-m-val">R$ 48,20</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Preço Teto</div>
+              <div class="c360-m-val" style="color:var(--pos)">R$ 51,00</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Margem</div>
+              <div class="c360-m-val" style="color:var(--pos)">+5,8%</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+            <span>DY 12m: <b style="color:var(--ink)">2,1%</b></span>
+            <span>Payout: <b style="color:var(--ink)">52%</b></span>
+            <span>CAGR 5a: <b style="color:var(--pos)">+18,5%</b></span>
+          </div>
+          <div class="c360-foot">
+            <span>25 anos sem cortar dividendos</span>
+            <button class="btn sm" onclick="event.stopPropagation(); alert('Simulação adicionada ao plano de aporte!')">+ Aportar</button>
+          </div>
+        </div>
+
+        <!-- Asset 6: MXRF11 (Alerta de Risco) -->
+        <div class="card360" data-tags="risk" style="border-color:rgba(217, 119, 6, .4);background:rgba(217, 119, 6, .03);" onclick="openDrawer('MXRF11', 'Maxi Renda', 'FII', 'R$ 10,08', 'R$ 10,40', '+3,1%', '12,6%', '104%', '42/100', 'Todo dia 14', true)">
+          <div class="c360-header">
+            <div>
+              <div class="ticker-title">MXRF11 <span class="pill warn">FII · Alerta</span></div>
+              <div class="ticker-sub">Maxi Renda · Sinal de Armadilha</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-circle" style="color:var(--neg)">42<span style="font-size:11px;color:var(--muted)">/100</span></div>
+              <div class="score-sub" style="color:var(--neg)">Risco Elevado</div>
+            </div>
+          </div>
+          <div class="c360-metrics">
+            <div>
+              <div class="c360-m-lbl">Cotação</div>
+              <div class="c360-m-val">R$ 10,08</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Preço Teto</div>
+              <div class="c360-m-val">R$ 10,40</div>
+            </div>
+            <div>
+              <div class="c360-m-lbl">Margem</div>
+              <div class="c360-m-val" style="color:var(--gold-600)">+3,1%</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+            <span>DY 12m: <b style="color:var(--neg)">12,6% ⚠</b></span>
+            <span>Payout: <b style="color:var(--neg)">104%</b></span>
+            <span>Patrimônio: <b style="color:var(--neg)">P/VP 1,02</b></span>
+          </div>
+          <div class="c360-foot">
+            <span style="color:var(--neg);font-weight:600">⚠ Distribuindo reservas</span>
+            <button class="btn sm ghost" onclick="event.stopPropagation(); openDrawer('MXRF11', 'Maxi Renda', 'FII', 'R$ 10,08', 'R$ 10,40', '+3,1%', '12,6%', '104%', '42/100', 'Todo dia 14', true)">Auditar Risco</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE PRO MODE (Profissional / 12 colunas) -->
+      <div id="c360-table-container" class="card" style="padding:0;overflow:hidden;display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ativo</th>
+              <th>Cotação</th>
+              <th>Teto Consenso</th>
+              <th>Margem</th>
+              <th>DY Bruto</th>
+              <th>DY Líquido Real</th>
+              <th>Payout FCF</th>
+              <th>CAGR 5a</th>
+              <th>Safety Score</th>
+              <th>Anos Crescendo</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-tags="dgi bazin upcoming" onclick="openDrawer('BBAS3', 'Banco do Brasil', 'STOCK_BR', 'R$ 26,15', 'R$ 31,10', '+18,9%', '9,8%', '41%', '94/100', 'Mai/26', false)">
+              <td><b>BBAS3</b> <span class="pill pos">B3</span></td>
+              <td class="mono">R$ 26,15</td>
+              <td class="mono" style="font-weight:600">R$ 31,10</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+18,9%</td>
+              <td class="mono">9,8%</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">9,1%</td>
+              <td class="mono">41%</td>
+              <td class="mono">+12,4%</td>
+              <td><span class="pill pos">94 / 100</span></td>
+              <td class="mono">8 anos</td>
+              <td><button class="btn sm">+ Aportar</button></td>
+            </tr>
+            <tr data-tags="dgi bazin" onclick="openDrawer('O', 'Realty Income', 'REIT', 'US$ 52,40', 'US$ 58,00', '+10,7%', '5,9%', '74%', '98/100', 'Todo dia 15', false)">
+              <td><b>O</b> <span class="pill gold">US$</span></td>
+              <td class="mono">US$ 52,40</td>
+              <td class="mono" style="font-weight:600">US$ 58,00</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+10,7%</td>
+              <td class="mono">5,9%</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">4,13%</td>
+              <td class="mono">74%</td>
+              <td class="mono">+4,2%</td>
+              <td><span class="pill pos">98 / 100</span></td>
+              <td class="mono">30 anos</td>
+              <td><button class="btn sm">+ Aportar</button></td>
+            </tr>
+            <tr data-tags="bazin upcoming" onclick="openDrawer('TAEE11', 'Taesa', 'STOCK_BR', 'R$ 34,00', 'R$ 38,20', '+12,4%', '8,4%', '88%', '78/100', 'Mai/26', false)">
+              <td><b>TAEE11</b> <span class="pill pos">B3</span></td>
+              <td class="mono">R$ 34,00</td>
+              <td class="mono" style="font-weight:600">R$ 38,20</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+12,4%</td>
+              <td class="mono">8,4%</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">7,6%</td>
+              <td class="mono">88%</td>
+              <td class="mono">+9,1%</td>
+              <td><span class="pill gold">78 / 100</span></td>
+              <td class="mono">11 anos</td>
+              <td><button class="btn sm">+ Aportar</button></td>
+            </tr>
+            <tr data-tags="dgi bazin" onclick="openDrawer('JNJ', 'Johnson & Johnson', 'STOCK_US', 'US$ 158,20', 'US$ 172,00', '+8,7%', '3,2%', '68%', '99/100', 'Trimestral', false)">
+              <td><b>JNJ</b> <span class="pill gold">US$</span></td>
+              <td class="mono">US$ 158,20</td>
+              <td class="mono" style="font-weight:600">US$ 172,00</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+8,7%</td>
+              <td class="mono">3,2%</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">2,24%</td>
+              <td class="mono">68%</td>
+              <td class="mono">+5,8%</td>
+              <td><span class="pill pos">99 / 100</span></td>
+              <td class="mono">62 anos</td>
+              <td><button class="btn sm">+ Aportar</button></td>
+            </tr>
+            <tr data-tags="dgi bazin" onclick="openDrawer('WEGE3', 'WEG S.A.', 'STOCK_BR', 'R$ 48,20', 'R$ 51,00', '+5,8%', '2,1%', '52%', '96/100', 'Set/26', false)">
+              <td><b>WEGE3</b> <span class="pill pos">B3</span></td>
+              <td class="mono">R$ 48,20</td>
+              <td class="mono" style="font-weight:600">R$ 51,00</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">+5,8%</td>
+              <td class="mono">2,1%</td>
+              <td class="mono" style="color:var(--pos);font-weight:600">2,1%</td>
+              <td class="mono">52%</td>
+              <td class="mono">+18,5%</td>
+              <td><span class="pill pos">96 / 100</span></td>
+              <td class="mono">25 anos</td>
+              <td><button class="btn sm">+ Aportar</button></td>
+            </tr>
+            <tr data-tags="risk" style="background:rgba(217, 119, 6, .04);" onclick="openDrawer('MXRF11', 'Maxi Renda', 'FII', 'R$ 10,08', 'R$ 10,40', '+3,1%', '12,6%', '104%', '42/100', 'Todo dia 14', true)">
+              <td><b>MXRF11</b> <span class="pill warn">Alerta</span></td>
+              <td class="mono">R$ 10,08</td>
+              <td class="mono" style="font-weight:600">R$ 10,40</td>
+              <td class="mono" style="color:var(--gold-600);font-weight:600">+3,1%</td>
+              <td class="mono" style="color:var(--neg);font-weight:700">12,6% ⚠</td>
+              <td class="mono" style="color:var(--neg);font-weight:600">12,6%</td>
+              <td class="mono" style="color:var(--neg)">104%</td>
+              <td class="mono">-2,1%</td>
+              <td><span class="pill warn">42 / 100</span></td>
+              <td class="mono">0 anos</td>
+              <td><button class="btn sm ghost">Auditar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="disc">
+        <span class="di">◆</span>
+        <div><b>Metodologia 360° Fuente:</b> O Dividend Safety Score™ combina solidez de balanço com o Preço Teto Bazin e o Preço Justo de Graham. Nenhum indicador isolado garante pagamentos futuros. Consulte os balanços auditados oficiais na CVM e SEC.</div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ABORDAGEM D: RADAR 360° + SAZONALIDADE (FUSÃO DEFINITIVA)-->
+    <!-- ======================================================= -->
+    <div id="view-prop-4" style="display:none;">
+      <div class="top">
+        <div>
+          <div class="eye">Fusão Institucional · Safety Score 360° + Margem Bazin + Calendário Sazonal Jan-Dez</div>
+          <h1 class="pg">Radar 360° de Dividendos & Calendário Tático</h1>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="pill gold" style="font-size:11px;padding:6px 12px;">★ Mercados: B3 + NYSE / Nasdaq</div>
+          <button class="btn sm" id="btn-toggle-view-d" onclick="toggleDViewMode()">Modo Tabela Pro</button>
+        </div>
+      </div>
+
+      <!-- Gap Finder & Alerta Inteligente de Fluxo -->
+      <div class="insight">
+        <div class="ii">◈</div>
+        <div class="it">
+          <h4>Gap Finder — Cobertura de Meses Secos & Dividend Safety</h4>
+          <p>Sua carteira hoje recebe menos de <b>R$ 250</b> nos meses de <b>Maio</b> e <b>Novembro</b>. Filtre os meses abaixo para descobrir ativos com <b>Dividend Safety Score &gt; 80</b> e <b>consistência 5/5 anos</b> que anunciam proventos nesses meses e estão abaixo do Preço Teto Bazin.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+          <div class="iv" id="d-total-count">12 ativos<div style="font-size:11px;color:var(--muted);font-family:'Space Grotesk'">no radar tático</div></div>
+          <button class="btn sm" onclick="filterDMonth('MAI')">⚡ Preencher Mês de Maio</button>
+        </div>
+      </div>
+
+      <!-- Timeline de Sazonalidade Jan-Dez -->
+      <div class="card" style="padding:16px 20px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);">
+            Timeline de Anúncios Previstos (Clique no mês para filtrar o fluxo):
+          </div>
+          <div id="d-month-status" style="font-size:11.5px;font-weight:600;color:var(--gold-600);">
+            Exibindo: Todos os meses (12 ativos monitorados)
+          </div>
+        </div>
+        <div class="months-bar-d">
+          <div class="m-tab-d active" onclick="filterDMonth('ALL', this)">
+            <div class="m-name">TODOS</div>
+            <div class="m-assets">12 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('JAN', this)">
+            <div class="m-name">JAN</div>
+            <div class="m-assets">3 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('FEV', this)">
+            <div class="m-name">FEV</div>
+            <div class="m-assets">2 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('MAR', this)">
+            <div class="m-name">MAR</div>
+            <div class="m-assets">4 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('ABR', this)">
+            <div class="m-name">ABR</div>
+            <div class="m-assets">3 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('MAI', this)">
+            <div class="m-name">MAI<span class="m-star">★</span></div>
+            <div class="m-assets">4 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('JUN', this)">
+            <div class="m-name">JUN</div>
+            <div class="m-assets">3 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('JUL', this)">
+            <div class="m-name">JUL</div>
+            <div class="m-assets">3 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('AGO', this)">
+            <div class="m-name">AGO</div>
+            <div class="m-assets">4 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('SET', this)">
+            <div class="m-name">SET</div>
+            <div class="m-assets">3 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('OUT', this)">
+            <div class="m-name">OUT</div>
+            <div class="m-assets">2 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('NOV', this)">
+            <div class="m-name">NOV<span class="m-star">★</span></div>
+            <div class="m-assets">3 ativos</div>
+          </div>
+          <div class="m-tab-d" onclick="filterDMonth('DEZ', this)">
+            <div class="m-name">DEZ</div>
+            <div class="m-assets">5 ativos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros Estratégicos & Busca -->
+      <div class="filter-row">
+        <div class="filter-chips">
+          <button class="fchip active" onclick="switchDStrategy(this, 'all')">🌐 Todas as Teses</button>
+          <button class="fchip" onclick="switchDStrategy(this, 'dgi')">💎 Reis dos Dividendos</button>
+          <button class="fchip" onclick="switchDStrategy(this, 'bazin')">🟢 Oportunidades &lt; Teto</button>
+          <button class="fchip" onclick="switchDStrategy(this, 'monthly')">🗓 Proventos Mensais</button>
+          <button class="fchip" onclick="switchDStrategy(this, 'risk')">⚠️ Alertas de Risco</button>
+        </div>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" placeholder="Filtrar por ticker..." oninput="searchDTable(this.value)">
+        </div>
+      </div>
+
+      <!-- MODO 1: CARDS 360° COM SAZONALIDADE -->
+      <div id="d-cards-container" class="cards360">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- MODO 2: TABELA PRO 360° COM SAZONALIDADE -->
+      <div id="d-table-container" class="card" style="padding:0;overflow:hidden;display:none;">
+        <table id="d-pro-table">
+          <thead>
+            <tr>
+              <th>Ativo</th>
+              <th>Cotação</th>
+              <th>Preço Teto</th>
+              <th>Margem</th>
+              <th>DY Bruto</th>
+              <th>DY Líq Real (Bolso)</th>
+              <th>Payout FCF</th>
+              <th>Safety Score</th>
+              <th>Mês Previsto (5a)</th>
+              <th>Próxima Data Com</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="disc">
+        <span class="di">◆</span>
+        <div><b>Metodologia Integrada Fuente:</b> Combina a Margem de Segurança Bazin (`DPA / 6% ou 8%`), o Dividend Safety Score™ (0-100) e a Sazonalidade dos últimos 5 anos auditada na CVM e SEC. O DY Líquido Real expurga retenções na fonte (30% nos EUA via W-8BEN e 15% no Brasil via JCP). Consulte sempre os relatórios oficiais de cada emissor.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ======================================================= -->
+<!-- RAIO-X DO ATIVO — DRAWER INTERATIVO                    -->
+<!-- ======================================================= -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<div class="drawer" id="assetDrawer">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+    <div>
+      <div class="eye" id="dr-class">AÇÃO BR · SETOR FINANCEIRO</div>
+      <h2 class="serif" style="font-size:24px;font-weight:600;" id="dr-title">BBAS3 — Banco do Brasil</h2>
+    </div>
+    <button class="btn ghost sm" onclick="closeDrawer()">✕ Fechar</button>
+  </div>
+
+  <div class="card" style="padding:16px;background:var(--paper2);margin-bottom:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:700;">Status do Radar</div>
+        <div class="serif" style="font-size:20px;font-weight:600;color:var(--pos);" id="dr-margin">+18,9% abaixo do teto</div>
+      </div>
+      <span class="pill pos" id="dr-score" style="font-size:12px;padding:5px 12px;">Score: 94 / 100</span>
+    </div>
+  </div>
+
+  <div class="rt"><h3>Decomposição do Preço Teto Bazin</h3></div>
+  <table style="margin-bottom:20px;">
+    <tbody>
+      <tr>
+        <td style="color:var(--muted)">Dividendo Médio Projetado (DPA)</td>
+        <td class="mono" style="text-align:right;font-weight:600;">R$ 2,48 / ação</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted)">Yield-Alvo Mínimo Exigido</td>
+        <td class="mono" style="text-align:right;font-weight:600;">8,0% ao ano</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-weight:600;">Preço Teto Calculado (DPA / 8%)</td>
+        <td class="mono" style="text-align:right;font-weight:700;color:var(--pos);" id="dr-teto">R$ 31,10</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted)">Cotação de Mercado Atual</td>
+        <td class="mono" style="text-align:right;" id="dr-price">R$ 26,15</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="rt"><h3>Sustentabilidade & Risco de Corte</h3></div>
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;">
+      <span style="color:var(--muted)">Payout sobre Lucro Líquido:</span>
+      <b class="mono" id="dr-payout">41% (Muito Seguro)</b>
+    </div>
+    <div style="height:8px;border-radius:99px;background:var(--paper2);overflow:hidden;margin-bottom:12px;">
+      <div id="dr-payout-bar" style="height:100%;width:41%;background:var(--pos);border-radius:99px;transition:width .3s, background .3s;"></div>
+    </div>
+    <p id="dr-payout-desc" style="font-size:11.5px;color:var(--muted);line-height:1.5;">
+      O payout está abaixo do limite prudencial de 75%. A empresa retém capital suficiente para expandir operações e proteger proventos futuros contra crises.
+    </p>
+  </div>
+
+  <div class="rt"><h3>Histórico de Anúncios & Próxima Data Com</h3></div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:24px;">
+    Próximo anúncio provável: <b style="color:var(--ink)" id="dr-com">Maio de 2026</b>.<br>
+    Histórico de pontualidade: <b>Auditado na CVM/SEC</b> com alta consistência estatística.
+  </div>
+
+  <div style="display:flex;gap:10px;">
+    <button class="btn" style="flex:1;" onclick="alert('Ativo adicionado ao seu Plano de Aporte!')">+ Incluir no Próximo Aporte</button>
+    <button class="btn ghost" onclick="alert('Abrindo Raio-X completo em /app/explore?ticker=' + document.getElementById('dr-title').textContent.split(' ')[0])">Ver Análise Completa →</button>
+  </div>
+</div>
+
+<script>
+const monthCatalog = {
+  'JAN': [
+    { ticker: 'BBDC4', name: 'Bradesco', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~02 a 05 Jan', pay: '~01 Fev', price: 'R$ 13,80', teto: 'R$ 16,50', margin: '+19,6%', dy: '7,2%', payout: '48%', score: '82/100', dpa: 'R$ 0,017 / mês', status: 'pos' },
+    { ticker: 'ITUB4', name: 'Itaú Unibanco', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~02 a 05 Jan', pay: '~01 Fev', price: 'R$ 32,50', teto: 'R$ 36,00', margin: '+10,8%', dy: '7,4%', payout: '44%', score: '91/100', dpa: 'R$ 0,017 / mês', status: 'pos' },
+    { ticker: 'O', name: 'Realty Income', cls: 'REIT', cons: '30 de 30 anos (100%)', com: '~31 Dez', pay: '~15 Jan', price: 'US$ 52,40', teto: 'US$ 58,00', margin: '+10,7%', dy: '5,9%', payout: '74%', score: '98/100', dpa: 'US$ 0,26 / cota', status: 'pos' }
+  ],
+  'FEV': [
+    { ticker: 'BBAS3', name: 'Banco do Brasil', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~21 a 24 Fev', pay: '~Março', price: 'R$ 26,15', teto: 'R$ 31,10', margin: '+18,9%', dy: '9,8%', payout: '41%', score: '94/100', dpa: '~R$ 0,82 / ação', status: 'pos' },
+    { ticker: 'ABEV3', name: 'Ambev', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~15 a 18 Fev', pay: '~Março', price: 'R$ 12,30', teto: 'R$ 14,00', margin: '+13,8%', dy: '6,1%', payout: '68%', score: '85/100', dpa: '~R$ 0,73 / ação', status: 'pos' }
+  ],
+  'MAR': [
+    { ticker: 'B3SA3', name: 'B3 S.A.', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~20 a 24 Mar', pay: '~Abril', price: 'R$ 11,20', teto: 'R$ 13,50', margin: '+20,5%', dy: '6,8%', payout: '80%', score: '84/100', dpa: '~R$ 0,25 / ação', status: 'pos' },
+    { ticker: 'ITUB4', name: 'Itaú Unibanco', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~12 a 16 Mar', pay: '~Abril', price: 'R$ 32,50', teto: 'R$ 36,00', margin: '+10,8%', dy: '7,4%', payout: '44%', score: '91/100', dpa: '~R$ 0,40 / ação', status: 'pos' }
+  ],
+  'ABR': [
+    { ticker: 'EGIE3', name: 'Engie Brasil', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~24 a 28 Abr', pay: '~Julho', price: 'R$ 41,20', teto: 'R$ 46,00', margin: '+11,6%', dy: '7,1%', payout: '58%', score: '90/100', dpa: '~R$ 1,80 (4,3%)', status: 'pos' },
+    { ticker: 'CPLE6', name: 'Copel', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~26 a 30 Abr', pay: '~Junho', price: 'R$ 9,80', teto: 'R$ 11,20', margin: '+14,3%', dy: '8,2%', payout: '62%', score: '83/100', dpa: '~R$ 0,55 (5,6%)', status: 'pos' },
+    { ticker: 'VALE3', name: 'Vale', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~18 a 22 Abr', pay: '~Maio', price: 'R$ 62,50', teto: 'R$ 70,00', margin: '+12,0%', dy: '9,5%', payout: '50%', score: '80/100', dpa: '~R$ 2,20 (3,5%)', status: 'pos' }
+  ],
+  'MAI': [
+    { ticker: 'TAEE11', name: 'Taesa', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~08 a 15 de Maio', pay: '~28 a 31 de Maio', price: 'R$ 34,00', teto: 'R$ 38,20', margin: '+12,4%', dy: '8,4%', payout: '88%', score: '78/100', dpa: '~R$ 0,95 / unit (2,8%)', status: 'pos' },
+    { ticker: 'TRPL4', name: 'ISA CTEEP', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~10 a 14 de Maio', pay: '~30 de Maio', price: 'R$ 25,10', teto: 'R$ 28,50', margin: '+13,5%', dy: '7,6%', payout: '82%', score: '86/100', dpa: '~R$ 0,62 / ação (2,5%)', status: 'pos' },
+    { ticker: 'PETR4', name: 'Petrobras', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~12 a 16 de Maio', pay: '~Junho/Julho', price: 'R$ 36,80', teto: 'R$ 41,00', margin: '+11,4%', dy: '14,2%', payout: '45%', score: '81/100', dpa: '~R$ 1,40 / ação (3,8%)', status: 'pos' },
+    { ticker: 'BBAS3', name: 'Banco do Brasil', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~22 a 25 de Maio', pay: '~12 de Junho', price: 'R$ 26,15', teto: 'R$ 31,10', margin: '+18,9%', dy: '9,8%', payout: '41%', score: '94/100', dpa: '~R$ 0,84 / ação (3,2%)', status: 'pos' }
+  ],
+  'JUN': [
+    { ticker: 'B3SA3', name: 'B3 S.A.', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~24 a 28 Jun', pay: '~Julho', price: 'R$ 11,20', teto: 'R$ 13,50', margin: '+20,5%', dy: '6,8%', payout: '80%', score: '84/100', dpa: '~R$ 0,28 / ação', status: 'pos' },
+    { ticker: 'CXSE3', name: 'Caixa Seguridade', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~15 a 19 Jun', pay: '~Julho', price: 'R$ 14,80', teto: 'R$ 16,50', margin: '+11,5%', dy: '8,6%', payout: '90%', score: '82/100', dpa: '~R$ 0,50 / ação', status: 'pos' }
+  ],
+  'JUL': [
+    { ticker: 'O', name: 'Realty Income', cls: 'REIT', cons: '30 de 30 anos (100%)', com: '~30 Jun', pay: '~15 Jul', price: 'US$ 52,40', teto: 'US$ 58,00', margin: '+10,7%', dy: '5,9%', payout: '74%', score: '98/100', dpa: 'US$ 0,26 / cota', status: 'pos' },
+    { ticker: 'KNIP11', name: 'Kinea Índices', cls: 'FII', cons: '5 de 5 anos (100%)', com: '~30 Jun', pay: '~12 Jul', price: 'R$ 94,20', teto: 'R$ 101,00', margin: '+7,2%', dy: '11,2%', payout: '98%', score: '88/100', dpa: 'R$ 0,88 / cota', status: 'pos' }
+  ],
+  'AGO': [
+    { ticker: 'BBAS3', name: 'Banco do Brasil', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~21 a 24 Ago', pay: '~Setembro', price: 'R$ 26,15', teto: 'R$ 31,10', margin: '+18,9%', dy: '9,8%', payout: '41%', score: '94/100', dpa: '~R$ 0,85 / ação (3,2%)', status: 'pos' },
+    { ticker: 'TAEE11', name: 'Taesa', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~12 a 16 Ago', pay: '~Novembro', price: 'R$ 34,00', teto: 'R$ 38,20', margin: '+12,4%', dy: '8,4%', payout: '88%', score: '78/100', dpa: '~R$ 0,78 / unit (2,3%)', status: 'pos' },
+    { ticker: 'ITUB4', name: 'Itaú Unibanco', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~15 a 19 Ago', pay: '~Outubro', price: 'R$ 32,50', teto: 'R$ 36,00', margin: '+10,8%', dy: '7,4%', payout: '44%', score: '91/100', dpa: '~R$ 0,55 / ação (1,7%)', status: 'pos' }
+  ],
+  'SET': [
+    { ticker: 'B3SA3', name: 'B3 S.A.', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~20 a 24 Set', pay: '~Outubro', price: 'R$ 11,20', teto: 'R$ 13,50', margin: '+20,5%', dy: '6,8%', payout: '80%', score: '84/100', dpa: '~R$ 0,27 / ação', status: 'pos' },
+    { ticker: 'WEGE3', name: 'WEG S.A.', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~18 a 22 Set', pay: '~Outubro', price: 'R$ 48,20', teto: 'R$ 51,00', margin: '+5,8%', dy: '2,1%', payout: '52%', score: '96/100', dpa: '~R$ 0,22 / ação', status: 'pos' }
+  ],
+  'OUT': [
+    { ticker: 'O', name: 'Realty Income', cls: 'REIT', cons: '30 de 30 anos (100%)', com: '~30 Set', pay: '~15 Out', price: 'US$ 52,40', teto: 'US$ 58,00', margin: '+10,7%', dy: '5,9%', payout: '74%', score: '98/100', dpa: 'US$ 0,26 / cota', status: 'pos' },
+    { ticker: 'KNIP11', name: 'Kinea Índices', cls: 'FII', cons: '5 de 5 anos (100%)', com: '~30 Set', pay: '~12 Out', price: 'R$ 94,20', teto: 'R$ 101,00', margin: '+7,2%', dy: '11,2%', payout: '98%', score: '88/100', dpa: 'R$ 0,85 / cota', status: 'pos' }
+  ],
+  'NOV': [
+    { ticker: 'TAEE11', name: 'Taesa', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~07 a 11 Nov', pay: '~Dezembro', price: 'R$ 34,00', teto: 'R$ 38,20', margin: '+12,4%', dy: '8,4%', payout: '88%', score: '78/100', dpa: '~R$ 0,88 / unit (2,6%)', status: 'pos' },
+    { ticker: 'TRPL4', name: 'ISA CTEEP', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~11 a 15 Nov', pay: '~Dezembro', price: 'R$ 25,10', teto: 'R$ 28,50', margin: '+13,5%', dy: '7,6%', payout: '82%', score: '86/100', dpa: '~R$ 0,70 / ação (2,8%)', status: 'pos' },
+    { ticker: 'SANB11', name: 'Santander BR', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~18 a 22 Nov', pay: '~Dezembro', price: 'R$ 28,40', teto: 'R$ 32,00', margin: '+12,7%', dy: '7,9%', payout: '55%', score: '80/100', dpa: '~R$ 0,65 / unit (2,3%)', status: 'pos' }
+  ],
+  'DEZ': [
+    { ticker: 'B3SA3', name: 'B3 S.A.', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~26 a 30 Dez', pay: '~Janeiro', price: 'R$ 11,20', teto: 'R$ 13,50', margin: '+20,5%', dy: '6,8%', payout: '80%', score: '84/100', dpa: '~R$ 0,38 / ação (3,4%)', status: 'pos' },
+    { ticker: 'BBAS3', name: 'Banco do Brasil', cls: 'STOCK_BR', cons: '5 de 5 anos (100%)', com: '~18 a 22 Dez', pay: '~Janeiro', price: 'R$ 26,15', teto: 'R$ 31,10', margin: '+18,9%', dy: '9,8%', payout: '41%', score: '94/100', dpa: '~R$ 0,90 / ação (3,4%)', status: 'pos' },
+    { ticker: 'VALE3', name: 'Vale', cls: 'STOCK_BR', cons: '4 de 5 anos (80%)', com: '~01 a 06 Dez', pay: '~Dezembro', price: 'R$ 62,50', teto: 'R$ 70,00', margin: '+12,0%', dy: '9,5%', payout: '50%', score: '80/100', dpa: '~R$ 2,50 / ação (4,0%)', status: 'pos' }
+  ]
+};
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('bl').classList.toggle('on', t === 'light');
+  document.getElementById('bd').classList.toggle('on', t === 'dark');
+}
+
+function switchProposal(n) {
+  document.querySelectorAll('.ps-btn').forEach((b, idx) => b.classList.toggle('active', idx === n - 1));
+  document.getElementById('view-prop-1').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('view-prop-2').style.display = n === 2 ? 'block' : 'none';
+  document.getElementById('view-prop-3').style.display = n === 3 ? 'block' : 'none';
+  document.getElementById('view-prop-4').style.display = n === 4 ? 'block' : 'none';
+  if (n === 4) {
+    renderProposalD();
+  }
+  window.scrollTo(0, 0);
+}
+
+function filterClass(btn, cls) {
+  btn.parentElement.querySelectorAll('.fchip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const rows = document.querySelectorAll('#radar-table-1 tbody tr');
+  rows.forEach(r => {
+    if (cls === 'all') { r.style.display = ''; return; }
+    const text = r.textContent.toLowerCase();
+    if (cls === 'stock_br' && text.includes('b3') && !text.includes('fii')) r.style.display = '';
+    else if (cls === 'fii' && text.includes('fii')) r.style.display = '';
+    else if (cls === 'dgi_us' && text.includes('nyse') && !text.includes('reit')) r.style.display = '';
+    else if (cls === 'reit_us' && text.includes('reit')) r.style.display = '';
+    else r.style.display = 'none';
+  });
+}
+
+function searchTable(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#radar-table-1 tbody tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function selectMonth(btn, month, count) {
+  document.querySelectorAll('.m-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const header = document.getElementById('season-month-header');
+  if (header) header.textContent = 'Ativo Previsto para ' + month;
+
+  const items = monthCatalog[month] || monthCatalog['MAI'];
+  const tbody = document.querySelector('#season-table tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  items.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.onclick = () => openDrawer(item.ticker, item.name, item.cls, item.price, item.teto, item.margin, item.dy, item.payout, item.score, item.com, false);
+    tr.innerHTML = `
+      <td>
+        <div class="ticker-title">${item.ticker} <span class="pill ${item.cls.includes('US') || item.cls === 'REIT' ? 'gold' : 'pos'}">${item.cls.replace('_', ' ')}</span></div>
+        <div class="ticker-sub">${item.name} · Anúncio Recorrente</div>
+      </td>
+      <td><span class="pill pos">${item.cons}</span></td>
+      <td class="mono">${item.com}</td>
+      <td class="mono">${item.pay}</td>
+      <td class="mono" style="color:var(--pos);font-weight:600">${item.price} (&lt; ${item.teto})</td>
+      <td class="mono" style="font-weight:600">${item.dpa}</td>
+      <td><button class="btn sm" onclick="event.stopPropagation(); alert('Lembrete de Data Com configurado!')">Garantir Com</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+let is360Table = false;
+function toggle360ViewMode() {
+  is360Table = !is360Table;
+  document.getElementById('c360-cards-container').style.display = is360Table ? 'none' : 'grid';
+  document.getElementById('c360-table-container').style.display = is360Table ? 'block' : 'none';
+  document.getElementById('btn-toggle-view').textContent = is360Table ? 'Modo Cards' : 'Modo Tabela Pro';
+}
+
+function switch360Tab(btn, tab) {
+  btn.parentElement.querySelectorAll('.fchip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const cards = document.querySelectorAll('#c360-cards-container .card360');
+  cards.forEach(card => {
+    const tags = card.getAttribute('data-tags') || '';
+    if (tab === 'all') card.style.display = '';
+    else if (tab === 'dgi') card.style.display = tags.includes('dgi') ? '' : 'none';
+    else if (tab === 'bazin') card.style.display = tags.includes('bazin') ? '' : 'none';
+    else if (tab === 'upcoming') card.style.display = tags.includes('upcoming') ? '' : 'none';
+    else if (tab === 'risk') card.style.display = tags.includes('risk') ? '' : 'none';
+  });
+
+  const rows = document.querySelectorAll('#c360-table-container tbody tr');
+  rows.forEach(row => {
+    const tags = row.getAttribute('data-tags') || '';
+    if (tab === 'all') row.style.display = '';
+    else if (tab === 'dgi') row.style.display = tags.includes('dgi') ? '' : 'none';
+    else if (tab === 'bazin') row.style.display = tags.includes('bazin') ? '' : 'none';
+    else if (tab === 'upcoming') row.style.display = tags.includes('upcoming') ? '' : 'none';
+    else if (tab === 'risk') row.style.display = tags.includes('risk') ? '' : 'none';
+  });
+}
+
+function openDrawer(ticker, name, cls, price, teto, margin, dy, payout, score, com, isTrap = false) {
+  document.getElementById('dr-title').textContent = ticker + ' — ' + name;
+  document.getElementById('dr-class').textContent = cls.replace('_', ' ') + ' · ANÁLISE DETALHADA';
+  document.getElementById('dr-price').textContent = price;
+  document.getElementById('dr-teto').textContent = teto;
+  
+  const drMargin = document.getElementById('dr-margin');
+  drMargin.textContent = margin + (isTrap ? ' (Risco de corte)' : ' abaixo do teto');
+  drMargin.style.color = isTrap ? 'var(--neg)' : 'var(--pos)';
+  
+  const drScore = document.getElementById('dr-score');
+  drScore.textContent = 'Score: ' + score;
+  drScore.className = isTrap ? 'pill warn' : 'pill pos';
+  
+  document.getElementById('dr-payout').textContent = payout + (isTrap ? ' ⚠ ALERTA' : ' (Seguro)');
+  document.getElementById('dr-com').textContent = com;
+  
+  const numPayout = parseInt(payout) || 45;
+  const bar = document.getElementById('dr-payout-bar');
+  if (bar) {
+    bar.style.width = Math.min(numPayout, 100) + '%';
+    bar.style.background = isTrap || numPayout > 85 ? 'var(--neg)' : 'var(--pos)';
+  }
+  
+  const desc = document.getElementById('dr-payout-desc');
+  if (desc) {
+    if (isTrap) {
+      desc.textContent = 'ATENÇÃO: Payout excede 100% da geração de caixa ou lucro recorrente. A distribuição atual consome caixa de reservas e apresenta elevado risco de corte nos próximos trimestres.';
+    } else {
+      desc.textContent = 'O payout está em patamar confortável. A empresa retém capital suficiente para financiar suas operações e sustentar o fluxo de proventos ao acionista com segurança.';
+    }
+  }
+
+  document.getElementById('drawerBackdrop').classList.add('show');
+  document.getElementById('assetDrawer').classList.add('show');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerBackdrop').classList.remove('show');
+  document.getElementById('assetDrawer').classList.remove('show');
+}
+
+/* ========================================================= */
+/* PROPOSAL D (FUSÃO DEFINITIVA): DADOS E INTERATIVIDADE    */
+/* ========================================================= */
+const datasetD = [
+  {
+    ticker: 'BBAS3',
+    name: 'Banco do Brasil',
+    cls: 'STOCK_BR',
+    price: 'R$ 26,15',
+    teto: 'R$ 31,10',
+    margin: '+18,9%',
+    dyGross: '9,8%',
+    dyNet: '9,1%',
+    payout: '41%',
+    cagr: '+12,4%',
+    score: '94/100',
+    scoreLabel: 'Muito Seguro',
+    scoreColor: 'var(--pos)',
+    months: ['FEV', 'MAI', 'AGO', 'DEZ'],
+    nextMonth: 'Maio/26',
+    consistency: '5 de 5 anos (100%)',
+    windowCom: '~22 a 25 de Maio',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'R$ 2,48'
+  },
+  {
+    ticker: 'TAEE11',
+    name: 'Taesa',
+    cls: 'STOCK_BR',
+    price: 'R$ 34,00',
+    teto: 'R$ 38,20',
+    margin: '+12,4%',
+    dyGross: '8,4%',
+    dyNet: '7,6%',
+    payout: '88%',
+    cagr: '+9,1%',
+    score: '78/100',
+    scoreLabel: 'Seguro · Payout Alto',
+    scoreColor: 'var(--gold-600)',
+    months: ['MAI', 'AGO', 'NOV'],
+    nextMonth: 'Maio/26',
+    consistency: '5 de 5 anos (100%)',
+    windowCom: '~08 a 15 de Maio',
+    tags: ['bazin'],
+    isTrap: false,
+    dpa: 'R$ 2,86'
+  },
+  {
+    ticker: 'TRPL4',
+    name: 'ISA CTEEP',
+    cls: 'STOCK_BR',
+    price: 'R$ 25,10',
+    teto: 'R$ 28,50',
+    margin: '+13,5%',
+    dyGross: '7,6%',
+    dyNet: '6,9%',
+    payout: '82%',
+    cagr: '+7,5%',
+    score: '86/100',
+    scoreLabel: 'Defensivo Seguro',
+    scoreColor: 'var(--pos)',
+    months: ['MAI', 'NOV'],
+    nextMonth: 'Maio/26',
+    consistency: '5 de 5 anos (100%)',
+    windowCom: '~10 a 14 de Maio',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'R$ 1,91'
+  },
+  {
+    ticker: 'O',
+    name: 'Realty Income',
+    cls: 'REIT',
+    price: 'US$ 52,40',
+    teto: 'US$ 58,00',
+    margin: '+10,7%',
+    dyGross: '5,9%',
+    dyNet: '4,13% (W-8BEN)',
+    payout: '74% AFFO',
+    cagr: '+4,2%',
+    score: '98/100',
+    scoreLabel: 'Aristocrata 30a',
+    scoreColor: 'var(--pos)',
+    months: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'],
+    nextMonth: 'Todo dia 15',
+    consistency: '30 anos consecutivos',
+    windowCom: 'Paga todo dia 15',
+    tags: ['dgi', 'bazin', 'monthly'],
+    isTrap: false,
+    dpa: 'US$ 3,12'
+  },
+  {
+    ticker: 'JNJ',
+    name: 'Johnson & Johnson',
+    cls: 'STOCK_US',
+    price: 'US$ 158,20',
+    teto: 'US$ 172,00',
+    margin: '+8,7%',
+    dyGross: '3,2%',
+    dyNet: '2,24%',
+    payout: '68%',
+    cagr: '+5,8%',
+    score: '99/100',
+    scoreLabel: 'Dividend King 62a',
+    scoreColor: 'var(--pos)',
+    months: ['MAR', 'JUN', 'SET', 'DEZ'],
+    nextMonth: 'Junho/26',
+    consistency: '62 anos aumentando',
+    windowCom: '~20 a 24 de Maio (ex)',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'US$ 4,96'
+  },
+  {
+    ticker: 'WEGE3',
+    name: 'WEG S.A.',
+    cls: 'STOCK_BR',
+    price: 'R$ 48,20',
+    teto: 'R$ 51,00',
+    margin: '+5,8%',
+    dyGross: '2,1%',
+    dyNet: '2,1%',
+    payout: '52%',
+    cagr: '+18,5%',
+    score: '96/100',
+    scoreLabel: 'Campeão DGI',
+    scoreColor: 'var(--pos)',
+    months: ['MAR', 'JUL', 'SET', 'DEZ'],
+    nextMonth: 'Julho/26',
+    consistency: '25 anos sem corte',
+    windowCom: '~18 a 22 de Julho',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'R$ 1,02'
+  },
+  {
+    ticker: 'KNIP11',
+    name: 'Kinea Índices',
+    cls: 'FII',
+    price: 'R$ 94,20',
+    teto: 'R$ 101,00',
+    margin: '+7,2%',
+    dyGross: '11,2%',
+    dyNet: '11,2% (Isento)',
+    payout: '98%',
+    cagr: '+6,2%',
+    score: '88/100',
+    scoreLabel: 'Defensivo IPCA',
+    scoreColor: 'var(--pos)',
+    months: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'],
+    nextMonth: 'Todo dia 12',
+    consistency: '5 de 5 anos',
+    windowCom: 'Todo último dia útil',
+    tags: ['bazin', 'monthly'],
+    isTrap: false,
+    dpa: 'R$ 10,50'
+  },
+  {
+    ticker: 'EGIE3',
+    name: 'Engie Brasil',
+    cls: 'STOCK_BR',
+    price: 'R$ 41,20',
+    teto: 'R$ 46,00',
+    margin: '+11,6%',
+    dyGross: '7,1%',
+    dyNet: '6,8%',
+    payout: '58%',
+    cagr: '+8,4%',
+    score: '90/100',
+    scoreLabel: 'Geração Elétrica AAA',
+    scoreColor: 'var(--pos)',
+    months: ['ABR', 'AGO', 'DEZ'],
+    nextMonth: 'Agosto/26',
+    consistency: '5 de 5 anos',
+    windowCom: '~06 a 10 de Agosto',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'R$ 2,92'
+  },
+  {
+    ticker: 'ITUB4',
+    name: 'Itaú Unibanco',
+    cls: 'STOCK_BR',
+    price: 'R$ 32,50',
+    teto: 'R$ 36,00',
+    margin: '+10,8%',
+    dyGross: '7,4%',
+    dyNet: '6,9%',
+    payout: '44%',
+    cagr: '+11,2%',
+    score: '91/100',
+    scoreLabel: 'Líder Financeiro',
+    scoreColor: 'var(--pos)',
+    months: ['JAN', 'MAR', 'AGO', 'DEZ'],
+    nextMonth: 'Agosto/26',
+    consistency: '5 de 5 anos',
+    windowCom: '~15 a 19 de Agosto',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'R$ 2,40'
+  },
+  {
+    ticker: 'CPLE6',
+    name: 'Copel',
+    cls: 'STOCK_BR',
+    price: 'R$ 9,80',
+    teto: 'R$ 11,20',
+    margin: '+14,3%',
+    dyGross: '8,2%',
+    dyNet: '7,5%',
+    payout: '62%',
+    cagr: '+10,5%',
+    score: '83/100',
+    scoreLabel: 'Pós-Privatização',
+    scoreColor: 'var(--pos)',
+    months: ['ABR', 'NOV'],
+    nextMonth: 'Novembro/26',
+    consistency: '4 de 5 anos',
+    windowCom: '~12 a 16 de Novembro',
+    tags: ['bazin'],
+    isTrap: false,
+    dpa: 'R$ 0,80'
+  },
+  {
+    ticker: 'SCHD',
+    name: 'Schwab US Dividend',
+    cls: 'ETF_US',
+    price: 'US$ 81,10',
+    teto: 'US$ 87,40',
+    margin: '+7,7%',
+    dyGross: '3,8%',
+    dyNet: '2,66%',
+    payout: 'Core DGI',
+    cagr: '+11,8%',
+    score: '99/100',
+    scoreLabel: 'Core DGI Global',
+    scoreColor: 'var(--pos)',
+    months: ['MAR', 'JUN', 'SET', 'DEZ'],
+    nextMonth: 'Junho/26',
+    consistency: '12 anos seguidos',
+    windowCom: '~18 a 22 de Junho',
+    tags: ['dgi', 'bazin'],
+    isTrap: false,
+    dpa: 'US$ 3,08'
+  },
+  {
+    ticker: 'MXRF11',
+    name: 'Maxi Renda',
+    cls: 'FII',
+    price: 'R$ 10,08',
+    teto: 'R$ 10,40',
+    margin: '+3,1%',
+    dyGross: '12,6%',
+    dyNet: '12,6%',
+    payout: '104%',
+    cagr: '-2,1%',
+    score: '42/100',
+    scoreLabel: 'Risco Elevado ⚠',
+    scoreColor: 'var(--neg)',
+    months: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'],
+    nextMonth: 'Todo dia 14',
+    consistency: 'Mensal',
+    windowCom: 'Todo último dia útil',
+    tags: ['risk'],
+    isTrap: true,
+    dpa: 'R$ 1,27'
+  }
+];
+
+let selectedDMonth = 'ALL';
+let selectedDStrategy = 'all';
+let searchQueryD = '';
+let isDTable = false;
+
+function toggleDViewMode() {
+  isDTable = !isDTable;
+  document.getElementById('d-cards-container').style.display = isDTable ? 'none' : 'grid';
+  document.getElementById('d-table-container').style.display = isDTable ? 'block' : 'none';
+  document.getElementById('btn-toggle-view-d').textContent = isDTable ? 'Modo Cards' : 'Modo Tabela Pro';
+}
+
+function filterDMonth(month, btn) {
+  selectedDMonth = month;
+  
+  // Highlight tab
+  if (btn) {
+    btn.parentElement.querySelectorAll('.m-tab-d').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    // If called programmatically (ex: Gap Finder button)
+    document.querySelectorAll('.months-bar-d .m-tab-d').forEach(b => {
+      const isTarget = b.textContent.includes(month);
+      b.classList.toggle('active', isTarget);
+    });
+  }
+
+  // Update status header
+  const statusEl = document.getElementById('d-month-status');
+  if (statusEl) {
+    if (month === 'ALL') {
+      statusEl.textContent = 'Exibindo: Todos os meses (12 ativos monitorados)';
+    } else {
+      const matchCount = datasetD.filter(item => item.months.includes(month)).length;
+      statusEl.textContent = `Exibindo: Mês de ${month} (${matchCount} ativos com janela histórica prevista)`;
+    }
+  }
+
+  renderProposalD();
+}
+
+function switchDStrategy(btn, strategy) {
+  selectedDStrategy = strategy;
+  btn.parentElement.querySelectorAll('.fchip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProposalD();
+}
+
+function searchDTable(query) {
+  searchQueryD = query.toLowerCase().trim();
+  renderProposalD();
+}
+
+function renderProposalD() {
+  const cardsContainer = document.getElementById('d-cards-container');
+  const tbody = document.querySelector('#d-pro-table tbody');
+  if (!cardsContainer || !tbody) return;
+
+  const filtered = datasetD.filter(item => {
+    // Month filter
+    if (selectedDMonth !== 'ALL' && !item.months.includes(selectedDMonth)) return false;
+    
+    // Strategy filter
+    if (selectedDStrategy === 'dgi' && !item.tags.includes('dgi')) return false;
+    if (selectedDStrategy === 'bazin' && !item.tags.includes('bazin')) return false;
+    if (selectedDStrategy === 'monthly' && !item.tags.includes('monthly')) return false;
+    if (selectedDStrategy === 'risk' && !item.tags.includes('risk')) return false;
+
+    // Search query
+    if (searchQueryD) {
+      const match = item.ticker.toLowerCase().includes(searchQueryD) || item.name.toLowerCase().includes(searchQueryD);
+      if (!match) return false;
+    }
+
+    return true;
+  });
+
+  // Update count badge
+  const totalCountEl = document.getElementById('d-total-count');
+  if (totalCountEl) {
+    totalCountEl.innerHTML = `${filtered.length} ativos<div style="font-size:11px;color:var(--muted);font-family:'Space Grotesk'">no radar tático</div>`;
+  }
+
+  // Render Cards
+  cardsContainer.innerHTML = '';
+  if (filtered.length === 0) {
+    cardsContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);background:var(--card);border-radius:18px;border:1px dashed var(--line);">Nenhum ativo encontrado para os filtros selecionados (${selectedDMonth} · ${selectedDStrategy}). Tente selecionar "TODOS".</div>`;
+  } else {
+    filtered.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card360';
+      if (item.isTrap) {
+        card.style.borderColor = 'rgba(217, 119, 6, .4)';
+        card.style.background = 'rgba(217, 119, 6, .03)';
+      }
+      card.onclick = () => openDrawer(item.ticker, item.name, item.cls, item.price, item.teto, item.margin, item.dyGross, item.payout, item.score, item.windowCom, item.isTrap);
+      
+      const badgeCls = item.cls.includes('US') || item.cls === 'REIT' || item.cls === 'ETF_US' ? 'pill gold' : 'pill pos';
+      const labelCls = item.cls.replace('_', ' ');
+
+      card.innerHTML = `
+        <div class="c360-header">
+          <div>
+            <div class="ticker-title">${item.ticker} <span class="${badgeCls}">${labelCls}</span></div>
+            <div class="ticker-sub">${item.name}</div>
+          </div>
+          <div class="score-badge">
+            <div class="score-circle" style="color:${item.scoreColor}">${item.score.split('/')[0]}<span style="font-size:11px;color:var(--muted)">/100</span></div>
+            <div class="score-sub" style="color:${item.scoreColor}">${item.scoreLabel}</div>
+          </div>
+        </div>
+        <div class="c360-metrics">
+          <div>
+            <div class="c360-m-lbl">Cotação</div>
+            <div class="c360-m-val">${item.price}</div>
+          </div>
+          <div>
+            <div class="c360-m-lbl">Preço Teto</div>
+            <div class="c360-m-val" style="color:var(--pos)">${item.teto}</div>
+          </div>
+          <div>
+            <div class="c360-m-lbl">Margem</div>
+            <div class="c360-m-val" style="color:${item.isTrap ? 'var(--gold-600)' : 'var(--pos)'}">${item.margin}</div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;padding:0 4px;">
+          <span>DY 12m: <b style="color:var(--ink)">${item.dyGross}</b></span>
+          <span>DY Líq Real: <b style="color:var(--pos)">${item.dyNet}</b></span>
+          <span>Payout: <b style="color:${item.isTrap ? 'var(--neg)' : 'var(--ink)'}">${item.payout}</b></span>
+        </div>
+        <div style="background:var(--paper2);padding:7px 10px;border-radius:9px;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;">
+          <span>📅 Sazonalidade: <b style="color:var(--ink)">${item.nextMonth}</b></span>
+          <span style="font-size:10px;font-weight:600;color:var(--gold-600);">${item.consistency}</span>
+        </div>
+        <div class="c360-foot">
+          <span>Com Prevista: <b>${item.windowCom}</b></span>
+          <button class="btn sm ${item.isTrap ? 'ghost' : ''}" onclick="event.stopPropagation(); ${item.isTrap ? `openDrawer('${item.ticker}', '${item.name}', '${item.cls}', '${item.price}', '${item.teto}', '${item.margin}', '${item.dyGross}', '${item.payout}', '${item.score}', '${item.windowCom}', true)` : `alert('Simulação adicionada ao plano de aporte para ${item.ticker}!')`}">${item.isTrap ? 'Auditar Risco' : '+ Aportar'}</button>
+        </div>
+      `;
+      cardsContainer.appendChild(card);
+    });
+  }
+
+  // Render Table Pro
+  tbody.innerHTML = '';
+  if (filtered.length > 0) {
+    filtered.forEach(item => {
+      const tr = document.createElement('tr');
+      if (item.isTrap) tr.style.background = 'rgba(217, 119, 6, .03)';
+      tr.onclick = () => openDrawer(item.ticker, item.name, item.cls, item.price, item.teto, item.margin, item.dyGross, item.payout, item.score, item.windowCom, item.isTrap);
+      
+      const badgeCls = item.cls.includes('US') || item.cls === 'REIT' || item.cls === 'ETF_US' ? 'pill gold' : 'pill pos';
+      const labelCls = item.cls.replace('_', ' ');
+
+      tr.innerHTML = `
+        <td>
+          <b>${item.ticker}</b> <span class="${badgeCls}">${labelCls}</span>
+          <div style="font-size:10px;color:var(--muted);">${item.name}</div>
+        </td>
+        <td class="mono">${item.price}</td>
+        <td class="mono" style="font-weight:600">${item.teto}</td>
+        <td class="mono" style="color:${item.isTrap ? 'var(--gold-600)' : 'var(--pos)'};font-weight:600">${item.margin}</td>
+        <td class="mono">${item.dyGross}</td>
+        <td class="mono" style="color:var(--pos);font-weight:600">${item.dyNet}</td>
+        <td class="mono" style="color:${item.isTrap ? 'var(--neg)' : 'inherit'}">${item.payout}</td>
+        <td><span class="pill ${item.isTrap ? 'warn' : 'pos'}">${item.score}</span></td>
+        <td class="mono"><b style="color:var(--ink)">${item.nextMonth}</b> <span style="font-size:10px;color:var(--muted)">(${item.consistency})</span></td>
+        <td class="mono">${item.windowCom}</td>
+        <td><button class="btn sm ${item.isTrap ? 'ghost' : ''}" onclick="event.stopPropagation(); ${item.isTrap ? `openDrawer('${item.ticker}', '${item.name}', '${item.cls}', '${item.price}', '${item.teto}', '${item.margin}', '${item.dyGross}', '${item.payout}', '${item.score}', '${item.windowCom}', true)` : `alert('Simulação adicionada ao plano de aporte para ${item.ticker}!')`}">${item.isTrap ? 'Auditar' : '+ Aportar'}</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+}
+
+// Initial render
+document.addEventListener('DOMContentLoaded', () => {
+  renderProposalD();
+});
+renderProposalD();
+</script>
+</body>
+</html>
