@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n-provider";
 import { useUserSettings } from "@/lib/useUserSettings";
@@ -16,6 +17,7 @@ export function DividendRadarView() {
   const { t, locale } = useI18n();
   const d = t.dividendRadar;
   const { settings } = useUserSettings();
+  const navigate = useNavigate();
 
   const radarQuery = useQuery(dividendRadarQueryOptions());
 
@@ -40,6 +42,9 @@ export function DividendRadarView() {
   // Actions
   const handleInvest = (item: RadarItem) => {
     toast.success(d.investToast.replace("{{ticker}}", item.ticker));
+    navigate({
+      to: "/app/contributionplan",
+    });
   };
 
   const handleOpenDetail = (item: RadarItem) => {

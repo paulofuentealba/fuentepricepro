@@ -3306,7 +3306,7 @@ export const ptBR = {
       body: "Combina a Margem de Segurança Bazin (DPA / 6% ou 8%), o Dividend Safety Score™ (0-100) e a Sazonalidade dos últimos 5 anos auditada na CVM e SEC. O DY Líquido Real expurga retenções na fonte (30% nos EUA via W-8BEN e 17,5% no Brasil via JCP). Consulte sempre os relatórios oficiais de cada emissor.",
     },
     empty: "Nenhum ativo encontrado para os filtros selecionados. Tente selecionar 'TODOS' ou alterar a tese estratégica.",
-    investToast: "Simulação de aporte para {{ticker}} enviada ao Aporte Inteligente!",
+    investToast: "Abrindo o Aporte Inteligente (Plano de Aportes) para {{ticker}}...",
     agenda: {
       eyebrow: "Agenda Diária de Proventos · Padrão Meus Dividendos + Inteligência de Valor Fuente",
       title: "Agenda de Dividendos & Radar Data Com",

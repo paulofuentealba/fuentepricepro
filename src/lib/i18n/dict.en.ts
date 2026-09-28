@@ -3294,7 +3294,7 @@ export const en = {
       body: "Combines Bazin Margin of Safety (DPS / 6% or 8%), Dividend Safety Score™ (0-100), and 5-year seasonality audited from CVM and SEC. Real Net DY deducts withholding taxes (30% in the US via W-8BEN and 17.5% in Brazil via JCP). Always review official issuer filings.",
     },
     empty: "No assets found for the selected filters. Try selecting 'ALL' or changing the strategic thesis.",
-    investToast: "Contribution simulation for {{ticker}} sent to Smart Allocation!",
+    investToast: "Opening Smart Allocation (Contribution Plan) for {{ticker}}...",
     agenda: {
       eyebrow: "Daily Dividend Agenda · Direct Pattern + Fuente Value Intelligence",
       title: "Dividend Calendar & Ex-Date Radar",

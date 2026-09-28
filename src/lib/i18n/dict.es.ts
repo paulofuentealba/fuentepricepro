@@ -3310,7 +3310,7 @@ export const es = {
       body: "Combina el Margen de Seguridad Bazin (DPA / 6% u 8%), el Dividend Safety Score™ (0-100) y la Estacionalidad de los últimos 5 años auditada en CVM y SEC. El DY Neto Real deduce retenciones en la fuente (30% en EE.UU. vía W-8BEN y 17,5% en Brasil vía JCP). Consulte siempre los informes oficiales de cada emisor.",
     },
     empty: "No se encontraron activos para los filtros seleccionados. Intente seleccionar 'TODOS' o cambiar la tesis estratégica.",
-    investToast: "¡Simulación de aporte para {{ticker}} enviada a Asignación Inteligente!",
+    investToast: "Abriendo Asignación Inteligente (Plan de Aportes) para {{ticker}}...",
     agenda: {
       eyebrow: "Calendario Diario de Dividendos · Patrón Meus Dividendos + Inteligencia Fuente",
       title: "Calendario de Dividendos y Radar Fecha Ex",
