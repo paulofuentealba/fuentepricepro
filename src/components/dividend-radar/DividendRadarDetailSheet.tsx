@@ -111,7 +111,7 @@ export function DividendRadarDetailSheet({
           </p>
         </div>
 
-        {/* Bazin Breakdown */}
+        {/* Valuation & Consensus Breakdown */}
         <div className="space-y-3">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground uppercase tracking-wider">
             <Scale className="h-3.5 w-3.5 text-primary" />
@@ -131,12 +131,39 @@ export function DividendRadarDetailSheet({
                   {item.targetYield.toFixed(1)}%
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-muted/20">
-                <span className="text-muted-foreground font-medium">{d.detailSheet.formulaBazin}</span>
-                <span className="font-mono font-bold text-success">
+              <div className="flex items-center justify-between p-3 bg-primary/5">
+                <span className="text-foreground font-semibold flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-primary" />
+                  {d.detailSheet.fuenteConsensus}
+                </span>
+                <span className="font-mono font-bold text-primary">
                   {formatCurrency(item.ceilingPrice, item.currency)}
                 </span>
               </div>
+              {item.methods?.bazin != null && (
+                <div className="flex items-center justify-between p-3 text-muted-foreground">
+                  <span>{d.detailSheet.formulaBazin}</span>
+                  <span className="font-mono font-medium text-foreground">
+                    {formatCurrency(item.methods.bazin, item.currency)}
+                  </span>
+                </div>
+              )}
+              {item.methods?.graham != null && (
+                <div className="flex items-center justify-between p-3 text-muted-foreground">
+                  <span>{d.detailSheet.grahamCeiling}</span>
+                  <span className="font-mono font-medium text-foreground">
+                    {formatCurrency(item.methods.graham, item.currency)}
+                  </span>
+                </div>
+              )}
+              {item.methods?.gordon != null && (
+                <div className="flex items-center justify-between p-3 text-muted-foreground">
+                  <span>{d.detailSheet.gordonCeiling}</span>
+                  <span className="font-mono font-medium text-foreground">
+                    {formatCurrency(item.methods.gordon, item.currency)}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between p-3">
                 <span className="text-muted-foreground">{d.detailSheet.currentPrice}</span>
                 <span className="font-mono font-semibold text-foreground">
