@@ -29,6 +29,7 @@ import { DividendRadarEventCard } from "./DividendRadarEventCard";
 interface DividendRadarAgendaDailyProps {
   radarItems: RadarItem[];
   agendaEvents?: RawAgendaEvent[];
+  classTargetYields?: Partial<Record<string, number>>;
   onOpenDetail: (radarItem: RadarItem) => void;
   formatCurrency: (val: number, cur?: string) => string;
 }
@@ -36,6 +37,7 @@ interface DividendRadarAgendaDailyProps {
 export function DividendRadarAgendaDaily({
   radarItems,
   agendaEvents,
+  classTargetYields,
   onOpenDetail,
   formatCurrency,
 }: DividendRadarAgendaDailyProps) {
@@ -55,8 +57,8 @@ export function DividendRadarAgendaDaily({
 
   // Build canonical events
   const allEvents = useMemo(() => {
-    return buildAgendaEvents(radarItems, locale, agendaEvents);
-  }, [radarItems, locale, agendaEvents]);
+    return buildAgendaEvents(radarItems, locale, agendaEvents, classTargetYields);
+  }, [radarItems, locale, agendaEvents, classTargetYields]);
 
   // Market count indicators
   const brCount = useMemo(

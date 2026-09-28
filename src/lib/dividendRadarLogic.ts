@@ -3,6 +3,7 @@ import {
   ceilingPrice,
   safetyMargin,
   avgDividend,
+  getAssetValuation,
   JCP_TAX_RATE,
 } from "./calculations";
 import cvmLocalEvents from "./api/data/cvm_agenda_events.json";
@@ -26,6 +27,12 @@ export interface RadarItem {
   margin: number;
   dpa: number;
   targetYield: number;
+  fuenteConsensus?: number | null;
+  methods?: {
+    bazin?: number | null;
+    graham?: number | null;
+    gordon?: number | null;
+  };
   dyGross: number;
   dyNet: number;
   payout: number | null;
@@ -1285,6 +1292,7 @@ export function buildRadarItems(
   liveData?: { br?: any[]; us?: any[] } | null,
   taxJurisdiction?: "BR" | "US",
   locale: string = "pt-BR",
+  classTargetYields?: Partial<Record<string, number>>,
 ): RadarItem[] {
   const liveMap = new Map<string, any>();
   if (liveData) {
@@ -1315,8 +1323,28 @@ export function buildRadarItems(
       }
     }
 
-    const teto = ceilingPrice(liveDpa, cat.targetYield);
-    const margin = safetyMargin(teto, livePrice);
+    const userTargetYield =
+      classTargetYields && typeof classTargetYields[cat.type] === "number" && classTargetYields[cat.type]! > 0
+        ? classTargetYields[cat.type]!
+        : cat.targetYield;
+
+    // SSOT: Consenso Fuente via getAssetValuation
+    const valuation = getAssetValuation({
+      ticker: cat.ticker,
+      targetYield: userTargetYield,
+      currentPrice: livePrice,
+      avgDividend: liveDpa,
+      currency: cat.currency,
+      type: cat.type,
+      isJCP: cat.isJcp,
+      taxJurisdiction,
+      payoutRatio: cat.payout,
+      roe: cat.roe,
+      dividendCagr: cat.cagr5y ? cat.cagr5y / 100 : undefined,
+    });
+
+    const activeCeiling = valuation.activeCeiling > 0 ? valuation.activeCeiling : ceilingPrice(liveDpa, userTargetYield);
+    const activeMargin = valuation.margin;
 
     const safetyInput: AssetSafetyInput = {
       type: cat.type,
@@ -1339,8 +1367,8 @@ export function buildRadarItems(
     const tags: RadarStrategy[] = ["all"];
     if (cat.defaultTags.includes("dgi")) tags.push("dgi");
     if (cat.defaultTags.includes("monthly")) tags.push("monthly");
-    if (margin > 0 && !isTrap) tags.push("bazin");
-    if (isTrap || margin < -20 || safetyResult.tier === "caution") tags.push("risk");
+    if (activeMargin > 0 && !isTrap) tags.push("bazin");
+    if (isTrap || activeMargin < -20 || safetyResult.tier === "caution") tags.push("risk");
 
     return {
       ticker: cat.ticker,
@@ -1348,10 +1376,16 @@ export function buildRadarItems(
       type: cat.type,
       currency: cat.currency,
       price: livePrice,
-      ceilingPrice: teto,
-      margin,
+      ceilingPrice: activeCeiling,
+      margin: activeMargin,
       dpa: liveDpa,
-      targetYield: cat.targetYield,
+      targetYield: userTargetYield,
+      fuenteConsensus: valuation.fuenteConsensus,
+      methods: {
+        bazin: valuation.methods?.bazin ?? ceilingPrice(liveDpa, userTargetYield),
+        graham: valuation.methods?.graham ?? null,
+        gordon: valuation.methods?.gordon ?? null,
+      },
       dyGross,
       dyNet,
       payout: cat.payout,
@@ -1781,6 +1815,7 @@ export function buildAgendaEvents(
   radarItems: RadarItem[] = [],
   locale: string = "pt-BR",
   customCatalog?: RawAgendaEvent[],
+  classTargetYields?: Partial<Record<string, number>>,
 ): AgendaDividendEvent[] {
   const catalog = customCatalog || AGENDA_CATALOG;
   const radarMap = new Map<string, RadarItem>();
@@ -1794,9 +1829,28 @@ export function buildAgendaEvents(
     const price = radar ? radar.price : raw.currency === "USD" ? 50.0 : 30.0;
     const multiplier = raw.type === "FII" ? 12 : 4;
     const estDpa = raw.declaredAmount * multiplier;
-    const targetYield = raw.type === "FII" || raw.type === "REIT" ? 8 : 6;
-    const ceiling = radar ? radar.ceilingPrice : ceilingPrice(estDpa, targetYield);
-    const margin = radar ? radar.margin : safetyMargin(ceiling, price);
+    const effTargetYield =
+      classTargetYields && typeof classTargetYields[raw.type] === "number" && classTargetYields[raw.type]! > 0
+        ? classTargetYields[raw.type]!
+        : raw.type === "FII" || raw.type === "REIT" ? 8 : 6;
+
+    let ceiling = radar ? radar.ceilingPrice : 0;
+    let margin = radar ? radar.margin : 0;
+
+    if (!radar) {
+      const val = getAssetValuation({
+        ticker: raw.ticker,
+        type: raw.type,
+        currentPrice: price,
+        avgDividend: estDpa,
+        targetYield: effTargetYield,
+        currency: raw.currency,
+        isJCP: raw.taxType === "jcp",
+      });
+      ceiling = val.activeCeiling > 0 ? val.activeCeiling : ceilingPrice(estDpa, effTargetYield);
+      margin = val.margin;
+    }
+
     const isBelowCeiling = margin > 0;
     const dyGross = radar ? radar.dyGross : (estDpa / price) * 100;
     const dyNet = radar ? radar.dyNet : calculateNetYield(dyGross, raw.currency, raw.type, raw.taxType === "jcp");

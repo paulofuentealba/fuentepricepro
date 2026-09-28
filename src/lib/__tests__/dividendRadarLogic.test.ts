@@ -81,9 +81,8 @@ describe("dividendRadarLogic", () => {
       const items = buildRadarItems(mockLiveData, "BR", "pt-BR");
       const bbas3 = items.find((i) => i.ticker === "BBAS3");
       expect(bbas3?.price).toBe(25.0);
-      // Ceiling = 2.5 / 0.06 = 41.666
-      // Margin = (41.666 - 25) / 25 * 100 = ~66.6%
-      expect(bbas3?.margin).toBeGreaterThan(60);
+      // Consenso Fuente computes activeCeiling with Graham/Bazin/Gordon weighting
+      expect(bbas3?.margin).toBeGreaterThan(20);
       expect(bbas3?.tags).toContain("bazin");
     });
 
@@ -92,6 +91,19 @@ describe("dividendRadarLogic", () => {
       const mxrf = items.find((i) => i.ticker === "MXRF11");
       expect(mxrf?.isTrap).toBe(true);
       expect(mxrf?.tags).toContain("risk");
+    });
+
+    it("respects user classTargetYields and sets Consenso Fuente activeCeiling", () => {
+      const itemsDefault = buildRadarItems(null, "BR", "pt-BR");
+      const defaultBbas3 = itemsDefault.find((i) => i.ticker === "BBAS3");
+      expect(defaultBbas3?.targetYield).toBe(6.0);
+
+      // User configured 8% for STOCK_BR
+      const itemsCustom = buildRadarItems(null, "BR", "pt-BR", { STOCK_BR: 8.0 });
+      const customBbas3 = itemsCustom.find((i) => i.ticker === "BBAS3");
+      expect(customBbas3?.targetYield).toBe(8.0);
+      expect(customBbas3?.ceilingPrice).toBeLessThan(defaultBbas3!.ceilingPrice);
+      expect(customBbas3?.fuenteConsensus).toBeDefined();
     });
   });
 

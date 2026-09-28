@@ -29,8 +29,13 @@ export function DividendRadarView() {
 
   // Derived Items
   const items = useMemo(() => {
-    return buildRadarItems(radarQuery.data, settings?.taxJurisdiction, locale);
-  }, [radarQuery.data, settings?.taxJurisdiction, locale]);
+    return buildRadarItems(
+      radarQuery.data,
+      settings?.taxJurisdiction,
+      locale,
+      settings?.classTargetYields,
+    );
+  }, [radarQuery.data, settings?.taxJurisdiction, locale, settings?.classTargetYields]);
 
   // Actions
   const handleInvest = (item: RadarItem) => {
@@ -48,6 +53,7 @@ export function DividendRadarView() {
       <DividendRadarAgendaDaily
         radarItems={items}
         agendaEvents={radarQuery.data?.agendaEvents}
+        classTargetYields={settings?.classTargetYields}
         onOpenDetail={handleOpenDetail}
         formatCurrency={formatCurr}
       />
