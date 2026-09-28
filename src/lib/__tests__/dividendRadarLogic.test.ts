@@ -33,10 +33,10 @@ describe("dividendRadarLogic", () => {
       expect(net).toBe(12.0);
     });
 
-    it("applies 15% IRRF withholding on Brazilian JCP", () => {
+    it("applies 17.5% IRRF withholding on Brazilian JCP", () => {
       const grossDy = 8.0;
       const net = calculateNetYield(grossDy, "BRL", "STOCK_BR", true, "BR");
-      expect(net).toBeCloseTo(6.8, 2); // 8 * 0.85 = 6.8
+      expect(net).toBeCloseTo(6.6, 2); // 8 * (1 - 0.175) = 6.60
     });
 
     it("treats standard Brazilian dividends as 100% tax exempt for PF", () => {

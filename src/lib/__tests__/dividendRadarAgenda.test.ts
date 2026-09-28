@@ -58,4 +58,23 @@ describe("DividendRadar Agenda Logic", () => {
     expect(stats.totalBelowCeiling).toBe(events.filter((e) => e.isBelowCeiling).length);
     expect(stats.totalHighSafety).toBe(events.filter((e) => e.safetyScore >= 80).length);
   });
+
+  it("provides comprehensive October coverage with dozens of Data Com and Payment events across asset classes", () => {
+    const events = buildAgendaEvents(radarItems, "pt-BR");
+    const octEvents = events.filter((e) => e.month === 10);
+    expect(octEvents.length).toBeGreaterThan(40);
+
+    const octComEvents = octEvents.filter((e) => e.eventType === "com");
+    expect(octComEvents.length).toBeGreaterThan(20);
+
+    // Verifies FIIs, Stocks, and US assets in October
+    expect(octEvents.some((e) => e.type === "FII")).toBe(true);
+    expect(octEvents.some((e) => e.type === "STOCK_BR")).toBe(true);
+    expect(octEvents.some((e) => e.type === "STOCK_US")).toBe(true);
+
+    // Verifies specific key events in October
+    expect(octEvents.some((e) => e.ticker === "TRPL4" && e.eventType === "com")).toBe(true);
+    expect(octEvents.some((e) => e.ticker === "BBDC4" && e.eventType === "pay")).toBe(true);
+    expect(octEvents.some((e) => e.ticker === "HGLG11" && e.eventType === "pay")).toBe(true);
+  });
 });

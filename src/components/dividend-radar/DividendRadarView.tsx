@@ -47,6 +47,7 @@ export function DividendRadarView() {
       {/* Primary Unified Experience: Agenda Diária & Radar Data Com */}
       <DividendRadarAgendaDaily
         radarItems={items}
+        agendaEvents={radarQuery.data?.agendaEvents}
         onOpenDetail={handleOpenDetail}
         formatCurrency={formatCurr}
       />

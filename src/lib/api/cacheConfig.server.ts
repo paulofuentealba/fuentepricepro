@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Single Source of Truth (SSOT) for backend ingestion and oracle cache TTLs.
  * Centralizes all cache durations to ensure consistent, auditable caching policies.
  */
@@ -66,3 +66,9 @@ export const HG_BRASIL_EXCHANGE_RATE_CACHE_TTL_MS = 5 * 60 * 1000;
  * server restart while still cutting BACEN request volume drastically.
  */
 export const MACRO_RATES_CACHE_TTL_MS = 60 * 60 * 1000;
+
+/**
+ * In-memory and Firestore cache TTL for CVM Dividend Announcements & Agenda (6 hours).
+ * Official corporate announcements (Avisos aos Acionistas) are deliberated during or after market hours.
+ */
+export const CVM_DIVIDENDS_CACHE_TTL_MS = 6 * 60 * 60 * 1000;

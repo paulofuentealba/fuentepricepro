@@ -4,7 +4,7 @@ import { sanitizeLogMessage } from "./http.server";
 
 export type IngestionStatus = "PASSED" | "FAILED" | "ERROR" | "SKIPPED" | "INVALID" | "WARNING";
 
-export type IngestionSource = "brapi" | "yahoo" | "cvm" | "secEdgar" | "nasdaq" | "benchmark" | "hgBrasil" | "dadosdemercado" | "macroRates";
+export type IngestionSource = "brapi" | "yahoo" | "cvm" | "cvm_dividends" | "secEdgar" | "nasdaq" | "benchmark" | "hgBrasil" | "dadosdemercado" | "macroRates";
 
 const MAX_DETAIL_LENGTH = 500;
 

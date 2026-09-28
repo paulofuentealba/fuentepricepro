@@ -92,13 +92,20 @@ describe("DividendRadarAgendaDaily", () => {
   it("filters events when clicking on month tabs", () => {
     renderAgenda();
 
-    // Click on October (10)
+    // Default month is September (9) - B3SA3 should not be visible
+    expect(screen.queryByText("B3SA3")).not.toBeInTheDocument();
+
+    // Click on October (10) - B3SA3 & TRPL4 appear
     const outTab = screen.getByTestId("agenda-month-10");
     fireEvent.click(outTab);
 
-    // TRPL4 has event in October
-    expect(screen.getByText("TRPL4")).toBeInTheDocument();
-    expect(screen.queryByText("HGLG11")).not.toBeInTheDocument();
+    expect(screen.getAllByText("TRPL4").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("B3SA3").length).toBeGreaterThanOrEqual(1);
+
+    // Click on November (11) - no events for B3SA3
+    const novTab = screen.getByTestId("agenda-month-11");
+    fireEvent.click(novTab);
+    expect(screen.queryByText("B3SA3")).not.toBeInTheDocument();
   });
 
   it("invokes onOpenDetail when clicking an event card", () => {

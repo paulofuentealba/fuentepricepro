@@ -460,12 +460,12 @@ const US_RADAR_TICKERS = [
   "IBIT",
 ];
 
-let radarCache: { br: any[]; us: any[]; timestamp: number } | null = null;
+let radarCache: { br: any[]; us: any[]; agendaEvents?: any[]; timestamp: number } | null = null;
 const RADAR_CACHE_TTL = 1000 * 60 * 15; // 15 minutes
 
 export const fetchRadarFn = createServerFn({ method: "GET" }).handler(async () => {
   if (radarCache && Date.now() - radarCache.timestamp < RADAR_CACHE_TTL) {
-    return { br: radarCache.br, us: radarCache.us };
+    return { br: radarCache.br, us: radarCache.us, agendaEvents: radarCache.agendaEvents };
   }
 
   const fetchRadarFor = async (tickers: string[]) => {
@@ -497,13 +497,14 @@ export const fetchRadarFn = createServerFn({ method: "GET" }).handler(async () =
     return results;
   };
 
-  const [br, us] = await Promise.all([
+  const [br, us, agendaEvents] = await Promise.all([
     fetchRadarFor(BR_RADAR_TICKERS),
     fetchRadarFor(US_RADAR_TICKERS),
+    import("./api/cvmDividends.server").then((m) => m.fetchCvmDividendEvents()).catch(() => []),
   ]);
 
-  radarCache = { br, us, timestamp: Date.now() };
-  return { br, us };
+  radarCache = { br, us, agendaEvents, timestamp: Date.now() };
+  return { br, us, agendaEvents };
 });
 
 // -------- Corporate Events --------
