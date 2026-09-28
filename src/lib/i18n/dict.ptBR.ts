@@ -3384,8 +3384,10 @@ export const ptBR = {
       btnAuditRisk: "Auditar Risco ↗",
       emptyTitle: "Nenhum provento encontrado com os filtros selecionados",
       emptyDesc: "Tente selecionar outro mês (ex: SET ou OUT), remover filtros de classe ou zerar o termo de busca.",
+      emptyDeliberationTitle: "Nenhum provento deliberado oficialmente para este período",
+      emptyDeliberationDesc: "As companhias de capital aberto aprovam e protocolam Avisos aos Acionistas na CVM/SEC após as reuniões de conselho e balanços periódicos. Assim que novas deliberações forem homologadas, os eventos serão exibidos aqui automaticamente.",
       resetFilters: "Restaurar Visualização Padrão",
-      disclaimer: "Metodologia da Agenda de Proventos Fuente: Dados auditados e cruzados em tempo real com avisos aos acionistas da CVM (Brasil) e SEC (Estados Unidos). Ao contrário de agendas convencionais que exibem apenas números brutos descontextualizados, a Fuente audita se o ativo está em Preço Teto de Segurança (método Décio Bazin) e se a distribuição é perene através do Dividend Safety Score™.",
+      disclaimer: "Metodologia da Agenda de Proventos Fuente: Dados auditados e cruzados em tempo real com avisos aos acionistas da CVM (Brasil) e SEC (Estados Unidos). Ao contrário de agendas convencionais que exibem apenas números brutos descontextualizados, a Fuente audita se o ativo está em Preço Teto de Segurança (Consenso Fuente) e se a distribuição é perene através do Dividend Safety Score™.",
     },
   },
   comingSoonScreen: {

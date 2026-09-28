@@ -3372,8 +3372,10 @@ export const en = {
       btnAuditRisk: "Audit Risk ↗",
       emptyTitle: "No dividend events found with the selected filters",
       emptyDesc: "Try selecting another month (e.g. SEP or OCT), clearing class filters, or resetting search.",
+      emptyDeliberationTitle: "No corporate events officially declared for this period",
+      emptyDeliberationDesc: "Publicly traded companies approve and file shareholder notices with CVM/SEC following board meetings and periodic earnings releases. As soon as new deliberations are approved, they will appear here automatically.",
       resetFilters: "Restore Default View",
-      disclaimer: "Fuente Dividend Agenda Methodology: Audited and cross-referenced in real-time with official corporate filings from CVM (Brazil) and SEC (United States). Unlike conventional calendars that show raw detached numbers, Fuente audits whether the asset offers an adequate Bazin Margin of Safety and whether distributions are sustainable via the Dividend Safety Score™.",
+      disclaimer: "Fuente Dividend Agenda Methodology: Audited and cross-referenced in real-time with official corporate filings from CVM (Brazil) and SEC (United States). Unlike conventional calendars that show raw detached numbers, Fuente audits whether the asset offers an adequate Margin of Safety (Fuente Consensus) and whether distributions are sustainable via the Dividend Safety Score™.",
     },
   },
   comingSoonScreen: {

@@ -102,10 +102,14 @@ describe("DividendRadarAgendaDaily", () => {
     expect(screen.getAllByText("TRPL4").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("B3SA3").length).toBeGreaterThanOrEqual(1);
 
-    // Click on November (11) - no events for B3SA3
+    // Verify timeline displays dynamic counts
+    expect(outTab).toHaveTextContent("ev.");
+
+    // Click on November (11) - no events for B3SA3 -> displays honest empty state
     const novTab = screen.getByTestId("agenda-month-11");
     fireEvent.click(novTab);
     expect(screen.queryByText("B3SA3")).not.toBeInTheDocument();
+    expect(screen.getByTestId("agenda-empty-state")).toBeInTheDocument();
   });
 
   it("invokes onOpenDetail when clicking an event card", () => {

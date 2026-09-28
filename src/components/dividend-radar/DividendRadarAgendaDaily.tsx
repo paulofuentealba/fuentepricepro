@@ -70,6 +70,22 @@ export function DividendRadarAgendaDaily({
     [allEvents]
   );
 
+  // Dynamic Month Event Counts based on selected market
+  const monthEventCounts = useMemo(() => {
+    const counts: Record<number, number> = {};
+    for (let m = 1; m <= 12; m++) counts[m] = 0;
+    for (const ev of allEvents) {
+      if (ev.market === selectedMarket && ev.month >= 1 && ev.month <= 12) {
+        counts[ev.month] = (counts[ev.month] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [allEvents, selectedMarket]);
+
+  const maxMonthCount = useMemo(() => {
+    return Math.max(0, ...Object.values(monthEventCounts));
+  }, [monthEventCounts]);
+
   // Filtered Events
   const filteredEvents = useMemo(() => {
     return allEvents.filter((event) => {
@@ -280,7 +296,8 @@ export function DividendRadarAgendaDaily({
           const isCurrent = selectedMonth === m;
           const monthKey = m as keyof typeof monthNames;
           const label = monthNames[monthKey] || String(m);
-          const isSept = m === 9;
+          const count = monthEventCounts[m] || 0;
+          const isPeak = count === maxMonthCount && count > 0;
 
           return (
             <button
@@ -295,17 +312,17 @@ export function DividendRadarAgendaDaily({
               }`}
             >
               <div
-                className={`text-xs font-bold tracking-tight ${
+                className={`text-xs font-bold tracking-tight flex items-center justify-center gap-0.5 ${
                   isCurrent ? "text-primary" : "text-foreground"
                 }`}
               >
-                {label}
-                {isSept && (
-                  <span className="ml-1 text-[9px] text-primary">⚡</span>
+                <span>{label}</span>
+                {isPeak && (
+                  <span className="text-[9px] text-primary" title="Pico de eventos">⚡</span>
                 )}
               </div>
               <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
-                {isSept ? "Pico" : "~"}
+                {count > 0 ? `${count} ev.` : "—"}
               </div>
             </button>
           );
@@ -611,10 +628,14 @@ export function DividendRadarAgendaDaily({
             <Calendar className="h-6 w-6" />
           </div>
           <h3 className="text-base font-bold text-foreground">
-            {d.emptyTitle}
+            {selectedMonth !== "ALL" && (monthEventCounts[selectedMonth] || 0) === 0
+              ? d.emptyDeliberationTitle
+              : d.emptyTitle}
           </h3>
-          <p className="max-w-md text-xs text-muted-foreground">
-            {d.emptyDesc}
+          <p className="max-w-md text-xs text-muted-foreground leading-relaxed">
+            {selectedMonth !== "ALL" && (monthEventCounts[selectedMonth] || 0) === 0
+              ? d.emptyDeliberationDesc
+              : d.emptyDesc}
           </p>
           <Button
             size="sm"
@@ -625,7 +646,7 @@ export function DividendRadarAgendaDaily({
               setSelectedEventType("all");
               setSelectedFuenteFilter("all");
               setSearchQuery("");
-              setSelectedMonth(9);
+              setSelectedMonth(10);
             }}
           >
             {d.resetFilters}

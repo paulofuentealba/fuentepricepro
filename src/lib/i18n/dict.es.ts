@@ -3388,8 +3388,10 @@ export const es = {
       btnAuditRisk: "Auditar Riesgo ↗",
       emptyTitle: "No se encontraron dividendos con los filtros seleccionados",
       emptyDesc: "Intente seleccionar otro mes (ej: SEP u OCT), limpiar filtros de clase o reiniciar la búsqueda.",
+      emptyDeliberationTitle: "Ningún dividendo deliberado oficialmente para este período",
+      emptyDeliberationDesc: "Las compañías de cotización pública aprueban y presentan Hechos Relevantes en CVM/SEC tras reuniones de directorio y balances trimestrales. Tan pronto como se homologuen nuevas deliberaciones, aparecerán aquí automáticamente.",
       resetFilters: "Restaurar Vista Predeterminada",
-      disclaimer: "Metodología del Calendario de Dividendos Fuente: Datos auditados y cruzados en tiempo real con hechos relevantes de CVM (Brasil) y SEC (Estados Unidos). A diferencia de agendas convencionales que muestran solo cifras brutas descontextualizadas, Fuente audita si el activo ofrece Margen de Seguridad Bazin y si la distribución es sostenible mediante el Dividend Safety Score™.",
+      disclaimer: "Metodología del Calendario de Dividendos Fuente: Datos auditados y cruzados en tiempo real con hechos relevantes de CVM (Brasil) y SEC (Estados Unidos). A diferencia de agendas convencionales que muestran solo cifras brutas descontextualizadas, Fuente audita si el activo ofrece Margen de Seguridad (Consenso Fuente) y si la distribución es sostenible mediante el Dividend Safety Score™.",
     },
   },
   comingSoonScreen: {
