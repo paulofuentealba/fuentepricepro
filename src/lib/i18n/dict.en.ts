@@ -3298,7 +3298,7 @@ export const en = {
     agenda: {
       eyebrow: "Daily Dividend Agenda · Direct Pattern + Fuente Value Intelligence",
       title: "Dividend Calendar & Ex-Date Radar",
-      subtitle: "Instantly discover which companies have Ex-Dividend and Payment dates today, this month, or next month, filtered directly by Bazin Ceiling Price and Dividend Safety Score.",
+      subtitle: "Instantly discover which companies have Ex-Dividend and Payment dates today, this month, or next month, filtered directly by Fuente Ceiling Price and Dividend Safety Score.",
       exportBtn: "Export Agenda CSV",
       alertBtn: "Ex-Date Alerts",
       exportToast: "Exporting Monthly Consolidated Agenda to CSV...",
@@ -3314,8 +3314,8 @@ export const en = {
         comDatesSub: "Deadline to guarantee dividend eligibility",
         payDates: "💰 Payment Dates this Month",
         payDatesSub: "Deposited directly into brokerage account",
-        bazinZone: "🟢 In Bazin Zone (< Ceiling)",
-        bazinZoneSub: "Average safety margin > +12%",
+        bazinZone: "🟢 Below Fuente Ceiling",
+        bazinZoneSub: "Fuente margin of safety > 0%",
         highSafety: "🛡️ Dividend Safety Score > 80",
         highSafetySub: "Low risk of dividend reduction or cut",
         eventsUnit: "events",
@@ -3344,7 +3344,7 @@ export const en = {
       fuenteLabel: "Fuente Filter:",
       fuenteFilters: {
         all: "All",
-        bazin: "🟢 Below Bazin Ceiling",
+        bazin: "🟢 Below Fuente Ceiling",
         safe: "🛡️ Safety Score > 80",
         trap: "⚠️ Risk Alerts",
       },

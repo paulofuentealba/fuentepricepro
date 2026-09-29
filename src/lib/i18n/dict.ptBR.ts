@@ -3310,7 +3310,7 @@ export const ptBR = {
     agenda: {
       eyebrow: "Agenda Diária de Proventos · Padrão Meus Dividendos + Inteligência de Valor Fuente",
       title: "Agenda de Dividendos & Radar Data Com",
-      subtitle: "Descubra instantaneamente quais empresas têm Data Com e Pagamento hoje, neste mês ou no próximo, com filtro direto para Preço Teto Bazin e Dividend Safety Score.",
+      subtitle: "Descubra instantaneamente quais empresas têm Data Com e Pagamento hoje, neste mês ou no próximo, com filtro direto para Preço Teto Fuente e Dividend Safety Score.",
       exportBtn: "Exportar Agenda CSV",
       alertBtn: "Alertas Data Com",
       exportToast: "Exportando Agenda Consolidada do Mês para CSV...",
@@ -3326,8 +3326,8 @@ export const ptBR = {
         comDatesSub: "Prazo final para garantir o provento",
         payDates: "💰 Pagamentos no Mês",
         payDatesSub: "Crédito em conta corrente dos cotistas",
-        bazinZone: "🟢 Em Zona Bazin (< Teto)",
-        bazinZoneSub: "Margem média de segurança > +12%",
+        bazinZone: "🟢 Abaixo do Teto Fuente",
+        bazinZoneSub: "Margem de segurança Fuente > 0%",
         highSafety: "🛡️ Dividend Safety Score > 80",
         highSafetySub: "Baixo risco de corte de proventos",
         eventsUnit: "eventos",
@@ -3356,7 +3356,7 @@ export const ptBR = {
       fuenteLabel: "Filtro Fuente:",
       fuenteFilters: {
         all: "Todos",
-        bazin: "🟢 Abaixo do Teto Bazin",
+        bazin: "🟢 Abaixo do Teto Fuente",
         safe: "🛡️ Safety Score > 80",
         trap: "⚠️ Alertas de Risco",
       },

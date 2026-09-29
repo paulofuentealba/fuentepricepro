@@ -73,7 +73,8 @@ describe("DividendRadar Agenda Logic", () => {
     expect(octEvents.some((e) => e.type === "STOCK_US")).toBe(true);
 
     // Verifies specific key events in October
-    expect(octEvents.some((e) => e.ticker === "TRPL4" && e.eventType === "com")).toBe(true);
+    expect(octEvents.some((e) => e.ticker === "TRPL4" && e.eventType === "pay")).toBe(true);
+    expect(octEvents.some((e) => e.ticker === "ITUB4" && e.eventType === "com")).toBe(true);
     expect(octEvents.some((e) => e.ticker === "BBDC4" && e.eventType === "pay")).toBe(true);
     expect(octEvents.some((e) => e.ticker === "HGLG11" && e.eventType === "pay")).toBe(true);
   });

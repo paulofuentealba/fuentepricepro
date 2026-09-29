@@ -3314,7 +3314,7 @@ export const es = {
     agenda: {
       eyebrow: "Calendario Diario de Dividendos · Patrón Meus Dividendos + Inteligencia Fuente",
       title: "Calendario de Dividendos y Radar Fecha Ex",
-      subtitle: "Descubra al instante qué empresas tienen Fecha Ex y Pago hoy, este mes o el próximo, con filtro directo por Precio Techo Bazin y Dividend Safety Score.",
+      subtitle: "Descubra al instante qué empresas tienen Fecha Ex y Pago hoy, este mes o el próximo, con filtro directo por Precio Techo Fuente y Dividend Safety Score.",
       exportBtn: "Exportar Calendario CSV",
       alertBtn: "Alertas Fecha Ex",
       exportToast: "Exportando Calendario Consolidado del Mes a CSV...",
@@ -3330,8 +3330,8 @@ export const es = {
         comDatesSub: "Plazo límite para garantizar el derecho",
         payDates: "💰 Pagos en el Mes",
         payDatesSub: "Crédito directo en cuenta de corretaje",
-        bazinZone: "🟢 En Zona Bazin (< Techo)",
-        bazinZoneSub: "Margen de seguridad promedio > +12%",
+        bazinZone: "🟢 Debajo del Techo Fuente",
+        bazinZoneSub: "Margen de seguridad Fuente > 0%",
         highSafety: "🛡️ Dividend Safety Score > 80",
         highSafetySub: "Bajo riesgo de recorte de dividendos",
         eventsUnit: "eventos",
@@ -3360,7 +3360,7 @@ export const es = {
       fuenteLabel: "Filtro Fuente:",
       fuenteFilters: {
         all: "Todos",
-        bazin: "🟢 Bajo Techo Bazin",
+        bazin: "🟢 Debajo del Techo Fuente",
         safe: "🛡️ Safety Score > 80",
         trap: "⚠️ Alertas de Riesgo",
       },

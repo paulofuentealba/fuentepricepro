@@ -92,23 +92,23 @@ describe("DividendRadarAgendaDaily", () => {
   it("filters events when clicking on month tabs", () => {
     renderAgenda();
 
-    // Default month is September (9) - B3SA3 should not be visible
-    expect(screen.queryByText("B3SA3")).not.toBeInTheDocument();
+    // Default month is September (9) - ITUB4 should not be visible
+    expect(screen.queryByText("ITUB4")).not.toBeInTheDocument();
 
-    // Click on October (10) - B3SA3 & TRPL4 appear
+    // Click on October (10) - ITUB4 & TRPL4 appear
     const outTab = screen.getByTestId("agenda-month-10");
     fireEvent.click(outTab);
 
     expect(screen.getAllByText("TRPL4").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("B3SA3").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("ITUB4").length).toBeGreaterThanOrEqual(1);
 
     // Verify timeline displays dynamic counts
     expect(outTab).toHaveTextContent("ev.");
 
-    // Click on November (11) - no events for B3SA3 -> displays honest empty state
+    // Click on November (11) - no events -> displays honest empty state
     const novTab = screen.getByTestId("agenda-month-11");
     fireEvent.click(novTab);
-    expect(screen.queryByText("B3SA3")).not.toBeInTheDocument();
+    expect(screen.queryByText("ITUB4")).not.toBeInTheDocument();
     expect(screen.getByTestId("agenda-empty-state")).toBeInTheDocument();
   });
 
