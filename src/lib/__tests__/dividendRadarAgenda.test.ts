@@ -78,4 +78,22 @@ describe("DividendRadar Agenda Logic", () => {
     expect(octEvents.some((e) => e.ticker === "BBDC4" && e.eventType === "pay")).toBe(true);
     expect(octEvents.some((e) => e.ticker === "HGLG11" && e.eventType === "pay")).toBe(true);
   });
+
+  it("strictly enforces BTLG11 fund regulation: Data Com on the 15th and Payment around the 25th", () => {
+    const btlg = radarItems.find((r) => r.ticker === "BTLG11");
+    expect(btlg).toBeDefined();
+    expect(btlg?.windowCom).toBe("Todo dia 15 (ou útil subseq.)");
+    expect(btlg?.nextMonth).toBe("Todo dia 25 (ou útil subseq.)");
+
+    const events = buildAgendaEvents(radarItems, "pt-BR");
+    const btlgComOct = events.find((e) => e.ticker === "BTLG11" && e.eventType === "com" && e.month === 10);
+    expect(btlgComOct).toBeDefined();
+    expect(btlgComOct?.dateKey).toBe("2026-10-15");
+    expect(btlgComOct?.reciprocalDateFormatted).toBe("23/10/2026");
+
+    const btlgPayOct = events.find((e) => e.ticker === "BTLG11" && e.eventType === "pay" && e.month === 10);
+    expect(btlgPayOct).toBeDefined();
+    expect(btlgPayOct?.dateKey).toBe("2026-10-23");
+    expect(btlgPayOct?.reciprocalDateFormatted).toBe("15/10/2026");
+  });
 });

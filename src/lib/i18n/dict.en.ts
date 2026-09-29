@@ -3285,8 +3285,11 @@ export const en = {
       fcfPayout: "Free Cash Flow Payout",
       cagr5y: "Dividend Growth (5y CAGR)",
       netDebtEbitda: "Leverage (Net Debt / EBITDA)",
-      seasonalityAudit: "Historical Punctuality Audit (5 years)",
+      seasonalityAudit: "Punctuality Audit & Distribution Calendar",
       historyTrack: "Proven track record of announcements in CVM / SEC over the last 5 years.",
+      labelPayment: "Expected Payment:",
+      ruleStatutory: "Mandatory monthly distribution rule audited from fund regulation (CVM/SEC).",
+      ruleHistorical: "Estimated window based on historical declaration seasonality in CVM/SEC.",
       close: "Close",
     },
     disclaimer: {

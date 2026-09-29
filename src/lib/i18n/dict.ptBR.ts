@@ -3297,8 +3297,11 @@ export const ptBR = {
       fcfPayout: "Payout sobre Fluxo de Caixa Livre",
       cagr5y: "Crescimento de Dividendos (CAGR 5 anos)",
       netDebtEbitda: "Alavancagem (Dívida Líq / EBITDA)",
-      seasonalityAudit: "Auditoria de Pontualidade Histórica (5 anos)",
+      seasonalityAudit: "Auditoria de Pontualidade & Calendário de Proventos",
       historyTrack: "Histórico comprovado de anúncios na CVM / SEC nos últimos 5 anos.",
+      labelPayment: "Previsão de Pagamento:",
+      ruleStatutory: "Regra mandatária de distribuição mensal auditada no regulamento (CVM/SEC).",
+      ruleHistorical: "Janela estimada com base na sazonalidade histórica de deliberações na CVM/SEC.",
       close: "Fechar",
     },
     disclaimer: {

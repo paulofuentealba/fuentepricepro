@@ -14,9 +14,9 @@
     "reciprocalDate": "30/09/2026"
   },
   {
-    "id": "br-btlg11-20261001-com",
+    "id": "br-btlg11-20261015-com",
     "market": "BR",
-    "dateKey": "2026-10-01",
+    "dateKey": "2026-10-15",
     "month": 10,
     "ticker": "BTLG11",
     "name": "BTG Pactual Logística FII",
@@ -558,7 +558,7 @@
     "eventType": "pay",
     "taxType": "rendimento_fii",
     "declaredAmount": 0.76,
-    "reciprocalDate": "01/10/2026"
+    "reciprocalDate": "15/10/2026"
   },
   {
     "id": "br-kepl3-20261023-pay",
