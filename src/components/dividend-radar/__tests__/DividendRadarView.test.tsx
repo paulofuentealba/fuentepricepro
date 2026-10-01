@@ -74,15 +74,15 @@ describe("DividendRadarView", () => {
     expect(screen.getByTestId("btn-scroll-today")).toBeInTheDocument();
 
     // Check presence of key tickers
-    expect(screen.getByText("BBAS3")).toBeInTheDocument();
-    expect(screen.getByText("HGLG11")).toBeInTheDocument();
+    expect(screen.getAllByText("BBAS3").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("HGLG11").length).toBeGreaterThanOrEqual(1);
   });
 
   it("switches smoothly between Brasil and EUA markets", () => {
     renderView();
 
     // Initially in BR mode
-    expect(screen.getByText("BBAS3")).toBeInTheDocument();
+    expect(screen.getAllByText("BBAS3").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("JNJ")).not.toBeInTheDocument();
 
     // Switch to US market
@@ -90,8 +90,8 @@ describe("DividendRadarView", () => {
     fireEvent.click(usBtn);
 
     // US assets appear
-    expect(screen.getByText("O")).toBeInTheDocument();
-    expect(screen.getByText("JNJ")).toBeInTheDocument();
+    expect(screen.getAllByText("O").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("JNJ").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("BBAS3")).not.toBeInTheDocument();
   });
 
@@ -101,7 +101,7 @@ describe("DividendRadarView", () => {
     const searchInput = screen.getByTestId("agenda-search-input");
     fireEvent.change(searchInput, { target: { value: "HGLG" } });
 
-    expect(screen.getByText("HGLG11")).toBeInTheDocument();
+    expect(screen.getAllByText("HGLG11").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("BBAS3")).not.toBeInTheDocument();
   });
 
@@ -109,7 +109,7 @@ describe("DividendRadarView", () => {
     renderView();
 
     // Click on BBAS3 card
-    const bbas3Element = screen.getByText("BBAS3");
+    const bbas3Element = screen.getAllByText("BBAS3")[0];
     fireEvent.click(bbas3Element.closest("[data-testid^='agenda-card-']")!);
 
     // Verify detail sheet opened with Bazin breakdown

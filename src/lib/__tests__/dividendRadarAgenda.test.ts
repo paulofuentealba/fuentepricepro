@@ -13,7 +13,9 @@ describe("DividendRadar Agenda Logic", () => {
     const events = buildAgendaEvents(radarItems, "pt-BR");
     expect(events.length).toBeGreaterThan(0);
 
-    const bbas3 = events.find((e) => e.ticker === "BBAS3" && e.eventType === "com");
+    const bbas3 = events.find(
+      (e) => e.ticker === "BBAS3" && e.eventType === "com" && e.dateKey === "2026-09-25"
+    );
     expect(bbas3).toBeDefined();
     expect(bbas3?.ceilingPrice).toBeGreaterThan(0);
     expect(bbas3?.margin).toBeDefined();

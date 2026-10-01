@@ -17,7 +17,6 @@ interface DividendRadarDetailSheetProps {
   item: RadarItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInvest: (item: RadarItem) => void;
   formatCurrency: (val: number, currency?: string) => string;
 }
 
@@ -25,7 +24,6 @@ export function DividendRadarDetailSheet({
   item,
   open,
   onOpenChange,
-  onInvest,
   formatCurrency,
 }: DividendRadarDetailSheetProps) {
   const { t } = useI18n();
@@ -272,21 +270,11 @@ export function DividendRadarDetailSheet({
         </div>
 
         {/* Actions */}
-        <div className="pt-2 flex items-center gap-2">
-          <Button
-            type="button"
-            className="flex-1 text-xs"
-            onClick={() => {
-              onOpenChange(false);
-              onInvest(item);
-            }}
-          >
-            {d.card.investBtn} ({item.ticker})
-          </Button>
+        <div className="pt-2">
           <Button
             type="button"
             variant="outline"
-            className="text-xs"
+            className="w-full text-xs"
             onClick={() => onOpenChange(false)}
           >
             {d.detailSheet.close}

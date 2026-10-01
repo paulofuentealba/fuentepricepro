@@ -31,8 +31,9 @@ describe("cvmDividends.server", () => {
     expect(octEvents.length).toBeGreaterThan(0);
     expect(octEvents.every((e) => e.month === 10)).toBe(true);
 
+    const allEvents = await fetchCvmDividendEvents();
     const nonExistentMonth = await fetchCvmDividendEvents(99);
-    expect(nonExistentMonth.length).toBe(octEvents.length); // falls back to all events on invalid month
+    expect(nonExistentMonth.length).toBe(allEvents.length); // falls back to all events on invalid month
   });
 
   it("gracefully catches Firestore read errors and falls back to local cache", async () => {

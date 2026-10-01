@@ -46,8 +46,21 @@ export function DividendRadarAgendaDaily({
   const s = t.dividendRadar.seasonality;
 
   // Filter States
+  const bcp47Locale = useMemo(() => {
+    if (locale === "ptBR") return "pt-BR";
+    if (locale === "en") return "en-US";
+    if (locale === "es") return "es-ES";
+    return locale;
+  }, [locale]);
+
+  const currentMonth = useMemo(() => new Date().getMonth() + 1, []);
+  const todayLabel = useMemo(
+    () => new Date().toLocaleDateString(bcp47Locale, { day: "2-digit", month: "short" }),
+    [bcp47Locale]
+  );
+
   const [selectedMarket, setSelectedMarket] = useState<MarketRegion>("BR");
-  const [selectedMonth, setSelectedMonth] = useState<number | "ALL">(9); // Setembro 2026
+  const [selectedMonth, setSelectedMonth] = useState<number | "ALL">(currentMonth);
   const [selectedClass, setSelectedClass] = useState<AgendaAssetClass>("all");
   const [selectedEventType, setSelectedEventType] = useState<"all" | DividendEventType>("all");
   const [selectedFuenteFilter, setSelectedFuenteFilter] = useState<"all" | "bazin" | "safe" | "trap">("all");
@@ -57,8 +70,8 @@ export function DividendRadarAgendaDaily({
 
   // Build canonical events
   const allEvents = useMemo(() => {
-    return buildAgendaEvents(radarItems, locale, agendaEvents, classTargetYields);
-  }, [radarItems, locale, agendaEvents, classTargetYields]);
+    return buildAgendaEvents(radarItems, bcp47Locale, agendaEvents, classTargetYields);
+  }, [radarItems, bcp47Locale, agendaEvents, classTargetYields]);
 
   // Market count indicators
   const brCount = useMemo(
@@ -165,8 +178,8 @@ export function DividendRadarAgendaDaily({
 
   // Handler: Scroll to Today
   const handleScrollToToday = () => {
-    if (selectedMonth !== 9) {
-      setSelectedMonth(9);
+    if (selectedMonth !== currentMonth) {
+      setSelectedMonth(currentMonth);
     }
     setTimeout(() => {
       if (todayRef.current) {
@@ -285,7 +298,7 @@ export function DividendRadarAgendaDaily({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
           </span>
-          <span>{d.todayAnchor.replace("{{date}}", "25/Set")}</span>
+          <span>{d.todayAnchor.replace("{{date}}", todayLabel)}</span>
           <Zap className="h-3 w-3" />
         </button>
       </div>
@@ -646,7 +659,7 @@ export function DividendRadarAgendaDaily({
               setSelectedEventType("all");
               setSelectedFuenteFilter("all");
               setSearchQuery("");
-              setSelectedMonth(10);
+              setSelectedMonth(currentMonth);
             }}
           >
             {d.resetFilters}

@@ -34,6 +34,10 @@ export function MonthlyCashflowTimeline({
     .filter((e) => {
       const dateStr = e.paymentDate || e.exDate;
       if (!dateStr) return false;
+      const parts = dateStr.split("T")[0].split("-").map(Number);
+      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        return parts[0] === currentYear && parts[1] - 1 === currentMonth;
+      }
       const d = new Date(dateStr);
       return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
     })
@@ -98,7 +102,8 @@ export function MonthlyCashflowTimeline({
             {weeks.map((week, wIdx) => {
               const weekEvents = monthEvents.filter((e) => {
                 const dateStr = e.paymentDate || e.exDate;
-                const day = new Date(dateStr).getDate();
+                const parts = (dateStr || "").split("T")[0].split("-").map(Number);
+                const day = parts.length === 3 && !isNaN(parts[2]) ? parts[2] : new Date(dateStr).getDate();
                 return day >= week.minDay && day <= week.maxDay;
               });
 

@@ -175,7 +175,8 @@ export async function fetchDadosDeMercado(ticker: string): Promise<DadosDeMercad
 
   if (adminDb) {
     try {
-      await adminDb.collection("dadosDeMercadoCache").doc(cleanTicker).set(result, { merge: true });
+      const cleanResult = JSON.parse(JSON.stringify(result));
+      await adminDb.collection("dadosDeMercadoCache").doc(cleanTicker).set(cleanResult, { merge: true });
       await reportIngestionStatus("dadosdemercado", "PASSED", "Scraped successfully", cleanTicker);
     } catch (err) {
       console.error(`[DadosDeMercado] DB write error for ${cleanTicker}`, err);
