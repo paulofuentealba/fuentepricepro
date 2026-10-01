@@ -97,7 +97,7 @@ export function resolveDividendIntelligence(params: {
   let frequency: DividendFrequencyType = "quarterly";
   let cyclesPerYear = 4;
 
-  if (isPureDemo && repData) {
+  if (isPureDemo && repData?.payFreq) {
     const rawFreq = repData.payFreq.toLowerCase();
     if (rawFreq.includes("sem distribui") || rawFreq.includes("reinvest")) {
       frequency = "accumulating";
@@ -194,7 +194,7 @@ export function resolveDividendIntelligence(params: {
           : locale === "es"
             ? "Mensual (The Monthly Dividend Co.)"
             : "Mensal (The Monthly Dividend Co.)";
-    } else if (repData && isPureDemo) {
+    } else if (repData?.payFreq && isPureDemo) {
       frequencyLabel = repData.payFreq;
     } else {
       frequencyLabel =
@@ -241,10 +241,6 @@ export function resolveDividendIntelligence(params: {
     }
   }
 
-  if (nextComDateText === "—" && repData?.nextCom && isPureDemo) {
-    nextComDateText = repData.nextCom;
-  }
-
   // Next Payment Date & Value per share
   let nextPaymentDateText = "—";
   let nextValAmount = 0;
@@ -266,16 +262,9 @@ export function resolveDividendIntelligence(params: {
     nextValAmount = latestEvent.amountPerShare;
   }
 
-  // Fallback for payment date from repData in demo mode
-  if (nextPaymentDateText === "—" && repData?.nextPay && isPureDemo) {
-    nextPaymentDateText = repData.nextPay;
-  }
-
   // Fallback for per-share amount: divide annual by cyclesPerYear
   if (nextValAmount <= 0) {
-    if (repData && isPureDemo && repData.nextVal) {
-      // Use representative value
-    } else if (annualDividend > 0 && cyclesPerYear > 0) {
+    if (annualDividend > 0 && cyclesPerYear > 0) {
       nextValAmount = annualDividend / cyclesPerYear;
     }
   }
@@ -288,8 +277,6 @@ export function resolveDividendIntelligence(params: {
     nextValFormatted =
       t?.deepDive?.frequencies?.reinvestedInEtf ||
       (locale === "en" ? "Reinvested in ETF" : locale === "es" ? "Reinvertido en el ETF" : "Reinvestido no ETF");
-  } else if (repData && isPureDemo && repData.nextVal) {
-    nextValFormatted = repData.nextVal;
   } else if (nextValAmount > 0) {
     nextValFormatted = `${currencySymbol}${nextValAmount.toFixed(2)} / ${shareUnit}`;
   } else {
