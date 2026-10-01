@@ -119,4 +119,76 @@ describe("IrpfMirrorReport", () => {
     expect(screen.getByText(/generated exclusively in Portuguese to comply with Brazilian Federal Revenue/i)).toBeInTheDocument();
     expect(screen.getByText(/100 ações de PETR4/)).toBeInTheDocument();
   });
+
+  it("correctly maps REIT and USD ETF to Grupo 02 - Bens no Exterior with US$ cost", () => {
+    const foreignItems: ValuedWatchlistItem[] = [
+      {
+        id: "reit-1",
+        ticker: "O",
+        name: "Realty Income Corp",
+        type: "REIT",
+        currency: "USD",
+        quantity: 50,
+        averagePrice: 52,
+        currentPrice: 55,
+        livePrice: 55,
+        annualDividend: 3.1,
+        targetYield: 0.05,
+        isClosedPosition: false,
+        isBffMode: true,
+        sector: "Imobiliário EUA",
+        valuation: {} as any,
+      } as ValuedWatchlistItem,
+      {
+        id: "etf-1",
+        ticker: "VOO",
+        name: "Vanguard S&P 500 ETF",
+        type: "ETF",
+        currency: "USD",
+        quantity: 10,
+        averagePrice: 480,
+        currentPrice: 500,
+        livePrice: 500,
+        annualDividend: 6.5,
+        targetYield: 0.015,
+        isClosedPosition: false,
+        isBffMode: true,
+        sector: "Índice EUA",
+        valuation: {} as any,
+      } as ValuedWatchlistItem,
+      {
+        id: "fiagro-1",
+        ticker: "KNCA11",
+        name: "Kinea Crédito Agro",
+        type: "FIAGRO",
+        currency: "BRL",
+        quantity: 100,
+        averagePrice: 100,
+        currentPrice: 102,
+        livePrice: 102,
+        annualDividend: 12,
+        targetYield: 0.11,
+        isClosedPosition: false,
+        isBffMode: true,
+        sector: "Agronegócio",
+        valuation: {} as any,
+      } as ValuedWatchlistItem,
+    ];
+
+    render(<IrpfMirrorReport valuedItems={foreignItems} context={mockContext} />);
+
+    // REIT O
+    expect(screen.getByText("O")).toBeInTheDocument();
+    expect(screen.getByText(/50 ativos no exterior de O \(Realty Income Corp\)/)).toBeInTheDocument();
+    expect(screen.getByText(/US\$ 2600\.00/)).toBeInTheDocument();
+
+    // ETF VOO
+    expect(screen.getByText("VOO")).toBeInTheDocument();
+    expect(screen.getByText(/10 ativos no exterior de VOO \(Vanguard S&P 500 ETF\)/)).toBeInTheDocument();
+    expect(screen.getByText(/US\$ 4800\.00/)).toBeInTheDocument();
+
+    // FIAGRO KNCA11
+    expect(screen.getByText("KNCA11")).toBeInTheDocument();
+    expect(screen.getByText(/100 cotas do FIAGRO KNCA11/)).toBeInTheDocument();
+  });
 });

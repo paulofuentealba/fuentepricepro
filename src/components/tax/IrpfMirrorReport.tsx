@@ -9,6 +9,7 @@ import { formatCurrency } from "@/lib/formatters";
 import { useI18n } from "@/lib/i18n-provider";
 import type { ValuedWatchlistItem } from "@/lib/useValuedPortfolio";
 import type { TaxRealityContext } from "@/lib/tax/buildTaxContext";
+import type { AssetType, Currency } from "@/lib/domain";
 import { cn } from "@/lib/utils";
 
 interface IrpfMirrorReportProps {
@@ -53,13 +54,19 @@ export function IrpfMirrorReport({
     const costBasis = qty * avgPrice;
     const brokerStr = (item as any).broker ? `custodiadas na corretora ${(item as any).broker}` : "custodiadas em corretora autorizada";
 
-    if (item.type === "FII") {
-      return `${qty} cotas do Fundo Imobiliário ${item.ticker} (${item.name}), ${brokerStr}, ao custo total de aquisição de ${formatCurrency(costBasis, "BRL", "ptBR")}, com preço médio ponderado de ${formatCurrency(avgPrice, "BRL", "ptBR")} por cota.`;
+    if (item.type === "FII" || item.type === "FIAGRO" || item.type === "FII_INFRA") {
+      const typeLabel =
+        item.type === "FIAGRO"
+          ? "FIAGRO"
+          : item.type === "FII_INFRA"
+            ? "FII-Infra"
+            : "Fundo Imobiliário";
+      return `${qty} cotas do ${typeLabel} ${item.ticker} (${item.name}), ${brokerStr}, ao custo total de aquisição de ${formatCurrency(costBasis, "BRL", "ptBR")}, com preço médio ponderado de ${formatCurrency(avgPrice, "BRL", "ptBR")} por cota.`;
     }
     if (item.type === "STOCK_BR") {
       return `${qty} ações de ${item.ticker} (${item.name}), ${brokerStr}, ao custo total de aquisição de ${formatCurrency(costBasis, "BRL", "ptBR")}, com preço médio de ${formatCurrency(avgPrice, "BRL", "ptBR")} por ação.`;
     }
-    if (item.type === "STOCK_US" || (item.type as string) === "ETF_US") {
+    if (item.type === "STOCK_US" || item.type === "REIT" || (item.type === "ETF" && item.currency === "USD")) {
       return `${qty} ativos no exterior de ${item.ticker} (${item.name}), ${brokerStr}, adquiridas pelo custo em moeda estrangeira de US$ ${(qty * avgPrice).toFixed(2)} (equivalente ao custo de aquisição declarado na fonte).`;
     }
     if (item.type === "FIXED_INCOME") {
@@ -68,17 +75,22 @@ export function IrpfMirrorReport({
     return `${qty} cotas/ações de ${item.ticker} (${item.name}), ${brokerStr}, ao custo total de aquisição de ${formatCurrency(costBasis, "BRL", "ptBR")}.`;
   };
 
-  const getIrpfGroupCode = (type: string) => {
+  const getIrpfGroupCode = (type: AssetType | string, currency?: Currency | string) => {
     switch (type) {
       case "STOCK_BR":
         return { group: "03 - Participações Societárias", code: "01 - Ações (inclusive as listadas em bolsa)" };
       case "FII":
-        return { group: "07 - Fundos", code: "03 - Fundos de Investimento Imobiliário (FII)" };
-      case "ETF_BR":
-        return { group: "07 - Fundos", code: "02 - Fundos de Investimento de Ações e ETFs" };
+      case "FIAGRO":
+      case "FII_INFRA":
+        return { group: "07 - Fundos", code: "03 - Fundos de Investimento Imobiliário (FII e correlatos)" };
       case "STOCK_US":
-      case "ETF_US":
+      case "REIT":
         return { group: "02 - Bens no Exterior", code: "01 - Ações e outros títulos no exterior" };
+      case "ETF":
+        if (currency === "USD") {
+          return { group: "02 - Bens no Exterior", code: "01 - Ações e outros títulos no exterior (ETFs em moeda estrangeira)" };
+        }
+        return { group: "07 - Fundos", code: "02 - Fundos de Investimento de Ações e ETFs" };
       case "FIXED_INCOME":
         return { group: "04 - Aplicações Financeiras", code: "02 - Títulos públicos / privados de renda fixa" };
       default:
@@ -120,7 +132,7 @@ export function IrpfMirrorReport({
                 onClick={() => {
                   let text = `ESPELHO IRPF ${baseYear + 1} (ANO-CALENDÁRIO ${baseYear})\n\n=== BENS E DIREITOS ===\n`;
                   activePositions.forEach((pos) => {
-                    const group = getIrpfGroupCode(pos.type);
+                    const group = getIrpfGroupCode(pos.type, pos.currency);
                     text += `\n[${pos.ticker}] ${group.group} | ${group.code}\n${formatBensDiscriminação(pos)}\nSituação em 31/12/${baseYear}: R$ ${((pos.quantity ?? 0) * (pos.averagePrice ?? 0)).toFixed(2)}\n`;
                   });
                   text += `\n=== RENDIMENTOS ISENTOS (CÓDIGO 09) ===\n`;
@@ -189,7 +201,7 @@ export function IrpfMirrorReport({
             </div>
           ) : (
             activePositions.map((item) => {
-              const info = getIrpfGroupCode(item.type);
+              const info = getIrpfGroupCode(item.type, item.currency);
               const discrimText = formatBensDiscriminação(item);
               const costBasis = (item.quantity ?? 0) * (item.averagePrice ?? item.currentPrice ?? 0);
               const isCopied = copiedId === `bem-${item.id}`;
