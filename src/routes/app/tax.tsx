@@ -65,7 +65,6 @@ export function RealidadeFiscalPage() {
   }
 
   const hasBrAssets = hasBrPositions;
-  const hasUsAssets = hasUsPositions;
 
   const [showBrSection, setShowBrSection] = useState<boolean>(!isUS || hasBrAssets);
 
@@ -94,10 +93,10 @@ export function RealidadeFiscalPage() {
         </p>
       </div>
 
-      <Tabs defaultValue={defaultTab} className="w-full">
+      <Tabs key={isUS ? "tax-tabs-us" : "tax-tabs-br"} defaultValue={defaultTab} className="w-full">
         <TabsList className="flex h-auto w-full items-center justify-start gap-1 overflow-x-auto scrollbar-none flex-nowrap rounded-none border-b border-border bg-transparent p-0 pb-px">
           {/* US Form 1099 tab */}
-          {(isUS || hasUsAssets) && (
+          {isUS && (
             <TabsTrigger
               value="us1099"
               className="flex items-center gap-2 shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-none data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:text-sm"
@@ -136,13 +135,15 @@ export function RealidadeFiscalPage() {
           )}
         </TabsList>
 
-        <TabsContent value="us1099" className="mt-6">
-          <UsTax1099Report
-            valuedItems={valuedItems}
-            context={context}
-            transactions={transactions}
-          />
-        </TabsContent>
+        {isUS && (
+          <TabsContent value="us1099" className="mt-6">
+            <UsTax1099Report
+              valuedItems={valuedItems}
+              context={context}
+              transactions={transactions}
+            />
+          </TabsContent>
+        )}
 
         {(!isUS || showBrSection) && (
           <>
