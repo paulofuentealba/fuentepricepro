@@ -104,6 +104,14 @@ describe("AssetDeepDiveView (Raio-X Aprofundado do Ativo)", () => {
   });
 
   it("renders 360° Hero Card with Preço Teto, Margem and Action badge for default asset", () => {
+    mockAssetData = {
+      ticker: "BBAS3",
+      name: "Banco do Brasil S.A.",
+      currentPrice: 20.0,
+      type: "STOCK_BR",
+      currency: "BRL",
+    };
+
     render(
       <TooltipProvider>
         <AssetDeepDiveView initialTicker="BBAS3" />
@@ -115,8 +123,63 @@ describe("AssetDeepDiveView (Raio-X Aprofundado do Ativo)", () => {
     expect(screen.getAllByText(/Preço Teto Fuente/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Margem de Segurança/i).length).toBeGreaterThanOrEqual(1);
 
-    // Verdict Action Badge
+    // Verdict Action Badge (margin > 15% -> APORTE FORTE)
     expect(screen.getByText(/APORTE FORTE/i)).toBeInTheDocument();
+  });
+
+  it("displays AGUARDAR when margin is moderately negative (regression: asset slightly above ceiling price)", () => {
+    mockAssetData = {
+      ticker: "BBAS3",
+      name: "Banco do Brasil S.A.",
+      currentPrice: 36.0, // Ceiling is ~34.00 -> margin ~ -5.5% (between -10% and 0%)
+      type: "STOCK_BR",
+      currency: "BRL",
+    };
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="BBAS3" />
+      </TooltipProvider>,
+    );
+
+    // When margin is moderately negative (-10% to 0%), action should be AGUARDAR, never APORTE FORTE
+    expect(screen.getByText(/AGUARDAR/i)).toBeInTheDocument();
+    expect(screen.queryByText(/APORTE FORTE/i)).toBeNull();
+  });
+
+  it("displays QUARENTENA when margin is severely negative (< -10%)", () => {
+    mockAssetData = {
+      ticker: "BBAS3",
+      name: "Banco do Brasil S.A.",
+      currentPrice: 45.0, // Ceiling is ~34.00 -> margin ~ -24% (< -10%)
+      type: "STOCK_BR",
+      currency: "BRL",
+    };
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="BBAS3" />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getByText(/QUARENTENA/i)).toBeInTheDocument();
+    expect(screen.queryByText(/APORTE FORTE/i)).toBeNull();
+  });
+
+  it("does not leak mock custody position when asset is not in user portfolio", () => {
+    mockValuedItems = []; // User owns nothing
+
+    render(
+      <TooltipProvider>
+        <AssetDeepDiveView initialTicker="BBAS3" />
+      </TooltipProvider>,
+    );
+
+    // Shows notInPortfolio badge
+    expect(screen.getByText(/Ativo fora da sua carteira/i)).toBeInTheDocument();
+
+    // Does NOT display fake broker or fake position
+    expect(screen.queryByText(/Corretora ref.:/i)).toBeNull();
   });
 
   it("switches to another asset (e.g. HGLG11) when its chip is clicked", () => {
